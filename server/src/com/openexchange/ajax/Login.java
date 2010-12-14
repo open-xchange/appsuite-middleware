@@ -288,15 +288,13 @@ public class Login extends AJAXServlet {
                 }
 
                 final Cookie[] cookies = req.getCookies();
-                final String hash = HashCalculator.getHash(req);
-
                 if (cookies == null) {
                     throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
                 }
+
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-
                 String secret = null;
-
+                final String hash = HashCalculator.getHash(req);
                 final String sessionCookieName = SESSION_PREFIX + hash;
                 final String secretCookieName = SECRET_PREFIX + hash;
 
