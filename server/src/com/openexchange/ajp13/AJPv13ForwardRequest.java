@@ -187,18 +187,14 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         /*
          * Determine protocol
          */
-        try {
-            servletRequest.setProtocol(parseString());
-        } catch (final AJPv13Exception e) {
-            throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "protocol");
-        }
+        servletRequest.setProtocol(parseString("protocol"));
         /*
          * Determine req_uri
          */
         String requestURI = null;
         String jsessionID = null;
-        try {
-            requestURI = parseString();
+        {
+            requestURI = parseString("req_uri");
             final String jsessionIdURI = AJPv13RequestHandler.JSESSIONID_URI;
             final int pos = requestURI.toLowerCase(Locale.ENGLISH).indexOf(jsessionIdURI);
             if (pos > -1) {
@@ -208,33 +204,19 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 servletRequest.setRequestedSessionIdFromCookie(false);
             }
             servletRequest.setRequestURI(requestURI);
-        } catch (final AJPv13Exception e) {
-            throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "req_uri");
         }
         /*
          * Determine remote_addr
          */
-        try {
-            servletRequest.setRemoteAddr(parseString());
-        } catch (final AJPv13Exception e) {
-            throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "remote_addr");
-        }
+        servletRequest.setRemoteAddr(parseString("remote_addr"));
         /*
          * Determine remote_host
          */
-        try {
-            servletRequest.setRemoteHost(parseString());
-        } catch (final AJPv13Exception e) {
-            throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "remote_host");
-        }
+        servletRequest.setRemoteHost(parseString("remote_host"));
         /*
          * Determine server_name
          */
-        try {
-            servletRequest.setServerName(parseString());
-        } catch (final AJPv13Exception e) {
-            throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "server_name");
-        }
+        servletRequest.setServerName(parseString("server_name"));
         /*
          * Determine server_name
          */
@@ -759,6 +741,14 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
          * HttpServletRequestWrapper.getSession() adds the JSESSIONID cookie
          */
         servletRequest.getSession(true);
+    }
+
+    private String parseString(final String headerName) throws AJPv13Exception {
+        try {
+            return parseString();
+        } catch (final AJPv13Exception e) {
+            throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, headerName);
+        }
     }
 
     private String parseString() throws AJPv13Exception {
