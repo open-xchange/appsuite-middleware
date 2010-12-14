@@ -794,7 +794,13 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Return
          */
-        return Arrays.asList(ret);
+        final List<Folder> l = new ArrayList<Folder>(ret.length);
+        for (final Folder folder : ret) {
+            if (null != folder) {
+                l.add(folder);
+            }
+        }
+        return l;
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {

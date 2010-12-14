@@ -762,7 +762,13 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Return
          */
-        return Arrays.asList(ret);
+        final List<Folder> l = new ArrayList<Folder>(ret.length);
+        for (final Folder folder : ret) {
+            if (null != folder) {
+                l.add(folder);
+            }
+        }
+        return l;
     }
 
     public FolderType getFolderType() {

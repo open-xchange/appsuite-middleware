@@ -723,7 +723,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Return
                  */
-                return Arrays.asList(ret);
+                final List<Folder> l = new ArrayList<Folder>(ret.length);
+                for (final Folder folder : ret) {
+                    if (null != folder) {
+                        l.add(folder);
+                    }
+                }
+                return l;
             }
             /*
              * Get from backup tables
@@ -1375,7 +1381,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
         if (!toLoad.isEmpty()) {
             final List<FolderObject> list = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.keys(), ctx, con);
             for (final FolderObject folderObject : list) {
-                ret[toLoad.get(folderObject.getObjectID())] = folderObject;
+                final int index = toLoad.get(folderObject.getObjectID());
+                ret[index] = folderObject;
                 cacheManager.putFolderObject(folderObject, ctx, false, null);
             }
         }
