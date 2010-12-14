@@ -1136,9 +1136,8 @@ public final class CacheFolderStorage implements FolderStorage {
                         /*
                          * Fill into map
                          */
-                        int j = 0;
-                        for (final String folderId : ids) {
-                            ret.put(folderId, folders.get(j++));
+                        for (final Folder folder : folders) {
+                            ret.put(folder.getID(), folder);
                         }
                         /*
                          * Return
