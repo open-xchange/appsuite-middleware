@@ -123,8 +123,8 @@ public final class LoginPerformer {
             final User user = findUser(ctx, username);
             retval.setUser(user);
             // Checks if something is deactivated.
-            AuthorizationService authService = Authorization.getService();
-            if( null == authService ) {
+            final AuthorizationService authService = Authorization.getService();
+            if (null == authService) {
                 // FIXME: what todo??
                 final ServiceException e = new ServiceException(Code.SERVICE_INITIALIZATION_FAILED);
                 LOG.error("unable to find AuthorizationService", e);
