@@ -156,6 +156,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-537
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/sessiond.properties
+   if ! ox_exists_property com.openexchange.sessiond.encryptionKey $pfile; then
+      ox_set_property com.openexchange.sessiond.encryptionKey "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn" $pfile
+   fi
+
    # SoftwareChange_Request-532
    # -----------------------------------------------------------------------
    smtpc=/opt/open-xchange/etc/groupware/smtp.properties
