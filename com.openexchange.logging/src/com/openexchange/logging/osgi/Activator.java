@@ -51,8 +51,6 @@ package com.openexchange.logging.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.logging.internal.JdkCorrector;
-import com.openexchange.logging.internal.LoggingCorrector;
 
 /**
  * {@link Activator}
@@ -62,16 +60,23 @@ import com.openexchange.logging.internal.LoggingCorrector;
 public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
-	    new JdkCorrector().correct();
+	    /*
+	     * Uncomment if a suitable solution is available that does not break other log4j settings, e.g. as used in USM module
+	     */
+	    /*-
+	     * 
+	    new com.openexchange.logging.internal.JdkCorrector().correct();
 	    try {
 	        Class<?> clazz = Class.forName("org.apache.log4j.Logger");
     	    if (null != clazz) {
-                LoggingCorrector corrector = (LoggingCorrector) Class.forName("com.openexchange.logging.internal.Log4JCorrector").newInstance();
+                com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector corrector = 
+                    (com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector) Class.forName("com.openexchange.logging.internal.Log4JCorrector").newInstance();
     	        corrector.correct();
     	    }
 	    } catch (Throwable t) {
 	        // Log4J is not installed.
 	    }
+	    */
 	}
 
 	public void stop(BundleContext context) throws Exception {
