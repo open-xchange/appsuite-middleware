@@ -5,6 +5,7 @@
 * 2010-12-14 - thorben.betten@open-xchange.com
 
  - Bugfix #17790: Disabled hard-coded setting of log levels for LoginPerformer and SessionHandler classes
+ - Bugfix #17817: Fixed NPE
 
 * 2010-12-13 - francisco.laguna@open-xchange.com
 
