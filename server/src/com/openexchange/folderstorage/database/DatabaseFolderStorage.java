@@ -723,13 +723,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Return
                  */
-                final List<Folder> l = new ArrayList<Folder>(ret.length);
-                for (final Folder folder : ret) {
-                    if (null != folder) {
-                        l.add(folder);
-                    }
-                }
-                return l;
+                return Arrays.asList(ret);
             }
             /*
              * Get from backup tables
