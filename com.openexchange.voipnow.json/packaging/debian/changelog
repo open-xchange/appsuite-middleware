@@ -1,3 +1,9 @@
+open-xchange-voipnow-json (6.18.2.0-11) unstable; urgency=low
+
+  * build for 6.18.2-rev11
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 15 Dec 2010 18:12:17 +0100
+
 open-xchange-voipnow-json (6.18.2.0-10) unstable; urgency=low
 
   * build for 6.18.2-rev10

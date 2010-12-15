@@ -1,3 +1,9 @@
+open-xchange-authorization-standard (6.18.2.0-3) unstable; urgency=low
+
+  * build for 6.18.2-rev11
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 15 Dec 2010 18:12:28 +0100
+
 open-xchange-authorization-standard (6.18.2.0-2) unstable; urgency=low
 
   * build for 6.18.2-rev10

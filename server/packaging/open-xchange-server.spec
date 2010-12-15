@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 10
+%define		ox_release 11
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -718,6 +718,23 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Dec 15 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17830: Detecting broken AJP cycles and closing socket if so
+* Tue Dec 14 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17790: Disabled hard-coded setting of log levels for LoginPerformer and SessionHandler classes
+ - Bugfix #17817: Fixed NPE
+* Tue Dec 14 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17751: Set up cleanup Handler for infostore folder publications.
+* Mon Dec 13 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17753: Ensured proper parent for shared database folders
+* Mon Dec 13 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17787: Moved domain name generation for publication specific domain to a more centralized location (so they also work in multiple requests).
+* Sun Dec 12 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17756: Ensure closing of HTTP connections. Don't use a single client and avoid locks.
+ - Bugfix #17782: Take encryption password from a property.
+ - Bugfix #17798: Leave JSESSIONID cookie untouched in action=redirect.
+* Thu Dec 09 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17721: Throwing a more meaningful error on IMAP protocol error
 * Wed Dec 08 2010 - thorben.betten@open-xchange.com
  - Bugfix #17758: Fixed NPE
  - Bugfix #17722: Fixed renaming of folders created in POP3 account
@@ -871,7 +888,7 @@ fi
  - Bugfix #16833: Added publication target name strings to I18N process.
  - Bugfix #17162: Using consistent codes for not visible and not found folders.
 * Thu Oct 14 2010 - martin.herfurth@open-xchange.com
- - Bugfix #17175: Remove of occurrences value.
+ - Bugfix #17662: Remove of occurrences value.
 * Wed Oct 13 2010 - marcus.klein@open-xchange.com
  - Bugfix #17131: Changed object events now contain every user identifier and folder identifier that might be affected.
  - Bugfix #17230: Using the mainstream tool method to get a time zone.
