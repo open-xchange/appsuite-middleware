@@ -64,8 +64,9 @@ public class Bug11307Test extends CalendarSqlTest {
         final Date end = D("24/02/1981 12:00");
 
         final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setTitle("unzelll");
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
-        appointment.setDays(CalendarDataObject.MONDAY);
+        appointment.setDays(CalendarDataObject.TUESDAY);
         appointment.setInterval(1);
         appointment.setRecurrenceCount(3);
         appointments.save(appointment);
@@ -78,9 +79,9 @@ public class Bug11307Test extends CalendarSqlTest {
         appointments.save(update);
 
         final CalendarDataObject reloaded = appointments.reload(appointment);
-        assertEquals(start.getTime(), reloaded.getStartDate().getTime());
-        assertEquals(end.getTime(), reloaded.getEndDate().getTime());
-        assertEquals(CalendarDataObject.NO_RECURRENCE, reloaded.getRecurrenceType());
+        assertEquals("Wrong start date", start.getTime(), reloaded.getStartDate().getTime());
+        assertEquals("Wrong end date", end, reloaded.getEndDate());
+        assertEquals("Wrong recurrence type", CalendarDataObject.NO_RECURRENCE, reloaded.getRecurrenceType());
 
     }
 }
