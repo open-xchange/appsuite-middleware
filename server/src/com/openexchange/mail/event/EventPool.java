@@ -59,7 +59,7 @@ import java.util.concurrent.TimeUnit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.concurrent.Blocker;
-import com.openexchange.concurrent.NonBlockingBlocker;
+import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.push.PushEventConstants;
@@ -147,7 +147,7 @@ public final class EventPool implements Runnable {
         super();
         map = new ConcurrentHashMap<PooledEvent, PooledEvent>(1024);
         queue = new DelayQueue<PooledEvent>();
-        blocker = new NonBlockingBlocker();
+        blocker = new ConcurrentBlocker();
         try {
             eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class, true);
         } catch (final ServiceException e) {
