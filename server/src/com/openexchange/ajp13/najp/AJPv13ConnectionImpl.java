@@ -90,9 +90,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     private int packageNumber;
 
-    private volatile BlockableBufferedInputStream inputStream;
+    private final BlockableBufferedInputStream inputStream;
 
-    private volatile BlockableBufferedOutputStream outputStream;
+    private final BlockableBufferedOutputStream outputStream;
 
     private final AJPv13Task task;
 
@@ -105,7 +105,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * 
      * @param listener The AJP listener providing client socket
      */
-    AJPv13ConnectionImpl(final AJPv13Task task) {
+    AJPv13ConnectionImpl(final AJPv13Task task) throws AJPv13Exception {
         super();
         state = IDLE_STATE;
         packageNumber = 0;
@@ -117,6 +117,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
             outputStream = new BlockableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE, false);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
+            throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, false, e, e.getMessage());
         }
     }
 
@@ -126,6 +127,18 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     public void unblock() {
         blocker.unblock();
+    }
+
+    /**
+     * Drops outstanding data.
+     */
+    public void dropOutstandingData() {
+        blocker.acquire();
+        try {
+            outputStream.dropBuffer();
+        } finally {
+            blocker.release();
+        }
     }
 
     /**

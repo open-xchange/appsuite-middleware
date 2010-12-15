@@ -52,6 +52,7 @@ package com.openexchange.ajp13;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import com.openexchange.concurrent.Blockable;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
@@ -98,6 +99,19 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     public void unblock() {
         blocker.unblock();
+    }
+
+    /**
+     * Drops the buffer.
+     */
+    public void dropBuffer() {
+        blocker.acquire();
+        try {
+            count = 0;
+            Arrays.fill(buf, (byte) 0);
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
