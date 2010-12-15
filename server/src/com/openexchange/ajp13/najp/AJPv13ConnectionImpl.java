@@ -71,7 +71,7 @@ import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.concurrent.Blockable;
 import com.openexchange.concurrent.Blocker;
-import com.openexchange.concurrent.NonBlockingBlocker;
+import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -109,12 +109,12 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         super();
         state = IDLE_STATE;
         packageNumber = 0;
-        blocker = new NonBlockingBlocker();
+        blocker = new ConcurrentBlocker();
         this.task = task;
         try {
             final Socket client = task.getSocket();
-            inputStream = new BlockableBufferedInputStream(client.getInputStream(), true);
-            outputStream = new BlockableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE, true);
+            inputStream = new BlockableBufferedInputStream(client.getInputStream(), false);
+            outputStream = new BlockableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE, false);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
