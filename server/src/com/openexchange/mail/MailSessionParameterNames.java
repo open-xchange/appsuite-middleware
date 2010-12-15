@@ -77,6 +77,10 @@ public final class MailSessionParameterNames {
         return PARAM_PUBLISHING_INFOSTORE_FOLDER_ID;
     }
 
+    /*-
+     * ####################### DEFAULT FOLDERS ########################
+     */
+
     /**
      * Default folder flag.
      */
@@ -90,6 +94,24 @@ public final class MailSessionParameterNames {
     public static String getParamDefaultFolderChecked() {
         return PARAM_DEF_FLD_FLAG;
     }
+
+    /**
+     * Default folder flag.
+     */
+    private static final String PARAM_DEF_FLD_TRASH = "mail.deftrash";
+
+    /**
+     * Gets the parameter name for default trash folder.
+     * 
+     * @return The parameter name for default trash folder
+     */
+    public static String getParamDefaultTrashFolder() {
+        return PARAM_DEF_FLD_TRASH;
+    }
+
+    /*-
+     * ####################### OTHER STUFF ########################
+     */
 
     /**
      * Mail folder separator.
