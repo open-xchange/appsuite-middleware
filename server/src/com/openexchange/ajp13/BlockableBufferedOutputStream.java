@@ -68,7 +68,9 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     private final Blocker blocker;
 
-    private long lastAccessed;
+    private volatile long lastAccessed;
+
+    private volatile boolean dirty;
 
     /**
      * Initializes a new {@link BlockableBufferedOutputStream}.
@@ -115,6 +117,34 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     }
 
     /**
+     * Checks if this stream is dirty. Already data written.
+     * 
+     * @return <code>true</code> if this stream is dirty; otherwise <code>false</code>
+     */
+    public boolean isDirty() {
+        blocker.acquire();
+        try {
+            return dirty;
+        } finally {
+            blocker.release();
+        }
+    }
+
+    /**
+     * Clears this stream and removes dirty flag.
+     */
+    public void clear() {
+        blocker.acquire();
+        try {
+            count = 0;
+            Arrays.fill(buf, (byte) 0);
+            dirty = false;
+        } finally {
+            blocker.release();
+        }
+    }
+
+    /**
      * Flush the internal buffer
      * 
      * @throws IOException
@@ -136,6 +166,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     public void write(final int b) throws IOException {
         blocker.acquire();
         try {
+            dirty = true;
             if (count >= buf.length) {
                 flushBuffer();
             }
@@ -162,6 +193,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     public void write(final byte b[], final int off, final int len) throws IOException {
         blocker.acquire();
         try {
+            dirty = true;
             if (len >= buf.length) {
                 /*
                  * If the request length exceeds the size of the output buffer, flush the output buffer and then write the data directly. In
@@ -191,6 +223,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     public void flush() throws IOException {
         blocker.acquire();
         try {
+            dirty = true;
             flushBuffer();
             out.flush();
             lastAccessed = System.currentTimeMillis();
@@ -203,6 +236,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     public void close() throws IOException {
         blocker.acquire();
         try {
+            dirty = false;
             super.close();
         } finally {
             blocker.release();

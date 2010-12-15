@@ -1,3 +1,7 @@
+* 2010-12-15 - thorben.betten@open-xchange.com
+
+ - Bugfix #17830: Detecting broken AJP cycles and closing socket if so
+
 * 2010-12-14 - francisco.laguna@open-xchange.com
 
  - Bugfix #17751: Set up cleanup Handler for infostore folder publications.

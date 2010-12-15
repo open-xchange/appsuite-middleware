@@ -170,12 +170,22 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
              */
             if (firstPackage) {
                 /*
+                 * AJP cycle still intact?
+                 */
+                if (ajpCon.isDirty() || endResponseSent) {
+                    /*
+                     * Caught in another cycle! Abort immediately
+                     */
+                    // ajpCon.dropOutstandingData();
+                    throw new AJPv13Exception(AJPCode.IO_ERROR, false, "Broken AJP cyle. Detected outgoing data available with first AJP package.");
+                }
+                /*
                  * Read Prefix Code from Input Stream
                  */
                 final int prefixCode = ajpCon.getInputStream().read();
                 if (FORWARD_REQUEST_PREFIX_CODE == prefixCode) {
                     /*
-                     * Special handling for a forward request
+                     * Special handling for a forward request, make sure output data is empty...
                      */
                     handleForwardRequest(dataLength);
                     return;

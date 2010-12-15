@@ -331,7 +331,13 @@ public final class AJPv13Task implements Task<Object> {
             /*
              * Assign a connection to this listener
              */
-            final AJPv13ConnectionImpl ajpCon = new AJPv13ConnectionImpl(this);
+            final AJPv13ConnectionImpl ajpCon;
+            try {
+                ajpCon = new AJPv13ConnectionImpl(this);
+            } catch (AJPv13Exception e) {
+                terminateAndClose(null);
+                return null;
+            }
             ajpConnection = ajpCon;
             final AJPv13TaskMonitor monitor = listenerMonitor;
             try {
