@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 10
+%define		ox_release 11
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -385,6 +385,10 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Dec 13 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17600: Added missing keys to contact tables
+* Thu Dec 09 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17766: Made fields static to be accessible in a static method
 * Wed Dec 08 2010 - thorben.betten@open-xchange.com
  - Bugfix #17762: Allowing "editpassword" module access for all module access combinations (webmail, pim, etc.)
 * Mon Dec 06 2010 - francisco.laguna@open-xchange.com
