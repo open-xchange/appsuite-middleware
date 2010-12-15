@@ -56,6 +56,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
@@ -70,6 +71,10 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class OXSOAPRMIMapper {
 
+    private static final String THREAD_INTERRUPTED_ERROR = "Thread was interrupted while trying to get lock";
+
+    private static final String CRLF = "\r\n";
+    
     /*
      * RMI connection attempts should only be done once at a time, because
      * else every Instance of OXSOAPRMIMapper does a (re)connect at the same
@@ -88,6 +93,12 @@ public abstract class OXSOAPRMIMapper {
     private final String CONNECT_ATTEMPTS_DELAY_TIME_PROP = "CONNECT_ATTEMPTS_DELAY_TIME";
     public int CONNECT_ATTEMPTS_DELAY_TIME = 1;
 
+    /**
+     * time in seconds to wait for a lock 
+     */
+    private final String LOCK_WAIT_TIME_PROP = "LOCK_WAIT_TIME";
+    public int LOCK_WAIT_TIME = 10;
+    
     private final String RMI_HOSTNAME_PROP = "RMI_HOSTNAME";
     public String RMI_HOSTNAME = "rmi://localhost:1099/";
     
@@ -121,14 +132,30 @@ public abstract class OXSOAPRMIMapper {
             if( props.containsKey(CONNECT_ATTEMPTS_DELAY_TIME_PROP) ) {
                 CONNECT_ATTEMPTS_DELAY_TIME = Integer.parseInt((String)props.get(CONNECT_ATTEMPTS_DELAY_TIME_PROP));
             }
+            if( props.containsKey(LOCK_WAIT_TIME_PROP) && null != props.get(LOCK_WAIT_TIME_PROP)) {
+                LOCK_WAIT_TIME = Integer.parseInt((String)props.get(LOCK_WAIT_TIME_PROP));
+            } else {
+                LOCK_WAIT_TIME = 10;
+            }
             if( props.containsKey(RMI_HOSTNAME_PROP) ) {
                 RMI_HOSTNAME = (String)props.get(RMI_HOSTNAME_PROP);
             }
             if( log.isDebugEnabled() ) {
-                log.debug("OXSOAPRMIMapper settings:");
-                log.debug("MAX_RMI_CONNECT_ATTEMPTS: " + MAX_RMI_CONNECT_ATTEMPTS);
-                log.debug("CONNECT_ATTEMPTS_DELAY_TIME: " + CONNECT_ATTEMPTS_DELAY_TIME);
-                log.debug("RMI_HOSTNAME: " + RMI_HOSTNAME);
+                final StringBuilder sb = new StringBuilder();
+                sb.append("OXSOAPRMIMapper settings:");
+                sb.append(CRLF);
+                sb.append("MAX_RMI_CONNECT_ATTEMPTS: ");
+                sb.append(MAX_RMI_CONNECT_ATTEMPTS);
+                sb.append(CRLF);
+                sb.append("CONNECT_ATTEMPTS_DELAY_TIME: ");
+                sb.append(CONNECT_ATTEMPTS_DELAY_TIME);
+                sb.append(CRLF);
+                sb.append("LOCK WAIT TIME: ");
+                sb.append(LOCK_WAIT_TIME);
+                sb.append(CRLF);
+                sb.append("RMI_HOSTNAME: ");
+                sb.append(RMI_HOSTNAME);
+                log.debug(sb.toString());
             }
         } catch (MalformedURLException e) {
             log.error(e.getMessage(), e);
@@ -144,9 +171,13 @@ public abstract class OXSOAPRMIMapper {
      * @throws RemoteException
      */
     protected void reconnect(final boolean force) throws RemoteException {
-
-        if( ! LOCK.tryLock() ) {
-            throw new RemoteException(RMI_CONNECT_ERROR);
+        
+        try {
+            if( ! LOCK.tryLock(LOCK_WAIT_TIME, TimeUnit.SECONDS) ) {
+                throw new RemoteException("Could get lock within " + LOCK_WAIT_TIME + " seconds");
+            }
+        } catch (InterruptedException e2) {
+            throw new RemoteException(THREAD_INTERRUPTED_ERROR);
         }
 
         try {

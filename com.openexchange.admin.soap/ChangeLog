@@ -1,3 +1,8 @@
+* 2010-12-15 - dennis.sieben@open-xchange.com
+
+ - Bugfix #17824: [L3] Operation with two or more SOAP Client leads to race condition errors
+   - Added config option to define lock wait time
+
 * 2009-11-12 - dennis.sieben@open-xchange.com
 
  - Bugfix #14846: deletecontext call via soap sends "reconnect to rmi service" failed error
