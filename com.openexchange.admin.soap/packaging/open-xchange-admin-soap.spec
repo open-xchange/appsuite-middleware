@@ -77,7 +77,22 @@ ant -Ddestdir=%{buildroot} \
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
 
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-540
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
+   if ! ox_exists_property LOCK_WAIT_TIME $pfile; then
+      ox_set_property LOCK_WAIT_TIME 10 $pfile
+   fi
+fi
 
 %files
 %defattr(-,root,root)
