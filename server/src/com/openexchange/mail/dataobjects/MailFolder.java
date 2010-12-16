@@ -850,7 +850,7 @@ public class MailFolder implements Serializable {
      * Sets own permission.
      * <p>
      * Apply an instance of {@link DefaultMailPermission} if mailing system does not support permissions, except if this mail folder denotes
-     * the root folder, then apply altered instance of {@link DefaultMailPermission} with no object permissions but properly reflects folder
+     * the root folder, then apply <code>null</code> or altered instance of {@link DefaultMailPermission} with no object permissions but properly reflects folder
      * permission as described in {@link #getOwnPermission()}.
      * <p>
      * Please note that even if the mail system does not support permissions the entity must be set on the {@link DefaultMailPermission}
