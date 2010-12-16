@@ -336,9 +336,10 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     /*
                                      * Convert to userized folders and put into array
                                      */
+                                    final int size = folders.size();
                                     int j = 0;
                                     for (final int index : indexes) {
-                                        if (j < folders.size()) {
+                                        if (j < size) {
                                             final Folder subfolder = folders.get(j++);
                                             /*
                                              * Check for subscribed status dependent on parameter "all"
