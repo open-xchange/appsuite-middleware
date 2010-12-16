@@ -49,7 +49,7 @@ msgstr "Freunde benachrichtigen"
 msgid "Enhance your system with &#8222;Teamwork Capabilities&#8220;"
 msgstr "Erweitern Sie Ihr System mit &#8222;Teamwork Funktionen&#8220;"
 
-msgid "Make your team more successful<br>and cooperate on mutual tasks and through the team-calendar!"
+msgid "Make your team successful and cooperate with each other <br>on tasks, shared files and your team-calendar!"
 msgstr "Machen Sie Ihr Team erfolgreicher<br>und kooperieren Sie gemeinsam in Aufgaben mit Dateien und im Team-Kalender!"
 
 msgid "Team-Calendar"
