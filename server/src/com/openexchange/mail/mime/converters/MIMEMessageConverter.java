@@ -1429,12 +1429,22 @@ public final class MIMEMessageConverter {
                      * No nested message
                      */
                     mail.setFolder(f.getFullName());
-                    if (f instanceof UIDFolder) {
-                        mail.setMailId(String.valueOf(((UIDFolder) f).getUID(msg)));
-                    } else if (f instanceof FullnameFolder) {
-                        mail.setMailId(((FullnameFolder) f).getUID(msg));
-                    } else if (f instanceof POP3Folder) {
-                        mail.setMailId(((POP3Folder) f).getUID(msg));
+                    final boolean openFolder = !f.isOpen();
+                    if (openFolder) {
+                        f.open(Folder.READ_ONLY);
+                    }
+                    try {
+                        if (f instanceof UIDFolder) {
+                            mail.setMailId(String.valueOf(((UIDFolder) f).getUID(msg)));
+                        } else if (f instanceof FullnameFolder) {
+                            mail.setMailId(((FullnameFolder) f).getUID(msg));
+                        } else if (f instanceof POP3Folder) {
+                            mail.setMailId(((POP3Folder) f).getUID(msg));
+                        }
+                    } finally {
+                        if (openFolder) {
+                            f.close(false);
+                        }
                     }
                     mail.setUnreadMessages(f.getUnreadMessageCount());
                 }
