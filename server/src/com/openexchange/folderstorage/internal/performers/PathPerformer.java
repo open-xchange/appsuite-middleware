@@ -264,7 +264,6 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (folderStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(folderStorage);
