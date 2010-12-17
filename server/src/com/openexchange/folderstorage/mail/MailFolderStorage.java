@@ -466,15 +466,10 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             final MailAccount mailAccount;
-            try {
+            {
                 final MailAccountStorageService storageService =
                     MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                mailAccount =
-                    storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
-            } catch (final ServiceException e) {
-                throw new FolderException(e);
-            } catch (final MailAccountException e) {
-                throw new FolderException(e);
+                mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
             }
 
             mailAccess = MailAccess.getInstance(session, accountId);
@@ -546,6 +541,10 @@ public final class MailFolderStorage implements FolderStorage {
         } catch (final MailException e) {
             throw new FolderException(e);
         } catch (final ContextException e) {
+            throw new FolderException(e);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        } catch (final MailAccountException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
