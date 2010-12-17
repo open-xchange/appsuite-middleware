@@ -520,7 +520,12 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * Check if denoted parent can hold default folders like Trash, Sent, etc.
                  */
-                if (!"INBOX".equals(fullname)) {
+                if ("INBOX".equals(fullname)) {
+                    /*
+                     * This one needs sorting. Just pass null or an empty array.
+                     */
+                    retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
+                } else {
                     /*
                      * Denoted parent is not capable to hold default folders. Therefore output as it is.
                      */
@@ -532,11 +537,6 @@ public final class MailFolderStorage implements FolderStorage {
                         subfolderIds[i++] = prepareFullname(accountId, child.getFullname());
                     }
                     retval.setSubfolderIDs(subfolderIds);
-                } else {
-                    /*
-                     * This one needs sorting. Just pass null or an empty array.
-                     */
-                    retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
                 }
                 addWarnings(mailAccess, storageParameters);
             }
