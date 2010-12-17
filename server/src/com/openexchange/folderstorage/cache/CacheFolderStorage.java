@@ -341,10 +341,14 @@ public final class CacheFolderStorage implements FolderStorage {
         try {
             List<String> ids = Collections.singletonList(id);
             try {
-                final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
-                ids = new ArrayList<String>(path.length);
-                for (final UserizedFolder userizedFolder : path) {
-                    ids.add(userizedFolder.getID());
+                if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
+                    final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
+                    ids = new ArrayList<String>(path.length);
+                    for (final UserizedFolder userizedFolder : path) {
+                        ids.add(userizedFolder.getID());
+                    }
+                } else {
+                    ids = Collections.singletonList(id);
                 }
             } catch (final Exception e) {
                 final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(CacheFolderStorage.class);
@@ -1045,6 +1049,31 @@ public final class CacheFolderStorage implements FolderStorage {
      */
     private CacheKey newCacheKey(final String folderId, final String treeId, final int cid, final int user) {
         return cacheService.newCacheKey(cid, Integer.valueOf(user), treeId, folderId);
+    }
+
+    private boolean existsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        final boolean started = storage.startTransaction(storageParameters, false);
+        try {
+            final boolean exists = storage.containsFolder(treeId, folderId, storageType, storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
+            return exists;
+        } catch (final FolderException e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     private Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
