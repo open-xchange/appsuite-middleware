@@ -51,7 +51,6 @@ package com.openexchange.folderstorage.database.getfolder;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.groupware.container.FolderObject;
 
@@ -101,9 +100,8 @@ public final class SystemRootFolder {
      * Gets the subfolder identifiers of database folder representing system root folder for given user.
      * 
      * @return The subfolder identifiers of database folder representing system root folder for given user
-     * @throws FolderException If the database folder cannot be returned
      */
-    public static String[] getSystemRootFolderSubfolder() throws FolderException {
+    public static String[] getSystemRootFolderSubfolder() {
         /*
          * The system root folder
          */
@@ -113,6 +111,23 @@ public final class SystemRootFolder {
         list.add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
         list.add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
         return list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * Gets the subfolder identifiers of database folder representing system root folder for given user.
+     * 
+     * @return The subfolder identifiers of database folder representing system root folder for given user
+     */
+    public static int[] getSystemRootFolderSubfolderAsInt() {
+        /*
+         * The system root folder
+         */
+        final int[] ret = new int[4];
+        ret[0] = FolderObject.SYSTEM_PRIVATE_FOLDER_ID;
+        ret[1] = FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
+        ret[2] = FolderObject.SYSTEM_SHARED_FOLDER_ID;
+        ret[3] = FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
+        return ret;
     }
 
 }
