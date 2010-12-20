@@ -60,8 +60,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -199,7 +199,7 @@ public final class VirtualListFolder {
      * @return The subfolder identifiers of database folder representing given virtual folder
      * @throws FolderException If returning database folder fails
      */
-    public static String[] getVirtualListFolderSubfolders(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getVirtualListFolderSubfoldersAsInt(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         /*
          * Get subfolders
          */
@@ -232,12 +232,35 @@ public final class VirtualListFolder {
         } catch (final OXException e) {
             throw new FolderException(e);
         }
-        final String[] subfolderIds = new String[q.size()];
+        final int[] subfolderIds = new int[q.size()];
         int i = 0;
         for (final FolderObject folderObject : q) {
-            subfolderIds[i++] = String.valueOf(folderObject.getObjectID());
+            subfolderIds[i++] = folderObject.getObjectID();
         }
         return subfolderIds;
+    }
+
+    /**
+     * Gets the subfolder identifiers of database folder representing given virtual folder.
+     * 
+     * @param folderId The virtual folder identifier
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection to use
+     * @return The subfolder identifiers of database folder representing given virtual folder
+     * @throws FolderException If returning database folder fails
+     */
+    public static String[] getVirtualListFolderSubfolders(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        /*
+         * Get subfolders
+         */
+        final int[] subfolderIds = getVirtualListFolderSubfoldersAsInt(folderId, user, userConfiguration, ctx, con);
+        final String[] ret = new String[subfolderIds.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = String.valueOf(subfolderIds[i]);
+        }
+        return ret;
     }
 
 }

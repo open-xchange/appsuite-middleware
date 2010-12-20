@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.database.getfolder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -66,9 +65,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -114,7 +113,7 @@ public final class SystemPrivateFolder {
      * @return The database folder representing system private folder
      * @throws FolderException If the database folder cannot be returned
      */
-    public static String[] getSystemPrivateFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getSystemPrivateFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         try {
             /*
              * The system private folder
@@ -156,11 +155,12 @@ public final class SystemPrivateFolder {
             /*
              * Extract IDs
              */
-            final List<String> subfolderIds = new ArrayList<String>(list.size());
+            final int[] ret = new int[list.size()];
+            int i = 0;
             for (final FolderObject folderObject : list) {
-                subfolderIds.add(String.valueOf(folderObject.getObjectID()));
+                ret[i++] = folderObject.getObjectID();
             }
-            return subfolderIds.toArray(new String[subfolderIds.size()]);
+            return ret;
         } catch (final SearchIteratorException e) {
             throw new FolderException(e);
         } catch (final DBPoolingException e) {
@@ -170,6 +170,25 @@ public final class SystemPrivateFolder {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the subfolder identifiers of database folder representing system private folder.
+     * 
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return The database folder representing system private folder
+     * @throws FolderException If the database folder cannot be returned
+     */
+    public static String[] getSystemPrivateFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int[] ids = getSystemPrivateFolderSubfoldersAsInt(user, userConfiguration, ctx, con);
+        final String[] ret = new String[ids.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = String.valueOf(ids[i]);
+        }
+        return ret;
     }
 
     /**
