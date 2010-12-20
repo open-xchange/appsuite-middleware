@@ -723,7 +723,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Return
                  */
-                return Arrays.asList(ret);
+                final List<Folder> l = new ArrayList<Folder>(ret.length);
+                for (final Folder folder : ret) {
+                    if (null != folder) {
+                        l.add(folder);
+                    }
+                }
+                return l;
             }
             /*
              * Get from backup tables
@@ -994,7 +1000,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final List<Integer> subfolderIds = FolderObject.getSubfolderIds(parentId, storageParameters.getContext(), con);
             final List<FolderObject> subfolders = new ArrayList<FolderObject>(subfolderIds.size());
             for (final Integer folderId : subfolderIds) {
-                subfolders.add(FolderObject.loadFolderObjectFromDB(folderId.intValue(), storageParameters.getContext(), con, false, false));
+                subfolders.add(getFolderObject(folderId.intValue(), storageParameters.getContext(), con));
             }
             final ServerSession session;
             {
