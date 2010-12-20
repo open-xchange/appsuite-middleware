@@ -1,6 +1,7 @@
 * 2010-12-20 - thorben.betten@open-xchange.com
 
  - Bugfix #17845: Ensure proper content type header on JSON response
+ - Bugfix #17800: Proper check for User instance when fetching from cache
 
 * 2010-12-16 - thorben.betten@open-xchange.com
 
