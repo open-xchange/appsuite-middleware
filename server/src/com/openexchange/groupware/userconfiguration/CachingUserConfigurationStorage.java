@@ -204,16 +204,16 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         if (cache == null) {
             return getFallback().getUserConfiguration(ctx, users);
         }
-        List<User> toLoad = new ArrayList<User>(users.length);
-        List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
+        final List<User> toLoad = new ArrayList<User>(users.length);
+        final List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
         for (final User user : users) {
             UserConfiguration userConfig = null;
             {
-                CacheKey key = getKey(user.getId(), ctx);
+                final CacheKey key = getKey(user.getId(), ctx);
                 final Object object = cache.get(key);
                 if (object instanceof Condition) {
                     // I have to wait for another thread to load the object.
-                    Condition cond = (Condition) object;
+                    final Condition cond = (Condition) object;
                     try {
                         if (cond.await(1, TimeUnit.SECONDS)) {
                             // Other thread finished loading the object.
@@ -235,12 +235,12 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 retval.add((UserConfiguration) userConfig.clone());
             }
         }
-        UserConfiguration[] userConfigs = delegateStorage.getUserConfiguration(ctx, toLoad.toArray(new User[toLoad.size()]));
-        for (UserConfiguration userConfig : userConfigs) {
+        final UserConfiguration[] userConfigs = delegateStorage.getUserConfiguration(ctx, toLoad.toArray(new User[toLoad.size()]));
+        for (final UserConfiguration userConfig : userConfigs) {
             cacheWriteLock.lock();
             try {
                 cache.put(getKey(userConfig.getUserId(), ctx), userConfig);
-            } catch (CacheException e) {
+            } catch (final CacheException e) {
                 throw new UserConfigurationException(e);
             } finally {
                 cacheWriteLock.unlock();
