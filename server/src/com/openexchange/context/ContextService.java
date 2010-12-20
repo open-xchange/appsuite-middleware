@@ -75,12 +75,11 @@ public interface ContextService {
     public abstract int getContextId(String loginContextInfo) throws ContextException;
 
     /**
-     * Creates a context implementation for the given context unique identifier.
+     * Gets the context for the given context unique identifier.
      * 
-     * @param contextId unique identifier of the context.
-     * @return an implementation of the context or <code>null</code> if the
-     *         context with the given identifier can't be found.
-     * @throws ContextException if an error occurs or the update is running or is started.
+     * @param contextId The unique identifier of the context.
+     * @return The context
+     * @throws ContextException If the specified context cannot be found or the update is running/started.
      */
     public Context getContext(int contextId) throws ContextException;
 
