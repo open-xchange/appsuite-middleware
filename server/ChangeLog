@@ -1,3 +1,7 @@
+* 2010-12-20 - thorben.betten@open-xchange.com
+
+ - Bugfix #17845: Ensure proper content type header on JSON response
+
 * 2010-12-16 - thorben.betten@open-xchange.com
 
  - Bugfix #17832: Fixed IndexOutOfBoundsException

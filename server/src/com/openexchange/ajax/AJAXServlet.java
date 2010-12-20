@@ -87,13 +87,13 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
-import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
-import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -386,7 +386,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected static final String RESPONSE_ERROR = "Error while writing response object.";
 
     /**
-     * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise apache things in a
+     * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
      * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
      * session.
      */
@@ -394,6 +394,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
         try {
+            /*
+             * Set 200 OK status code and JSON content by default
+             */
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             super.service(req, resp);
         } catch (final ServletException x) {
             throw x;
