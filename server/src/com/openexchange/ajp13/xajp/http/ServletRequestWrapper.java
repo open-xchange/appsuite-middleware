@@ -84,6 +84,8 @@ public class ServletRequestWrapper implements ServletRequest {
 
     public static final String CONTENT_LENGTH = "content-length";
 
+    private static final String HOST = "Host";
+
     static {
         singleValueHeaders.add(CONTENT_TYPE);
         singleValueHeaders.add(CONTENT_LENGTH);
@@ -392,7 +394,21 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     public String getServerName() {
-        return server_name;
+        String host = getFromHost();
+        
+        return (host == null) ? server_name : host;
+    }
+
+    private String getFromHost() {
+        String header = getHeader(HOST);
+        if(header == null) {
+            return null;
+        }
+        int colonPos = header.indexOf(':');
+        if(colonPos == -1) {
+            return header;
+        }
+        return header.substring(0, colonPos);
     }
 
     public void setServerPort(final int server_port) {

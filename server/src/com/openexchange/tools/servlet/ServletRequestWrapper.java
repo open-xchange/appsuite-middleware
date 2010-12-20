@@ -96,6 +96,8 @@ public class ServletRequestWrapper implements ServletRequest {
      */
     private static final Set<String> SINGLE_VALUE_HEADERS = new HashSet<String>(Arrays.asList(CONTENT_TYPE, CONTENT_LENGTH));
 
+    private static final String HOST = "Host";
+
     /*-
      * ------------------- Member stuff ---------------------
      */
@@ -493,7 +495,21 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     public String getServerName() {
-        return serverName;
+        String host = getFromHost();
+        
+        return (host == null) ? serverName : host;
+    }
+
+    private String getFromHost() {
+        String header = getHeader(HOST);
+        if(header == null) {
+            return null;
+        }
+        int colonPos = header.indexOf(':');
+        if(colonPos == -1) {
+            return header;
+        }
+        return header.substring(0, colonPos);
     }
 
     /**
