@@ -193,7 +193,7 @@ public class CachingUserStorage extends UserStorage {
                         if (cond.await(1, TimeUnit.SECONDS)) {
                             // Other thread finished loading the object.
                             final Object tmp = cache.get(key);
-                            if (null != tmp && !(tmp instanceof Condition)) {
+                            if (tmp instanceof User) {
                                 user = (User) tmp;
                             }
                         }

@@ -218,7 +218,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                         if (cond.await(1, TimeUnit.SECONDS)) {
                             // Other thread finished loading the object.
                             final Object tmp = cache.get(key);
-                            if (null != tmp && !(tmp instanceof Condition)) {
+                            if (tmp instanceof UserConfiguration) {
                                 userConfig = (UserConfiguration) tmp;
                             }
                         }
