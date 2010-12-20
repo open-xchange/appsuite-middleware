@@ -1,3 +1,8 @@
+* 2010-12-20 - choeger@open-xchange.com
+
+ - Bugfix #17849 - An infostore folder named XXXXXX already exists below folder userstore
+   SoftwareChange_Request-542: Removed DISPLAYNAME_UNIQUE
+
 * 2010-12-13 - thorben.betten@open-xchange.com
 
  - Bugfix #17600: Added missing keys to contact tables
