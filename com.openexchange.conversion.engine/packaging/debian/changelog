@@ -1,3 +1,9 @@
+open-xchange-conversion-engine (6.18.2.0-12) unstable; urgency=low
+
+  * Build for 6.18.2 Rev12
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Mon, 20 Dec 2010 16:56:14 +0100
+
 open-xchange-conversion-engine (6.18.2.0-11) unstable; urgency=low
 
   * build for 6.18.2-rev11
