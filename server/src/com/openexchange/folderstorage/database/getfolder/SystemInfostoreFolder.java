@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -66,8 +67,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -114,7 +115,7 @@ public final class SystemInfostoreFolder {
      * @return The database folder representing system infostore folder
      * @throws FolderException If the database folder cannot be returned
      */
-    public static String[] getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getSystemInfostoreFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         try {
             /*
              * The system infostore folder
@@ -146,10 +147,10 @@ public final class SystemInfostoreFolder {
                     }
                 }
             }
-            final List<String> subfolderIds = new ArrayList<String>(size);
+            final TIntArrayList subfolderIds = new TIntArrayList(size);
             final Iterator<FolderObject> iter = l.iterator();
             for (int i = 0; i < size; i++) {
-                subfolderIds.add(String.valueOf(iter.next().getObjectID()));
+                subfolderIds.add(iter.next().getObjectID());
             }
             /*
              * Check if user has non-tree-visible folders
@@ -163,9 +164,9 @@ public final class SystemInfostoreFolder {
                     ctx,
                     con)).asQueue();
             if (!q.isEmpty()) {
-                subfolderIds.add(String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+                subfolderIds.add(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
             }
-            return subfolderIds.toArray(new String[subfolderIds.size()]);
+            return subfolderIds.toNativeArray();
         } catch (final SearchIteratorException e) {
             throw new FolderException(e);
         } catch (final DBPoolingException e) {
@@ -175,6 +176,25 @@ public final class SystemInfostoreFolder {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the subfolder identifiers of database folder representing system infostore folder. <code>false</code>.
+     * 
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return The database folder representing system infostore folder
+     * @throws FolderException If the database folder cannot be returned
+     */
+    public static String[] getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int[] ids = getSystemInfostoreFolderSubfoldersAsInt(user, userConfiguration, ctx, con);
+        final String[] ret = new String[ids.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = String.valueOf(ids[i]);
+        }
+        return ret;
     }
 
 }

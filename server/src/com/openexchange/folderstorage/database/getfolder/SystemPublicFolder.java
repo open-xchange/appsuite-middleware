@@ -49,10 +49,9 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
@@ -64,8 +63,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -111,7 +110,7 @@ public final class SystemPublicFolder {
      * @return The database folder representing system public folder
      * @throws FolderException If the database folder cannot be returned
      */
-    public static String[] getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getSystemPublicFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         try {
             /*
              * The system public folder
@@ -125,13 +124,13 @@ public final class SystemPublicFolder {
                     userConfiguration,
                     null,
                     con)).asQueue();
-            final List<String> subfolderIds = new ArrayList<String>(q.size());
+            final TIntArrayList subfolderIds = new TIntArrayList(q.size());
             /*
              * Add global address book and subfolders
              */
-            subfolderIds.add(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+            subfolderIds.add(FolderObject.SYSTEM_LDAP_FOLDER_ID);
             for (final FolderObject folderObject : q) {
-                subfolderIds.add(String.valueOf(folderObject.getObjectID()));
+                subfolderIds.add(folderObject.getObjectID());
             }
             /*
              * Check for presence of virtual folders
@@ -146,7 +145,7 @@ public final class SystemPublicFolder {
                         ctx,
                         con)).asQueue();
                 if (!tmp.isEmpty()) {
-                    subfolderIds.add(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID));
+                    subfolderIds.add(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
                 }
             }
             {
@@ -159,7 +158,7 @@ public final class SystemPublicFolder {
                         ctx,
                         con)).asQueue();
                 if (!tmp.isEmpty()) {
-                    subfolderIds.add(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID));
+                    subfolderIds.add(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
                 }
             }
             {
@@ -172,10 +171,10 @@ public final class SystemPublicFolder {
                         ctx,
                         con)).asQueue();
                 if (!tmp.isEmpty()) {
-                    subfolderIds.add(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID));
+                    subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
                 }
             }
-            return subfolderIds.toArray(new String[subfolderIds.size()]);
+            return subfolderIds.toNativeArray();
         } catch (final SearchIteratorException e) {
             throw new FolderException(e);
         } catch (final DBPoolingException e) {
@@ -185,6 +184,25 @@ public final class SystemPublicFolder {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the subfolder identifiers of database folder representing system public folder.
+     * 
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return The database folder representing system public folder
+     * @throws FolderException If the database folder cannot be returned
+     */
+    public static String[] getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int[] ids = getSystemPublicFolderSubfoldersAsInt(user, userConfiguration, ctx, con);
+        final String[] ret = new String[ids.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = String.valueOf(ids[i]);
+        }
+        return ret;
     }
 
 }
