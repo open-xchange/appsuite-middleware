@@ -146,6 +146,13 @@ if [ ${1:-0} -eq 2 ]; then
 
   GLOBIGNORE='*'
 
+   # SoftwareChange_Request-542
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/admindaemon/User.properties
+   if ox_exists_property DISPLAYNAME_UNIQUE $pfile; then
+      ox_remove_property DISPLAYNAME_UNIQUE $pfile
+   fi
+
    # -----------------------------------------------------------------------
    # bugfix id#16667
    pfile=/opt/open-xchange/etc/admindaemon/User.properties

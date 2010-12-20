@@ -2151,7 +2151,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         if (!usr.mandatoryCreateMembersSet()) {
             throw new InvalidDataException("Mandatory fields not set: " + usr.getUnsetMembers());
         }
-        if (!usr.isContextadmin() && prop.getUserProp(AdminProperties.User.DISPLAYNAME_UNIQUE, true)) {
+        if (!usr.isContextadmin()) {
             if (existsDisplayName(ctx, usr)) {
                 throw new InvalidDataException("The displayname is already used");
             }
