@@ -158,11 +158,24 @@ public final class LoginCounterTool {
             withRegex += "\nfor expression\n    '" + regex + "'";
         }
         
-        mbsc.setAttribute(Constants.OXTENDER_MONITOR_NAME, new Attribute("DeviceRegex", regex));
-        int count = (Integer) mbsc.invoke(Constants.OXTENDER_MONITOR_NAME, "getNumberOfLogins", new Object[] {startDate, endDate}, new String[] {Date.class.getName(), Date.class.getName()});
+        int count = 0;
+        boolean err = false;
+        String errMsg = null;
+        try {
+        	mbsc.setAttribute(Constants.OXTENDER_MONITOR_NAME, new Attribute("DeviceWildcard", regex));
+        	count = (Integer) mbsc.invoke(Constants.OXTENDER_MONITOR_NAME, "getNumberOfLogins", new Object[] {startDate, endDate}, new String[] {Date.class.getName(), Date.class.getName()});
+        } catch (Exception e) {
+        	err = true;
+        	errMsg = e.getMessage();
+        }
         
-        String output = "Number of logins between\n    " + startDate.toString() + "\nand\n    " + endDate.toString() + withRegex + "\n\n    :    " + count;
-
+        String output;
+        if (err) {
+        	output = errMsg != null ? errMsg : "An error occurred.";
+        } else {
+        	output= "Number of logins between\n    " + startDate.toString() + "\nand\n    " + endDate.toString() + withRegex + "\n\n    :    " + count;
+        }
+        
         System.out.println(output);
     }
 
