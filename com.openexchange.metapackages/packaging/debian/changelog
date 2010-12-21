@@ -1,3 +1,9 @@
+open-xchange-meta (6.18.2.0-13) unstable; urgency=low
+
+  * Build for 6.18.2 Rev13
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Tue, 21 Dec 2010 16:52:08 +0100
+
 open-xchange-meta (6.18.2.0-12) unstable; urgency=low
 
   * Build for 6.18.2 Rev12
