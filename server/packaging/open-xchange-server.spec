@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 12
+%define		ox_release 13
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -721,6 +721,7 @@ fi
 * Mon Dec 20 2010 - thorben.betten@open-xchange.com
  - Bugfix #17845: Ensure proper content type header on JSON response
  - Bugfix #17800: Proper check for User instance when fetching from cache
+ - Bugfix #17833: Fixed JavaDoc
 * Thu Dec 16 2010 - thorben.betten@open-xchange.com
  - Bugfix #17832: Fixed IndexOutOfBoundsException
  - Bugfix #17812: Enhanced JavaDoc
