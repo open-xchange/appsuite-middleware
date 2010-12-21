@@ -71,7 +71,7 @@ import com.openexchange.tools.sql.DBUtils;
 /**
  * {@link LoginCounter}
  * 
- * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LoginCounter implements LoginCounterMBean {
