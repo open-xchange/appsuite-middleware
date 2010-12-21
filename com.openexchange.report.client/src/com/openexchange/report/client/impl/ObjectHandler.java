@@ -109,11 +109,11 @@ public class ObjectHandler {
 		c.add(Calendar.DATE, -30);
 		gnl_params[0] = c.getTime();  // startDate
 		
-		mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceRegex", "USM-EAS"));
+		mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "USM-EAS"));
 		int usmeas = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
         retval.setUsmeas(Integer.toString(usmeas));
   
-        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceRegex", "OpenXchange\\.HTTPClient\\.OXAddIn"));
+        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "OpenXchange\\.HTTPClient\\.OXAddIn"));
 		int olox2 = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
 	    retval.setOlox2(Integer.toString(olox2));
 	    

@@ -1,3 +1,7 @@
+* 2010-12-21 - benjamin.otterbach@open-xchange.com
+
+  - Changes for bugfix #17859
+
 * 2010-05-28 - benjamin.otterbach@open-xchange.com
 
   - Bugfix #15190: Report Server does not add a separator to multiple license keys
