@@ -54,6 +54,9 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -91,6 +94,25 @@ public final class SessionMailCache {
             }
         }
         return mailCache;
+    }
+
+    /**
+     * Clears all cached data.
+     */
+    public static void clearAll(final Session session) {
+        try {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null != storageService) {
+                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                for (final MailAccount mailAccount : accounts) {
+                    SessionMailCache.getInstance(session, mailAccount.getId()).clear();
+                }
+            }
+        } catch (final Exception e) {
+            // SWALLOW
+            org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(SessionMailCache.class);
+            logger.warn(e.getMessage(), e);
+        }
     }
 
     /*-
