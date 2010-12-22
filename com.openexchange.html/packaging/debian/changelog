@@ -1,3 +1,9 @@
+open-xchange-html (6.19.0.0-0) unstable; urgency=low
+
+  * new unstable cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 22 Dec 2010 20:06:19 +0100
+
 open-xchange-html (6.18.2.0-14) unstable; urgency=low
 
   * Build for 6.18.2 Rev14
