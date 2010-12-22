@@ -76,7 +76,11 @@ public enum MailCacheCode {
 	/**
 	 * Capabilities
 	 */
-	CAPS(5);
+	CAPS(5),
+	/**
+	 * Folders
+	 */
+	FOLDERS(6);
 
 	private final int code;
 
