@@ -51,8 +51,6 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -207,28 +205,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         final List<User> toLoad = new ArrayList<User>(users.length);
         final List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
         for (final User user : users) {
-            UserConfiguration userConfig = null;
-            {
-                final CacheKey key = getKey(user.getId(), ctx);
-                final Object object = cache.get(key);
-                if (object instanceof Condition) {
-                    // I have to wait for another thread to load the object.
-                    final Condition cond = (Condition) object;
-                    try {
-                        if (cond.await(1, TimeUnit.SECONDS)) {
-                            // Other thread finished loading the object.
-                            final Object tmp = cache.get(key);
-                            if (tmp instanceof UserConfiguration) {
-                                userConfig = (UserConfiguration) tmp;
-                            }
-                        }
-                    } catch (final InterruptedException e) {
-                        userConfig = null;
-                    }
-                } else {
-                    userConfig = (UserConfiguration) object;
-                }
-            }
+            final UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(user.getId(), ctx));
             if (null == userConfig) {
                 toLoad.add(user);
             } else {
