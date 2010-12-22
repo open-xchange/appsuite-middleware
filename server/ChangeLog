@@ -1,3 +1,7 @@
+* 2010-12-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #17876: Fixed illgeal monitor state when waiting on Condition instance
+
 * 2010-12-20 - thorben.betten@open-xchange.com
 
  - Bugfix #17845: Ensure proper content type header on JSON response

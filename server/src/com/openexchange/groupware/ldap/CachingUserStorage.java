@@ -187,11 +187,17 @@ public class CachingUserStorage extends UserStorage {
                 final Serializable key = factory.getKey();
                 final Object object = cache.get(key);
                 if (object instanceof Condition) {
-                    // I have to wait for another thread to load the object.
-                    Condition cond = (Condition) object;
+                    /*
+                     * Wait for another thread to load the object.
+                     */
+                    final Condition cond = (Condition) object;
+                    final Lock lock = factory.getCacheLock();
+                    lock.lock();
                     try {
                         if (cond.await(1, TimeUnit.SECONDS)) {
-                            // Other thread finished loading the object.
+                            /*
+                             * Another thread finished loading the object.
+                             */
                             final Object tmp = cache.get(key);
                             if (tmp instanceof User) {
                                 user = (User) tmp;
@@ -199,6 +205,8 @@ public class CachingUserStorage extends UserStorage {
                         }
                     } catch (final InterruptedException e) {
                         user = null;
+                    } finally {
+                        lock.unlock();
                     }
                 } else {
                     user = (User) object;
