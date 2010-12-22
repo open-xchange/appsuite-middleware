@@ -142,7 +142,7 @@ public final class FolderCache {
                 mailFolder = newFld;
             }
         } else if (DEBUG) {
-            LOG.debug("\n\tIMAP folder \"" + fullName + "\" taken from cache!\n\n");
+            LOG.debug("IMAP folder \"" + fullName + "\" taken from cache!");
         }
         /*
          * Return
