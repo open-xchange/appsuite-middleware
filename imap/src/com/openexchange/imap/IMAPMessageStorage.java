@@ -164,16 +164,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private IIMAPProperties imapProperties;
 
+    private final IMAPFolderStorage imapFolderStorage;
+
     /**
      * Initializes a new {@link IMAPMessageStorage}.
      * 
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
      * @param session The session providing needed user data
-     * @throws IMAPException If context loading fails
+     * @throws MailException If initialization fails
      */
-    public IMAPMessageStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws IMAPException {
+    public IMAPMessageStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws MailException {
         super(imapStore, imapAccess, session);
+        imapFolderStorage = imapAccess.getFolderStorage();
     }
 
     private MailAccount getMailAccount() throws MailException {
@@ -737,6 +740,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
+            imapFolderStorage.removeFromCache(fullname);
             if (hardDelete || usm.isHardDeleteMsgs()) {
                 blockwiseDeletion(msgUIDs, false, null);
                 return;
@@ -901,6 +905,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Nothing to move
                 return new long[0];
             }
+            imapFolderStorage.clearCache();
             /*
              * Open and check user rights on source folder
              */
@@ -1169,6 +1174,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
+            imapFolderStorage.removeFromCache(destFullname);
             /*
              * Convert messages to JavaMail message objects
              */
@@ -1262,6 +1268,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Remove non user-alterable system flags
              */
+            imapFolderStorage.removeFromCache(fullname);
             int flags = flagsArg;
             flags &= ~MailMessage.FLAG_RECENT;
             flags &= ~MailMessage.FLAG_USER;
@@ -1408,6 +1415,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Remove all old color label flag(s) and set new color label flag
              */
+            imapFolderStorage.removeFromCache(fullname);
             long start = System.currentTimeMillis();
             IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -1460,6 +1468,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Append message to draft folder
                  */
+                imapFolderStorage.removeFromCache(draftFullname);
                 uid = appendMessagesLong(draftFullname, new MailMessage[] { MIMEMessageConverter.convertMessage(mimeMessage) })[0];
             } finally {
                 composedMail.cleanUp();

@@ -1,0 +1,252 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.imap.cache;
+
+import javax.mail.MessagingException;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPFolderStorage;
+import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.converters.IMAPFolderConverter;
+import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.cache.SessionMailCache;
+import com.openexchange.mail.cache.SessionMailCacheEntry;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.session.Session;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
+
+/**
+ * {@link FolderCache}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class FolderCache {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderCache.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final boolean ENABLED = true;
+
+    /**
+     * No instance
+     */
+    private FolderCache() {
+        super();
+    }
+
+    /**
+     * Gets cached IMAP folder.
+     * 
+     * @param fullName The IMAP folder full name
+     * @param folderStorage The connected IMAP folder storage
+     * @return The cached IMAP folder or <code>null</code>
+     * @throws MailException If loading the folder fails
+     */
+    public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) throws MailException {
+        return getCachedFolder(fullName, folderStorage, null);
+    }
+
+    /**
+     * Gets cached IMAP folder.
+     * 
+     * @param fullName The IMAP folder full name
+     * @param folderStorage The connected IMAP folder storage
+     * @param The possibly loaded IMAP folder; may be <code>null</code>
+     * @return The cached IMAP folder or <code>null</code>
+     * @throws MailException If loading the folder fails
+     */
+    public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
+        if (!ENABLED) {
+            return loadFolder(fullName, folderStorage, imapFolder);
+        }
+        final Session session = folderStorage.getSession();
+        /*
+         * Initialize appropriate cache entry
+         */
+        final FolderCacheEntry entry = new FolderCacheEntry();
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, folderStorage.getAccountId());
+        mailCache.get(entry);
+        FolderMap folderMap = entry.getValue();
+        if (null == folderMap) {
+            synchronized (session) {
+                mailCache.get(entry);
+                folderMap = entry.getValue();
+                if (null == folderMap) {
+                    final FolderMap newMap = new FolderMap();
+                    entry.setValue(newMap);
+                    mailCache.put(entry);
+                    folderMap = newMap;
+                }
+            }
+        }
+        /*
+         * Check for folder
+         */
+        MailFolder mailFolder = folderMap.get(fullName);
+        if (null == mailFolder) {
+            final MailFolder newFld = loadFolder(fullName, folderStorage, imapFolder);
+            mailFolder = folderMap.putIfAbsent(fullName, newFld);
+            if (null == mailFolder) {
+                mailFolder = newFld;
+            }
+        } else if (DEBUG) {
+            LOG.debug("\n\tIMAP folder \"" + fullName + "\" taken from cache!\n\n");
+        }
+        /*
+         * Return
+         */
+        return mailFolder;
+    }
+
+    private static final MailFolder loadFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
+        final Session session = folderStorage.getSession();
+        final IMAPConfig imapConfig = folderStorage.getImapConfig();
+        try {
+            final IMAPStore imapStore = folderStorage.getImapStore();
+            IMAPFolder f;
+            if (null == imapFolder) {
+                if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName) || 0 == fullName.length()) {
+                    f = (IMAPFolder) imapStore.getDefaultFolder();
+                } else {
+                    f = (IMAPFolder) imapStore.getFolder(fullName);
+                }
+                if (!f.exists()) {
+                    f = folderStorage.checkForNamespaceFolder(fullName);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                }
+            } else {
+                f = imapFolder;
+            }
+            return IMAPFolderConverter.convertFolder(f, session, imapConfig, folderStorage.getContext());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
+    }
+
+    /**
+     * Removes all cached IMAP folders.
+     * 
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     */
+    public static void removeCachedFolders(final Session session, final int accountId) {
+        final FolderCacheEntry entry = new FolderCacheEntry();
+        SessionMailCache.getInstance(session, accountId).get(entry);
+        final FolderMap folderMap = entry.getValue();
+        if (null != folderMap) {
+            folderMap.clear();
+        }
+    }
+
+    /**
+     * Removes cached IMAP folder.
+     * 
+     * @param fullName The IMAP folder full name
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     */
+    public static void removeCachedFolder(final String fullName, final Session session, final int accountId) {
+        final FolderCacheEntry entry = new FolderCacheEntry();
+        SessionMailCache.getInstance(session, accountId).get(entry);
+        final FolderMap folderMap = entry.getValue();
+        if (null != folderMap) {
+            folderMap.remove(fullName);
+        }
+    }
+
+    private static final class FolderCacheEntry implements SessionMailCacheEntry<FolderMap> {
+
+        private volatile FolderMap folderMap;
+
+        private volatile CacheKey key;
+
+        public FolderCacheEntry() {
+            this(null);
+        }
+
+        public FolderCacheEntry(final FolderMap folder) {
+            super();
+            this.folderMap = folder;
+        }
+
+        private CacheKey getKeyInternal() {
+            CacheKey tmp = key;
+            if (null == tmp) {
+                final int code = MailCacheCode.FOLDERS.getCode();
+                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(code, code);
+            }
+            return tmp;
+        }
+
+        public CacheKey getKey() {
+            return getKeyInternal();
+        }
+
+        public FolderMap getValue() {
+            return folderMap;
+        }
+
+        public void setValue(final FolderMap value) {
+            folderMap = value;
+        }
+
+        public Class<FolderMap> getEntryClass() {
+            return FolderMap.class;
+        }
+    }
+
+}
