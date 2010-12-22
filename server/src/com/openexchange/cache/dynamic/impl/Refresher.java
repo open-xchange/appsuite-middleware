@@ -102,7 +102,7 @@ public abstract class Refresher<T extends Serializable> {
         return getCache(regionName);
     }
 
-    protected void cache(T obj) throws CacheException {
+    protected void cache(final T obj) throws CacheException {
         cache(obj, getCache(), factory);
     }
 
@@ -114,13 +114,13 @@ public abstract class Refresher<T extends Serializable> {
         return refresh(regionName, factory);
     }
 
-    public static <T extends Serializable> T cache(T obj, Cache cache, OXObjectFactory<T> factory) throws CacheException {
+    public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws CacheException {
         T retval = null;
         final Lock lock = factory.getCacheLock();
         final Serializable key = factory.getKey(); 
         lock.lock();
         try {
-            Object tmp = cache.get(key);
+            final Object tmp = cache.get(key);
             if (null == tmp) {
                 cache.put(key, obj);
             } else if (tmp instanceof Condition) {
@@ -129,6 +129,7 @@ public abstract class Refresher<T extends Serializable> {
             } else {
                 // If object is already in cache, return it instead of putting new object into cache.
                 @SuppressWarnings("unchecked")
+                final
                 T tmp2 = (T) tmp;
                 retval = tmp2;
             }
@@ -138,11 +139,11 @@ public abstract class Refresher<T extends Serializable> {
         return retval;
     }
 
-    public static <T extends Serializable> T refresh(String regionName, OXObjectFactory<T> factory) throws AbstractOXException {
+    public static <T extends Serializable> T refresh(final String regionName, final OXObjectFactory<T> factory) throws AbstractOXException {
         return refresh(regionName, getCache(regionName), factory);
     }
 
-    public static <T extends Serializable> T refresh(String regionName, Cache cache, OXObjectFactory<T> factory) throws AbstractOXException {
+    public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory) throws AbstractOXException {
         if (null == cache) {
             return factory.load();
         }
@@ -152,7 +153,7 @@ public abstract class Refresher<T extends Serializable> {
         Condition cond = null;
         lock.lock();
         try {
-            Object tmp = cache.get(key);
+            final Object tmp = cache.get(key);
             if (null == tmp) {
                 // I am the thread to load the object. Put temporary condition
                 // into cache.
@@ -170,6 +171,7 @@ public abstract class Refresher<T extends Serializable> {
                     final Object tmp2 = cache.get(key);
                     if (null != tmp2 && !(tmp2 instanceof Condition)) {
                         @SuppressWarnings("unchecked")
+                        final
                         T tmp3 = (T) tmp2;
                         retval = tmp3;
                         cond = null;
@@ -181,6 +183,7 @@ public abstract class Refresher<T extends Serializable> {
             } else {
                 // Only other option is that the cache contains the delegate object.
                 @SuppressWarnings("unchecked")
+                final
                 T tmp2 = (T) tmp;
                 retval = tmp2;
             }
@@ -209,7 +212,7 @@ public abstract class Refresher<T extends Serializable> {
         return retval;
     }
 
-    public static Cache getCache(String regionName) throws CacheException {
+    public static Cache getCache(final String regionName) throws CacheException {
         if (null == regionName) {
             throw new CacheException(CacheException.Code.INVALID_CACHE_REGION_NAME, regionName);
         }
