@@ -97,7 +97,7 @@ public final class SessionMailCache {
     }
 
     /**
-     * Clears all cached data.
+     * Clears all user-related cached data.
      */
     public static void clearAll(final Session session) {
         try {
