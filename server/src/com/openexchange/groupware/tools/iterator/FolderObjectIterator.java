@@ -954,7 +954,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 return f.get(timeoutSec, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
-                throw new SearchIteratorException(Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                /*
+                 * Wait was interrupted
+                 */
+                return null;
             } catch (final ExecutionException e) {
                 throw new SearchIteratorException(ThreadPools.launderThrowable(e, AbstractOXException.class));
             } catch (final TimeoutException e) {
