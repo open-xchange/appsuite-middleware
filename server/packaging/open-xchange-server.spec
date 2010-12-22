@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 14
+%define		ox_release 15
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -718,6 +718,9 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Dec 21 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17876: Fixed illegal monitor state when waiting on Condition instance
+ - Bugfix #17877: Dealing with possible InterruptedException during concurrent loading of folder permissions
 * Mon Dec 20 2010 - thorben.betten@open-xchange.com
  - Bugfix #17845: Ensure proper content type header on JSON response
  - Bugfix #17800: Proper check for User instance when fetching from cache
