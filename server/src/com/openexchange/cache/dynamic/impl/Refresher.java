@@ -214,10 +214,7 @@ public abstract class Refresher<T extends Serializable> {
             throw new CacheException(CacheException.Code.INVALID_CACHE_REGION_NAME, regionName);
         }
         final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null == service) {
-            return null;
-        }
-        return service.getCache(regionName);
+        return null == service ? null : service.getCache(regionName);
     }
 
 }
