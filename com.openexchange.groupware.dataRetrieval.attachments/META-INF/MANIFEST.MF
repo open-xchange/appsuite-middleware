@@ -11,6 +11,7 @@ Import-Package: com.openexchange.groupware,
  com.openexchange.groupware.dataRetrieval,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
+ com.openexchange.tx,
  com.openexchange.tools.session,
  org.osgi.framework
 Bundle-Activator: com.openexchange.groupware.dataRetrieval.attachments.osgi.PIMAttachmentDataRetrievalActivator
