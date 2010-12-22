@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -523,7 +522,10 @@ public final class POP3StoreConnector {
             }
             this.host = host;
             this.port = port;
-            hashCode = (host.toLowerCase(Locale.ENGLISH).hashCode()) ^ port;
+            int result = HashCodeUtil.SEED;
+            result = HashCodeUtil.hash(result, host);
+            result = HashCodeUtil.hash(result, port);
+            hashCode = result;
         }
 
         @Override
