@@ -169,7 +169,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
                 try {
                     outputStream.flush();
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.debug(e.getMessage(), e);
                 }
                 outputStream.clear();
             }
