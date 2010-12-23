@@ -546,10 +546,10 @@ public final class AJPv13Task implements Task<Object> {
      * Writes connection-terminating AJP END_RESPONSE package to web server, closes the AJP connection and accepted client socket as well.
      */
     private void terminateAndClose(final AJPv13ConnectionImpl ajpCon) {
+        /*-
+         * 
         try {
-            /*
-             * Release AJP connection
-             */
+            // Release AJP connection
             if (ajpCon != null) {
                 ajpCon.close();
             }
@@ -558,6 +558,7 @@ public final class AJPv13Task implements Task<Object> {
                 LOG.warn(e.getMessage(), e);
             }
         }
+        */
         try {
             /*
              * Terminate AJP cycle and close socket
