@@ -127,10 +127,10 @@ public final class Tools {
      * @see #removeCachingHeader(HttpServletResponse)
      */
     public static void disableCaching(final HttpServletResponse resp) {
-        resp.addHeader(EXPIRES_KEY, EXPIRES_DATE);
-        resp.addHeader(CACHE_CONTROL_KEY, CACHE_VALUE1);
-        resp.addHeader(CACHE_CONTROL_KEY, CACHE_VALUE2);
-        resp.addHeader(PRAGMA_KEY, PRAGMA_VALUE);
+        resp.setHeader(EXPIRES_KEY, EXPIRES_DATE);
+        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE1);
+        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE2);
+        resp.setHeader(PRAGMA_KEY, PRAGMA_VALUE);
     }
 
     /**
