@@ -201,6 +201,15 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         httpOnly = (null != cs && cs.getBoolProperty(ServerConfig.Property.COOKIE_HTTP_ONLY.getPropertyName(), true));
     }
 
+    /**
+     * Gets the associated HTTP request.
+     * 
+     * @return The associated HTTP request
+     */
+    public HttpServletRequestWrapper getRequest() {
+        return request;
+    }
+
     public String encodeRedirectUrl(final String url) {
         return encodeURL(url);
     }
