@@ -147,12 +147,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @return <code>true</code> if data has already been written; otherwsie <code>false</code>
      */
     public boolean isDirty() {
-        blocker.acquire();
-        try {
-            return outputStream.isDirty();
-        } finally {
-            blocker.release();
-        }
+        return outputStream.isDirty();
     }
 
     /**

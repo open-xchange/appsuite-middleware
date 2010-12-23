@@ -122,12 +122,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      * @return <code>true</code> if this stream is dirty; otherwise <code>false</code>
      */
     public boolean isDirty() {
-        blocker.acquire();
-        try {
-            return dirty;
-        } finally {
-            blocker.release();
-        }
+        return dirty;
     }
 
     /**
