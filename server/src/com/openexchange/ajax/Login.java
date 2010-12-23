@@ -516,10 +516,14 @@ public class Login extends AJAXServlet {
     }
     
     private void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
+        Tools.disableCaching(resp);
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
     	doCookieReWrite(req, resp, CookieType.SESSION);
     }
 
     private void doRefreshSecret(final HttpServletRequest req, final HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
+        Tools.disableCaching(resp);
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
     	doCookieReWrite(req, resp, CookieType.SECRET);
     }
 
