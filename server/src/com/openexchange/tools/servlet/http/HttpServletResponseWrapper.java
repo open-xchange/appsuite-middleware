@@ -58,7 +58,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -195,7 +194,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      */
     public HttpServletResponseWrapper(final HttpServletRequestWrapper request) {
         super();
-        cookies = new LinkedHashSet<Cookie>(); 
+        cookies = new LinkedHashSet<Cookie>();
         status = HttpServletResponse.SC_OK;
         this.request = request;
         final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
