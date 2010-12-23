@@ -317,15 +317,14 @@ public class AJPv13Response {
             statusMsg = "";
         }
         final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(MAX_PACKAGE_SIZE);
+        final int headersSize = servletResponse.getHeadersSize();
         final byte[] headers;
         {
             sink.reset();
-            final int headersSize = servletResponse.getHeadersSize();
             final Iterator<String> iter = servletResponse.getHeaderNames();
             for (int i = 0; i < headersSize; i++) {
                 final String headerName = iter.next();
-                final String headerValue = servletResponse.getHeader(headerName);
-                writeHeader(headerName, headerValue, sink);
+                writeHeader(headerName, servletResponse.getHeader(headerName), sink);
             }
             headers = sink.toByteArray();
         }
@@ -360,7 +359,7 @@ public class AJPv13Response {
         fillStartBytes(SEND_HEADERS_PREFIX_CODE, dataLength, sink);
         writeInt(servletResponse.getStatus(), sink);
         writeString(statusMsg, sink);
-        writeInt(servletResponse.getHeadersSize() + numOfCookieHdrs, sink);
+        writeInt(headersSize + numOfCookieHdrs, sink);
         writeByteArray(headers, sink);
         writeByteArray(cookies, sink);
         return sink.toByteArray();
@@ -506,7 +505,8 @@ public class AJPv13Response {
         int retval = 0;
         final StringBuilder sb = new StringBuilder(128);
         for (final Map.Entry<String, String[]> hdr : set) {
-            if (HEADER_MAP.containsKey(hdr.getKey())) {
+            final String name = hdr.getKey();
+            if (HEADER_MAP.containsKey(name)) {
                 /*
                  * Header can be encoded as an integer
                  */
@@ -515,7 +515,7 @@ public class AJPv13Response {
                 /*
                  * Header must be written as string which takes three extra bytes in addition to header name length
                  */
-                retval += hdr.getKey().length() + 3;
+                retval += name.length() + 3;
             }
             sb.setLength(0);
             retval += array2string(hdr.getValue(), sb).length() + 3;
