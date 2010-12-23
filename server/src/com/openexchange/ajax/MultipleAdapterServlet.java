@@ -63,11 +63,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -99,7 +100,11 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     
     
     protected void handle(final HttpServletRequest req, final HttpServletResponse resp) {
-        if(handleOverride(req, resp)) {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        Tools.disableCaching(resp);
+
+        if (handleOverride(req, resp)) {
             return;
         }
         try {
@@ -107,12 +112,12 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final JSONObject request = toJSON(req, action);
             final MultipleHandler handler = createMultipleHandler();
 
-            if(action == null) {
+            if (action == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
             }
             final Object response = handler.performRequest(action, request, getSessionObject(req), req.isSecure());
             final Date timestamp = handler.getTimestamp();
-            writeResponseSafely(response, timestamp, handler.getWarnings(), resp);       
+            writeResponseSafely(response, timestamp, handler.getWarnings(), resp);
         } catch (final AbstractOXException x) {
             writeException(x, resp);
         } catch (final Throwable t) {

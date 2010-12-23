@@ -77,7 +77,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -148,6 +147,10 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      * @throws IOException If an I/O error occurs
      */
     protected final void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException, ServletException {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        Tools.disableCaching(resp);
+
         final String action = req.getParameter(PARAMETER_ACTION);
         boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
 
@@ -156,14 +159,15 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             if (action == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
             }
-            if(handleIndividually(action, req, resp)) {
+            if (handleIndividually(action, req, resp)) {
                 return;
             }
 
             final AJAXRequestData data = parseRequest(req, preferStream, isFileUpload);
-            if(handleIndividually(action, data, req, resp)) {
+            if (handleIndividually(action, data, req, resp)) {
                 return;
             }
+
             final AJAXRequestResult result = factory.createActionService(action).perform(data, getSessionObject(req));
             response.setData(result.getResultObject());
             response.setTimestamp(result.getTimestamp());
@@ -175,9 +179,6 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
-        Tools.disableCaching(resp);
         try {
             if (isFileUpload) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
