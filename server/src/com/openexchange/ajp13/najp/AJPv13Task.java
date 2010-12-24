@@ -186,19 +186,17 @@ public final class AJPv13Task implements Task<Object> {
      * Cancels this AJP task; meaning to close the client socket and to stop its execution.
      */
     public void cancel() {
-        if (null != client) {
+        final Socket s = client;
+        if (null != s) {
             try {
-                client.close();
-            } catch (final IOException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
-                }
+                closeQuitely(s);
             } finally {
                 client = null;
             }
         }
-        if (control != null) {
-            control.cancel(false);
+        final Future<Object> f = control;
+        if (f != null) {
+            f.cancel(false);
             control = null;
         }
     }
@@ -590,7 +588,9 @@ public final class AJPv13Task implements Task<Object> {
         try {
             s.close();
         } catch (final IOException e) {
-            LOG.debug(e.getMessage(), e);
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
+            }
         }
     }
 
