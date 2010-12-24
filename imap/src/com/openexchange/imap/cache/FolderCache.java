@@ -54,6 +54,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
+import com.openexchange.imap.cache.util.FolderMap;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -67,13 +68,15 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link FolderCache} - A session-bound cache for IMAP folders converted to a {@link MailFolder} instance.s
+ * {@link FolderCache} - A session-bound cache for IMAP folders converted to a {@link MailFolder} instance.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderCache {
 
     private static final boolean ENABLED = true;
+
+    private static final int MAX_CAPACITY_PER_ACCOUNT = 96;
 
     /**
      * No instance
@@ -120,7 +123,7 @@ public final class FolderCache {
                 mailCache.get(entry);
                 folderMap = entry.getValue();
                 if (null == folderMap) {
-                    final FolderMap newMap = new FolderMap();
+                    final FolderMap newMap = new FolderMap(MAX_CAPACITY_PER_ACCOUNT);
                     entry.setValue(newMap);
                     mailCache.put(entry);
                     folderMap = newMap;

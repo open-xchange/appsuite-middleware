@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.imap.cache;
+package com.openexchange.imap.cache.util;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
@@ -67,9 +68,14 @@ public final class FolderMap {
     /**
      * Initializes a new {@link FolderMap}.
      */
-    public FolderMap() {
+    public FolderMap(final int maximumCapacity) {
         super();
-        map = new ConcurrentHashMap<String, MailFolder>(16);
+        /*
+         * No ReadWriteLock since modifications are also performed on read access
+         */
+        final ConcurrentMap<String, MailFolder> delegate = new MaxCapacityLinkedHashMap<String, MailFolder>(maximumCapacity);
+        final Lock lock = new ReentrantLock();
+        map = new LockedConcurrentMap<String, MailFolder>(lock, lock, delegate);
     }
 
     public MailFolder putIfAbsent(final String key, final MailFolder value) {
@@ -121,14 +127,14 @@ public final class FolderMap {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
         if (!(obj instanceof FolderMap)) {
             return false;
         }
-        FolderMap other = (FolderMap) obj;
+        final FolderMap other = (FolderMap) obj;
         if (map == null) {
             if (other.map != null) {
                 return false;

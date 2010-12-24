@@ -215,7 +215,7 @@ public final class IMAPFolderConverter {
         
     }
 
-    //private static final ConcurrentMap<Key, Object> M = new ConcurrentHashMap<Key, Object>();
+//    private static final ConcurrentMap<Key, Object> M = new ConcurrentHashMap<Key, Object>();
 
     /**
      * Creates a folder data object from given IMAP folder.

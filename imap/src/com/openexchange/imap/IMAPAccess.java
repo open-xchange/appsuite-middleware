@@ -445,7 +445,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             if (Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
-                imapSession.setDebugOut(System.err);
+                imapSession.setDebugOut(System.out);
             }
             /*
              * Get connected store
