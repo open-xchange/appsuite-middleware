@@ -62,6 +62,10 @@ public final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> im
 
     private static final long serialVersionUID = 8965907246210389424L;
 
+    private static final int INITIAL_CAPACITY = 16;
+
+    private static final float LOAD_FACTOR = 0.75f;
+
     private final int maximumCapacity;
 
     /**
@@ -70,7 +74,7 @@ public final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> im
      * @param maximumCapacity The maximum capacity
      */
     public MaxCapacityLinkedHashMap(final int maximumCapacity) {
-        super(maximumCapacity, 0.75f, true);
+        super(INITIAL_CAPACITY, LOAD_FACTOR, true);
         this.maximumCapacity = maximumCapacity;
     }
 

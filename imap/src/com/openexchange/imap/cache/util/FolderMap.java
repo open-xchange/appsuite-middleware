@@ -70,12 +70,8 @@ public final class FolderMap {
      */
     public FolderMap(final int maximumCapacity) {
         super();
-        /*
-         * No ReadWriteLock since modifications are also performed on read access
-         */
-        final ConcurrentMap<String, MailFolder> delegate = new MaxCapacityLinkedHashMap<String, MailFolder>(maximumCapacity);
         final Lock lock = new ReentrantLock();
-        map = new LockedConcurrentMap<String, MailFolder>(lock, lock, delegate);
+        map = new LockedConcurrentMap<String, MailFolder>(lock, lock, new MaxCapacityLinkedHashMap<String, MailFolder>(maximumCapacity));
     }
 
     public MailFolder putIfAbsent(final String key, final MailFolder value) {

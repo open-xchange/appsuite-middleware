@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.najp;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -334,7 +335,7 @@ public final class AJPv13Task implements Task<Object> {
             final AJPv13ConnectionImpl ajpCon;
             try {
                 ajpCon = new AJPv13ConnectionImpl(this);
-            } catch (AJPv13Exception e) {
+            } catch (final AJPv13Exception e) {
                 terminateAndClose(null);
                 return null;
             }
@@ -583,8 +584,9 @@ public final class AJPv13Task implements Task<Object> {
     }
 
     private static void writeEndResponse(final Socket client, final boolean closeConnection) throws AJPv13Exception, IOException {
-        client.getOutputStream().write(AJPv13Response.getEndResponseBytes(closeConnection));
-        client.getOutputStream().flush();
+        final OutputStream out = client.getOutputStream();
+        out.write(AJPv13Response.getEndResponseBytes(closeConnection));
+        out.flush();
     }
 
     private static void writeSendHeaders(final Socket client, final HttpServletResponseWrapper resp) throws AJPv13Exception, IOException {
