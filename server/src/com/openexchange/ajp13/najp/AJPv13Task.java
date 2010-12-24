@@ -566,11 +566,14 @@ public final class AJPv13Task implements Task<Object> {
              */
             final Socket s = client;
             if (s != null) {
-                if (!s.isClosed()) {
-                    writeEndResponse(s, true);
-                    s.close();
+                try {
+                    if (!s.isClosed()) {
+                        writeEndResponse(s, true);
+                    }
+                } finally {
+                    closeQuitely(s);
+                    client = null;
                 }
-                client = null;
             }
             if (control != null) {
                 // control.cancel(false);
@@ -580,6 +583,14 @@ public final class AJPv13Task implements Task<Object> {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(e.getMessage(), e);
             }
+        }
+    }
+
+    private static void closeQuitely(final Socket s) {
+        try {
+            s.close();
+        } catch (final IOException e) {
+            LOG.debug(e.getMessage(), e);
         }
     }
 
