@@ -67,15 +67,11 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link FolderCache}
+ * {@link FolderCache} - A session-bound cache for IMAP folders converted to a {@link MailFolder} instance.s
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderCache {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderCache.class);
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final boolean ENABLED = true;
 
@@ -141,8 +137,6 @@ public final class FolderCache {
             if (null == mailFolder) {
                 mailFolder = newFld;
             }
-        } else if (DEBUG) {
-            LOG.debug("IMAP folder \"" + fullName + "\" taken from cache!");
         }
         /*
          * Return
