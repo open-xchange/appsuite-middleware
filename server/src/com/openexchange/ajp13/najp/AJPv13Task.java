@@ -590,13 +590,15 @@ public final class AJPv13Task implements Task<Object> {
     }
 
     private static void writeSendHeaders(final Socket client, final HttpServletResponseWrapper resp) throws AJPv13Exception, IOException {
-        client.getOutputStream().write(AJPv13Response.getSendHeadersBytes(resp));
-        client.getOutputStream().flush();
+        final OutputStream out = client.getOutputStream();
+        out.write(AJPv13Response.getSendHeadersBytes(resp));
+        out.flush();
     }
 
     private static void writeSendBody(final Socket client, final byte[] data) throws AJPv13Exception, IOException {
-        client.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(data));
-        client.getOutputStream().flush();
+        final OutputStream out = client.getOutputStream();
+        out.write(AJPv13Response.getSendBodyChunkBytes(data));
+        out.flush();
     }
 
 }
