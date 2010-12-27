@@ -177,7 +177,8 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                      * Caught in another cycle! Abort immediately
                      */
                     // ajpCon.dropOutstandingData();
-                    throw new AJPv13Exception(AJPCode.IO_ERROR, false, "Broken AJP cyle. Detected outgoing data available with first AJP package.");
+                    AJPv13Exception e = new AJPv13Exception(AJPCode.IO_ERROR, false, "Broken AJP cyle. Detected outgoing data available with first AJP package.");
+                    LOG.error(e.getMessage(), e);
                 }
                 /*
                  * Read Prefix Code from Input Stream

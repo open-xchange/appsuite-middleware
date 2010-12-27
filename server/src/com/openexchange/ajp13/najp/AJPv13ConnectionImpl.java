@@ -90,9 +90,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     private int packageNumber;
 
-    private final BlockableBufferedInputStream inputStream;
+    private volatile BlockableBufferedInputStream inputStream;
 
-    private final BlockableBufferedOutputStream outputStream;
+    private volatile BlockableBufferedOutputStream outputStream;
 
     private final AJPv13Task task;
 
@@ -117,7 +117,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
             outputStream = new BlockableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE, false);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, false, e, e.getMessage());
+            //throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, false, e, e.getMessage());
         }
     }
 
