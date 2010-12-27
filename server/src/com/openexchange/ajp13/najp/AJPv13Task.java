@@ -334,6 +334,7 @@ public final class AJPv13Task implements Task<Object> {
             try {
                 ajpCon = new AJPv13ConnectionImpl(this);
             } catch (final AJPv13Exception e) {
+                LOG.error(e.getMessage(), e);
                 terminateAndClose(null);
                 return null;
             }
