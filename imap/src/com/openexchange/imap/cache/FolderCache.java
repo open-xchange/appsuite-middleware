@@ -63,6 +63,7 @@ import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -76,7 +77,9 @@ public final class FolderCache {
 
     private static final boolean ENABLED = true;
 
-    private static final int MAX_CAPACITY_PER_ACCOUNT = 96;
+    private static final int MAX_CAPACITY_DEFAULT_ACCOUNT = 128;
+
+    private static final int MAX_CAPACITY_PER_ACCOUNT = 16;
 
     /**
      * No instance
@@ -115,7 +118,8 @@ public final class FolderCache {
          * Initialize appropriate cache entry
          */
         final FolderCacheEntry entry = new FolderCacheEntry();
-        final SessionMailCache mailCache = SessionMailCache.getInstance(session, folderStorage.getAccountId());
+        final int accountId = folderStorage.getAccountId();
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
         FolderMap folderMap = entry.getValue();
         if (null == folderMap) {
@@ -123,7 +127,7 @@ public final class FolderCache {
                 mailCache.get(entry);
                 folderMap = entry.getValue();
                 if (null == folderMap) {
-                    final FolderMap newMap = new FolderMap(MAX_CAPACITY_PER_ACCOUNT);
+                    final FolderMap newMap = new FolderMap(MailAccount.DEFAULT_ID == accountId ? MAX_CAPACITY_DEFAULT_ACCOUNT : MAX_CAPACITY_PER_ACCOUNT);
                     entry.setValue(newMap);
                     mailCache.put(entry);
                     folderMap = newMap;
