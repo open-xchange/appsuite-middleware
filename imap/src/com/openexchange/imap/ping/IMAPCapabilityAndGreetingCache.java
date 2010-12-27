@@ -249,8 +249,9 @@ public final class IMAPCapabilityAndGreetingCache {
                     /*
                      * Set connect timeout
                      */
-                    if (imapProperties.getImapConnectionTimeout() > 0) {
-                        s.connect(key, imapProperties.getImapConnectionTimeout());
+                    final int connectionTimeout = imapProperties.getImapConnectionTimeout();
+                    if (connectionTimeout > 0) {
+                        s.connect(key, connectionTimeout);
                     } else {
                         s.connect(key);
                     }
