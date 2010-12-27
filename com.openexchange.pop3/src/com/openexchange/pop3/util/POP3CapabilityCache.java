@@ -192,7 +192,11 @@ public final class POP3CapabilityCache {
         /*
          * Create own callable for this thread
          */
-        return new CapabilityCallable(address, isSecure, pop3Properties).call();
+        try {
+            return new CapabilityCallable(address, isSecure, pop3Properties).call();
+        } catch (final java.net.SocketTimeoutException e) {
+            throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, e, address, login);
+        }
     }
 
     private static String getFrom(final Future<String> f, final InetSocketAddress address, final String login, final boolean caller) throws IOException, MailException {
@@ -257,7 +261,7 @@ public final class POP3CapabilityCache {
             this.timeout = timeout;
         }
 
-        public String call() throws IOException, POP3Exception {
+        public String call() throws IOException {
             Socket s = null;
             try {
                 try {
