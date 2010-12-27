@@ -198,7 +198,7 @@ public class MIMEMailException extends MailException {
          */
         BIND_ERROR("Could not bind connection to local port %1$s", Category.SETUP_ERROR, 1015),
         /**
-         * Connect error: Connection was refused or timed out while attempting to connect to remote mail server %1$s for user %2$s.
+         * Connection was refused or timed out while attempting to connect to remote mail server %1$s for user %2$s.
          * <p>
          * An error occurred while attempting to connect to remote mail server. Typically, the connection was refused remotely (e.g., no
          * process is listening on the remote address/port).
