@@ -77,10 +77,6 @@ public final class OAuthServiceImpl implements OAuthService {
         registry = MetaDataRegistry.getInstance();
     }
 
-    public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
-        return registry;
-    }
-
     public List<OAuthAccount> getAccounts(int user, int contextId) throws OAuthException {
         // TODO Auto-generated method stub
         return null;
