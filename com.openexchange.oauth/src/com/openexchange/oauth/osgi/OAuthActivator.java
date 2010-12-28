@@ -57,7 +57,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.oauth.OAuthException;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.exception.OAuthExceptionFactory;
+import com.openexchange.oauth.internal.OAuthServiceImpl;
 
 /**
  * {@link OAuthActivator}
@@ -107,6 +109,11 @@ public final class OAuthActivator implements BundleActivator {
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
+            /*
+             * Register
+             */
+            registrations = new ArrayList<ServiceRegistration>(2);
+            registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(), null));
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
