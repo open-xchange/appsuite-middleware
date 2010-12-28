@@ -64,17 +64,17 @@ public final class OAuthConstants {
     }
 
     /**
-     * The argument name for PIN.
+     * The argument name for PIN. <code>java.lang.String</code>
      */
     public static final String ARGUMENT_PIN = "oauth.pin";
 
     /**
-     * The argument name for display name.
+     * The argument name for display name. <code>java.lang.String</code>
      */
     public static final String ARGUMENT_DISPLAY_NAME = "oauth.dn";
 
     /**
-     * The argument name for request token.
+     * The argument name for request token. <code>com.openexchange.oauth.OAuthToken</code>
      */
     public static final String ARGUMENT_REQUEST_TOKEN = "oauth.reqToken";
 
