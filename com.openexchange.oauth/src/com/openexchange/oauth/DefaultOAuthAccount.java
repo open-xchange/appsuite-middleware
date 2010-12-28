@@ -100,7 +100,7 @@ public final class DefaultOAuthAccount implements OAuthAccount {
      * 
      * @param token The token to set
      */
-    public void setToken(String token) {
+    public void setToken(final String token) {
         this.token = token;
     }
 
@@ -109,7 +109,7 @@ public final class DefaultOAuthAccount implements OAuthAccount {
      * 
      * @param secret The secret to set
      */
-    public void setSecret(String secret) {
+    public void setSecret(final String secret) {
         this.secret = secret;
     }
 
@@ -118,7 +118,7 @@ public final class DefaultOAuthAccount implements OAuthAccount {
      * 
      * @param id The id to set
      */
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -127,7 +127,7 @@ public final class DefaultOAuthAccount implements OAuthAccount {
      * 
      * @param displayName The display name to set
      */
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
@@ -136,7 +136,7 @@ public final class DefaultOAuthAccount implements OAuthAccount {
      * 
      * @param metaData The meta data to set
      */
-    public void setMetaData(OAuthServiceMetaData metaData) {
+    public void setMetaData(final OAuthServiceMetaData metaData) {
         this.metaData = metaData;
     }
 
