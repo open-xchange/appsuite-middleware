@@ -68,10 +68,41 @@ public enum OAuthInteractionType {
      * @see OAuthConstants#ARGUMENT_PIN
      * @see OAuthConstants#ARGUMENT_REQUEST_TOKEN
      */
-    OUT_OF_BAND,
+    OUT_OF_BAND("outOfBand"),
     /**
      * No user action needed.
      */
-    CALLBACK;
+    CALLBACK("callback");
+
+    private final String name;
+
+    private OAuthInteractionType(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the name
+     * 
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the interaction type for given name.
+     * 
+     * @param name The name
+     * @return The interaction type or <code>null</code> if none matches
+     */
+    public static OAuthInteractionType typeFor(final String name) {
+        final OAuthInteractionType[] values = OAuthInteractionType.values();
+        for (final OAuthInteractionType type : values) {
+            if (type.name.equalsIgnoreCase(name)) {
+                return type;
+            }
+        }
+        return null;
+    }
 
 }
