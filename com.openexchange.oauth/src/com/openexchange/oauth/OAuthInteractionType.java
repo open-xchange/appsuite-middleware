@@ -96,6 +96,9 @@ public enum OAuthInteractionType {
      * @return The interaction type or <code>null</code> if none matches
      */
     public static OAuthInteractionType typeFor(final String name) {
+        if (null == name) {
+            return null;
+        }
         final OAuthInteractionType[] values = OAuthInteractionType.values();
         for (final OAuthInteractionType type : values) {
             if (type.name.equalsIgnoreCase(name)) {
