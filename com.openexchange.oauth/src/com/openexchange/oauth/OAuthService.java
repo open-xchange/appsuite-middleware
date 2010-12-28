@@ -62,6 +62,13 @@ import java.util.Map;
 public interface OAuthService {
 
     /**
+     * Gets the meta data registry.
+     * 
+     * @return The meta data registry
+     */
+    OAuthServiceMetaDataRegistry getMetaDataRegistry();
+
+    /**
      * Gets all accounts belonging to specified user.
      * 
      * @param user The user identifier

@@ -60,13 +60,14 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 
 /**
  * {@link MetaDataRegistry}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MetaDataRegistry {
+public final class MetaDataRegistry implements OAuthServiceMetaDataRegistry {
 
     private static volatile MetaDataRegistry instance;
 

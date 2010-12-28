@@ -58,6 +58,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.exception.OAuthExceptionFactory;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
 
@@ -114,6 +115,7 @@ public final class OAuthActivator implements BundleActivator {
              */
             registrations = new ArrayList<ServiceRegistration>(2);
             registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(), null));
+            registrations.add(context.registerService(OAuthServiceMetaDataRegistry.class.getName(), registry, null));
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
@@ -126,7 +128,6 @@ public final class OAuthActivator implements BundleActivator {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.oauth");
             }
-            MetaDataRegistry.releaseInstance();
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
                     trackers.remove(0).close();
@@ -139,6 +140,7 @@ public final class OAuthActivator implements BundleActivator {
                 }
                 registrations = null;
             }
+            MetaDataRegistry.releaseInstance();
             /*
              * Unregister component
              */

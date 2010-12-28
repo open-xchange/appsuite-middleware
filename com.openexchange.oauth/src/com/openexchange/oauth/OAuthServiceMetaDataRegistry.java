@@ -47,73 +47,39 @@
  *
  */
 
-package com.openexchange.oauth.internal;
+package com.openexchange.oauth;
 
 import java.util.List;
-import java.util.Map;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthException;
-import com.openexchange.oauth.OAuthInteraction;
-import com.openexchange.oauth.OAuthInteractionType;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.oauth.osgi.MetaDataRegistry;
-
 
 /**
- * {@link OAuthServiceImpl}
- *
+ * {@link OAuthServiceMetaDataRegistry}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthServiceImpl implements OAuthService {
-
-    private final OAuthServiceMetaDataRegistry registry;
+public interface OAuthServiceMetaDataRegistry {
 
     /**
-     * Initializes a new {@link OAuthServiceImpl}.
+     * Gets all known services.
+     * 
+     * @return All services
      */
-    public OAuthServiceImpl() {
-        super();
-        registry = MetaDataRegistry.getInstance();
-    }
+    List<OAuthServiceMetaData> getAllServices();
 
-    public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
-        return registry;
-    }
+    /**
+     * Gets the service belonging to specified identifier.
+     * 
+     * @param id The service identifier
+     * @return The service
+     * @throws OAuthException If service look-up fails
+     */
+    OAuthServiceMetaData getService(String id) throws OAuthException;
 
-    public List<OAuthAccount> getAccounts(int user, int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public List<OAuthAccount> getAccounts(String serviceMetaData, int user, int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public OAuthInteraction initOAuth(String serviceMetaData) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void deleteAccount(int accountId, int user, int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-
-    }
-
-    public OAuthAccount getAccount(int accountId, int user, int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    /**
+     * Checks for existence of specified service
+     * 
+     * @param id The service identifier
+     * @return <code>true</code> if such a service exists; otherwise <code>false</code>
+     */
+    boolean containsService(String id);
 
 }
