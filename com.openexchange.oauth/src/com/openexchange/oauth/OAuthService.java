@@ -49,12 +49,101 @@
 
 package com.openexchange.oauth;
 
+import java.util.List;
+import java.util.Map;
 
 /**
- * {@link OAuthService}
- *
+ * {@link OAuthService} - The OAuth service.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OAuthService {
+
+    /**
+     * Gets all accounts belonging to specified user.
+     * 
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OAuthException If accounts cannot be returned
+     * @return The accounts
+     */
+    List<OAuthAccount> getAccounts(int user, int contextId) throws OAuthException;
+
+    /**
+     * Gets all accounts belonging to specified user with given service identifier.
+     * 
+     * @param serviceMetaData The identifier of service meta data
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OAuthException If accounts cannot be returned
+     * @return The accounts
+     */
+    List<OAuthAccount> getAccounts(String serviceMetaData, int user, int contextId) throws OAuthException;
+
+    /**
+     * Initializes a new OAuth account.
+     * 
+     * @param serviceMetaData The identifier of service meta data
+     * @throws OAuthException If initialization fails
+     * @return The OAuth interaction providing needed steps
+     */
+    OAuthInteraction initOAuth(String serviceMetaData) throws OAuthException;
+
+    /**
+     * Create a new OAuth account from specified arguments.
+     * <p>
+     * The arguments should provide:
+     * <ul>
+     * <li>display name; {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}</li>
+     * </ul>
+     * 
+     * @param serviceMetaData The identifier of service meta data
+     * @param type The interaction type
+     * @param arguments The arguments appropriate for interaction type
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OAuthException If creation fails
+     * @return The newly created account
+     */
+    OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
+
+    /**
+     * Deletes the specified account.
+     * 
+     * @param accountId The account identifier
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OAuthException If deletion fails
+     */
+    void deleteAccount(int accountId, int user, int contextId) throws OAuthException;
+
+    /**
+     * Update the specified account.
+     * <p>
+     * The arguments may provide:
+     * <ul>
+     * <li>display name; {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}</li>
+     * </ul>
+     * 
+     * @param accountId The account identifier
+     * @param arguments The arguments to update
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OAuthException If deletion fails
+     */
+    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
+
+    /**
+     * Gets the specified account.
+     * 
+     * @param accountId The account identifier
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OAuthException If account cannot be returned
+     * @return The account
+     */
+    OAuthAccount getAccount(int accountId, int user, int contextId) throws OAuthException;
 
 }
