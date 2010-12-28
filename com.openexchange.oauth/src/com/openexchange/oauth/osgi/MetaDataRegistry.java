@@ -54,7 +54,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -100,7 +102,7 @@ public final class MetaDataRegistry {
         }
     }
 
-    private final ConcurrentMap<String, OAuthServiceMetaData> map;
+    final ConcurrentMap<String, OAuthServiceMetaData> map;
 
     private ServiceTracker tracker;
 
@@ -135,7 +137,7 @@ public final class MetaDataRegistry {
      */
     void start(final BundleContext context) {
         if (null == tracker) {
-            tracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new Customizer(map, context));
+            tracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new Customizer(context));
             tracker.open();
         }
     }
@@ -148,6 +150,58 @@ public final class MetaDataRegistry {
             tracker.close();
             tracker = null;
         }
+    }
+
+    private final class Customizer implements ServiceTrackerCustomizer {
+
+        private final BundleContext context;
+
+        /**
+         * Initializes a new {@link Customizer}.
+         */
+        public Customizer(final BundleContext context) {
+            super();
+            this.context = context;
+        }
+
+        public Object addingService(final ServiceReference reference) {
+            final Object service = context.getService(reference);
+            if ((service instanceof OAuthServiceMetaData)) {
+                final OAuthServiceMetaData addMe = (OAuthServiceMetaData) service;
+                if (null == map.putIfAbsent(addMe.getId(), addMe)) {
+                    return service;
+                }
+                final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(Customizer.class);
+                if (logger.isWarnEnabled()) {
+                    logger.warn(new StringBuilder(128).append("OAuth service meta data ").append(addMe.getDisplayName()).append(
+                        " could not be added to registry. Another service meta data is already registered with identifier: ").append(
+                        addMe.getId()).toString());
+                }
+            }
+            /*
+             * Adding to registry failed
+             */
+            context.ungetService(reference);
+            return null;
+        }
+
+        public void modifiedService(final ServiceReference reference, final Object service) {
+            // Nothing to do
+        }
+
+        public void removedService(final ServiceReference reference, final Object service) {
+            if (null != service) {
+                try {
+                    if (service instanceof OAuthServiceMetaData) {
+                        final OAuthServiceMetaData removeMe = (OAuthServiceMetaData) service;
+                        map.remove(removeMe.getId());
+                    }
+                } finally {
+                    context.ungetService(reference);
+                }
+            }
+        }
+
     }
 
 }

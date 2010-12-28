@@ -99,7 +99,7 @@ public final class OAuthActivator implements BundleActivator {
             /*
              * Collect OAuth services
              */
-            final Registry registry = Registry.getInstance();
+            final MetaDataRegistry registry = MetaDataRegistry.getInstance();
             registry.start(context);
             /*
              * Start other trackers
@@ -126,7 +126,7 @@ public final class OAuthActivator implements BundleActivator {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.oauth");
             }
-            Registry.releaseInstance();
+            MetaDataRegistry.releaseInstance();
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
                     trackers.remove(0).close();
