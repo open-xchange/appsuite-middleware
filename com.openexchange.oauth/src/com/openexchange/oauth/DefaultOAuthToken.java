@@ -50,62 +50,47 @@
 package com.openexchange.oauth;
 
 /**
- * {@link DefaultOAuthAccount}
+ * {@link DefaultOAuthToken}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccount {
+public class DefaultOAuthToken implements OAuthToken {
 
-    private int id;
+    private String token;
 
-    private String displayName;
-
-    private OAuthServiceMetaData metaData;
+    private String secret;
 
     /**
-     * Initializes a new {@link DefaultOAuthAccount}.
+     * Initializes a new {@link DefaultOAuthToken}.
      */
-    public DefaultOAuthAccount() {
+    public DefaultOAuthToken() {
         super();
     }
 
-    public int getId() {
-        return id;
+    public String getToken() {
+        return token;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public OAuthServiceMetaData getMetaData() {
-        return metaData;
+    public String getSecret() {
+        return secret;
     }
 
     /**
-     * Sets the id
+     * Sets the token
      * 
-     * @param id The id to set
+     * @param token The token to set
      */
-    public void setId(final int id) {
-        this.id = id;
+    public void setToken(final String token) {
+        this.token = token;
     }
 
     /**
-     * Sets the display name
+     * Sets the secret
      * 
-     * @param displayName The display name to set
+     * @param secret The secret to set
      */
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Sets the meta data
-     * 
-     * @param metaData The meta data to set
-     */
-    public void setMetaData(final OAuthServiceMetaData metaData) {
-        this.metaData = metaData;
+    public void setSecret(final String secret) {
+        this.secret = secret;
     }
 
 }
