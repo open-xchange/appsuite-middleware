@@ -113,30 +113,30 @@ public enum OAuthExceptionCodes implements OXErrorMessage {
     private static final Object[] EMPTY = new Object[0];
 
     /**
-     * Creates a new file storage exception of this error type with no message arguments.
+     * Creates a new OAuth exception of this error type with no message arguments.
      * 
-     * @return A new twitter exception
+     * @return A new OAuth exception
      */
     public OAuthException create() {
         return OAuthExceptionFactory.getInstance().create(this, EMPTY);
     }
 
     /**
-     * Creates a new file storage exception of this error type with specified message arguments.
+     * Creates a new OAuth exception of this error type with specified message arguments.
      * 
      * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return A new OAuth exception
      */
     public OAuthException create(final Object... messageArgs) {
         return OAuthExceptionFactory.getInstance().create(this, messageArgs);
     }
 
     /**
-     * Creates a new file storage exception of this error type with specified cause and message arguments.
+     * Creates a new OAuth exception of this error type with specified cause and message arguments.
      * 
      * @param cause The cause
      * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return A new OAuth exception
      */
     public OAuthException create(final Throwable cause, final Object... messageArgs) {
         return OAuthExceptionFactory.getInstance().create(this, cause, messageArgs);
