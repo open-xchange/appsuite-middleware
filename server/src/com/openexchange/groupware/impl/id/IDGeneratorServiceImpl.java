@@ -119,7 +119,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
                 throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } catch (final Exception e) {
                 DBUtils.rollback(con);
-                throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                throw IDExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.autocommit(con);
                 dbService.releaseWriteConnection(ctx, con);
