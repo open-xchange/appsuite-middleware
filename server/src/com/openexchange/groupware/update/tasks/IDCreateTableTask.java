@@ -88,7 +88,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws AbstractOXException {
         createTable("sequenceIds", getCreate(), params.getContextId());
         if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'MailAccountCreateTablesTask' successfully performed!");
+            LOG.info("UpdateTask 'IDCreateTableTask' successfully performed!");
         }
     }
 
