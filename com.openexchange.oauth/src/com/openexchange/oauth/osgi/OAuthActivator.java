@@ -114,7 +114,7 @@ public final class OAuthActivator implements BundleActivator {
              * Register
              */
             registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(), null));
+            registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(null /* FIXME */, null, MetaDataRegistry.getInstance()), null));
             registrations.add(context.registerService(OAuthServiceMetaDataRegistry.class.getName(), registry, null));
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);

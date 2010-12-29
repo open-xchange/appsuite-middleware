@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,38 +49,35 @@
 
 package com.openexchange.oauth;
 
-/**
- * {@link OAuthConstants}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class OAuthConstants {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-    /**
-     * Initializes a new {@link OAuthConstants}.
-     */
-    private OAuthConstants() {
-        super();
+
+/**
+ * {@link SimOAuthServiceMetaDataRegistry}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class SimOAuthServiceMetaDataRegistry implements OAuthServiceMetaDataRegistry {
+
+    private Map<String, OAuthServiceMetaData> map = new HashMap<String, OAuthServiceMetaData>();
+    
+    public boolean containsService(String id) {
+        return map.containsKey(id);
     }
 
-    /**
-     * The argument name for PIN. <code>java.lang.String</code>
-     */
-    public static final String ARGUMENT_PIN = "pin";
+    public List<OAuthServiceMetaData> getAllServices() {
+        return new ArrayList<OAuthServiceMetaData>(map.values());
+    }
 
-    /**
-     * The argument name for display name. <code>java.lang.String</code>
-     */
-    public static final String ARGUMENT_DISPLAY_NAME = "displayName";
+    public OAuthServiceMetaData getService(String id) throws OAuthException {
+        return map.get(id);
+    }
 
-    /**
-     * The argument name for request token. <code>com.openexchange.oauth.OAuthToken</code>
-     */
-    public static final String ARGUMENT_REQUEST_TOKEN = "requestToken";
-
-    /**
-     * The type constant used for generated IDs.
-     */
-    public static final String TYPE_ACCOUNT = "com.openexchange.oauth.account";
+    public void addService(OAuthServiceMetaData authServiceMetaData) {
+        map.put(authServiceMetaData.getId(), authServiceMetaData);
+    }
 
 }

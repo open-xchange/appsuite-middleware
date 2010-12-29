@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,13 @@ package com.openexchange.oauth.internal;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.id.IDGeneratorService;
+import com.openexchange.id.SimIDGenerator;
+import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -61,20 +67,31 @@ import com.openexchange.oauth.osgi.MetaDataRegistry;
 
 
 /**
- * {@link OAuthServiceImpl}
+ * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction. 
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class OAuthServiceImpl implements OAuthService {
+public class OAuthServiceImpl implements OAuthService {
 
     private final OAuthServiceMetaDataRegistry registry;
-
+    private DBProvider provider;
+    private IDGeneratorService idGenerator;
+    
     /**
      * Initializes a new {@link OAuthServiceImpl}.
+     * @param provider 
+     * @param simIDGenerator 
      */
-    public OAuthServiceImpl() {
+    public OAuthServiceImpl(DBProvider provider, IDGeneratorService idGenerator, OAuthServiceMetaDataRegistry registry) {
         super();
-        registry = MetaDataRegistry.getInstance();
+        this.registry = registry;
+        this.provider = provider;
+        this.idGenerator = idGenerator;
+    }
+
+    public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
+        return registry;
     }
 
     public List<OAuthAccount> getAccounts(int user, int contextId) throws OAuthException {
@@ -93,9 +110,21 @@ public final class OAuthServiceImpl implements OAuthService {
     }
 
     public OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            DefaultOAuthAccount account = new DefaultOAuthAccount();
+            
+            account.setDisplayName(arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME).toString());
+            account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
+            account.setMetaData(registry.getService(serviceMetaData));
+            
+            obtainToken(type, arguments, account);
+            
+            return account;
+        } catch (AbstractOXException x) {
+            throw new OAuthException(x);
+        }
     }
+
 
     public void deleteAccount(int accountId, int user, int contextId) throws OAuthException {
         // TODO Auto-generated method stub
@@ -111,5 +140,17 @@ public final class OAuthServiceImpl implements OAuthService {
         // TODO Auto-generated method stub
         return null;
     }
+
+    
+    // OAuth
+    
+    protected void obtainToken(OAuthInteractionType type, Map<String, Object> arguments, DefaultOAuthAccount account) {
+        
+    }
+
+    
+    // Helper Methods
+    
+    
 
 }

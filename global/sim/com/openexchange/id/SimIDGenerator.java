@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,24 @@
  *
  */
 
-package com.openexchange.oauth;
+package com.openexchange.id;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.id.IDException;
+import com.openexchange.id.IDGeneratorService;
+
 
 /**
- * {@link OAuthConstants}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link SimIDGenerator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class OAuthConstants {
+public class SimIDGenerator implements IDGeneratorService {
 
-    /**
-     * Initializes a new {@link OAuthConstants}.
-     */
-    private OAuthConstants() {
-        super();
+    private static final AtomicInteger id = new AtomicInteger(1);
+    
+    public int getId(String type, int contextId) throws IDException {
+        return id.getAndIncrement();
     }
-
-    /**
-     * The argument name for PIN. <code>java.lang.String</code>
-     */
-    public static final String ARGUMENT_PIN = "pin";
-
-    /**
-     * The argument name for display name. <code>java.lang.String</code>
-     */
-    public static final String ARGUMENT_DISPLAY_NAME = "displayName";
-
-    /**
-     * The argument name for request token. <code>com.openexchange.oauth.OAuthToken</code>
-     */
-    public static final String ARGUMENT_REQUEST_TOKEN = "requestToken";
-
-    /**
-     * The type constant used for generated IDs.
-     */
-    public static final String TYPE_ACCOUNT = "com.openexchange.oauth.account";
 
 }
