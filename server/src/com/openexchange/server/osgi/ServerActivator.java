@@ -139,6 +139,7 @@ import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.id.IDGeneratorService;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageSessionEventHandler;
 import com.openexchange.login.LoginHandlerService;
@@ -579,6 +580,11 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(
             UnifiedINBOXManagement.class.getName(),
             ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class),
+            null));
+        // Register ID generator
+        registrationList.add(context.registerService(
+            IDGeneratorService.class.getName(),
+            ServerServiceRegistry.getInstance().getService(IDGeneratorService.class),
             null));
         /*
          * Register data sources

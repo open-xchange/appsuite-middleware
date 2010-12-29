@@ -182,7 +182,8 @@ public class Starter implements Initialization {
     new com.openexchange.filemanagement.internal.ManagedFileInitialization(),
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.mailaccount.json.init.MailAccountServletInit(),
-    new com.openexchange.multiple.internal.MultipleHandlerInit() };
+    new com.openexchange.multiple.internal.MultipleHandlerInit(),
+    new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
     /**
      * This contains the components that must be started if the admin uses APIs of the server.
@@ -253,8 +254,7 @@ public class Starter implements Initialization {
      * Image registry initialization
      */
     new com.openexchange.image.internal.ImageRegistryInit(),
-    new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
-    new com.openexchange.groupware.impl.id.IDGeneratorInit() };
+    new com.openexchange.mailaccount.internal.MailAccountStorageInit() };
 
     private static final Log LOG = LogFactory.getLog(Starter.class);
 
