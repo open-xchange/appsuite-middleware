@@ -101,7 +101,7 @@ public final class CreateAction implements AJAXActionService {
              */
             final JSONObject data = (JSONObject) request.getData();
             final Map<String, Object> arguments = new HashMap<String, Object>(data.length());
-            for (Entry<String, Object> entry : data.entrySet()) {
+            for (final Entry<String, Object> entry : data.entrySet()) {
                 final String key = entry.getKey();
                 if (OAuthConstants.ARGUMENT_REQUEST_TOKEN.equals(key)) {
                     final JSONObject jsonToken = (JSONObject) entry.getValue();
