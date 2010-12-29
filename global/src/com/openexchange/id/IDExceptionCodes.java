@@ -69,9 +69,9 @@ public enum IDExceptionCodes implements OXErrorMessage {
      */
     IO_ERROR(IDExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 2),
     /**
-     * An I/O error occurred: %1$s
+     * A SQL error occurred: %1$s
      */
-    JSON_ERROR(IDExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 3),
+    SQL_ERROR(IDExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 3),
     /**
      * ID generation failed
      */

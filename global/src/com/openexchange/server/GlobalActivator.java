@@ -59,6 +59,8 @@ import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.id.IDException;
+import com.openexchange.id.exception.IDExceptionFactory;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
 
 /**
@@ -77,6 +79,8 @@ public final class GlobalActivator implements BundleActivator {
     private ComponentRegistration sessionComponent;
 
     private Initialization initialization;
+
+    private ComponentRegistration idRegistration;
 
     /**
      * Initializes a new {@link GlobalActivator}
@@ -100,6 +104,7 @@ public final class GlobalActivator implements BundleActivator {
                 "com.openexchange.authentication",
                 LoginExceptionFactory.getInstance());
             sessionComponent = new ComponentRegistration(context, EnumComponent.SESSION, "com.openexchange.sessiond", SessionExceptionFactory.getInstance());
+            idRegistration = new ComponentRegistration(context, IDException.COMPONENT, "com.openexchange.id", IDExceptionFactory.getInstance());
             LOG.debug("Global bundle successfully started");
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -112,8 +117,12 @@ public final class GlobalActivator implements BundleActivator {
      */
     public void stop(final BundleContext context) throws Exception {
         try {
+            idRegistration.unregister();
+            idRegistration = null;
             sessionComponent.unregister();
+            sessionComponent = null;
             loginComponent.unregister();
+            loginComponent = null;
             componentRegistryRegistration.unregister();
             ServiceHolderInit.getInstance().stop();
             initialization.stop();

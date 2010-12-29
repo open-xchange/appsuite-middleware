@@ -47,34 +47,49 @@
  *
  */
 
-package com.openexchange.id;
+package com.openexchange.id.exception;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.id.IDException;
+import com.openexchange.id.IDExceptionCodes;
 
 /**
- * {@link IDExceptionMessages} - Exception messages for {@link IDException} that needs to be translated.
+ * {@link IDExceptionFactory} - Factory for creating {@link IDException}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IDExceptionMessages implements LocalizableStrings {
+public final class IDExceptionFactory extends Exceptions<IDException> {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // A SQL error occurred: %1$s
-    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
-
-    // ID generation failed
-    public static final String ID_GEN_FAILED_MSG = "ID generation failed";
+    private static final IDExceptionFactory SINGLETON = new IDExceptionFactory();
 
     /**
-     * Initializes a new {@link IDExceptionMessages}.
+     * Prevent instantiation.
      */
-    private IDExceptionMessages() {
+    private IDExceptionFactory() {
         super();
     }
 
+    /**
+     * @return the singleton instance.
+     */
+    public static IDExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected IDException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        return new IDException(message, cause, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void knownExceptions() {
+        declareAll(IDExceptionCodes.values());
+    }
 }
