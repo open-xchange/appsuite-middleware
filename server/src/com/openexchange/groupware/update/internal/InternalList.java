@@ -342,7 +342,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.ParticipantCommentFieldLength(),
 
         // New table for linking several appointments (from different sources) together that represent the same person.
-        new com.openexchange.groupware.update.tasks.AggregatingContactTableService()
+        new com.openexchange.groupware.update.tasks.AggregatingContactTableService(),
+
+        // Creates new table for multi-purpose ID generation
+        new com.openexchange.groupware.update.tasks.IDCreateTableTask(),
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure

@@ -77,7 +77,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.RdbContactInterfaceFactory;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.CustomCharsetProvider;
@@ -131,6 +130,7 @@ import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServ
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
@@ -569,6 +569,7 @@ public final class ServerActivator extends DeferredActivator {
 //        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateMailAccountTables(), null));
+        registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateIDSequenceTable(), null));
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
         registrationList.add(context.registerService(
             MailAccountStorageService.class.getName(),
