@@ -253,7 +253,8 @@ public class Starter implements Initialization {
      * Image registry initialization
      */
     new com.openexchange.image.internal.ImageRegistryInit(),
-    new com.openexchange.mailaccount.internal.MailAccountStorageInit() };
+    new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
+    new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
     private static final Log LOG = LogFactory.getLog(Starter.class);
 
