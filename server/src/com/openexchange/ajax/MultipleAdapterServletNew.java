@@ -152,7 +152,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         Tools.disableCaching(resp);
 
         final String action = req.getParameter(PARAMETER_ACTION);
-        boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
+        final boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
 
         final Response response = new Response();
         try {
@@ -186,7 +186,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 if(callback == null) {
                     callback = action;
                 }
-                StringWriter w = new StringWriter();
+                final StringWriter w = new StringWriter();
                 ResponseWriter.write(response, w);
                 
                 resp.getWriter().print(substituteJS(w.toString(), callback));
@@ -209,7 +209,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      * @return <code>true</code> if operation completed successfully and therefore usual JSON handling must be omitted; otherwise <code>false</code> to fall-back to usual JSON handling
      * @throws AbstractOXException 
      */
-    protected boolean handleIndividually(String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
+    protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
         return false;
     }
     
@@ -226,11 +226,11 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      * @throws IOException 
      * @throws AbstractOXException 
      */
-    protected boolean handleIndividually(String action, AJAXRequestData data, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
+    protected boolean handleIndividually(final String action, final AJAXRequestData data, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
         return false;
     }
 
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, boolean isFileUpload) throws IOException, UploadException {
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload) throws IOException, UploadException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setSecure(req.isSecure());
         retval.setHostname(req.getServerName()); // Maybe use hostname service
@@ -245,14 +245,14 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             }
         }
         if (isFileUpload) {
-            UploadEvent upload = processUpload(req);
-            Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
+            final UploadEvent upload = processUpload(req);
+            final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
             while(iterator.hasNext()) {
                 retval.addFile(iterator.next());
             }
-            Iterator<String> names = upload.getFormFieldNames();
+            final Iterator<String> names = upload.getFormFieldNames();
             while(names.hasNext()) {
-                String name = names.next();
+                final String name = names.next();
                 retval.putParameter(name, upload.getFormField(name));
             }
             retval.setUploadEvent(upload);
