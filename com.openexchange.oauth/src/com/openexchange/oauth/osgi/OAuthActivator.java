@@ -53,11 +53,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTask;
@@ -70,13 +70,15 @@ import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.internal.groupware.CreateOAuthAccountTable;
 import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask;
 import com.openexchange.oauth.internal.groupware.OAuthDeleteListener;
+import com.openexchange.oauth.services.ServiceRegistry;
+import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
  * {@link OAuthActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthActivator implements BundleActivator {
+public final class OAuthActivator extends DeferredActivator {
 
     private ComponentRegistration componentRegistration;
 
@@ -91,11 +93,49 @@ public final class OAuthActivator implements BundleActivator {
         super();
     }
 
-    public void start(final BundleContext context) throws Exception {
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class, ContextService.class };
+    }
+
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(OAuthActivator.class);
+        if (logger.isInfoEnabled()) {
+            logger.info("Re-available service: " + clazz.getName());
+        }
+        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
+    }
+
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(OAuthActivator.class);
+        if (logger.isWarnEnabled()) {
+            logger.warn("Absent service: " + clazz.getName());
+        }
+        ServiceRegistry.getInstance().removeService(clazz);
+    }
+
+    @Override
+    public void startBundle() throws Exception {
         final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(OAuthActivator.class);
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.oauth");
+            }
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = ServiceRegistry.getInstance();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (final Class<?> classe : classes) {
+                    final Object service = getService(classe);
+                    if (null != service) {
+                        registry.addService(classe, service);
+                    }
+                }
             }
             /*
              * Register component
@@ -138,7 +178,8 @@ public final class OAuthActivator implements BundleActivator {
         }
     }
 
-    public void stop(final BundleContext context) throws Exception {
+    @Override
+    public void stopBundle() throws Exception {
         final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(OAuthActivator.class);
         try {
             if (log.isInfoEnabled()) {

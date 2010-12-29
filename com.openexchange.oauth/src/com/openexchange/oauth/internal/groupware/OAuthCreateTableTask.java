@@ -57,7 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -104,9 +104,9 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
     }
 
     private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
-        final DBProvider dbProvider;
+        final DatabaseService dbService;
         try {
-            dbProvider = ServiceRegistry.getInstance().getService(DBProvider.class, true);
+            dbService = ServiceRegistry.getInstance().getService(DatabaseService.class, true);
         } catch (ServiceException e) {
             throw new UpdateException(e);
         }
@@ -114,7 +114,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
         final Connection writeCon;
         try {
             ctx = ServiceRegistry.getInstance().getService(ContextService.class, true).getContext(contextId);
-            writeCon = dbProvider.getWriteConnection(ctx);
+            writeCon = dbService.getWritable(ctx);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         } catch (final ContextException e) {
@@ -135,7 +135,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
             }
         } finally {
             closeSQLStuff(null, stmt);
-            dbProvider.releaseWriteConnection(ctx, writeCon);
+            dbService.backWritable(ctx, writeCon);
         }
     }
 
