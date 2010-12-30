@@ -254,18 +254,54 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     // Error Cases
 
     public void testUnknownAccountMetadataOnCreate() {
+        Map<String, Object> arguments = new HashMap<String, Object>();
+        arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
+        arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
+        arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
+
+            public String getSecret() {
+                return "requestSecret";
+            }
+
+            public String getToken() {
+                return "requestToken";
+            }});
         
+        
+        try {
+            oauth.createAccount("com.openexchange.fantasy", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1);
+            fail("Should have died");
+        } catch (OAuthException e) {
+            // Hooray;
+        }
     }
     
     public void testUnknownIdOnGet() {
-        
+        try {
+            oauth.getAccount(12, 1, 23);
+            fail("Should have died");
+        } catch (OAuthException x) {
+            // Hooray!
+        }
     }
     
     public void testUnknownIdOnUpdate() {
-        
+        try {
+            Map<String, Object> update = new HashMap<String,Object>();
+            update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
+            oauth.updateAccount(12, update, 23, 1);
+            fail("Should have died");
+        } catch (OAuthException x) {
+            // Hooray!
+        }
     }
     
     public void testUnknownIdOnDelete() {
-        
+        try {
+            oauth.deleteAccount(12, 1, 23);
+            // Don't die here, just gracefully do nothing
+        } catch (OAuthException x) {
+            fail(x.getMessage());
+        }
     }
 }
