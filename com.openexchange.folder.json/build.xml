@@ -1,4 +1,4 @@
-<project name="com.openexchange.user.json" default="install" basedir=".">
+<project name="com.openexchange.folder.json" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
