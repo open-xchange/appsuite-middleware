@@ -77,23 +77,25 @@ import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.server.ServiceException;
 
-
 /**
- * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction. 
- *
+ * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OAuthServiceImpl implements OAuthService {
 
     private final OAuthServiceMetaDataRegistry registry;
+
     private final DBProvider provider;
+
     private final IDGeneratorService idGenerator;
-    
+
     /**
      * Initializes a new {@link OAuthServiceImpl}.
-     * @param provider 
-     * @param simIDGenerator 
+     * 
+     * @param provider
+     * @param simIDGenerator
      */
     public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry) {
         super();
@@ -124,19 +126,18 @@ public class OAuthServiceImpl implements OAuthService {
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
         try {
             final DefaultOAuthAccount account = new DefaultOAuthAccount();
-            
+
             account.setDisplayName(arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME).toString());
             account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
             account.setMetaData(registry.getService(serviceMetaData));
-            
+
             obtainToken(type, arguments, account);
-            
+
             return account;
         } catch (final AbstractOXException x) {
             throw new OAuthException(x);
         }
     }
-
 
     public void deleteAccount(final int accountId, final int user, final int contextId) throws OAuthException {
         final Context context = getContext(contextId);
@@ -170,10 +171,10 @@ public class OAuthServiceImpl implements OAuthService {
         try {
             final StringBuilder stmtBuilder = new StringBuilder(128).append("UPDATE oauthAccounts SET ");
             final int size = list.size();
-            list.get(0).append(stmtBuilder);
+            list.get(0).appendTo(stmtBuilder);
             for (int i = 1; i < size; i++) {
                 stmtBuilder.append(", ");
-                list.get(i).append(stmtBuilder);
+                list.get(i).appendTo(stmtBuilder);
             }
             stmt = con.prepareStatement(stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?").toString());
             int pos = 1;
@@ -185,7 +186,10 @@ public class OAuthServiceImpl implements OAuthService {
             stmt.setInt(pos, accountId);
             final int rows = stmt.executeUpdate();
             if (rows <= 0) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(
+                    Integer.valueOf(accountId),
+                    Integer.valueOf(user),
+                    Integer.valueOf(contextId));
             }
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -207,7 +211,10 @@ public class OAuthServiceImpl implements OAuthService {
             stmt.setInt(3, accountId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(
+                    Integer.valueOf(accountId),
+                    Integer.valueOf(user),
+                    Integer.valueOf(contextId));
             }
             final DefaultOAuthAccount account = new DefaultOAuthAccount();
             account.setId(accountId);
@@ -224,14 +231,12 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-    
     // OAuth
-    
+
     protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) {
-        
+
     }
 
-    
     // Helper Methods
 
     private Connection getConnection(final boolean readOnly, final Context context) throws OAuthException {
@@ -241,7 +246,7 @@ public class OAuthServiceImpl implements OAuthService {
             throw new OAuthException(e);
         }
     }
-    
+
     private static Context getContext(final int contextId) throws OAuthException {
         try {
             return getService(ContextService.class).getContext(contextId);
@@ -249,7 +254,7 @@ public class OAuthServiceImpl implements OAuthService {
             throw new OAuthException(e);
         }
     }
-    
+
     private static <S> S getService(final Class<? extends S> clazz) throws OAuthException {
         try {
             return ServiceRegistry.getInstance().getService(clazz, true);
@@ -259,9 +264,9 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     private static interface Setter {
-        
-        void append(StringBuilder stmtBuilder);
-        
+
+        void appendTo(StringBuilder stmtBuilder);
+
         int set(int pos, PreparedStatement stmt) throws SQLException;
     }
 
@@ -273,13 +278,13 @@ public class OAuthServiceImpl implements OAuthService {
         final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
         if (null != displayName) {
             ret.add(new Setter() {
-                
+
                 public int set(final int pos, final PreparedStatement stmt) throws SQLException {
                     stmt.setString(pos, displayName);
                     return pos + 1;
                 }
-                
-                public void append(final StringBuilder stmtBuilder) {
+
+                public void appendTo(final StringBuilder stmtBuilder) {
                     stmtBuilder.append("displayName = ?");
                 }
             });
@@ -292,14 +297,14 @@ public class OAuthServiceImpl implements OAuthService {
             final String sToken = token.getToken();
             final String secret = token.getSecret();
             ret.add(new Setter() {
-                
+
                 public int set(final int pos, final PreparedStatement stmt) throws SQLException {
                     stmt.setString(pos, sToken);
                     stmt.setString(pos + 1, secret);
                     return pos + 2;
                 }
-                
-                public void append(final StringBuilder stmtBuilder) {
+
+                public void appendTo(final StringBuilder stmtBuilder) {
                     stmtBuilder.append("accessToken = ?, accessSecret = ?");
                 }
             });
@@ -309,5 +314,5 @@ public class OAuthServiceImpl implements OAuthService {
          */
         return ret;
     }
- 
+
 }
