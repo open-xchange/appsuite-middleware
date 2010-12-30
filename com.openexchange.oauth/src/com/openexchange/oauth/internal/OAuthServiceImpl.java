@@ -402,7 +402,7 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     protected void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
-        
+        throw new UnsupportedOperationException("OAuth not supported via call-back, yet");
     }
 
     // Helper Methods

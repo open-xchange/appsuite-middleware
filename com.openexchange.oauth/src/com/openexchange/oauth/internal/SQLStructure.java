@@ -49,13 +49,12 @@
 
 package com.openexchange.oauth.internal;
 
+import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import java.util.List;
-import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.sql.grammar.Column;
 import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.Table;
-import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 
 /**
  * {@link SQLStructure}
@@ -74,9 +73,9 @@ public class SQLStructure {
         ACCESS_SECRET("accessSecret"),
         SERVICE_ID("serviceId");
         
-        private Column column;
+        private final Column column;
         
-        private OAUTH_COLUMN(String colName) {
+        private OAUTH_COLUMN(final String colName) {
             this.column = new Column(colName);
         }
         
@@ -84,11 +83,11 @@ public class SQLStructure {
             return column;
         }
         
-        public Object get(OAuthAccount account, int cid, int userId) {
+        public Object get(final OAuthAccount account, final int cid, final int userId) {
             switch(this) {
-            case CID: return cid;
-            case USER: return userId;
-            case ID: return account.getId();
+            case CID: return Integer.valueOf(cid);
+            case USER: return Integer.valueOf(userId);
+            case ID: return Integer.valueOf(account.getId());
             case DISPLAY_NAME: return account.getDisplayName();
             case ACCESS_TOKEN: return account.getToken();
             case ACCESS_SECRET: return account.getSecret();
@@ -99,10 +98,10 @@ public class SQLStructure {
         
     }
     
-    public static INSERT INSERT_ACCOUNT(OAuthAccount account, int contextId, int user, List<Object> values) {
-        INSERT insert = new INSERT().INTO(OAUTH_ACCOUNTS);
-        for(OAUTH_COLUMN column : OAUTH_COLUMN.values()) {
-            Object o = column.get(account, contextId, user);
+    public static INSERT INSERT_ACCOUNT(final OAuthAccount account, final int contextId, final int user, final List<Object> values) {
+        final INSERT insert = new INSERT().INTO(OAUTH_ACCOUNTS);
+        for(final OAUTH_COLUMN column : OAUTH_COLUMN.values()) {
+            final Object o = column.get(account, contextId, user);
             if(o != null) {
                 insert.SET(column.getColumn(), PLACEHOLDER);
                 values.add(o);
