@@ -77,7 +77,10 @@ public enum OAuthExceptionCodes implements OXErrorMessage {
      * Unknown OAuth service meta data: %1$s
      */
     UNKNOWN_OAUTH_SERVICE_META_DATA(OAuthExceptionMessages.UNKNOWN_OAUTH_SERVICE_META_DATA_MSG, Category.CODE_ERROR, 4),
-    
+    /**
+     * A SQL error occurred: %1$s
+     */
+    SQL_ERROR(OAuthExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 5),
     
     
     ;

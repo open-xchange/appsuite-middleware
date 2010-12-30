@@ -118,6 +118,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Unknown OAuth service meta data: %1$s
     public static final String UNKNOWN_OAUTH_SERVICE_META_DATA_MSG = "Unknown OAuth service meta data: %1$s";
 
+    // A SQL error occurred: %1$s
+    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

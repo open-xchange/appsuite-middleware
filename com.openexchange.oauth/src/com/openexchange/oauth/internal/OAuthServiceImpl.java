@@ -49,21 +49,31 @@
 
 package com.openexchange.oauth.internal;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.id.SimIDGenerator;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthException;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.oauth.osgi.MetaDataRegistry;
+import com.openexchange.oauth.services.ServiceRegistry;
+import com.openexchange.server.ServiceException;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -75,15 +85,15 @@ import com.openexchange.oauth.osgi.MetaDataRegistry;
 public class OAuthServiceImpl implements OAuthService {
 
     private final OAuthServiceMetaDataRegistry registry;
-    private DBProvider provider;
-    private IDGeneratorService idGenerator;
+    private final DBProvider provider;
+    private final IDGeneratorService idGenerator;
     
     /**
      * Initializes a new {@link OAuthServiceImpl}.
      * @param provider 
      * @param simIDGenerator 
      */
-    public OAuthServiceImpl(DBProvider provider, IDGeneratorService idGenerator, OAuthServiceMetaDataRegistry registry) {
+    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry) {
         super();
         this.registry = registry;
         this.provider = provider;
@@ -94,24 +104,24 @@ public class OAuthServiceImpl implements OAuthService {
         return registry;
     }
 
-    public List<OAuthAccount> getAccounts(int user, int contextId) throws OAuthException {
+    public List<OAuthAccount> getAccounts(final int user, final int contextId) throws OAuthException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public List<OAuthAccount> getAccounts(String serviceMetaData, int user, int contextId) throws OAuthException {
+    public List<OAuthAccount> getAccounts(final String serviceMetaData, final int user, final int contextId) throws OAuthException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public OAuthInteraction initOAuth(String serviceMetaData) throws OAuthException {
+    public OAuthInteraction initOAuth(final String serviceMetaData) throws OAuthException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
         try {
-            DefaultOAuthAccount account = new DefaultOAuthAccount();
+            final DefaultOAuthAccount account = new DefaultOAuthAccount();
             
             account.setDisplayName(arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME).toString());
             account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
@@ -120,37 +130,78 @@ public class OAuthServiceImpl implements OAuthService {
             obtainToken(type, arguments, account);
             
             return account;
-        } catch (AbstractOXException x) {
+        } catch (final AbstractOXException x) {
             throw new OAuthException(x);
         }
     }
 
 
-    public void deleteAccount(int accountId, int user, int contextId) throws OAuthException {
+    public void deleteAccount(final int accountId, final int user, final int contextId) throws OAuthException {
         // TODO Auto-generated method stub
 
     }
 
-    public void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
         // TODO Auto-generated method stub
 
     }
 
-    public OAuthAccount getAccount(int accountId, int user, int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
+    public OAuthAccount getAccount(final int accountId, final int user, final int contextId) throws OAuthException {
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(true, context);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT displayName, accessToke, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, user);
+            stmt.setInt(3, accountId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
+            }
+            
+            return null;
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            provider.releaseReadConnection(context, con);
+        }
     }
 
     
     // OAuth
     
-    protected void obtainToken(OAuthInteractionType type, Map<String, Object> arguments, DefaultOAuthAccount account) {
+    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) {
         
     }
 
     
     // Helper Methods
+
+    private Connection getConnection(final boolean readOnly, final Context context) throws OAuthException {
+        try {
+            return readOnly ? provider.getReadConnection(context) : provider.getWriteConnection(context);
+        } catch (final DBPoolingException e) {
+            throw new OAuthException(e);
+        }
+    }
     
+    private static Context getContext(final int contextId) throws OAuthException {
+        try {
+            return getService(ContextService.class).getContext(contextId);
+        } catch (final ContextException e) {
+            throw new OAuthException(e);
+        }
+    }
     
+    private static <S> S getService(final Class<? extends S> clazz) throws OAuthException {
+        try {
+            return ServiceRegistry.getInstance().getService(clazz, true);
+        } catch (final ServiceException e) {
+            throw new OAuthException(e);
+        }
+    }
 
 }
