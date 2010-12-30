@@ -88,7 +88,11 @@ public enum OAuthExceptionCodes implements OXErrorMessage {
     /**
      * Unsupported OAuth service: %1$s
      */
-    UNSUPPORTED_SERVICE(OAuthExceptionMessages.UNSUPPORTED_SERVICE_MSG, Category.CODE_ERROR, 7);
+    UNSUPPORTED_SERVICE(OAuthExceptionMessages.UNSUPPORTED_SERVICE_MSG, Category.CODE_ERROR, 7),
+    /**
+     * Missing argument: %1$s
+     */
+    MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, Category.CODE_ERROR, 8),
     
     ;
 

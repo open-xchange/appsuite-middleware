@@ -127,6 +127,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Unsupported OAuth service: %1$s
     public static final String UNSUPPORTED_SERVICE_MSG = "Unsupported OAuth service: %1$s";
 
+    // Missing argument: %1$s
+    public static final String MISSING_ARGUMENT_MSG = "Missing argument: %1$s";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */
