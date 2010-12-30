@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.context.ContextService;
@@ -72,6 +73,7 @@ import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.server.ServiceException;
 
@@ -155,8 +157,42 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-
+        final List<Setter> list = setterFrom(arguments);
+        if (list.isEmpty()) {
+            /*
+             * Nothing to update
+             */
+            return;
+        }
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(false, context);
+        PreparedStatement stmt = null;
+        try {
+            final StringBuilder stmtBuilder = new StringBuilder(128).append("UPDATE oauthAccounts SET ");
+            final int size = list.size();
+            list.get(0).append(stmtBuilder);
+            for (int i = 1; i < size; i++) {
+                stmtBuilder.append(", ");
+                list.get(i).append(stmtBuilder);
+            }
+            stmt = con.prepareStatement(stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?").toString());
+            int pos = 1;
+            for (final Setter setter : list) {
+                pos = setter.set(pos, stmt);
+            }
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos, accountId);
+            final int rows = stmt.executeUpdate();
+            if (rows <= 0) {
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
+            }
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            provider.releaseReadConnection(context, con);
+        }
     }
 
     public OAuthAccount getAccount(final int accountId, final int user, final int contextId) throws OAuthException {
@@ -222,4 +258,56 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
+    private static interface Setter {
+        
+        void append(StringBuilder stmtBuilder);
+        
+        int set(int pos, PreparedStatement stmt) throws SQLException;
+    }
+
+    private static List<Setter> setterFrom(final Map<String, Object> arguments) {
+        final List<Setter> ret = new ArrayList<Setter>(4);
+        /*
+         * Check for display name
+         */
+        final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+        if (null != displayName) {
+            ret.add(new Setter() {
+                
+                public int set(final int pos, final PreparedStatement stmt) throws SQLException {
+                    stmt.setString(pos, displayName);
+                    return pos + 1;
+                }
+                
+                public void append(final StringBuilder stmtBuilder) {
+                    stmtBuilder.append("displayName = ?");
+                }
+            });
+        }
+        /*
+         * Check for request token
+         */
+        final OAuthToken token = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
+        if (null != token) {
+            final String sToken = token.getToken();
+            final String secret = token.getSecret();
+            ret.add(new Setter() {
+                
+                public int set(final int pos, final PreparedStatement stmt) throws SQLException {
+                    stmt.setString(pos, sToken);
+                    stmt.setString(pos + 1, secret);
+                    return pos + 2;
+                }
+                
+                public void append(final StringBuilder stmtBuilder) {
+                    stmtBuilder.append("accessToken = ?, accessSecret = ?");
+                }
+            });
+        }
+        /*
+         * Other arguments?
+         */
+        return ret;
+    }
+ 
 }
