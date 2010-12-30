@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.internal;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,7 +74,6 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.server.ServiceException;
-import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -137,8 +137,21 @@ public class OAuthServiceImpl implements OAuthService {
 
 
     public void deleteAccount(final int accountId, final int user, final int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(false, context);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, user);
+            stmt.setInt(3, accountId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            provider.releaseReadConnection(context, con);
+        }
     }
 
     public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
@@ -170,7 +183,7 @@ public class OAuthServiceImpl implements OAuthService {
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(context, con);
         }
     }
