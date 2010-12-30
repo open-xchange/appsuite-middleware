@@ -142,8 +142,36 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     public List<OAuthAccount> getAccounts(final String serviceMetaData, final int user, final int contextId) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(true, context);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, user);
+            stmt.setString(3, serviceMetaData);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
+            do {
+                final DefaultOAuthAccount account = new DefaultOAuthAccount();
+                account.setId(rs.getInt(1));
+                account.setDisplayName(rs.getString(2));
+                account.setToken(rs.getString(3));
+                account.setSecret(rs.getString(4));
+                account.setMetaData(registry.getService(serviceMetaData));
+                accounts.add(account);
+            } while (rs.next());
+            return accounts;
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            provider.releaseReadConnection(context, con);
+        }
     }
 
     public OAuthInteraction initOAuth(final String serviceMetaData) throws OAuthException {
