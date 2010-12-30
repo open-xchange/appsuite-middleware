@@ -58,6 +58,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
@@ -76,8 +78,10 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
-import com.openexchange.oauth.services.ServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.sql.builder.StatementBuilder;
+import com.openexchange.sql.grammar.Command;
+import com.openexchange.sql.grammar.INSERT;
+
 
 /**
  * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction.
@@ -87,11 +91,15 @@ import com.openexchange.server.ServiceException;
  */
 public class OAuthServiceImpl implements OAuthService {
 
+    private static final Log LOG = LogFactory.getLog(OAuthServiceImpl.class);
+    
     private final OAuthServiceMetaDataRegistry registry;
 
     private final DBProvider provider;
 
     private final IDGeneratorService idGenerator;
+
+    private ContextService contexts;
 
     /**
      * Initializes a new {@link OAuthServiceImpl}.
@@ -99,11 +107,12 @@ public class OAuthServiceImpl implements OAuthService {
      * @param provider
      * @param simIDGenerator
      */
-    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry) {
+    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, ContextService contexts) {
         super();
         this.registry = registry;
         this.provider = provider;
         this.idGenerator = idGenerator;
+        this.contexts = contexts;
     }
 
     public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
@@ -212,19 +221,54 @@ public class OAuthServiceImpl implements OAuthService {
         };
     }
 
-    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
         try {
-            final DefaultOAuthAccount account = new DefaultOAuthAccount();
+            DefaultOAuthAccount account = new DefaultOAuthAccount();
+            
+            OAuthServiceMetaData service = registry.getService(serviceMetaData);
+            account.setMetaData(service);
 
-            account.setDisplayName(arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME).toString());
+            Object displayName = arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            if(displayName == null) {
+                displayName = service.getDisplayName();
+            }
+            account.setDisplayName(displayName.toString());
             account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
-            account.setMetaData(registry.getService(serviceMetaData));
-
+            
             obtainToken(type, arguments, account);
-
+            
+            ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+            INSERT insert = SQLStructure.INSERT_ACCOUNT(account, contextId, user, values);
+            
+            executeUpdate(contextId, insert, values);
+            
             return account;
-        } catch (final AbstractOXException x) {
+        } catch (OAuthException x) {
+            throw x;
+        } catch (AbstractOXException x) {
             throw new OAuthException(x);
+        }
+    }
+
+
+    private void executeUpdate(int contextId, Command command, List<Object> values) throws OAuthException {
+        Connection writeCon = null;
+        Context ctx = null;
+        try {
+            ctx = contexts.getContext(contextId);
+            writeCon = provider.getWriteConnection(ctx);
+            new StatementBuilder().executeStatement(writeCon, command, values);
+        } catch (DBPoolingException e) {
+            throw new OAuthException(e);
+        } catch (SQLException e) {
+            LOG.error(e);
+            throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+        } catch (ContextException e) {
+            throw new OAuthException(e);
+        } finally {
+            if(writeCon != null) {
+                provider.releaseWriteConnection(ctx, writeCon);
+            }
         }
     }
 
@@ -336,18 +380,10 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-    private static Context getContext(final int contextId) throws OAuthException {
+    private Context getContext(final int contextId) throws OAuthException {
         try {
-            return getService(ContextService.class).getContext(contextId);
+            return contexts.getContext(contextId);
         } catch (final ContextException e) {
-            throw new OAuthException(e);
-        }
-    }
-
-    private static <S> S getService(final Class<? extends S> clazz) throws OAuthException {
-        try {
-            return ServiceRegistry.getInstance().getService(clazz, true);
-        } catch (final ServiceException e) {
             throw new OAuthException(e);
         }
     }
