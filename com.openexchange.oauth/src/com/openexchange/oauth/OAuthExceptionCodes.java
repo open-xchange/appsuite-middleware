@@ -85,7 +85,10 @@ public enum OAuthExceptionCodes implements OXErrorMessage {
      * Account not found with identifier %1$s for user %2$s in context %3$s.
      */
     ACCOUNT_NOT_FOUND(OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 6),
-    
+    /**
+     * Unsupported OAuth service: %1$s
+     */
+    UNSUPPORTED_SERVICE(OAuthExceptionMessages.UNSUPPORTED_SERVICE_MSG, Category.CODE_ERROR, 7);
     
     ;
 

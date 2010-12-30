@@ -124,6 +124,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Account not found with identifier %1$s for user %2$s in context %3$s.
     public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found with identifier %1$s for user %2$s in context %3$s.";
 
+    // Unsupported OAuth service: %1$s
+    public static final String UNSUPPORTED_SERVICE_MSG = "Unsupported OAuth service: %1$s";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */
