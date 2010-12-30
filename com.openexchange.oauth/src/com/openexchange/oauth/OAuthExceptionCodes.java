@@ -81,6 +81,10 @@ public enum OAuthExceptionCodes implements OXErrorMessage {
      * A SQL error occurred: %1$s
      */
     SQL_ERROR(OAuthExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 5),
+    /**
+     * Account not found with identifier %1$s for user %2$s in context %3$s.
+     */
+    ACCOUNT_NOT_FOUND(OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 6),
     
     
     ;

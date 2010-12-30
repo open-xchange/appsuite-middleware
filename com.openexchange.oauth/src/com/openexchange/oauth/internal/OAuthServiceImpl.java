@@ -150,14 +150,23 @@ public class OAuthServiceImpl implements OAuthService {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
-        final ResultSet rs = null;
+        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT displayName, accessToke, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt = con.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
-            
-            return null;
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
+            }
+            final DefaultOAuthAccount account = new DefaultOAuthAccount();
+            account.setId(accountId);
+            account.setDisplayName(rs.getString(1));
+            account.setToken(rs.getString(2));
+            account.setSecret(rs.getString(3));
+            account.setMetaData(registry.getService(rs.getString(4)));
+            return account;
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

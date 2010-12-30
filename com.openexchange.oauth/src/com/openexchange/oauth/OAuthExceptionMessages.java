@@ -121,6 +121,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // A SQL error occurred: %1$s
     public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
 
+    // Account not found with identifier %1$s for user %2$s in context %3$s.
+    public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found with identifier %1$s for user %2$s in context %3$s.";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */
