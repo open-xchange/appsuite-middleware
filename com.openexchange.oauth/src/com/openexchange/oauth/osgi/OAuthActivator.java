@@ -163,7 +163,7 @@ public final class OAuthActivator extends DeferredActivator {
              * Register
              */
             registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(null /* FIXME */, null, registry), null));
+            registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(null /* FIXME */, null, registry, null), null));
             registrations.add(context.registerService(OAuthServiceMetaDataRegistry.class.getName(), registry, null));
             registrations.add(context.registerService(CreateTableService.class.getName(), new CreateOAuthAccountTable(), null));
             registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
