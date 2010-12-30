@@ -49,38 +49,20 @@
 
 package com.openexchange.oauth;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import com.openexchange.oauth.internal.OAuthServiceImplDBTest;
 
 
 /**
- * {@link SimOAuthServiceMetaDataRegistry}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SimOAuthServiceMetaDataRegistry implements OAuthServiceMetaDataRegistry {
-
-    private Map<String, OAuthServiceMetaData> map = new HashMap<String, OAuthServiceMetaData>();
-    
-    public boolean containsService(String id) {
-        return map.containsKey(id);
+public class UnitTests {
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(OAuthServiceImplDBTest.class);
+        return tests;
     }
-
-    public List<OAuthServiceMetaData> getAllServices() {
-        return new ArrayList<OAuthServiceMetaData>(map.values());
-    }
-
-    public OAuthServiceMetaData getService(String id) throws OAuthException {
-        if (!containsService(id)) {
-            throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
-        }
-        return map.get(id);
-    }
-
-    public void addService(OAuthServiceMetaData authServiceMetaData) {
-        map.put(authServiceMetaData.getId(), authServiceMetaData);
-    }
-
 }
