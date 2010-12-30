@@ -60,6 +60,15 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.FoursquareApi;
+import org.scribe.builder.api.GoogleApi;
+import org.scribe.builder.api.LinkedInApi;
+import org.scribe.builder.api.TwitterApi;
+import org.scribe.builder.api.YahooApi;
+import org.scribe.model.Token;
+import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
@@ -99,7 +108,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     private final IDGeneratorService idGenerator;
 
-    private ContextService contexts;
+    private final ContextService contexts;
 
     /**
      * Initializes a new {@link OAuthServiceImpl}.
@@ -107,7 +116,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @param provider
      * @param simIDGenerator
      */
-    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, ContextService contexts) {
+    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, final ContextService contexts) {
         super();
         this.registry = registry;
         this.provider = provider;
@@ -185,47 +194,38 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     public OAuthInteraction initOAuth(final String serviceMetaData) throws OAuthException {
-        /*
-         * TODO: Fix this stuff
-         */
         final OAuthServiceMetaData metaData = registry.getService(serviceMetaData);
-        final String apiKey = metaData.getAPIKey();
-        final String apiSecret = metaData.getAPISecret();
-        final String authorizationURL = metaData.getAuthorizationURL(new OAuthToken() {
-            
-            public String getToken() {
-                return apiKey;
-            }
-            
-            public String getSecret() {
-                return apiSecret;
-            }
-        });
+        /*
+         * Get appropriate Scribe service implementation
+         */
+        final String callbackUrl = getCallbackUrl(metaData);
+        final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
+        final OAuthToken requestToken = new ScribeOAuthToken(service.getRequestToken());
+        final String authorizationURL = metaData.getAuthorizationURL(requestToken);
         /*
          * Return out-of-band interaction
          */
         return new OAuthInteraction() {
-            
+
             public OAuthToken getRequestToken() {
-                // TODO Auto-generated method stub
-                return null;
+                return requestToken;
             }
-            
+
             public OAuthInteractionType getInteractionType() {
-                return OAuthInteractionType.OUT_OF_BAND;
+                return callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK;
             }
-            
+
             public String getAuthorizationURL() {
                 return authorizationURL;
             }
         };
     }
 
-    public OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
         try {
-            DefaultOAuthAccount account = new DefaultOAuthAccount();
+            final DefaultOAuthAccount account = new DefaultOAuthAccount();
             
-            OAuthServiceMetaData service = registry.getService(serviceMetaData);
+            final OAuthServiceMetaData service = registry.getService(serviceMetaData);
             account.setMetaData(service);
 
             Object displayName = arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
@@ -237,33 +237,33 @@ public class OAuthServiceImpl implements OAuthService {
             
             obtainToken(type, arguments, account);
             
-            ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
-            INSERT insert = SQLStructure.INSERT_ACCOUNT(account, contextId, user, values);
+            final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+            final INSERT insert = SQLStructure.INSERT_ACCOUNT(account, contextId, user, values);
             
             executeUpdate(contextId, insert, values);
             
             return account;
-        } catch (OAuthException x) {
+        } catch (final OAuthException x) {
             throw x;
-        } catch (AbstractOXException x) {
+        } catch (final AbstractOXException x) {
             throw new OAuthException(x);
         }
     }
 
 
-    private void executeUpdate(int contextId, Command command, List<Object> values) throws OAuthException {
+    private void executeUpdate(final int contextId, final Command command, final List<Object> values) throws OAuthException {
         Connection writeCon = null;
         Context ctx = null;
         try {
             ctx = contexts.getContext(contextId);
             writeCon = provider.getWriteConnection(ctx);
             new StatementBuilder().executeStatement(writeCon, command, values);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new OAuthException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error(e);
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new OAuthException(e);
         } finally {
             if(writeCon != null) {
@@ -366,11 +366,90 @@ public class OAuthServiceImpl implements OAuthService {
 
     // OAuth
 
-    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) {
+    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
+        switch (type) {
+        case OUT_OF_BAND:
+            obtainTokenByOutOfBand(arguments, account);
+            break;
+        case CALLBACK:
+            obtainTokenByCallback(arguments, account);
+            break;
+        default:
+            break;
+        }
+    }
 
+    protected void obtainTokenByOutOfBand(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
+        final String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
+        if (null == pin) {
+            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PIN);
+        }
+        final OAuthToken requestToken = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
+        if (null == requestToken) {
+            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
+        }
+        /*
+         * With the request token and the verifier (which is a number) we need now to get the access token
+         */
+        final Verifier verifier = new Verifier(pin);
+        final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null);
+        final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
+        /*
+         * Apply to account
+         */
+        account.setToken(accessToken.getToken());
+        account.setSecret(accessToken.getSecret());
+    }
+
+    protected void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
+        
     }
 
     // Helper Methods
+
+    private static String getCallbackUrl(final OAuthServiceMetaData metaData) throws OAuthException {
+        /*
+         * TODO: Provide call-back URL dependent on configuration
+         */
+        final String serviceId = metaData.getId();
+        if (serviceId.indexOf("twitter") >= 0) {
+            return null;
+        } else if (serviceId.indexOf("linkedin") >= 0) {
+            return null;
+        } else if (serviceId.indexOf("google") >= 0) {
+            return null;
+        } else if (serviceId.indexOf("yahoo") >= 0) {
+            return null;
+        } else if (serviceId.indexOf("foursquare") >= 0) {
+            return null;
+        } else {
+            throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
+        }
+    }
+
+    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OAuthException {
+        final String serviceId = metaData.getId();
+        final Class<? extends Api> apiClass;
+        if (serviceId.indexOf("twitter") >= 0) {
+            apiClass = TwitterApi.class;
+        } else if (serviceId.indexOf("linkedin") >= 0) {
+            apiClass = LinkedInApi.class;
+        } else if (serviceId.indexOf("google") >= 0) {
+            apiClass = GoogleApi.class;
+        } else if (serviceId.indexOf("yahoo") >= 0) {
+            apiClass = YahooApi.class;
+        } else if (serviceId.indexOf("foursquare") >= 0) {
+            apiClass = FoursquareApi.class;
+        } else {
+            throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
+        }
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(apiClass);
+        serviceBuilder.apiKey(metaData.getAPIKey()).apiSecret(metaData.getAPISecret());
+        if (null != callbackUrl) {
+            serviceBuilder.callback(callbackUrl);
+        }
+        return serviceBuilder.build();
+    }
 
     private Connection getConnection(final boolean readOnly, final Context context) throws OAuthException {
         try {
