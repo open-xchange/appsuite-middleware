@@ -73,6 +73,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.services.ServiceRegistry;
@@ -175,8 +176,40 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     public OAuthInteraction initOAuth(final String serviceMetaData) throws OAuthException {
-        // TODO Auto-generated method stub
-        return null;
+        /*
+         * TODO: Fix this stuff
+         */
+        final OAuthServiceMetaData metaData = registry.getService(serviceMetaData);
+        final String apiKey = metaData.getAPIKey();
+        final String apiSecret = metaData.getAPISecret();
+        final String authorizationURL = metaData.getAuthorizationURL(new OAuthToken() {
+            
+            public String getToken() {
+                return apiKey;
+            }
+            
+            public String getSecret() {
+                return apiSecret;
+            }
+        });
+        /*
+         * Return out-of-band interaction
+         */
+        return new OAuthInteraction() {
+            
+            public OAuthToken getRequestToken() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            public OAuthInteractionType getInteractionType() {
+                return OAuthInteractionType.OUT_OF_BAND;
+            }
+            
+            public String getAuthorizationURL() {
+                return authorizationURL;
+            }
+        };
     }
 
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
