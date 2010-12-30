@@ -49,8 +49,17 @@
 
 package com.openexchange.junit;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * {@link Assert}
@@ -96,5 +105,47 @@ public class Assert extends org.junit.Assert {
             retval = col.iterator().next();
         }
         return retval;
+    }
+    
+    /**
+     * Compare two bean style objects attributes. If given a list of field names only those fields will be compared,
+     * otherwise all fields will be compared
+     * @param message The message to display on failure
+     * @param bean1 The expected values
+     * @param bean2 The actual values
+     * @param fields The fields to compare, if empty, compares all fields.
+     * @throws IntrospectionException 
+     * @throws InvocationTargetException 
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
+     */
+    public static void assertEqualAttributes(String message, Object expected, Object actual, String...fields) throws Exception {
+        if(! expected.getClass().isAssignableFrom(actual.getClass())) {
+            fail(message+" The class "+actual.getClass()+" is not compatible with "+expected.getClass());
+        }
+        BeanInfo beanInfo = Introspector.getBeanInfo(expected.getClass());
+        PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+        boolean all = fields.length == 0;
+        Set<String> fieldsToCompare = new HashSet<String>(Arrays.asList(fields));
+        
+        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            String propName = propertyDescriptor.getName();
+            if(all || fieldsToCompare.contains(propName)) {
+                Method readMethod = propertyDescriptor.getReadMethod();
+                if(readMethod == null && !all) {
+                    fail("Can't read property "+propName);
+                }
+                if(readMethod == null) {
+                    continue;
+                }
+                Object expectedValue = readMethod.invoke(expected);
+                Object actualValue = readMethod.invoke(actual); // Hopefully I can reuse a Method object in compatible class definitions.
+                assertEquals(message+" Attribute: "+propName, expectedValue, actualValue);
+            }
+        }
+    }
+    
+    public static void assertEqualAttributes(Object expected, Object actual, String...fields) throws Exception {
+        assertEqualAttributes("Attributes mismatch", expected, actual, fields);
     }
 }
