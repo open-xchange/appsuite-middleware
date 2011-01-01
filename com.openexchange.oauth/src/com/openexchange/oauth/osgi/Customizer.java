@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,51 @@
  *
  */
 
-package com.openexchange.oauth.services;
+package com.openexchange.oauth.osgi;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 
 /**
- * {@link ServiceRegistry} remembers needed services.
+ * {@link Customizer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServiceRegistry extends AbstractServiceRegistry {
+public final class Customizer<S> implements ServiceTrackerCustomizer {
 
-    private static final ServiceRegistry SINGLETON = new ServiceRegistry();
+    private final AtomicReference<S> reference;
 
-    private ServiceRegistry() {
-        super();
-    }
+    private final BundleContext context;
 
     /**
-     * Gets the service registry instance.
+     * Initializes a new {@link Customizer}.
      * 
-     * @return The service registry instance
+     * @param reference The service reference
+     * @param context The bundle context
      */
-    public static ServiceRegistry getInstance() {
-        return SINGLETON;
+    public Customizer(final AtomicReference<S> reference, final BundleContext context) {
+        super();
+        this.reference = reference;
+        this.context = context;
     }
+
+    @SuppressWarnings("unchecked")
+    public Object addingService(final ServiceReference reference) {
+        final Object service = context.getService(reference);
+        this.reference.set((S) service);
+        return service;
+    }
+
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nope
+    }
+
+    public void removedService(final ServiceReference reference, final Object service) {
+        this.reference.set(null);
+        context.ungetService(reference);
+    }
+
 }

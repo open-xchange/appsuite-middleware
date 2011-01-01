@@ -249,21 +249,14 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-
     private void executeUpdate(final int contextId, final Command command, final List<Object> values) throws OAuthException {
-        Connection writeCon = null;
-        Context ctx = null;
+        final Context ctx = getContext(contextId);
+        final Connection writeCon = getConnection(false, ctx);
         try {
-            ctx = contexts.getContext(contextId);
-            writeCon = provider.getWriteConnection(ctx);
             new StatementBuilder().executeStatement(writeCon, command, values);
-        } catch (final DBPoolingException e) {
-            throw new OAuthException(e);
         } catch (final SQLException e) {
             LOG.error(e);
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
-        } catch (final ContextException e) {
-            throw new OAuthException(e);
         } finally {
             if(writeCon != null) {
                 provider.releaseWriteConnection(ctx, writeCon);

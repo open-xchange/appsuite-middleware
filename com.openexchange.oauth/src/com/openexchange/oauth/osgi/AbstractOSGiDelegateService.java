@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,88 @@
  *
  */
 
-package com.openexchange.oauth.services;
+package com.openexchange.oauth.osgi;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.id.IDGeneratorService;
+import com.openexchange.server.ServiceException;
+
 
 /**
- * {@link ServiceRegistry} remembers needed services.
+ * {@link AbstractOSGiDelegateService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServiceRegistry extends AbstractServiceRegistry {
+public abstract class AbstractOSGiDelegateService<S> {
 
-    private static final ServiceRegistry SINGLETON = new ServiceRegistry();
+    private final Class<S> clazz;
 
-    private ServiceRegistry() {
+    private final AtomicReference<S> service;
+
+    private volatile ServiceTracker tracker;
+
+    /**
+     * Initializes a new {@link AbstractOSGiDelegateService}.
+     */
+    protected AbstractOSGiDelegateService(final Class<S> clazz) {
         super();
+        this.clazz = clazz;
+        service = new AtomicReference<S>();
     }
 
     /**
-     * Gets the service registry instance.
+     * Starts tracking
      * 
-     * @return The service registry instance
+     * @param bundleContext The bundle context
+     * @return This instance for method chaining
      */
-    public static ServiceRegistry getInstance() {
-        return SINGLETON;
+    @SuppressWarnings("unchecked")
+    public <I extends AbstractOSGiDelegateService<S>> I start(final BundleContext bundleContext) {
+        if (null == tracker) {
+            synchronized (this) {
+                ServiceTracker tmp = tracker;
+                if (null == tracker) {
+                    tracker = tmp = new ServiceTracker(bundleContext, clazz.getName(), new Customizer<S>(service, bundleContext));
+                    tmp.open();
+                }
+            }
+        }
+        return (I) this;
     }
+
+    /**
+     * Stops tracking {@link IDGeneratorService}
+     */
+    public void stop() {
+        final ServiceTracker tmp = tracker;
+        if (null != tmp) {
+            tmp.close();
+        }
+    }
+
+    /**
+     * Gets the service from service reference.
+     * 
+     * @return The service
+     * @throws ServiceException If service reference returned <code>null</code>
+     */
+    protected S getService() throws ServiceException {
+        final S serviceInst = service.get();
+        if (null == serviceInst) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, clazz.getName());
+        }
+        return serviceInst;
+    }
+
+    /**
+     * Gets the service from service reference.
+     * 
+     * @return The service or <code>null</code> if absent
+     */
+    protected S optService() {
+        return service.get();
+    }
+
 }

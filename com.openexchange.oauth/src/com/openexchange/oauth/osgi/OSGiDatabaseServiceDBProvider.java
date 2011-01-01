@@ -47,29 +47,68 @@
  *
  */
 
-package com.openexchange.oauth.services;
+package com.openexchange.oauth.osgi;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import java.sql.Connection;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceException;
 
 /**
- * {@link ServiceRegistry} remembers needed services.
+ * {@link OSGiDatabaseServiceDBProvider} - The {@link DBProvider} backed by tracked {@link DatabaseService} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServiceRegistry extends AbstractServiceRegistry {
-
-    private static final ServiceRegistry SINGLETON = new ServiceRegistry();
-
-    private ServiceRegistry() {
-        super();
-    }
+public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<DatabaseService> implements DBProvider {
 
     /**
-     * Gets the service registry instance.
-     * 
-     * @return The service registry instance
+     * Initializes a new {@link OSGiDatabaseServiceDBProvider}.
      */
-    public static ServiceRegistry getInstance() {
-        return SINGLETON;
+    public OSGiDatabaseServiceDBProvider() {
+        super(DatabaseService.class);
     }
+
+    public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+        try {
+            final DatabaseService dbService = getService();
+            return dbService.getReadOnly(ctx);
+        } catch (final ServiceException e) {
+            throw new DBPoolingException(e);
+        }
+    }
+
+    public void releaseReadConnection(final Context ctx, final Connection con) {
+        if (con != null) {
+            final DatabaseService dbService = optService();
+            if (null == dbService) {
+                return;
+            }
+            dbService.backReadOnly(ctx,con);
+        }
+    }
+
+    public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+        try {
+            final DatabaseService dbService = getService();
+            return dbService.getWritable(ctx);
+        } catch (final ServiceException e) {
+            throw new DBPoolingException(e);
+        }
+    }
+
+    public void releaseWriteConnection(final Context ctx, final Connection con) {
+        if (con == null) {
+            return;
+        }
+        final DatabaseService dbService = optService();
+        if (null == dbService) {
+            return;
+        }
+        autocommit(con);
+        dbService.backWritable(ctx,con);
+    }
+    
 }

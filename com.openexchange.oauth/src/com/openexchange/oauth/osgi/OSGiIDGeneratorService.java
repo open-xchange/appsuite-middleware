@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,34 @@
  *
  */
 
-package com.openexchange.oauth.services;
+package com.openexchange.oauth.osgi;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import com.openexchange.id.IDException;
+import com.openexchange.id.IDGeneratorService;
+import com.openexchange.server.ServiceException;
+
 
 /**
- * {@link ServiceRegistry} remembers needed services.
+ * {@link OSGiIDGeneratorService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServiceRegistry extends AbstractServiceRegistry {
-
-    private static final ServiceRegistry SINGLETON = new ServiceRegistry();
-
-    private ServiceRegistry() {
-        super();
-    }
+public final class OSGiIDGeneratorService extends AbstractOSGiDelegateService<IDGeneratorService> implements IDGeneratorService  {
 
     /**
-     * Gets the service registry instance.
-     * 
-     * @return The service registry instance
+     * Initializes a new {@link OSGiIDGeneratorService}.
      */
-    public static ServiceRegistry getInstance() {
-        return SINGLETON;
+    public OSGiIDGeneratorService() {
+        super(IDGeneratorService.class);
     }
+
+    public int getId(final String type, final int contextId) throws IDException {
+        try {
+            final IDGeneratorService service = getService();
+            return service.getId(type, contextId);
+        } catch (final ServiceException e) {
+            throw new IDException(e);
+        }
+    }
+
 }

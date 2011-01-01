@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,64 @@
  *
  */
 
-package com.openexchange.oauth.services;
+package com.openexchange.oauth.osgi;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import java.util.HashMap;
+import java.util.Map;
+import org.osgi.framework.BundleContext;
 
 /**
- * {@link ServiceRegistry} remembers needed services.
- *
+ * {@link OSGiDelegateServiceMap}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServiceRegistry extends AbstractServiceRegistry {
+public final class OSGiDelegateServiceMap {
 
-    private static final ServiceRegistry SINGLETON = new ServiceRegistry();
-
-    private ServiceRegistry() {
-        super();
-    }
+    private final Map<Class<?>, AbstractOSGiDelegateService<?>> map;
 
     /**
-     * Gets the service registry instance.
-     * 
-     * @return The service registry instance
+     * Initializes a new {@link OSGiDelegateServiceMap}.
      */
-    public static ServiceRegistry getInstance() {
-        return SINGLETON;
+    public OSGiDelegateServiceMap() {
+        super();
+        map = new HashMap<Class<?>, AbstractOSGiDelegateService<?>>(4);
     }
+
+    public void clear() {
+        for (final AbstractOSGiDelegateService<?> delegateService : map.values()) {
+            delegateService.stop();
+        }
+        map.clear();
+    }
+
+    public void startAll(final BundleContext context) {
+        for (final AbstractOSGiDelegateService<?> delegateService : map.values()) {
+            delegateService.start(context);
+        }
+    }
+
+    public boolean containsKey(final Class<?> serviceClass) {
+        return map.containsKey(serviceClass);
+    }
+
+    public <S> S get(final Class<S> serviceClass) {
+        return serviceClass.cast(map.get(serviceClass));
+    }
+
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    public <C, S> void put(final Class<C> key, final AbstractOSGiDelegateService<S> delegateService) {
+        map.put(key, delegateService);
+    }
+
+    public <S> S remove(final Class<S> serviceClass) {
+        return serviceClass.cast(map.remove(serviceClass));
+    }
+
+    public int size() {
+        return map.size();
+    }
+
 }

@@ -96,10 +96,10 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws AbstractOXException {
         createTable("oauthAccounts", getCreate(), params.getContextId());
         if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'IDCreateTableTask' successfully performed!");
+            LOG.info("UpdateTask 'OAuthCreateTableTask' successfully performed!");
         }
     }
 
@@ -107,7 +107,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
         final DatabaseService dbService;
         try {
             dbService = ServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             throw new UpdateException(e);
         }
         final Context ctx;

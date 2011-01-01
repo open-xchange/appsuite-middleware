@@ -58,10 +58,12 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
@@ -86,6 +88,8 @@ public final class OAuthActivator extends DeferredActivator {
 
     private List<ServiceTracker> trackers;
 
+    private OSGiDelegateServiceMap delegateServices;
+
     /**
      * Initializes a new {@link OAuthActivator}.
      */
@@ -95,7 +99,7 @@ public final class OAuthActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class };
+        return new Class<?>[] { DatabaseService.class };
     }
 
     @Override
@@ -140,12 +144,11 @@ public final class OAuthActivator extends DeferredActivator {
             /*
              * Register component
              */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    OAuthException.COMPONENT,
-                    "com.openexchange.oauth",
-                    OAuthExceptionFactory.getInstance());
+            componentRegistration = new ComponentRegistration(
+                context,
+                OAuthException.COMPONENT,
+                "com.openexchange.oauth",
+                OAuthExceptionFactory.getInstance());
             /*
              * Collect OAuth services
              */
@@ -155,7 +158,7 @@ public final class OAuthActivator extends DeferredActivator {
              * Start other trackers
              */
             trackers = new ArrayList<ServiceTracker>(4);
-            //trackers.add();
+            // trackers.add();
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
@@ -163,10 +166,22 @@ public final class OAuthActivator extends DeferredActivator {
              * Register
              */
             registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(null /* FIXME */, null, registry, null), null));
+
+            delegateServices = new OSGiDelegateServiceMap();
+            delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
+            delegateServices.put(ContextService.class, new OSGiContextService().start(context));
+            delegateServices.put(IDGeneratorService.class, new OSGiIDGeneratorService().start(context));
+            delegateServices.startAll(context);
+
+            registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(
+                delegateServices.get(DBProvider.class),
+                delegateServices.get(IDGeneratorService.class),
+                registry,
+                delegateServices.get(ContextService.class)), null));
             registrations.add(context.registerService(OAuthServiceMetaDataRegistry.class.getName(), registry, null));
             registrations.add(context.registerService(CreateTableService.class.getName(), new CreateOAuthAccountTable(), null));
             registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+
                 public Collection<UpdateTask> getUpdateTasks() {
                     return Arrays.asList(((UpdateTask) new OAuthCreateTableTask()));
                 }
@@ -196,6 +211,10 @@ public final class OAuthActivator extends DeferredActivator {
                     registrations.remove(0).unregister();
                 }
                 registrations = null;
+            }
+            if (null != delegateServices) {
+                delegateServices.clear();
+                delegateServices = null;
             }
             MetaDataRegistry.releaseInstance();
             /*
