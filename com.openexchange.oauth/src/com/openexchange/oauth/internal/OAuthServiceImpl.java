@@ -210,22 +210,37 @@ public class OAuthServiceImpl implements OAuthService {
 
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
         try {
+            /*
+             * Create appropriate OAuth account instance
+             */
             final DefaultOAuthAccount account = new DefaultOAuthAccount();
-            
+            /*
+             * Determine associated service's meta data
+             */
             final OAuthServiceMetaData service = registry.getService(serviceMetaData);
             account.setMetaData(service);
-
+            /*
+             * Set display name
+             */
             final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
             account.setDisplayName(null == displayName ? service.getDisplayName() : displayName);
             account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
-            
+            /*
+             * Obtain & apply the access token
+             */
             obtainToken(type, arguments, account);
-            
+            /*
+             * Create INSERT command
+             */
             final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
             final INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
-            
+            /*
+             * Execute INSERT command
+             */
             executeUpdate(contextId, insert, values);
-            
+            /*
+             * Return newly created account
+             */
             return account;
         } catch (final OAuthException x) {
             throw x;
