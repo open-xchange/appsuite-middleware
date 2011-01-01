@@ -58,12 +58,20 @@ import com.openexchange.sql.grammar.Table;
 
 /**
  * {@link SQLStructure}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SQLStructure {
+
+    /**
+     * The "oauthAccounts" table.
+     */
     public static final Table OAUTH_ACCOUNTS = new Table("oauthAccounts");
 
+    /**
+     * The columns of "oauthAccounts" table.
+     */
     public enum OAUTH_COLUMN {
         CID("cid"),
         USER("user"),
@@ -72,42 +80,72 @@ public class SQLStructure {
         ACCESS_TOKEN("accessToken"),
         ACCESS_SECRET("accessSecret"),
         SERVICE_ID("serviceId");
-        
+
         private final Column column;
-        
+
         private OAUTH_COLUMN(final String colName) {
             this.column = new Column(colName);
         }
-        
+
+        /**
+         * Gets the associated column
+         * 
+         * @return The associated column
+         */
         public Column getColumn() {
             return column;
         }
-        
+
+        /**
+         * Gets this column's associated value from given OAuth account
+         * 
+         * @param account The account
+         * @param cid The context identifier
+         * @param userId The user identifier
+         * @return The associated value or <code>null</code> if unknown
+         */
         public Object get(final OAuthAccount account, final int cid, final int userId) {
-            switch(this) {
-            case CID: return Integer.valueOf(cid);
-            case USER: return Integer.valueOf(userId);
-            case ID: return Integer.valueOf(account.getId());
-            case DISPLAY_NAME: return account.getDisplayName();
-            case ACCESS_TOKEN: return account.getToken();
-            case ACCESS_SECRET: return account.getSecret();
-            case SERVICE_ID: return account.getMetaData().getId();
+            switch (this) {
+            case CID:
+                return Integer.valueOf(cid);
+            case USER:
+                return Integer.valueOf(userId);
+            case ID:
+                return Integer.valueOf(account.getId());
+            case DISPLAY_NAME:
+                return account.getDisplayName();
+            case ACCESS_TOKEN:
+                return account.getToken();
+            case ACCESS_SECRET:
+                return account.getSecret();
+            case SERVICE_ID:
+                return account.getMetaData().getId();
             }
             return null;
         }
-        
+
     }
-    
-    public static INSERT INSERT_ACCOUNT(final OAuthAccount account, final int contextId, final int user, final List<Object> values) {
+
+    /**
+     * Performs an INSERT for specified account.
+     * 
+     * @param account The account
+     * @param contextId The context identifier
+     * @param user The user identifier
+     * @param values The added values in insertion order
+     * @return The INSERT command
+     */
+    public static INSERT insertAccount(final OAuthAccount account, final int contextId, final int user, final List<Object> values) {
         final INSERT insert = new INSERT().INTO(OAUTH_ACCOUNTS);
-        for(final OAUTH_COLUMN column : OAUTH_COLUMN.values()) {
+        for (final OAUTH_COLUMN column : OAUTH_COLUMN.values()) {
             final Object o = column.get(account, contextId, user);
-            if(o != null) {
+            if (o != null) {
                 insert.SET(column.getColumn(), PLACEHOLDER);
                 values.add(o);
             }
         }
-        
+
         return insert;
     }
+
 }

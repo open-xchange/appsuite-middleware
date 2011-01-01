@@ -203,9 +203,9 @@ public class OAuthServiceImpl implements OAuthService {
         final OAuthToken requestToken = new ScribeOAuthToken(service.getRequestToken());
         final String authorizationURL = metaData.getAuthorizationURL(requestToken);
         /*
-         * Return out-of-band interaction
+         * Return interaction
          */
-        return new OAuthInteractionImpl(requestToken, authorizationURL, callbackUrl);
+        return new OAuthInteractionImpl(requestToken, authorizationURL, callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
     }
 
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
@@ -225,7 +225,7 @@ public class OAuthServiceImpl implements OAuthService {
             obtainToken(type, arguments, account);
             
             final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
-            final INSERT insert = SQLStructure.INSERT_ACCOUNT(account, contextId, user, values);
+            final INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
             
             executeUpdate(contextId, insert, values);
             
