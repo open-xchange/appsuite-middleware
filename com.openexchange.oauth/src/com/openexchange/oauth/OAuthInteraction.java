@@ -75,7 +75,7 @@ public interface OAuthInteraction {
     OAuthInteractionType getInteractionType();
 
     /**
-     * Gets the request token.
+     * Gets the request token needed to acquire the access token.
      * 
      * @return The request token.
      */
