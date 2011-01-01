@@ -73,8 +73,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
 
     public Connection getReadConnection(final Context ctx) throws DBPoolingException {
         try {
-            final DatabaseService dbService = getService();
-            return dbService.getReadOnly(ctx);
+            return getService().getReadOnly(ctx);
         } catch (final ServiceException e) {
             throw new DBPoolingException(e);
         }
@@ -92,8 +91,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
 
     public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
         try {
-            final DatabaseService dbService = getService();
-            return dbService.getWritable(ctx);
+            return getService().getWritable(ctx);
         } catch (final ServiceException e) {
             throw new DBPoolingException(e);
         }

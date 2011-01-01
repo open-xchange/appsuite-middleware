@@ -72,8 +72,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
 
     public List<Integer> getAllContextIds() throws ContextException {
         try {
-            final ContextService cs = getService();
-            return cs.getAllContextIds();
+            return getService().getAllContextIds();
         } catch (final ServiceException e) {
             throw new ContextException(e);
         }
@@ -81,8 +80,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
 
     public Context getContext(final int contextId) throws ContextException {
         try {
-            final ContextService cs = getService();
-            return cs.getContext(contextId);
+            return getService().getContext(contextId);
         } catch (final ServiceException e) {
             throw new ContextException(e);
         }
@@ -90,8 +88,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
 
     public int getContextId(final String loginContextInfo) throws ContextException {
         try {
-            final ContextService cs = getService();
-            return cs.getContextId(loginContextInfo);
+            return getService().getContextId(loginContextInfo);
         } catch (final ServiceException e) {
             throw new ContextException(e);
         }
@@ -99,8 +96,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
 
     public void invalidateContext(final int contextId) throws ContextException {
         try {
-            final ContextService cs = getService();
-            cs.invalidateContext(contextId);
+            getService().invalidateContext(contextId);
         } catch (final ServiceException e) {
             throw new ContextException(e);
         }
@@ -108,8 +104,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
 
     public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
         try {
-            final ContextService cs = getService();
-            cs.invalidateLoginInfo(loginContextInfo);
+            getService().invalidateLoginInfo(loginContextInfo);
         } catch (final ServiceException e) {
             throw new ContextException(e);
         }
@@ -117,8 +112,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
 
     public Context loadContext(final int contextId) throws ContextException {
         try {
-            final ContextService cs = getService();
-            return cs.loadContext(contextId);
+            return getService().loadContext(contextId);
         } catch (final ServiceException e) {
             throw new ContextException(e);
         }

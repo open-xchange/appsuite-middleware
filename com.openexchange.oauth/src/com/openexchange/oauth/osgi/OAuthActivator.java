@@ -152,7 +152,7 @@ public final class OAuthActivator extends DeferredActivator {
             /*
              * Collect OAuth services
              */
-            final MetaDataRegistry registry = MetaDataRegistry.getInstance();
+            final OSGiMetaDataRegistry registry = OSGiMetaDataRegistry.getInstance();
             registry.start(context);
             /*
              * Start other trackers
@@ -216,7 +216,7 @@ public final class OAuthActivator extends DeferredActivator {
                 delegateServices.clear();
                 delegateServices = null;
             }
-            MetaDataRegistry.releaseInstance();
+            OSGiMetaDataRegistry.releaseInstance();
             /*
              * Unregister component
              */

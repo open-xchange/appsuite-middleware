@@ -63,26 +63,26 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 
 /**
- * {@link MetaDataRegistry}
+ * {@link OSGiMetaDataRegistry}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MetaDataRegistry implements OAuthServiceMetaDataRegistry {
+public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry {
 
-    private static volatile MetaDataRegistry instance;
+    private static volatile OSGiMetaDataRegistry instance;
 
     /**
      * Gets the registry instance.
      * 
      * @return The instance
      */
-    public static MetaDataRegistry getInstance() {
-        MetaDataRegistry tmp = instance;
+    public static OSGiMetaDataRegistry getInstance() {
+        OSGiMetaDataRegistry tmp = instance;
         if (null == tmp) {
-            synchronized (MetaDataRegistry.class) {
+            synchronized (OSGiMetaDataRegistry.class) {
                 tmp = instance;
                 if (null == tmp) {
-                    instance = tmp = new MetaDataRegistry();
+                    instance = tmp = new OSGiMetaDataRegistry();
                 }
             }
         }
@@ -93,8 +93,8 @@ public final class MetaDataRegistry implements OAuthServiceMetaDataRegistry {
      * Releases the instance.
      */
     public static void releaseInstance() {
-        synchronized (MetaDataRegistry.class) {
-            final MetaDataRegistry tmp = instance;
+        synchronized (OSGiMetaDataRegistry.class) {
+            final OSGiMetaDataRegistry tmp = instance;
             if (null != tmp) {
                 tmp.stop();
                 tmp.map.clear();
@@ -108,9 +108,9 @@ public final class MetaDataRegistry implements OAuthServiceMetaDataRegistry {
     private ServiceTracker tracker;
 
     /**
-     * Initializes a new {@link MetaDataRegistry}.
+     * Initializes a new {@link OSGiMetaDataRegistry}.
      */
-    public MetaDataRegistry() {
+    public OSGiMetaDataRegistry() {
         super();
         map = new ConcurrentHashMap<String, OAuthServiceMetaData>();
     }
