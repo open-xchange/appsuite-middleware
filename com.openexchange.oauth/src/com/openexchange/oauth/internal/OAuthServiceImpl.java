@@ -203,9 +203,9 @@ public class OAuthServiceImpl implements OAuthService {
         final OAuthToken requestToken = new ScribeOAuthToken(service.getRequestToken());
         final String authorizationURL = metaData.getAuthorizationURL(requestToken);
         /*
-         * Return interaction
+         * Return out-of-band interaction
          */
-        return new OAuthInteractionImpl(requestToken, authorizationURL, callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
+        return new OAuthInteractionImpl(requestToken, authorizationURL, callbackUrl);
     }
 
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
