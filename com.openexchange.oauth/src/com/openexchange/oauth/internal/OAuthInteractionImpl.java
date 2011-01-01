@@ -62,7 +62,7 @@ public final class OAuthInteractionImpl implements OAuthInteraction {
 
     private final String authorizationURL;
 
-    private final String callbackUrl;
+    private final OAuthInteractionType interactionType;
 
     private final OAuthToken requestToken;
 
@@ -71,11 +71,11 @@ public final class OAuthInteractionImpl implements OAuthInteraction {
      * 
      * @param requestToken The request token needed to acquire the access token
      * @param authorizationURL The base authorization URL
-     * @param callbackUrl The optional call-back URL; may be <code>null</code>
+     * @param interactionType The interaction type
      */
-    public OAuthInteractionImpl(final OAuthToken requestToken, final String authorizationURL, final String callbackUrl) {
+    public OAuthInteractionImpl(final OAuthToken requestToken, final String authorizationURL, final OAuthInteractionType interactionType) {
         this.authorizationURL = authorizationURL;
-        this.callbackUrl = callbackUrl;
+        this.interactionType = interactionType;
         this.requestToken = requestToken;
     }
 
@@ -84,7 +84,7 @@ public final class OAuthInteractionImpl implements OAuthInteraction {
     }
 
     public OAuthInteractionType getInteractionType() {
-        return callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK;
+        return interactionType;
     }
 
     public String getAuthorizationURL() {

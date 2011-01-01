@@ -203,7 +203,7 @@ public class OAuthServiceImpl implements OAuthService {
         final OAuthToken requestToken = new ScribeOAuthToken(service.getRequestToken());
         final String authorizationURL = metaData.getAuthorizationURL(requestToken);
         /*
-         * Return out-of-band interaction
+         * Return interaction
          */
         return new OAuthInteractionImpl(requestToken, authorizationURL, callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
     }
@@ -215,11 +215,8 @@ public class OAuthServiceImpl implements OAuthService {
             final OAuthServiceMetaData service = registry.getService(serviceMetaData);
             account.setMetaData(service);
 
-            Object displayName = arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            if(displayName == null) {
-                displayName = service.getDisplayName();
-            }
-            account.setDisplayName(displayName.toString());
+            final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            account.setDisplayName(null == displayName ? service.getDisplayName() : displayName);
             account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
             
             obtainToken(type, arguments, account);
