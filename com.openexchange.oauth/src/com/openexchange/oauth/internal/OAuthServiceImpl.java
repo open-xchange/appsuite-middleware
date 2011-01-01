@@ -205,20 +205,7 @@ public class OAuthServiceImpl implements OAuthService {
         /*
          * Return out-of-band interaction
          */
-        return new OAuthInteraction() {
-
-            public OAuthToken getRequestToken() {
-                return requestToken;
-            }
-
-            public OAuthInteractionType getInteractionType() {
-                return callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK;
-            }
-
-            public String getAuthorizationURL() {
-                return authorizationURL;
-            }
-        };
+        return new OAuthInteractionImpl(requestToken, authorizationURL, callbackUrl);
     }
 
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
