@@ -53,17 +53,16 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountParser;
-import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -72,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UpdateAction implements AJAXActionService {
+public final class UpdateAction extends AbstractOAuthAJAXActionService {
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -101,7 +100,7 @@ public final class UpdateAction implements AJAXActionService {
             /*
              * Update account
              */
-            final OAuthService oAuthService = ServiceRegistry.getInstance().getService(OAuthService.class, true);
+            final OAuthService oAuthService = getOAuthService();
             final Map<String, Object> arguments = new HashMap<String, Object>(1);
 
             final String displayName = account.getDisplayName();

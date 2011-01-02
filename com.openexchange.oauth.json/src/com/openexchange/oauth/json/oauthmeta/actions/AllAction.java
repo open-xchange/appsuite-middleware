@@ -52,15 +52,14 @@ package com.openexchange.oauth.json.oauthmeta.actions;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthmeta.MetaDataWriter;
-import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllAction implements AJAXActionService {
+public final class AllAction extends AbstractOAuthAJAXActionService {
 
     /**
      * Initializes a new {@link AllAction}.
@@ -83,7 +82,7 @@ public final class AllAction implements AJAXActionService {
             /*
              * Request accounts
              */
-            final OAuthService oAuthService = ServiceRegistry.getInstance().getService(OAuthService.class, true);
+            final OAuthService oAuthService = getOAuthService();
             final OAuthServiceMetaDataRegistry registry = oAuthService.getMetaDataRegistry();
             final List<OAuthServiceMetaData> services = registry.getAllServices();
             /*

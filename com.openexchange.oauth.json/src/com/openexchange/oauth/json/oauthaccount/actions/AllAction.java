@@ -52,14 +52,13 @@ package com.openexchange.oauth.json.oauthaccount.actions;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
-import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllAction implements AJAXActionService {
+public final class AllAction extends AbstractOAuthAJAXActionService {
 
     /**
      * Initializes a new {@link AllAction}.
@@ -86,7 +85,7 @@ public final class AllAction implements AJAXActionService {
             /*
              * Request accounts
              */
-            final OAuthService oAuthService = ServiceRegistry.getInstance().getService(OAuthService.class, true);
+            final OAuthService oAuthService = getOAuthService();
             final List<OAuthAccount> accounts;
             if (null == serviceId) {
                 accounts = oAuthService.getAccounts(session.getUserId(), session.getContextId());

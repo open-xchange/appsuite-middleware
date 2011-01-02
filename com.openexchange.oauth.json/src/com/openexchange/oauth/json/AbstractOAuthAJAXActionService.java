@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,43 @@
  *
  */
 
-package com.openexchange.oauth.json.oauthaccount.actions;
+package com.openexchange.oauth.json;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.oauth.OAuthInteraction;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
-import com.openexchange.oauth.json.oauthaccount.AccountWriter;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link InitAction}
+ * {@link AbstractOAuthAJAXActionService}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class InitAction extends AbstractOAuthAJAXActionService {
+public abstract class AbstractOAuthAJAXActionService implements AJAXActionService {
+
+    private static volatile OAuthService oAuthService;
 
     /**
-     * Initializes a new {@link InitAction}.
+     * Sets the OAuth service
+     * 
+     * @param oAuthService The OAuth service
      */
-    public InitAction() {
-        super();
+    public static void setOAuthService(final OAuthService oAuthService) {
+        AbstractOAuthAJAXActionService.oAuthService = oAuthService;
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final String serviceId = request.getParameter("serviceId");
-            if (serviceId == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "serviceId");
-            }
-            /*
-             * Invoke
-             */
-            final OAuthService oAuthService = getOAuthService();
-            final OAuthInteraction interaction = oAuthService.initOAuth(serviceId);
-            /*
-             * Write as JSON
-             */
-            final JSONObject jsonInteraction = AccountWriter.write(interaction);
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(jsonInteraction);
-        } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
-        }
+    /**
+     * Gets the OAuth service
+     * 
+     * @return The OAuth service
+     */
+    public static OAuthService getOAuthService() {
+        return oAuthService;
+    }
+
+    /**
+     * Initializes a new {@link AbstractOAuthAJAXActionService}.
+     */
+    protected AbstractOAuthAJAXActionService() {
+        super();
     }
 
 }

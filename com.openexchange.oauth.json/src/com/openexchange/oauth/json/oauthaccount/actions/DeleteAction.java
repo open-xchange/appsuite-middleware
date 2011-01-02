@@ -49,13 +49,12 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Tools;
-import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -64,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteAction implements AJAXActionService {
+public final class DeleteAction extends AbstractOAuthAJAXActionService {
 
     /**
      * Initializes a new {@link DeleteAction}.
@@ -84,7 +83,7 @@ public final class DeleteAction implements AJAXActionService {
         /*
          * Delete account
          */
-        final OAuthService oAuthService = ServiceRegistry.getInstance().getService(OAuthService.class, true);
+        final OAuthService oAuthService = getOAuthService();
         oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
         /*
          * Return appropriate result

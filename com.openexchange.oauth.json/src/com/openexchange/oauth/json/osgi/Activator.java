@@ -59,6 +59,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -76,6 +77,8 @@ public class Activator extends DeferredActivator {
     private List<ServiceRegistration> serviceRegistrations;
 
     private List<ServiceTracker> trackers;
+
+    private OSGiOAuthService oAuthService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -101,6 +104,18 @@ public class Activator extends DeferredActivator {
     @Override
     public void startBundle() throws Exception {
         try {
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            final ServiceRegistry registry = ServiceRegistry.getInstance();
+            registry.clearRegistry();
+            final Class<?>[] classes = getNeededServices();
+            for (final Class<?> classe : classes) {
+                final Object service = getService(classe);
+                if (null != service) {
+                    registry.addService(classe, service);
+                }
+            }
             /*
              * Service trackers
              */
@@ -128,6 +143,9 @@ public class Activator extends DeferredActivator {
                 MultipleHandlerFactoryService.class.getName(),
                 new AccountMultipleHandlerFactory(),
                 null));
+            oAuthService = new OSGiOAuthService().start(context);
+            registry.addService(OAuthService.class, oAuthService);
+            AbstractOAuthAJAXActionService.setOAuthService(oAuthService);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -155,6 +173,12 @@ public class Activator extends DeferredActivator {
                 }
                 serviceRegistrations = null;
             }
+            if (null != oAuthService) {
+                oAuthService.stop();
+                oAuthService = null;
+            }
+            AbstractOAuthAJAXActionService.setOAuthService(null);
+            ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
             throw e;
