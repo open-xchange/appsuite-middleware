@@ -85,7 +85,7 @@ public abstract class AbstractOSGiDelegateService<S> {
      * @return This instance for method chaining
      */
     @SuppressWarnings("unchecked")
-    public <I extends AbstractOSGiDelegateService<S>> I start(final BundleContext bundleContext) {
+    public final <I extends AbstractOSGiDelegateService<S>> I start(final BundleContext bundleContext) {
         if (null == tracker) {
             synchronized (this) {
                 ServiceTracker tmp = tracker;
@@ -101,7 +101,7 @@ public abstract class AbstractOSGiDelegateService<S> {
     /**
      * Stops tracking {@link IDGeneratorService}
      */
-    public void stop() {
+    public final void stop() {
         final ServiceTracker tmp = tracker;
         if (null != tmp) {
             tmp.close();
