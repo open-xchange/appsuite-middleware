@@ -213,36 +213,29 @@ public final class FolderCache {
 
         private volatile FolderMap folderMap;
 
-        private volatile CacheKey key;
+        private final CacheKey key;
 
         public FolderCacheEntry() {
             this(null);
         }
 
-        public FolderCacheEntry(final FolderMap folder) {
+        public FolderCacheEntry(final FolderMap folderMap) {
             super();
-            this.folderMap = folder;
-        }
-
-        private CacheKey getKeyInternal() {
-            CacheKey tmp = key;
-            if (null == tmp) {
-                final int code = MailCacheCode.FOLDERS.getCode();
-                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(code, code);
-            }
-            return tmp;
+            this.folderMap = folderMap;
+            final int code = MailCacheCode.FOLDERS.getCode();
+            key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(code, code);
         }
 
         public CacheKey getKey() {
-            return getKeyInternal();
+            return key;
         }
 
         public FolderMap getValue() {
             return folderMap;
         }
 
-        public void setValue(final FolderMap value) {
-            folderMap = value;
+        public void setValue(final FolderMap folderMap) {
+            this.folderMap = folderMap;
         }
 
         public Class<FolderMap> getEntryClass() {
