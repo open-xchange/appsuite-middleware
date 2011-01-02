@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class AccountMultipleHandler implements MultipleHandler {
 
     private AJAXRequestResult result;
-    
+
     /**
      * Initializes a new {@link AccountMultipleHandler}.
      */

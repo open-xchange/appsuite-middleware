@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth;
 
-
 /**
  * {@link OAuthToken} - Represents an OAuth token.
  * 
@@ -72,5 +71,5 @@ public interface OAuthToken {
      * @return The secret
      */
     String getSecret();
-    
+
 }

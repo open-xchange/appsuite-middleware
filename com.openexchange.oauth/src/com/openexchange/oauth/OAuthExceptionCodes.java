@@ -93,7 +93,7 @@ public enum OAuthExceptionCodes implements OXErrorMessage {
      * Missing argument: %1$s
      */
     MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, Category.CODE_ERROR, 8),
-    
+
     ;
 
     private final Category category;

@@ -84,8 +84,7 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     public static final String EQUAL_NAME_MSG = "The source and destination URIs are equal: %1$s.";
 
     // Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.
-    public static final String CONFLICT_MSG =
-        "Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.";
+    public static final String CONFLICT_MSG = "Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.";
 
     // Such a resource already exists: %1$s.
     public static final String PRECONDITION_FAILED_MSG = "Such a resource already exists: %1$s.";
@@ -106,8 +105,7 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     public static final String UNSUPPORTED_PROTOCOL_MSG = "Unsupported protocol for SmartDrive server access: %1$s";
 
     // SmartDrive user "%1$s" is not authenticated for stateful access to SmarTDrive server "%2$s".
-    public static final String UNAUTHORIZED_MSG =
-        "SmartDrive user \"%1$s\" is not authenticated for stateful access to SmarTDrive server \"%2$s\".";
+    public static final String UNAUTHORIZED_MSG = "SmartDrive user \"%1$s\" is not authenticated for stateful access to SmarTDrive server \"%2$s\".";
 
     // This resource is not a file
     public static final String NOT_A_FILE_MSG = "This resource is not a file";

@@ -55,7 +55,7 @@ import com.openexchange.oauth.OAuthToken;
 
 /**
  * {@link OAuthInteractionImpl} - The {@link OAuthInteraction} implementation.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthInteractionImpl implements OAuthInteraction {

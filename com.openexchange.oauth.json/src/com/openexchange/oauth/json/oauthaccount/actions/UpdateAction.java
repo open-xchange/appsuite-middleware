@@ -103,7 +103,7 @@ public final class UpdateAction implements AJAXActionService {
              */
             final OAuthService oAuthService = ServiceRegistry.getInstance().getService(OAuthService.class, true);
             final Map<String, Object> arguments = new HashMap<String, Object>(1);
-            
+
             final String displayName = account.getDisplayName();
             if (null != displayName) {
                 arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, displayName);

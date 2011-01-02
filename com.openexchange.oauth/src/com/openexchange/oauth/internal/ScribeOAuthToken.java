@@ -52,10 +52,9 @@ package com.openexchange.oauth.internal;
 import org.scribe.model.Token;
 import com.openexchange.oauth.OAuthToken;
 
-
 /**
  * {@link ScribeOAuthToken} - TODO Short description of this class' purpose.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ScribeOAuthToken implements OAuthToken {

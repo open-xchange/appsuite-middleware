@@ -80,5 +80,5 @@ public interface OAuthInteraction {
      * @return The request token.
      */
     OAuthToken getRequestToken();
-    
+
 }

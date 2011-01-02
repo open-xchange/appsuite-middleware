@@ -91,7 +91,6 @@ import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.Command;
 import com.openexchange.sql.grammar.INSERT;
 
-
 /**
  * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction.
  * 
@@ -101,7 +100,7 @@ import com.openexchange.sql.grammar.INSERT;
 public class OAuthServiceImpl implements OAuthService {
 
     private static final Log LOG = LogFactory.getLog(OAuthServiceImpl.class);
-    
+
     private final OAuthServiceMetaDataRegistry registry;
 
     private final DBProvider provider;
@@ -205,7 +204,10 @@ public class OAuthServiceImpl implements OAuthService {
         /*
          * Return interaction
          */
-        return new OAuthInteractionImpl(requestToken, authorizationURL, callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
+        return new OAuthInteractionImpl(
+            requestToken,
+            authorizationURL,
+            callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
     }
 
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
@@ -258,7 +260,7 @@ public class OAuthServiceImpl implements OAuthService {
             LOG.error(e);
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
-            if(writeCon != null) {
+            if (writeCon != null) {
                 provider.releaseWriteConnection(ctx, writeCon);
             }
         }

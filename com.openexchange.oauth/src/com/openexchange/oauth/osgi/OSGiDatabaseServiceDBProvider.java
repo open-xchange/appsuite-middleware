@@ -59,7 +59,7 @@ import com.openexchange.server.ServiceException;
 
 /**
  * {@link OSGiDatabaseServiceDBProvider} - The {@link DBProvider} backed by tracked {@link DatabaseService} instance.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<DatabaseService> implements DBProvider {
@@ -85,7 +85,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
             if (null == dbService) {
                 return;
             }
-            dbService.backReadOnly(ctx,con);
+            dbService.backReadOnly(ctx, con);
         }
     }
 
@@ -106,7 +106,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
             return;
         }
         autocommit(con);
-        dbService.backWritable(ctx,con);
+        dbService.backWritable(ctx, con);
     }
-    
+
 }

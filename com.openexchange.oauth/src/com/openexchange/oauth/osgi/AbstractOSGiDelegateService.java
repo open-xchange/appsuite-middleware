@@ -54,10 +54,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.server.ServiceException;
 
-
 /**
  * {@link AbstractOSGiDelegateService}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractOSGiDelegateService<S> {

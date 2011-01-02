@@ -66,7 +66,7 @@ public enum MetaDataField {
      * The display name
      */
     DISPLAY_NAME(OAuthConstants.ARGUMENT_DISPLAY_NAME),
-    
+
     ;
 
     private final String name;

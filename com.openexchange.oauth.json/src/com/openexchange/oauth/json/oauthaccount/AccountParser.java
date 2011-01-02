@@ -88,8 +88,7 @@ public class AccountParser {
             }
             if (accountJSON.hasAndNotNull(AccountField.SERVICE_ID.getName())) {
                 final String serviceId = accountJSON.getString(AccountField.SERVICE_ID.getName());
-                final OAuthServiceMetaDataRegistry registry =
-                    ServiceRegistry.getInstance().getService(OAuthService.class, true).getMetaDataRegistry();
+                final OAuthServiceMetaDataRegistry registry = ServiceRegistry.getInstance().getService(OAuthService.class, true).getMetaDataRegistry();
                 account.setMetaData(registry.getService(serviceId));
             }
 

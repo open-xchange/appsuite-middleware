@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 
 /**
  * {@link ServiceRegistry} remembers needed services.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ServiceRegistry extends AbstractServiceRegistry {

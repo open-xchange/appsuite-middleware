@@ -90,7 +90,10 @@ public final class GetAction implements AJAXActionService {
              * Request account
              */
             final OAuthService oAuthService = ServiceRegistry.getInstance().getService(OAuthService.class, true);
-            final OAuthAccount account = oAuthService.getAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+            final OAuthAccount account = oAuthService.getAccount(
+                Tools.getUnsignedInteger(accountId),
+                session.getUserId(),
+                session.getContextId());
             /*
              * Write account as a JSON object
              */

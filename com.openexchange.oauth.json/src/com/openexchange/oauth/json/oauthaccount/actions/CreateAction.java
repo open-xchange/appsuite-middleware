@@ -117,7 +117,12 @@ public final class CreateAction implements AJAXActionService {
              * Request accounts
              */
             final OAuthService oAuthService = ServiceRegistry.getInstance().getService(OAuthService.class, true);
-            final OAuthAccount createdAccount = oAuthService.createAccount(serviceId, type, arguments, session.getUserId(), session.getContextId());
+            final OAuthAccount createdAccount = oAuthService.createAccount(
+                serviceId,
+                type,
+                arguments,
+                session.getUserId(),
+                session.getContextId());
             /*
              * Write account as a JSON object
              */

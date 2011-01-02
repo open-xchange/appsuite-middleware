@@ -78,22 +78,11 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OAuthCreateTableTask.class);
 
     public String[] getDependencies() {
-        return new String[] { };
+        return new String[] {};
     }
 
     private static final String getCreate() {
-        return "CREATE TABLE oauthAccounts ("
-        + "cid INT4 UNSIGNED NOT NULL,"
-        + "user INT4 UNSIGNED NOT NULL,"
-        + "id INT4 UNSIGNED NOT NULL,"
-        + "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "accessToken VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "accessSecret VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "serviceId VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "PRIMARY KEY (cid, id),"
-        + "INDEX (cid, user),"
-        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        return "CREATE TABLE oauthAccounts (" + "cid INT4 UNSIGNED NOT NULL," + "user INT4 UNSIGNED NOT NULL," + "id INT4 UNSIGNED NOT NULL," + "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "accessToken VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "accessSecret VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "serviceId VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "PRIMARY KEY (cid, id)," + "INDEX (cid, user)," + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
     public void perform(final PerformParameters params) throws AbstractOXException {

@@ -54,10 +54,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-
 /**
  * {@link Customizer}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Customizer<S> implements ServiceTrackerCustomizer {

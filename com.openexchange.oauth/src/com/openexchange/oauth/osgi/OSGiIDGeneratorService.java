@@ -53,13 +53,12 @@ import com.openexchange.id.IDException;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.ServiceException;
 
-
 /**
  * {@link OSGiIDGeneratorService}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiIDGeneratorService extends AbstractOSGiDelegateService<IDGeneratorService> implements IDGeneratorService  {
+public final class OSGiIDGeneratorService extends AbstractOSGiDelegateService<IDGeneratorService> implements IDGeneratorService {
 
     /**
      * Initializes a new {@link OSGiIDGeneratorService}.

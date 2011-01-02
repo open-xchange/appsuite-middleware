@@ -90,7 +90,7 @@ public enum AccountField {
      * Request token
      */
     REQUEST_TOKEN(OAuthConstants.ARGUMENT_REQUEST_TOKEN),
-    
+
     ;
 
     private final String name;
