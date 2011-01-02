@@ -52,7 +52,6 @@ package com.openexchange.oauth.osgi;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.ServiceException;
 
 
@@ -79,7 +78,7 @@ public abstract class AbstractOSGiDelegateService<S> {
     }
 
     /**
-     * Starts tracking
+     * Starts tracking the delegate service.
      * 
      * @param bundleContext The bundle context
      * @return This instance for method chaining
@@ -99,7 +98,7 @@ public abstract class AbstractOSGiDelegateService<S> {
     }
 
     /**
-     * Stops tracking {@link IDGeneratorService}
+     * Stops tracking the delegate service.
      */
     public final void stop() {
         final ServiceTracker tmp = tracker;
