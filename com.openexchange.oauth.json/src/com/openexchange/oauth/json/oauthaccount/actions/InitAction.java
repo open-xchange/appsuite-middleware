@@ -49,15 +49,20 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
+import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
+import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -85,14 +90,39 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "serviceId");
             }
             /*
+             * Generate UUID
+             */
+            final String uuid = UUID.randomUUID().toString();
+            /*
+             * Compose call-back URL
+             */
+            final String callbackUrl;
+            if (ServiceRegistry.getInstance().getService(ConfigurationService.class, true).getBoolProperty("com.openexchange.oauth.callback", false)) {
+                final StringBuilder cbBuilder = new StringBuilder(128);
+                cbBuilder.append(request.isSecure() ? "https://" : "http://");
+                cbBuilder.append(request.getHostname());
+                cbBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
+                cbBuilder.append("?action=create&session=").append(session.getSessionID());
+                final String displayName = request.getParameter("displayName");
+                cbBuilder.append("&displayName=").append(displayName);
+                cbBuilder.append("&serviceId=").append(serviceId);
+                cbBuilder.append("&uuid=").append(uuid);
+                callbackUrl = cbBuilder.toString();
+            } else {
+                callbackUrl = null;
+            }
+            /*
              * Invoke
              */
             final OAuthService oAuthService = getOAuthService();
-            final OAuthInteraction interaction = oAuthService.initOAuth(serviceId);
+            final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl);
+            final OAuthToken requestToken = interaction.getRequestToken();
+            session.setParameter(uuid, requestToken.getSecret());
             /*
              * Write as JSON
              */
             final JSONObject jsonInteraction = AccountWriter.write(interaction);
+            jsonInteraction.put("uuid", uuid);
             /*
              * Return appropriate result
              */

@@ -133,7 +133,8 @@ public class OAuthServiceImpl implements OAuthService {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ?");
+            stmt =
+                con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
@@ -165,7 +166,8 @@ public class OAuthServiceImpl implements OAuthService {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt =
+                con.prepareStatement("SELECT id, displayName, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setString(3, serviceMetaData);
@@ -192,12 +194,11 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-    public OAuthInteraction initOAuth(final String serviceMetaData) throws OAuthException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OAuthException {
         final OAuthServiceMetaData metaData = registry.getService(serviceMetaData);
         /*
          * Get appropriate Scribe service implementation
          */
-        final String callbackUrl = getCallbackUrl(metaData);
         final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
         final OAuthToken requestToken = new ScribeOAuthToken(service.getRequestToken());
         final String authorizationURL = metaData.getAuthorizationURL(requestToken);
@@ -332,7 +333,8 @@ public class OAuthServiceImpl implements OAuthService {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt =
+                con.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
@@ -396,30 +398,11 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     protected void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
-        throw new UnsupportedOperationException("OAuth not supported via call-back, yet");
+        obtainTokenByOutOfBand(arguments, account);
     }
 
     // Helper Methods
 
-    private static String getCallbackUrl(final OAuthServiceMetaData metaData) throws OAuthException {
-        /*
-         * TODO: Provide call-back URL dependent on configuration
-         */
-        final String serviceId = metaData.getId();
-        if (serviceId.indexOf("twitter") >= 0) {
-            return null;
-        } else if (serviceId.indexOf("linkedin") >= 0) {
-            return null;
-        } else if (serviceId.indexOf("google") >= 0) {
-            return null;
-        } else if (serviceId.indexOf("yahoo") >= 0) {
-            return null;
-        } else if (serviceId.indexOf("foursquare") >= 0) {
-            return null;
-        } else {
-            throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
-        }
-    }
 
     private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OAuthException {
         final String serviceId = metaData.getId();

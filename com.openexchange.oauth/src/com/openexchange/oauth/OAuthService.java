@@ -93,10 +93,11 @@ public interface OAuthService {
      * Initializes a new OAuth account.
      * 
      * @param serviceMetaData The identifier of service meta data
+     * @param callbackUrl The optional call-back URL
      * @throws OAuthException If initialization fails
      * @return The OAuth interaction providing needed steps
      */
-    OAuthInteraction initOAuth(String serviceMetaData) throws OAuthException;
+    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl) throws OAuthException;
 
     /**
      * Create a new OAuth account from specified arguments.

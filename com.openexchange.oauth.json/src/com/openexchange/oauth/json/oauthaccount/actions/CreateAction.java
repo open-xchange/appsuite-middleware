@@ -51,7 +51,6 @@ package com.openexchange.oauth.json.oauthaccount.actions;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -63,7 +62,6 @@ import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
-import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
@@ -87,45 +85,35 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             /*
              * Parse parameters
              */
+            // http://wiki.oauth.net/w/page/12238555/Signed-Callback-URLs
+            // http://developer.linkedin.com/message/4568
+            final String oauthToken = request.getParameter("oauth_token");
+            final String uuid = request.getParameter("uuid");
+            
+            final String oauthTokenSecret = (String) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
+            final String oauthVerfifier = request.getParameter("oauth_verifier");
+
             final String serviceId = request.getParameter("serviceId");
             if (serviceId == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "serviceId");
             }
-            final OAuthInteractionType type = OAuthInteractionType.typeFor(request.getParameter("type"));
-            if (type == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "type");
-            }
             /*
-             * Parse arguments
+             * Invoke
              */
-            final JSONObject data = (JSONObject) request.getData();
-            final Map<String, Object> arguments = new HashMap<String, Object>(data.length());
-            for (final Entry<String, Object> entry : data.entrySet()) {
-                final String key = entry.getKey();
-                if (OAuthConstants.ARGUMENT_REQUEST_TOKEN.equals(key)) {
-                    final JSONObject jsonToken = (JSONObject) entry.getValue();
-                    final DefaultOAuthToken token = new DefaultOAuthToken();
-                    token.setSecret(jsonToken.getString(AccountField.SECRET.getName()));
-                    token.setToken(jsonToken.getString(AccountField.TOKEN.getName()));
-                    arguments.put(key, token);
-                } else {
-                    arguments.put(key, entry.getValue());
-                }
-            }
-            /*
-             * Request accounts
-             */
+            final Map<String, Object> arguments = new HashMap<String, Object>();
+            arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, request.getParameter("displayName"));
+            arguments.put(OAuthConstants.ARGUMENT_PIN, oauthVerfifier);
+            final DefaultOAuthToken token = new DefaultOAuthToken();
+            token.setSecret(oauthTokenSecret);
+            token.setToken(oauthToken);
+            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
             final OAuthService oAuthService = getOAuthService();
-            final OAuthAccount createdAccount = oAuthService.createAccount(
-                serviceId,
-                type,
-                arguments,
-                session.getUserId(),
-                session.getContextId());
+            final OAuthAccount newAccount =
+                oAuthService.createAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
             /*
-             * Write account as a JSON object
+             * Write as JSON
              */
-            final JSONObject jsonAccount = AccountWriter.write(createdAccount);
+            final JSONObject jsonAccount = AccountWriter.write(newAccount);
             /*
              * Return appropriate result
              */

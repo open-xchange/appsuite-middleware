@@ -96,8 +96,9 @@ public class MessagesServlet extends MultipleAdapterServletNew {
     @Override
     protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
         if(RESOLVE.equals(action)) {
-            final AJAXRequestData requestData = parseRequest(req, false, FileUploadBase.isMultipartContent(new ServletRequestContext(req)));
-            final MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, getSessionObject(req));
+            final ServerSession session = getSessionObject(req);
+            final AJAXRequestData requestData = parseRequest(req, false, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
+            final MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, session);
             
             try {
                 final MessagingMessageAccess messageAccess = request.getMessageAccess();

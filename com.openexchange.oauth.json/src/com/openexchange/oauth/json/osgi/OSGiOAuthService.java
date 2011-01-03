@@ -109,8 +109,8 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         return delegatee.getMetaDataRegistry();
     }
 
-    public OAuthInteraction initOAuth(final String serviceMetaData) throws OAuthException {
-        return getService0().initOAuth(serviceMetaData);
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OAuthException {
+        return getService0().initOAuth(serviceMetaData, callbackUrl);
     }
 
     public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {

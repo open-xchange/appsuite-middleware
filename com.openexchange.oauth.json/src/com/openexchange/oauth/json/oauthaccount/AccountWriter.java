@@ -100,9 +100,9 @@ public class AccountWriter {
 
         final OAuthToken requestToken = interaction.getRequestToken();
         if (null != requestToken) {
-            JSONObject jsonToken = new JSONObject();
+            final JSONObject jsonToken = new JSONObject();
             jsonToken.put(AccountField.TOKEN.getName(), requestToken.getToken());
-            jsonToken.put(AccountField.SECRET.getName(), requestToken.getSecret());
+            // jsonToken.put(AccountField.SECRET.getName(), requestToken.getSecret());
             json.put(AccountField.REQUEST_TOKEN.getName(), jsonToken);
         }
         return json;
