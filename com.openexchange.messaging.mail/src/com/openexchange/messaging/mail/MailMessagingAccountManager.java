@@ -530,6 +530,13 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         try {
             return ((Integer) value).intValue();
         } catch (final ClassCastException e) {
+            if (value instanceof String) {
+                try {
+                    return Integer.parseInt((String) value);
+                } catch (final NumberFormatException nfe) {
+                    throw MailMessagingExceptionCodes.WRONG_CONFIGURATION_PARAMETER.create(e, Integer.class.getName(), e.getMessage());
+                }
+            }
             throw MailMessagingExceptionCodes.WRONG_CONFIGURATION_PARAMETER.create(e, Integer.class.getName(), e.getMessage());
         }
     }
@@ -542,6 +549,13 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         try {
             return ((Integer) value).intValue();
         } catch (final ClassCastException e) {
+            if (value instanceof String) {
+                try {
+                    return Integer.parseInt((String) value);
+                } catch (final NumberFormatException nfe) {
+                    throw MailMessagingExceptionCodes.WRONG_CONFIGURATION_PARAMETER.create(e, Integer.class.getName(), e.getMessage());
+                }
+            }
             throw MailMessagingExceptionCodes.WRONG_CONFIGURATION_PARAMETER.create(e, Integer.class.getName(), e.getMessage());
         }
     }
@@ -554,6 +568,14 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         try {
             return (Boolean) value;
         } catch (final ClassCastException e) {
+            if (value instanceof String) {
+                final String sVal = (String) value;
+                if ("true".equalsIgnoreCase(sVal)) {
+                    return Boolean.TRUE;
+                } else if ("false".equalsIgnoreCase(sVal)) {
+                    return Boolean.FALSE;
+                }
+            }
             throw MailMessagingExceptionCodes.WRONG_CONFIGURATION_PARAMETER.create(e, Boolean.class.getName(), e.getMessage());
         }
     }
