@@ -350,7 +350,7 @@ public class OXContextMySQLStorageCommon {
         List<String> tmp = new ArrayList<String>();
         try {
             stmt = con.prepareStatement("SHOW TABLES LIKE ?");
-            stmt.setString(1, "%sequence_%");
+            stmt.setString(1, "%sequence\\_%");
             result = stmt.executeQuery();
             while (result.next()) {
                 tmp.add(result.getString(1));
