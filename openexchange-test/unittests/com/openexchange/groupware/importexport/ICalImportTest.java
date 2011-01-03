@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -405,9 +405,9 @@ public class ICalImportTest extends AbstractICalImportTest {
 			+ "END:STANDARD\n"
 			+ "END:VTIMEZONE\n"
 			+ "BEGIN:VEVENT\n"
-			+ "CREATED:20100916T122236Z\n"
+			+ "CREATED:20110916T122236Z\n"
 			+ "UID:32B3BF02-6736-4AF9-A6B0-68E290E7EFED\n"
-			+ "DTEND;TZID=\"Europe/Paris\":20100917T203000\n"
+			+ "DTEND;TZID=\"Europe/Paris\":20110917T203000\n"
 			+ "ATTENDEE;CN=Frank Hoberg;CUTYPE=INDIVIDUAL;EMAIL=frank.hoberg@open-xchange.c\n"
 			+ " om;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:frank.hoberg@\n"
 			+ " open-xchange.com\n"
@@ -418,8 +418,8 @@ public class ICalImportTest extends AbstractICalImportTest {
 			+ " ity.com\n"
 			+ "TRANSP:OPAQUE\n"
 			+ "SUMMARY:Sync up with Frank@OX about meeting in DC\n"
-			+ "DTSTART;TZID=\"Europe/Paris\":20100917T193000\n"
-			+ "DTSTAMP:20100916T161511Z\n"
+			+ "DTSTART;TZID=\"Europe/Paris\":20110917T193000\n"
+			+ "DTSTAMP:20110916T161511Z\n"
 			+ "ORGANIZER;CN=Marc Villemade:mailto:m@scality.com\n"
 			+ "SEQUENCE:15\n" //here's the culprit
 			+ "END:VEVENT\n"
