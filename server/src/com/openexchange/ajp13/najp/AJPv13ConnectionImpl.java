@@ -251,9 +251,6 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @throws IOException If input stream cannot be returned
      */
     public InputStream getInputStream() throws IOException {
-        if (inputStream == null) {
-            throw new IOException("Input stream not availalbe");
-        }
         blocker.acquire();
         try {
             return inputStream;
@@ -269,9 +266,6 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @throws IOException If output stream cannot be returned
      */
     public OutputStream getOutputStream() throws IOException {
-        if (outputStream == null) {
-            throw new IOException("Output stream not available");
-        }
         blocker.acquire();
         try {
             return outputStream;
