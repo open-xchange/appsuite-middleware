@@ -54,15 +54,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.tx.DBService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.databaseold.Database;
 import com.openexchange.id.IDException;
 import com.openexchange.id.IDExceptionCodes;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.server.ServiceException;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -80,54 +75,43 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
     }
 
     public int getId(final String type, final int contextId) throws IDException {
+        /*
+         * Get appropriate connection
+         */
+        final Connection con;
         try {
-            /*
-             * Get appropriate connection
-             */
-            final DBService dbService = ServerServiceRegistry.getInstance().getService(DBService.class);
-            if (null == dbService) {
-                throw new IDException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, DBService.class.getName()));
-            }
-            final Context ctx = ContextStorage.getStorageContext(contextId);
-            if (null == ctx) {
-                throw new IDException(new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId)));
-            }
-            final Connection con = dbService.getWriteConnection(ctx);
-            try {
-                con.setAutoCommit(false); // BEGIN
-            } catch (final SQLException e) {
-                throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            }
-            try {
-                /*
-                 * Try to perform an UPDATE
-                 */
-                final int id = getId(type, contextId, con);
-                if (id < 0) {
-                    /*
-                     * Failed
-                     */
-                    throw IDExceptionCodes.ID_GEN_FAILED.create();
-                }
-                con.commit(); // COMMIT;
-                /*
-                 * Return identifier
-                 */
-                return id;
-            } catch (final SQLException e) {
-                DBUtils.rollback(con);
-                throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (final Exception e) {
-                DBUtils.rollback(con);
-                throw IDExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.autocommit(con);
-                dbService.releaseWriteConnection(ctx, con);
-            }
-        } catch (final ContextException e) {
-            throw new IDException(e);
+            con = Database.get(contextId, true);
+            con.setAutoCommit(false); // BEGIN
+        } catch (final SQLException e) {
+            throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
             throw new IDException(e);
+        }
+        try {
+            /*
+             * Try to perform an UPDATE
+             */
+            final int id = getId(type, contextId, con);
+            if (id < 0) {
+                /*
+                 * Failed
+                 */
+                throw IDExceptionCodes.ID_GEN_FAILED.create();
+            }
+            con.commit(); // COMMIT;
+            /*
+             * Return identifier
+             */
+            return id;
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            DBUtils.rollback(con);
+            throw IDExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            Database.back(contextId, true, con);
         }
     }
 
