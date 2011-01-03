@@ -1,3 +1,7 @@
+* 2011-01-03 - tobias.prinz@open-xchange.com
+
+ - Bugfix #17937: If an import cannot be done because the UUID is in use, you now get to know which UUID is the problem
+ 
 * 2010-12-27 - thorben.betten@open-xchange.com
 
  - Bugfix #17882: Retry fetching POP3 server's capabilities if cached check indicates failure
