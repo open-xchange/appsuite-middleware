@@ -783,7 +783,15 @@ public final class DatabaseAccess {
 
             final int size = mails.size();
             final Map<UUID, MailMessage> uuids = new HashMap<UUID, MailMessage>(size);
-            if (!batch) {
+            if (batch) {
+                stmt = wc.prepareStatement(SQL_INSERT_UUID);
+                final int pos = 1;
+                for (final MailMessage mail : mails) {
+                    fillInsertUUIDStatement(stmt, uuids, pos, mail);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            } else {
                 /*
                  * Compose statement string
                  */
@@ -802,14 +810,6 @@ public final class DatabaseAccess {
                     pos = fillInsertUUIDStatement(stmt, uuids, pos, mail);
                 }
                 stmt.executeUpdate();
-            } else {
-                stmt = wc.prepareStatement(SQL_INSERT_UUID);
-                final int pos = 1;
-                for (final MailMessage mail : mails) {
-                    fillInsertUUIDStatement(stmt, uuids, pos, mail);
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
             }
 
             // long d = System.currentTimeMillis() - st;
@@ -834,7 +834,15 @@ public final class DatabaseAccess {
 
             // st = System.currentTimeMillis();
 
-            if (!batch) {
+            if (batch) {
+                stmt = wc.prepareStatement(SQL_INSERT_DATA);
+                final int pos = 1;
+                for (final Entry<UUID, MailMessage> entry : entrySet) {
+                    fillInsertDataStatement(stmt, completionService, pos, entry);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            } else {
                 /*
                  * Compose statement string
                  */
@@ -853,14 +861,6 @@ public final class DatabaseAccess {
                     pos = fillInsertDataStatement(stmt, completionService, pos, entry);
                 }
                 stmt.executeUpdate();
-            } else {
-                stmt = wc.prepareStatement(SQL_INSERT_DATA);
-                final int pos = 1;
-                for (final Entry<UUID, MailMessage> entry : entrySet) {
-                    fillInsertDataStatement(stmt, completionService, pos, entry);
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
             }
 
             // d = System.currentTimeMillis() - st;

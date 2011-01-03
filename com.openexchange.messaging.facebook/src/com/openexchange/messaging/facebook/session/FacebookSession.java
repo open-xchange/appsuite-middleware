@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,6 +68,7 @@ import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
@@ -457,6 +458,7 @@ public final class FacebookSession {
          * JavaScript needs to be disabled for security reasons
          */
         wc.setJavaScriptEnabled(false);
+        wc.setRedirectEnabled(true);
         if (useThreadedRefreshHandler) {
             wc.setRefreshHandler(new ThreadedRefreshHandler());
         }
@@ -538,7 +540,40 @@ public final class FacebookSession {
             }
             loginForm.<HtmlTextInput> getInputByName(nameOfUserField).setValueAttribute(login);
             loginForm.<HtmlPasswordInput> getInputByName(configuration.getNameOfPasswordField()).setValueAttribute(password);
-            final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
+            HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
+            
+            /*
+             * Check if user should allow application access
+             */
+            {
+                final Iterable<HtmlElement> elements = pageAfterLogin.getAllHtmlChildElements();
+                for (final Iterator<HtmlElement> iterator = elements.iterator(); iterator.hasNext();) {
+                    final HtmlElement htmlElement = iterator.next();
+                    if ("meta".equalsIgnoreCase(htmlElement.getNodeName())) {
+                        final String httpEquiv = htmlElement.getAttribute("http-equiv");
+                        if ("refresh".equals(httpEquiv)) {
+                            String content = htmlElement.getAttribute("content");
+                            if (null != content) {
+                                final String url = content.substring(content.indexOf("url=") + 4);
+                                pageAfterLogin = webClient.<HtmlPage> getPage(url);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Look for button
+                 */
+                final List<HtmlElement> list = pageAfterLogin.getHtmlElementsByName("grant_clicked");
+                for (final HtmlElement el : list){
+                    try {
+                        el.click();
+                    } catch (final IOException e) {
+                        LOG.error(e);
+                    }
+                }
+            }
             /*
              * Check for proper pager after login
              */
