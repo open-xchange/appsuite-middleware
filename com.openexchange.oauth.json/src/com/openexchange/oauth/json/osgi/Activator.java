@@ -122,7 +122,7 @@ public class Activator extends DeferredActivator {
             trackers = new ArrayList<ServiceTracker>(6);
             trackers.add(new ServiceTracker(context, OAuthService.class.getName(), new RegistryServiceTrackerCustomizer<OAuthService>(
                 context,
-                com.openexchange.oauth.json.service.ServiceRegistry.getInstance(),
+                registry,
                 OAuthService.class)));
             /*
              * Tracker for HTTPService to register servlets
