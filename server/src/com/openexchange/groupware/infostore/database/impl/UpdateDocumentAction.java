@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,49 +49,28 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
-@OXExceptionSource(
-        classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_UPDATEDOCUMENTACTION,
-        component = EnumComponent.INFOSTORE
-)
 public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(UpdateDocumentAction.class);
-
-
-    @OXThrowsMultiple(
-            category = {Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION},
-            desc ={ "An invalid SQL Query was sent to the server","The document was updated in between do and undo. The Database is now probably inconsistent."},
-            exceptionId = {0,3},
-            msg = {"Invalid SQL Query : %s","The document was updated in between do and undo. The Database is now probalby inconsistent."} )
     @Override
     protected void undoAction() throws AbstractOXException {
         int counter = 0;
         try {
             counter = doUpdates(getQueryCatalog().getDocumentUpdate(getModified()), getQueryCatalog().filterForDocument(getModified()), getOldDocuments());
         } catch (final UpdateException e) {
-            throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
-
-        if(counter < 0) {
-            throw EXCEPTIONS.create(3);
+        if (counter < 0) {
+            throw InfostoreExceptionCodes.UPDATED_BETWEEN_DO_AND_UNDO.create();
         }
     }
 
-    @OXThrowsMultiple(
-            category = {Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION},
-            desc = {"An invalid SQL Query was sent to the server","The document could not be updated because it was modified."},
-            exceptionId = {1,2},
-            msg = {"Invalid SQL Query : %s","The document could not be updated because it was modified. Reload the view." })
     public void perform() throws AbstractOXException {
         int counter = 0;
         try {
@@ -99,17 +78,16 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
             fields = getQueryCatalog().filterWritable(fields);
             counter = doUpdates(getQueryCatalog().getDocumentUpdate(fields), fields, getDocuments());
         } catch (final UpdateException e) {
-            throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
         setTimestamp(System.currentTimeMillis());
-
-        if(counter <= 0) {
-            throw EXCEPTIONS.create(2);
+        if (counter <= 0) {
+            throw InfostoreExceptionCodes.MODIFIED_CONCURRENTLY.create();
         }
     }
 
     @Override
     protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[]{getContext().getContextId(), doc.getId(), getTimestamp()};
+        return new Object[] { I(getContext().getContextId()), I(doc.getId()), L(getTimestamp()) };
     }
 }

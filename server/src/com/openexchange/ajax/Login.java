@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -181,6 +181,7 @@ public class Login extends AJAXServlet {
         } else if (ACTION_LOGOUT.equals(action)) {
             // The magic spell to disable caching
             Tools.disableCaching(resp);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             final String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -200,6 +201,7 @@ public class Login extends AJAXServlet {
         } else if (ACTION_REDIRECT.equals(action) || ACTION_REDEEM.equals(action)) {
             // The magic spell to disable caching
             Tools.disableCaching(resp);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             final String randomToken = req.getParameter(LoginFields.PARAM_RANDOM);
             if (randomToken == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -280,6 +282,8 @@ public class Login extends AJAXServlet {
                 }
             }
         } else if (ACTION_AUTOLOGIN.equals(action)) {
+            Tools.disableCaching(resp);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             final Response response = new Response();
             Session session = null;
             try {
@@ -534,6 +538,8 @@ public class Login extends AJAXServlet {
 
     private void logAndSendException(final HttpServletResponse resp, final AbstractOXException e) throws IOException {
         LOG.debug(e.getMessage(), e);
+        Tools.disableCaching(resp);
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Response response = new Response();
         response.setException(e);
         Send.sendResponse(response, resp);

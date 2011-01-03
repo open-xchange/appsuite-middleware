@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,8 +80,8 @@ public abstract class AbstractWebDAVFileStorageTest extends TestCase {
             final Map<String, Object> conf = new HashMap<String, Object>(4);
             conf.put(WebDAVConstants.WEBDAV_URL, "http://localhost:80/files/");
             conf.put(WebDAVConstants.WEBDAV_TIMEOUT, "60000");
-            conf.put(WebDAVConstants.WEBDAV_LOGIN, "");
-            conf.put(WebDAVConstants.WEBDAV_PASSWORD, "");
+            conf.put(WebDAVConstants.WEBDAV_LOGIN, "thorben");
+            conf.put(WebDAVConstants.WEBDAV_PASSWORD, "secret");
             account.setConfiguration(conf);
             account.setId("0");
         }
@@ -89,8 +89,8 @@ public abstract class AbstractWebDAVFileStorageTest extends TestCase {
         final SimSession session = new SimSession();
         session.setUserId(17);
         session.setContextId(1337);
-        session.setLoginName("");
-        session.setPassword("");
+        session.setLoginName("thorben@1337");
+        session.setPassword("netline");
 
         return new WebDAVFileStorageAccountAccess(null, account, session);
     }

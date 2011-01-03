@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -199,21 +199,25 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     }
 
     private void copy2File(final InputStream in) throws IOException {
-        final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-        if (null == mfm) {
-            throw new IOException("Missing file management");
-        }
-        final ManagedFile mf;
         try {
-            mf = mfm.createManagedFile(in);
-        } catch (final ManagedFileException e) {
-            final IOException ioerr = new IOException();
-            ioerr.initCause(e);
-            throw ioerr;
+            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            if (null == mfm) {
+                throw new IOException("Missing file management");
+            }
+            final ManagedFile mf;
+            try {
+                mf = mfm.createManagedFile(in);
+            } catch (final ManagedFileException e) {
+                final IOException ioerr = new IOException();
+                ioerr.initCause(e);
+                throw ioerr;
+            }
+            setSize(mf.getSize());
+            file = mf;
+            fileId = mf.getID();
+        } finally {
+            IOUtils.closeStreamStuff(in);
         }
-        setSize(mf.getSize());
-        file = mf;
-        fileId = mf.getID();
     }
 
     private void copy2ByteArr(final InputStream in) throws IOException {

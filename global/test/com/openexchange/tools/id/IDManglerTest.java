@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,7 +84,7 @@ public class IDManglerTest extends TestCase {
     public void testSpecialCharacters() {
         String id = IDMangler.mangle(
             "com.openexchange.some.service",
-            "someFolder/folder/with/slashes and whitespace and fŸnny chŠrŠcter$",
+            "someFolder/folder/with/slashes and whitespace and fï¿½nny chï¿½rï¿½cter$",
             "someId");
         assertNotNull(id);
 
@@ -92,7 +92,7 @@ public class IDManglerTest extends TestCase {
 
         assertEquals(Arrays.asList(
             "com.openexchange.some.service",
-            "someFolder/folder/with/slashes and whitespace and fŸnny chŠrŠcter$",
+            "someFolder/folder/with/slashes and whitespace and fï¿½nny chï¿½rï¿½cter$",
             "someId"), unmangled);
     }
 

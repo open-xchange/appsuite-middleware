@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -266,7 +266,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
             final DummyFolder folder = new DummyFolder();
             folder.setName(new StringHelper(UserStorage.getStorageUser(user, ctx).getLocale()).getString(MailStrings.INBOX));
             folder.setID(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"));
-            folder.setTreeID("1");
+            folder.setTreeID(FolderStorage.PRIVATE_ID);
             folder.setParentID(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
             folder.setSubscribed(true);
             Insert.insertFolder(ctx.getContextId(), 1, user, folder);

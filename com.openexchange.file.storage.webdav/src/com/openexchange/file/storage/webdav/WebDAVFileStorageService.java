@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.services.WebDAVFileStorageServiceRegistry;
 import com.openexchange.server.ServiceException;
@@ -71,6 +72,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageService implements FileStorageService {
+
+    private static final int MISSING_MANAGER_DETAIL_NUMBER = FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.getDetailNumber();
 
     /**
      * Creates a new WebDAV file storage service.
@@ -88,7 +91,7 @@ public final class WebDAVFileStorageService implements FileStorageService {
 
     private final Set<String> secretProperties;
 
-    private FileStorageAccountManager accountManager;
+    private volatile FileStorageAccountManager accountManager;
 
     /**
      * Initializes a new {@link WebDAVFileStorageService}.
@@ -107,6 +110,14 @@ public final class WebDAVFileStorageService implements FileStorageService {
             accountManager =
                 WebDAVFileStorageServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
                     this);
+        } catch (final FileStorageException e) {
+            if (!FileStorageException.COMPONENT.equals(e.getComponent()) || MISSING_MANAGER_DETAIL_NUMBER != e.getDetailNumber()) {
+                throw e;
+            }
+            /*
+             * Retry
+             */
+            throw e;
         } catch (final ServiceException e) {
             throw new FileStorageException(e);
         }
