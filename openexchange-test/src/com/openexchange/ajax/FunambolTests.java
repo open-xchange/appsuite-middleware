@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -247,7 +247,7 @@ public class FunambolTests extends AbstractAJAXSession {
     public void testUpdateTask() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/tasks? action=update&session=cfbaa1d35d0aab24f0145f60b62c8302&id=215&folder=39&timestamp=12
-         * 12762010129 Following is a sample of a request body for the update calendar item: REQUEST BODY: {"alarm":
+         * 12762011129 Following is a sample of a request body for the update calendar item: REQUEST BODY: {"alarm":
          * 15,"ignore_conflicts":true,"private_flag":false,"title":"testing","end_date":
          * 1196420400000,"start_date":1196416800000,"location":"","note":"","recurrence_type": 0,"full_time":false}
          */
