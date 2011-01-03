@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -122,8 +122,8 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
         // Nothing to to.
     }
 
-    public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
-        return false;
+    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+        return null;
     }
 
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
