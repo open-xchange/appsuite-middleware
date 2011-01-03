@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
-# Build open-xchange-publish-basic
+# Build open-xchange-oauth
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-publish-basic
+oxroot=$(CURDIR)/debian/open-xchange-oauth
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
