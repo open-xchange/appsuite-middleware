@@ -74,12 +74,15 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MultipleAdapterServletNew} is a rewrite of the really good {@link MultipleAdapterServlet} with smarter handling of the request
@@ -163,12 +166,14 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 return;
             }
 
-            final AJAXRequestData data = parseRequest(req, preferStream, isFileUpload);
+            final ServerSession session = getSessionObject(req);
+
+            final AJAXRequestData data = parseRequest(req, preferStream, isFileUpload, session);
             if (handleIndividually(action, data, req, resp)) {
                 return;
             }
 
-            final AJAXRequestResult result = factory.createActionService(action).perform(data, getSessionObject(req));
+            final AJAXRequestResult result = factory.createActionService(action).perform(data, session);
             response.setData(result.getResultObject());
             response.setTimestamp(result.getTimestamp());
             final Collection<AbstractOXException> warnings = result.getWarnings();
@@ -230,10 +235,11 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         return false;
     }
 
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload) throws IOException, UploadException {
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, UploadException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setSecure(req.isSecure());
-        retval.setHostname(req.getServerName()); // Maybe use hostname service
+        final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+        retval.setHostname(hostnameService == null ? req.getServerName() : hostnameService.getHostname(session.getUserId(), session.getContextId()));
         retval.setRoute(AJPv13Config.getJvmRoute()); // Maybe use system name service
         /*
          * Pass all parameters to AJAX request object

@@ -63,13 +63,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.FolderRequest;
-import com.openexchange.ajax.request.InfostoreRequest;
-import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
@@ -195,7 +193,8 @@ public class Multiple extends SessionServlet {
             /*
              * Look up appropriate multiple handler first, then step through if-else-statement
              */
-            jsonObj.put(MultipleHandler.HOSTNAME, req.getServerName());
+            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+            jsonObj.put(MultipleHandler.HOSTNAME, hostnameService == null ? req.getServerName() : hostnameService.getHostname(session.getUserId(), session.getContextId()));
             jsonObj.put(MultipleHandler.ROUTE, AJPv13Config.getJvmRoute());
             
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
