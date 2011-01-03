@@ -78,15 +78,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         /*
          * Get appropriate connection
          */
-        final Connection con;
-        try {
-            con = Database.get(contextId, true);
-            con.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
-            throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            throw new IDException(e);
-        }
+        final Connection con = getWritableNonAutoCommitConnection(contextId); // BEGIN
         try {
             /*
              * Try to perform an UPDATE
@@ -112,6 +104,18 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         } finally {
             DBUtils.autocommit(con);
             Database.back(contextId, true, con);
+        }
+    }
+
+    private static Connection getWritableNonAutoCommitConnection(final int contextId) throws IDException {
+        try {
+            final Connection con = Database.get(contextId, true);
+            con.setAutoCommit(false); // BEGIN
+            return con;
+        } catch (final SQLException e) {
+            throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final DBPoolingException e) {
+            throw new IDException(e);
         }
     }
 
