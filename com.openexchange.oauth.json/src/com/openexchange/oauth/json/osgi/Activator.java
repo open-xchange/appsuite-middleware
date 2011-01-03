@@ -144,7 +144,7 @@ public class Activator extends DeferredActivator {
                 new AccountMultipleHandlerFactory(),
                 null));
             oAuthService = new OSGiOAuthService().start(context);
-            registry.addService(OAuthService.class, oAuthService);
+            // registry.addService(OAuthService.class, oAuthService);
             AbstractOAuthAJAXActionService.setOAuthService(oAuthService);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
