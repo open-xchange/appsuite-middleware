@@ -267,97 +267,132 @@ public class AJAXRequestData {
     }
 
     /**
-     * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and
-     * not via the multiple module.
+     * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
+     * multiple module.
+     * 
      * @return true if one or more files were uploaded, false otherwise.
      */
     public boolean hasUploads() {
         return !files.isEmpty();
     }
-    
+
     /**
      * Retrieve file uploads.
+     * 
      * @return A list of file uploads.
      */
     public List<UploadFile> getFiles() {
         return Collections.unmodifiableList(files);
     }
-    
+
     /**
      * Retrieve a file with a given form name.
+     * 
      * @param name The name of the form field that include the file
      * @return The file, or null if no file field of this name was found
      */
     public UploadFile getFile(String name) {
         for (UploadFile file : files) {
-            if(file.getFieldName().equals(name)) {
+            if (file.getFieldName().equals(name)) {
                 return file;
             }
         }
         return null;
     }
-    
+
     public void addFile(UploadFile file) {
         files.add(file);
     }
-    
+
     /**
      * Constructs a URL to this server, injecting the hostname and optionally the jvm route.
+     * 
      * @param protocol The protocol to use (http or https). If <code>null</code>, defaults to the protocol used for this request.
      * @param path The path on the server. If <code>null</code> no path is inserted
-     * @param withRoute Whether to include the jvm route in the server URL or not 
+     * @param withRoute Whether to include the jvm route in the server URL or not
      * @param query The query string. If <code>null</code> no query is included
      * @return A string builder with the URL so far, ready for meddling.
      */
     public StringBuilder constructURL(String protocol, String path, boolean withRoute, String query) {
         StringBuilder url = new StringBuilder();
-        if(protocol == null) {
-            protocol = isSecure() ? "https://" : "http://";
+        String prot = protocol;
+        if (prot == null) {
+            prot = isSecure() ? "https://" : "http://";
         }
-        url.append(protocol);
-        if(!protocol.endsWith("://")) {
+        url.append(prot);
+        if (!prot.endsWith("://")) {
             url.append("://");
         }
-        
+
         url.append(hostname);
-        if(path != null) {
-            if(!path.startsWith("/")) {
+        if (path != null) {
+            if (!path.startsWith("/")) {
                 url.append('/');
             }
             url.append(path);
         }
-        if(withRoute) {
+        if (withRoute) {
             url.append(";jsessionid=12345.").append(route);
         }
-        if(query != null) {
-            if(!query.startsWith("?")) {
+        if (query != null) {
+            if (!query.startsWith("?")) {
                 url.append('?');
             }
             url.append(query);
         }
         return url;
     }
-    
+
+    /**
+     * Gets the host name either fetched from HTTP request or from host name service
+     * 
+     * @return The host name
+     */
     public String getHostname() {
         return hostname;
     }
-    
+
+    /**
+     * Sets the host name either fetched from HTTP request or from host name service
+     * 
+     * @param hostname The host name
+     */
     public void setHostname(String hostname) {
         this.hostname = hostname;
     }
-    
+
+    /**
+     * Gets the AJP route.
+     * 
+     * @return The AJP route
+     */
     public String getRoute() {
         return route;
     }
-    
+
+    /**
+     * Sets the AJP route.
+     * 
+     * @param route The AJP route
+     */
     public void setRoute(String route) {
         this.route = route;
     }
 
+    /**
+     * Sets the associated upload event.
+     * 
+     * @param upload The upload event
+     */
     public void setUploadEvent(UploadEvent upload) {
         this.uploadEvent = upload;
     }
-    
+
+    /**
+     * Gets the associated upload event.
+     * 
+     * @return The upload event
+     */
     public UploadEvent getUploadEvent() {
         return uploadEvent;
     }
