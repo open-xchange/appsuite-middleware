@@ -24,7 +24,7 @@ Bundle-ClassPath: .,
  lib/jakarta-slide-webdavlib-2.1.jar,
  lib/json.jar,
  lib/libidn-1.9.jar,
- lib/mail-1.4.2.jar,
+ lib/mail-1.4.3.jar,
  lib/mysql-connector-java-5.1.6-bin.jar,
  lib/tnef-1.6.0.jar,
  lib/trove-2.1.0.jar
