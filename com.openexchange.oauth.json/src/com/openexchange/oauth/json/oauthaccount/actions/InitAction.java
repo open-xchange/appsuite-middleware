@@ -56,10 +56,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
@@ -85,9 +87,9 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             /*
              * Parse parameters
              */
-            final String serviceId = request.getParameter("serviceId");
+            final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "serviceId");
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
             }
             /*
              * Generate UUID
@@ -98,16 +100,16 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
              */
             final String callbackUrl;
             if (ServiceRegistry.getInstance().getService(ConfigurationService.class, true).getBoolProperty("com.openexchange.oauth.callback", false)) {
-                final StringBuilder cbBuilder = new StringBuilder(128);
-                cbBuilder.append(request.isSecure() ? "https://" : "http://");
-                cbBuilder.append(request.getHostname());
-                cbBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
-                cbBuilder.append("?action=create&session=").append(session.getSessionID());
-                final String displayName = request.getParameter("displayName");
-                cbBuilder.append("&displayName=").append(displayName);
-                cbBuilder.append("&serviceId=").append(serviceId);
-                cbBuilder.append("&uuid=").append(uuid);
-                callbackUrl = cbBuilder.toString();
+                final StringBuilder callbackUrlBuilder = new StringBuilder(256);
+                callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
+                callbackUrlBuilder.append(request.getHostname());
+                callbackUrlBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
+                callbackUrlBuilder.append("?action=create&session=").append(session.getSessionID());
+                final String displayName = request.getParameter(AccountField.DISPLAY_NAME.getName());
+                callbackUrlBuilder.append('&').append(AccountField.DISPLAY_NAME.getName()).append('=').append(displayName);
+                callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(serviceId);
+                callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
+                callbackUrl = callbackUrlBuilder.toString();
             } else {
                 callbackUrl = null;
             }
@@ -121,8 +123,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             /*
              * Write as JSON
              */
-            final JSONObject jsonInteraction = AccountWriter.write(interaction);
-            jsonInteraction.put("uuid", uuid);
+            final JSONObject jsonInteraction = AccountWriter.write(interaction, uuid);
             /*
              * Return appropriate result
              */

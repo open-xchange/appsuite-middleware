@@ -62,6 +62,7 @@ import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
@@ -87,21 +88,21 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
              */
             // http://wiki.oauth.net/w/page/12238555/Signed-Callback-URLs
             // http://developer.linkedin.com/message/4568
-            final String oauthToken = request.getParameter("oauth_token");
-            final String uuid = request.getParameter("uuid");
+            final String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
+            final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
             
             final String oauthTokenSecret = (String) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
-            final String oauthVerfifier = request.getParameter("oauth_verifier");
+            final String oauthVerfifier = request.getParameter(OAuthConstants.URLPARAM_OAUTH_VERIFIER);
 
-            final String serviceId = request.getParameter("serviceId");
+            final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "serviceId");
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
             }
             /*
              * Invoke
              */
             final Map<String, Object> arguments = new HashMap<String, Object>();
-            arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, request.getParameter("displayName"));
+            arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, request.getParameter(AccountField.DISPLAY_NAME.getName()));
             arguments.put(OAuthConstants.ARGUMENT_PIN, oauthVerfifier);
             final DefaultOAuthToken token = new DefaultOAuthToken();
             token.setSecret(oauthTokenSecret);
