@@ -25,6 +25,13 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-548
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/easylogin.properties
+  if ox_exists_property com.openexchange.easylogin.OX_PATH_RELATIVE $pfile; then
+      ox_remove_property com.openexchange.easylogin.OX_PATH_RELATIVE $pfile
+  fi
+
   # SoftwareChange_Request-409
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/easylogin.properties
