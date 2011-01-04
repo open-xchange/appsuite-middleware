@@ -97,6 +97,15 @@ public final class OAuthConstants {
     public static final String URLPARAM_OAUTH_VERIFIER = "oauth_verifier";
 
     /*-
+     * ------------------- Session parameters -------------------
+     */
+
+    /**
+     * The session parameter providing the UUID associated with token secret.
+     */
+    public static final String SESSION_PARAM_UUID = "uuid";
+
+    /*-
      * ------------------- ID type identifier for accounts -------------------
      */
 
