@@ -193,8 +193,10 @@ public class Multiple extends SessionServlet {
             /*
              * Look up appropriate multiple handler first, then step through if-else-statement
              */
-            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-            jsonObj.put(MultipleHandler.HOSTNAME, hostnameService == null ? req.getServerName() : hostnameService.getHostname(session.getUserId(), session.getContextId()));
+            {
+                final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+                jsonObj.put(MultipleHandler.HOSTNAME, hostnameService == null ? req.getServerName() : hostnameService.getHostname(session.getUserId(), session.getContextId()));
+            }
             jsonObj.put(MultipleHandler.ROUTE, AJPv13Config.getJvmRoute());
             
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);

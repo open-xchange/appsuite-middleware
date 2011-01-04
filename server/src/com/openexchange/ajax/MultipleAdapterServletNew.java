@@ -238,8 +238,10 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, UploadException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setSecure(req.isSecure());
-        final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-        retval.setHostname(hostnameService == null ? req.getServerName() : hostnameService.getHostname(session.getUserId(), session.getContextId()));
+        {
+            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+            retval.setHostname(hostnameService == null ? req.getServerName() : hostnameService.getHostname(session.getUserId(), session.getContextId()));
+        }
         retval.setRoute(AJPv13Config.getJvmRoute()); // Maybe use system name service
         /*
          * Pass all parameters to AJAX request object
