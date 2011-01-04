@@ -278,7 +278,6 @@ public final class POP3StoreConnector {
                 pop3Props.put("mail.pop3.socketFactory.class", socketFactoryClass);
                 pop3Props.put("mail.pop3.socketFactory.port", sPort);
                 pop3Props.put("mail.pop3.socketFactory.fallback", "false");
-                pop3Props.put("mail.pop3.starttls.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4
                  */
