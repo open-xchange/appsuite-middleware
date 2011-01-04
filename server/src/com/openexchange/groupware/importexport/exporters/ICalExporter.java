@@ -56,6 +56,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -134,7 +136,10 @@ public class ICalExporter implements Exporter {
         Appointment.SHOWN_AS,
         Appointment.FULL_TIME,
         Appointment.COLOR_LABEL,
-        Appointment.TIMEZONE
+        Appointment.TIMEZONE,
+        Appointment.UID,
+        Appointment.SEQUENCE,
+        Appointment.ORGANIZER
     };
     protected final static int[] _taskFields = {
         DataObject.OBJECT_ID,
@@ -248,6 +253,10 @@ public class ICalExporter implements Exporter {
                                 appointment.setTimezone(user.getTimeZone());
                             }
                             recColl.replaceDatesWithFirstOccurence(appointment);
+                            //appointments need a UID to ensure that exceptions can be associated with them.
+                            if(appointment.getUid() == null){
+                            	appointment.setUid(UUID.randomUUID().toString());
+                            }
                         }
                         appointments.add(appointment);
                        }
