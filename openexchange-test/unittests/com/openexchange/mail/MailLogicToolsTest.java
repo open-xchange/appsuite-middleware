@@ -177,15 +177,12 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 						final DumperMessageHandler msgHandler1 = new DumperMessageHandler(false);
 						new MailMessageParser().parseMailMessage(mailAccess.getMessageStorage().getMessage("INBOX",
 								mails[i].getMailId(), true), msgHandler1);
-						System.out.println(msgHandler1.getString());
-						System.out.println("\n\n----------------------------------- FORWARD VERSION of Message UID #"
-								+ mails[i].getMailId() + "-------------------------------------\n\n");
+
 						final MailMessage[] ms = new MailMessage[] { mailAccess.getMessageStorage().getMessage("INBOX",
 								mails[i].getMailId(), false) };
 						final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(ms);
 						final DumperMessageHandler msgHandler = new DumperMessageHandler(false);
 						new MailMessageParser().parseMailMessage(forwardMail, msgHandler);
-						System.out.println(msgHandler.getString());
 						if (++count == 50) {
 							break;
 						}
@@ -221,15 +218,12 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 					final DumperMessageHandler msgHandler1 = new DumperMessageHandler(true);
 					new MailMessageParser().parseMailMessage(mailConnection.getMessageStorage().getMessage(
 							"default/INBOX", mails[i].getMailId(), true), msgHandler1);
-					System.out.println(msgHandler1.getString());
-					System.out.println("\n\n----------------------------------- REPLY VERSION of Message UID #"
-							+ mails[i].getMailId() + "-------------------------------------\n\n");
+
 					final MailMessage originalMail = mailConnection.getMessageStorage().getMessage("INBOX",
 							mails[i].getMailId(), false);
 					final MailMessage replyMail = mailConnection.getLogicTools().getReplyMessage(originalMail, true);
 					final DumperMessageHandler msgHandler = new DumperMessageHandler(true);
 					new MailMessageParser().parseMailMessage(replyMail, msgHandler);
-					System.out.println(msgHandler.getString());
 					if (++count == 50) {
 						break;
 					}
