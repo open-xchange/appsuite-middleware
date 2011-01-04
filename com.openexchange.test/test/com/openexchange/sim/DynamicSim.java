@@ -90,7 +90,9 @@ public class DynamicSim implements InvocationHandler{
     }
     
     public <T> T become(Class<T> klass) {
-        return (T) Proxy.newProxyInstance(klass.getClassLoader(), new Class[]{klass}, this);
+        @SuppressWarnings("unchecked")
+        T returnVal = (T) Proxy.newProxyInstance(klass.getClassLoader(), new Class[]{klass}, this);
+        return returnVal;
     }
     
     public static <T> T compose(Class<T> klass, DynamicSim...sims) {
@@ -101,18 +103,20 @@ public class DynamicSim implements InvocationHandler{
         return compose(klass, new Class[0], dynamicSims);
     }
 
-    public static <T> T compose(Class<T> klass, Class[] additionalClasses, DynamicSim...sims) {
+    public static <T> T compose(Class<T> klass, Class<?>[] additionalClasses, DynamicSim...sims) {
         SequenceInvocationHandler sequenceInvocationHandler = new SequenceInvocationHandler(sims);
-        Class[] classes = new Class[additionalClasses.length+1];
+        Class<?>[] classes = new Class[additionalClasses.length+1];
         classes[0] = klass;
         int i = 1;
-        for(Class c : additionalClasses) {
+        for(Class<?> c : additionalClasses) {
             classes[i++] = c;
         }
-        return (T) Proxy.newProxyInstance(klass.getClassLoader(), classes, sequenceInvocationHandler);
+        @SuppressWarnings("unchecked")
+        T retval = (T) Proxy.newProxyInstance(klass.getClassLoader(), classes, sequenceInvocationHandler);
+        return retval;
     }
     
-    public static<T> T compose(Class<T> klass, Class[] additionalClasses, List<DynamicSim> dynamicSims) {
+    public static<T> T compose(Class<T> klass, Class<?>[] additionalClasses, List<DynamicSim> dynamicSims) {
         return compose(klass, additionalClasses, dynamicSims.toArray(new DynamicSim[dynamicSims.size()]));
     }
     
