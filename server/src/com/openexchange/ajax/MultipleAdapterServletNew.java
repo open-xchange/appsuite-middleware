@@ -240,14 +240,12 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         retval.setSecure(req.isSecure());
         {
             final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-            final String hostName;
             if (null == hostnameService) {
-                hostName = req.getServerName();
+                retval.setHostname(req.getServerName());
             } else {
                 final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
-                hostName = null == hn ? req.getServerName() : hn;
+                retval.setHostname(null == hn ? req.getServerName() : hn);
             }
-            retval.setHostname(hostName);
         }
         retval.setRoute(AJPv13Config.getJvmRoute()); // Maybe use system name service
         /*

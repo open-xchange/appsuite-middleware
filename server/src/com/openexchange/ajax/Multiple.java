@@ -195,7 +195,6 @@ public class Multiple extends SessionServlet {
              */
             {
                 final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-                final String hostName;
                 if (null == hostnameService) {
                     jsonObj.put(MultipleHandler.HOSTNAME, req.getServerName());
                 } else {
