@@ -89,11 +89,31 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             // http://wiki.oauth.net/w/page/12238555/Signed-Callback-URLs
             // http://developer.linkedin.com/message/4568
             final String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
+            if (oauthToken == null) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.URLPARAM_OAUTH_TOKEN);
+            }
             final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
-            
+            if (uuid == null) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.SESSION_PARAM_UUID);
+            }
+            /*
+             * Get request token secret from session parameters
+             */
             final String oauthTokenSecret = (String) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
+            session.setParameter(uuid, null);
+            if (oauthTokenSecret == null) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.REQUEST_TOKEN.getName());
+            }
+            /*
+             * The OAuth verifier (PIN)
+             */
             final String oauthVerfifier = request.getParameter(OAuthConstants.URLPARAM_OAUTH_VERIFIER);
-
+            if (oauthVerfifier == null) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.URLPARAM_OAUTH_VERIFIER);
+            }
+            /*
+             * The meta data identifier
+             */
             final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
@@ -109,6 +129,9 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             token.setToken(oauthToken);
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
             final OAuthService oAuthService = getOAuthService();
+            /*
+             * By now it doesn't matter which interaction type is passed
+             */
             final OAuthAccount newAccount =
                 oAuthService.createAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
             /*
