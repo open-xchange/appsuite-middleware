@@ -28,7 +28,7 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
 	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
-    <property name="mailjar" value="mail-1.4.2.jar" />
+    <property name="mailjar" value="mail-1.4.3.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">

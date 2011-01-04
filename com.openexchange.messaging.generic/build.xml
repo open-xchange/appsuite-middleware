@@ -43,7 +43,7 @@
 	<property name="secretrecovjar" value="com.openexchange.secret.recovery.jar"/>
     <property name="htmljar" value="com.openexchange.html.jar"/>
 
-    <property name="mailjar" value="mail-1.4.2.jar"/>
+    <property name="mailjar" value="mail-1.4.3.jar"/>
     <property name="activationjar" value="activation-1.1.1.jar"/>
     <property name="trovejar" value="trove-2.1.0.jar"/>
 
