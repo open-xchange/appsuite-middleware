@@ -272,15 +272,39 @@ public final class POP3StoreConnector {
              * switch the connection into TLS mode using the STLS command. Possibly the server will accept
              * connecting to the secure POP3 port in TLS mode.
              */
+            final String sPort = String.valueOf(port);
+            final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             if (pop3Config.isSecure()) {
-                pop3Props.put("mail.pop3.socketFactory.class", TrustAllSSLSocketFactory.class.getName());
-                pop3Props.put("mail.pop3.socketFactory.port", String.valueOf(port));
+                pop3Props.put("mail.pop3.socketFactory.class", socketFactoryClass);
+                pop3Props.put("mail.pop3.socketFactory.port", sPort);
                 pop3Props.put("mail.pop3.socketFactory.fallback", "false");
                 pop3Props.put("mail.pop3.starttls.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4
                  */
                 // Security.setProperty("ssl.SocketFactory.provider", TrustAllSSLSocketFactory.class.getName());
+            } else {
+                /*
+                 * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
+                 */
+                pop3Props.put("mail.pop3.starttls.enable", "true");
+                /*
+                 * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create POP3 SSL sockets if TLS handshake says
+                 * so.
+                 */
+                pop3Props.put("mail.pop3.socketFactory.port", sPort);
+                pop3Props.put("mail.pop3.ssl.socketFactory.class", socketFactoryClass);
+                pop3Props.put("mail.pop3.ssl.socketFactory.port", sPort);
+                pop3Props.put("mail.pop3.socketFactory.fallback", "false");
+                /*
+                 * Specify SSL protocols
+                 */
+                pop3Props.put("mail.pop3.ssl.protocols", "SSLv3 TLSv1");
+                // pop3Props.put("mail.pop3.ssl.enable", "true");
+                /*
+                 * Needed for JavaMail >= 1.4
+                 */
+                // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
             }
             /*
              * Apply properties to POP3 session
