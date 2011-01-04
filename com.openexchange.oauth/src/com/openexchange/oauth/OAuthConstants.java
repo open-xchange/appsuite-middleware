@@ -63,6 +63,10 @@ public final class OAuthConstants {
         super();
     }
 
+    /*-
+     * ------------------- Arguments -------------------
+     */
+
     /**
      * The argument name for PIN. <code>java.lang.String</code>
      */
@@ -77,6 +81,24 @@ public final class OAuthConstants {
      * The argument name for request token. <code>com.openexchange.oauth.OAuthToken</code>
      */
     public static final String ARGUMENT_REQUEST_TOKEN = "requestToken";
+
+    /*-
+     * ------------------- URL parameters -------------------
+     */
+
+    /**
+     * The URL parameter added to call-back URL providing the OAuth token according to specification.
+     */
+    public static final String URLPARAM_OAUTH_TOKEN = "oauth_token";
+
+    /**
+     * The URL parameter added to call-back URL providing the OAuth verifier according to specification.
+     */
+    public static final String URLPARAM_OAUTH_VERIFIER = "oauth_verifier";
+
+    /*-
+     * ------------------- ID type identifier for accounts -------------------
+     */
 
     /**
      * The type constant used for generated IDs.
