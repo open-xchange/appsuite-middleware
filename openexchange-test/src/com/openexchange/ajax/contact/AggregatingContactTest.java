@@ -165,7 +165,7 @@ public class AggregatingContactTest extends AbstractAJAXSession{
     }
     
     public void testWorksWithUUIDsNotGivenByFinalContactModule() throws Exception {
-    	
+    	//Karsten's case
     }
     
     public void testWorksWithMoreThanOneAssociatedPair() throws Exception {

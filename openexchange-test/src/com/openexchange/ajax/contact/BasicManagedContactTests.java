@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,44 +50,16 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.test.ContactTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ManagedContactTests extends AbstractAJAXSession {
+public class BasicManagedContactTests extends AbstractManagedContactTest {
 
-    private ContactTestManager manager;
-
-    private int folderID;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        manager = new ContactTestManager(getClient());
-        manager.setFailOnError(false);
-        folderID = getClient().getValues().getPrivateContactFolder();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
-    }
-
-    public ManagedContactTests(String name) {
+    public BasicManagedContactTests(String name) {
         super(name);
-    }
-
-    private Contact generateContact() {
-        Contact contact = new Contact();
-        contact.setSurName("Surname");
-        contact.setGivenName("Given name");
-        contact.setParentFolderID(folderID);
-        return contact;
     }
 
     public void testCreateAndGetContact() {

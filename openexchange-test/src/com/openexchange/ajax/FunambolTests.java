@@ -50,7 +50,7 @@
 package com.openexchange.ajax;
 
 import com.openexchange.ajax.appointment.CalendarTestManagerTest;
-import com.openexchange.ajax.contact.ManagedContactTests;
+import com.openexchange.ajax.contact.BasicManagedContactTests;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.BasicManagedTaskTests;
 
@@ -81,7 +81,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * -> request columns 1,4,5,20
          */
 
-        ManagedContactTests test = new ManagedContactTests("funambol: all contacts");
+        BasicManagedContactTests test = new BasicManagedContactTests("funambol: all contacts");
         try {
             test.setUp();
             test.testGetAllContactsWithColumns();
@@ -127,7 +127,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://192.168.0.76/ajax/contacts? action=updates&session=e4533629a58e8de2d550ee0a0a78cd33&folder=38&timestamp=12061116
          * 47532&ignore=none&columns=1%2C4%2C5
          */
-        ManagedContactTests test = new ManagedContactTests("funambol: updates for contact");
+        BasicManagedContactTests test = new BasicManagedContactTests("funambol: updates for contact");
         try {
             test.setUp();
             test.testUpdateContactAndGetUpdates();
@@ -174,7 +174,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Parameter "column" is not used, 'get' always return the whole object.
          */
 
-        ManagedContactTests test = new ManagedContactTests("funambol: add contact");
+        BasicManagedContactTests test = new BasicManagedContactTests("funambol: add contact");
         try {
             test.setUp();
             test.testCreateAndGetContact();
@@ -218,7 +218,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 1212760797891
          */
 
-        ManagedContactTests test = new ManagedContactTests("funambol: update contact");
+        BasicManagedContactTests test = new BasicManagedContactTests("funambol: update contact");
         try {
             test.setUp();
             test.testUpdateContactAndGetUpdates();
@@ -264,7 +264,7 @@ public class FunambolTests extends AbstractAJAXSession {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=new&session=092644bdf45610f622b6b631e74c0d17
          */
-        ManagedContactTests test = new ManagedContactTests("funambol: add contact");
+        BasicManagedContactTests test = new BasicManagedContactTests("funambol: add contact");
         try {
             test.setUp();
             test.testCreateAndGetContact();
@@ -310,7 +310,7 @@ public class FunambolTests extends AbstractAJAXSession {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=delete&session=887e15e1497fddf59e67ba0450a346e0&timestamp=1206111782257
          */
-        ManagedContactTests test = new ManagedContactTests("funambol: delete contact");
+        BasicManagedContactTests test = new BasicManagedContactTests("funambol: delete contact");
         try {
             test.setUp();
             test.testDeleteContact();

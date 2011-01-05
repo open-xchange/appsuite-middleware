@@ -69,7 +69,7 @@ public class ContactAJAXSuite extends TestSuite {
         tests.addTestSuite(MultipleTest.class);
         tests.addTestSuite(NewListTest.class);
         tests.addTestSuite(SearchInAllContactFoldersTest.class);
-        tests.addTestSuite(ManagedContactTests.class);
+        tests.addTestSuite(BasicManagedContactTests.class);
         tests.addTestSuite(ExemplaryContactTestManagerTest.class);
         tests.addTestSuite(ContactAttachmentTests.class);
         
