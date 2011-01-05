@@ -569,6 +569,10 @@ public final class AJPv13Task implements Task<Object> {
                     if (!s.isClosed()) {
                         writeEndResponse(s, true);
                     }
+                } catch (final Exception e) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Writing END_RESPONSE package failed.", e);
+                    }
                 } finally {
                     closeQuitely(s);
                     client = null;
