@@ -49,11 +49,19 @@
 
 package com.openexchange.ajax.request;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
@@ -62,8 +70,14 @@ import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.ajax.writer.AttachmentWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataProperties;
+import com.openexchange.conversion.DataSource;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -74,6 +88,9 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.mail.MailException;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.OXAborted;
@@ -90,6 +107,10 @@ public class AttachmentRequest extends CommonRequest {
     private static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 
     private static final Log LOG = LogFactory.getLog(AttachmentRequest.class);
+
+    private static final String DATASOURCE = "datasource";
+
+    private static final String IDENTIFIER = "identifier";
 
     private final UserConfiguration userConfig;
 
@@ -120,8 +141,114 @@ public class AttachmentRequest extends CommonRequest {
             LOG.debug("Attachments: " + action + ' ' + req);
         }
         try {
+            if (AJAXServlet.ACTION_ATTACH.equals(action)) {
+                JSONObject object = (JSONObject) req.getBody();
+                
+                for (final AttachmentField required : Attachment.REQUIRED) {
+                    if (!object.has(required.getName())) {
+                        missingParameter(required.getName(), action);
+                        return true;
+                    }
+                }
+                if(!object.has(DATASOURCE)) {
+                    missingParameter(DATASOURCE, action);
+                    return true;
+                }
 
-            if (AJAXServlet.ACTION_GET.equals(action)) {
+                final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(object.toString());
+                final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
+                
+                if (conversionService == null) {
+                    throw new ServiceException(
+                        ServiceException.Code.SERVICE_UNAVAILABLE,
+                        ConversionService.class.getName());
+                }
+                
+                JSONObject datasourceDef = object.getJSONObject(DATASOURCE);
+                String datasourceIdentifier = datasourceDef.getString(IDENTIFIER);
+                
+                DataSource source = conversionService.getDataSource(datasourceIdentifier);
+                if(source == null) {
+                    invalidParameter("datasource", datasourceIdentifier);
+                    return true;
+                }
+                
+                List<Class<?>> types = Arrays.asList(source.getTypes());
+                
+                Map<String, String> arguments = new HashMap<String, String>();
+                
+                for(String key : datasourceDef.keySet()) {
+                    arguments.put(key, datasourceDef.getString(key));
+                }
+                
+                InputStream is;
+                if(types.contains(InputStream.class)) {
+                    Data<InputStream> data = source.getData(InputStream.class, new DataArguments(arguments), session);
+                    String sizeS = data.getDataProperties().get(DataProperties.PROPERTY_SIZE);
+                    String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
+                    
+                    if(sizeS != null) {
+                        attachment.setFilesize(Long.parseLong(sizeS));
+                    }
+                    
+                    if(contentTypeS != null) {
+                        attachment.setFileMIMEType(contentTypeS);
+                    }
+                    
+                    String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
+                    if(name != null && null == attachment.getFilename()) {
+                        attachment.setFilename(name);
+                    }
+                    
+                    is = data.getData();
+                    
+                } else if (types.contains(byte[].class)) {
+                    Data<byte[]> data = source.getData(byte[].class, new DataArguments(arguments), session);
+                    byte[] bytes = data.getData();
+                    is = new ByteArrayInputStream(bytes);
+                    attachment.setFilesize(bytes.length);
+
+                    String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
+                    if(contentTypeS != null) {
+                        attachment.setFileMIMEType(contentTypeS);
+                    }
+                    
+                    String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
+                    if(name != null && null == attachment.getFilename()) {
+                        attachment.setFilename(name);
+                    }
+                    
+                } else {
+                    invalidParameter("datasource", datasourceIdentifier);
+                    return true; // Maybe add better error message here.
+                }
+                
+                if(attachment.getFilename() == null) {
+                    attachment.setFilename("unknown"+System.currentTimeMillis());
+                }
+                
+                attachment.setId(AttachmentBase.NEW);
+                
+                ATTACHMENT_BASE.startTransaction();
+                long ts;
+                try {
+                    ts = ATTACHMENT_BASE.attachToObject(attachment, is, session, ctx, user, userConfig);
+                    ATTACHMENT_BASE.commit();
+                } catch (AttachmentException x) {
+                    ATTACHMENT_BASE.rollback();
+                    throw x;
+                } finally {
+                    ATTACHMENT_BASE.finish();
+                }
+                
+                final Response resp = new Response();
+                resp.setData(attachment.getId());
+                resp.setTimestamp(new Date(ts));
+                
+                ResponseWriter.write(resp, w);
+                return true;
+                
+            } else if (AJAXServlet.ACTION_GET.equals(action)) {
                 if (!checkRequired(
                     req,
                     AJAXServlet.PARAMETER_FOLDERID,
@@ -237,6 +364,10 @@ public class AttachmentRequest extends CommonRequest {
             handle(e);
         } catch (final OXAborted x) {
             return true;
+        } catch (JSONException e) {
+            handle(e);
+        } catch (AbstractOXException e) {
+            handle(e);
         }
 
         return false;

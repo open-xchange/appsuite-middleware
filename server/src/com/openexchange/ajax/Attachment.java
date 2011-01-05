@@ -124,7 +124,7 @@ public class Attachment extends PermissionServlet {
 
     private static transient final AttachmentParser PARSER = new AttachmentParser();
 
-    private static transient final AttachmentField[] REQUIRED = new AttachmentField[] {
+    public static transient final AttachmentField[] REQUIRED = new AttachmentField[] {
         AttachmentField.FOLDER_ID_LITERAL, AttachmentField.ATTACHED_ID_LITERAL, AttachmentField.MODULE_ID_LITERAL };
 
     public static transient final AttachmentBase ATTACHMENT_BASE = Attachments.getInstance();
@@ -300,7 +300,7 @@ public class Attachment extends PermissionServlet {
                     upload = processUpload(req);
                     final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
                     final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
-
+                    
                     long sum = 0;
                     final JSONObject json = new JSONObject();
                     final List<UploadFile> l = upload.getUploadFiles();
@@ -332,6 +332,7 @@ public class Attachment extends PermissionServlet {
                         // session.getUserId(), session.getContext()));
                         checkSize(sum);
                     }
+                    
                     attach(res, attachments, uploadFiles, session, ctx, user, userConfig);
                 } finally {
                     if (upload != null) {
