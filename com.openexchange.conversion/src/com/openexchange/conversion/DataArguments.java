@@ -85,6 +85,15 @@ public final class DataArguments {
     public DataArguments(final int initialCapacity) {
         this(false, initialCapacity);
     }
+    
+    /**
+     * Construct DataArguments out of an existing Map.
+     *
+     * @param arguments The Map containing the key-value pairs for these arguments
+     */
+    public DataArguments(Map<String, String> arguments) {
+        this.map = new HashMap<String, String>(arguments);
+    }
 
     private DataArguments(final boolean empty, final int initialCapacity) {
         super();
