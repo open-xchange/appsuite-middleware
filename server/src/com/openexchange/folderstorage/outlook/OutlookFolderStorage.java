@@ -1241,7 +1241,15 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
         }
         // Load folder data from database
-        final String[] ids = Select.getSubfolderIds(contextId, tree, user.getId(), locale, parentId, l, StorageType.WORKING, checkReadConnection(storageParameters));
+        final String[] ids;
+        {
+            final Connection con = checkReadConnection(storageParameters);
+            if (null == con) {
+                ids = Select.getSubfolderIds(contextId, tree, user.getId(), locale, parentId, l, StorageType.WORKING);
+            } else {
+                ids = Select.getSubfolderIds(contextId, tree, user.getId(), locale, parentId, l, StorageType.WORKING, con);
+            }
+        }
         final SortableId[] ret = new SortableId[ids.length];
         for (int i = 0; i < ids.length; i++) {
             ret[i] = new OutlookId(ids[i], i, null);
@@ -1333,14 +1341,28 @@ public final class OutlookFolderStorage implements FolderStorage {
                         /*
                          * Filter those mail folders which denote a virtual one
                          */
-                        final boolean[] contained =
+                        final boolean[] contained;
+                        {
+                            final Connection con = checkReadConnection(storageParameters);
+                            if (null == con) {
+                                contained =
+                                    Select.containsFolders(
+                                        contextId,
+                                        tree,
+                                        storageParameters.getUserId(),
+                                        inboxSubfolders,
+                                        StorageType.WORKING);
+                            } else {
+                                contained =
                                     Select.containsFolders(
                                         contextId,
                                         tree,
                                         storageParameters.getUserId(),
                                         inboxSubfolders,
                                         StorageType.WORKING,
-                                        checkReadConnection(storageParameters));
+                                        con);
+                            }
+                        }
                         for (int i = 0; i < inboxSubfolders.length; i++) {
                             if (!contained[i]) {
                                 final SortableId sortableId = inboxSubfolders[i];
@@ -1359,8 +1381,16 @@ public final class OutlookFolderStorage implements FolderStorage {
                         /*
                          * Get virtual subfolders
                          */
-                        final List<String[]> ids =
-                                    Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, checkReadConnection(storageParameters));
+                        final List<String[]> ids;
+                        {
+                            final Connection con = checkReadConnection(storageParameters);
+                            if (null == con) {
+                                ids = Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING);
+                            } else {
+                                ids =
+                                    Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, con);
+                            }
+                        }
                         /*
                          * Merge them into tree map
                          */
@@ -2194,14 +2224,22 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     String getLocalizedName(final String id, final int tree, final Locale locale, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
-        final String name =
+        final String name;
+        {
+            final Connection con = checkReadConnection(storageParameters);
+            if (null == con) {
+                name = Select.getFolderName(storageParameters.getContextId(), tree, storageParameters.getUserId(), id, StorageType.WORKING);
+            } else {
+                name =
                     Select.getFolderName(
                         storageParameters.getContextId(),
                         tree,
                         storageParameters.getUserId(),
                         id,
                         StorageType.WORKING,
-                        checkReadConnection(storageParameters));
+                        con);
+            }
+        }
         if (null != name) {
             /*
              * If name is held in virtual tree, it has no locale-sensitive string
