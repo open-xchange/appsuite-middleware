@@ -49,6 +49,7 @@
 
 package com.openexchange.test.sql;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,13 +64,14 @@ import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import junit.framework.TestCase;
 
 /**
- * {@link SQLTestCase}
- * TODO remove due to duplicate class in com.openexchange.server
+ * {@link SQLTestCase} TODO remove due to duplicate class in com.openexchange.server
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class SQLTestCase extends TestCase {
 
     private ConfigurableDBProvider dbProvider;
+
     protected Properties properties;
 
     public void setUp() throws Exception {
@@ -86,7 +88,19 @@ public abstract class SQLTestCase extends TestCase {
     }
 
     protected void loadProperties() throws IOException {
-        String filename = System.getProperty("com.openexchange.test.sql.properties", "conf/sql.properties");
+        String filename = System.getProperty("com.openexchange.test.sql.properties");
+        if (filename == null) {
+            filename = "conf/sql.properties";
+            File f = new File(filename);
+            if (!f.exists() || !f.canRead()) {
+                filename = "testConf/sql.properties";
+            }
+            f = new File(filename);
+            if (!f.exists() || !f.canRead()) {
+                throw new IOException("Could not find suitable db conf file. Please put a sql.properties into either the conf or testConf directories or set the com.openexchange.test.sql.properties system property.");
+            }
+        }
+
         properties = new Properties();
         InputStream input = null;
         try {
@@ -137,7 +151,7 @@ public abstract class SQLTestCase extends TestCase {
             }
         }
     }
-    
+
     public void assertNoResult(String sql) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -160,11 +174,11 @@ public abstract class SQLTestCase extends TestCase {
             }
         }
     }
-    
+
     public void exec(String sql) throws SQLException, DBPoolingException {
         Connection con = null;
         PreparedStatement stmt = null;
-        
+
         try {
             con = getDBProvider().getReadConnection(null);
             stmt = con.prepareStatement(sql);
