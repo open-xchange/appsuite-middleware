@@ -30,3 +30,6 @@ com.openexchange.sessiond.autologin=true
 # Session and secret cookie TTL, relevant only if autologin is enabled as well.
 # Can contain units of measurement: D (=days) W(=weeks) H(=hours).
 # See property "com.openexchange.cookie.ttl" in file 'server.properties'.
+
+# Key to encrypt passwords during transmission during session migration. Change this, and make sure it's the same in the entire cluster
+com.openexchange.sessiond.encryptionKey=auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn
