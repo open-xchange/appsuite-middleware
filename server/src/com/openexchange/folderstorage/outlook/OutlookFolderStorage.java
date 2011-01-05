@@ -1333,28 +1333,14 @@ public final class OutlookFolderStorage implements FolderStorage {
                         /*
                          * Filter those mail folders which denote a virtual one
                          */
-                        final boolean[] contained;
-                        {
-                            final Connection con = checkReadConnection(storageParameters);
-                            if (null == con) {
-                                contained =
-                                    Select.containsFolders(
-                                        contextId,
-                                        tree,
-                                        storageParameters.getUserId(),
-                                        inboxSubfolders,
-                                        StorageType.WORKING);
-                            } else {
-                                contained =
+                        final boolean[] contained =
                                     Select.containsFolders(
                                         contextId,
                                         tree,
                                         storageParameters.getUserId(),
                                         inboxSubfolders,
                                         StorageType.WORKING,
-                                        con);
-                            }
-                        }
+                                        checkReadConnection(storageParameters));
                         for (int i = 0; i < inboxSubfolders.length; i++) {
                             if (!contained[i]) {
                                 final SortableId sortableId = inboxSubfolders[i];
@@ -1373,16 +1359,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                         /*
                          * Get virtual subfolders
                          */
-                        final List<String[]> ids;
-                        {
-                            final Connection con = checkReadConnection(storageParameters);
-                            if (null == con) {
-                                ids = Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING);
-                            } else {
-                                ids =
-                                    Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, con);
-                            }
-                        }
+                        final List<String[]> ids =
+                                    Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, checkReadConnection(storageParameters));
                         /*
                          * Merge them into tree map
                          */
