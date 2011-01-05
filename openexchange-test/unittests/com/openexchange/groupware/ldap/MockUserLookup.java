@@ -71,7 +71,7 @@ public class MockUserLookup {
     public User getUserByMail(final String mail) {
         for(final User user : users.values()) {
             final String cur_mail = user.getMail();
-            if(cur_mail != null && cur_mail.equals(mail)) {
+            if(cur_mail != null && cur_mail.equalsIgnoreCase(mail)) {
                 return user;
             }
         }
