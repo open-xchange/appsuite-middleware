@@ -453,6 +453,9 @@ public final class Select {
      * @throws FolderException If checking folder's presence fails
      */
     public static boolean[] containsFolders(final int cid, final int tree, final int user, final SortableId[] folderIds, final StorageType storageType, final Connection con) throws FolderException {
+        if (null == con) {
+            return containsFolders(cid, tree, user, folderIds, storageType);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {

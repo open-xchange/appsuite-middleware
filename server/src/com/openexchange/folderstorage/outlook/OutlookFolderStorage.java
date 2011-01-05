@@ -1200,28 +1200,13 @@ public final class OutlookFolderStorage implements FolderStorage {
                     /*
                      * Strip subfolders occurring at another location in folder tree
                      */
-                    final boolean[] contained;
-                    {
-                        final Connection con = checkReadConnection(storageParameters);
-                        if (null == con) {
-                            contained =
-                                Select.containsFolders(
-                                    contextId,
-                                    tree,
-                                    storageParameters.getUserId(),
-                                    realSubfolderIds,
-                                    StorageType.WORKING);
-                        } else {
-                            contained =
-                                Select.containsFolders(
-                                    contextId,
-                                    tree,
-                                    storageParameters.getUserId(),
-                                    realSubfolderIds,
-                                    StorageType.WORKING,
-                                    con);
-                        }
-                    }
+                    final boolean[] contained = Select.containsFolders(
+                        contextId,
+                        tree,
+                        storageParameters.getUserId(),
+                        realSubfolderIds,
+                        StorageType.WORKING,
+                        checkReadConnection(storageParameters));
                     for (int k = 0; k < realSubfolderIds.length; k++) {
                         final SortableId realSubfolderId = realSubfolderIds[k];
                         if (!contained[k]) {
@@ -1256,15 +1241,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
         }
         // Load folder data from database
-        final String[] ids;
-        {
-            final Connection con = checkReadConnection(storageParameters);
-            if (null == con) {
-                ids = Select.getSubfolderIds(contextId, tree, user.getId(), locale, parentId, l, StorageType.WORKING);
-            } else {
-                ids = Select.getSubfolderIds(contextId, tree, user.getId(), locale, parentId, l, StorageType.WORKING, con);
-            }
-        }
+        final String[] ids = Select.getSubfolderIds(contextId, tree, user.getId(), locale, parentId, l, StorageType.WORKING, checkReadConnection(storageParameters));
         final SortableId[] ret = new SortableId[ids.length];
         for (int i = 0; i < ids.length; i++) {
             ret[i] = new OutlookId(ids[i], i, null);
@@ -1356,28 +1333,14 @@ public final class OutlookFolderStorage implements FolderStorage {
                         /*
                          * Filter those mail folders which denote a virtual one
                          */
-                        final boolean[] contained;
-                        {
-                            final Connection con = checkReadConnection(storageParameters);
-                            if (null == con) {
-                                contained =
-                                    Select.containsFolders(
-                                        contextId,
-                                        tree,
-                                        storageParameters.getUserId(),
-                                        inboxSubfolders,
-                                        StorageType.WORKING);
-                            } else {
-                                contained =
+                        final boolean[] contained =
                                     Select.containsFolders(
                                         contextId,
                                         tree,
                                         storageParameters.getUserId(),
                                         inboxSubfolders,
                                         StorageType.WORKING,
-                                        con);
-                            }
-                        }
+                                        checkReadConnection(storageParameters));
                         for (int i = 0; i < inboxSubfolders.length; i++) {
                             if (!contained[i]) {
                                 final SortableId sortableId = inboxSubfolders[i];
