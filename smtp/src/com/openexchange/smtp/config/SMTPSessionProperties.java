@@ -136,6 +136,10 @@ public final class SMTPSessionProperties {
                 MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
                 MailProperties.getInstance().getDefaultMimeCharset());
         }
+        /*
+         * Deny NTLM authentication
+         */
+        properties.put("mail.smtp.auth.ntlm.disable", "true");
         if (MailProperties.getInstance().getJavaMailProperties() != null) {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties

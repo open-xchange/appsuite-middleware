@@ -160,6 +160,10 @@ public final class POP3SessionProperties {
          * RSET before quit means any messages, that have been marked as deleted by the POP3 server, are unmarked.
          */
         properties.put("mail.pop3.rsetbeforequit", "true");
+        /*
+         * Deny NTLM authentication
+         */
+        properties.put("mail.pop3.auth.ntlm.disable", "true");
         if (MailProperties.getInstance().getJavaMailProperties() != null) {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties

@@ -164,6 +164,10 @@ public final class IMAPSessionProperties {
          */
         properties.put("mail.imap.fetchsize", "51200");
         /*
+         * Deny NTLM authentication
+         */
+        properties.put("mail.imap.auth.ntlm.disable", "true");
+        /*
          * Apply configured JavaMail properties from file
          */
         final Properties javaMailProperties = MailProperties.getInstance().getJavaMailProperties();
