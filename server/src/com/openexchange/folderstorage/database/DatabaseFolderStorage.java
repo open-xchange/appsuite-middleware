@@ -116,6 +116,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.oxfolder.OXFolderLoader;
+import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -182,7 +184,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             } while (null != nonExistingParents && nonExistingParents.length > 0);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new FolderException(e);
         }
     }
@@ -997,10 +999,33 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 return list.toArray(new SortableId[list.size()]);
             }
 
-            final List<Integer> subfolderIds = FolderObject.getSubfolderIds(parentId, storageParameters.getContext(), con);
-            final List<FolderObject> subfolders = new ArrayList<FolderObject>(subfolderIds.size());
-            for (final Integer folderId : subfolderIds) {
-                subfolders.add(getFolderObject(folderId.intValue(), storageParameters.getContext(), con));
+            /*-
+             * IDs already sorted by default_flag DESC, fname
+             * 
+             * TODO: Ensure locale-specific ordering is maintained
+             */
+            final boolean doDBSorting = true;
+            if (doDBSorting) {
+                final List<OXFolderLoader.IdAndName> idAndNames = OXFolderLoader.getSubfolderIdAndNames(parentId, storageParameters.getContext(), con);
+                final int size = idAndNames.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int i = 0; i < size; i++) {
+                    final IdAndName idAndName = idAndNames.get(i);
+                    list.add(new DatabaseId(idAndName.getFolderId(), i, idAndName.getName()));
+                }
+                return list.toArray(new SortableId[size]);
+            }
+            /*
+             * Ensure locale-specific ordering is maintained
+             */
+            final List<FolderObject> subfolders;
+            {
+                final List<Integer> subfolderIds = FolderObject.getSubfolderIds(parentId, storageParameters.getContext(), con);
+                final int[] arr = new int[subfolderIds.size()];
+                for (int i = 0; i < arr.length; i++) {
+                    arr[i] = subfolderIds.get(i).intValue();
+                }
+                subfolders = getFolderObjects(arr, storageParameters.getContext(), con);
             }
             final ServerSession session;
             {
