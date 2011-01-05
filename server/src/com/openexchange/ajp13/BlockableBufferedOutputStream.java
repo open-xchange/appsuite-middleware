@@ -172,7 +172,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     }
 
     /**
-     * Writes the specified byte to this buffered output stream.
+     * Writes the specified byte to this buffered output stream without touching dirty flag.
      * 
      * @param b the byte to be written.
      * @exception IOException if an I/O error occurs.
@@ -281,7 +281,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     }
 
     /**
-     * Flushes this buffered output stream. This forces any buffered output bytes to be written out to the underlying output stream.
+     * Flushes this buffered output stream. This forces any buffered output bytes to be written out to the underlying output stream without touching dirty flag.
      * 
      * @exception IOException if an I/O error occurs.
      * @see java.io.FilterOutputStream#out
