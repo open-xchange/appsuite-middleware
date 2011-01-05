@@ -270,18 +270,4 @@ public abstract class SQLTestCase extends TestCase {
         
         exec(builder.toString(), values);
     }
-    
-    protected void assertEntry(String tableName, Object...attrs) throws DBPoolingException, SQLException {
-        StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
-        String key = null;
-        for(Object object : attrs) {
-            if(key == null) {
-                key = (String) object;
-            } else {
-                builder.append(key).append(" = ").append(object);
-                key = null;
-            }
-        }
-        assertResult(builder.toString());
-    }
 }
