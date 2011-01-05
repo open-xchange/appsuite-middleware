@@ -1359,16 +1359,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                         /*
                          * Get virtual subfolders
                          */
-                        final List<String[]> ids;
-                        {
-                            final Connection con = checkReadConnection(storageParameters);
-                            if (null == con) {
-                                ids = Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING);
-                            } else {
-                                ids =
-                                    Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, con);
-                            }
-                        }
+                        final List<String[]> ids =
+                                    Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, checkReadConnection(storageParameters));
                         /*
                          * Merge them into tree map
                          */
@@ -2202,22 +2194,14 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     String getLocalizedName(final String id, final int tree, final Locale locale, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
-        final String name;
-        {
-            final Connection con = checkReadConnection(storageParameters);
-            if (null == con) {
-                name = Select.getFolderName(storageParameters.getContextId(), tree, storageParameters.getUserId(), id, StorageType.WORKING);
-            } else {
-                name =
+        final String name =
                     Select.getFolderName(
                         storageParameters.getContextId(),
                         tree,
                         storageParameters.getUserId(),
                         id,
                         StorageType.WORKING,
-                        con);
-            }
-        }
+                        checkReadConnection(storageParameters));
         if (null != name) {
             /*
              * If name is held in virtual tree, it has no locale-sensitive string

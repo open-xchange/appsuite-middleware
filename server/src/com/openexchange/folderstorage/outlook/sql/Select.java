@@ -207,6 +207,9 @@ public final class Select {
      * @throws FolderException If checking folder's presence fails
      */
     public static boolean containsParent(final int cid, final int tree, final int user, final String parentId, final StorageType storageType, final Connection con) throws FolderException {
+        if (null == con) {
+            return containsParent(cid, tree, user, parentId, storageType);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -268,6 +271,9 @@ public final class Select {
      * @throws FolderException If checking folder's presence fails
      */
     public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType, final Connection con) throws FolderException {
+        if (null == con) {
+            return containsFolder(cid, tree, user, folderId, storageType);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -327,6 +333,9 @@ public final class Select {
      * @throws FolderException If returning folder's name fails
      */
     public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType, final Connection con) throws FolderException {
+        if (null == con) {
+            return getFolderName(cid, tree, user, folderId, storageType);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -386,6 +395,9 @@ public final class Select {
      * @throws FolderException If checking folder's presence fails
      */
     public static boolean[] containsFolders(final int cid, final int tree, final int user, final String[] folderIds, final StorageType storageType, final Connection con) throws FolderException {
+        if (null == con) {
+            return containsFolders(cid, tree, user, folderIds, storageType);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -529,6 +541,9 @@ public final class Select {
      * @throws FolderException If filling the folder fails
      */
     public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final StorageType storageType, final Connection con) throws FolderException {
+        if (null == con) {
+            return fillFolder(cid, tree, user, locale, outlookFolder, storageType);
+        }
         final String folderId = outlookFolder.getID();
         // Select folder data
         PreparedStatement stmt = null;
@@ -739,6 +754,9 @@ public final class Select {
      * @throws FolderException If subfolders cannot be detected
      */
     public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final List<String[]> realSubfolderIds, final StorageType storageType, final Connection con) throws FolderException {
+        if (null == con) {
+            return getSubfolderIds(cid, tree, user, locale, parentId, realSubfolderIds, storageType);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -834,6 +852,9 @@ public final class Select {
     private static final String SQL_SELECT_ALL = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ?";
 
     public static List<String> getFolders(final int cid, final int tree, final int user, final Connection con) throws FolderException {
+        if (null == con) {
+            return getFolders(cid, tree, user);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -885,6 +906,9 @@ public final class Select {
     }
 
     public static List<String[]> getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType, final Connection con) throws FolderException {
+        if (null == con) {
+            return getSubfolderIds(cid, tree, user, parentId, storageType);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
