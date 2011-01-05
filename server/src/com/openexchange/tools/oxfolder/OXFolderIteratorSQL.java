@@ -76,12 +76,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -867,7 +867,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If all visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static SearchIterator<FolderObject> getAllVisibleFoldersNotSeenInTreeView(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws OXException {
-        return getVisibleFoldersNotSeenInTreeView(null, userId, groups, userConfig, ctx, null);
+        return getVisibleFoldersNotSeenInTreeViewNew(null, userId, groups, userConfig, ctx, null);
     }
 
     /**
@@ -883,7 +883,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If all visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static SearchIterator<FolderObject> getAllVisibleFoldersNotSeenInTreeView(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
-        return getVisibleFoldersNotSeenInTreeView(null, userId, groups, userConfig, ctx, readCon);
+        return getVisibleFoldersNotSeenInTreeViewNew(null, userId, groups, userConfig, ctx, readCon);
     }
 
     /**
@@ -900,7 +900,148 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
-        return getVisibleFoldersNotSeenInTreeView(Integer.valueOf(module), userId, groups, userConfig, ctx, readCon);
+        return getVisibleFoldersNotSeenInTreeViewNew(Integer.valueOf(module), userId, groups, userConfig, ctx, readCon);
+    }
+
+    /**
+     * Checks for non-tree-visible folder of specified module.
+     * 
+     * @param module The module
+     * @param userId The user ID
+     * @param groups The user's group IDs
+     * @param userConfig The user configuration
+     * @param ctx The context
+     * @param readCon An readable connection (optional: may be <code>null</code>)
+     * @return <code>true</code> if non-tree-visible folder of specified module exist; otherwise <code>false</code>
+     * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
+     */
+    public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
+        Connection rc = readCon;
+        boolean closeReadCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final int contextId = ctx.getContextId();
+        try {
+            if (readCon == null) {
+                rc = DBPool.pickup(ctx);
+                closeReadCon = true;
+            }
+            /*
+             * Statement to select all user-visible public folders
+             */
+            final String sqlSelectStr = buildQueryNonTreeVisibleFolders(Integer.valueOf(module), userId, groups, userConfig, contextId);
+            int pos = 1;
+            stmt = rc.prepareStatement(sqlSelectStr);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+
+            if (DEBUG) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
+            
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(contextId));
+        } catch (final Throwable t) {
+            throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
+        } finally {
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+        }
+    }
+
+    private static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeViewNew(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
+        Connection rc = readCon;
+        boolean closeReadCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final int contextId = ctx.getContextId();
+        try {
+            if (readCon == null) {
+                rc = DBPool.pickup(ctx);
+                closeReadCon = true;
+            }
+            /*
+             * Statement to select all user-visible public folders
+             */
+            final String sqlSelectStr = buildQueryNonTreeVisibleFolders(module, userId, groups, userConfig, contextId);
+            int pos = 1;
+            stmt = rc.prepareStatement(sqlSelectStr);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+
+            if (DEBUG) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
+            
+            rs = stmt.executeQuery();
+            return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(contextId));
+        } catch (final SearchIteratorException e) {
+            throw new OXFolderException(e);
+        } catch (final Throwable t) {
+            throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
+        }
+    }
+
+    private static String buildQueryNonTreeVisibleFolders(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final int contextId) {
+        /*
+         * SQL select string for condition
+         */
+        String sqlStr =
+            getSQLUserVisibleFolders(
+                "ot.fuid",
+                StringCollection.getSqlInString(userId, groups),
+                StringCollection.getSqlInString(userConfig.getAccessibleModules()),
+                null,
+                null);
+        sqlStr = sqlStr.replaceAll("ot\\.", "pt.").replaceAll("op\\.", "pp.");
+        sqlStr = sqlStr.replaceAll(" ot", " pt").replaceAll(" op", " pp");
+        /*
+         * Fill values
+         */
+        {
+            final String regex = "\\?";
+            final String sContextId = String.valueOf(contextId);
+            final String sUserId = String.valueOf(userId);
+            sqlStr = sqlStr.replaceFirst(regex, sContextId);
+            sqlStr = sqlStr.replaceFirst(regex, sUserId);
+            sqlStr = sqlStr.replaceFirst(regex, sContextId);
+            sqlStr = sqlStr.replaceFirst(regex, sContextId);
+            sqlStr = sqlStr.replaceFirst(regex, sUserId);
+            sqlStr = sqlStr.replaceFirst(regex, sContextId);
+            sqlStr = sqlStr.replaceFirst(regex, sContextId);
+        }
+        /*
+         * Main SQL select string
+         */
+        final StringBuilder condBuilder = new StringBuilder(32).append("AND ot.type = ").append(FolderObject.PUBLIC);
+        condBuilder.append(" AND ot.module = ").append(module);
+        condBuilder.append(" AND ot.parent NOT IN (").append(sqlStr).append(')');
+        return
+            getSQLUserVisibleFolders(
+                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                StringCollection.getSqlInString(userId, groups),
+                StringCollection.getSqlInString(userConfig.getAccessibleModules()),
+                condBuilder.toString(),
+                getOrderBy(STR_OT, "module", "fname"));
     }
 
     private static final String SQL_SEL_ALL_PUB = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? ORDER BY fuid";
