@@ -1006,7 +1006,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             final boolean doDBSorting = true;
             if (doDBSorting) {
-                final List<OXFolderLoader.IdAndName> idAndNames = OXFolderLoader.getSubfolderIdAndNames(parentId, storageParameters.getContext(), con);
+                final List<IdAndName> idAndNames = OXFolderLoader.getSubfolderIdAndNames(parentId, storageParameters.getContext(), con);
                 final int size = idAndNames.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
