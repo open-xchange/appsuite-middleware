@@ -221,19 +221,24 @@ public final class DatabaseFolderConverter {
                 retval.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
             } else {
                 /*
-                 * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be used.
+                 * Set subfolders for folder.
                  */
-                final List<Integer> subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
-                if (subfolderIds.isEmpty()) {
-                    retval.setSubfolderIDs(new String[0]);
-                    retval.setSubscribedSubfolders(false);
-                } else {
-                    final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                    for (final Integer id : subfolderIds) {
-                        tmp.add(id.toString());
-                    }
-                    retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
+                    retval.setSubfolderIDs(null);
                     retval.setSubscribedSubfolders(true);
+                } else {                
+                    final List<Integer> subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
+                    if (subfolderIds.isEmpty()) {
+                        retval.setSubfolderIDs(new String[0]);
+                        retval.setSubscribedSubfolders(false);
+                    } else {
+                        final List<String> tmp = new ArrayList<String>(subfolderIds.size());
+                        for (final Integer id : subfolderIds) {
+                            tmp.add(id.toString());
+                        }
+                        retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                        retval.setSubscribedSubfolders(true);
+                    }
                 }
             }
             return retval;
