@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,9 +67,11 @@ import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.test.TestInit;
 
@@ -150,7 +154,6 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return Response.parse(response.toString());
 	}
 	
-	
 	public Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId,final File upload) throws JSONException, IOException {
 		return attach(webConv,sessionId,folderId,attachedId,moduleId,upload,null, null);
 	}
@@ -167,6 +170,22 @@ public class AttachmentTest extends AbstractAJAXTest {
 		}
 		
 		return attach(webConv,sessionId,folderId,attachedId,moduleId,Arrays.asList(upload), filenames, mimeTypes);
+	}
+	
+	public Response attach (final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, Map<String, Object> dataSourceParams) throws JSONException, MalformedURLException, IOException, SAXException {
+	    final StringBuffer url = getUrl(sessionId,"attach");
+               
+        JSONObject object = new JSONObject();
+        object.put("folder", folderId);
+        object.put("attached", attachedId);
+        object.put("module",moduleId);
+	    
+        object.put("datasource", JSONCoercion.coerceToJSON(dataSourceParams));
+        
+        JSONObject resp = put(webConv, url.toString(), object.toString());
+        return Response.parse(resp.toString());
+	    
+	    //return Response.parse(response.toString());
 	}
 
 	public Response detach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {

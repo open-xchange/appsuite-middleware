@@ -112,6 +112,10 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 			upload();
 		}
 	}*/
+	
+	public void testDatasource() throws Exception {
+	    doDatasource();
+	}
 
 
 }

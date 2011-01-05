@@ -56,7 +56,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -375,6 +377,29 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		assertNoError(res);
 		
 		assertEquals(useAfter-use,((JSONObject)res.getData()).get("file_size"));
+	}
+	
+	protected void doDatasource() throws MalformedURLException, JSONException, IOException, SAXException {
+	    // Action attach in a regular PUT may contain a datasource field
+	    // Note that POST must always contain a file upload field and may never contain a datasource field. Maybe, anyway. Whatever.
+	    
+	    Map<String, Object> datasourceDefinition = new HashMap<String, Object>();
+	    
+	    datasourceDefinition.put("identifier", "com.openexchange.url.mail.attachment");
+	    datasourceDefinition.put("url", "http://www.open-xchange.com/");
+	    
+	    Response res = attach(getWebConversation(), sessionId,folderId, attachedId, moduleId, datasourceDefinition);
+	    
+	    final AttachmentMetadata attachment = new AttachmentImpl();
+        attachment.setFolderId(folderId);
+        attachment.setAttachedId(attachedId);
+        attachment.setModuleId(moduleId);
+        attachment.setId((Integer)res.getData());
+        clean.add(attachment);
+        
+	    res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, clean.get(0).getId());
+	    
+	    assertFalse(res.hasError()); // Good enough
 	}
 	
 	public void upload() throws Exception {
