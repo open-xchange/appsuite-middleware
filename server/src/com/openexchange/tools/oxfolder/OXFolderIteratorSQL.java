@@ -1033,7 +1033,9 @@ public final class OXFolderIteratorSQL {
          * Main SQL select string
          */
         final StringBuilder condBuilder = new StringBuilder(32).append("AND ot.type = ").append(FolderObject.PUBLIC);
-        condBuilder.append(" AND ot.module = ").append(module);
+        if (null != module) {
+            condBuilder.append(" AND ot.module = ").append(module);
+        }
         condBuilder.append(" AND ot.parent NOT IN (").append(sqlStr).append(')');
         return
             getSQLUserVisibleFolders(

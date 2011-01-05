@@ -136,41 +136,41 @@ public final class SystemPublicFolder {
              * Check for presence of virtual folders
              */
             {
-                final Queue<FolderObject> tmp =
-                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
                         FolderObject.CALENDAR,
                         user.getId(),
                         user.getGroups(),
                         userConfiguration,
                         ctx,
-                        con)).asQueue();
-                if (!tmp.isEmpty()) {
+                        con);
+                if (tmp) {
                     subfolderIds.add(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
                 }
             }
             {
-                final Queue<FolderObject> tmp =
-                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
                         FolderObject.CONTACT,
                         user.getId(),
                         user.getGroups(),
                         userConfiguration,
                         ctx,
-                        con)).asQueue();
-                if (!tmp.isEmpty()) {
+                        con);
+                if (tmp) {
                     subfolderIds.add(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
                 }
             }
             {
-                final Queue<FolderObject> tmp =
-                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
                         FolderObject.TASK,
                         user.getId(),
                         user.getGroups(),
                         userConfiguration,
                         ctx,
-                        con)).asQueue();
-                if (!tmp.isEmpty()) {
+                        con);
+                if (tmp) {
                     subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
                 }
             }
