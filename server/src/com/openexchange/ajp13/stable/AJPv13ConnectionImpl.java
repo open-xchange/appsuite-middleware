@@ -227,6 +227,19 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
     }
 
     /**
+     * Gets the neutral output stream to AJP client
+     * 
+     * @return The neutral output stream to AJP client
+     *  @throws IOException If neutral output stream cannot be returned
+     */
+    public OutputStream getNeutralOutputStream() throws IOException {
+        if (outputStream == null) {
+            throw new IOException("Output stream not available");
+        }
+        return outputStream.getNeutralOutputStream();
+    }
+
+    /**
      * Sets the SO_TIMEOUT with the specified timeout, in milliseconds.
      * 
      * @param millis The timeout in milliseconds

@@ -275,6 +275,21 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
     }
 
     /**
+     * Gets the neutral output stream to AJP client
+     * 
+     * @return The neutral output stream to AJP client
+     *  @throws IOException If neutral output stream cannot be returned
+     */
+    public OutputStream getNeutralOutputStream() throws IOException {
+        blocker.acquire();
+        try {
+            return outputStream.getNeutralOutputStream();
+        } finally {
+            blocker.release();
+        }
+    }
+
+    /**
      * Sets the SO_TIMEOUT with the specified timeout, in milliseconds.
      * 
      * @param millis The timeout in milliseconds
