@@ -155,15 +155,14 @@ public final class SystemInfostoreFolder {
             /*
              * Check if user has non-tree-visible folders
              */
-            final Queue<FolderObject> q =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
-                    FolderObject.INFOSTORE,
-                    user.getId(),
-                    user.getGroups(),
-                    userConfiguration,
-                    ctx,
-                    con)).asQueue();
-            if (!q.isEmpty()) {
+            final boolean hasNonTreeVisibleFolders = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
+                FolderObject.INFOSTORE,
+                user.getId(),
+                user.getGroups(),
+                userConfiguration,
+                ctx,
+                con);
+            if (hasNonTreeVisibleFolders) {
                 subfolderIds.add(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
             }
             return subfolderIds.toNativeArray();
