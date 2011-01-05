@@ -85,6 +85,7 @@ import com.openexchange.folderstorage.mail.contentType.SentContentType;
 import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
@@ -158,7 +159,55 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
-        throw new UnsupportedOperationException("MailFolderStorage.getVisibleSubfolders()");
+        if (!MailType.getInstance().equals(type) && !PrivateType.getInstance().equals(type)) {
+            return new SortableId[0];
+        }
+        if (!MailContentType.getInstance().toString().equals(contentType.toString())) {
+            return new SortableId[0];
+        }
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            /*
+             * Only primary account folders
+             */
+            final int accountId = MailAccount.DEFAULT_ID;
+            final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
+            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect(true);
+            final List<MailFolder> folders = new ArrayList<MailFolder>(32);
+            final MailFolder rootFolder = mailAccess.getRootFolder();
+            folders.add(rootFolder);
+            /*
+             * Start recursive iteration 
+             */
+            addSubfolders(MailFolder.DEFAULT_FOLDER_ID, folders, mailAccess.getFolderStorage());
+            /*
+             * Sort by name
+             */
+            Collections.sort(folders, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
+            final int size = folders.size();
+            final List<SortableId> list = new ArrayList<SortableId>(size);
+            for (int j = 0; j < size; j++) {
+                final MailFolder tmp = folders.get(j);
+                list.add(new MailId(prepareFullname(mailAccess.getAccountId(), tmp.getFullname()), j).setName(tmp.getName()));
+            }
+            return list.toArray(new SortableId[list.size()]);
+        } catch (final MailException e) {
+            throw new FolderException(e);
+        } finally {
+            closeMailAccess(mailAccess);
+        }
+    }
+
+    private static void addSubfolders(String fullname, List<MailFolder> folders, IMailFolderStorage folderStorage) throws MailException {
+        final MailFolder[] subfolders = folderStorage.getSubfolders(fullname, false);
+        for (final MailFolder subfolder : subfolders) {
+            folders.add(subfolder);
+            addSubfolders(subfolder.getFullname(), folders, folderStorage);
+        }
     }
 
     public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
@@ -737,8 +786,8 @@ public final class MailFolderStorage implements FolderStorage {
                 Collections.sort(children, new MailFolderComparator(names, storageParameters.getUser().getLocale()));
             }
 
-            final List<SortableId> list = new ArrayList<SortableId>(children.size());
             final int size = children.size();
+            final List<SortableId> list = new ArrayList<SortableId>(size);
             for (int j = 0; j < size; j++) {
                 final MailFolder tmp = children.get(j);
                 list.add(new MailId(prepareFullname(mailAccess.getAccountId(), tmp.getFullname()), j).setName(tmp.getName()));
