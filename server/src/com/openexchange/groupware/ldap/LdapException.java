@@ -223,7 +223,13 @@ public class LdapException extends AbstractOXException {
          */
         GROUP_NOT_FOUND(
             "Cannot find group with identifier %1$s in context %2$d.",
-            Category.CODE_ERROR, Detail.ERROR, 17);
+            Category.CODE_ERROR, Detail.ERROR, 17),
+        /**    
+         * Unexpected error: %1$s
+         */
+        UNEXPECTED_ERROR(
+            "Unexpected error: %1$s",
+            Category.CODE_ERROR, Detail.ERROR, 18);
 
         /**
          * Message of the exception.
