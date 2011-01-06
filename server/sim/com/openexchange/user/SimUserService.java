@@ -62,6 +62,16 @@ import com.openexchange.groupware.ldap.UserException;
  */
 public class SimUserService implements UserService {
 
+    public String getUserAttribute(String name, int userId, Context context) throws UserException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setUserAttribute(String name, String value, int userId, Context context) throws UserException {
+        // TODO Auto-generated method stub
+        
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#authenticate(com.openexchange.groupware.ldap.User, java.lang.String)
      */

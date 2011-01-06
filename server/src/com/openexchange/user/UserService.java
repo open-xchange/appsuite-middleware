@@ -51,6 +51,7 @@ package com.openexchange.user;
 
 import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 
@@ -60,6 +61,28 @@ import com.openexchange.groupware.ldap.UserException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UserService {
+
+    /**
+     * Gets specified user attribute.
+     * 
+     * @param name The attribute name
+     * @param userId The user identifier
+     * @param context The context
+     * @return The attribute value
+     * @throws LdapException If user attribute cannot be returned
+     */
+    String getUserAttribute(String name, int userId, Context context) throws UserException;
+
+    /**
+     * Sets specified user attribute.
+     * 
+     * @param name The attribute name
+     * @param value The attribute value
+     * @param userId The user identifier
+     * @param context The context
+     * @throws LdapException If user attribute cannot be set
+     */
+    void setUserAttribute(String name, String value, int userId, Context context) throws UserException;
 
     /**
      * Searches for a user whose login matches the given uid.
