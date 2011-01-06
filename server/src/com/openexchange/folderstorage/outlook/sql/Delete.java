@@ -100,7 +100,7 @@ public final class Delete {
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
      * @throws FolderException If delete fails
      */
-    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup) throws FolderException {
+    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup) throws FolderException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
@@ -111,8 +111,9 @@ public final class Delete {
         }
         try {
             con.setAutoCommit(false); // BEGIN
-            deleteFolder(cid, tree, user, folderId, backup, con);
+            final boolean ret = deleteFolder(cid, tree, user, folderId, backup, con);
             con.commit(); // COMMIT
+            return ret;
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -141,8 +142,10 @@ public final class Delete {
      * @throws FolderException If delete fails
      */
     public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Connection con) throws FolderException {
+        if (null == con) {
+            return deleteFolder(cid, tree, user, folderId, backup);
+        }
         PreparedStatement stmt = null;
-
         if (backup) {
             /*
              * Backup folder data
