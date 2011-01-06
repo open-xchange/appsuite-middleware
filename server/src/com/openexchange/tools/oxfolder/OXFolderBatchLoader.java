@@ -136,36 +136,28 @@ public final class OXFolderBatchLoader {
                     readCon = DBPool.pickup(ctx);
                     closeCon = true;
                 }
-                List<FolderObject> ret = null;
+                final List<FolderObject> list = new ArrayList<FolderObject>(folderIds.length);
                 int pos = 0;
                 if ((folderIds.length - pos) > LIMIT) {
                     do {
                         final int[] fids = new int[LIMIT];
                         System.arraycopy(folderIds, pos, fids, 0, LIMIT);
                         pos += LIMIT;
-                        if (null == ret) {
-                            ret = loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
-                        } else {
-                            ret.addAll(loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable));
-                        }
+                        loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable, list);
                     } while ((folderIds.length - pos) > LIMIT);
                     if (pos < folderIds.length) {
                         final int len = folderIds.length - pos;
                         final int[] fids = new int[len];
                         System.arraycopy(folderIds, pos, fids, 0, len);
-                        if (null == ret) {
-                            ret = loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
-                        } else {
-                            ret.addAll(loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable));
-                        }
+                        loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable, list);
                     }
                 } else {
-                    ret = loadFolderObjectsFromDB0(folderIds, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+                     loadFolderObjectsFromDB0(folderIds, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable, list);
                 }
                 /*
                  * Return list
                  */
-                return ret;
+                return list;
             } finally {
                 if (closeCon) {
                     DBPool.closeReaderSilent(ctx, readCon);
@@ -176,7 +168,7 @@ public final class OXFolderBatchLoader {
         }
     }
 
-    private static final List<FolderObject> loadFolderObjectsFromDB0(final int[] folderIds, final Context ctx, final Connection readCon, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
+    private static final void loadFolderObjectsFromDB0(final int[] folderIds, final Context ctx, final Connection readCon, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable, final List<FolderObject> list) throws OXException {
         try {
             PreparedStatement stmt = null;
             ResultSet rs = null;
@@ -201,7 +193,6 @@ public final class OXFolderBatchLoader {
                 }
                 stmt.setInt(pos, ctx.getContextId());
                 rs = stmt.executeQuery();
-                final List<FolderObject> list = new ArrayList<FolderObject>(folderIds.length);
                 pos = 0;
                 while (rs.next()) {
                     final FolderObject folderObj = new FolderObject(rs.getString(2), folderIds[pos++], rs.getInt(3), rs.getInt(4), rs.getInt(6));
@@ -232,7 +223,6 @@ public final class OXFolderBatchLoader {
                         fo.setPermissions(map.get(fo.getObjectID()));
                     }
                 }
-                return list;
             } finally {
                 closeSQLStuff(rs, stmt);
             }
