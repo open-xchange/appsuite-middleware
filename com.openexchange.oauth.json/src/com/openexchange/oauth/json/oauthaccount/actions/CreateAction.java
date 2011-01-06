@@ -102,7 +102,7 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             final String oauthTokenSecret = (String) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
             session.setParameter(uuid, null);
             if (oauthTokenSecret == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.REQUEST_TOKEN.getName());
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SECRET.getName());
             }
             /*
              * The OAuth verifier (PIN)

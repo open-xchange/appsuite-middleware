@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
-import com.openexchange.oauth.OAuthToken;
 
 /**
  * The OAuth account writer
@@ -99,13 +98,7 @@ public class AccountWriter {
         final JSONObject json = new JSONObject();
         json.put(AccountField.AUTH_URL.getName(), interaction.getAuthorizationURL());
         json.put(AccountField.INTERACTION_TYPE.getName(), interaction.getInteractionType().getName());
-        final OAuthToken requestToken = interaction.getRequestToken();
-        if (null != requestToken) {
-            final JSONObject jsonToken = new JSONObject();
-            jsonToken.put(AccountField.TOKEN.getName(), requestToken.getToken());
-            // jsonToken.put(AccountField.SECRET.getName(), requestToken.getSecret());
-            json.put(AccountField.REQUEST_TOKEN.getName(), jsonToken);
-        }
+        json.put(AccountField.TOKEN.getName(), interaction.getRequestToken().getToken());
         json.put(OAuthConstants.SESSION_PARAM_UUID, uuid);
         return json;
     }

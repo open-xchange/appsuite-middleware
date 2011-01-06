@@ -86,10 +86,6 @@ public enum AccountField {
      * The interaction type
      */
     INTERACTION_TYPE("type"),
-    /**
-     * Request token
-     */
-    REQUEST_TOKEN(OAuthConstants.ARGUMENT_REQUEST_TOKEN),
 
     ;
 
