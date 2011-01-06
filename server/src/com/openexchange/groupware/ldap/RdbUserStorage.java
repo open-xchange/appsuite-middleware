@@ -497,6 +497,104 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
+    public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws LdapException {
+        if (null == name) {
+            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, "Attribute name is null.");
+        }
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(context);
+            con.setAutoCommit(false);
+        } catch (final SQLException e) {
+            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } catch (final DBPoolingException e) {
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+        }
+        try {
+            final String attrName = new StringBuilder("attr_").append(name).toString();
+            setAttribute(attrName, value, context.getContextId(), userId, con);
+            
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+        } catch (final Exception e) {
+            rollback(con);
+            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } finally {
+            autocommit(con);
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
+
+    private void setAttribute(final String name, final String value, final int contextId, final int userId, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND " + IDENTIFIER + "=? and name=?");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setString(pos, name);
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(stmt);
+            stmt = null;
+        }
+        if (null != value) {
+            try {
+                stmt = con.prepareStatement("INSERT INTO user_attribute (cid," + IDENTIFIER + ",name,value) VALUES (?,?,?,?)");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, userId);
+                stmt.setString(pos++, name);
+                stmt.setString(pos, value);
+                stmt.executeUpdate();
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        }
+    }
+
+    @Override
+    public String getUserAttribute(final String name, final int userId, final Context context) throws LdapException {
+        if (null == name) {
+            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, "Attribute name is null.");
+        }
+        final Connection con;
+        try {
+            con = DBPool.pickup(context);
+        } catch (final DBPoolingException e) {
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+        }
+        try {
+            final String attrName = new StringBuilder("attr_").append(name).toString();
+            return getAttribute(attrName, context.getContextId(), userId, con);
+        } catch (final SQLException e) {
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+        } catch (final Exception e) {
+            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } finally {
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
+
+    private String getAttribute(final String name, final int contextId, final int userId, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND " + IDENTIFIER + "=? and name=?");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setString(pos, name);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getString(1) : null;
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
     private void updateAttributes(Context ctx, User user, Connection con) throws SQLException {
         // Update attributes
         int contextId = ctx.getContextId();

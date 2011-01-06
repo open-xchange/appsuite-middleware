@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -118,7 +119,7 @@ public class CachingUserStorage extends UserStorage {
         }
     }
 
-    private User createProxy(final Context ctx, final int userId, final CacheService cacheService, User user) throws UserException {
+    private User createProxy(final Context ctx, final int userId, final CacheService cacheService, final User user) throws UserException {
         final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
             public Serializable getKey() {
                 return cacheService.newCacheKey(ctx.getContextId(), userId);
@@ -143,10 +144,10 @@ public class CachingUserStorage extends UserStorage {
     @Override
     public User getUser(final Context ctx, final int userId, Connection con) throws UserException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        User user = delegate.getUser(ctx, userId, con);
         if (cacheService == null) {
             return delegate.getUser(ctx, userId, con);
         }
+        final User user = delegate.getUser(ctx, userId, con);
         return createProxy(ctx, userId, cacheService, user);
     }
 
@@ -249,6 +250,26 @@ public class CachingUserStorage extends UserStorage {
         delegate.updateUser(user, context);
         try {
             invalidateUser(context, user.getId());
+        } catch (final UserException e) {
+            throw new LdapException(e);
+        }
+    }
+
+    @Override
+    public String getUserAttribute(String name, int userId, Context context) throws LdapException {
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getUserAttribute(name, userId, context);
+        }
+        final Set<String> set = getUser(userId, context).getAttributes().get(new StringBuilder("attr_").append(name).toString());
+        return null == set ? null : (set.isEmpty() ? null : set.iterator().next());
+    }
+
+    @Override
+    public void setUserAttribute(String name, String value, int userId, Context context) throws LdapException {
+        delegate.setUserAttribute(name, value, userId, context);
+        try {
+            invalidateUser(context, userId);
         } catch (final UserException e) {
             throw new LdapException(e);
         }

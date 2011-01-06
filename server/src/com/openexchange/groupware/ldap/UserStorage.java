@@ -229,6 +229,28 @@ public abstract class UserStorage {
     public abstract void updateUser(User user, Context context) throws LdapException;
 
     /**
+     * Gets specified user attribute.
+     * 
+     * @param name The attribute name
+     * @param userId The user identifier
+     * @param context The context
+     * @return The attribute value
+     * @throws LdapException If user attribute cannot be returned
+     */
+    public abstract String getUserAttribute(String name, int userId, Context context) throws LdapException;
+
+    /**
+     * Sets specified user attribute.
+     * 
+     * @param name The attribute name
+     * @param value The attribute value
+     * @param userId The user identifier
+     * @param context The context
+     * @throws LdapException If user attribute cannot be set
+     */
+    public abstract void setUserAttribute(String name, String value, int userId, Context context) throws LdapException;
+
+    /**
      * Searches a user by its email address. This is used for converting iCal to
      * appointments.
      * @param email the email address of the user.
