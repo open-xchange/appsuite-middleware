@@ -28,7 +28,7 @@
 	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
 	
 	<property name="jsonjar" value="json.jar" />
-	<property name="chardetjar" value="chardet-1.0.jar" />
+	<property name="chardetjar" value="chardet-1.1.jar" />
 	
 	<property name="jazzyjar" value="jazzy-0.5.2.jar" />
 	<!-- Bundle dependencies -->
