@@ -285,7 +285,7 @@ public final class OXFolderBatchLoader {
                 for (int i = 1; i < folderIds.length; i++) {
                     sb.append(" UNION ALL SELECT ?");
                 }
-                sb.append(") AS x ON t.fuid = x.fuid WHERE cid = ?");
+                sb.append(") AS x ON p.fuid = x.fuid WHERE cid = ?");
                 stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sb.toString()).replaceFirst(table));
             }
             int pos = 1;
