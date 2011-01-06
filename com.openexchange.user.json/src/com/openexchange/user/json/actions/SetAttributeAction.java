@@ -55,6 +55,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -85,6 +86,7 @@ public final class SetAttributeAction extends AbstractUserAction {
              * Parse parameters
              */
             final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
+            final boolean setIfAbsent = Boolean.parseBoolean(request.getParameter("setIfAbsent"));
             /*
              * Get user service
              */
@@ -96,11 +98,22 @@ public final class SetAttributeAction extends AbstractUserAction {
             /*
              * Perform update
              */
-            userService.setUserAttribute(jData.getString("name"), jData.get("value").toString(), id, session.getContext());
+            final String name = jData.getString("name");
+            final Context context = session.getContext();
+            if (setIfAbsent) {
+                final String prevValue = userService.getUserAttribute(name, id, context);
+                if (null != prevValue) {
+                    return new AJAXRequestResult(Boolean.FALSE);
+                }
+            }
+            /*
+             * Set
+             */
+            userService.setUserAttribute(name, jData.get("value").toString(), id, context);
             /*
              * Return
              */
-            return new AJAXRequestResult(new JSONObject());
+            return new AJAXRequestResult(Boolean.TRUE);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
