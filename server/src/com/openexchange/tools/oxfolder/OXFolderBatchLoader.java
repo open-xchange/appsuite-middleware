@@ -111,7 +111,9 @@ public final class OXFolderBatchLoader {
     public static final List<FolderObject> loadFolderObjectsFromDB(final int[] folderIds, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList) throws OXException {
         return loadFolderObjectsFromDB(folderIds, ctx, readConArg, loadPermissions, loadSubfolderList, TABLE_OT, TABLE_OP);
     }
-    
+
+    private static final int LIMIT = 1000;
+
     /**
      * Loads specified folder from database.
      * 
@@ -129,19 +131,62 @@ public final class OXFolderBatchLoader {
         try {
             Connection readCon = readConArg;
             boolean closeCon = false;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
             try {
                 if (readCon == null) {
                     readCon = DBPool.pickup(ctx);
                     closeCon = true;
                 }
+                List<FolderObject> ret = null;
+                int pos = 0;
+                if ((folderIds.length - pos) > LIMIT) {
+                    do {
+                        final int[] fids = new int[LIMIT];
+                        System.arraycopy(folderIds, pos, fids, 0, LIMIT);
+                        pos += LIMIT;
+                        if (null == ret) {
+                            ret = loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+                        } else {
+                            ret.addAll(loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable));
+                        }
+                    } while ((folderIds.length - pos) > LIMIT);
+                    if (pos < folderIds.length) {
+                        final int len = folderIds.length - pos;
+                        final int[] fids = new int[len];
+                        System.arraycopy(folderIds, pos, fids, 0, len);
+                        if (null == ret) {
+                            ret = loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+                        } else {
+                            ret.addAll(loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable));
+                        }
+                    }
+                } else {
+                    ret = loadFolderObjectsFromDB0(folderIds, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+                }
+                /*
+                 * Return list
+                 */
+                return ret;
+            } finally {
+                if (closeCon) {
+                    DBPool.closeReaderSilent(ctx, readCon);
+                }
+            }
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(e);
+        }
+    }
+
+    private static final List<FolderObject> loadFolderObjectsFromDB0(final int[] folderIds, final Context ctx, final Connection readCon, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
+        try {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
                 /*
                  * Compose statement
                  */
                 {
                     final StringBuilder sb = new StringBuilder(512);
-                    sb.append("SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag");
+                    sb.append("SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag ");
                     sb.append("FROM #TABLE# AS t INNER JOIN (");
                     sb.append("SELECT ? AS fuid");
                     for (int i = 1; i < folderIds.length; i++) {
@@ -189,7 +234,7 @@ public final class OXFolderBatchLoader {
                 }
                 return list;
             } finally {
-                closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+                closeSQLStuff(rs, stmt);
             }
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
@@ -197,7 +242,6 @@ public final class OXFolderBatchLoader {
             throw new OXFolderException(e);
         }
     }
-
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
