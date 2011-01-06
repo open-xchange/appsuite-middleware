@@ -49,77 +49,61 @@
 
 package com.openexchange.user.json.actions;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
+import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
- * {@link UserActionFactory} - Factory for user component.
+ * {@link GetAttributeAction} - Maps the action to an <tt>update</tt> action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UserActionFactory implements AJAXActionServiceFactory {
+public final class GetAttributeAction extends AbstractUserAction {
 
     /**
-     * The singleton instance.
+     * The <tt>getAttribute</tt> action string.
      */
-    private static final UserActionFactory SINGLETON = new UserActionFactory();
+    public static final String ACTION = "getAttribute";
 
     /**
-     * Gets the {@link UserActionFactory factory} instance.
-     * 
-     * @return The {@link UserActionFactory factory} instance.
+     * Initializes a new {@link GetAttributeAction}.
      */
-    public static final UserActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    /*-
-     * Member section
-     */
-
-    /**
-     * The map to store actions.
-     */
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link UserActionFactory}.
-     */
-    private UserActionFactory() {
+    public GetAttributeAction() {
         super();
-        actions = initActions();
     }
 
-    public AJAXActionService createActionService(final String action) throws AjaxException {
-        if (null == action) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+        try {
+            /*
+             * Parse parameters
+             */
+            final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
+            final String name = checkStringParameter("name", request);
+            /*
+             * Get user service
+             */
+            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+            /*
+             * Perform update
+             */
+            final String value = userService.getUserAttribute(name, id, session.getContext());
+            /*
+             * Return
+             */
+            final JSONObject json = new JSONObject();
+            json.put("name", name);
+            json.put("value", value);
+            return new AJAXRequestResult(json);
+        } catch (final JSONException e) {
+            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
-        }
-        return retval;
-    }
-
-    /**
-     * Initializes the unmodifiable map to stored actions.
-     * 
-     * @return The unmodifiable map with actions stored
-     */
-    private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(AllAction.ACTION, new AllAction());
-        tmp.put(SearchAction.ACTION, new SearchAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        tmp.put(GetAttributeAction.ACTION, new GetAttributeAction());
-        tmp.put(SetAttributeAction.ACTION, new SetAttributeAction());
-        return Collections.unmodifiableMap(tmp);
     }
 
 }

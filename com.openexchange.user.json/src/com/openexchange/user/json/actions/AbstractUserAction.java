@@ -218,6 +218,22 @@ public abstract class AbstractUserAction implements AJAXActionService {
         }
     }
 
+    /**
+     * Parses specified parameter into an <code>int</code>.
+     * 
+     * @param parameterName The parameter name
+     * @param request The request
+     * @return The parsed <code>int</code> value
+     * @throws AjaxException If parameter is not present or invalid in given request
+     */
+    protected static String checkStringParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+        String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+        }
+        return tmp.trim();
+    }
+
     private static final Pattern PAT = Pattern.compile(" *, *");
     
     private static final ContactCensorship DO_NOTHING_CENSORSHIP = new DoNothingCensorship();
