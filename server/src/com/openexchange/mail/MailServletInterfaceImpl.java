@@ -2336,7 +2336,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 count += (composedMail.getBcc() == null ? 0 : composedMail.getBcc().length);
 
                 if (count > maxToCcBcc) {
-                    throw new MailException(MailException.Code.RECIPIENTS_EXCEEDED, maxToCcBcc);
+                    throw new MailException(MailException.Code.RECIPIENTS_EXCEEDED, Integer.valueOf(maxToCcBcc));
                 }
             }
         }
