@@ -1003,7 +1003,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                          * Remove the ones kept in virtual table
                          */
                         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                        final boolean[] contained = memoryTable.getTree(tree).containsFolders(realSubfolderIDs);
+                        final boolean[] contained = memoryTable.getTree(tree, user.getId(), contextId).containsFolders(realSubfolderIDs);
                         boolean found = false;
                         for (int i = 0; !found && i < realSubfolderIDs.length; i++) {
                             if (!contained[i]) {
