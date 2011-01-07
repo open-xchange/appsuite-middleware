@@ -115,6 +115,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     // Modules
     public static final String MODULE_TASK = "tasks";
 
+    public static final String MODULE_ATTACHMENTS = "attachments";
+
     public static final String MODULE_CALENDAR = "calendar";
 
     public static final String MODULE_CONTACT = "contacts";

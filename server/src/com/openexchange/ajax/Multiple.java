@@ -62,7 +62,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.FolderRequest;
+import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13Config;
@@ -313,6 +315,9 @@ public class Multiple extends SessionServlet {
                     ResponseWriter.writeException(oje, jsonWriter);
                     jsonWriter.endObject();
                 }
+            } else if (MODULE_ATTACHMENTS.equals(module)) {
+                    AttachmentRequest request = new AttachmentRequest(session, jsonWriter);
+                    request.action(action, new JSONSimpleRequest(jsonObj));
             } else {
                 final AjaxException ajaxException = new AjaxException(AjaxException.Code.UNKNOWN_MODULE, module);
                 LOG.error(ajaxException.getMessage(), ajaxException);
