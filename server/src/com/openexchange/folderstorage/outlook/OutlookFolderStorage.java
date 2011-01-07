@@ -333,8 +333,9 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Initialize memory tree
          */
-        final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-        final List<String> folderIds = memoryTable.getTree(Tools.getUnsignedInteger(treeId)).getFolders();
+        final Session session = storageParameters.getSession();
+        final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session, true);
+        final List<String> folderIds = memoryTable.getTree(Tools.getUnsignedInteger(treeId), session).getFolders();
         for (final String folderId : folderIds) {
             final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
             final boolean started = folderStorage.startTransaction(storageParameters, true);
@@ -778,7 +779,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                  * Load folder data from database
                  */
                 final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                final boolean presentInTable = memoryTable.getTree(tree).fillFolder(outlookFolder);
+                final boolean presentInTable = memoryTable.getTree(tree, user.getId(), contextId).fillFolder(outlookFolder);
                 //
                 if (!presentInTable) {
                     doModifications(outlookFolder);
@@ -925,7 +926,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                             throw FolderExceptionErrorMessage.TEMPORARY_ERROR.create(e, new Object[0]);
                         }
                     } else {
-                        final MemoryTree memoryTree = memoryTable.getTree(tree);
+                        final MemoryTree memoryTree = memoryTable.getTree(tree, user.getId(), contextId);
                         if (memoryTree.containsFolder(folderId)) {
                             /*
                              * In virtual tree table, but shouldn't
@@ -989,7 +990,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                      * Folder indicates to hold no subfolders; verify against virtual tree
                      */
                     final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                    final boolean contains = memoryTable.getTree(tree).containsParent(folderId);
+                    final boolean contains = memoryTable.getTree(tree, user.getId(), contextId).containsParent(folderId);
                     if (contains) {
                         outlookFolder.setSubfolderIDs(null);
                         outlookFolder.setSubscribedSubfolders(true);
@@ -1058,7 +1059,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                      * Get the ones from virtual table
                      */
                     final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                    final List<String[]> l = memoryTable.getTree(tree).getSubfolderIds(FolderStorage.PRIVATE_ID);
+                    final List<String[]> l = memoryTable.getTree(tree, user.getId(), contextId).getSubfolderIds(FolderStorage.PRIVATE_ID);
                     /*
                      * Filter only mail folders
                      */
@@ -1162,7 +1163,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                      * Strip subfolders occurring at another location in folder tree
                      */
                     final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                    final boolean[] contained = memoryTable.getTree(tree).containsFolders(realSubfolderIds);
+                    final boolean[] contained = memoryTable.getTree(tree, user.getId(), contextId).containsFolders(realSubfolderIds);
                     for (int k = 0; k < realSubfolderIds.length; k++) {
                         final SortableId realSubfolderId = realSubfolderIds[k];
                         if (!contained[k]) {
@@ -1291,7 +1292,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                          * Filter those mail folders which denote a virtual one
                          */
                         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                        final MemoryTree memoryTree = memoryTable.getTree(tree);
+                        final MemoryTree memoryTree = memoryTable.getTree(tree, user.getId(), contextId);
                         final boolean[] contained = memoryTree.containsFolders(inboxSubfolders);
                         for (int i = 0; i < inboxSubfolders.length; i++) {
                             if (!contained[i]) {
@@ -1504,7 +1505,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                  * Get the ones from virtual table
                  */
                 final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(parameters.getSession(), true);
-                final List<String[]> l = memoryTable.getTree(tree).getSubfolderIds(parentId);
+                final List<String[]> l = memoryTable.getTree(tree, user.getId(), contextId).getSubfolderIds(parentId);
                 final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
                 for (final String[] idAndName : l) {
                     put2TreeMap(idAndName[1], idAndName[0], treeMap);
@@ -1989,7 +1990,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
                 final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
                 final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                final boolean[] contained = memoryTable.getTree(tree).containsFolders(inboxSubfolders);
+                final boolean[] contained = memoryTable.getTree(tree, user.getId(), contextId).containsFolders(inboxSubfolders);
                 for (int i = 0; i < inboxSubfolders.length; i++) {
                     if (!contained[i]) {
                         final SortableId sortableId = inboxSubfolders[i];
@@ -2123,8 +2124,9 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     String getLocalizedName(final String id, final int tree, final Locale locale, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
-        final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-        final MemoryTree memoryTree = memoryTable.getTree(tree);
+        final Session session = storageParameters.getSession();
+        final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session, true);
+        final MemoryTree memoryTree = memoryTable.getTree(tree, session);
         final String name = memoryTree.getFolderName(id);
         if (null != name) {
             /*

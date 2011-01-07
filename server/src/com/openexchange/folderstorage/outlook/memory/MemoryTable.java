@@ -169,6 +169,14 @@ public final class MemoryTable {
         return initializeTree(treeId, session.getUserId(), session.getContextId());
     }
 
+    public MemoryTree getTree(final int treeId, final int userId, final int contextId) throws FolderException {
+        final MemoryTree memoryTree = treeMap.get(treeId);
+        if (null != memoryTree) {
+            return memoryTree;
+        }
+        return initializeTree(treeId, userId, contextId);
+    }
+
     public MemoryTree getTree(final int treeId) {
         return treeMap.get(treeId);
     }

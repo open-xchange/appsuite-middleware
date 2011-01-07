@@ -51,7 +51,6 @@ package com.openexchange.folderstorage.outlook.memory.impl;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -76,97 +75,6 @@ import com.openexchange.i18n.tools.StringHelper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryTreeImpl implements MemoryTree {
-
-    /**
-     * The empty memory tree.
-     */
-    public static final MemoryTree EMPTY_TREE = new MemoryTree() {
-        
-        public int size() {
-            return 0;
-        }
-        
-        public boolean isEmpty() {
-            return true;
-        }
-        
-        public String[] getSubfolderIds(Locale locale, String parentId, List<String[]> realSubfolderIds) {
-            return new String[0];
-        }
-        
-        public List<String[]> getSubfolderIds(String parentId) {
-            return Collections.emptyList();
-        }
-        
-        public List<String> getFolders() {
-            return Collections.emptyList();
-        }
-        
-        public MemoryCRUD getCrud() {
-            return new MemoryCRUD() {
-                
-                public MemoryFolder remove(String folderId) {
-                    return null;
-                }
-                
-                public MemoryFolder putIfAbsent(String folderId, MemoryFolder folder) {
-                    throw new UnsupportedOperationException("Not allowed for empty memory tree implementation.");
-                }
-                
-                public MemoryFolder putIfAbsent(MemoryFolder folder) {
-                    throw new UnsupportedOperationException("Not allowed for empty memory tree implementation.");
-                }
-                
-                public MemoryFolder put(String folderId, MemoryFolder folder) {
-                    throw new UnsupportedOperationException("Not allowed for empty memory tree implementation.");
-                }
-                
-                public MemoryFolder put(MemoryFolder folder) {
-                    throw new UnsupportedOperationException("Not allowed for empty memory tree implementation.");
-                }
-                
-                public MemoryFolder get(String folderId) {
-                    return null;
-                }
-                
-                public boolean containsFolder(String folderId) {
-                    return false;
-                }
-            };
-        }
-        
-        public boolean fillFolder(OutlookFolder outlookFolder) {
-            throw new UnsupportedOperationException("Not allowed for empty memory tree implementation.");
-        }
-        
-        public boolean containsParent(String parentId) {
-            return false;
-        }
-        
-        public boolean[] containsFolders(SortableId[] folderIds) {
-            boolean[] ret = new boolean[folderIds.length];
-            Arrays.fill(ret, false);
-            return ret;
-        }
-        
-        public boolean[] containsFolders(String[] folderIds) {
-            boolean[] ret = new boolean[folderIds.length];
-            Arrays.fill(ret, false);
-            return ret;
-        }
-        
-        public boolean containsFolder(String folderId) {
-            return false;
-        }
-        
-        public void clear() {
-            // Nope
-        }
-
-        public String getFolderName(String folderId) {
-            return null;
-        }
-    };
 
     private final ConcurrentMap<String, MemoryFolder> folderMap;
 
