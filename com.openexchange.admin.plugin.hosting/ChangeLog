@@ -1,3 +1,7 @@
+* 2011-01-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #17840: Added missing columns to getmoduleaccessforcontext CLT.
+
 * 2010-12-01 - choeger@open-xchange.com
 
  - Bugfix #16733: Production JVM settings differ from proposed server settings
