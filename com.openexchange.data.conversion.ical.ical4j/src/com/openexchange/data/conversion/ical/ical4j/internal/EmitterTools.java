@@ -51,6 +51,8 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
+import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.util.TimeZones;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,12 +61,16 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class EmitterTools {
+
+	private static TimeZoneRegistry timeZoneRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
 
     private static final Log LOG = LogFactory.getLog(EmitterTools.class);
 
@@ -81,13 +87,36 @@ public final class EmitterTools {
      * TODO add default timezone
      */
     public static DateTime toDateTime(final java.util.Date date) {
-        final DateTime retval = new DateTime(true);
+    	final DateTime retval = new DateTime(false);
+        retval.setTime(date.getTime());
+        return retval;
+    }
+
+    public static DateTime toDateTime(final java.util.Date date, String tzid) {
+    	final DateTime retval = new DateTime(false);
+
+        if(tzid != null){
+        	net.fortuna.ical4j.model.TimeZone ical4jTimezone = timeZoneRegistry.getTimeZone(tzid);
+        	retval.setTimeZone(ical4jTimezone);
+        }
         retval.setTime(date.getTime());
         return retval;
     }
 
     public static net.fortuna.ical4j.model.Date toDate(final java.util.Date date) {
         return new UTCDate(date.getTime());
+    }
+    
+    public static net.fortuna.ical4j.model.Date toDate(final java.util.Date date, String tzid) {
+    	if(tzid == null)
+    		return toDate(date);
+        return new TzDate(date.getTime(), tzid); 
+    }
+
+    public static String extractTimezoneIfPossible(CalendarObject co){
+    	if(Appointment.class.isAssignableFrom(co.getClass()))
+    		return ((Appointment) co).getTimezone();
+    	return null;
     }
 
     /**
@@ -107,6 +136,17 @@ public final class EmitterTools {
         }
     }
 
+    private static final class TzDate extends net.fortuna.ical4j.model.Date {
+
+        private static final long serialVersionUID = -4317836084736029666L;
+
+        public TzDate(final long time, final String tzid) {
+            super();
+            getFormat().setTimeZone(TimeZone.getTimeZone(tzid));
+            setTime(time);
+        }
+    }
+    
     public static java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
         java.util.Date retval = exception;
         try {

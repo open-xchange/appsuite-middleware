@@ -58,6 +58,7 @@ import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtEnd;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
@@ -80,7 +81,8 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
      */
     public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final DtEnd end = new DtEnd();
-        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getEndDate()) : toDateTime(calendar.getEndDate());
+        String tz = EmitterTools.extractTimezoneIfPossible(calendar);
+        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getEndDate(),tz) : toDateTime(calendar.getEndDate(),tz);
         end.setDate(date);
         component.getProperties().add(end);
     }

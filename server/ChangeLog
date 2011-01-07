@@ -1,3 +1,7 @@
+* 2011-01-07 - tobias.prinz@open-xchange.com
+
+ - Bugfix #17392: ICal exports now contain the timezone of the appointment on dates, so they are not "floating" (RFC5545) any more. 
+ 
 * 2011-01-03 - tobias.prinz@open-xchange.com
 
  - Bugfix #17937: If an import cannot be done because the UUID is in use, you now get to know which UUID is the problem
