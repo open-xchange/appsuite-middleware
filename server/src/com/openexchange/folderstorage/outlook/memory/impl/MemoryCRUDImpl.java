@@ -94,8 +94,8 @@ final class MemoryCRUDImpl implements MemoryCRUD {
         return prev;
     }
 
-    public boolean containsKey(final String fullName) {
-        return folderMap.containsKey(fullName);
+    public boolean containsFolder(final String folderId) {
+        return folderMap.containsKey(folderId);
     }
 
     public MemoryFolder get(final String folderId) {

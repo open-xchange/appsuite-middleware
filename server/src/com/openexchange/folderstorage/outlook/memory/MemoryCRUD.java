@@ -49,26 +49,69 @@
 
 package com.openexchange.folderstorage.outlook.memory;
 
-
-
 /**
- * {@link MemoryCRUD}
- *
+ * {@link MemoryCRUD} - Provides CRUD (<b>CR</b>eate, <b>U</b>pdate, and <b>D</b>elete) operations.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MemoryCRUD {
 
+    /**
+     * Puts specified folder if no such a folder is already contained.
+     * 
+     * @param folder The folder
+     * @return The folder already contained or <code>null</code> for successful put operation
+     */
     public MemoryFolder putIfAbsent(MemoryFolder folder);
 
+    /**
+     * Puts specified folder if no such a folder is already contained.
+     * 
+     * @param folderId The folder identifier
+     * @param folder The folder
+     * @return The folder already contained or <code>null</code> for successful put operation
+     */
     public MemoryFolder putIfAbsent(String folderId, MemoryFolder folder);
-    
-    public boolean containsKey(String fullName);
 
+    /**
+     * Checks if specified folder is contained.
+     * 
+     * @param folderId The folder identifier
+     * @return <code>true</code> if specified folder is contained; otherwise <code>false</code>
+     */
+    public boolean containsFolder(String folderId);
+
+    /**
+     * Gets the specified folder.
+     * 
+     * @param folderId The folder identifier
+     * @return The folder or <code>null</code> if there was no mapping
+     */
     public MemoryFolder get(String folderId);
 
+    /**
+     * Puts specified folder
+     * 
+     * @param folder The folder
+     * @return The previous folder or <code>null</code> if there was no mapping
+     */
     public MemoryFolder put(MemoryFolder folder);
 
+    /**
+     * Puts specified folder
+     * 
+     * @param folderId The folder identifier
+     * @param folder The folder
+     * @return The previous folder or <code>null</code> if there was no mapping
+     */
     public MemoryFolder put(String folderId, MemoryFolder folder);
 
+    /**
+     * Removes the specified folder.
+     * 
+     * @param folderId The folder identifier
+     * @return The removed folder or <code>null</code> if there was no mapping
+     */
     public MemoryFolder remove(String folderId);
+
 }

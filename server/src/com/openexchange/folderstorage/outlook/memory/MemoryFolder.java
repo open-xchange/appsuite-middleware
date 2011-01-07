@@ -54,228 +54,65 @@ import com.openexchange.folderstorage.Permission;
 
 /**
  * {@link MemoryFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MemoryFolder {
-
-    private String treeId;
-
-    private String id;
-
-    private String name;
-
-    private String parentId;
-
-    private Permission[] permissions;
-
-    private int modifiedBy;
-
-    private Date lastModified;
-
-    private Boolean subscribed;
-
-    /**
-     * Initializes a new {@link MemoryFolder}.
-     */
-    public MemoryFolder() {
-        super();
-    }
+public interface MemoryFolder {
 
     /**
      * Gets the subscribed
      *
      * @return The subscribed
      */
-    public Boolean getSubscribed() {
-        return subscribed;
-    }
-
-    
-    /**
-     * Sets the subscribed
-     *
-     * @param subscribed The subscribed to set
-     */
-    public void setSubscribed(Boolean subscribed) {
-        this.subscribed = subscribed;
-    }
+    public Boolean getSubscribed();
 
     /**
      * Gets the treeId
      * 
      * @return The treeId
      */
-    public String getTreeId() {
-        return treeId;
-    }
-
-    /**
-     * Sets the treeId
-     * 
-     * @param treeId The treeId to set
-     */
-    public void setTreeId(String treeId) {
-        this.treeId = treeId;
-    }
+    public String getTreeId();
 
     /**
      * Gets the id
      * 
      * @return The id
      */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Sets the id
-     * 
-     * @param id The id to set
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getId();
 
     /**
      * Gets the name
      * 
      * @return The name
      */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets the name
-     * 
-     * @param name The name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getName();
 
     /**
      * Gets the parentId
      * 
      * @return The parentId
      */
-    public String getParentId() {
-        return parentId;
-    }
-
-    /**
-     * Sets the parentId
-     * 
-     * @param parentId The parentId to set
-     */
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
-    }
+    public String getParentId();
 
     /**
      * Gets the permissions
      * 
      * @return The permissions
      */
-    public Permission[] getPermissions() {
-        return permissions;
-    }
-
-    /**
-     * Sets the permissions
-     * 
-     * @param permissions The permissions to set
-     */
-    public void setPermissions(Permission[] permissions) {
-        this.permissions = permissions;
-    }
+    public Permission[] getPermissions();
 
     /**
      * Gets the modifiedBy
      * 
      * @return The modifiedBy
      */
-    public int getModifiedBy() {
-        return modifiedBy;
-    }
-
-    /**
-     * Sets the modifiedBy
-     * 
-     * @param modifiedBy The modifiedBy to set
-     */
-    public void setModifiedBy(int modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
+    public int getModifiedBy();
 
     /**
      * Gets the lastModified
      * 
      * @return The lastModified
      */
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    /**
-     * Sets the lastModified
-     * 
-     * @param lastModified The lastModified to set
-     */
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((parentId == null) ? 0 : parentId.hashCode());
-        result = prime * result + ((treeId == null) ? 0 : treeId.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof MemoryFolder)) {
-            return false;
-        }
-        MemoryFolder other = (MemoryFolder) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
-        }
-        if (parentId == null) {
-            if (other.parentId != null) {
-                return false;
-            }
-        } else if (!parentId.equals(other.parentId)) {
-            return false;
-        }
-        if (treeId == null) {
-            if (other.treeId != null) {
-                return false;
-            }
-        } else if (!treeId.equals(other.treeId)) {
-            return false;
-        }
-        return true;
-    }
+    public Date getLastModified();
 
 }

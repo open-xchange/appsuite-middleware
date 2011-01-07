@@ -129,7 +129,7 @@ public final class MemoryTreeImpl implements MemoryTree {
                     return null;
                 }
                 
-                public boolean containsKey(String fullName) {
+                public boolean containsFolder(String folderId) {
                     return false;
                 }
             };
