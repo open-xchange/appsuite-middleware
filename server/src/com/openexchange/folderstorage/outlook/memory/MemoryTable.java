@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderException;
@@ -78,19 +79,35 @@ public final class MemoryTable {
     private static final String PARAM_MEMORY_TABLE = "com.openexchange.folderstorage.outlook.memory.memoryTable";
 
     public static MemoryTable getMemoryTableFor(final Session session, final boolean createIfAbsent) throws FolderException {
+        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        if (null != lock) {
+            lock.lock();
+            try {
+                return getMemoryTable0(session, createIfAbsent);
+            } finally {
+                lock.unlock();
+            }
+        }
+        /*
+         * Standard synchronization
+         */
         synchronized (session) {
-            MemoryTable memoryTable = (MemoryTable) session.getParameter(PARAM_MEMORY_TABLE);
-            if (null != memoryTable) {
-                return memoryTable;
-            }
-            if (!createIfAbsent) {
-                return null;
-            }
-            memoryTable = new MemoryTable();
-            memoryTable.initialize(session.getUserId(), session.getContextId());
-            session.setParameter(PARAM_MEMORY_TABLE, memoryTable);
+            return getMemoryTable0(session, createIfAbsent);
+        }
+    }
+
+    private static MemoryTable getMemoryTable0(final Session session, final boolean createIfAbsent) throws FolderException {
+        MemoryTable memoryTable = (MemoryTable) session.getParameter(PARAM_MEMORY_TABLE);
+        if (null != memoryTable) {
             return memoryTable;
         }
+        if (!createIfAbsent) {
+            return null;
+        }
+        memoryTable = new MemoryTable();
+        memoryTable.initialize(session.getUserId(), session.getContextId());
+        session.setParameter(PARAM_MEMORY_TABLE, memoryTable);
+        return memoryTable;
     }
 
     public static void dropMemoryTableFrom(final Session session) {
@@ -98,7 +115,7 @@ public final class MemoryTable {
             session.setParameter(PARAM_MEMORY_TABLE, null);
         }
     }
-    
+
     /*-
      * ------------------------ MEMBER STUFF -----------------------------
      */
@@ -197,7 +214,8 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT t.tree, t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? ORDER BY t.tree");
+            stmt =
+                con.prepareStatement("SELECT t.tree, t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? ORDER BY t.tree");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
@@ -270,7 +288,8 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ?");
+            stmt =
+                con.prepareStatement("SELECT t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, tree);
@@ -332,12 +351,14 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ? AND t.folderId = ?");
+            stmt =
+                con.prepareStatement("SELECT t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ? AND t.folderId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, tree);
             stmt.setString(4, folderId);
-            rs = stmt.executeQuery();;
+            rs = stmt.executeQuery();
+            ;
             if (!rs.next()) {
                 return;
             }
@@ -387,7 +408,8 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system FROM virtualPermission WHERE cid = ? AND user = ? AND tree = ? AND folderId = ?");
+            stmt =
+                con.prepareStatement("SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system FROM virtualPermission WHERE cid = ? AND user = ? AND tree = ? AND folderId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
