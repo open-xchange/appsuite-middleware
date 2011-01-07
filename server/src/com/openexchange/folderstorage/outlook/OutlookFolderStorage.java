@@ -991,7 +991,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                      * Folder indicates to hold no subfolders; verify against virtual tree
                      */
                     final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                    final boolean contains = memoryTable.getTree(tree, userId, contextId).containsParent(folderId);
+                    final MemoryTree memoryTree = memoryTable.getTree(tree, userId, contextId);
+                    final boolean contains = memoryTree.containsParent(folderId);
                     if (contains) {
                         outlookFolder.setSubfolderIDs(null);
                         outlookFolder.setSubscribedSubfolders(true);
