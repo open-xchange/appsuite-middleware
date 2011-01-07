@@ -82,8 +82,10 @@ public final class MemoryTable {
      * Gets the memory table for specified session.
      * 
      * @param session The session
-     * @param createIfAbsent <code>true</code> to create if absent; otherwise <code>false</code> to possible return <code>null</code> if there is no memory table
-     * @return The memory table for specified session or <code>null</code> if there is no memory table and <code>createIfAbsent</code> is <code>false</code>
+     * @param createIfAbsent <code>true</code> to create if absent; otherwise <code>false</code> to possible return <code>null</code> if
+     *            there is no memory table
+     * @return The memory table for specified session or <code>null</code> if there is no memory table and <code>createIfAbsent</code> is
+     *         <code>false</code>
      * @throws FolderException If creation of memory table fails
      */
     public static MemoryTable getMemoryTableFor(final Session session, final boolean createIfAbsent) throws FolderException {
@@ -153,42 +155,90 @@ public final class MemoryTable {
         treeMap = new ConcurrentTIntObjectHashMap<MemoryTree>();
     }
 
+    /**
+     * Clears this memory table.
+     */
     public void clear() {
         treeMap.clear();
     }
 
+    /**
+     * Checks if this memory table contains specified memory tree.
+     * 
+     * @param treeId The tree identifier
+     * @return <code>true</code> if this memory table contains specified memory tree; otherwise <code>false</code>
+     */
     public boolean containsTree(final int treeId) {
         return treeMap.containsKey(treeId);
     }
 
+    /**
+     * Gets the specified memory tree; atomically creates it if absent.
+     * 
+     * @param treeId The memory tree identifier
+     * @param session The session providing user data
+     * @return The memory tree
+     * @throws FolderException If creating memory tree fail
+     */
     public MemoryTree getTree(final int treeId, final Session session) throws FolderException {
-        final MemoryTree memoryTree = treeMap.get(treeId);
-        if (null != memoryTree) {
-            return memoryTree;
-        }
-        return initializeTree(treeId, session.getUserId(), session.getContextId());
+        return getTree(treeId, session.getUserId(), session.getContextId());
     }
 
+    /**
+     * Gets the specified memory tree; atomically creates it if absent.
+     * 
+     * @param treeId The memory tree identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The memory tree
+     * @throws FolderException If creating memory tree fail
+     */
     public MemoryTree getTree(final int treeId, final int userId, final int contextId) throws FolderException {
-        final MemoryTree memoryTree = treeMap.get(treeId);
-        if (null != memoryTree) {
-            return memoryTree;
+        MemoryTree memoryTree = treeMap.get(treeId);
+        if (null == memoryTree) {
+            final MemoryTree newMemoryTree = initializeTree(treeId, userId, contextId);
+            memoryTree = treeMap.putIfAbsent(treeId, newMemoryTree);
+            if (null == memoryTree) {
+                memoryTree = newMemoryTree;
+            }
         }
-        return initializeTree(treeId, userId, contextId);
+        return memoryTree;
     }
 
+    /**
+     * Gets the specified memory tree.
+     * 
+     * @param treeId The memory tree identifier
+     * @return The memory tree or <code>null</code> if absent
+     */
     public MemoryTree getTree(final int treeId) {
         return treeMap.get(treeId);
     }
 
+    /**
+     * Checks if this memory table is empty.
+     * 
+     * @return <code>true</code> if this memory table is empty; otherwise <code>false</code>
+     */
     public boolean isEmpty() {
         return treeMap.isEmpty();
     }
 
+    /**
+     * Removes the specified memory tree from this memory table.
+     * 
+     * @param treeId The memory tree identifier
+     * @return The removed memory tree or <code>null</code> if there was no such memory tree
+     */
     public MemoryTree remove(final int treeId) {
         return treeMap.remove(treeId);
     }
 
+    /**
+     * Gets the number of memory trees held by this memory table
+     * 
+     * @return The number of memory trees
+     */
     public int size() {
         return treeMap.size();
     }
@@ -213,6 +263,15 @@ public final class MemoryTable {
         }
     }
 
+    /**
+     * (Re-)Initializes specified tree.
+     * 
+     * @param treeId The tree identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The (re-)initialized tree
+     * @throws FolderException If initialization fails
+     */
     public MemoryTree initializeTree(final int treeId, final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
@@ -229,6 +288,16 @@ public final class MemoryTable {
         }
     }
 
+    /**
+     * (Re-)Initializes specified folder.
+     * 
+     * @param folderId The folder identifier
+     * @param treeId The tree identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The (re-)initialized folder
+     * @throws FolderException If initialization fails
+     */
     public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
@@ -314,6 +383,16 @@ public final class MemoryTable {
         }
     }
 
+    /**
+     * (Re-)Initializes specified tree.
+     * 
+     * @param treeId The tree identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con A connection
+     * @return The (re-)initialized tree
+     * @throws FolderException If initialization fails
+     */
     public MemoryTree initializeTree(final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
         if (null == con) {
             return initializeTree(treeId, userId, contextId);
@@ -327,11 +406,11 @@ public final class MemoryTable {
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
             rs = stmt.executeQuery();
-            if (!rs.next()) {
-                throw FolderExceptionErrorMessage.TREE_NOT_FOUND.create(Integer.valueOf(treeId));
-            }
             final MemoryTree memoryTree = new MemoryTreeImpl();
             treeMap.put(treeId, memoryTree);
+            if (!rs.next()) {
+                return memoryTree;
+            }
             do {
                 final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
                 memoryFolder.setId(rs.getString(1));
@@ -379,6 +458,17 @@ public final class MemoryTable {
         }
     }
 
+    /**
+     * (Re-)Initializes specified folder.
+     * 
+     * @param folderId The folder identifier
+     * @param treeId The tree identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con A connection
+     * @return The (re-)initialized folder
+     * @throws FolderException If initialization fails
+     */
     public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
         if (null == con) {
             return initializeFolder(folderId, treeId, userId, contextId);

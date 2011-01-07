@@ -954,7 +954,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          * Load folder data from database
          */
         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-        final boolean presentInTable = memoryTable.getTree(tree).fillFolder(outlookFolder);
+        final boolean presentInTable = memoryTable.getTree(tree, user.getId(), contextId).fillFolder(outlookFolder);
         //
         if (!presentInTable) {
             doModifications(outlookFolder);
@@ -1199,7 +1199,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         // Load folder data from database
         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-        final String[] ids = memoryTable.getTree(tree).getSubfolderIds(locale, parentId, l);
+        final String[] ids = memoryTable.getTree(tree, user.getId(), contextId).getSubfolderIds(locale, parentId, l);
         final SortableId[] ret = new SortableId[ids.length];
         for (int i = 0; i < ids.length; i++) {
             ret[i] = new OutlookId(ids[i], i, null);

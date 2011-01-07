@@ -51,7 +51,6 @@ package com.openexchange.folderstorage.outlook.memory.impl;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -76,105 +75,6 @@ import com.openexchange.i18n.tools.StringHelper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryTreeImpl implements MemoryTree {
-
-    public static final class EmptyMemoryTree implements MemoryTree {
-
-        private final int treeId;
-
-        public EmptyMemoryTree(final int treeId) {
-            super();
-            this.treeId = treeId;
-        }
-
-        public int getTreeId() {
-            return treeId;
-        }
-
-        public int size() {
-            return 0;
-        }
-
-        public boolean isEmpty() {
-            return true;
-        }
-
-        public String[] getSubfolderIds(final Locale locale, final String parentId, final List<String[]> realSubfolderIds) {
-            return new String[0];
-        }
-
-        public List<String[]> getSubfolderIds(final String parentId) {
-            return Collections.emptyList();
-        }
-
-        public List<String> getFolders() {
-            return Collections.emptyList();
-        }
-
-        public String getFolderName(final String folderId) {
-            return null;
-        }
-
-        public MemoryCRUD getCrud() {
-            return new MemoryCRUD() {
-
-                public MemoryFolder remove(final String folderId) {
-                    return null;
-                }
-
-                public MemoryFolder putIfAbsent(final String folderId, final MemoryFolder folder) {
-                    return null;
-                }
-
-                public MemoryFolder putIfAbsent(final MemoryFolder folder) {
-                    return null;
-                }
-
-                public MemoryFolder put(final String folderId, final MemoryFolder folder) {
-                    return null;
-                }
-
-                public MemoryFolder put(final MemoryFolder folder) {
-                    return null;
-                }
-
-                public MemoryFolder get(final String folderId) {
-                    return null;
-                }
-
-                public boolean containsFolder(final String folderId) {
-                    return false;
-                }
-            };
-        }
-
-        public boolean fillFolder(final OutlookFolder outlookFolder) {
-            return false;
-        }
-
-        public boolean containsParent(final String parentId) {
-            return false;
-        }
-
-        public boolean[] containsFolders(final SortableId[] folderIds) {
-            final boolean[] bs = new boolean[folderIds.length];
-            Arrays.fill(bs, false);
-            return bs;
-        }
-
-        public boolean[] containsFolders(final String[] folderIds) {
-            final boolean[] bs = new boolean[folderIds.length];
-            Arrays.fill(bs, false);
-            return bs;
-        }
-
-        public boolean containsFolder(final String folderId) {
-            return false;
-        }
-
-        public void clear() {
-            // Nothing to do
-        }
-    };
 
     private final ConcurrentMap<String, MemoryFolder> folderMap;
 
