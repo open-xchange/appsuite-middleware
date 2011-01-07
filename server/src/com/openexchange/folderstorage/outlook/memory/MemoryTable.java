@@ -62,6 +62,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.outlook.memory.impl.MemoryFolderImpl;
+import com.openexchange.folderstorage.outlook.memory.impl.MemoryTreeImpl;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
@@ -98,7 +100,7 @@ public final class MemoryTable {
     }
     
     /*-
-     * ------------------------ MEMNER STUFF -----------------------------
+     * ------------------------ MEMBER STUFF -----------------------------
      */
 
     private final ConcurrentTIntObjectHashMap<MemoryTree> treeMap;
@@ -110,6 +112,38 @@ public final class MemoryTable {
         super();
         treeMap = new ConcurrentTIntObjectHashMap<MemoryTree>();
     }
+
+    public void clear() {
+        treeMap.clear();
+    }
+
+    public boolean containsTree(final String treeId) {
+        return treeMap.containsKey(Integer.parseInt(treeId));
+    }
+
+    public MemoryTree getTree(final String treeId) {
+        final MemoryTree tree = treeMap.get(Integer.parseInt(treeId));
+        if (null == tree) {
+            return MemoryTreeImpl.EMPTY_TREE;
+        }
+        return tree;
+    }
+
+    public boolean isEmpty() {
+        return treeMap.isEmpty();
+    }
+
+    public MemoryTree remove(final String treeId) {
+        return treeMap.remove(Integer.parseInt(treeId));
+    }
+
+    public int size() {
+        return treeMap.size();
+    }
+
+    /*-
+     * ------------------------------- INIT STUFF -------------------------------
+     */
 
     private void initialize(final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
@@ -159,34 +193,6 @@ public final class MemoryTable {
         }
     }
 
-    public void clear() {
-        treeMap.clear();
-    }
-
-    public boolean containsTree(final String treeId) {
-        return treeMap.containsKey(Integer.parseInt(treeId));
-    }
-
-    public MemoryTree getTree(final String treeId) {
-        return treeMap.get(Integer.parseInt(treeId));
-    }
-
-    public boolean isEmpty() {
-        return treeMap.isEmpty();
-    }
-
-    public MemoryTree remove(final String treeId) {
-        return treeMap.remove(Integer.parseInt(treeId));
-    }
-
-    public int size() {
-        return treeMap.size();
-    }
-
-    /*-
-     * ------------------------------- INIT STUFF -------------------------------
-     */
-
     private void initialize(final int userId, final int contextId, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -197,7 +203,7 @@ public final class MemoryTable {
             rs = stmt.executeQuery();
             if (rs.next()) {
                 int tree = rs.getInt(1);
-                MemoryTree memoryTree = new MemoryTree();
+                MemoryTree memoryTree = new MemoryTreeImpl();
                 treeMap.put(tree, memoryTree);
                 do {
                     /*
@@ -207,11 +213,11 @@ public final class MemoryTable {
                         final int tid = rs.getInt(1);
                         if (tree != tid) {
                             tree = tid;
-                            memoryTree = new MemoryTree();
+                            memoryTree = new MemoryTreeImpl();
                             treeMap.put(tree, memoryTree);
                         }
                     }
-                    final MemoryFolder memoryFolder = new MemoryFolder();
+                    final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
                     memoryFolder.setId(rs.getString(2));
                     // Set optional modified-by
                     {
@@ -272,10 +278,10 @@ public final class MemoryTable {
             if (!rs.next()) {
                 return;
             }
-            final MemoryTree memoryTree = new MemoryTree();
+            final MemoryTree memoryTree = new MemoryTreeImpl();
             treeMap.put(tree, memoryTree);
             do {
-                final MemoryFolder memoryFolder = new MemoryFolder();
+                final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
                 memoryFolder.setId(rs.getString(1));
                 // Set optional modified-by
                 {
@@ -336,7 +342,7 @@ public final class MemoryTable {
                 return;
             }
             final MemoryTree memoryTree = treeMap.get(tree);
-            final MemoryFolder memoryFolder = new MemoryFolder();
+            final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
             memoryFolder.setId(rs.getString(1));
             // Set optional modified-by
             {
@@ -377,7 +383,7 @@ public final class MemoryTable {
         }
     }
 
-    private static void addPermissions(final MemoryFolder memoryFolder, final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
+    private static void addPermissions(final MemoryFolderImpl memoryFolder, final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
