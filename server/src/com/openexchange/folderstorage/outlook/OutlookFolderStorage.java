@@ -1987,14 +1987,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                     defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), mailType, storageParameters));
                 }
                 final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
-                final boolean[] contained =
-                            Select.containsFolders(
-                                contextId,
-                                tree,
-                                storageParameters.getUserId(),
-                                inboxSubfolders,
-                                StorageType.WORKING,
-                                checkReadConnection(storageParameters));
+                final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
+                final boolean[] contained = memoryTable.getTree(String.valueOf(tree)).containsFolders(inboxSubfolders);
                 for (int i = 0; i < inboxSubfolders.length; i++) {
                     if (!contained[i]) {
                         final SortableId sortableId = inboxSubfolders[i];
