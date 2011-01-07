@@ -82,7 +82,15 @@ public final class MailSessionCache {
         }
         if (null == mailCache) {
             final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-            if (null != lock) {
+            if (null == lock) {
+                synchronized (session) {
+                    mailCache = (MailSessionCache) session.getParameter(key);
+                    if (null == mailCache) {
+                        mailCache = new MailSessionCache();
+                        session.setParameter(key, mailCache);
+                    }
+            }
+            } else {
                 lock.lock();
                 try {
                     mailCache = (MailSessionCache) session.getParameter(key);
@@ -93,14 +101,6 @@ public final class MailSessionCache {
                 } finally {
                     lock.unlock();
                 }
-            } else {
-                synchronized (session) {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null == mailCache) {
-                        mailCache = new MailSessionCache();
-                        session.setParameter(key, mailCache);
-                    }
-            }
             }
         }
         return mailCache;
@@ -126,7 +126,15 @@ public final class MailSessionCache {
         }
         if (null != mailCache) {
             final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-            if (null != lock) {
+            if (null == lock) {
+                synchronized (session) {
+                    mailCache = (MailSessionCache) session.getParameter(key);
+                    if (null != mailCache) {
+                        mailCache.clear();
+                        session.setParameter(key, null);
+                    }
+                }
+            } else {
                 lock.lock();
                 try {
                     mailCache = (MailSessionCache) session.getParameter(key);
@@ -136,14 +144,6 @@ public final class MailSessionCache {
                     }
                 } finally {
                     lock.unlock();
-                }
-            } else {
-                synchronized (session) {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null != mailCache) {
-                        mailCache.clear();
-                        session.setParameter(key, null);
-                    }
                 }
             }
         }

@@ -1248,7 +1248,15 @@ public final class CacheFolderStorage implements FolderStorage {
         FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
         if (null == map) {
             final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-            if (null != lock) {
+            if (null == lock) {
+                synchronized (session) {
+                    map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+                    if (null == map) {
+                        map = new FolderMap(1024, 300, TimeUnit.SECONDS);
+                        session.setParameter(PARAM_FOLDER_MAP, map);
+                    }
+                }
+            } else {
                 lock.lock();
                 try {
                     map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
@@ -1258,14 +1266,6 @@ public final class CacheFolderStorage implements FolderStorage {
                     }
                 } finally {
                     lock.unlock();
-                }
-            } else {
-                synchronized (session) {
-                    map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
-                    if (null == map) {
-                        map = new FolderMap(1024, 300, TimeUnit.SECONDS);
-                        session.setParameter(PARAM_FOLDER_MAP, map);
-                    }
                 }
             }
         }

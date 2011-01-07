@@ -86,7 +86,19 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         final String key = SessionParameterNames.getTrashContainer(pop3Access.getAccountId());
         SessionPOP3StorageTrashContainer cached;
         final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-        if (null != lock) {
+        if (null == lock) {
+            synchronized (session) {
+                try {
+                    cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
+                } catch (final ClassCastException e) {
+                    cached = null;
+                }
+                if (null == cached) {
+                    cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access), session, key);
+                    session.setParameter(key, cached);
+                }
+            }
+        } else {
             lock.lock();
             try {
                 try {
@@ -100,18 +112,6 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
                 }
             } finally {
                 lock.unlock();
-            }
-        } else {
-            synchronized (session) {
-                try {
-                    cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access), session, key);
-                    session.setParameter(key, cached);
-                }
             }
         }
         return cached;

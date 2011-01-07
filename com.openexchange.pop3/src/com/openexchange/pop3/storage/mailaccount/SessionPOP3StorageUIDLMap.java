@@ -85,7 +85,19 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         final String key = SessionParameterNames.getUIDLMap(pop3Access.getAccountId());
         SessionPOP3StorageUIDLMap cached;
         final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-        if (null != lock) {
+        if (null == lock) {
+            synchronized (session) {
+                try {
+                    cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
+                } catch (final ClassCastException e) {
+                    cached = null;
+                }
+                if (null == cached) {
+                    cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access), session, key);
+                    session.setParameter(key, cached);
+                }
+            }
+        } else {
             lock.lock();
             try {
                 try {
@@ -99,18 +111,6 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 }
             } finally {
                 lock.unlock();
-            }
-        } else {
-            synchronized (session) {
-                try {
-                    cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access), session, key);
-                    session.setParameter(key, cached);
-                }
             }
         }
         return cached;
