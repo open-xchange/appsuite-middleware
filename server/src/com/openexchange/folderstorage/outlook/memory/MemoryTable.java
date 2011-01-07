@@ -98,7 +98,7 @@ public final class MemoryTable {
     }
     
     /*-
-     * ------------------------ MEMNER STUFF -----------------------------
+     * ------------------------ MEMBER STUFF -----------------------------
      */
 
     private final ConcurrentTIntObjectHashMap<MemoryTree> treeMap;
@@ -111,7 +111,35 @@ public final class MemoryTable {
         treeMap = new ConcurrentTIntObjectHashMap<MemoryTree>();
     }
 
-    public void initialize(final int userId, final int contextId) throws FolderException {
+    public void clear() {
+        treeMap.clear();
+    }
+
+    public boolean containsTree(final String treeId) {
+        return treeMap.containsKey(Integer.parseInt(treeId));
+    }
+
+    public MemoryTree getTree(final String treeId) {
+        return treeMap.get(Integer.parseInt(treeId));
+    }
+
+    public boolean isEmpty() {
+        return treeMap.isEmpty();
+    }
+
+    public MemoryTree remove(final String treeId) {
+        return treeMap.remove(Integer.parseInt(treeId));
+    }
+
+    public int size() {
+        return treeMap.size();
+    }
+
+    /*-
+     * ------------------------------- INIT STUFF -------------------------------
+     */
+
+    private void initialize(final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
         final Connection con;
@@ -158,34 +186,6 @@ public final class MemoryTable {
             databaseService.backWritable(contextId, con);
         }
     }
-
-    public void clear() {
-        treeMap.clear();
-    }
-
-    public boolean containsTree(final String treeId) {
-        return treeMap.containsKey(Integer.parseInt(treeId));
-    }
-
-    public MemoryTree getTree(final String treeId) {
-        return treeMap.get(Integer.parseInt(treeId));
-    }
-
-    public boolean isEmpty() {
-        return treeMap.isEmpty();
-    }
-
-    public MemoryTree remove(final String treeId) {
-        return treeMap.remove(Integer.parseInt(treeId));
-    }
-
-    public int size() {
-        return treeMap.size();
-    }
-
-    /*-
-     * ------------------------------- INIT STUFF -------------------------------
-     */
 
     private void initialize(final int userId, final int contextId, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
