@@ -180,6 +180,14 @@ public final class MemoryTreeImpl implements MemoryTree {
         crud = new MemoryCRUDImpl(folderMap, parentMap);
     }
 
+    /**
+     * Gets the name of the folder held in virtual tree for the folder denoted by given folder identifier.
+     */
+    public String getFolderName(final String folderId) {
+        final MemoryFolder memoryFolder = folderMap.get(folderId);
+        return null == memoryFolder ? null : memoryFolder.getName();
+    }
+
     public boolean containsParent(final String parentId) {
         return parentMap.containsKey(parentId);
     }
