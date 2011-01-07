@@ -157,12 +157,12 @@ public final class MemoryTable {
         treeMap.clear();
     }
 
-    public boolean containsTree(final String treeId) {
-        return treeMap.containsKey(Integer.parseInt(treeId));
+    public boolean containsTree(final int treeId) {
+        return treeMap.containsKey(treeId);
     }
 
-    public MemoryTree getTree(final String treeId) {
-        final MemoryTree tree = treeMap.get(Integer.parseInt(treeId));
+    public MemoryTree getTree(final int treeId) {
+        final MemoryTree tree = treeMap.get(treeId);
         if (null == tree) {
             return MemoryTreeImpl.EMPTY_TREE;
         }
@@ -173,8 +173,8 @@ public final class MemoryTable {
         return treeMap.isEmpty();
     }
 
-    public MemoryTree remove(final String treeId) {
-        return treeMap.remove(Integer.parseInt(treeId));
+    public MemoryTree remove(final int treeId) {
+        return treeMap.remove(treeId);
     }
 
     public int size() {
@@ -201,7 +201,7 @@ public final class MemoryTable {
         }
     }
 
-    public void initializeTree(final String treeId, final int userId, final int contextId) throws FolderException {
+    public void initializeTree(final int treeId, final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
         final Connection con;
@@ -217,7 +217,7 @@ public final class MemoryTable {
         }
     }
 
-    public void initializeFolder(final String folderId, final String treeId, final int userId, final int contextId) throws FolderException {
+    public void initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
         final Connection con;
@@ -302,12 +302,11 @@ public final class MemoryTable {
         }
     }
 
-    public void initializeTree(final String treeId, final int userId, final int contextId, final Connection con) throws FolderException {
+    public void initializeTree(final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
         if (null == con) {
             initializeTree(treeId, userId, contextId);
             return;
         }
-        final int tree = Integer.parseInt(treeId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -315,13 +314,13 @@ public final class MemoryTable {
                 con.prepareStatement("SELECT t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setInt(3, tree);
+            stmt.setInt(3, treeId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return;
             }
             final MemoryTree memoryTree = new MemoryTreeImpl();
-            treeMap.put(tree, memoryTree);
+            treeMap.put(treeId, memoryTree);
             do {
                 final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
                 memoryFolder.setId(rs.getString(1));
@@ -352,7 +351,7 @@ public final class MemoryTable {
                     }
                 }
                 // Add permissions in a separate query
-                addPermissions(memoryFolder, tree, userId, contextId, con);
+                addPermissions(memoryFolder, treeId, userId, contextId, con);
                 // Finally add folder to memory tree
                 memoryTree.getCrud().put(memoryFolder);
             } while (rs.next());
@@ -365,12 +364,11 @@ public final class MemoryTable {
         }
     }
 
-    public void initializeFolder(final String folderId, final String treeId, final int userId, final int contextId, final Connection con) throws FolderException {
+    public void initializeFolder(final String folderId, final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
         if (null == con) {
             initializeFolder(folderId, treeId, userId, contextId);
             return;
         }
-        final int tree = Integer.parseInt(treeId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -378,14 +376,14 @@ public final class MemoryTable {
                 con.prepareStatement("SELECT t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ? AND t.folderId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setInt(3, tree);
+            stmt.setInt(3, treeId);
             stmt.setString(4, folderId);
             rs = stmt.executeQuery();
             ;
             if (!rs.next()) {
                 return;
             }
-            final MemoryTree memoryTree = treeMap.get(tree);
+            final MemoryTree memoryTree = treeMap.get(treeId);
             final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
             memoryFolder.setId(rs.getString(1));
             // Set optional modified-by
@@ -415,7 +413,7 @@ public final class MemoryTable {
                 }
             }
             // Add permissions in a separate query
-            addPermissions(memoryFolder, tree, userId, contextId, con);
+            addPermissions(memoryFolder, treeId, userId, contextId, con);
             // Finally add folder to memory tree
             memoryTree.getCrud().put(memoryFolder);
         } catch (final SQLException e) {
