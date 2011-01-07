@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.objects.CachedSession;
@@ -124,6 +125,7 @@ public final class SessionImpl implements Session {
         this.authId = authId;
         this.hash = hash;
         parameters = new ConcurrentHashMap<String, Object>();
+        parameters.put(PARAM_LOCK, new ReentrantLock());
     }
 
     /**
@@ -149,6 +151,7 @@ public final class SessionImpl implements Session {
         for (final Entry<String, Serializable> entry : params.entrySet()) {
             parameters.put(entry.getKey(), entry.getValue());
         }
+        parameters.put(PARAM_LOCK, new ReentrantLock());
     }
 
     /**

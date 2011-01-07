@@ -57,6 +57,11 @@ package com.openexchange.session;
 public interface Session {
 
     /**
+     * The parameter name for session lock. The parameter value is an instance of <code>java.uitl.concurrent.locks.Lock</code>.
+     */
+    public static final String PARAM_LOCK = "com.openexchange.session.lock";
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();
