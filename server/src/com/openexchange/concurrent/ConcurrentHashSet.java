@@ -63,9 +63,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Moreover it supports full concurrency of retrievals and adjustable expected concurrency for updates.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @deprecated Use {@link NonBlockingHashSet} instead
  */
-@Deprecated
 public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
 
     private static final long serialVersionUID = -2608324279213322648L;
