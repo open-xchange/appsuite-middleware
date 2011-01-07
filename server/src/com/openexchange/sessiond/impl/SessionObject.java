@@ -52,6 +52,7 @@ package com.openexchange.sessiond.impl;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.session.Session;
 
 /**
@@ -98,9 +99,15 @@ public class SessionObject implements Session {
 
     private final Map<String, Object> parameters;
 
-    public SessionObject(final String sessionid) {
-        this.sessionid = sessionid;
+    /**
+     * Initializes a new {@link SessionObject}.
+     * 
+     * @param sessionId The session identifier
+     */
+    public SessionObject(final String sessionId) {
+        this.sessionid = sessionId;
         parameters = new ConcurrentHashMap<String, Object>();
+        parameters.put(PARAM_LOCK, new ReentrantLock());
     }
 
     public void setUsername(final String username) {
