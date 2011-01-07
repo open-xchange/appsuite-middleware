@@ -62,9 +62,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -985,12 +985,13 @@ public final class OutlookFolderStorage implements FolderStorage {
                  */
                 outlookFolder.setSubfolderIDs(null);
             } else {
+                final int userId = user.getId();
                 if (0 == realSubfolderIDs.length) {
                     /*
                      * Folder indicates to hold no subfolders; verify against virtual tree
                      */
                     final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                    final boolean contains = memoryTable.getTree(tree, user.getId(), contextId).containsParent(folderId);
+                    final boolean contains = memoryTable.getTree(tree, userId, contextId).containsParent(folderId);
                     if (contains) {
                         outlookFolder.setSubfolderIDs(null);
                         outlookFolder.setSubscribedSubfolders(true);
@@ -1003,7 +1004,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                          * Remove the ones kept in virtual table
                          */
                         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
-                        final boolean[] contained = memoryTable.getTree(tree, user.getId(), contextId).containsFolders(realSubfolderIDs);
+                        final MemoryTree memoryTree = memoryTable.getTree(tree, userId, contextId);
+                        final boolean[] contained = memoryTree.containsFolders(realSubfolderIDs);
                         boolean found = false;
                         for (int i = 0; !found && i < realSubfolderIDs.length; i++) {
                             if (!contained[i]) {
