@@ -161,12 +161,16 @@ public final class MemoryTable {
         return treeMap.containsKey(treeId);
     }
 
-    public MemoryTree getTree(final int treeId) {
-        final MemoryTree tree = treeMap.get(treeId);
-        if (null == tree) {
-            return MemoryTreeImpl.EMPTY_TREE;
+    public MemoryTree getTree(final int treeId, final Session session) throws FolderException {
+        final MemoryTree memoryTree = treeMap.get(treeId);
+        if (null != memoryTree) {
+            return memoryTree;
         }
-        return tree;
+        return initializeTree(treeId, session.getUserId(), session.getContextId());
+    }
+
+    public MemoryTree getTree(final int treeId) {
+        return treeMap.get(treeId);
     }
 
     public boolean isEmpty() {
@@ -201,7 +205,7 @@ public final class MemoryTable {
         }
     }
 
-    public void initializeTree(final int treeId, final int userId, final int contextId) throws FolderException {
+    public MemoryTree initializeTree(final int treeId, final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
         final Connection con;
@@ -211,13 +215,13 @@ public final class MemoryTable {
             throw new FolderException(e);
         }
         try {
-            initializeTree(treeId, userId, contextId, con);
+            return initializeTree(treeId, userId, contextId, con);
         } finally {
             databaseService.backWritable(contextId, con);
         }
     }
 
-    public void initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws FolderException {
+    public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
         final Connection con;
@@ -227,7 +231,7 @@ public final class MemoryTable {
             throw new FolderException(e);
         }
         try {
-            initializeFolder(folderId, treeId, userId, contextId, con);
+            return initializeFolder(folderId, treeId, userId, contextId, con);
         } finally {
             databaseService.backWritable(contextId, con);
         }
@@ -302,10 +306,9 @@ public final class MemoryTable {
         }
     }
 
-    public void initializeTree(final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
+    public MemoryTree initializeTree(final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
         if (null == con) {
-            initializeTree(treeId, userId, contextId);
-            return;
+            return initializeTree(treeId, userId, contextId);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -317,7 +320,7 @@ public final class MemoryTable {
             stmt.setInt(3, treeId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                return;
+                throw FolderExceptionErrorMessage.TREE_NOT_FOUND.create(Integer.valueOf(treeId));
             }
             final MemoryTree memoryTree = new MemoryTreeImpl();
             treeMap.put(treeId, memoryTree);
@@ -355,6 +358,10 @@ public final class MemoryTable {
                 // Finally add folder to memory tree
                 memoryTree.getCrud().put(memoryFolder);
             } while (rs.next());
+            /*
+             * Return newly initialized tree
+             */
+            return memoryTree;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -364,10 +371,9 @@ public final class MemoryTable {
         }
     }
 
-    public void initializeFolder(final String folderId, final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
+    public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
         if (null == con) {
-            initializeFolder(folderId, treeId, userId, contextId);
-            return;
+            return initializeFolder(folderId, treeId, userId, contextId);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -381,7 +387,7 @@ public final class MemoryTable {
             rs = stmt.executeQuery();
             ;
             if (!rs.next()) {
-                return;
+                throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, Integer.valueOf(treeId));
             }
             final MemoryTree memoryTree = treeMap.get(treeId);
             final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
@@ -416,6 +422,7 @@ public final class MemoryTable {
             addPermissions(memoryFolder, treeId, userId, contextId, con);
             // Finally add folder to memory tree
             memoryTree.getCrud().put(memoryFolder);
+            return memoryFolder;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
