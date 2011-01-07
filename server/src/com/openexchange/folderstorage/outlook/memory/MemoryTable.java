@@ -98,7 +98,7 @@ public final class MemoryTable {
     }
     
     /*-
-     * ------------------------ MEMBER STUFF -----------------------------
+     * ------------------------ MEMNER STUFF -----------------------------
      */
 
     private final ConcurrentTIntObjectHashMap<MemoryTree> treeMap;
@@ -110,34 +110,6 @@ public final class MemoryTable {
         super();
         treeMap = new ConcurrentTIntObjectHashMap<MemoryTree>();
     }
-
-    public void clear() {
-        treeMap.clear();
-    }
-
-    public boolean containsTree(final String treeId) {
-        return treeMap.containsKey(Integer.parseInt(treeId));
-    }
-
-    public MemoryTree getTree(final String treeId) {
-        return treeMap.get(Integer.parseInt(treeId));
-    }
-
-    public boolean isEmpty() {
-        return treeMap.isEmpty();
-    }
-
-    public MemoryTree remove(final String treeId) {
-        return treeMap.remove(Integer.parseInt(treeId));
-    }
-
-    public int size() {
-        return treeMap.size();
-    }
-
-    /*-
-     * ------------------------------- INIT STUFF -------------------------------
-     */
 
     private void initialize(final int userId, final int contextId) throws FolderException {
         final DatabaseService databaseService = Utility.getDatabaseService();
@@ -186,6 +158,34 @@ public final class MemoryTable {
             databaseService.backWritable(contextId, con);
         }
     }
+
+    public void clear() {
+        treeMap.clear();
+    }
+
+    public boolean containsTree(final String treeId) {
+        return treeMap.containsKey(Integer.parseInt(treeId));
+    }
+
+    public MemoryTree getTree(final String treeId) {
+        return treeMap.get(Integer.parseInt(treeId));
+    }
+
+    public boolean isEmpty() {
+        return treeMap.isEmpty();
+    }
+
+    public MemoryTree remove(final String treeId) {
+        return treeMap.remove(Integer.parseInt(treeId));
+    }
+
+    public int size() {
+        return treeMap.size();
+    }
+
+    /*-
+     * ------------------------------- INIT STUFF -------------------------------
+     */
 
     private void initialize(final int userId, final int contextId, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
