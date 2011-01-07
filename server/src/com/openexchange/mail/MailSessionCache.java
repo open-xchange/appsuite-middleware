@@ -126,15 +126,7 @@ public final class MailSessionCache {
         }
         if (null != mailCache) {
             final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-            if (null == lock) {
-                synchronized (session) {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null != mailCache) {
-                        mailCache.clear();
-                        session.setParameter(key, null);
-                    }
-                }
-            } else {
+            if (null != lock) {
                 lock.lock();
                 try {
                     mailCache = (MailSessionCache) session.getParameter(key);
@@ -144,6 +136,14 @@ public final class MailSessionCache {
                     }
                 } finally {
                     lock.unlock();
+                }
+            } else {
+                synchronized (session) {
+                    mailCache = (MailSessionCache) session.getParameter(key);
+                    if (null != mailCache) {
+                        mailCache.clear();
+                        session.setParameter(key, null);
+                    }
                 }
             }
         }
