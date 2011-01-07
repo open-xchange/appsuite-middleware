@@ -196,10 +196,11 @@ public final class MemoryTable {
     public MemoryTree getTree(final int treeId, final int userId, final int contextId) throws FolderException {
         MemoryTree memoryTree = treeMap.get(treeId);
         if (null == memoryTree) {
-            final MemoryTree newMemoryTree = initializeTree(treeId, userId, contextId);
-            memoryTree = treeMap.putIfAbsent(treeId, newMemoryTree);
-            if (null == memoryTree) {
-                memoryTree = newMemoryTree;
+            synchronized (this) {
+                memoryTree = treeMap.get(treeId);
+                if (null == memoryTree) {
+                    memoryTree = initializeTree(treeId, userId, contextId);
+                }
             }
         }
         return memoryTree;
