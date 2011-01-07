@@ -388,4 +388,12 @@ public final class LoginPerformer {
         sb.append(session.getSessionID());
         LOG.info(sb.toString());
     }
+
+    public Session lookupSession(String sessionId) throws LoginException {
+        try {
+            return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
+        } catch (ServiceException x) {
+            throw new LoginException(x);
+        }
+    }
 }

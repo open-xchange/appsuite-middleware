@@ -97,6 +97,7 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
@@ -188,8 +189,16 @@ public class Login extends AJAXServlet {
                 return;
             }
             try {
-                final Session session = LoginPerformer.getInstance().doLogout(sessionId);
+                Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                 if(session != null) {
+                    final String secret = SessionServlet.extractSecret(session.getHash(), req.getCookies());
+
+                    if (secret == null || !session.getSecret().equals(secret)) {
+                        sendError(resp);
+                        return;
+                    }
+
+                    LoginPerformer.getInstance().doLogout(sessionId);
                     // Drop relevant cookies
                     SessionServlet.removeOXCookies(session.getHash(), req, resp);
                     SessionServlet.removeJSESSIONID(req, resp);
