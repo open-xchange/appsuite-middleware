@@ -63,6 +63,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -1246,11 +1247,25 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
         if (null == map) {
-            synchronized (session) {
-                map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
-                if (null == map) {
-                    map = new FolderMap(1024, 300, TimeUnit.SECONDS);
-                    session.setParameter(PARAM_FOLDER_MAP, map);
+            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+            if (null != lock) {
+                lock.lock();
+                try {
+                    map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+                    if (null == map) {
+                        map = new FolderMap(1024, 300, TimeUnit.SECONDS);
+                        session.setParameter(PARAM_FOLDER_MAP, map);
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            } else {
+                synchronized (session) {
+                    map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+                    if (null == map) {
+                        map = new FolderMap(1024, 300, TimeUnit.SECONDS);
+                        session.setParameter(PARAM_FOLDER_MAP, map);
+                    }
                 }
             }
         }

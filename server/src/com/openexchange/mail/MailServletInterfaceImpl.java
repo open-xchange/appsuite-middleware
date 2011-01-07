@@ -2306,9 +2306,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
+    private Object getLockObject() {
+        final Object lock = session.getParameter(Session.PARAM_LOCK);
+        return null == lock ? session : lock;
+    }
+
     private void setRateLimitTime(final int rateLimit) {
         if (rateLimit > 0) {
-            synchronized (session) {
+            synchronized (getLockObject()) {
                 session.setParameter(LAST_SEND_TIME, Long.valueOf(System.currentTimeMillis()));
             }
         }
@@ -2316,7 +2321,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private void rateLimitChecks(final ComposedMailMessage composedMail, final int rateLimit, final int maxToCcBcc) throws MailException {
         if (rateLimit > 0) {
-            synchronized (session) {
+            synchronized (getLockObject()) {
                 final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
                 if (null != parameter && (parameter.longValue() + rateLimit) >= System.currentTimeMillis()) {
                     final NumberFormat numberInstance = DecimalFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
@@ -2325,7 +2330,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         if (maxToCcBcc > 0) {
-            synchronized (session) {
+            synchronized (getLockObject()) {
                 int count = (composedMail.getTo() == null ? 0 : composedMail.getTo().length);
                 count += (composedMail.getCc() == null ? 0 : composedMail.getCc().length);
                 count += (composedMail.getBcc() == null ? 0 : composedMail.getBcc().length);

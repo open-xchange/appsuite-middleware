@@ -195,10 +195,15 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
     }
 
+    private Object getLockObject() {
+        final Object lock = session.getParameter(Session.PARAM_LOCK);
+        return null == lock ? session : lock;
+    }
+
     public void checkDefaultFolders() throws MailException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         if (!isDefaultFoldersChecked(mailSessionCache)) {
-            synchronized (session) {
+            synchronized (getLockObject()) {
                 if (isDefaultFoldersChecked(mailSessionCache)) {
                     return;
                 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.cache;
 
+import java.util.concurrent.locks.Lock;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -123,14 +124,31 @@ public final class FolderCache {
         mailCache.get(entry);
         FolderMap folderMap = entry.getValue();
         if (null == folderMap) {
-            synchronized (session) {
-                mailCache.get(entry);
-                folderMap = entry.getValue();
-                if (null == folderMap) {
-                    final FolderMap newMap = new FolderMap(MailAccount.DEFAULT_ID == accountId ? MAX_CAPACITY_DEFAULT_ACCOUNT : MAX_CAPACITY_PER_ACCOUNT);
-                    entry.setValue(newMap);
-                    mailCache.put(entry);
-                    folderMap = newMap;
+            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+            if (null != lock) {
+                lock.lock();
+                try {
+                    mailCache.get(entry);
+                    folderMap = entry.getValue();
+                    if (null == folderMap) {
+                        final FolderMap newMap = new FolderMap(MailAccount.DEFAULT_ID == accountId ? MAX_CAPACITY_DEFAULT_ACCOUNT : MAX_CAPACITY_PER_ACCOUNT);
+                        entry.setValue(newMap);
+                        mailCache.put(entry);
+                        folderMap = newMap;
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            } else {
+                synchronized (session) {
+                    mailCache.get(entry);
+                    folderMap = entry.getValue();
+                    if (null == folderMap) {
+                        final FolderMap newMap = new FolderMap(MailAccount.DEFAULT_ID == accountId ? MAX_CAPACITY_DEFAULT_ACCOUNT : MAX_CAPACITY_PER_ACCOUNT);
+                        entry.setValue(newMap);
+                        mailCache.put(entry);
+                        folderMap = newMap;
+                    }
                 }
             }
         }

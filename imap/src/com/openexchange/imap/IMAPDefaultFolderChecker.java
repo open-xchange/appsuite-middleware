@@ -195,9 +195,14 @@ public final class IMAPDefaultFolderChecker {
         checkDefaultFolders(MailSessionParameterNames.getParamDefaultFolderChecked(), MailSessionCache.getInstance(session));
     }
 
+    private Object getLockObject() {
+        final Object lock = session.getParameter(Session.PARAM_LOCK);
+        return null == lock ? session : lock;
+    }
+
     private void checkDefaultFolders(final String key, final MailSessionCache mailSessionCache) throws MailException {
         if (!isDefaultFoldersChecked(key, mailSessionCache)) {
-            synchronized (session) {
+            synchronized (getLockObject()) {
                 if (isDefaultFoldersChecked(key, mailSessionCache)) {
                     return;
                 }

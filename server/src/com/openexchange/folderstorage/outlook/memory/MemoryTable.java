@@ -78,6 +78,14 @@ public final class MemoryTable {
 
     private static final String PARAM_MEMORY_TABLE = "com.openexchange.folderstorage.outlook.memory.memoryTable";
 
+    /**
+     * Gets the memory table for specified session.
+     * 
+     * @param session The session
+     * @param createIfAbsent <code>true</code> to create if absent; otherwise <code>false</code> to possible return <code>null</code> if there is no memory table
+     * @return The memory table for specified session or <code>null</code> if there is no memory table and <code>createIfAbsent</code> is <code>false</code>
+     * @throws FolderException If creation of memory table fails
+     */
     public static MemoryTable getMemoryTableFor(final Session session, final boolean createIfAbsent) throws FolderException {
         final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null != lock) {
@@ -110,9 +118,24 @@ public final class MemoryTable {
         return memoryTable;
     }
 
+    /**
+     * Drops the memory table from specified session
+     * 
+     * @param session The session
+     */
     public static void dropMemoryTableFrom(final Session session) {
-        synchronized (MemoryTable.class) {
-            session.setParameter(PARAM_MEMORY_TABLE, null);
+        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        if (null != lock) {
+            lock.lock();
+            try {
+                session.setParameter(PARAM_MEMORY_TABLE, null);
+            } finally {
+                lock.unlock();
+            }
+        } else {
+            synchronized (MemoryTable.class) {
+                session.setParameter(PARAM_MEMORY_TABLE, null);
+            }
         }
     }
 

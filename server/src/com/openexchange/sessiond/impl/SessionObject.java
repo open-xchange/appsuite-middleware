@@ -231,6 +231,9 @@ public class SessionObject implements Session {
     }
 
     public void setParameter(final String name, final Object value) {
+        if (PARAM_LOCK.equals(name)) {
+            return;
+        }
         if (null == value) {
             parameters.remove(name);
         } else {

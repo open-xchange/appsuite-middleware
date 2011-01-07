@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import gnu.trove.TIntObjectHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.session.Session;
 
 /**
@@ -80,12 +81,26 @@ public final class MailSessionCache {
             session.setParameter(key, null);
         }
         if (null == mailCache) {
-            synchronized (session) {
-                mailCache = (MailSessionCache) session.getParameter(key);
-                if (null == mailCache) {
-                    mailCache = new MailSessionCache();
-                    session.setParameter(key, mailCache);
+            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+            if (null != lock) {
+                lock.lock();
+                try {
+                    mailCache = (MailSessionCache) session.getParameter(key);
+                    if (null == mailCache) {
+                        mailCache = new MailSessionCache();
+                        session.setParameter(key, mailCache);
+                    }
+                } finally {
+                    lock.unlock();
                 }
+            } else {
+                synchronized (session) {
+                    mailCache = (MailSessionCache) session.getParameter(key);
+                    if (null == mailCache) {
+                        mailCache = new MailSessionCache();
+                        session.setParameter(key, mailCache);
+                    }
+            }
             }
         }
         return mailCache;
