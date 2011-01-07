@@ -62,9 +62,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -106,8 +106,8 @@ import com.openexchange.folderstorage.mail.contentType.SentContentType;
 import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
-import com.openexchange.folderstorage.outlook.memory.MemoryTree;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
+import com.openexchange.folderstorage.outlook.memory.MemoryTree;
 import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
@@ -2128,14 +2128,9 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     String getLocalizedName(final String id, final int tree, final Locale locale, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
-        final String name =
-                    Select.getFolderName(
-                        storageParameters.getContextId(),
-                        tree,
-                        storageParameters.getUserId(),
-                        id,
-                        StorageType.WORKING,
-                        checkReadConnection(storageParameters));
+        final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession(), true);
+        final MemoryTree memoryTree = memoryTable.getTree(String.valueOf(tree));
+        final String name = memoryTree.getFolderName(id);
         if (null != name) {
             /*
              * If name is held in virtual tree, it has no locale-sensitive string

@@ -62,35 +62,40 @@ import com.openexchange.folderstorage.outlook.OutlookFolder;
 public interface MemoryTree {
 
     /**
+     * Gets the name of the folder held in virtual tree for the folder denoted by given folder identifier.
+     */
+    public String getFolderName(String folderId);
+
+    /**
      * Checks if the specified virtual tree contains a parent denoted by given parent identifier.
      */
-    public boolean containsParent(final String parentId);
+    public boolean containsParent(String parentId);
 
     /**
      * Checks if the specified virtual tree contains the folder denoted by given folder identifier.
      */
-    public boolean containsFolder(final String folderId);
+    public boolean containsFolder(String folderId);
 
     /**
      * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
      */
-    public boolean[] containsFolders(final String[] folderIds);
+    public boolean[] containsFolders(String[] folderIds);
 
     /**
      * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
      */
-    public boolean[] containsFolders(final SortableId[] folderIds);
+    public boolean[] containsFolders(SortableId[] folderIds);
 
-    public List<String[]> getSubfolderIds(final String parentId);
+    public List<String[]> getSubfolderIds(String parentId);
 
     public List<String> getFolders();
 
     /**
      * Gets the sorted identifiers of the subfolders located below specified parent.
      */
-    public String[] getSubfolderIds(final Locale locale, final String parentId, final List<String[]> realSubfolderIds);
+    public String[] getSubfolderIds(Locale locale, String parentId, List<String[]> realSubfolderIds);
 
-    public boolean fillFolder(final OutlookFolder outlookFolder);
+    public boolean fillFolder(OutlookFolder outlookFolder);
 
     public MemoryCRUD getCrud();
 

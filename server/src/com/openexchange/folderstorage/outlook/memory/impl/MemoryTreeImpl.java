@@ -162,6 +162,10 @@ public final class MemoryTreeImpl implements MemoryTree {
         public void clear() {
             // Nope
         }
+
+        public String getFolderName(String folderId) {
+            return null;
+        }
     };
 
     private final ConcurrentMap<String, MemoryFolder> folderMap;
