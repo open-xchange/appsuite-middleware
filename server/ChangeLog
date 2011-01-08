@@ -1,3 +1,7 @@
+* 2011-01-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #17976: Returning empty in-memory tree if there is no entry for current user
+
 * 2011-01-07 - tobias.prinz@open-xchange.com
 
  - Bugfix #17392: ICal exports now contain the timezone of the appointment on dates, so they are not "floating" (RFC5545) any more. 
