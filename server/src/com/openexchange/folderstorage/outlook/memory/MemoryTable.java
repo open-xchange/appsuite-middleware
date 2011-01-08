@@ -290,63 +290,11 @@ public final class MemoryTable {
         }
     }
 
-    /**
-     * (Re-)Initializes specified tree.
-     * 
-     * @param treeId The tree identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The (re-)initialized tree
-     * @throws FolderException If initialization fails
-     */
-    public MemoryTree initializeTree(final int treeId, final int userId, final int contextId) throws FolderException {
-        final DatabaseService databaseService = Utility.getDatabaseService();
-        // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getWritable(contextId);
-        } catch (final DBPoolingException e) {
-            throw new FolderException(e);
-        }
-        try {
-            return initializeTree(treeId, userId, contextId, con);
-        } finally {
-            databaseService.backWritable(contextId, con);
-        }
-    }
-
-    /**
-     * (Re-)Initializes specified folder.
-     * 
-     * @param folderId The folder identifier
-     * @param treeId The tree identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The (re-)initialized folder
-     * @throws FolderException If initialization fails
-     */
-    public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws FolderException {
-        final DatabaseService databaseService = Utility.getDatabaseService();
-        // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getWritable(contextId);
-        } catch (final DBPoolingException e) {
-            throw new FolderException(e);
-        }
-        try {
-            return initializeFolder(folderId, treeId, userId, contextId, con);
-        } finally {
-            databaseService.backWritable(contextId, con);
-        }
-    }
-
     private void initialize(final int userId, final int contextId, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt =
-                con.prepareStatement("SELECT t.tree, t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? ORDER BY t.tree");
+            stmt = con.prepareStatement("SELECT t.tree, t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? ORDER BY t.tree");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
@@ -419,6 +367,31 @@ public final class MemoryTable {
      * @param treeId The tree identifier
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return The (re-)initialized tree
+     * @throws FolderException If initialization fails
+     */
+    public MemoryTree initializeTree(final int treeId, final int userId, final int contextId) throws FolderException {
+        final DatabaseService databaseService = Utility.getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getWritable(contextId);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            return initializeTree(treeId, userId, contextId, con);
+        } finally {
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * (Re-)Initializes specified tree.
+     * 
+     * @param treeId The tree identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param con A connection
      * @return The (re-)initialized tree
      * @throws FolderException If initialization fails
@@ -430,8 +403,7 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt =
-                con.prepareStatement("SELECT t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ?");
+            stmt = con.prepareStatement("SELECT t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
@@ -495,6 +467,32 @@ public final class MemoryTable {
      * @param treeId The tree identifier
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return The (re-)initialized folder
+     * @throws FolderException If initialization fails
+     */
+    public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws FolderException {
+        final DatabaseService databaseService = Utility.getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getWritable(contextId);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            return initializeFolder(folderId, treeId, userId, contextId, con);
+        } finally {
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * (Re-)Initializes specified folder.
+     * 
+     * @param folderId The folder identifier
+     * @param treeId The tree identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param con A connection
      * @return The (re-)initialized folder
      * @throws FolderException If initialization fails
@@ -506,8 +504,7 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt =
-                con.prepareStatement("SELECT t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ? AND t.folderId = ?");
+            stmt = con.prepareStatement("SELECT t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ? AND t.folderId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
@@ -564,8 +561,7 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt =
-                con.prepareStatement("SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system FROM virtualPermission WHERE cid = ? AND user = ? AND tree = ? AND folderId = ?");
+            stmt = con.prepareStatement("SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system FROM virtualPermission WHERE cid = ? AND user = ? AND tree = ? AND folderId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
