@@ -51,13 +51,33 @@ package com.openexchange.session;
 
 /**
  * {@link Session}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Session {
 
     /**
      * The parameter name for session lock. The parameter value is an instance of <code>java.uitl.concurrent.locks.Lock</code>.
+     * <p>
+     * Usage for locking session might look like:
+     * 
+     * <pre>
+     * import java.uitl.concurrent.locks.Lock
+     * ...
+     * final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+     * if (null == lock) {
+     *  synchronized (session) {
+     *   ...
+     *  }
+     * } else {
+     *  lock.lock();
+     *  try {
+     *   ...
+     *  } finally {
+     *   lock.unlock();
+     *  }
+     * }
+     * </pre>
      */
     public static final String PARAM_LOCK = "com.openexchange.session.lock";
 
@@ -68,27 +88,28 @@ public interface Session {
 
     /**
      * Gets the local IP address
-     *
+     * 
      * @return The local IP address
      */
     public String getLocalIp();
 
     /**
      * Updates the local IP address.
+     * 
      * @param ip the new IP address associated with this session
      */
     public void setLocalIp(String ip);
 
     /**
      * Gets the login name
-     *
+     * 
      * @return The login name
      */
     public String getLoginName();
 
     /**
      * Checks if there is a parameter bound to specified name.
-     *
+     * 
      * @param name The parameter name
      * @return <code>true</code> if there is a parameter bound to specified name; otherwise <code>false</code>
      */
@@ -96,7 +117,7 @@ public interface Session {
 
     /**
      * Gets the parameter bound to specified name or <code>null</code> if no such parameter is present
-     *
+     * 
      * @param name The parameter name
      * @return The parameter or <code>null</code>
      */
@@ -104,49 +125,49 @@ public interface Session {
 
     /**
      * Gets the password
-     *
+     * 
      * @return The password
      */
     public String getPassword();
 
     /**
      * Gets the random token
-     *
+     * 
      * @return The random token
      */
     public String getRandomToken();
 
     /**
      * Gets the secret
-     *
+     * 
      * @return
      */
     public String getSecret();
 
     /**
      * Gets the session ID
-     *
+     * 
      * @return The session ID
      */
     public String getSessionID();
 
     /**
      * Gets the user ID
-     *
+     * 
      * @return The user ID
      */
     public int getUserId();
 
     /**
      * Gets the user login
-     *
+     * 
      * @return The user login
      */
     public String getUserlogin();
 
     /**
      * Gets the full login incl. context information; e.g <code>test@foo</code>
-     *
+     * 
      * @return The full login
      */
     public String getLogin();
@@ -158,7 +179,7 @@ public interface Session {
      * <p>
      * <code>Note</code>: To ensure the parameter will reside in session on remote distribution the <code>Serializable</code> interface
      * should be implemented for specified value.
-     *
+     * 
      * @param name The parameter name
      * @param value The parameter value
      */
@@ -181,6 +202,7 @@ public interface Session {
 
     /**
      * Updates the hash value of this session.
+     * 
      * @param hash The new hash value
      */
     public void setHash(String hash);

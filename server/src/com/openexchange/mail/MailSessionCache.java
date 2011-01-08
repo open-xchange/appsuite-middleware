@@ -118,7 +118,7 @@ public final class MailSessionCache {
             mailCache = (MailSessionCache) session.getParameter(key);
         } catch (final ClassCastException e) {
             /*
-             * Class version does not match; just renew session cache.
+             * Class version does not match
              */
             mailCache = null;
             session.setParameter(key, null);
@@ -126,7 +126,15 @@ public final class MailSessionCache {
         }
         if (null != mailCache) {
             final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-            if (null != lock) {
+            if (null == lock) {
+                synchronized (session) {
+                    mailCache = (MailSessionCache) session.getParameter(key);
+                    if (null != mailCache) {
+                        mailCache.clear();
+                        session.setParameter(key, null);
+                    }
+                }
+            } else {
                 lock.lock();
                 try {
                     mailCache = (MailSessionCache) session.getParameter(key);
@@ -136,14 +144,6 @@ public final class MailSessionCache {
                     }
                 } finally {
                     lock.unlock();
-                }
-            } else {
-                synchronized (session) {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null != mailCache) {
-                        mailCache.clear();
-                        session.setParameter(key, null);
-                    }
                 }
             }
         }

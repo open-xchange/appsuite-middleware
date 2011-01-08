@@ -83,8 +83,9 @@ public final class ProxyEventHandler implements EventHandler {
                 @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
                     (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                 // For each session
+                final ProxyRegistryImpl registryImpl = ProxyRegistryImpl.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    ProxyRegistryImpl.getInstance().dropRegistrationsFor(session.getSessionID());
+                    registryImpl.dropRegistrationsFor(session.getSessionID());
                 }
             } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
                 // final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);

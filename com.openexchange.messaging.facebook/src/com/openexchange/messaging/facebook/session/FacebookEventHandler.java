@@ -95,8 +95,9 @@ public final class FacebookEventHandler implements EventHandler {
                 @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
                     (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                 // For each session
+                final FacebookSessionRegistry sessionRegistry = FacebookSessionRegistry.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    if (FacebookSessionRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                    if (sessionRegistry.removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
                         LOG.debug(new StringBuilder("Facebook session removed for user ").append(session.getUserId()).append(" in context ").append(
                             session.getContextId()).toString());
                     }
