@@ -93,6 +93,21 @@ public final class MemoryTable {
      * Gets the memory table for specified session.
      * 
      * @param session The session
+     * @return The memory table for specified session or <code>null</code> if absent
+     */
+    public static MemoryTable optMemoryTableFor(final Session session) {
+        try {
+            return getMemoryTableFor(session, false);
+        } catch (final FolderException e) {
+            // Cannot occur
+            return null;
+        }
+    }
+
+    /**
+     * Gets the memory table for specified session.
+     * 
+     * @param session The session
      * @param createIfAbsent <code>true</code> to create if absent; otherwise <code>false</code> to possibly return <code>null</code> if
      *            there is no memory table
      * @return The memory table for specified session or <code>null</code> if there is no memory table and <code>createIfAbsent</code> is
