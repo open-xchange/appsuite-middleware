@@ -222,7 +222,7 @@ public final class MemoryTable {
     public MemoryTree getTree(final int treeId, final int userId, final int contextId) throws FolderException {
         MemoryTree memoryTree = treeMap.get(treeId);
         if (null == memoryTree) {
-            synchronized (this) {
+            synchronized (treeMap) {
                 memoryTree = treeMap.get(treeId);
                 if (null == memoryTree) {
                     memoryTree = initializeTree(treeId, userId, contextId);
