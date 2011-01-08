@@ -121,9 +121,6 @@ public final class MemoryPermission implements Permission {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
         if (!(obj instanceof Permission)) {
             return false;
         }
