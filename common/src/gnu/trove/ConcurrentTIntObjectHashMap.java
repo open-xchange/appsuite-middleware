@@ -58,6 +58,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * {@link ConcurrentTIntObjectHashMap} - A concurrent {@link TIntObjectHashMap} implementation using a {@link ReadWriteLock} instance.
+ * <p>
+ * An open addressed Map implementation for int keys and Object values.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
