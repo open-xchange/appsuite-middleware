@@ -79,6 +79,17 @@ public final class MemoryTable {
     private static final String PARAM_MEMORY_TABLE = "com.openexchange.folderstorage.outlook.memory.memoryTable";
 
     /**
+     * Gets the memory table for specified session, creates it if absent for given session.
+     * 
+     * @param session The session
+     * @return The memory table for specified session
+     * @throws FolderException If creation of memory table fails
+     */
+    public static MemoryTable getMemoryTableFor(final Session session) throws FolderException {
+        return getMemoryTableFor(session, true);
+    }
+
+    /**
      * Gets the memory table for specified session.
      * 
      * @param session The session
