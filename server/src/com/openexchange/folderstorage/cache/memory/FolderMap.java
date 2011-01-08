@@ -111,16 +111,20 @@ public final class FolderMap {
     public Folder putIfAbsent(final String folderId, final String treeId, final Folder folder) {
         final Wrapper wrapper = wrapperOf(folder);
         final Key key = keyOf(folderId, treeId);
-        final Wrapper prev = map.putIfAbsent(key, wrapper);
+        Wrapper prev = map.putIfAbsent(key, wrapper);
         if (null == prev) {
+            // Successfully put into map
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            /*
-             * Replace
-             */
-            map.put(key, wrapper);
-            return null;
+            synchronized (map) {
+                prev = map.get(key);
+                if (prev.elapsed(maxLifeMillis)) {
+                    shrink();
+                    map.put(key, wrapper);
+                    return null;
+                }
+            }
         }
         return prev.getValue();
     }
@@ -145,6 +149,7 @@ public final class FolderMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(key);
+            shrink();
             return null;
         }
         return wrapper.getValue();
@@ -162,6 +167,7 @@ public final class FolderMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(key);
+            shrink();
             return null;
         }
         return wrapper.getValue();
