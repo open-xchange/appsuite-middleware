@@ -347,7 +347,7 @@ public final class CacheFolderStorage implements FolderStorage {
             return;
         }
         try {
-            List<String> ids = Collections.singletonList(id);
+            List<String> ids;
             try {
                 if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
                     final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);

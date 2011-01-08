@@ -350,57 +350,60 @@ public final class MemoryTable {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                int tree = rs.getInt(1);
-                MemoryTree memoryTree = new MemoryTreeImpl();
-                treeMap.put(tree, memoryTree);
-                do {
-                    /*
-                     * Check for tree identifier
-                     */
-                    {
-                        final int tid = rs.getInt(1);
-                        if (tree != tid) {
-                            tree = tid;
-                            memoryTree = new MemoryTreeImpl();
-                            treeMap.put(tree, memoryTree);
-                        }
-                    }
-                    final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
-                    memoryFolder.setId(rs.getString(2));
-                    // Set optional modified-by
-                    {
-                        final int modifiedBy = rs.getInt(6);
-                        if (rs.wasNull()) {
-                            memoryFolder.setModifiedBy(-1);
-                        } else {
-                            memoryFolder.setModifiedBy(modifiedBy);
-                        }
-                    }
-                    // Set optional last-modified time stamp
-                    {
-                        final long date = rs.getLong(5);
-                        if (rs.wasNull()) {
-                            memoryFolder.setLastModified(null);
-                        } else {
-                            memoryFolder.setLastModified(new Date(date));
-                        }
-                    }
-                    memoryFolder.setName(rs.getString(4));
-                    memoryFolder.setParentId(rs.getString(3));
-                    {
-                        final int subscribed = rs.getInt(7);
-                        if (!rs.wasNull()) {
-                            memoryFolder.setSubscribed(Boolean.valueOf(subscribed > 0));
-                        }
-                    }
-                    // Add permissions in a separate query
-                    addPermissions(memoryFolder, tree, userId, contextId, con);
-                    // Finally add folder to memory tree
-                    memoryTree.getCrud().put(memoryFolder);
-                } while (rs.next());
+            if (!rs.next()) {
+                /*
+                 * No tree found in table
+                 */
+                return;
             }
-
+            int tree = rs.getInt(1);
+            MemoryTree memoryTree = new MemoryTreeImpl();
+            treeMap.put(tree, memoryTree);
+            do {
+                /*
+                 * Check for tree identifier
+                 */
+                {
+                    final int tid = rs.getInt(1);
+                    if (tree != tid) {
+                        tree = tid;
+                        memoryTree = new MemoryTreeImpl();
+                        treeMap.put(tree, memoryTree);
+                    }
+                }
+                final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
+                memoryFolder.setId(rs.getString(2));
+                // Set optional modified-by
+                {
+                    final int modifiedBy = rs.getInt(6);
+                    if (rs.wasNull()) {
+                        memoryFolder.setModifiedBy(-1);
+                    } else {
+                        memoryFolder.setModifiedBy(modifiedBy);
+                    }
+                }
+                // Set optional last-modified time stamp
+                {
+                    final long date = rs.getLong(5);
+                    if (rs.wasNull()) {
+                        memoryFolder.setLastModified(null);
+                    } else {
+                        memoryFolder.setLastModified(new Date(date));
+                    }
+                }
+                memoryFolder.setName(rs.getString(4));
+                memoryFolder.setParentId(rs.getString(3));
+                {
+                    final int subscribed = rs.getInt(7);
+                    if (!rs.wasNull()) {
+                        memoryFolder.setSubscribed(Boolean.valueOf(subscribed > 0));
+                    }
+                }
+                // Add permissions in a separate query
+                addPermissions(memoryFolder, tree, userId, contextId, con);
+                // Finally add folder to memory tree
+                memoryTree.getCrud().put(memoryFolder);
+            } while (rs.next());
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
