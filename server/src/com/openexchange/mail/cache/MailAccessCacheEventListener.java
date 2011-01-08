@@ -51,7 +51,6 @@ package com.openexchange.mail.cache;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,7 +83,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         final String topic = event.getTopic();
         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
             final @SuppressWarnings("unchecked") Map<String, Session> sessions =
-                (Map<String, Session>) event.getProperty("com.openexchange.sessiond.container");
+                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
             final MailAccessCache mac;
             try {
                 mac = MailAccessCache.getInstance();
@@ -92,8 +91,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                 LOG.error("Mail access cache could not be obtained.", e);
                 return;
             }
-            for (final Iterator<Session> iter = sessions.values().iterator(); iter.hasNext();) {
-                final Session session = iter.next();
+            for (final Session session : sessions.values()) {
                 try {
                     mac.clearUserEntries(session);
                     if (LOG.isInfoEnabled()) {
@@ -105,12 +103,31 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                     LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
                 }
             }
+        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+            final MailAccessCache mac;
+            try {
+                mac = MailAccessCache.getInstance();
+            } catch (final MailException e) {
+                LOG.error("Mail access cache could not be obtained.", e);
+                return;
+            }
+            try {
+                mac.clearUserEntries(session);
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(new StringBuilder(128).append("Detected timed-out session: ").append(session.getSessionID()).append(
+                        ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
+                        " in context ").append(session.getContextId()).toString());
+                }
+            } catch (final MailException e) {
+                LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
+            }
         }
     }
 
     public void registerService(final BundleContext context) {
         final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>();
-        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER });
+        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER, SessiondEventConstants.TOPIC_REMOVE_SESSION });
         serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }
 
