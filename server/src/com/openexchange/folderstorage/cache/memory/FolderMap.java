@@ -49,6 +49,9 @@
 
 package com.openexchange.folderstorage.cache.memory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -84,6 +87,21 @@ public final class FolderMap {
         final Lock lock = new ReentrantLock();
         map = new LockBasedConcurrentMap<Key, Wrapper>(lock, lock, new MaxCapacityLinkedHashMap<Key, Wrapper>(maxCapacity));
         this.maxLifeMillis = maxLifeMillis;
+    }
+
+    /**
+     * Removes elapsed entries from map.
+     */
+    public void shrink() {
+        final List<Key> removeKeys = new ArrayList<Key>(16);
+        for (final Entry<Key, Wrapper> entry : map.entrySet()) {
+            if (entry.getValue().elapsed(maxLifeMillis)) {
+                removeKeys.add(entry.getKey());
+            }
+        }
+        for (final Key key : removeKeys) {
+            map.remove(key);
+        }
     }
 
     public Folder putIfAbsent(final String treeId, final Folder folder) {
@@ -137,8 +155,16 @@ public final class FolderMap {
     }
 
     public Folder put(final String folderId, final String treeId, final Folder folder) {
-        final Wrapper wrapper = map.put(keyOf(folderId, treeId), wrapperOf(folder));
-        return wrapper == null ? null : wrapper.getIfNotElapsed(maxLifeMillis);
+        final Key key = keyOf(folderId, treeId);
+        final Wrapper wrapper = map.put(key, wrapperOf(folder));
+        if (null == wrapper) {
+            return null;
+        }
+        if (wrapper.elapsed(maxLifeMillis)) {
+            map.remove(key);
+            return null;
+        }
+        return wrapper.getValue();
     }
 
     public Folder remove(final String folderId, final String treeId) {
