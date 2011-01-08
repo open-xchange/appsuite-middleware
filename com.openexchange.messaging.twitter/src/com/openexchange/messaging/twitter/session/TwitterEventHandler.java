@@ -88,8 +88,9 @@ public final class TwitterEventHandler implements EventHandler {
                 @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
                     (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                 // For each session
+                final TwitterAccessRegistry accessRegistry = TwitterAccessRegistry.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    if (TwitterAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                    if (accessRegistry.removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
                         LOG.debug(new StringBuilder("Twitter access removed for user ").append(session.getUserId()).append(" in context ").append(
                             session.getContextId()).toString());
                     }
