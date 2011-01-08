@@ -54,7 +54,7 @@ import java.sql.SQLException;
 import com.openexchange.folderstorage.Permission;
 
 /**
- * {@link MemoryPermission} - A mail folder permission.
+ * {@link MemoryPermission} - An in-memory representation of a virtual folder permission.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -84,7 +84,7 @@ public final class MemoryPermission implements Permission {
     }
 
     /**
-     * Initializes an empty {@link MemoryPermission} from specified {@link ResultSet}'s currently select row:<br>
+     * Initializes a {@link MemoryPermission} from specified {@link ResultSet}'s currently select row:<br>
      * <code>SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system FROM virtualPermission ...</code>
      * 
      * @throws SQLException If reading from result set fails
@@ -120,9 +120,6 @@ public final class MemoryPermission implements Permission {
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
-        }
-        if (obj == null) {
-            return false;
         }
         if (!(obj instanceof Permission)) {
             return false;

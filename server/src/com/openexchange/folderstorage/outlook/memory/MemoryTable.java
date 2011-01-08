@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link MemoryTable}
+ * {@link MemoryTable} - The in-memory representation of the virtual folder table.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

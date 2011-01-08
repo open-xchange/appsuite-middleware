@@ -55,7 +55,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.outlook.OutlookFolder;
 
 /**
- * {@link MemoryTree}
+ * {@link MemoryTree} - The in-memory representation of a virtual folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
