@@ -114,7 +114,7 @@ public final class MemoryTable {
      *         <code>false</code>
      * @throws FolderException If creation of memory table fails
      */
-    public static MemoryTable getMemoryTableFor(final Session session, final boolean createIfAbsent) throws FolderException {
+    private static MemoryTable getMemoryTableFor(final Session session, final boolean createIfAbsent) throws FolderException {
         final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null != lock) {
             lock.lock();
