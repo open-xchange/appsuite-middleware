@@ -109,38 +109,38 @@ public class CPServlet extends PermissionServlet {
 
     private static TemplateService templates = null;
 
-    public static void setTemplateService(TemplateService service) {
+    public static void setTemplateService(final TemplateService service) {
         templates = service;
     }
 
     private static AppointmentSqlFactoryService appointmentSqlFactory = null;
 
-    public static void setAppointmentSqlFactoryService(AppointmentSqlFactoryService service) {
+    public static void setAppointmentSqlFactoryService(final AppointmentSqlFactoryService service) {
         appointmentSqlFactory = service;
     }
 
     private static CalendarCollectionService calendarTools = null;
 
-    public static void setCalendarTools(CalendarCollectionService service) {
+    public static void setCalendarTools(final CalendarCollectionService service) {
         calendarTools = service;
     }
 
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().hasCalendar();
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        List<String> debuggingItems = new LinkedList<String>();
-        CPTool tool = new CPTool();
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        final List<String> debuggingItems = new LinkedList<String>();
+        final CPTool tool = new CPTool();
 
         resp.setContentType("text/html; charset=UTF-8");
 
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
-            TimeZone zone = TimeZone.getTimeZone(session.getUser().getTimeZone());
-            CPParameters params = new CPParameters(req, zone);
+            final TimeZone zone = TimeZone.getTimeZone(session.getUser().getTimeZone());
+            final CPParameters params = new CPParameters(req, zone);
             if (params.hasUnparseableFields()) {
                 throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(
                     params.getUnparseableFields(),
@@ -155,16 +155,18 @@ public class CPServlet extends PermissionServlet {
                 throw new ServletException("Cannot find template " + params.getTemplate());
             }
 
-            if (tool.isBlockTemplate(params))
+            if (tool.isBlockTemplate(params)) {
                 tool.calculateNewStartAndEnd(params);
+            }
 
             OXTemplate template;
-            if(params.hasUserTemplate())
+            if(params.hasUserTemplate()) {
                 template = templates.loadTemplate(params.getUserTemplate(), params.getTemplate(), session);
-            else 
+            } else {
                 template = templates.loadTemplate(params.getTemplate());
+            }
 
-            AppointmentSQLInterface appointmentSql = appointmentSqlFactory.createAppointmentSql(session);
+            final AppointmentSQLInterface appointmentSql = appointmentSqlFactory.createAppointmentSql(session);
             SearchIterator<Appointment> iterator;
             if (params.hasFolder()) {
                 iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
@@ -173,16 +175,16 @@ public class CPServlet extends PermissionServlet {
                 iterator = appointmentSql.getAppointmentsBetween(session.getUserId(), params.getStart(), params.getEnd(), new int[] {
                     Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS }, -1, null);
             }
-            List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
+            final List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 
-            Locale locale = session.getUser().getLocale();
-            CPCalendar cal = CPCalendar.getCalendar(zone, locale);
+            final Locale locale = session.getUser().getLocale();
+            final CPCalendar cal = CPCalendar.getCalendar(zone, locale);
             modifyCalendar(cal, params);
 
-            Partitioner partitioner = new Partitioner(params, cal, session.getContext(), appointmentSql, calendarTools);
-            List<Day> perDayList = partitioner.partition(idList);
+            final Partitioner partitioner = new Partitioner(params, cal, session.getContext(), appointmentSql, calendarTools);
+            final List<Day> perDayList = partitioner.partition(idList);
 
-            List<CPAppointment> expandedAppointments = tool.expandAppointements(
+            final List<CPAppointment> expandedAppointments = tool.expandAppointements(
                 idList,
                 params.getStart(),
                 params.getEnd(),
@@ -191,16 +193,16 @@ public class CPServlet extends PermissionServlet {
 
             tool.sort(expandedAppointments);
 
-            CPFactory factory = new CPFactory();
+            final CPFactory factory = new CPFactory();
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.addStrategy(new WeekPartitioningStrategy());
             factory.addStrategy(new MonthPartitioningStrategy());
             factory.setCalendar(cal);
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
 
-            CPPartition partitions = factory.partition(expandedAppointments);
+            final CPPartition partitions = factory.partition(expandedAppointments);
 
-            Map<String, Object> variables = new HashMap<String, Object>();
+            final Map<String, Object> variables = new HashMap<String, Object>(8);
             variables.put(APPOINTMENTS, partitions.getAppointments());
             variables.put(FORMATTINGINFO, partitions.getFormattingInformation());
             variables.put(VIEW_START, params.getStart());
@@ -209,15 +211,15 @@ public class CPServlet extends PermissionServlet {
             variables.put(DAYS, perDayList);
             variables.put(I18N, new I18n(I18nServices.getInstance().getService(locale)));
 
-            for (CPAppointment app : partitions.getAppointments()) {
+            for (final CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());
             }
-            for (CPFormattingInformation info : partitions.getFormattingInformation()) {
+            for (final CPFormattingInformation info : partitions.getFormattingInformation()) {
                 debuggingItems.add(info.toString());
             }
 
             template.process(variables, resp.getWriter());
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             writeException(resp, t);
         }
     }
@@ -226,9 +228,9 @@ public class CPServlet extends PermissionServlet {
      * Write an exception message as HTML to the response
      * @throws IOException 
      */
-    private void writeException(HttpServletResponse resp, Throwable t) throws IOException {
+    private void writeException(final HttpServletResponse resp, final Throwable t) throws IOException {
         LOG.error(t.getMessage(), t);
-        PrintWriter writer = resp.getWriter();
+        final PrintWriter writer = resp.getWriter();
         writer.append(t.getMessage());
         // TODO Write HTML page as response
     }
@@ -236,24 +238,28 @@ public class CPServlet extends PermissionServlet {
     /**
      * Modify a calendar according to the given parameters
      */
-    public void modifyCalendar(CPCalendar calendar, CPParameters params) {
-        if (params.hasWeekStart())
+    public void modifyCalendar(final CPCalendar calendar, final CPParameters params) {
+        if (params.hasWeekStart()) {
             calendar.setFirstDayOfWeek(params.getWeekStart());
-        if (params.hasWorkWeekDuration())
+        }
+        if (params.hasWorkWeekDuration()) {
             calendar.setWorkWeekDurationInDays(params.getWorkWeekDuration());
-        if (params.hasWorkWeekStart())
+        }
+        if (params.hasWorkWeekStart()) {
             calendar.setWorkWeekStartingDay(params.getWorkWeekStart());
+        }
         if (params.hasWorkDayEnd()) {
-            Calendar cal = Calendar.getInstance();
+            final Calendar cal = Calendar.getInstance();
             cal.setTime(params.getWorkDayEnd());
             calendar.setWorkDayStartingHours(cal.get(Calendar.HOUR_OF_DAY));
         }
         if (params.hasWorkDayStart()) {
-            Calendar cal = Calendar.getInstance();
+            final Calendar cal = Calendar.getInstance();
             cal.setTime(params.getWorkDayStart());
             calendar.setWorkDayStartingHours(cal.get(Calendar.HOUR_OF_DAY));
         }
-        if (params.hasTimezone())
+        if (params.hasTimezone()) {
             calendar.setTimeZone(params.getTimezone());
+        }
     }
 }
