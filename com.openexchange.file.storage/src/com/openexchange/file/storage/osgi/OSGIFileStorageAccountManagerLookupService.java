@@ -151,7 +151,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                          */
                         final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
                         if (null != eventAdmin) {
-                            final Dictionary<Object, Object> dict = new Hashtable<Object, Object>(2);
+                            final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
                             dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
                             dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
                             final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);

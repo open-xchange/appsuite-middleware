@@ -161,7 +161,7 @@ public final class CIFSActivator extends DeferredActivator {
             //serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             //registrations.add(context.registerService(EventHandler.class.getName(), null, serviceProperties));
             {
-                final Dictionary<Object, Object> dict = new Hashtable<Object, Object>(1);
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, FileStorageAccountManagerProvider.TOPIC);
                 registerer = new Registerer(context);
                 registrations.add(context.registerService(EventHandler.class.getName(), registerer, dict));

@@ -218,7 +218,12 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
         ServiceReference[] services;
         try {
-            services = bundleContext.getServiceReferences(null, null);
+            /*
+             * Null parameters to get all services from BundleContext.getServiceReferences(String clazz, String filter);
+             */
+            final String clazz = null;
+            final String filter = null;
+            services = bundleContext.getServiceReferences(clazz, filter);
             if (services != null) {
                 final int size = services.length;
                 if (size > 0) {
