@@ -88,7 +88,9 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -202,7 +204,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    private static void addSubfolders(String fullname, List<MailFolder> folders, IMailFolderStorage folderStorage) throws MailException {
+    private static void addSubfolders(final String fullname, final List<MailFolder> folders, final IMailFolderStorage folderStorage) throws MailException {
         final MailFolder[] subfolders = folderStorage.getSubfolders(fullname, false);
         for (final MailFolder subfolder : subfolders) {
             folders.add(subfolder);
@@ -783,9 +785,22 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * Sort them
                  */
-                Collections.sort(children, new MailFolderComparator(names, storageParameters.getUser().getLocale()));
+                final Locale locale = storageParameters.getUser().getLocale();
+                Collections.sort(children, new MailFolderComparator(names, locale));
+                /*
+                 * i18n INBOX name
+                 */
+                if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+                    for (final MailFolder child : children) {
+                        if ("INBOX".equals(child.getFullname())) {
+                            child.setName(new StringHelper(locale).getString(MailStrings.INBOX));
+                        }
+                    }
+                }
             }
-
+            /*
+             * Generate sorted IDs preserving order
+             */
             final int size = children.size();
             final List<SortableId> list = new ArrayList<SortableId>(size);
             for (int j = 0; j < size; j++) {
