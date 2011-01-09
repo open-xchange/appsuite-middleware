@@ -52,7 +52,9 @@ package com.openexchange.i18n.osgi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -182,10 +184,10 @@ public class I18nActivator implements BundleActivator {
         for (final Locale locale : locales.keySet()) {
             final List<I18nService> list = locales.get(locale);
 
-            final Properties prop = new Properties();
+            final Dictionary<String, Object> prop = new Hashtable<String, Object>(1);
             prop.put(I18nService.LANGUAGE, locale);
 
-            I18nService i18n = null;
+            final I18nService i18n;
             if (list.size() == 1) {
                 i18n = list.get(0);
             } else {
