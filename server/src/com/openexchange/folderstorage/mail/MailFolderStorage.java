@@ -805,7 +805,7 @@ public final class MailFolderStorage implements FolderStorage {
             final List<SortableId> list = new ArrayList<SortableId>(size);
             for (int j = 0; j < size; j++) {
                 final MailFolder tmp = children.get(j);
-                list.add(new MailId(prepareFullname(mailAccess.getAccountId(), tmp.getFullname()), j).setName(tmp.getName()));
+                list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(tmp.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
         } catch (final MailException e) {
