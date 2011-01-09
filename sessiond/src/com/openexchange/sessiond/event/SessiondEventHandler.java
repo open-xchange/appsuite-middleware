@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.event;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -106,7 +107,7 @@ public final class SessiondEventHandler implements EventHandler {
      * @return The appropriate {@link ServiceRegistration service registration}.
      */
     public ServiceRegistration registerSessiondEventHandler(final BundleContext context) {
-        final Hashtable<Object, Object> properties = new Hashtable<Object, Object>();
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
         return context.registerService(EventHandler.class.getName(), this, properties);
 

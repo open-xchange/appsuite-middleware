@@ -100,7 +100,7 @@ public class CleanUpActivator implements BundleActivator {
     }
 
     private void registerHandler(final BundleContext context, final EventHandler handler, final String topic) {
-        final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>();
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>();
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { topic });
         registrations.add(context.registerService(EventHandler.class.getName(), handler, serviceProperties));
     }

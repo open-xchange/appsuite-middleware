@@ -392,7 +392,7 @@ public final class SessionHandler {
     private static void postSessionCreation(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
             eventAdmin.postEvent(event);
@@ -405,7 +405,7 @@ public final class SessionHandler {
     private static void postSessionRemoval(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic);
             eventAdmin.postEvent(event);
@@ -418,7 +418,7 @@ public final class SessionHandler {
     private static void postContainerRemoval(final List<SessionControl> sessionControls) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
             final Map<String, Session> eventMap = new HashMap<String, Session>();
             for (final SessionControl sessionControl : sessionControls) {
                 final Session session = sessionControl.getSession();
@@ -436,7 +436,7 @@ public final class SessionHandler {
     private static void postSessionDataRemoval(final List<SessionControl> controls) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
             final Map<String, Session> eventMap = new HashMap<String, Session>();
             for (final SessionControl sessionControl : controls) {
                 final Session session = sessionControl.getSession();
@@ -454,7 +454,7 @@ public final class SessionHandler {
     static void postSessionReactivation(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
             eventAdmin.postEvent(event);

@@ -125,7 +125,7 @@ public final class PushActivator implements BundleActivator {
             /*
              * Register event handler to detect removed sessions
              */
-            final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
+            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             eventHandlerRegistration = context.registerService(EventHandler.class.getName(), new PushEventHandler(), serviceProperties);
         } catch (final Exception e) {

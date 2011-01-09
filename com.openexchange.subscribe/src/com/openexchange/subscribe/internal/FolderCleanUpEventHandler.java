@@ -89,7 +89,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
     }
     
     private void register(BundleContext context) {
-        final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>();
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>();
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/folder/delete" });
         registration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }

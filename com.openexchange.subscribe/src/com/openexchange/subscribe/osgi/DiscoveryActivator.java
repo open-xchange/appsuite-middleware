@@ -51,6 +51,7 @@
 package com.openexchange.subscribe.osgi;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
@@ -118,7 +119,7 @@ public class DiscoveryActivator implements BundleActivator {
         final InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);
         final FolderService folders = whiteboard.getService(FolderService.class);
 
-        final Hashtable<Object, Object> discoveryDict = new Hashtable<Object, Object>();
+        final Dictionary<String, Object> discoveryDict = new Hashtable<String, Object>();
         discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
 
         final OSGiSubscriptionSourceDiscoveryCollector discoveryCollector = new OSGiSubscriptionSourceDiscoveryCollector(context);

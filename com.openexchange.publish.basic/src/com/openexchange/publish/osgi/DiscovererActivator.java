@@ -95,7 +95,7 @@ public class DiscovererActivator implements BundleActivator {
 
         discovererCollector.ignore(compositeDiscovererCollector);
 
-        final Hashtable<Object, Object> discoveryDict = new Hashtable<Object, Object>();
+        final Hashtable<String, Object> discoveryDict = new Hashtable<String, Object>();
         discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
 
         discoveryRegistration =
@@ -111,7 +111,7 @@ public class DiscovererActivator implements BundleActivator {
 
         componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);
         
-        PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
+        final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
         listener.setDiscoveryService(compositeDiscovererCollector);
         listener.setGenConfStorage(confStorage);
         

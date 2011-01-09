@@ -70,7 +70,7 @@ public abstract class LoginEventListener implements EventHandler {
     }
 
     public void register(final BundleContext context) {
-        final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>();
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>();
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { LoginEvent.TOPIC });
         context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }
