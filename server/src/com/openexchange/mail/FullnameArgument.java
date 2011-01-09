@@ -58,9 +58,9 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class FullnameArgument {
 
-    private int accountId;
+    private final int accountId;
 
-    private String fullname;
+    private final String fullname;
 
     /**
      * Initializes a new {@link FullnameArgument} with default account ID.
@@ -93,30 +93,12 @@ public final class FullnameArgument {
     }
 
     /**
-     * Sets the account ID.
-     * 
-     * @param accountId The account ID
-     */
-    public void setAccountId(final int accountId) {
-        this.accountId = accountId;
-    }
-
-    /**
      * Gets the full name.
      * 
      * @return The full name
      */
     public String getFullname() {
         return fullname;
-    }
-
-    /**
-     * Sets the full name.
-     * 
-     * @param fullname The full name
-     */
-    public void setFullname(final String fullname) {
-        this.fullname = fullname;
     }
 
     @Override
