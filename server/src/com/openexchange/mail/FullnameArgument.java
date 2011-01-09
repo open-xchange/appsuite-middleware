@@ -52,20 +52,20 @@ package com.openexchange.mail;
 import com.openexchange.mailaccount.MailAccount;
 
 /**
- * {@link FullnameArgument} - Represents a fullname argument; e.g. &quot;default347/INBOX/folder3&quot;.
+ * {@link FullnameArgument} - Represents a full name argument; e.g. &quot;default347/INBOX/folder3&quot;.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FullnameArgument {
 
-    private final int accountId;
+    private int accountId;
 
-    private final String fullname;
+    private String fullname;
 
     /**
      * Initializes a new {@link FullnameArgument} with default account ID.
      * 
-     * @param fullname The fullname
+     * @param fullname The full name
      */
     public FullnameArgument(final String fullname) {
         this(MailAccount.DEFAULT_ID, fullname);
@@ -75,7 +75,7 @@ public final class FullnameArgument {
      * Initializes a new {@link FullnameArgument}.
      * 
      * @param accountId The account ID
-     * @param fullname The fullname
+     * @param fullname The full name
      */
     public FullnameArgument(final int accountId, final String fullname) {
         super();
@@ -93,12 +93,30 @@ public final class FullnameArgument {
     }
 
     /**
-     * Gets the fullname.
+     * Sets the account ID.
      * 
-     * @return The fullname
+     * @param accountId The account ID
+     */
+    public void setAccountId(final int accountId) {
+        this.accountId = accountId;
+    }
+
+    /**
+     * Gets the full name.
+     * 
+     * @return The full name
      */
     public String getFullname() {
         return fullname;
+    }
+
+    /**
+     * Sets the full name.
+     * 
+     * @param fullname The full name
+     */
+    public void setFullname(final String fullname) {
+        this.fullname = fullname;
     }
 
     @Override
