@@ -71,9 +71,9 @@ public final class Utility {
      * &quot;<b>Trash</b>&quot;&nbsp;=&gt;&nbsp;&quot;INBOX/path/to/pop3account/<b>Trash</b>&quot;
      * </code>
      * 
-     * @param path The path to prepend
+     * @param path The path to prepend; e.g. "INBOX/My POP3 account"
      * @param separator The separator character
-     * @param virtualFullname The virtual fullname
+     * @param virtualFullname The virtual fullname; e.g. "INBOX"
      * @return The real fullname
      */
     public static String prependPath2Fullname(final String path, final char separator, final String virtualFullname) {
