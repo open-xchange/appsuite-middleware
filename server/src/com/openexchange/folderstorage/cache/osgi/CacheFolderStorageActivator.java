@@ -220,7 +220,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     }
                 }
             };
-            final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
             eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
         }
@@ -244,7 +244,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     }
                 }
             };
-            final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, FolderEventConstants.getAllTopics());
             eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
         }

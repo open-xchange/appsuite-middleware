@@ -90,7 +90,7 @@ public final class PushUtility {
              */
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(4);
             properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
             properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
             properties.put(PushEventConstants.PROPERTY_SESSION, session);

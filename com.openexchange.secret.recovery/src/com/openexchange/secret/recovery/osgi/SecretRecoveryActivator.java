@@ -68,8 +68,8 @@ public class SecretRecoveryActivator implements BundleActivator {
 	    
 	    context.registerService(SecretInconsistencyDetector.class.getName(), detector, null);
 	    
-	    final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-	    properties.put(Constants.SERVICE_RANKING, 1000);
+	    final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+	    properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
 	    
 	    context.registerService(SecretMigrator.class.getName(), migrator, properties);
 	    

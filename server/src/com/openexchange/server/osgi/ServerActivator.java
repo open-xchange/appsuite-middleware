@@ -209,7 +209,7 @@ public final class ServerActivator extends DeferredActivator {
 
         private final BundleContext context;
 
-        public ServiceAdderTrackerCustomizer(BundleContext context) {
+        public ServiceAdderTrackerCustomizer(final BundleContext context) {
             super();
             this.context = context;
         }
@@ -527,7 +527,7 @@ public final class ServerActivator extends DeferredActivator {
         // Register server's services
         registrationList.add(context.registerService(CharsetProvider.class.getName(), new CustomCharsetProvider(), null));
         registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
-        GroupService groupService = new GroupServiceImpl();
+        final GroupService groupService = new GroupServiceImpl();
         registrationList.add(context.registerService(GroupService.class.getName(), groupService, null));
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         registrationList.add(context.registerService(
@@ -590,29 +590,29 @@ public final class ServerActivator extends DeferredActivator {
          * Register data sources
          */
         {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
             registrationList.add(context.registerService(DataSource.class.getName(), new VCardMailPartDataSource(), props));
         }
         {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
             registrationList.add(context.registerService(DataSource.class.getName(), new ICalMailPartDataSource(), props));
         }
         {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
         }
         {
             final InlineImageDataSource dataSource = new InlineImageDataSource();
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
             registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
         }
         {
             final ContactImageDataSource dataSource = new ContactImageDataSource();
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
             registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
         }
@@ -620,27 +620,27 @@ public final class ServerActivator extends DeferredActivator {
          * Register data handlers
          */
         {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(), props));
         }
         {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.contact.json");
             registrationList.add(context.registerService(DataHandler.class.getName(), new ContactJSONDataHandler(), props));
         }
         {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.ical");
             registrationList.add(context.registerService(DataHandler.class.getName(), new ICalInsertDataHandler(), props));
         }
         {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.ical.json");
             registrationList.add(context.registerService(DataHandler.class.getName(), new ICalJSONDataHandler(), props));
         }
         {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
             registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
         }
@@ -667,7 +667,7 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(EventFactoryService.class.getName(), new EventFactoryServiceImpl(), null));
 
         // Register folder service
-        FolderService folderService = new FolderServiceImpl();
+        final FolderService folderService = new FolderServiceImpl();
         registrationList.add(context.registerService(FolderService.class.getName(), folderService, null));
         ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
 

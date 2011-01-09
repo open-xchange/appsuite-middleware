@@ -78,18 +78,18 @@ import com.openexchange.subscribe.SubscriptionStorage;
 public class FolderCleanUpEventHandler implements EventHandler {
     
     private static final Log LOG = LogFactory.getLog(FolderCleanUpEventHandler.class);
-    private ContextService contexts;
-    private SubscriptionStorage storage;
+    private final ContextService contexts;
+    private final SubscriptionStorage storage;
     private ServiceRegistration registration;
     
-    public FolderCleanUpEventHandler(BundleContext context, SubscriptionStorage storage, ContextService contexts) {
+    public FolderCleanUpEventHandler(final BundleContext context, final SubscriptionStorage storage, final ContextService contexts) {
         this.contexts = contexts;
         this.storage = storage;
         register(context);
     }
     
-    private void register(BundleContext context) {
-        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>();
+    private void register(final BundleContext context) {
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/folder/delete" });
         registration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }
@@ -98,26 +98,26 @@ public class FolderCleanUpEventHandler implements EventHandler {
         registration.unregister();
     }
     
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
-        FolderObject actionObj = (FolderObject) commonEvent.getActionObj();
+        final FolderObject actionObj = (FolderObject) commonEvent.getActionObj();
         
         // TODO: Special Handling for mail?
-        String folderId = String.valueOf(actionObj.getObjectID());
+        final String folderId = String.valueOf(actionObj.getObjectID());
         Context context;
         try {
             context = contexts.getContext(commonEvent.getContextId());
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             LOG.error("Could not delete all dependent subscriptions: " + e.getMessage(), e);
             return;
         }
 
         try {
-            List<Subscription> subscriptions = storage.getSubscriptions(context, folderId);
-            for (Subscription subscription : subscriptions) {
+            final List<Subscription> subscriptions = storage.getSubscriptions(context, folderId);
+            for (final Subscription subscription : subscriptions) {
                 storage.forgetSubscription(subscription);
             }
-        } catch (SubscriptionException e) {
+        } catch (final SubscriptionException e) {
             LOG.error("Could not delete all dependent subscriptions: " + e.getMessage(), e);
         }
 

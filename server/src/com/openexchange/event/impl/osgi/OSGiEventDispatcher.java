@@ -235,7 +235,7 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
     }
 
     public void registerService(final BundleContext context) {
-        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>();
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*" });
         serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }

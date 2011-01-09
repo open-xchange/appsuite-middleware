@@ -126,7 +126,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
     }
 
     public void registerService(final BundleContext context) {
-        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>();
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER, SessiondEventConstants.TOPIC_REMOVE_SESSION });
         serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }

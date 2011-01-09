@@ -267,7 +267,7 @@ public final class SessionHandler {
             return null;
         }
         // Set local IP
-        Session session = sessionControl.getSession();
+        final Session session = sessionControl.getSession();
         LOG.info("Changing IP of session " + session.getSessionID() + " from " + session.getLocalIp() + " to " + localIp + '.');
         session.setLocalIp(localIp);
         return sessionControl.getSession();
@@ -366,9 +366,9 @@ public final class SessionHandler {
     }
 
     protected static void cleanUpLongTerm() {
-        List<SessionControl> controls = sessionData.rotateLongTerm();
+        final List<SessionControl> controls = sessionData.rotateLongTerm();
         if (INFO) {
-            for (SessionControl control : controls) {
+            for (final SessionControl control : controls) {
                 LOG.info("Session timed out. ID: " + control.getSession().getSessionID());
             }
         }
@@ -392,7 +392,7 @@ public final class SessionHandler {
     private static void postSessionCreation(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
             eventAdmin.postEvent(event);
@@ -405,7 +405,7 @@ public final class SessionHandler {
     private static void postSessionRemoval(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic);
             eventAdmin.postEvent(event);
@@ -418,7 +418,7 @@ public final class SessionHandler {
     private static void postContainerRemoval(final List<SessionControl> sessionControls) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
             final Map<String, Session> eventMap = new HashMap<String, Session>();
             for (final SessionControl sessionControl : sessionControls) {
                 final Session session = sessionControl.getSession();
@@ -436,7 +436,7 @@ public final class SessionHandler {
     private static void postSessionDataRemoval(final List<SessionControl> controls) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
             final Map<String, Session> eventMap = new HashMap<String, Session>();
             for (final SessionControl sessionControl : controls) {
                 final Session session = sessionControl.getSession();
@@ -454,7 +454,7 @@ public final class SessionHandler {
     static void postSessionReactivation(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
             eventAdmin.postEvent(event);
@@ -472,7 +472,7 @@ public final class SessionHandler {
         sessionData.removeThreadPoolService();
     }
 
-    public static void addTimerService(TimerService service) {
+    public static void addTimerService(final TimerService service) {
         sessionData.addTimerService(service);
         shortSessionContainerRotator = service.scheduleWithFixedDelay(
             new ShortSessionContainerRotator(),

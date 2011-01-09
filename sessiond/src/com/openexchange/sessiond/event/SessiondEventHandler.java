@@ -107,7 +107,7 @@ public final class SessiondEventHandler implements EventHandler {
      * @return The appropriate {@link ServiceRegistration service registration}.
      */
     public ServiceRegistration registerSessiondEventHandler(final BundleContext context) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
         return context.registerService(EventHandler.class.getName(), this, properties);
 

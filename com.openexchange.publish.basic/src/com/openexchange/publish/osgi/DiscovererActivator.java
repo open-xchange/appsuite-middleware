@@ -95,7 +95,7 @@ public class DiscovererActivator implements BundleActivator {
 
         discovererCollector.ignore(compositeDiscovererCollector);
 
-        final Hashtable<String, Object> discoveryDict = new Hashtable<String, Object>();
+        final Hashtable<String, Object> discoveryDict = new Hashtable<String, Object>(1);
         discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
 
         discoveryRegistration =
