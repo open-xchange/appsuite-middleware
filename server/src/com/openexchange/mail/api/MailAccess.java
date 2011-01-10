@@ -230,7 +230,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
         }
         {
-            final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session, accountId);
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccessCache.getInstance().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
