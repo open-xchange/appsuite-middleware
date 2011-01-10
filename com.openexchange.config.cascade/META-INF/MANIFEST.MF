@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: A Cascading Configuration System
+Bundle-SymbolicName: com.openexchange.config.cascade
+Bundle-Version: 6.19.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.server.osgiservice,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.config.cascade
+Bundle-Activator: com.openexchange.config.cascade.osgi.ConfigCascadeActivator
