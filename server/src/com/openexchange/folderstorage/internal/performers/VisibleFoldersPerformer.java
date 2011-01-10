@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
@@ -77,6 +78,7 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -226,6 +228,10 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     ids.add(allSubfolderIds.get(index).getId());
                                 }
                                 folders = tmp.getFolders(treeId, ids, newParameters);
+                                final Set<AbstractOXException> warnings = newParameters.getWarnings();
+                                if (!warnings.isEmpty()) {
+                                    addWarning(warnings.iterator().next());
+                                }
                             } catch (final FolderException e) {
                                 /*
                                  * Batch-load failed...

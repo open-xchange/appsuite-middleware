@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
@@ -289,6 +290,10 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         ids.add(subfolderIds[index]);
                                     }
                                     folders = tmp.getFolders(treeId, ids, newParameters);
+                                    final Set<AbstractOXException> warnings = newParameters.getWarnings();
+                                    if (!warnings.isEmpty()) {
+                                        addWarning(warnings.iterator().next());
+                                    }
                                 } catch (final FolderException e) {
                                     /*
                                      * Batch-load failed...
@@ -555,6 +560,10 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 ids.add(allSubfolderIds.get(index).getId());
                             }
                             folders = tmp.getFolders(treeId, ids, newParameters);
+                            final Set<AbstractOXException> warnings = newParameters.getWarnings();
+                            if (!warnings.isEmpty()) {
+                                addWarning(warnings.iterator().next());
+                            }
                         } catch (final FolderException e) {
                             /*
                              * Batch-load failed...
