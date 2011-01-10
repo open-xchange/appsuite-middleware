@@ -990,9 +990,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return b_subfolderIds;
     }
 
-    @SuppressWarnings("unchecked")
     public void setSubfolderIds(final ArrayList<Integer> subfolderIds) {
-        this.subfolderIds = (ArrayList) subfolderIds.clone();
+        this.subfolderIds = new ArrayList<Integer>(subfolderIds);
         b_subfolderIds = true;
     }
 
