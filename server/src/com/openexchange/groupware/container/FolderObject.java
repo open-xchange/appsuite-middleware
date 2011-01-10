@@ -73,9 +73,9 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
@@ -620,6 +620,16 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      */
     public boolean containsPermissions() {
         return b_permissions;
+    }
+
+    /**
+     * Applies given permissions to this folder.
+     * 
+     * @param permissions The permissions to set
+     */
+    public void setPermissionsNoClone(final List<OCLPermission> permissions) {
+        this.permissions = new ArrayList<OCLPermission>(permissions);
+        b_permissions = true;
     }
 
     /**
