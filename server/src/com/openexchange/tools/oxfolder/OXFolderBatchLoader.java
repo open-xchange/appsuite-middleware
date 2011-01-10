@@ -280,7 +280,7 @@ public final class OXFolderBatchLoader {
                  */
                 {
                     final StringBuilder sb = new StringBuilder(512);
-                    sb.append("SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag, fuid ");
+                    sb.append("SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag, t.fuid ");
                     sb.append("FROM #TABLE# AS t INNER JOIN (");
                     sb.append("SELECT ? AS fuid");
                     for (int i = 1; i < folderIds.length; i++) {
