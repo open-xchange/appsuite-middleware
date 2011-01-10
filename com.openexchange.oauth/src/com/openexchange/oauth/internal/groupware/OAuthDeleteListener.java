@@ -81,7 +81,7 @@ public final class OAuthDeleteListener implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            final int userId = event.getSession().getUserId();
+            final int userId = event.getId();
             /*
              * Delete account data
              */

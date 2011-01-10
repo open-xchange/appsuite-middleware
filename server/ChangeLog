@@ -1,4 +1,8 @@
-* 2011-01-11 - martin.herfurth@open-xchange.com
+* 2011-01-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #17924: Using correct identifier when deleting data from database if a user is removed.
+
+* 2011-01-10 - martin.herfurth@open-xchange.com
 
  - Bugfix #17890: Imip invitations for newly added external participants.
 

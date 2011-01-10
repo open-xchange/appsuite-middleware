@@ -91,7 +91,7 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            final int userId = event.getSession().getUserId();
+            final int userId = event.getId();
             final TIntArrayList confIds;
             {
                 ResultSet rs = null;
