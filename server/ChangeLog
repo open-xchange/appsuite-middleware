@@ -1,3 +1,7 @@
+* 2011-01-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #17803: Removed obsolete property "com.openexchange.mail.maxNumOfConnections" from mail module
+
 * 2011-01-10 - choeger@open-xchange.com
 
  - Bugfix #17769: [L3] /tmp/.OX must be automatically re-created when tmpwatch deletes it
