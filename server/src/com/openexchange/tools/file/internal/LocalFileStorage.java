@@ -397,7 +397,7 @@ public class LocalFileStorage implements FileStorage {
     }
 
     protected void listRecursively(final SortedSet<String> allIds, String prefix, final File file) {
-        if(!prefix.isEmpty() && !prefix.endsWith("/")) {
+        if(prefix.length() != 0 && !prefix.endsWith("/")) {
             prefix += "/";
         }
         if (SPECIAL_FILENAMES.contains(file.getName())) {
