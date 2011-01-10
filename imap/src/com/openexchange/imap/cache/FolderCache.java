@@ -227,6 +227,26 @@ public final class FolderCache {
         }
     }
 
+    /**
+     * Decrements unread message counter from cached IMAP folder.
+     * 
+     * @param fullName The IMAP folder full name
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     */
+    public static void decrementUnreadMessageCount(final String fullName, final Session session, final int accountId) {
+        final FolderCacheEntry entry = new FolderCacheEntry();
+        SessionMailCache.getInstance(session, accountId).get(entry);
+        final FolderMap folderMap = entry.getValue();
+        if (null != folderMap) {
+            MailFolder mailFolder = folderMap.get(fullName);
+            if (null != mailFolder) {
+                final int cur = mailFolder.getUnreadMessageCount();
+                mailFolder.setUnreadMessageCount(cur > 0 ? cur - 1 : 0);
+            }
+        }
+    }
+
     private static final class FolderCacheEntry implements SessionMailCacheEntry<FolderMap> {
 
         private volatile FolderMap folderMap;
