@@ -217,13 +217,17 @@ public final class OXFolderBatchLoader {
                 if (loadSubfolderList) {
                     final TIntObjectHashMap<ArrayList<Integer>> map = getSubfolderIds(folderIds, ctx, readCon, table);
                     for (final FolderObject fo : list) {
-                        fo.setSubfolderIds(map.get(fo.getObjectID()));
+                        if (null != fo) {
+                            fo.setSubfolderIds(map.get(fo.getObjectID()));
+                        }
                     }
                 }
                 if (loadPermissions) {
                     final TIntObjectHashMap<List<OCLPermission>> map = getFolderPermissions(folderIds, ctx, readCon, permTable);
                     for (final FolderObject fo : list) {
-                        fo.setPermissions(map.get(fo.getObjectID()));
+                        if (null != fo) {
+                            fo.setPermissions(map.get(fo.getObjectID()));
+                        }
                     }
                 }
             } finally {
