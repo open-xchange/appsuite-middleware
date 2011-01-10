@@ -131,7 +131,7 @@ public final class Bug11871Test extends AbstractAJAXSession {
         try {
             final ICalExportResponse response = myClient.execute(new ICalExportRequest(folder.getObjectID()));
             final ICalFile ical = new ICalFile(new StringReader(response.getICal()));
-            Assert.assertStandardAppFields(ical, appointment.getStartDate(), appointment.getEndDate());
+            Assert.assertStandardAppFields(ical, appointment.getStartDate(), appointment.getEndDate(), tz);
         } finally {
             Executor.execute(myClient, new DeleteRequest(appointment.getObjectID(),
                 appointment.getParentFolderID(), appointment.getLastModified()));

@@ -50,6 +50,7 @@
 package com.openexchange.data.conversion.ical;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  *
@@ -62,6 +63,11 @@ public class Assert extends junit.framework.Assert {
      */
     private Assert() {
         super();
+    }
+
+    public static void assertStandardAppFields(final ICalFile ical, final Date start, final Date end, TimeZone tz) {
+        assertProperty(ical, "DTSTART", "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(start));
+        assertProperty(ical, "DTEND",   "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(end));
     }
 
     public static void assertStandardAppFields(final ICalFile ical, final Date start, final Date end) {

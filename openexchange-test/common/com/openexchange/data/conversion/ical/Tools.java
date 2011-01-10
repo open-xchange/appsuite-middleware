@@ -65,11 +65,17 @@ public class Tools {
     }
 
     private static SimpleDateFormat utc = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+    
     static {
         utc.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     public static String formatForICal(Date date) {
         return utc.format(date);
+    }
+    
+
+    public static String formatForICalWithoutTimezone(Date date) {
+        return new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date);
     }
 }
