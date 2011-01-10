@@ -96,6 +96,7 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -129,7 +130,7 @@ import com.sun.mail.imap.Rights;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt {
+public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class);
 
@@ -1379,6 +1380,125 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    public void updateMessageFlags(final String fullname, final int flagsArg, final boolean set) throws MailException {
+        if (null == fullname) {
+            // Nothing to do
+            return;
+        }
+        try {
+            imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
+            /*
+             * Remove non user-alterable system flags
+             */
+            imapFolderStorage.removeFromCache(fullname);
+            int flags = flagsArg;
+            flags &= ~MailMessage.FLAG_RECENT;
+            flags &= ~MailMessage.FLAG_USER;
+            /*
+             * Set new flags...
+             */
+            final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session, accountId) : null;
+            final Flags affectedFlags = new Flags();
+            boolean applyFlags = false;
+            if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+                affectedFlags.add(Flags.Flag.ANSWERED);
+                applyFlags = true;
+            }
+            if (((flags & MailMessage.FLAG_DELETED) > 0)) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(myRights)) {
+                    throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+                affectedFlags.add(Flags.Flag.DELETED);
+                applyFlags = true;
+            }
+            if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+                affectedFlags.add(Flags.Flag.DRAFT);
+                applyFlags = true;
+            }
+            if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+                affectedFlags.add(Flags.Flag.FLAGGED);
+                applyFlags = true;
+            }
+            if (((flags & MailMessage.FLAG_SEEN) > 0)) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canKeepSeen(myRights)) {
+                    throw IMAPException.create(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+                affectedFlags.add(Flags.Flag.SEEN);
+                applyFlags = true;
+            }
+            /*
+             * Check for forwarded flag (supported through user flags)
+             */
+            Boolean supportsUserFlags = null;
+            if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
+                supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
+                if (supportsUserFlags.booleanValue()) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(MailMessage.USER_FORWARDED);
+                    applyFlags = true;
+                } else if (DEBUG) {
+                    LOG.debug(new StringBuilder().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
+                        " does not support user flags. Skipping forwarded flag."));
+                }
+            }
+            /*
+             * Check for read acknowledgment flag (supported through user flags)
+             */
+            if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
+                if (null == supportsUserFlags) {
+                    supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
+                }
+                if (supportsUserFlags.booleanValue()) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(MailMessage.USER_READ_ACK);
+                    applyFlags = true;
+                } else if (DEBUG) {
+                    LOG.debug(new StringBuilder().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
+                        " does not support user flags. Skipping read-ack flag."));
+                }
+            }
+            if (applyFlags) {
+                if (DEBUG) {
+                    final long start = System.currentTimeMillis();
+                    new FlagsIMAPCommand(imapFolder, affectedFlags, set, true).doCommand();
+                    final long time = System.currentTimeMillis() - start;
+                    LOG.debug(new StringBuilder(128).append("Flags applied to all messages in ").append(time).append(
+                        STR_MSEC).toString());
+                } else {
+                    new FlagsIMAPCommand(imapFolder, affectedFlags, set, true).doCommand();
+                }
+            }
+            /*
+             * Check for spam action
+             */
+            if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
+                final long[] uids = IMAPCommandsCollection.getUIDs(imapFolder);
+                handleSpamByUID(uids, set, true, fullname, Folder.READ_WRITE);
+            } else {
+                /*
+                 * Force JavaMail's cache update through folder closure
+                 */
+                imapFolder.close(false);
+                resetIMAPFolder();
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
+    }
+
     @Override
     public void updateMessageColorLabelLong(final String fullname, final long[] msgUIDs, final int colorLabel) throws MailException {
         if (null == msgUIDs || 0 == msgUIDs.length) {
@@ -1431,6 +1551,69 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             if (DEBUG) {
                 LOG.debug(new StringBuilder(128).append("All color flags set in ").append(msgUIDs.length).append(" messages in ").append(
+                    (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            }
+            /*
+             * Force JavaMail's cache update through folder closure
+             */
+            imapFolder.close(false);
+            resetIMAPFolder();
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
+    }
+
+    public void updateMessageColorLabel(final String fullname, final int colorLabel) throws MailException {
+        if (null == fullname) {
+            // Nothing to do
+            return;
+        }
+        try {
+            if (!MailProperties.getInstance().isUserFlagsEnabled()) {
+                /*
+                 * User flags are disabled
+                 */
+                if (DEBUG) {
+                    LOG.debug("User flags are disabled or not supported. Update of color flag ignored.");
+                }
+                return;
+            }
+            imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
+            try {
+                if (!holdsMessages()) {
+                    throw IMAPException.create(
+                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
+                        imapConfig,
+                        session,
+                        imapFolder.getFullName());
+                }
+                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+            } catch (final MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
+            }
+            if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
+                LOG.error(new StringBuilder().append("Folder \"").append(imapFolder.getFullName()).append(
+                    "\" does not support user-defined flags. Update of color flag ignored."));
+                return;
+            }
+            /*
+             * Remove all old color label flag(s) and set new color label flag
+             */
+            imapFolderStorage.removeFromCache(fullname);
+            long start = System.currentTimeMillis();
+            IMAPCommandsCollection.clearAllColorLabels(imapFolder, null);
+            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            if (DEBUG) {
+                LOG.debug(new StringBuilder(128).append("All color flags cleared from all messages in ").append(
+                    (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            }
+            start = System.currentTimeMillis();
+            IMAPCommandsCollection.setColorLabel(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
+            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            if (DEBUG) {
+                LOG.debug(new StringBuilder(128).append("All color flags set in all messages in ").append(
                     (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
             }
             /*
