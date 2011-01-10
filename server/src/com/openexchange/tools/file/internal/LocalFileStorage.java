@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -397,19 +397,24 @@ public class LocalFileStorage implements FileStorage {
         return allIds;
     }
 
-    protected void listRecursively(final SortedSet<String> allIds, final String prefix, final File file) {
+    protected void listRecursively(final SortedSet<String> allIds, String prefix, final File file) {
+        if(!prefix.isEmpty() && !prefix.endsWith("/")) {
+            prefix += "/";
+        }
         if (SPECIAL_FILENAMES.contains(file.getName())) {
             // Skip
             return;
         }
         if (file.isDirectory()) {
             for (final File subfile : file.listFiles()) {
-                // This adds an illegal  /storage_name/  in the beginning
-                listRecursively(allIds, prefix + "/" + file.getName(), subfile);
+                if(file.equals(storage)) {
+                    listRecursively(allIds, "" , subfile);
+                } else {
+                    listRecursively(allIds, prefix + file.getName(), subfile);
+                }
             }
         } else {
-            // Gets rid of that illegal prefix
-            allIds.add(prefix.substring(2 + file.getName().length()) + "/" + file.getName());
+            allIds.add(prefix + file.getName());
         }
     }
 
