@@ -298,6 +298,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     /*
                                      * Batch-load failed...
                                      */
+                                    if (log.isWarnEnabled()) {
+                                        log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                                    }
                                     folders = null;
                                 }
                                 if (null == folders) {
@@ -568,6 +571,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             /*
                              * Batch-load failed...
                              */
+                            if (log.isWarnEnabled()) {
+                                log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                            }
                             folders = null;
                         }
                         if (null == folders) {
