@@ -224,11 +224,8 @@ public final class MailAccessWatcher {
                     /*
                      * Remove/Close exceeded accesses
                      */
-                    final int n = exceededCons.size();
-                    final Iterator<MailAccess<?, ?>> iter = exceededCons.iterator();
                     if (MailProperties.getInstance().isWatcherShallClose()) {
-                        for (int i = 0; i < n; i++) {
-                            final MailAccess<?, ?> mailAccess = iter.next();
+                        for (final MailAccess<?, ?> mailAccess : exceededCons) {
                             try {
                                 sb.setLength(0);
                                 sb.append(INFO_PREFIX2).append(mailAccess.toString());
@@ -240,8 +237,8 @@ public final class MailAccessWatcher {
                             }
                         }
                     } else {
-                        for (int i = 0; i < n; i++) {
-                            mailAccessMap.remove(iter.next());
+                        for (final MailAccess<?, ?> mailAccess : exceededCons) {
+                            mailAccessMap.remove(mailAccess);
                         }
                     }
                 }
