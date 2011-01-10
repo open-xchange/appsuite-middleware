@@ -198,14 +198,19 @@ public final class MailAccessWatcher {
                 final StringBuilder sb = new StringBuilder(512);
                 final List<MailAccess<?, ?>> exceededCons = new ArrayList<MailAccess<?, ?>>();
                 final int watcherTime = MailProperties.getInstance().getWatcherTime();
+                final long now = System.currentTimeMillis();
                 for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = mailAccessMap.entrySet().iterator(); iter.hasNext();) {
                     final Entry<MailAccess<?, ?>, Long> e = iter.next();
                     final MailAccess<?, ?> mailAccess = e.getKey();
                     if (mailAccess.isConnectedUnsafe()) {
                         final Long val = e.getValue();
-                        if ((null != val) && ((System.currentTimeMillis() - l(val)) > watcherTime)) {
-                            logger.info(INFO_PREFIX.replaceFirst("#N#", Long.toString(System.currentTimeMillis() - l(val))) + mailAccess.getTrace());
-                            exceededCons.add(mailAccess);
+                        if ((null != val)) {
+                            final long duration = (now - l(val));
+                            if (duration > watcherTime) {
+                                logger.info(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration)) + mailAccess.getTrace());
+                                exceededCons.add(mailAccess);
+                            }
+                            
                         }
                     } else {
                         /*
