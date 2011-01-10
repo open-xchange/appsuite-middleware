@@ -9,6 +9,7 @@
 * 2011-01-10 - thorben.betten@open-xchange.com
 
  - Bugfix #17803: Removed obsolete property "com.openexchange.mail.maxNumOfConnections" from mail module
+ - Bugfix #17920: Invalidate IMAP folder cache when accessing unseen message
 
 * 2011-01-10 - choeger@open-xchange.com
 
