@@ -774,6 +774,7 @@ setConfigFilePermissions() {
     ox_update_permissions "/opt/open-xchange/etc/groupware/mail.properties" root:open-xchange 640
     ox_update_permissions "/opt/open-xchange/etc/groupware/configdb.properties" root:open-xchange 640
     ox_update_permissions "/opt/open-xchange/etc/groupware/server.properties" root:open-xchange 640
+    ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
 }
 
 case "$1" in

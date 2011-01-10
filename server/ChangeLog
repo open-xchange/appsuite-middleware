@@ -1,3 +1,8 @@
+* 2011-01-10 - choeger@open-xchange.com
+
+ - Bugfix #17769: [L3] /tmp/.OX must be automatically re-created when tmpwatch deletes it
+   /tmp/.OX is now /var/spool/open-xchange/uploads/ per default on new installations
+
 * 2011-01-08 - thorben.betten@open-xchange.com
 
  - Bugfix #17976: Returning empty in-memory tree if there is no entry for current user

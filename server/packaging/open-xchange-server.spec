@@ -124,6 +124,8 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb install
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb installExceptJars installConfig
 
 mkdir -p %{buildroot}/var/log/open-xchange
+mkdir -m 750 -p %{buildroot}/var/spool/open-xchange/uploads
+chown open-xchange:root %{buildroot}/var/spool/open-xchange/uploads
 
 # generate list of config files for config package
 rm -f %{configfiles}
@@ -689,6 +691,7 @@ EOF
    ox_update_permissions "/opt/open-xchange/etc/groupware/mail.properties" root:open-xchange 640
    ox_update_permissions "/opt/open-xchange/etc/groupware/configdb.properties" root:open-xchange 640
    ox_update_permissions "/opt/open-xchange/etc/groupware/server.properties" root:open-xchange 640
+   ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
 
    # run checkconfigconsistency once
    /opt/open-xchange/sbin/checkconfigconsistency
@@ -713,6 +716,7 @@ fi
 /opt/open-xchange/etc/groupware/osgi/config.ini.template
 /opt/open-xchange/sbin/*
 %dir %attr(750,open-xchange,open-xchange) /var/log/open-xchange
+%dir %attr(750,open-xchange,root) /var/spool/open-xchange/uploads
 /etc/init.d/open-xchange-groupware
 %dir /opt/open-xchange/etc/groupware/servletmappings
 %dir /opt/open-xchange/etc/groupware
