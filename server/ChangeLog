@@ -1,3 +1,7 @@
+* 2011-01-11 - martin.herfurth@open-xchange.com
+
+ - Bugfix #17890: Imip invitations for newly added external participants.
+
 * 2011-01-10 - thorben.betten@open-xchange.com
 
  - Bugfix #17803: Removed obsolete property "com.openexchange.mail.maxNumOfConnections" from mail module
