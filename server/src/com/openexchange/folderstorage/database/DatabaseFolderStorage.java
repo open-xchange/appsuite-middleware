@@ -1382,12 +1382,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     private static FolderObject getFolderObject(final int folderId, final Context ctx, final Connection con) throws OXException {
         if (!FolderCacheManager.isEnabled()) {
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
         }
         final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
         FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
         if (null == fo) {
-            fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+            fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
             cacheManager.putFolderObject(fo, ctx, false, null);
         }
         return fo;
@@ -1398,7 +1398,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             /*
              * OX folder cache not enabled
              */
-            return OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con);
+            return OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con, true, true);
         }
         /*
          * Load them either from cache or from database
@@ -1417,7 +1417,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
         }
         if (!toLoad.isEmpty()) {
-            final List<FolderObject> list = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.keys(), ctx, con);
+            final List<FolderObject> list = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.keys(), ctx, con, true, true);
             for (final FolderObject folderObject : list) {
                 if (null != folderObject) {
                     final int index = toLoad.get(folderObject.getObjectID());

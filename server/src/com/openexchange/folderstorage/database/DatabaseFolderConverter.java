@@ -69,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tools.oxfolder.OXFolderException;
 
 /**
  * {@link DatabaseFolderConverter}
@@ -226,8 +227,13 @@ public final class DatabaseFolderConverter {
                 if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
                     retval.setSubfolderIDs(null);
                     retval.setSubscribedSubfolders(true);
-                } else {                
-                    final List<Integer> subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
+                } else {
+                    final List<Integer> subfolderIds;
+                    if (fo.containsSubfolderIds()) {
+                        subfolderIds = fo.getSubfolderIds();
+                    } else {
+                        subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
+                    }
                     if (subfolderIds.isEmpty()) {
                         retval.setSubfolderIDs(new String[0]);
                         retval.setSubscribedSubfolders(false);
@@ -246,6 +252,8 @@ public final class DatabaseFolderConverter {
             throw new FolderException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXFolderException e) {
+            throw new FolderException(e);
         }
     }
 
