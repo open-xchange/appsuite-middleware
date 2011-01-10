@@ -239,10 +239,12 @@ public final class FolderCache {
         SessionMailCache.getInstance(session, accountId).get(entry);
         final FolderMap folderMap = entry.getValue();
         if (null != folderMap) {
-            MailFolder mailFolder = folderMap.get(fullName);
-            if (null != mailFolder) {
-                final int cur = mailFolder.getUnreadMessageCount();
-                mailFolder.setUnreadMessageCount(cur > 0 ? cur - 1 : 0);
+            synchronized (folderMap) {
+                MailFolder mailFolder = folderMap.get(fullName);
+                if (null != mailFolder) {
+                    final int cur = mailFolder.getUnreadMessageCount();
+                    mailFolder.setUnreadMessageCount(cur > 0 ? cur - 1 : 0);
+                }
             }
         }
     }

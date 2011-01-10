@@ -222,6 +222,15 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     }
 
     /**
+     * Decrements unread message counter from cached IMAP folder.
+     * 
+     * @param fullName The IMAP folder full name
+     */
+    public void decrementUnreadMessageCount(final String fullName) {
+        FolderCache.decrementUnreadMessageCount(fullName, session, accountId);
+    }
+
+    /**
      * Removes the IMAP folders denoted by specified set of fullnames.
      * 
      * @param modifiedFullnames The fullnames of the folders which have been modified

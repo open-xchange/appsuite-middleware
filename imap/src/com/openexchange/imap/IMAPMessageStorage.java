@@ -358,7 +358,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                              */
                             msg.setFlags(FLAGS_SEEN, true);
                             mail.setFlag(MailMessage.FLAG_SEEN, true);
-                            mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
+                            final int cur = mail.getUnreadMessages();
+                            mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
                         }
                     } catch (final MessagingException e) {
                         if (LOG.isWarnEnabled()) {
@@ -372,7 +373,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      */
                     msg.setFlags(FLAGS_SEEN, true);
                     mail.setFlag(MailMessage.FLAG_SEEN, true);
-                    mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
+                    final int cur = mail.getUnreadMessages();
+                    mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
                 }
             }
             return setAccountInfo(mail);
