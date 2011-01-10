@@ -173,7 +173,6 @@ public class Bug17392Test extends ManagedAppointmentTest {
 		AJAXRequest<?> request = new ICalExportRequest(folder.getObjectID());
 		AbstractAJAXResponse response = getClient().execute(request);
 		String ical = (String) response.getData();
-		System.out.println("Export:\n"+ical);
 		
 		//remove original
 		calendarManager.delete(app);
