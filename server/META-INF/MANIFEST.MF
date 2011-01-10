@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 6.19.0.0
-OXVersion: 6.19.0
-OXRevision: 0
+Bundle-Version: 6.18.2.0
+OXVersion: 6.18.2
+OXRevision: 15
 Bundle-Activator: com.openexchange.server.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.davekoelle,
@@ -32,7 +32,6 @@ Import-Package: com.davekoelle,
  com.openexchange.groupware.results,
  com.openexchange.html,
  com.openexchange.i18n,
- com.openexchange.id,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.management,

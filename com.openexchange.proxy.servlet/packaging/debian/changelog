@@ -1,8 +1,8 @@
-open-xchange-proxy-servlet (6.19.0.0-0) unstable; urgency=low
+open-xchange-proxy-servlet (6.18.2.0-15) unstable; urgency=low
 
-  * new unstable cycle
+  * build for public ptf 2011-01-12
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 22 Dec 2010 20:06:34 +0100
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 10 Jan 2011 15:53:31 +0100
 
 open-xchange-proxy-servlet (6.18.2.0-14) unstable; urgency=low
 

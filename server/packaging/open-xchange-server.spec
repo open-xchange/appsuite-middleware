@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 16
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -1554,6 +1554,8 @@ fi
  - Bugfix #14922: Confirm status in public folders.
 * Mon Jan 11 2010 - choeger@open-xchange.com
  - Bugfix #15176: Crawler YML files can not be updated
+* Sun Jan 10 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17915: FileStorage lists files correctly now.
 * Wed Jan 06 2010 - martin.herfurth@open-xchange.com
  - Bugfix #15155: Changing start date of a series (server side).
 * Wed Jan 06 2010 - thorben.betten@open-xchange.com
