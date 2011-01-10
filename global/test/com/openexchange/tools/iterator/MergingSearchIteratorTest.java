@@ -81,6 +81,27 @@ public class MergingSearchIteratorTest extends TestCase {
         
         assertFalse(complete.hasNext());
     }
+    
+    public void testMergeEmptyWithFull() throws AbstractOXException {
+        Integer[] a = new Integer[0];
+        Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
+        
+        Integer[] expected = b;
+        
+        
+        SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
+            new IntegerComparator(),
+            new ArrayIterator<Integer>(a),
+            new ArrayIterator<Integer>(b)
+        );
+    
+        for(int i = 0; i < complete.size(); i++) {
+            assertTrue(complete.hasNext());
+            assertEquals(expected[i], complete.next());
+        }
+        
+        assertFalse(complete.hasNext());
+    }
 
     private static final class IntegerComparator implements Comparator<Integer> {
 

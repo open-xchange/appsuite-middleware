@@ -78,6 +78,8 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
             if(iterator.hasNext()) {
                 topmost.add(iterator.next());
                 hasNext = true;
+            } else {
+                topmost.add(null);
             }
         }
         this.comparator = criterion;
