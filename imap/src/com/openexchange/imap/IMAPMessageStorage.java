@@ -348,6 +348,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw e;
             }
             if (!mail.isSeen() && markSeen) {
+                imapFolderStorage.removeFromCache(fullname);
                 mail.setPrevSeen(false);
                 if (imapConfig.isSupportsACLs()) {
                     try {
