@@ -63,8 +63,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
+
 
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
@@ -88,13 +90,13 @@ public class ICalEmitterTest extends TestCase {
     private ICal4JEmitter emitter;
     private MockUserLookup users;
     private UserResolver oldUserResolver;
+    private TimeZone tz = TimeZone.getDefault();
 
     private Appointment getDefault() {
         final Appointment app = new Appointment();
 
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
-
         app.setStartDate(start);
         app.setEndDate(end);
 
@@ -109,7 +111,7 @@ public class ICalEmitterTest extends TestCase {
         app.setNote("The Note");
         app.setCategories("cat1, cat2, cat3");
         app.setLocation("The Location");
-
+        app.setTimezone(tz.getDisplayName());
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
