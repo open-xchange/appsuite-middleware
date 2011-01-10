@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import gnu.trove.TIntLongHashMap;
+import gnu.trove.TLongArrayList;
 import gnu.trove.TLongIntHashMap;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -843,6 +844,8 @@ public final class IMAPCommandsCollection {
 
     private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
 
+    private final static String TEMPL_STORE_FLAGS = "STORE %s %sFLAGS (%s)";
+
     private static final String ALL_COLOR_LABELS =
         "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
 
@@ -868,11 +871,19 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 160);
+                final String[] args;
+                final String format;
+                if (null == msgUIDs) {
+                    args = new String[] { "1:*" };
+                    format = TEMPL_STORE_FLAGS;
+                } else {
+                    args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 160);
+                    format = TEMPL_UID_STORE_FLAGS;
+                }
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
-                    final String command = String.format(TEMPL_UID_STORE_FLAGS, args[i], "-", ALL_COLOR_LABELS);
+                    final String command = String.format(format, args[i], "-", ALL_COLOR_LABELS);
                     r = p.command(command, null);
                     response = r[r.length - 1];
                     if (response.isOK()) {
@@ -917,11 +928,19 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 32 + colorLabelFlag.length());
+                final String[] args;
+                final String format;
+                if (null == msgUIDs) {
+                    args = new String[] { "1:*" };
+                    format = TEMPL_STORE_FLAGS;
+                } else {
+                    args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 32 + colorLabelFlag.length());
+                    format = TEMPL_UID_STORE_FLAGS;
+                }
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
-                    final String command = String.format(TEMPL_UID_STORE_FLAGS, args[i], "+", colorLabelFlag);
+                    final String command = String.format(format, args[i], "+", colorLabelFlag);
                     r = p.command(command, null);
                     response = r[r.length - 1];
                     if (response.isOK()) {
@@ -1689,6 +1708,69 @@ public final class IMAPCommandsCollection {
                     return trim;
                 }
                 return uids;
+            }
+
+        }));
+    }
+
+    /**
+     * Detects the corresponding UIDs from given folder
+     * 
+     * @param imapFolder The IMAP folder
+     * @return The corresponding UIDs
+     * @throws MessagingException If an error occurs in underlying protocol
+     */
+    public static long[] getUIDs(final IMAPFolder imapFolder) throws MessagingException {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
+            /*
+             * Empty folder...
+             */
+            return new long[0];
+        }
+        return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                Response[] r = null;
+                Response response = null;
+                final TLongArrayList uids = new TLongArrayList(messageCount);
+                /*-
+                 * Arguments:  sequence set
+                 * message data item names or macro
+                 * 
+                 * Responses:  untagged responses: FETCH
+                 * 
+                 * Result:     OK - fetch completed
+                 *             NO - fetch error: can't fetch that data
+                 *             BAD - command unknown or arguments invalid
+                 */
+                final String command = String.format(TEMPL_FETCH_UID, "1:*");
+                r = p.command(command, null);
+                final int len = r.length - 1;
+                response = r[len];
+                if (response.isOK()) {
+                    for (int j = 0; j < len; j++) {
+                        if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                            final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
+                            uids.add(uidItem.uid);
+                            r[j] = null;
+                        }
+                    }
+                    p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else {
+                    p.handleResult(response);
+                }
+                return uids.toNativeArray();
             }
 
         }));
