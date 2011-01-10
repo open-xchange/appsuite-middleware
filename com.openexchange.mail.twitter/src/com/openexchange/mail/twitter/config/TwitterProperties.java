@@ -101,10 +101,6 @@ public final class TwitterProperties extends AbstractProtocolProperties implemen
         return mailProperties.getMailFetchLimit();
     }
 
-    public int getMaxNumOfConnections() {
-        return mailProperties.getMaxNumOfConnections();
-    }
-
     public int getWatcherFrequency() {
         return mailProperties.getWatcherFrequency();
     }

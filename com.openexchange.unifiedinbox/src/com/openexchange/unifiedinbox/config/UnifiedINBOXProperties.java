@@ -119,10 +119,6 @@ public final class UnifiedINBOXProperties extends AbstractProtocolProperties imp
         return mailProperties.getMailFetchLimit();
     }
 
-    public int getMaxNumOfConnections() {
-        return mailProperties.getMaxNumOfConnections();
-    }
-
     public int getWatcherFrequency() {
         return mailProperties.getWatcherFrequency();
     }

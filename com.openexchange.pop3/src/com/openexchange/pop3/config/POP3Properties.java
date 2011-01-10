@@ -238,10 +238,6 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         return mailProperties.getMailFetchLimit();
     }
 
-    public int getMaxNumOfConnections() {
-        return mailProperties.getMaxNumOfConnections();
-    }
-
     public int getWatcherFrequency() {
         return mailProperties.getWatcherFrequency();
     }

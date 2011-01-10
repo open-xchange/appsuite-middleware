@@ -150,20 +150,6 @@ public class MailAccountProperties implements IMailProperties {
         }
     }
 
-    public int getMaxNumOfConnections() {
-        final String maxNum = properties.get("com.openexchange.mail.maxNumOfConnections");
-        if (null == maxNum) {
-            return MailProperties.getInstance().getMaxNumOfConnections();
-        }
-
-        try {
-            return Integer.parseInt(maxNum);
-        } catch (final NumberFormatException e) {
-            LOG.error("Max Number of connections: Non parseable value.", e);
-            return MailProperties.getInstance().getMaxNumOfConnections();
-        }
-    }
-
     public int getWatcherFrequency() {
         final String watcherFreqStr = properties.get("com.openexchange.mail.watcherFrequency");
         if (null == watcherFreqStr) {

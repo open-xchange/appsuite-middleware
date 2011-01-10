@@ -145,8 +145,6 @@ public final class MailProperties implements IMailProperties {
 
     private char defaultSeparator;
 
-    private int maxNumOfConnections;
-
     private String[] quoteLineColors;
 
     private Properties javaMailProperties;
@@ -250,7 +248,6 @@ public final class MailProperties implements IMailProperties {
         defaultMimeCharset = null;
         ignoreSubscription = false;
         defaultSeparator = '/';
-        maxNumOfConnections = 0;
         quoteLineColors = null;
         javaMailProperties = null;
         watcherEnabled = false;
@@ -472,18 +469,6 @@ public final class MailProperties implements IMailProperties {
             } else {
                 defaultSeparator = defaultSep;
                 logBuilder.append("\tDefault Separator: ").append(defaultSeparator).append('\n');
-            }
-        }
-
-        {
-            final String maxNum = configuration.getProperty("com.openexchange.mail.maxNumOfConnections", "0").trim();
-            try {
-                maxNumOfConnections = Integer.parseInt(maxNum);
-                logBuilder.append("\tMax Number of Connections: ").append(maxNumOfConnections).append('\n');
-            } catch (final NumberFormatException e) {
-                maxNumOfConnections = 0;
-                logBuilder.append("\tMax Number of Connections: Invalid value \"").append(maxNum).append(fallbackPrefix).append(
-                    maxNumOfConnections).append('\n');
             }
         }
 
@@ -777,10 +762,6 @@ public final class MailProperties implements IMailProperties {
      */
     public String getMasterPassword() {
         return masterPassword;
-    }
-
-    public int getMaxNumOfConnections() {
-        return maxNumOfConnections;
     }
 
     /**

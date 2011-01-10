@@ -353,10 +353,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return mailProperties.getMailFetchLimit();
     }
 
-    public int getMaxNumOfConnections() {
-        return mailProperties.getMaxNumOfConnections();
-    }
-
     public int getWatcherFrequency() {
         return mailProperties.getWatcherFrequency();
     }

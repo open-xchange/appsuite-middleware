@@ -97,13 +97,6 @@ public interface IMailProperties {
      * @return The mail fetch limit
      */
     public int getMailFetchLimit();
-    
-    /**
-     * Gets the max. number of connections.
-     * 
-     * @return The max. number of connections
-     */
-    public int getMaxNumOfConnections();
 
     /**
      * Indicates if user flags are enabled.

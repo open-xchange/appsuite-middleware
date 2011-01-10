@@ -55,9 +55,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -89,10 +86,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccess.class);
 
     private static final AtomicInteger COUNTER = new AtomicInteger();
-
-    private static final transient Lock LOCK_CON = new ReentrantLock();
-
-    private static final transient Condition LOCK_CON_CONDITION = LOCK_CON.newCondition();
 
     /*-
      * ############### MEMBERS ###############
@@ -249,36 +242,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             checkAdminLogin(session, accountId);
         }
         /*
-         * Check if a new connection may be established
+         * Return new connection
          */
-        if ((MailProperties.getInstance().getMaxNumOfConnections() > 0) && (COUNTER.get() > MailProperties.getInstance().getMaxNumOfConnections())) {
-            LOCK_CON.lock();
-            try {
-                while (COUNTER.get() > MailProperties.getInstance().getMaxNumOfConnections()) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Too many mail connections currently established. Going asleep.");
-                    }
-                    LOCK_CON_CONDITION.await();
-                }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Woke up & mail access may again be established");
-                }
-                /*
-                 * Try to fetch from cache again
-                 */
-                if (MailAccessCache.getInstance().containsMailAccess(session, accountId)) {
-                    final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session, accountId);
-                    if (mailAccess != null) {
-                        return mailAccess;
-                    }
-                }
-            } catch (final InterruptedException e) {
-                LOG.error(e.getMessage(), e);
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e, new Object[0]);
-            } finally {
-                LOCK_CON.unlock();
-            }
-        }
         return MailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
     }
 
@@ -524,9 +489,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                  */
                 if (put && isCacheable() && MailAccessCache.getInstance().putMailAccess(session, accountId, this)) {
                     /*
-                     * Successfully cached: signal & return
+                     * Successfully cached: return
                      */
-                    signalAvailableConnection();
                     return;
                 }
             } catch (final MailException e) {
@@ -536,7 +500,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Close mail connection
              */
             delegateCloseInternal();
-            signalAvailableConnection();
         } finally {
             /*
              * Remove from watcher no matter if cached or closed
@@ -608,23 +571,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         final MailConfig instance = delegateCreateNewMailConfig();
         instance.setMailProperties(delegateCreateNewMailProperties());
         return MailConfig.getConfig(instance.getClass(), instance, session, accountId);
-    }
-
-    /**
-     * Signals an available connection.
-     */
-    private void signalAvailableConnection() {
-        if (MailProperties.getInstance().getMaxNumOfConnections() > 0) {
-            LOCK_CON.lock();
-            try {
-                LOCK_CON_CONDITION.signalAll();
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Sending signal to possible waiting threads");
-                }
-            } finally {
-                LOCK_CON.unlock();
-            }
-        }
     }
 
     /**
