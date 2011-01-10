@@ -87,18 +87,21 @@ public final class EmitterTools {
      * TODO add default timezone
      */
     public static DateTime toDateTime(final java.util.Date date) {
-    	final DateTime retval = new DateTime(false);
+    	final DateTime retval = new DateTime(true);
         retval.setTime(date.getTime());
         return retval;
     }
 
     public static DateTime toDateTime(final java.util.Date date, String tzid) {
-    	final DateTime retval = new DateTime(false);
+        if(tzid == null)
+        	return toDateTime(date);
+        
+        net.fortuna.ical4j.model.TimeZone ical4jTimezone = timeZoneRegistry.getTimeZone(tzid);
+        if(ical4jTimezone == null)
+        	return toDateTime(date);
 
-        if(tzid != null){
-        	net.fortuna.ical4j.model.TimeZone ical4jTimezone = timeZoneRegistry.getTimeZone(tzid);
-        	retval.setTimeZone(ical4jTimezone);
-        }
+        final DateTime retval = new DateTime(false);
+        retval.setTimeZone(ical4jTimezone);
         retval.setTime(date.getTime());
         return retval;
     }
