@@ -207,7 +207,8 @@ public final class MailAccessWatcher {
                         if ((null != val)) {
                             final long duration = (now - l(val));
                             if (duration > watcherTime) {
-                                logger.info(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration)) + mailAccess.getTrace());
+                                sb.setLength(0);
+                                logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration))).append(mailAccess.getTrace()).toString());
                                 exceededCons.add(mailAccess);
                             }
                             
