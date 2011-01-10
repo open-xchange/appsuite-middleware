@@ -712,23 +712,31 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 if (!map.isEmpty()) {
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
-                        final int index = map.get(folderObject.getObjectID());
-                        ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, con);
+                        if (null != folderObject) {
+                            final int index = map.get(folderObject.getObjectID());
+                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, con);
+                        }
                     }
                 }
                 /*
                  * Set proper tree identifier
                  */
                 for (final Folder folder : ret) {
-                    folder.setTreeID(treeId);
+                    if (null != folder) {
+                        folder.setTreeID(treeId);
+                    }
                 }
                 /*
                  * Return
                  */
-                final List<Folder> l = new ArrayList<Folder>(ret.length);
-                for (final Folder folder : ret) {
+                final int length = ret.length;
+                final List<Folder> l = new ArrayList<Folder>(length);
+                for (int i = 0; i < length; i++) {
+                    final Folder folder = ret[i];
                     if (null != folder) {
                         l.add(folder);
+                    } else {
+                        storageParameters.addWarning(FolderExceptionErrorMessage.NOT_FOUND.create(Integer.valueOf(folderIdentifiers.get(i)), treeId));
                     }
                 }
                 return l;
@@ -741,13 +749,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 list.add(getUnsignedInteger(folderIdentifier));
             }
             final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toNativeArray(), ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
-            final List<Folder> ret = new ArrayList<Folder>(folders.size());
-            for (final FolderObject fo : folders) {
-                final DatabaseFolder df = new DatabaseFolder(fo);
-                df.setTreeID(treeId);
-                ret.add(df);
+            final int size = folders.size();
+            final List<Folder> ret = new ArrayList<Folder>(size);
+            for (int i = 0; i < size; i++) {
+                final FolderObject fo = folders.get(i);
+                if (null == fo) {
+                    storageParameters.addWarning(FolderExceptionErrorMessage.NOT_FOUND.create(Integer.valueOf(list.get(i)), treeId));
+                } else {
+                    final DatabaseFolder df = new DatabaseFolder(fo);
+                    df.setTreeID(treeId);
+                    ret.add(df);
+                }
             }
-
             return ret;
         } catch (final FolderException e) {
             throw e;
@@ -1406,9 +1419,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
         if (!toLoad.isEmpty()) {
             final List<FolderObject> list = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.keys(), ctx, con);
             for (final FolderObject folderObject : list) {
-                final int index = toLoad.get(folderObject.getObjectID());
-                ret[index] = folderObject;
-                cacheManager.putFolderObject(folderObject, ctx, false, null);
+                if (null != folderObject) {
+                    final int index = toLoad.get(folderObject.getObjectID());
+                    ret[index] = folderObject;
+                    cacheManager.putFolderObject(folderObject, ctx, false, null);
+                }
             }
         }
         return Arrays.asList(ret);
