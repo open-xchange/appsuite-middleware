@@ -139,6 +139,9 @@ public final class OXFolderBatchLoader {
                 final List<FolderObject> list = new ArrayList<FolderObject>(folderIds.length);
                 int pos = 0;
                 if ((folderIds.length - pos) > LIMIT) {
+                    /*
+                     * Chunked loading
+                     */
                     do {
                         final int[] fids = new int[LIMIT];
                         System.arraycopy(folderIds, pos, fids, 0, LIMIT);
