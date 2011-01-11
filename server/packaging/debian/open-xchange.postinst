@@ -27,6 +27,13 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-561
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mail.properties
+  if ox_exists_property com.openexchange.mail.maxNumOfConnections $pfile; then
+      ox_remove_property com.openexchange.mail.maxNumOfConnections $pfile
+  fi
+
   # SoftwareChange_Request-537
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/sessiond.properties
