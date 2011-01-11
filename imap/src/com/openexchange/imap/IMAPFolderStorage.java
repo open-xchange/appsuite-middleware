@@ -235,19 +235,22 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      * 
      * @param fullName The full name
      * @param total The message count
+     * @return <code>true</code> if updated; otherwise <code>false</code>
      */
-    public void updateCacheIfDiffer(final String fullName, final int total) {
+    public boolean updateCacheIfDiffer(final String fullName, final int total) {
         final MailFolder mailFolder = FolderCache.optCachedFolder(fullName, this);
         if (null != mailFolder) {
             try {
                 if (mailFolder.getMessageCount() != total) {
                     FolderCache.updateCachedFolder(fullName, this);
+                    return true;
                 }
             } catch (final MailException e) {
                 LOG.warn("Updating IMAP folder cache failed.", e);
                 FolderCache.removeCachedFolder(fullName, session, accountId);
             }
         }
+        return false;
     }
 
     /**
