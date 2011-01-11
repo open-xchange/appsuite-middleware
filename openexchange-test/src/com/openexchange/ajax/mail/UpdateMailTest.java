@@ -99,7 +99,7 @@ public class UpdateMailTest extends AbstractMailTest {
         super.tearDown();
     }
 
-    public void ntestShouldBeAbleToAddFlags() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldBeAbleToAddFlags() throws AjaxException, IOException, SAXException, JSONException{
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
@@ -224,7 +224,7 @@ public class UpdateMailTest extends AbstractMailTest {
         }
     }
 
-    public void ntestShouldBeAbleToAddFlagsByMessageId() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldBeAbleToAddFlagsByMessageId() throws AjaxException, IOException, SAXException, JSONException{
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag by message id", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
@@ -258,7 +258,7 @@ public class UpdateMailTest extends AbstractMailTest {
     }
 
     
-    public void ntestShouldBeAbleToSetColors() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldBeAbleToSetColors() throws AjaxException, IOException, SAXException, JSONException{
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for changing colors", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
