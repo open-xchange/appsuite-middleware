@@ -418,7 +418,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
                 if (MailSortField.RECEIVED_DATE.equals(sortField) && onlyLowCostFields(usedFields)) {
-                    return performLowCostFetch(fullname, usedFields, order, indexRange);
+                    final MailMessage[] mailMessages = performLowCostFetch(fullname, usedFields, order, indexRange);
+                    imapFolderStorage.updateCacheIfDiffer(fullname, mailMessages.length);
+                    return mailMessages;
                 }
                 /*
                  * Proceed with common handling

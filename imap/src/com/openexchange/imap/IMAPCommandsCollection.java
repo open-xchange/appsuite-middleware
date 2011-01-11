@@ -473,6 +473,71 @@ public final class IMAPCommandsCollection {
     }
 
     /**
+     * Gets total message count from given IMAP folder
+     * 
+     * @param imapFolder The IMAP folder
+     * @return The total message count
+     * @throws MessagingException If determining counts fails
+     */
+    public static int getTotal(final IMAPFolder imapFolder) throws MessagingException {
+        return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
+                    /*
+                     * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
+                     */
+                    throw new com.sun.mail.iap.BadCommandException("STATUS not supported");
+                }
+                /*
+                 * Encode the mbox as per RFC2060
+                 */
+                final Argument args = new Argument();
+                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                /*
+                 * Item arguments
+                 */
+                final Argument itemArgs = new Argument();
+                final String[] items = { "MESSAGES" };
+                for (int i = 0, len = items.length; i < len; i++) {
+                    itemArgs.writeAtom(items[i]);
+                }
+                args.writeArgument(itemArgs);
+                /*
+                 * Perform command
+                 */
+                final Response[] r = protocol.command("STATUS", args);
+                final Response response = r[r.length - 1];
+                /*
+                 * Look for STATUS responses
+                 */
+                int total = -1;
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals("STATUS")) {
+                            final int status = parseTotalResponse(ir);
+                            if (status != -1) {
+                                total = status;
+                            }
+                            r[i] = null;
+                        }
+                    }
+                }
+                /*
+                 * Dispatch remaining untagged responses
+                 */
+                protocol.notifyResponseHandlers(r);
+                protocol.handleResult(response);
+                return Integer.valueOf(total);
+            }
+        })).intValue();
+    }
+
+    /**
      * Parses number of total, recent and unread messages from specified IMAP response whose key is equal to <code>&quot;STATUS&quot;</code>
      * .
      * 
@@ -510,6 +575,39 @@ public final class IMAPCommandsCollection {
             }
         } while (statusResponse.readByte() != ')');
         return new int[] { total, recent, unseen };
+    }
+
+    /**
+     * Parses number of total messages from specified IMAP response whose key is equal to <code>&quot;STATUS&quot;</code>
+     * .
+     * 
+     * @param statusResponse The <code>&quot;STATUS&quot;</code> IMAP response to parse.
+     * @return The  number of total messages
+     * @throws ParsingException If parsing STATUS response fails
+     */
+    static int parseTotalResponse(final Response statusResponse) throws ParsingException {
+        /*
+         * Read until opening parenthesis or EOF
+         */
+        byte b = 0;
+        do {
+            b = statusResponse.readByte();
+        } while (b != 0 && b != '(');
+        if (0 == b) {
+            // EOF
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
+        /*
+         * Parse parenthesized list
+         */
+        int total = -1;
+        do {
+            final String attr = statusResponse.readAtom();
+            if (attr.equalsIgnoreCase("MESSAGES")) {
+                total = statusResponse.readNumber();
+            }
+        } while (statusResponse.readByte() != ')');
+        return total;
     }
 
     /**

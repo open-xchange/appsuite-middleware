@@ -231,6 +231,56 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     }
 
     /**
+     * Updates the cached IMAP folder if message has changed.
+     * 
+     * @param fullName The full name
+     * @param total The message count
+     */
+    public void updateCacheIfDiffer(final String fullName, final int total) {
+        final MailFolder mailFolder = FolderCache.optCachedFolder(fullName, this);
+        if (null != mailFolder) {
+            try {
+                if (mailFolder.getMessageCount() != total) {
+                    FolderCache.updateCachedFolder(fullName, this);
+                }
+            } catch (final MailException e) {
+                LOG.warn("Updating IMAP folder cache failed.", e);
+                FolderCache.removeCachedFolder(fullName, session, accountId);
+            }
+        }
+    }
+
+    /**
+     * Updates the cached IMAP folder if message has changed.
+     * 
+     * @param fullName The full name
+     */
+    public void updateCacheIfDiffer(final String fullName) {
+        final MailFolder mailFolder = FolderCache.optCachedFolder(fullName, this);
+        if (null != mailFolder) {
+            try {
+                IMAPFolder folder = (IMAPFolder) (DEFAULT_FOLDER_ID.equals(fullName) ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
+                if (!folder.exists()) {
+                    folder = checkForNamespaceFolder(fullName);
+                }
+                if (null == folder) {
+                    FolderCache.removeCachedFolder(fullName, session, accountId);
+                    return;
+                }
+                if (mailFolder.getMessageCount() != IMAPCommandsCollection.getTotal(folder)) {
+                    FolderCache.updateCachedFolder(fullName, this, folder);
+                }
+            } catch (final MessagingException e) {
+                LOG.warn("Updating IMAP folder cache failed.", e);
+                FolderCache.removeCachedFolder(fullName, session, accountId);
+            } catch (final MailException e) {
+                LOG.warn("Updating IMAP folder cache failed.", e);
+                FolderCache.removeCachedFolder(fullName, session, accountId);
+            }
+        }
+    }
+
+    /**
      * Removes the IMAP folders denoted by specified set of fullnames.
      * 
      * @param modifiedFullnames The fullnames of the folders which have been modified
