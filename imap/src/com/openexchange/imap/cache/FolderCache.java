@@ -95,6 +95,37 @@ public final class FolderCache {
      * @param fullName The IMAP folder full name
      * @param folderStorage The connected IMAP folder storage
      * @return The cached IMAP folder or <code>null</code>
+     */
+    public static MailFolder optCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) {
+        if (!ENABLED) {
+            return null;
+        }
+        final Session session = folderStorage.getSession();
+        /*
+         * Initialize appropriate cache entry
+         */
+        final FolderCacheEntry entry = new FolderCacheEntry();
+        final int accountId = folderStorage.getAccountId();
+        /*
+         * Get entry from session cache
+         */
+        SessionMailCache.getInstance(session, accountId).get(entry);
+        final FolderMap folderMap = entry.getValue();
+        if (null == folderMap) {
+            return null;
+        }
+        /*
+         * Check for folder
+         */
+        return folderMap.get(fullName);
+    }
+
+    /**
+     * Gets cached IMAP folder.
+     * 
+     * @param fullName The IMAP folder full name
+     * @param folderStorage The connected IMAP folder storage
+     * @return The cached IMAP folder
      * @throws MailException If loading the folder fails
      */
     public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) throws MailException {
@@ -107,7 +138,7 @@ public final class FolderCache {
      * @param fullName The IMAP folder full name
      * @param folderStorage The connected IMAP folder storage
      * @param The possibly loaded IMAP folder; may be <code>null</code>
-     * @return The cached IMAP folder or <code>null</code>
+     * @return The cached IMAP folder
      * @throws MailException If loading the folder fails
      */
     public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
