@@ -284,6 +284,10 @@ public final class MailMessageCache {
         if (null == cache) {
             return;
         }
+        if (null == uids) {
+            updateCachedMessages(accountId, fullname, userId, cid, changedFields, newValues);
+            return;
+        }
         final CacheKey mapKey = getMapKey(userId, cid);
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();

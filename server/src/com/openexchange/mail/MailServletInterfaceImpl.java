@@ -2409,11 +2409,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         final String[] ids;
         if (null == mailIDs) {
-            ids = getAllMessageIDs(argument);
             if (messageStorage instanceof IMailMessageStorageBatch) {
                 final IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
+                ids = null;
                 batch.updateMessageColorLabel(fullname, newColorLabel);
             } else {
+                ids = getAllMessageIDs(argument);
                 messageStorage.updateMessageColorLabel(fullname, ids, newColorLabel);
             }
         } else {
@@ -2424,7 +2425,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Update caches
          */
-        {
+        if (null != ids) {
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
             if (null != jsonMessageCache) {
                 final List<String> updateIds = new ArrayList<String>(ids.length);
@@ -2440,6 +2441,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      */
                     jsonMessageCache.updateColorFlag(accountId, fullname, ids, newColorLabel, session);
                 }
+            }
+        } else {
+            final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
+            if (null != jsonMessageCache) {
+                /*
+                 * Update color label in JSON message cache
+                 */
+                jsonMessageCache.updateColorFlag(accountId, fullname, newColorLabel, session);
             }
         }
         try {
@@ -2490,11 +2499,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         final String[] ids;
         if (null == mailIDs) {
-            ids = getAllMessageIDs(argument);
             if (messageStorage instanceof IMailMessageStorageBatch) {
                 final IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
+                ids = null;
                 batch.updateMessageFlags(fullname, flagBits, flagVal);
             } else {
+                ids = getAllMessageIDs(argument);
                 messageStorage.updateMessageFlags(fullname, ids, flagBits, flagVal);
             }
         } else {
@@ -2510,7 +2520,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Update caches
          */
-        {
+        if (null != ids) {
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
             if (null != jsonMessageCache) {
                 final List<String> updateIds = new ArrayList<String>(ids.length);
@@ -2535,6 +2545,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     if (flags > 0) { // Any flags left after \Seen removed?
                         jsonMessageCache.updateFlags(accountId, fullname, updateIdsArr, flags, flagVal, session);
                     }
+                }
+            }
+        } else {
+            final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
+            if (null != jsonMessageCache) {
+                int flags = flagBits;
+                if ((flags & MailMessage.FLAG_SEEN) > 0) {
+                    // Strip \Seen flag from bit mask
+                    flags = (flags & ~MailMessage.FLAG_SEEN);
+                    // Invoke special method for \Seen flag
+                    final int unread = mailAccess.getUnreadMessagesCount(fullname);
+                    jsonMessageCache.switchSeenFlag(accountId, fullname, flagVal, unread, session);
+                }
+                if (flags > 0) { // Any flags left after \Seen removed?
+                    jsonMessageCache.updateFlags(accountId, fullname, flags, flagVal, session);
                 }
             }
         }
