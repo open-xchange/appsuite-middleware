@@ -55,11 +55,11 @@ package com.openexchange.config.cascade;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ConfigProperty {
+public interface ConfigProperty<T> {
 
-    void set(Object value);
+    void set(T value);
 
-    Object get();
+    T get();
 
     void set(String metadataName, Object value);
 

@@ -58,6 +58,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.Scope;
+import com.openexchange.tools.strings.StringParser;
 import static com.openexchange.config.cascade.Scope.*;
 
 
@@ -71,6 +72,7 @@ public class ConfigCascade implements ConfigViewFactory {
     ConcurrentHashMap<Scope, ConfigProviderService> providers = new ConcurrentHashMap<Scope, ConfigProviderService>();
     Scope[] searchPath = Scope.searchPath();
     private List<ConfigProviderService> path;
+    StringParser stringParser;
     
     public void setProvider(Scope scope, ConfigProviderService configProvider) {
         providers.put(scope, configProvider);
@@ -96,6 +98,10 @@ public class ConfigCascade implements ConfigViewFactory {
         }
         return path = p;
     }
+    
+    public void setStringParser(StringParser stringParser) {
+        this.stringParser = stringParser;
+    }
  
     
     private final class View implements ConfigView {
@@ -107,27 +113,27 @@ public class ConfigCascade implements ConfigViewFactory {
             this.context = context;
         }
 
-        public void set(Scope scope, String property, Object value) {
-            property(scope, property).set(value);
+        public <T> void set(Scope scope, String property, T value) {
+            ((ConfigProperty<T>)property(scope, property, value.getClass())).set(value); 
         }
 
-        public Object get(String property) {
-            return property(property).get();
+        public <T> T get(String property, Class<T> coerceTo) {
+            return property(property, coerceTo).get();
         }
 
-        public ConfigProperty property(Scope scope, String property) {
-            return providers.get(scope).get(property, context, user);
+        public <T> ConfigProperty<T> property(Scope scope, String property, Class<T> coerceTo) {
+            return new CoercingConfigProperty<T>(coerceTo, providers.get(scope).get(property, context, user), stringParser);
         }
 
-        public ComposedConfigProperty property(final String property) {
-            return new ComposedConfigProperty() {
+        public <T> ComposedConfigProperty<T> property(final String property, Class<T> coerceTo) {
+            return new CoercingComposedConfigProperty<T>(coerceTo, new ComposedConfigProperty<String>() {
 
                 private Scope[] overriddenScopes;
 
-                public Object get() {
+                public String get() {
                     Scope finalScope = getFinalScope();
                     for(ConfigProviderService provider : getConfigProviders(finalScope)) {
-                        Object value = provider.get(property, context, user).get();
+                        String value = provider.get(property, context, user).get();
                         if (value != null) {
                             return value;
                         }
@@ -136,7 +142,7 @@ public class ConfigCascade implements ConfigViewFactory {
                 }
 
                 private Scope getFinalScope() {
-                    String scopeS = (String) property(property).precedence(SERVER, CONTEXT, USER).get("final");
+                    String scopeS = (String) property(property, String.class).precedence(SERVER, CONTEXT, USER).get("final");
                     if(scopeS == null) {
                         return null;
                     }
@@ -157,11 +163,11 @@ public class ConfigCascade implements ConfigViewFactory {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
-                public void set(Object value) {
+                public void set(String value) {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
-                public ComposedConfigProperty precedence(Scope... scopes) {
+                public ComposedConfigProperty<String> precedence(Scope... scopes) {
                     overriddenScopes = scopes;
                     return this;
                 }
@@ -195,7 +201,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return false;
                 }
                 
-            };
+            }, stringParser);
         }
     }
 

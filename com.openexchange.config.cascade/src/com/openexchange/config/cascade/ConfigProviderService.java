@@ -57,6 +57,6 @@ package com.openexchange.config.cascade;
  */
 public interface ConfigProviderService {
 
-    ConfigProperty get(String property, int context, int user);
+    ConfigProperty<String> get(String property, int context, int user);
 
 }

@@ -57,12 +57,12 @@ package com.openexchange.config.cascade;
  */
 public interface ConfigView {
 
-    void set(Scope scope, String property, Object value);
+    <T> void set(Scope scope, String property, T value);
 
-    Object get(String property);
+    <T> T get(String property, Class<T> coerceTo);
 
-    ConfigProperty property(Scope scope, String property);
+    <T> ConfigProperty<T> property(Scope scope, String property, Class<T> coerceTo);
 
-    ComposedConfigProperty property(String property);
+    <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo);
 
 }

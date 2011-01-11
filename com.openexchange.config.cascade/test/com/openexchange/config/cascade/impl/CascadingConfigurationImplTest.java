@@ -50,6 +50,7 @@
 package com.openexchange.config.cascade.impl;
 
 import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.tools.strings.BasicTypesStringParser;
 import static com.openexchange.config.cascade.Scope.*;
 import junit.framework.TestCase;
 
@@ -72,42 +73,44 @@ public class CascadingConfigurationImplTest extends TestCase {
         
         cascade.setSearchPath(USER, CONTEXT, SERVER);
         
+        cascade.setStringParser(new BasicTypesStringParser());
+        
         view = cascade.getView(1, 23);
     }
     
     public void testCascadingProperty() {
         view.set(SERVER, "com.openexchange.test.property", "Rosebud");
-        assertEquals("Rosebud", view.get("com.openexchange.test.property"));
+        assertEquals("Rosebud", view.get("com.openexchange.test.property", String.class));
     
         // Now let's override this on context level
         
         view.set(CONTEXT, "com.openexchange.test.property", "Lemongrass");
-        assertEquals("Lemongrass", view.get("com.openexchange.test.property"));
+        assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
         
         // And finally on user level
 
         view.set(USER, "com.openexchange.test.property", "Rootbeer");
-        assertEquals("Rootbeer", view.get("com.openexchange.test.property"));
+        assertEquals("Rootbeer", view.get("com.openexchange.test.property", String.class));
         
         // Even if I change the context value, once the user value is set, it doesn't matter
         view.set(CONTEXT, "com.openexchange.test.property", "Forget-Me-Not");
-        assertEquals("Rootbeer", view.get("com.openexchange.test.property"));
+        assertEquals("Rootbeer", view.get("com.openexchange.test.property", String.class));
     
     }
     
     public void testPropertyMetadata() {
-        view.property(SERVER, "com.openexchange.test.property").set("published", true);
+        view.property(SERVER, "com.openexchange.test.property", String.class).set("published", true);
         
         
-        assertTrue((Boolean) view.property("com.openexchange.test.property").get("published"));
+        assertTrue((Boolean) view.property("com.openexchange.test.property", String.class).get("published"));
         
-        view.property(SERVER, "com.openexchange.test.property").set("final", "server");
-        view.property(CONTEXT, "com.openexchange.test.property").set("final", "context");
+        view.property(SERVER, "com.openexchange.test.property", String.class).set("final", "server");
+        view.property(CONTEXT, "com.openexchange.test.property", String.class).set("final", "context");
         
-        assertEquals("context", view.property("com.openexchange.test.property").get("final"));
+        assertEquals("context", view.property("com.openexchange.test.property", String.class).get("final"));
         
         // On combined properties the precedence may be changed
-        assertEquals("server", view.property("com.openexchange.test.property").precedence(SERVER,CONTEXT, USER).get("final"));
+        assertEquals("server", view.property("com.openexchange.test.property", String.class).precedence(SERVER,CONTEXT, USER).get("final"));
     }
 
     
@@ -117,10 +120,10 @@ public class CascadingConfigurationImplTest extends TestCase {
         view.set(CONTEXT, "com.openexchange.test.property", "Lemongrass");
         view.set(USER, "com.openexchange.test.property", "Rootbeer");
 
-        view.property(SERVER, "com.openexchange.test.property").set("final", "context");
+        view.property(SERVER, "com.openexchange.test.property", String.class).set("final", "context");
         
         
-        assertEquals("Lemongrass", view.get("com.openexchange.test.property"));
+        assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
     
     public void testFinalPropertyInversesSearchOrder() {
@@ -129,11 +132,11 @@ public class CascadingConfigurationImplTest extends TestCase {
         view.set(CONTEXT, "com.openexchange.test.property", "Lemongrass");
         view.set(USER, "com.openexchange.test.property", "Rootbeer");
 
-        view.property(SERVER, "com.openexchange.test.property").set("final", "context");
-        view.property(USER, "com.openexchange.test.property").set("final", "user");
+        view.property(SERVER, "com.openexchange.test.property", String.class).set("final", "context");
+        view.property(USER, "com.openexchange.test.property", String.class).set("final", "user");
         
         
-        assertEquals("Lemongrass", view.get("com.openexchange.test.property"));
+        assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
     
 }

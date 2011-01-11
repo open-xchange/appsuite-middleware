@@ -47,14 +47,59 @@
  *
  */
 
-package com.openexchange.config.cascade;
+package com.openexchange.config.cascade.impl;
+
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.Scope;
+import com.openexchange.tools.strings.StringParser;
 
 
 /**
- * {@link ComposedConfigProperty}
+ * {@link CoercingComposedConfigProperty}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
-    public ComposedConfigProperty<T> precedence(Scope...scopes);
+public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty<T> {
+    private ComposedConfigProperty<String> delegate;
+    private CoercingConfigProperty<T> delegate2;
+    private StringParser stringParser;
+    private Class<T> coerceTo;
+    
+    public CoercingComposedConfigProperty(Class<T> coerceTo, ComposedConfigProperty<String> delegate, StringParser stringParser) {
+        this.stringParser = stringParser;
+        this.coerceTo = coerceTo;
+        this.stringParser = stringParser;
+        initDelegate(delegate);
+        
+    }
+ 
+    private void initDelegate(ComposedConfigProperty<String> d) {
+        this.delegate = d;
+        this.delegate2 = new CoercingConfigProperty<T>(coerceTo, delegate, stringParser);
+    }
+
+    public ComposedConfigProperty<T> precedence(Scope... scopes) {
+        initDelegate(delegate.precedence(scopes));
+        return this;
+    }
+
+    public T get() {
+        return delegate2.get();
+    }
+
+    public Object get(String metadataName) {
+        return delegate.get(metadataName);
+    }
+
+    public boolean isDefined() {
+        return delegate.isDefined();
+    }
+
+    public void set(T value) {
+        delegate2.set(value);
+    }
+
+    public void set(String metadataName, Object value) {
+        delegate.set(metadataName, value);
+    }
 }

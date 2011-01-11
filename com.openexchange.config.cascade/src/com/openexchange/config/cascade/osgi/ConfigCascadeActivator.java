@@ -49,12 +49,15 @@
 
 package com.openexchange.config.cascade.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.Scope;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.tools.strings.StringParser;
 
 
 /**
@@ -64,7 +67,9 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public class ConfigCascadeActivator extends HousekeepingActivator{
 
-    private static final Class<?>[] NEEDED = {ConfigProviderService.class};
+    private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
+    
+    static final Log LOG = LogFactory.getLog(ConfigCascadeActivator.class);
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -74,6 +79,22 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     @Override
     protected void startBundle() throws Exception {
         ConfigCascade configCascade = new ConfigCascade();
+        
+        final ServiceTracker stringParsers = track(StringParser.class);
+        
+        configCascade.setStringParser(new StringParser() {
+
+            public <T> T parse(String s, Class<T> t) {
+                Object service = stringParsers.getService();
+                if(service == null) {
+                    LOG.fatal("Could not find suitable string parser in OSGi system");
+                    return null;
+                }
+                StringParser parser = (StringParser) service;
+                return parser.parse(s, t);
+            }
+            
+        });
         
         ServiceTracker serverProviders = track(context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope=server))"));
         ServiceTracker contextProviders = track(context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope=context))"));

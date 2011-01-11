@@ -52,6 +52,7 @@ package com.openexchange.config;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link ConfigTools} collect common parsing operations for configuration options.
@@ -59,16 +60,7 @@ import java.util.Map;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigTools {
-    private static final Map<String, Long> UNITS = new HashMap<String, Long>() {
-        private static final long serialVersionUID = 4341197305332412108L;
-    {
-        put("MS", L(1l));
-        put("S", L(1000l));
-        put("M", L(1000l*60));
-        put("H", L(1000l*60*60));
-        put("D", L(1000l*60*60*24));
-        put("W", L(1000l*60*60*24*7));
-    }};
+    
 
     /**
      * A timespan specification consists of a number and a unit of measurement. Units are:
@@ -84,43 +76,7 @@ public class ConfigTools {
      * @return
      */
     public static long parseTimespan(final String span) {
-        final StringBuilder numberBuilder = new StringBuilder();
-        final StringBuilder unitBuilder = new StringBuilder();
-        int mode = 0;
-        long tally = 0;
-        
-        for(final char c : span.toCharArray()) {
-            if(Character.isDigit(c)) {
-                if(mode == 0) {
-                    numberBuilder.append(c);
-                } else {
-                    final String unit = unitBuilder.toString().toUpperCase();
-                    final Long factor = UNITS.get(unit);
-                    if(factor == null) {
-                        throw new IllegalArgumentException("I don't know unit "+unit);
-                    }
-                    tally += Long.parseLong(numberBuilder.toString()) * factor;
-                    numberBuilder.setLength(0);
-                    unitBuilder.setLength(0);
-                    mode = 0;
-                    numberBuilder.append(c);
-                }
-            } else if(Character.isLetter(c)){
-                mode = 1;
-                unitBuilder.append(c);
-            } else {
-                // IGNORE
-            }
-        }
-        if(numberBuilder.length() != 0) {
-            final String unit = unitBuilder.toString().toUpperCase();
-            final Long factor = UNITS.get(unit);
-            if(factor == null) {
-                throw new IllegalArgumentException("I don't know unit "+unit);
-            }
-            tally += Long.parseLong(numberBuilder.toString()) * factor;
-        }
-        return tally;
+        return TimeSpanParser.parseTimespan(span);
     }
 
 }

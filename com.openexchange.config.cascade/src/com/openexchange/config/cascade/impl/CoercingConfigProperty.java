@@ -47,14 +47,59 @@
  *
  */
 
-package com.openexchange.config.cascade;
+package com.openexchange.config.cascade.impl;
+
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.tools.strings.StringParser;
 
 
 /**
- * {@link ComposedConfigProperty}
+ * {@link CoercingConfigProperty}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
-    public ComposedConfigProperty<T> precedence(Scope...scopes);
+public class CoercingConfigProperty<T> implements ConfigProperty<T>{
+
+    private Class<T> type;
+    private ConfigProperty<String> delegate;
+    private StringParser parser;
+    
+    public CoercingConfigProperty(Class<T> type, ConfigProperty<String> delegate, StringParser parser) {
+        super();
+        this.type = type;
+        this.delegate = delegate;
+        this.parser = parser;
+    }
+
+    public T get() {
+        String value = delegate.get();
+        if(value == null) {
+            return null;
+        }
+        
+        T parsed = parser.parse(value, type);
+        if(parsed == null) {
+            // TOOD: Throw Exception
+            return null;
+        }
+        
+        return parsed;
+    }
+
+    public Object get(String metadataName) {
+        return delegate.get(metadataName);
+    }
+
+    public boolean isDefined() {
+        return delegate.isDefined();
+    }
+
+    public void set(T value) {
+        delegate.set(value.toString()); // We assume good toString methods that allow reparsing
+    }
+
+    public void set(String metadataName, Object value) {
+        delegate.set(metadataName, value);
+    }
+
 }
