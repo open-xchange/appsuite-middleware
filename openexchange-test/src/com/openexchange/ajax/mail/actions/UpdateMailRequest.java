@@ -142,6 +142,14 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
     /**
      * Initializes a new {@link UpdateMailRequest}.
      */
+    public UpdateMailRequest(final String folderID) {
+        super();
+        this.folderID = folderID;
+    }
+
+    /**
+     * Initializes a new {@link UpdateMailRequest}.
+     */
     public UpdateMailRequest(final String folderID, final String mailID) {
         super();
         this.folderID = folderID;
@@ -165,8 +173,9 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
 
         list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_UPDATE));
         list.add(new Parameter(Mail.PARAMETER_FOLDERID, folderID));
-        list.add(new Parameter(messageId ? Mail.PARAMETER_MESSAGE_ID : Mail.PARAMETER_ID, mailID));
-
+        if (null != mailID) {
+            list.add(new Parameter(messageId ? Mail.PARAMETER_MESSAGE_ID : Mail.PARAMETER_ID, mailID));
+        }
         return list.toArray(new Parameter[list.size()]);
     }
 
