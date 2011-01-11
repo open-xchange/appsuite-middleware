@@ -588,6 +588,71 @@ public final class JSONMessageCache {
     }
 
     /**
+     * Updates flags for specified mails' JSON representations.
+     * 
+     * @param accountId The account ID
+     * @param fullname The fullname
+     * @param flags The flags bit mask
+     * @param set <code>true</code> to set; otherwise <code>false</code>
+     * @param session The session providing user and context information
+     * @throws MailException If an error occurs
+     */
+    public void updateFlags(final int accountId, final String fullname, final int newFlags, final boolean set, final Session session) throws MailException {
+        updateFlags(accountId, fullname, newFlags, set, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Updates flags for specified mails' JSON representations.
+     * 
+     * @param accountId The account ID
+     * @param fullname The fullname
+     * @param flags The flags bit mask
+     * @param set <code>true</code> to set; otherwise <code>false</code>
+     * @param userId The user ID
+     * @param cid The context ID
+     * @throws MailException If an error occurs
+     */
+    public void updateFlags(final int accountId, final String fullname, final int newFlags, final boolean set, final int userId, final int cid) throws MailException {
+        final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
+            superMap.get(new UserKey(userId, cid));
+        if (null == timeoutConcurrentMap) {
+            return;
+        }
+        final FolderKey key = new FolderKey(accountId, fullname);
+        /*
+         * Get JSON object map
+         */
+        final ConcurrentMap<String, FutureTask<JSONObject>> objectMap = timeoutConcurrentMap.get(key);
+        if (null == objectMap) {
+            return;
+        }
+        /*
+         * Get from map
+         */
+        /*
+         * Iterate
+         */
+        try {
+            /*
+             * Switch seen flag in messages
+             */
+            final String flagsKey = MailJSONField.FLAGS.getKey();
+            final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
+            for (final FutureTask<JSONObject> ft : objectMap.values()) {
+                try {
+                    final JSONObject jsonObject = getFromFuture(ft, waitTimeMillis);
+                    final int flags = jsonObject.optInt(flagsKey);
+                    jsonObject.put(flagsKey, set ? (flags | newFlags) : (flags & ~newFlags));
+                } catch (final TimeoutException e) {
+                    // Not yet available
+                }
+            }
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        }
+    }
+
+    /**
      * Updates the color flag for specified mails' JSON representations.
      * 
      * @param accountId The account ID
@@ -643,6 +708,65 @@ public final class JSONMessageCache {
             final String clKey = MailJSONField.COLOR_LABEL.getKey();
             final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
             for (final FutureTask<JSONObject> ft : futures) {
+                /*
+                 * Update color flag in message
+                 */
+                try {
+                    final JSONObject jsonObject = getFromFuture(ft, waitTimeMillis);
+                    jsonObject.put(clKey, colorFlag);
+                } catch (final TimeoutException e) {
+                    // Not yet available
+                }
+            }
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        }
+    }
+
+    /**
+     * Updates the color flag for specified mails' JSON representations.
+     * 
+     * @param accountId The account ID
+     * @param fullname The fullname
+     * @param colorFlag The color flag to set
+     * @param session The session providing user and context information
+     * @throws MailException If an error occurs
+     */
+    public void updateColorFlag(final int accountId, final String fullname, final int colorFlag, final Session session) throws MailException {
+        updateColorFlag(accountId, fullname, colorFlag, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Updates the color flag for specified mails' JSON representations.
+     * 
+     * @param accountId The account ID
+     * @param fullname The fullname
+     * @param colorFlag The color flag to set
+     * @param userId The user ID
+     * @param cid The context ID
+     * @throws MailException If an error occurs
+     */
+    public void updateColorFlag(final int accountId, final String fullname, final int colorFlag, final int userId, final int cid) throws MailException {
+        final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
+            superMap.get(new UserKey(userId, cid));
+        if (null == timeoutConcurrentMap) {
+            return;
+        }
+        final FolderKey key = new FolderKey(accountId, fullname);
+        /*
+         * Get JSON object map
+         */
+        final ConcurrentMap<String, FutureTask<JSONObject>> objectMap = timeoutConcurrentMap.get(key);
+        if (null == objectMap) {
+            return;
+        }
+        /*
+         * Get from map
+         */
+        try {
+            final String clKey = MailJSONField.COLOR_LABEL.getKey();
+            final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
+            for (final FutureTask<JSONObject> ft : objectMap.values()) {
                 /*
                  * Update color flag in message
                  */

@@ -310,6 +310,45 @@ public final class MailMessageCache {
     }
 
     /**
+     * Updates cached message
+     * 
+     * @param accountId The account ID
+     * @param fullname The fullname
+     * @param userId The user identifier
+     * @param cid The context identifier
+     * @param changedFields The changed fields
+     * @param newValues The new values
+     */
+    public void updateCachedMessages(final int accountId, final String fullname, final int userId, final int cid, final MailListField[] changedFields, final Object[] newValues) {
+        if (null == cache) {
+            return;
+        }
+        final CacheKey mapKey = getMapKey(userId, cid);
+        final Lock writeLock = getLock(mapKey).writeLock();
+        writeLock.lock();
+        try {
+            final @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+                (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
+            if (map == null) {
+                return;
+            }
+            final MailMessage[] mails = map.getValues(getEntryKey(accountId, fullname));
+            if ((mails != null) && (mails.length > 0)) {
+                final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
+                for (final MailMessage mail : mails) {
+                    if (mail != null) {
+                        for (int i = 0; i < updaters.length; i++) {
+                            updaters[i].updateField(mail, newValues[i]);
+                        }
+                    }
+                }
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
      * Detects if cache holds messages belonging to given user.
      * 
      * @param userId The user ID
