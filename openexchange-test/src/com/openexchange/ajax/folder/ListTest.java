@@ -158,15 +158,6 @@ public class ListTest extends AbstractAJAXSession {
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
         assertTrue("Subfolders expected below private folder.", length > 0);
-
-        System.out.println("\n\n#######################################\n\n");
-        for (int i = 0; i < length; i++) {
-            final JSONArray folderArray = jsonArray.getJSONArray(i);
-            System.out.println(folderArray);
-        }
-
-        // final JSONArray email = jsonArray.getJSONArray(0);
-        // System.out.println(email);
     }
 
     public void testListPublic() throws Throwable {
@@ -177,15 +168,6 @@ public class ListTest extends AbstractAJAXSession {
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
         assertTrue("Subfolders expected below public folder.", length > 0);
-
-        System.out.println("\n\n#######################################\n\n");
-        for (int i = 0; i < length; i++) {
-            final JSONArray folderArray = jsonArray.getJSONArray(i);
-            System.out.println(folderArray);
-        }
-
-        // final JSONArray email = jsonArray.getJSONArray(0);
-        // System.out.println(email);
     }
 
     public void testListShared() throws Throwable {
