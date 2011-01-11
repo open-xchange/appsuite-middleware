@@ -74,8 +74,7 @@ public class CreatedAndDTStamp <T extends CalendarComponent, U extends CalendarO
 
     public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final Created created = new Created();
-        String tz = EmitterTools.extractTimezoneIfPossible(calendar);
-        created.setDate(toDateTime(calendar.getCreationDate(), tz));
+        created.setDate(toDateTime(calendar.getCreationDate()));
         t.getProperties().add(created);
     }
 
