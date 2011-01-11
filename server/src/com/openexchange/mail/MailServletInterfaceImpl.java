@@ -1156,6 +1156,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 OrderDirection.getOrderDirection(order),
                 searchTerm,
                 FIELDS_ID_INFO);
+        if (null == searchTerm) {
+            /*
+             * All requested
+             */
+            postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false);
+            /*
+             * Update caches
+             */
+            final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
+            if (null != jsonMessageCache) {
+                /*
+                 * Update color label in JSON message cache
+                 */
+                jsonMessageCache.removeFolder(accountId, fullname, session);
+            }
+            try {
+                MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
+            } catch (final OXCachingException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        /*
+         * Proceed
+         */
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
         }
