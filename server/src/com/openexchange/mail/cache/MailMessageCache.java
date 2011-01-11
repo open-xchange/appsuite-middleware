@@ -443,7 +443,7 @@ public final class MailMessageCache {
     /**
      * Removes the messages appearing in given UIDs belonging to a certain folder.
      * 
-     * @param uids The mail IDs
+     * @param uids The mail IDs; pass <code>null</code> to remove all associated with folder
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
@@ -462,7 +462,11 @@ public final class MailMessageCache {
             if (map == null) {
                 return;
             }
-            map.removeValues(getEntryKey(accountId, fullname), uids);
+            if (null == uids) {
+                map.removeValues(getEntryKey(accountId, fullname));
+            } else {
+                map.removeValues(getEntryKey(accountId, fullname), uids);
+            }
         } finally {
             writeLock.unlock();
         }
