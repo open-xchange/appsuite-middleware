@@ -453,7 +453,6 @@ public final class JSONMessageCache {
     public void switchSeenFlag(final int accountId, final String fullname, final String[] ids, final boolean seen, final int unread, final int userId, final int cid) throws MailException {
         if (null == ids) {
             switchSeenFlag(accountId, fullname, seen, unread, userId, cid);
-            return;
         }
         final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
             superMap.get(new UserKey(userId, cid));
@@ -623,10 +622,6 @@ public final class JSONMessageCache {
      * @throws MailException If an error occurs
      */
     public void updateFlags(final int accountId, final String fullname, final String[] ids, final int newFlags, final boolean set, final int userId, final int cid) throws MailException {
-        if (null == ids) {
-            updateFlags(accountId, fullname, newFlags, set, userId, cid);
-            return;
-        }
         final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
             superMap.get(new UserKey(userId, cid));
         if (null == timeoutConcurrentMap) {
@@ -764,10 +759,6 @@ public final class JSONMessageCache {
      * @throws MailException If an error occurs
      */
     public void updateColorFlag(final int accountId, final String fullname, final String[] ids, final int colorFlag, final int userId, final int cid) throws MailException {
-        if (null == ids) {
-            updateColorFlag(accountId, fullname, colorFlag, userId, cid);
-            return;
-        }
         final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
             superMap.get(new UserKey(userId, cid));
         if (null == timeoutConcurrentMap) {

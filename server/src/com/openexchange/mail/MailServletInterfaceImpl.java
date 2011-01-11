@@ -2570,7 +2570,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             try {
                 if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
                     MailMessageCache.getInstance().removeMessages(ids, accountId, fullname, session.getUserId(), contextId);
-
                 }
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
