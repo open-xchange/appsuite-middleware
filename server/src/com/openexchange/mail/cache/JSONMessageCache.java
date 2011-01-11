@@ -275,6 +275,38 @@ public final class JSONMessageCache {
     }
 
     /**
+     * Checks if a JSON mail object is associated with specified account ID, folder fullname and mail ID.
+     * 
+     * @param accountId The account ID
+     * @param fullname The folder fullname
+     * @param id The mail ID
+     * @param session The session providing user and context information
+     * @return <code>true</code> If this cache contains a mapping for given key; otherwise <code>false</code>
+     */
+    public boolean containsFolder(final int accountId, final String fullname, final Session session) {
+        return containsFolder(accountId, fullname, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Checks if a JSON mail object is associated with specified account ID, folder fullname and mail ID.
+     * 
+     * @param accountId The account ID
+     * @param fullname The folder fullname
+     * @param id The mail ID
+     * @param userId The user ID
+     * @param cid The context ID
+     * @return <code>true</code> If this cache contains a mapping for given key; otherwise <code>false</code>
+     */
+    public boolean containsFolder(final int accountId, final String fullname, final int userId, final int cid) {
+        final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
+            superMap.get(new UserKey(userId, cid));
+        if (null == timeoutConcurrentMap) {
+            return false;
+        }
+        return timeoutConcurrentMap.containsKey(new FolderKey(accountId, fullname));
+    }
+
+    /**
      * Gets the <b>cloned</b> JSON mail object associated with specified account ID, folder fullname and mail ID.
      * 
      * @param accountId The account ID

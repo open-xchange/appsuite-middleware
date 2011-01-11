@@ -3139,9 +3139,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (null == tmp) {
                         tmp = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
                         if (null == tmp) {
-                            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ID);
+                            uid = null;
+                        } else {
+                            uid = mailInterface.getMailIDByMessageID(sourceFolder, tmp);
                         }
-                        uid = mailInterface.getMailIDByMessageID(sourceFolder, tmp);
                     } else {
                         uid = tmp;
                     }
@@ -3153,25 +3154,25 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Update color label
                      */
-                    mailInterface.updateMessageColorLabel(sourceFolder, new String[] { uid }, colorLabel.intValue());
+                    mailInterface.updateMessageColorLabel(sourceFolder, uid == null ? null : new String[] { uid }, colorLabel.intValue());
                 }
                 if (flagBits != null) {
                     /*
                      * Update system flags which are allowed to be altered by client
                      */
-                    mailInterface.updateMessageFlags(sourceFolder, new String[] { uid }, flagBits.intValue(), flagVal);
+                    mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, flagBits.intValue(), flagVal);
                 }
                 if (setFlags != null) {
                     /*
                      * Add system flags which are allowed to be altered by client
                      */
-                    mailInterface.updateMessageFlags(sourceFolder, new String[] { uid }, setFlags.intValue(), true);
+                    mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, setFlags.intValue(), true);
                 }
                 if (clearFlags != null) {
                     /*
                      * Remove system flags which are allowed to be altered by client
                      */
-                    mailInterface.updateMessageFlags(sourceFolder, new String[] { uid }, clearFlags.intValue(), false);
+                    mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, clearFlags.intValue(), false);
                 }
                 if (destFolder != null) {
                     /*
