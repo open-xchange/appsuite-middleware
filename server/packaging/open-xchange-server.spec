@@ -169,7 +169,7 @@ if [ ${1:-0} -eq 2 ]; then
    mailc=/opt/open-xchange/etc/groupware/mail.properties
    oval=0
    if ox_exists_property com.openexchange.smtp.smtpRateLimit $smtpc; then
-      local oval=$(ox_read_property com.openexchange.smtp.smtpRateLimit $smtpc)
+      oval=$(ox_read_property com.openexchange.smtp.smtpRateLimit $smtpc)
       ox_remove_property com.openexchange.smtp.smtpRateLimit $smtpc
    fi
    if ! ox_exists_property com.openexchange.mail.rateLimit $mailc; then
@@ -718,6 +718,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jan 11 2011 - choeger@open-xchange.com
+ - Bugfix #18000: updating on RHEL and SLES does not work
+* Mon Jan 10 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #17915: FileStorage lists files correctly now.
 * Tue Dec 21 2010 - thorben.betten@open-xchange.com
  - Bugfix #17876: Fixed illegal monitor state when waiting on Condition instance
  - Bugfix #17877: Dealing with possible InterruptedException during concurrent loading of folder permissions
@@ -1554,8 +1558,6 @@ fi
  - Bugfix #14922: Confirm status in public folders.
 * Mon Jan 11 2010 - choeger@open-xchange.com
  - Bugfix #15176: Crawler YML files can not be updated
-* Sun Jan 10 2010 - francisco.laguna@open-xchange.com
- - Bugfix #17915: FileStorage lists files correctly now.
 * Wed Jan 06 2010 - martin.herfurth@open-xchange.com
  - Bugfix #15155: Changing start date of a series (server side).
 * Wed Jan 06 2010 - thorben.betten@open-xchange.com
