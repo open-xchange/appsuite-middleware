@@ -87,7 +87,7 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
         return delegate2.get();
     }
 
-    public Object get(String metadataName) {
+    public String get(String metadataName) {
         return delegate.get(metadataName);
     }
 
@@ -99,7 +99,7 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
         delegate2.set(value);
     }
 
-    public void set(String metadataName, Object value) {
+    public void set(String metadataName, String value) {
         delegate.set(metadataName, value);
     }
 }

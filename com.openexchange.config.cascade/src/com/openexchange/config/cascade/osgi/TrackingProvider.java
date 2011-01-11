@@ -75,7 +75,7 @@ public class TrackingProvider implements ConfigProviderService {
         this.tracker = providers;
     }
 
-    public ConfigProperty get(String property, int context, int user) {
+    public ConfigProperty<String> get(String property, int context, int user) {
         ServiceReference[] serviceReferences = tracker.getServiceReferences();
         
         Arrays.sort(serviceReferences, new Comparator<ServiceReference>() {
@@ -98,10 +98,10 @@ public class TrackingProvider implements ConfigProviderService {
             
         });
         
-        ConfigProperty first = null;
+        ConfigProperty<String> first = null;
         for (ServiceReference ref : serviceReferences) {
             ConfigProviderService delegate = (ConfigProviderService) tracker.getService(ref);
-            ConfigProperty prop = delegate.get(property, context, user);
+            ConfigProperty<String> prop = delegate.get(property, context, user);
             if (first == null) {
                 first = prop;
             }
@@ -110,13 +110,13 @@ public class TrackingProvider implements ConfigProviderService {
             }
         }
         if(first == null) {
-            first = new ConfigProperty() {
+            first = new ConfigProperty<String>() {
 
-                public Object get() {
+                public String get() {
                     return null;
                 }
 
-                public Object get(String metadataName) {
+                public String get(String metadataName) {
                     return null;
                 }
 
@@ -124,14 +124,13 @@ public class TrackingProvider implements ConfigProviderService {
                     return false;
                 }
 
-                public void set(Object value) {
+                public void set(String value) {
                     throw new UnsupportedOperationException();
                 }
 
-                public void set(String metadataName, Object value) {
+                public void set(String metadataName, String value) {
                     throw new UnsupportedOperationException();    
-                }
-                
+                }                
             };
         }
         return first;

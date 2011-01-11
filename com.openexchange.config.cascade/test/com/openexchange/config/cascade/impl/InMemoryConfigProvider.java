@@ -61,33 +61,33 @@ import com.openexchange.config.cascade.ConfigProviderService;
  */
 public class InMemoryConfigProvider implements ConfigProviderService{
 
-    ConcurrentHashMap<String, Object> values = new ConcurrentHashMap<String, Object>();
-    ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> metadata = new ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>();
+    ConcurrentHashMap<String, String> values = new ConcurrentHashMap<String, String>();
+    ConcurrentHashMap<String, ConcurrentHashMap<String, String>> metadata = new ConcurrentHashMap<String, ConcurrentHashMap<String, String>>();
     
     
-    public ConfigProperty get(final String property, final int context, final int user) {
-        return new ConfigProperty() {
+    public ConfigProperty<String> get(final String property, final int context, final int user) {
+        return new ConfigProperty<String>() {
 
-            public Object get() {
+            public String get() {
                 return values.get(property);
             }
 
-            public void set(Object value) {
+            public void set(String value) {
                 values.put(property, value);
             }
 
-            public Object get(String metadataName) {
+            public String get(String metadataName) {
                 return getMetadata().get(metadataName);
             }
 
-            public void set(String metadataName, Object value) {
+            public void set(String metadataName, String value) {
                 getMetadata().put(metadataName, value);
             }
 
-            private ConcurrentHashMap<String, Object> getMetadata() {
-                ConcurrentHashMap<String, Object> retval = metadata.get(property);
+            private ConcurrentHashMap<String, String> getMetadata() {
+                ConcurrentHashMap<String, String> retval = metadata.get(property);
                 if(retval == null) {
-                    retval = metadata.putIfAbsent(property, new ConcurrentHashMap<String, Object>());
+                    retval = metadata.putIfAbsent(property, new ConcurrentHashMap<String, String>());
                     if(retval == null) {
                         retval = metadata.get(property);
                     }

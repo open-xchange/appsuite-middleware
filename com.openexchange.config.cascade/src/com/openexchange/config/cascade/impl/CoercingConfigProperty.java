@@ -86,7 +86,7 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T>{
         return parsed;
     }
 
-    public Object get(String metadataName) {
+    public String get(String metadataName) {
         return delegate.get(metadataName);
     }
 
@@ -98,7 +98,7 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T>{
         delegate.set(value.toString()); // We assume good toString methods that allow reparsing
     }
 
-    public void set(String metadataName, Object value) {
+    public void set(String metadataName, String value) {
         delegate.set(metadataName, value);
     }
 

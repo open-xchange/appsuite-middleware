@@ -149,9 +149,9 @@ public class ConfigCascade implements ConfigViewFactory {
                     return Scope.valueOf(scopeS.toUpperCase());
                 }
 
-                public Object get(String metadataName) {
+                public String get(String metadataName) {
                     for(ConfigProviderService provider : getConfigProviders(null)) {
-                        Object value = provider.get(property, context, user).get(metadataName);
+                        String value = provider.get(property, context, user).get(metadataName);
                         if (value != null) {
                             return value;
                         }
@@ -159,7 +159,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return null;
                 }
 
-                public void set(String metadataName, Object value) {
+                public void set(String metadataName, String value) {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
