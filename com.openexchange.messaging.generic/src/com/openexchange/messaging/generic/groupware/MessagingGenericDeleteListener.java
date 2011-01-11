@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,7 +91,7 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            final int userId = event.getSession().getUserId();
+            final int userId = event.getId();
             final TIntArrayList confIds;
             {
                 ResultSet rs = null;

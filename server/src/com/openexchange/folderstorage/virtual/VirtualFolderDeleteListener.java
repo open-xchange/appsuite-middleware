@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,7 +77,7 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             final int contextId = event.getContext().getContextId();
-            final int userId = event.getSession().getUserId();
+            final int userId = event.getId();
             // Drop user's subscriptions
             stmt = writeCon.prepareStatement("DELETE FROM virtualSubscription WHERE cid = ? AND user = ?");
             int pos = 1;
