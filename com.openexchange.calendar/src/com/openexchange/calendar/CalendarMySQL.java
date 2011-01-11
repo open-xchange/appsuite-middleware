@@ -1778,7 +1778,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 }
                             }
                             if (null != reminder) {
-                                changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), reminder, CalendarOperation.INSERT, false, writecon);
+                                changeReminder(cdao.getObjectID(), user.getIdentifier(), cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), reminder, CalendarOperation.INSERT, false, writecon);
                             }
                         } else {
                             stmt.setNull(6, java.sql.Types.INTEGER);
