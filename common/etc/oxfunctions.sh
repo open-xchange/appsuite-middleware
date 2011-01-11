@@ -294,7 +294,7 @@ if ( $end > 0 ) {
     else
         # quote & in URLs to make sed happy
 	test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
-	if grep -E "^$prop" $propfile >/dev/null; then
+	if grep -E "^$prop *[:=]" $propfile >/dev/null; then
 	    cat<<EOF | sed -f - $propfile > $tmp
 s;\(^$prop[[:space:]]*[:=]\).*$;\1${val};
 EOF
