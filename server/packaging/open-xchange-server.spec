@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 13
+%define		ox_release 14
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -592,6 +592,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jan 11 2011 - marcus.klein@open-xchange.com
+ - Bugfix #17924: Using correct identifier when deleting data from database if a user is removed.
+* Tue Dec 07 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17191: NullPointer during TimeZone evaluation.
 * Tue Nov 30 2010 - thorben.betten@open-xchange.com
  - Bugfix #17292: Grouping listed folders by their folder storage to get those folders by one
  - Bugfix #17658: No poll (take with timeout) on a submitted task.
@@ -1270,6 +1274,10 @@ fi
  - Bugfix #14922: Confirm status in public folders.
 * Mon Jan 11 2010 - choeger@open-xchange.com
  - Bugfix #15176: Crawler YML files can not be updated
+* Mon Jan 11 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17882: Retry fetching POP3 server's capabilities if cached check indicates failure
+* Sun Jan 10 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17915: FileStorage lists files correctly now.
 * Wed Jan 06 2010 - martin.herfurth@open-xchange.com
  - Bugfix #15155: Changing start date of a series (server side).
 * Wed Jan 06 2010 - thorben.betten@open-xchange.com
