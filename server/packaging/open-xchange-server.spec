@@ -171,7 +171,7 @@ if [ ${1:-0} -eq 2 ]; then
    mailc=/opt/open-xchange/etc/groupware/mail.properties
    oval=0
    if ox_exists_property com.openexchange.smtp.smtpRateLimit $smtpc; then
-      local oval=$(ox_read_property com.openexchange.smtp.smtpRateLimit $smtpc)
+      oval=$(ox_read_property com.openexchange.smtp.smtpRateLimit $smtpc)
       ox_remove_property com.openexchange.smtp.smtpRateLimit $smtpc
    fi
    if ! ox_exists_property com.openexchange.mail.rateLimit $mailc; then
