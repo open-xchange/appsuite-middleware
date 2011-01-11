@@ -272,7 +272,7 @@ public final class MailMessageCache {
     /**
      * Updates cached message
      * 
-     * @param uids The messages' identifiers; pann <code>null</code>  update all cached message of given folder
+     * @param uids The messages' identifiers; pass <code>null</code>  update all cached message of given folder
      * @param accountId The account ID
      * @param fullname The fullname
      * @param userId The user identifier
