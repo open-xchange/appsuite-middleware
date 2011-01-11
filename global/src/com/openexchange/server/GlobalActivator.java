@@ -49,11 +49,17 @@
 
 package com.openexchange.server;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.authentication.exception.LoginExceptionFactory;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
@@ -62,6 +68,11 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.id.IDException;
 import com.openexchange.id.exception.IDExceptionFactory;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
+import com.openexchange.tools.strings.BasicTypesStringParser;
+import com.openexchange.tools.strings.CompositeParser;
+import com.openexchange.tools.strings.DateStringParser;
+import com.openexchange.tools.strings.StringParser;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link GlobalActivator} - Activator for global (aka kernel) bundle
@@ -80,7 +91,11 @@ public final class GlobalActivator implements BundleActivator {
 
     private Initialization initialization;
 
-    private ComponentRegistration idComponent;
+    private ComponentRegistration idRegistration;
+    
+    private ServiceTracker parserTracker = null;
+
+    private ServiceRegistration parserRegistration;
 
     /**
      * Initializes a new {@link GlobalActivator}
@@ -104,21 +119,65 @@ public final class GlobalActivator implements BundleActivator {
                 "com.openexchange.authentication",
                 LoginExceptionFactory.getInstance());
             sessionComponent = new ComponentRegistration(context, EnumComponent.SESSION, "com.openexchange.sessiond", SessionExceptionFactory.getInstance());
-            idComponent = new ComponentRegistration(context, IDException.COMPONENT, "com.openexchange.id", IDExceptionFactory.getInstance());
+            idRegistration = new ComponentRegistration(context, IDException.COMPONENT, "com.openexchange.id", IDExceptionFactory.getInstance());
+            initStringParsers(context);
+            
             LOG.debug("Global bundle successfully started");
+            
+        
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    private void initStringParsers(BundleContext context) {
+        parserTracker = new ServiceTracker(context, StringParser.class.getName(), null);
+        final List<StringParser> standardParsers = new ArrayList<StringParser>(3);
+        final StringParser standardParsersComposite = new CompositeParser() {
+
+            @Override
+            protected Collection<StringParser> getParsers() {
+                return standardParsers;
+            }
+            
+        };
+        
+        StringParser allParsers = new CompositeParser() {
+
+            @Override
+            protected Collection<StringParser> getParsers() {
+                Object[] services = parserTracker.getServices();
+                List<StringParser> parsers = new ArrayList<StringParser>(services.length);
+                
+                for (Object object : services) {
+                    if (object != this) {
+                        parsers.add((StringParser) object);
+                    }
+                }
+                parsers.add(standardParsersComposite);
+                return parsers;
+            }
+            
+        };
+        
+        standardParsers.add(new BasicTypesStringParser());
+        standardParsers.add(new DateStringParser(allParsers));
+        standardParsers.add(new TimeSpanParser());
+        
+        Hashtable<String, Object> properties = new Hashtable<String, Object>();
+        properties.put(Constants.SERVICE_RANKING, 100);
+        
+        parserTracker.open();
+        
+        parserRegistration = context.registerService(StringParser.class.getName(), allParsers, properties);
+        
+    }
+
     public void stop(final BundleContext context) throws Exception {
         try {
-            idComponent.unregister();
-            idComponent = null;
+            idRegistration.unregister();
+            idRegistration = null;
             sessionComponent.unregister();
             sessionComponent = null;
             loginComponent.unregister();
@@ -127,10 +186,16 @@ public final class GlobalActivator implements BundleActivator {
             ServiceHolderInit.getInstance().stop();
             initialization.stop();
             initialization = null;
+            shutdownStringParsers();
             LOG.debug("Global bundle successfully stopped");
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
         }
+    }
+
+    private void shutdownStringParsers() {
+        parserRegistration.unregister();
+        parserTracker.close();
     }
 }

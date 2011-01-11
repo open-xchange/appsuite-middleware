@@ -26,7 +26,8 @@ Export-Package: com.openexchange.authentication,
  com.openexchange.tools.global,
  com.openexchange.tools.id,
  com.openexchange.tools.iterator,
- com.openexchange.tools.stream
+ com.openexchange.tools.stream,
+ com.openexchange.tools.strings
 Import-Package: com.openexchange.java,
  gnu.trove,
  javax.mail.internet,
