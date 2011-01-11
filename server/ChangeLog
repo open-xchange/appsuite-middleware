@@ -1,3 +1,7 @@
+* 2010-01-11 - marcus.klein@open-xchange.com
+
+ - Bugfix #17882: Retry fetching POP3 server's capabilities if cached check indicates failure
+
 * 2010-01-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #17915: FileStorage lists files correctly now.
