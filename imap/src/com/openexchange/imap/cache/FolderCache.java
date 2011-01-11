@@ -121,6 +121,46 @@ public final class FolderCache {
     }
 
     /**
+     * Updates the cached IMAP folder
+     * 
+     * @param fullName The full name
+     * @param folderStorage The folder storage
+     * @throws MailException If loading the folder fails
+     */
+    public static void updateCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) throws MailException {
+        updateCachedFolder(fullName, folderStorage, null);
+    }
+
+    /**
+     * Updates the cached IMAP folder
+     * 
+     * @param fullName The full name
+     * @param folderStorage The folder storage
+     * @param imapFolder The optional IMAP folder
+     * @throws MailException If loading the folder fails
+     */
+    public static void updateCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
+        if (!ENABLED) {
+            return;
+        }
+        final Session session = folderStorage.getSession();
+        /*
+         * Initialize appropriate cache entry
+         */
+        final FolderCacheEntry entry = new FolderCacheEntry();
+        final int accountId = folderStorage.getAccountId();
+        SessionMailCache.getInstance(session, accountId).get(entry);
+        final FolderMap folderMap = entry.getValue();
+        if (null == folderMap) {
+            return;
+        }
+        synchronized (folderMap) {
+            folderMap.remove(fullName);
+            folderMap.put(fullName, loadFolder(fullName, folderStorage, imapFolder));
+        }
+    }
+
+    /**
      * Gets cached IMAP folder.
      * 
      * @param fullName The IMAP folder full name
