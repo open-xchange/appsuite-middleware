@@ -53,7 +53,7 @@
         <pathelement location="${bundlesdir}/${sqljar}"/>
         <pathelement location="${bundlesdir}/${publishjar}"/>
         <pathelement location="${bundlesdir}/${txjar}"/>
-         <pathelement location="${bundlesdir}/${cachingBundle}/${cachingjar}"/>
+        <pathelement location="${bundlesdir}/${cachingBundle}/${cachingjar}"/>
     </path>
 
     <!-- Compile -->
