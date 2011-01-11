@@ -350,26 +350,29 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             if (!mail.isSeen() && markSeen) {
                 mail.setPrevSeen(false);
-                try {
-                    if (imapConfig.isSupportsACLs()) {
-                        try {
-                            if (aclExtension.canKeepSeen(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
-                                /*
-                                 * User has \KEEP_SEEN right: Switch \Seen flag
-                                 */
-                                msg.setFlags(FLAGS_SEEN, true);
-                                mail.setFlag(MailMessage.FLAG_SEEN, true);
-                                final int cur = mail.getUnreadMessages();
-                                mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
-                                imapFolderStorage.decrementUnreadMessageCount(fullname);
-                            }
-                        } catch (final MessagingException e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(new StringBuilder("/SEEN flag could not be set on message #").append(mail.getMailId()).append(
-                                    " in folder ").append(mail.getFolder()).toString(), e);
-                            }
+                if (imapConfig.isSupportsACLs()) {
+                    try {
+                        if (aclExtension.canKeepSeen(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
+                            /*
+                             * User has \KEEP_SEEN right: Switch \Seen flag
+                             */
+                            msg.setFlags(FLAGS_SEEN, true);
+                            mail.setFlag(MailMessage.FLAG_SEEN, true);
+                            final int cur = mail.getUnreadMessages();
+                            mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
+                            imapFolderStorage.decrementUnreadMessageCount(fullname);
                         }
-                    } else {
+                    } catch (final MessagingException e) {
+                        imapFolderStorage.removeFromCache(fullname);
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn(
+                                new StringBuilder("/SEEN flag could not be set on message #").append(mail.getMailId()).append(" in folder ").append(
+                                    mail.getFolder()).toString(),
+                                e);
+                        }
+                    }
+                } else {
+                    try {
                         /*
                          * Switch \Seen flag
                          */
@@ -378,10 +381,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         final int cur = mail.getUnreadMessages();
                         mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
                         imapFolderStorage.decrementUnreadMessageCount(fullname);
+                    } catch (final MessagingException e) {
+                        imapFolderStorage.removeFromCache(fullname);
+                        throw e;
                     }
-                } catch (final MessagingException e) {
-                    imapFolderStorage.removeFromCache(fullname);
-                    throw e;
                 }
             }
             return setAccountInfo(mail);
