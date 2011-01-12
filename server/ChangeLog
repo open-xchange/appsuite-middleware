@@ -1,8 +1,11 @@
+* 2011-01-12 - marcus.klein@open-xchange.com
+
+ - TA5701 of US 5504: Made session handling more restrictive. Hash used in cookies will now be recalculated for every request.
+ 
 * 2011-01-12 - martin.herfurth@open-xchange.com
 
  - Bugfix #17883: Reminder in shared folders.
- - TA5701 of US 5504: Made session handling more restrictive. Hash used in cookies will now be recalculated for every request.
- 
+
 * 2011-01-11 - marcus.klein@open-xchange.com
 
  - Bugfix #18004: Allowing HTML italic tag through whitelist.properties.
