@@ -41,7 +41,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -147,6 +147,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Jan 07 2011 - marcus.klein@open-xchange.com
+ - Bugfix #17840: Added missing columns to getmoduleaccessforcontext CLT.
 * Wed Dec 01 2010 - choeger@open-xchange.com
  - Bugfix #16733: Production JVM settings differ from proposed server settings
 * Fri Nov 19 2010 - thorben.betten@open-xchange.com
