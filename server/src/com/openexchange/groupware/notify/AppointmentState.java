@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -246,9 +246,14 @@ public class AppointmentState extends LinkableState {
 		return type;
 	}
 
-	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
-        Appointment.ALARM,
+    private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
+        Appointment.OBJECT_ID,
+        Appointment.CREATED_BY,
+        Appointment.MODIFIED_BY,
+        Appointment.CREATION_DATE,
         Appointment.LAST_MODIFIED,
+        Appointment.LAST_MODIFIED_UTC,
+        Appointment.ALARM,
         Appointment.NOTIFICATION,
         Appointment.RECURRENCE_TYPE,
         Appointment.CATEGORIES,
