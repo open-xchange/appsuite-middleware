@@ -50,7 +50,6 @@
 package com.openexchange.config.cascade.impl;
 
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.ConfigProperty;
