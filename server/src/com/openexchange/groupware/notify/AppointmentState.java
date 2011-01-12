@@ -247,8 +247,13 @@ public class AppointmentState extends LinkableState {
 	}
 
 	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
-        Appointment.ALARM,
+	    Appointment.OBJECT_ID,
+	    Appointment.CREATED_BY,
+        Appointment.MODIFIED_BY,
+        Appointment.CREATION_DATE,
         Appointment.LAST_MODIFIED,
+        Appointment.LAST_MODIFIED_UTC,
+        Appointment.ALARM,
         Appointment.NOTIFICATION,
         Appointment.RECURRENCE_TYPE,
         Appointment.CATEGORIES,
