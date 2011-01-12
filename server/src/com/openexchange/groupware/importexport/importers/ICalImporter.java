@@ -94,338 +94,419 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
- * Imports ICal files. ICal files can be translated to either tasks or appointments within the OX, so the importer works with both SQL
- * interfaces.
+ * Imports ICal files. ICal files can be translated to either tasks or
+ * appointments within the OX, so the importer works with both SQL interfaces.
  * 
- * @see OXContainerConverter OXContainerConverter - if you have a problem with the contend of the parsed ICAL file
- * @see AppointmentSQLInterface AppointmentSQLInterface - if you have a problem entering the parsed entry as Appointment
- * @see TasksSQLInterface TasksSQLInterface - if you have trouble entering the parsed entry as Task
+ * @see OXContainerConverter OXContainerConverter - if you have a problem with
+ *      the contend of the parsed ICAL file
+ * @see AppointmentSQLInterface AppointmentSQLInterface - if you have a problem
+ *      entering the parsed entry as Appointment
+ * @see TasksSQLInterface TasksSQLInterface - if you have trouble entering the
+ *      parsed entry as Task
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (changes to new interface, bugfixes, maintenance)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb'
+ *         Prinz</a> (changes to new interface, bugfixes, maintenance)
  */
 public class ICalImporter extends AbstractImporter {
 	private static final int APP = 0;
 	private static final int TASK = 1;
-	
-    private static final Log LOG = LogFactory.getLog(ICalImporter.class);
 
-    public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
-        if (!format.equals(Format.ICAL)) {
-            return false;
-        }
-        final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
-        final Iterator<String> iterator = folders.iterator();
-        while (iterator.hasNext()) {
-            final String folder = iterator.next();
+	private static final Log LOG = LogFactory.getLog(ICalImporter.class);
 
-            int folderId = 0;
-            try {
-                folderId = Integer.parseInt(folder);
-            } catch (final NumberFormatException e) {
-                throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-            }
+	public boolean canImport(final ServerSession session, final Format format,
+			final List<String> folders,
+			final Map<String, String[]> optionalParams)
+			throws ImportExportException {
+		if (!format.equals(Format.ICAL)) {
+			return false;
+		}
+		final OXFolderAccess folderAccess = new OXFolderAccess(
+				session.getContext());
+		final Iterator<String> iterator = folders.iterator();
+		while (iterator.hasNext()) {
+			final String folder = iterator.next();
 
-            FolderObject fo;
-            try {
-                fo = folderAccess.getFolderObject(folderId);
-            } catch (final OXException e) {
-                return false;
-            }
+			int folderId = 0;
+			try {
+				folderId = Integer.parseInt(folder);
+			} catch (final NumberFormatException e) {
+				throw ImportExportExceptionCodes.NUMBER_FAILED
+						.create(e, folder);
+			}
 
-            // check format of folder
-            final int module = fo.getModule();
-            if (module == FolderObject.CALENDAR) {
-                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
-                    return false;
-                }
-            } else if (module == FolderObject.TASK) {
-                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+			FolderObject fo;
+			try {
+				fo = folderAccess.getFolderObject(folderId);
+			} catch (final OXException e) {
+				return false;
+			}
 
-            // check read access to folder
-            EffectivePermission perm;
-            try {
-                perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-                    session.getUserId(),
-                    session.getContext()));
-            } catch (final DBPoolingException e) {
-                throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-            } catch (final SQLException e) {
-                throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-            }
+			// check format of folder
+			final int module = fo.getModule();
+			if (module == FolderObject.CALENDAR) {
+				if (!UserConfigurationStorage
+						.getInstance()
+						.getUserConfigurationSafe(session.getUserId(),
+								session.getContext()).hasCalendar()) {
+					return false;
+				}
+			} else if (module == FolderObject.TASK) {
+				if (!UserConfigurationStorage
+						.getInstance()
+						.getUserConfigurationSafe(session.getUserId(),
+								session.getContext()).hasTask()) {
+					return false;
+				}
+			} else {
+				return false;
+			}
 
-            if (!perm.canCreateObjects()) {
-                return false;
-            }
-        }
-        return true;
-    }
+			// check read access to folder
+			EffectivePermission perm;
+			try {
+				perm = fo.getEffectiveUserPermission(
+						session.getUserId(),
+						UserConfigurationStorage.getInstance()
+								.getUserConfigurationSafe(session.getUserId(),
+										session.getContext()));
+			} catch (final DBPoolingException e) {
+				throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION
+						.create(e);
+			} catch (final SQLException e) {
+				throw ImportExportExceptionCodes.SQL_PROBLEM.create(e,
+						e.getMessage());
+			}
 
-    private int[] determineFolders(ServerSession session, List<String> folders, Format format) throws ImportExportException{
-    	int[] result = new int[]{-1,-1};
-        final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
-        final Iterator<String> iterator = folders.iterator();
-        while (iterator.hasNext()) {
-            final int folderId = Integer.parseInt(iterator.next());
-            FolderObject fo;
-            try {
-                fo = folderAccess.getFolderObject(folderId);
-            } catch (final OXException e) {
-                throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, I(folderId));
-            }
-            if (fo.getModule() == FolderObject.CALENDAR) {
-                result[APP] = folderId;
-            } else if (fo.getModule() == FolderObject.TASK) {
-                result[TASK] = folderId;
-            } else {
-                throw ImportExportExceptionCodes.CANNOT_IMPORT.create(fo.getFolderName(), format);
-            }
-        }
-        return result;
-    }
-    public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
-    	int[] res = determineFolders(session, folders, format);
-        int appointmentFolderId = res[APP];
-        int taskFolderId = res[TASK];
+			if (!perm.canCreateObjects()) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-        
+	private int[] determineFolders(ServerSession session, List<String> folders,
+			Format format) throws ImportExportException {
+		int[] result = new int[] { -1, -1 };
+		final OXFolderAccess folderAccess = new OXFolderAccess(
+				session.getContext());
+		final Iterator<String> iterator = folders.iterator();
+		while (iterator.hasNext()) {
+			final int folderId = Integer.parseInt(iterator.next());
+			FolderObject fo;
+			try {
+				fo = folderAccess.getFolderObject(folderId);
+			} catch (final OXException e) {
+				throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(
+						e, I(folderId));
+			}
+			if (fo.getModule() == FolderObject.CALENDAR) {
+				result[APP] = folderId;
+			} else if (fo.getModule() == FolderObject.TASK) {
+				result[TASK] = folderId;
+			} else {
+				throw ImportExportExceptionCodes.CANNOT_IMPORT.create(
+						fo.getFolderName(), format);
+			}
+		}
+		return result;
+	}
 
-        AppointmentSQLInterface appointmentInterface = null;
+	public List<ImportResult> importData(final ServerSession session,
+			final Format format, final InputStream is,
+			final List<String> folders,
+			final Map<String, String[]> optionalParams)
+			throws ImportExportException {
+		int[] res = determineFolders(session, folders, format);
+		int appointmentFolderId = res[APP];
+		int taskFolderId = res[TASK];
 
-        if (appointmentFolderId != -1) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
-                throw ImportExportExceptionCodes.CALENDAR_DISABLED.create(new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Calendar"));
-            }
-            appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-        }
+		final AppointmentSQLInterface appointmentInterface = retrieveAppointmentInterface(
+				appointmentFolderId, session);
+		final TasksSQLInterface taskInterface = retrieveTaskInterface(
+				taskFolderId, session);
+		final ICalParser parser = retrieveIcalParser();
+		final Context ctx = session.getContext();
+		final TimeZone defaultTz = TimeZoneUtils.getTimeZone(UserStorage
+				.getStorageUser(session.getUserId(), ctx).getTimeZone());
 
-        TasksSQLInterface taskInterface = null;
+		final List<ImportResult> list = new ArrayList<ImportResult>();
+		final List<ConversionError> errors = new ArrayList<ConversionError>();
+		final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
-        if (taskFolderId != -1) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
-                throw ImportExportExceptionCodes.TASKS_DISABLED.create( new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Task"));
-            }
-            taskInterface = new TasksSQLImpl(session);
-        }
+		if (appointmentFolderId != -1) {
+			List<CalendarDataObject> appointments;
+			try {
+				appointments = parser.parseAppointments(is, defaultTz, ctx,
+						errors, warnings);
+			} catch (final ConversionError conversionError) {
+				throw new ImportExportException(conversionError);
+			}
+			final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
-        final ICalParser parser;
-        try {
-            parser = ServerServiceRegistry.getInstance().getService(ICalParser.class, true);
-        } catch (ServiceException e) {
-            throw ImportExportExceptionCodes.ICAL_PARSER_SERVICE_MISSING.create(e);
-        }
+			for (final ConversionError error : errors) {
+				errorMap.put(error.getIndex(), error);
+			}
 
-        final List<ImportResult> list = new ArrayList<ImportResult>();
+			final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
 
-        final Context ctx = session.getContext();
-        final TimeZone defaultTz = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+			for (final ConversionWarning warning : warnings) {
+				List<ConversionWarning> warningList = warningMap.get(warning
+						.getIndex());
+				if (warningList == null) {
+					warningList = new LinkedList<ConversionWarning>();
+					warningMap.put(warning.getIndex(), warningList);
+				}
+				warningList.add(warning);
+			}
 
-        final List<ConversionError> errors = new ArrayList<ConversionError>();
-        final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+			Map uid2id = new HashMap<String, Integer>();
+			HashMap<String, LinkedList<CalendarDataObject>> waitingLounge = new HashMap<String, LinkedList<CalendarDataObject>>();
 
-        if (appointmentFolderId != -1) {
-            List<CalendarDataObject> appointments;
-            try {
-                appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings);
-            } catch (final ConversionError conversionError) {
-                throw new ImportExportException(conversionError);
-            }
-            final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
+			int index = 0;
+			final Iterator<CalendarDataObject> iter = appointments.iterator();
 
-            for (final ConversionError error : errors) {
-                errorMap.put(error.getIndex(), error);
-            }
+			boolean suppressNotification = (optionalParams != null && optionalParams
+					.containsKey("suppressNotification"));
+			while (iter.hasNext()) {
+				final ImportResult importResult = new ImportResult();
+				final ConversionError error = errorMap.get(index);
+				if (error != null) {
+					errorMap.remove(index);
+					importResult.setException(new ImportExportException(error));
+				} else {
+					final CalendarDataObject appointmentObj = iter.next();
+					appointmentObj.setContext(session.getContext());
+					appointmentObj.setParentFolderID(appointmentFolderId);
+					appointmentObj.setIgnoreConflicts(true);
+					if (suppressNotification) {
+						appointmentObj.setNotification(false);
+					}
+					// Check for possible full-time appointment
+					check4FullTime(appointmentObj);
+					try {
+						final Appointment[] conflicts = appointmentInterface
+								.insertAppointmentObject(appointmentObj);
+						if (conflicts == null || conflicts.length == 0) {
+							importResult.setObjectId(String
+									.valueOf(appointmentObj.getObjectID()));
+							importResult.setDate(appointmentObj
+									.getLastModified());
+							importResult.setFolder(String
+									.valueOf(appointmentFolderId));
+						} else {
+							importResult
+									.setException(ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT
+											.create());
+						}
+					} catch (final OXException e) {
+						LOG.error(e.getMessage(), e);
+						importResult.setException(e);
+					}
+					final List<ConversionWarning> warningList = warningMap
+							.get(index);
+					if (warningList != null) {
+						importResult.addWarnings(warningList);
+						importResult
+								.setException(ImportExportExceptionCodes.WARNINGS
+										.create(I(warningList.size())));
+					}
+				}
+				importResult.setEntryNumber(index);
+				list.add(importResult);
+				index++;
+			}
+			if (!errorMap.isEmpty()) {
+				errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
 
-            final TIntObjectHashMap<List<ConversionWarning>> warningMap = new  TIntObjectHashMap<List<ConversionWarning>>();
+					public boolean execute(final ConversionError error) {
+						final ImportResult importResult = new ImportResult();
+						importResult.setEntryNumber(error.getIndex());
+						importResult.setException(new ImportExportException(
+								error));
+						list.add(importResult);
+						return true;
+					}
+				});
+			}
+		}
+		if (taskFolderId != -1) {
+			List<Task> tasks;
+			try {
+				tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
+			} catch (final ConversionError conversionError) {
+				throw new ImportExportException(conversionError);
+			}
+			final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
-            for (final ConversionWarning warning : warnings) {
-                List<ConversionWarning> warningList = warningMap.get(warning.getIndex());
-                if (warningList == null) {
-                    warningList = new LinkedList<ConversionWarning>();
-                    warningMap.put(warning.getIndex(), warningList);
-                }
-                warningList.add(warning);
-            }
+			for (final ConversionError error : errors) {
+				errorMap.put(error.getIndex(), error);
+			}
 
-            Map uid2id = new HashMap<String,Integer>();
-            HashMap<String, LinkedList<CalendarDataObject>> waitingLounge = new HashMap<String,LinkedList<CalendarDataObject>>();
-            
-            int index = 0;
-            final Iterator<CalendarDataObject> iter = appointments.iterator();
-            
-            boolean suppressNotification = (optionalParams != null && optionalParams.containsKey("suppressNotification"));
-            while (iter.hasNext()) {
-                final ImportResult importResult = new ImportResult();
-                final ConversionError error = errorMap.get(index);
-                if (error != null) {
-                    errorMap.remove(index);
-                    importResult.setException(new ImportExportException(error));
-                } else {
-                    final CalendarDataObject appointmentObj = iter.next();
-                    appointmentObj.setContext(session.getContext());
-                    appointmentObj.setParentFolderID(appointmentFolderId);
-                    appointmentObj.setIgnoreConflicts(true);
-                    if (suppressNotification) {
-                    	appointmentObj.setNotification(false);
-                    }
-                    // Check for possible full-time appointment
-                    check4FullTime(appointmentObj);
-                    try {
-                        final Appointment[] conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
-                        if (conflicts == null || conflicts.length == 0) {
-                            importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
-                            importResult.setDate(appointmentObj.getLastModified());
-                            importResult.setFolder(String.valueOf(appointmentFolderId));
-                        } else {
-                            importResult.setException(ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT.create());
-                        }
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
-                        importResult.setException(e);
-                    }
-                    final List<ConversionWarning> warningList = warningMap.get(index);
-                    if (warningList != null) {
-                        importResult.addWarnings(warningList);
-                        importResult.setException(ImportExportExceptionCodes.WARNINGS.create(I(warningList.size())));
-                    }
-                }
-                importResult.setEntryNumber(index);
-                list.add(importResult);
-                index++;
-            }
-            if (!errorMap.isEmpty()) {
-                errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
+			final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
 
-                    public boolean execute(final ConversionError error) {
-                        final ImportResult importResult = new ImportResult();
-                        importResult.setEntryNumber(error.getIndex());
-                        importResult.setException(new ImportExportException(error));
-                        list.add(importResult);
-                        return true;
-                    }
-                });
-            }
-        }
-        if (taskFolderId != -1) {
-            List<Task> tasks;
-            try {
-                tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
-            } catch (final ConversionError conversionError) {
-                throw new ImportExportException(conversionError);
-            }
-            final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
+			for (final ConversionWarning warning : warnings) {
+				List<ConversionWarning> warningList = warningMap.get(warning
+						.getIndex());
+				if (warningList == null) {
+					warningList = new LinkedList<ConversionWarning>();
+					warningMap.put(warning.getIndex(), warningList);
+				}
+				warningList.add(warning);
+			}
 
-            for (final ConversionError error : errors) {
-                errorMap.put(error.getIndex(), error);
-            }
+			int index = 0;
+			final Iterator<Task> iter = tasks.iterator();
+			while (iter.hasNext()) {
+				final ImportResult importResult = new ImportResult();
+				final ConversionError error = errorMap.get(index);
+				if (error != null) {
+					errorMap.remove(index);
+					importResult.setException(new ImportExportException(error));
+				} else {
+					// IGNORE WARNINGS. Protocol doesn't allow for warnings.
+					// TODO: Verify This
+					final Task task = iter.next();
+					task.setParentFolderID(taskFolderId);
+					try {
+						taskInterface.insertTaskObject(task);
+						importResult.setObjectId(String.valueOf(task
+								.getObjectID()));
+						importResult.setDate(task.getLastModified());
+						importResult.setFolder(String.valueOf(taskFolderId));
+					} catch (final OXException e) {
+						LOG.error(e.getMessage(), e);
+						importResult.setException(e);
+					}
 
-            final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
+					final List<ConversionWarning> warningList = warningMap
+							.get(index);
+					if (warningList != null) {
+						importResult.addWarnings(warningList);
+						importResult
+								.setException(ImportExportExceptionCodes.WARNINGS
+										.create(I(warningList.size())));
+					}
+				}
+				importResult.setEntryNumber(index);
+				list.add(importResult);
+				index++;
+			}
+			if (!errorMap.isEmpty()) {
+				errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
 
-            for (final ConversionWarning warning : warnings) {
-                List<ConversionWarning> warningList = warningMap.get(warning.getIndex());
-                if (warningList == null) {
-                    warningList = new LinkedList<ConversionWarning>();
-                    warningMap.put(warning.getIndex(), warningList);
-                }
-                warningList.add(warning);
-            }
+					public boolean execute(final ConversionError error) {
+						final ImportResult importResult = new ImportResult();
+						importResult.setEntryNumber(error.getIndex());
+						importResult.setException(new ImportExportException(
+								error));
+						list.add(importResult);
+						return true;
+					}
+				});
+			}
+		}
+		return list;
+	}
 
-            int index = 0;
-            final Iterator<Task> iter = tasks.iterator();
-            while (iter.hasNext()) {
-                final ImportResult importResult = new ImportResult();
-                final ConversionError error = errorMap.get(index);
-                if (error != null) {
-                    errorMap.remove(index);
-                    importResult.setException(new ImportExportException(error));
-                } else {
-                    // IGNORE WARNINGS. Protocol doesn't allow for warnings. TODO: Verify This
-                    final Task task = iter.next();
-                    task.setParentFolderID(taskFolderId);
-                    try {
-                        taskInterface.insertTaskObject(task);
-                        importResult.setObjectId(String.valueOf(task.getObjectID()));
-                        importResult.setDate(task.getLastModified());
-                        importResult.setFolder(String.valueOf(taskFolderId));
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
-                        importResult.setException(e);
-                    }
+	private ICalParser retrieveIcalParser() throws ImportExportException {
+		try {
+			return ServerServiceRegistry.getInstance().getService(
+					ICalParser.class, true);
+		} catch (ServiceException e) {
+			throw ImportExportExceptionCodes.ICAL_PARSER_SERVICE_MISSING
+					.create(e);
+		}
+	}
 
-                    final List<ConversionWarning> warningList = warningMap.get(index);
-                    if (warningList != null) {
-                        importResult.addWarnings(warningList);
-                        importResult.setException(ImportExportExceptionCodes.WARNINGS.create(I(warningList.size())));
-                    }
-                }
-                importResult.setEntryNumber(index);
-                list.add(importResult);
-                index++;
-            }
-            if (!errorMap.isEmpty()) {
-                errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
+	private AppointmentSQLInterface retrieveAppointmentInterface(
+			int appointmentFolderId, ServerSession session)
+			throws ImportExportException {
+		if (appointmentFolderId == -1)
+			return null;
 
-                    public boolean execute(final ConversionError error) {
-                        final ImportResult importResult = new ImportResult();
-                        importResult.setEntryNumber(error.getIndex());
-                        importResult.setException(new ImportExportException(error));
-                        list.add(importResult);
-                        return true;
-                    }
-                });
-            }
-        }
-        return list;
-    }
+		if (!UserConfigurationStorage
+				.getInstance()
+				.getUserConfigurationSafe(session.getUserId(),
+						session.getContext()).hasCalendar())
+			throw ImportExportExceptionCodes.CALENDAR_DISABLED
+					.create(new OXPermissionException(
+							OXPermissionException.Code.NoPermissionForModul,
+							"Calendar"));
 
-    /**
-     * Checks if specified appointment lasts exactly one day; if so treat it as a full-time appointment through setting
-     * {@link CalendarDataObject#setFullTime(boolean)} to <code>true</code>.
-     * <p>
-     * Moreover its start/end date is changed to match the date in UTC time zone.
-     * 
-     * @param appointmentObj The appointment to check
-     */
-    private void check4FullTime(final Appointment appointmentObj) {
-        final long start = appointmentObj.getStartDate().getTime();
-        final long end = appointmentObj.getEndDate().getTime();
-        if (Constants.MILLI_DAY == (end - start)) {
-            // Appointment exactly lasts one day; assume a full-time appointment
-            appointmentObj.setFullTime(true);
-            // Adjust start/end to UTC date's zero time; e.g. "13. January 2009 00:00:00 UTC"
-            final TimeZone tz = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone(appointmentObj.getTimezone());
-            long offset = tz.getOffset(start);
-            appointmentObj.setStartDate(new Date(start + offset));
-            offset = tz.getOffset(end);
-            appointmentObj.setEndDate(new Date(end + offset));
-        }
-    }
+		return ServerServiceRegistry.getInstance()
+				.getService(AppointmentSqlFactoryService.class)
+				.createAppointmentSql(session);
+	}
 
-    @Override
-    protected String getNameForFieldInTruncationError(final int id, final OXException oxex) {
-        if (oxex.getComponent() == EnumComponent.APPOINTMENT) {
-            final CalendarField field = CalendarField.getByAppointmentObjectId(id);
-            if (field != null) {
-                return field.getName();
-            }
-        } else if (oxex.getComponent() == EnumComponent.TASK) {
-            final TaskField field = TaskField.getByTaskID(id);
-            if (field != null) {
-                return field.getName();
-            }
-        }
-        return String.valueOf(id);
+	private TasksSQLInterface retrieveTaskInterface(int taskFolderId,
+			ServerSession session) throws ImportExportException {
+		if (taskFolderId == -1)
+			return null;
+		if (!UserConfigurationStorage
+				.getInstance()
+				.getUserConfigurationSafe(session.getUserId(),
+						session.getContext()).hasTask())
+			throw ImportExportExceptionCodes.TASKS_DISABLED
+					.create(new OXPermissionException(
+							OXPermissionException.Code.NoPermissionForModul,
+							"Task"));
 
-    }
+		return new TasksSQLImpl(session);
+	}
+
+	/**
+	 * Checks if specified appointment lasts exactly one day; if so treat it as
+	 * a full-time appointment through setting
+	 * {@link CalendarDataObject#setFullTime(boolean)} to <code>true</code>.
+	 * <p>
+	 * Moreover its start/end date is changed to match the date in UTC time
+	 * zone.
+	 * 
+	 * @param appointmentObj
+	 *            The appointment to check
+	 */
+	private void check4FullTime(final Appointment appointmentObj) {
+		final long start = appointmentObj.getStartDate().getTime();
+		final long end = appointmentObj.getEndDate().getTime();
+		if (Constants.MILLI_DAY == (end - start)) {
+			// Appointment exactly lasts one day; assume a full-time appointment
+			appointmentObj.setFullTime(true);
+			// Adjust start/end to UTC date's zero time; e.g.
+			// "13. January 2009 00:00:00 UTC"
+			final TimeZone tz = ServerServiceRegistry.getInstance()
+					.getService(CalendarCollectionService.class)
+					.getTimeZone(appointmentObj.getTimezone());
+			long offset = tz.getOffset(start);
+			appointmentObj.setStartDate(new Date(start + offset));
+			offset = tz.getOffset(end);
+			appointmentObj.setEndDate(new Date(end + offset));
+		}
+	}
+
+	@Override
+	protected String getNameForFieldInTruncationError(final int id,
+			final OXException oxex) {
+		if (oxex.getComponent() == EnumComponent.APPOINTMENT) {
+			final CalendarField field = CalendarField
+					.getByAppointmentObjectId(id);
+			if (field != null) {
+				return field.getName();
+			}
+		} else if (oxex.getComponent() == EnumComponent.TASK) {
+			final TaskField field = TaskField.getByTaskID(id);
+			if (field != null) {
+				return field.getName();
+			}
+		}
+		return String.valueOf(id);
+
+	}
 
 }
