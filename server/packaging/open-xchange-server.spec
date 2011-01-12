@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -729,6 +729,31 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jan 12 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #17883: Reminder in shared folders.
+ - TA5701 of US 5504: Made session handling more restrictive. Hash used in cookies will now be recalculated for every request.
+* Tue Jan 11 2011 - choeger@open-xchange.com
+ - Bugfix #18000: updating on RHEL and SLES does not work
+* Tue Jan 11 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18004: Allowing HTML italic tag through whitelist.properties.
+* Mon Jan 10 2011 - choeger@open-xchange.com
+ - Bugfix #17769: [L3] /tmp/.OX must be automatically re-created when tmpwatch deletes it
+   /tmp/.OX is now /var/spool/open-xchange/uploads/ per default on new installations
+* Mon Jan 10 2011 - thorben.betten@open-xchange.com
+ - Bugfix #17803: Removed obsolete property "com.openexchange.mail.maxNumOfConnections" from mail module
+ - Bugfix #17920: Invalidate IMAP folder cache when accessing unseen message
+* Mon Jan 10 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #17890: Imip invitations for newly added external participants.
+* Mon Jan 10 2011 - marcus.klein@open-xchange.com
+ - Bugfix #17924: Using correct identifier when deleting data from database if a user is removed.
+* Sat Jan 08 2011 - thorben.betten@open-xchange.com
+ - Bugfix #17976: Returning empty in-memory tree if there is no entry for current user
+* Fri Jan 07 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #17392: ICal exports now contain the timezone of the appointment on dates, so they are not "floating" (RFC5545) any more. 
+* Mon Jan 03 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #17937: If an import cannot be done because the UUID is in use, you now get to know which UUID is the problem
+* Mon Dec 27 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17882: Retry fetching POP3 server's capabilities if cached check indicates failure
 * Tue Dec 21 2010 - thorben.betten@open-xchange.com
  - Bugfix #17876: Fixed illegal monitor state when waiting on Condition instance
  - Bugfix #17877: Dealing with possible InterruptedException during concurrent loading of folder permissions

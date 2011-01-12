@@ -1,3 +1,9 @@
+open-xchange-messaging (6.19.0.0-1) unstable; urgency=low
+
+  * build for 6.19.0-rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Jan 2011 14:32:50 +0100
+
 open-xchange-messaging (6.19.0.0-0) unstable; urgency=low
 
   * new unstable cycle
