@@ -52,7 +52,9 @@ package com.openexchange.config.cascade.osgi;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.cascade.BasicProperty;
@@ -140,12 +142,17 @@ public class TrackingProvider implements ConfigProviderService {
         return first;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.cascade.ConfigProviderService#getAllPropertyNames(int, int)
-     */
     public Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException {
-        // TODO Auto-generated method stub
-        return null;
+        Object[] services = tracker.getServices();
+        Set<String> allNames = new HashSet<String>();
+        
+        for (Object object : services) {
+            ConfigProviderService configProvider = (ConfigProviderService) object;
+            Collection<String> names = configProvider.getAllPropertyNames(context, user);
+            allNames.addAll(names);
+            
+        }
+        return allNames;
     }
 
 }
