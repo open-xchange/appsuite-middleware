@@ -138,8 +138,9 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.ADDRESSES));
                 arrayList.add(Rule2JSON2Rule.JSONArrayToStringList(addresses));
             }
-            final String subject = object.getString(VacationActionFields.SUBJECT.getFieldname());
-            if (null != subject) {
+            final String subjectFieldname = VacationActionFields.SUBJECT.getFieldname();
+            if (object.has(subjectFieldname)) {
+                final String subject = object.getString(subjectFieldname);
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.SUBJECT));
                 arrayList.add(stringToList(subject));
             }
@@ -212,6 +213,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
      * @param actionCommand the TestCommand itself
      * @throws JSONException
      */
+    @SuppressWarnings("unchecked")
     private void createJSONFromActionCommand(final JSONObject tmp, final ActionCommand actionCommand) throws JSONException {
         if (null == actionCommand) {
             return;
@@ -253,11 +255,13 @@ final class ActionCommandMapper implements Mapper<Rule> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void createOneParameterJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
         tmp.put(GeneralFields.ID, command.getJsonname());
         tmp.put(field, ((List<String>)arguments.get(0)).get(0));
     }
 
+    @SuppressWarnings("unchecked")
     private void createFileintoJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
         tmp.put(GeneralFields.ID, command.getJsonname());
         tmp.put(field, MailFolderUtility.prepareFullname(0, ((List<String>)arguments.get(0)).get(0)));
