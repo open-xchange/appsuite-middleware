@@ -47,76 +47,22 @@
  *
  */
 
-package com.openexchange.config.cascade.impl;
-
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.Scope;
-import com.openexchange.tools.strings.StringParser;
+package com.openexchange.config.cascade;
 
 
 /**
- * {@link CoercingComposedConfigProperty}
+ * {@link BasicProperty}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty<T> {
-    private ComposedConfigProperty<String> delegate;
-    private StringParser stringParser;
-    private Class<T> coerceTo;
+public interface BasicProperty {
+    void set(String value);
+
+    String get();
+
+    void set(String metadataName, String value);
+
+    String get(String metadataName);
     
-    public CoercingComposedConfigProperty(Class<T> coerceTo, ComposedConfigProperty<String> delegate, StringParser stringParser) {
-        this.stringParser = stringParser;
-        this.coerceTo = coerceTo;
-        this.stringParser = stringParser;
-        initDelegate(delegate);
-        
-    }
- 
-    private void initDelegate(ComposedConfigProperty<String> d) {
-        this.delegate = d;
-    }
-
-    public ComposedConfigProperty<T> precedence(Scope... scopes) {
-        initDelegate(delegate.precedence(scopes));
-        return this;
-    }
-    
-    public T get() {
-        String value = delegate.get();
-        return parse(value, coerceTo);
-    }
-
-    private <S> S parse(String value, Class<S> s) {
-        if (value == null) {
-            return null;
-        }
-
-        S parsed = stringParser.parse(value, s);
-        if (parsed == null) {
-            // TOOD: Throw Exception
-            return null;
-        }
-        return parsed;
-    }
-
-    public String get(String metadataName) {
-        return delegate.get(metadataName);
-    }
-
-    public <M> M get(String metadataName, Class<M> m) {
-        return parse(delegate.get(metadataName), m);
-    }
-
-    public boolean isDefined() {
-        return delegate.isDefined();
-    }
-
-    public void set(T value) {
-        delegate.set(value.toString()); // We assume good toString methods that allow reparsing
-    }
-
-    public <M> void set(String metadataName, M value) {
-        delegate.set(metadataName, value);
-    }
-
+    public boolean isDefined();
 }

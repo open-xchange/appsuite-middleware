@@ -49,22 +49,24 @@
 
 package com.openexchange.config.cascade.impl;
 
+import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.tools.strings.StringParser;
 
-
 /**
  * {@link CoercingConfigProperty}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CoercingConfigProperty<T> implements ConfigProperty<T>{
+public class CoercingConfigProperty<T> implements ConfigProperty<T> {
 
     private Class<T> type;
-    private ConfigProperty<String> delegate;
+
+    private BasicProperty delegate;
+
     private StringParser parser;
-    
-    public CoercingConfigProperty(Class<T> type, ConfigProperty<String> delegate, StringParser parser) {
+
+    public CoercingConfigProperty(Class<T> type, BasicProperty delegate, StringParser parser) {
         super();
         this.type = type;
         this.delegate = delegate;
@@ -73,21 +75,28 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T>{
 
     public T get() {
         String value = delegate.get();
-        if(value == null) {
+        return parse(value, type);
+    }
+
+    private <S> S parse(String value, Class<S> s) {
+        if (value == null) {
             return null;
         }
-        
-        T parsed = parser.parse(value, type);
-        if(parsed == null) {
+
+        S parsed = parser.parse(value, s);
+        if (parsed == null) {
             // TOOD: Throw Exception
             return null;
         }
-        
         return parsed;
     }
 
     public String get(String metadataName) {
         return delegate.get(metadataName);
+    }
+
+    public <M> M get(String metadataName, Class<M> m) {
+        return parse(delegate.get(metadataName), m);
     }
 
     public boolean isDefined() {
@@ -98,8 +107,8 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T>{
         delegate.set(value.toString()); // We assume good toString methods that allow reparsing
     }
 
-    public void set(String metadataName, String value) {
-        delegate.set(metadataName, value);
+    public <M> void set(String metadataName, M value) {
+        delegate.set(metadataName, value.toString());
     }
 
 }

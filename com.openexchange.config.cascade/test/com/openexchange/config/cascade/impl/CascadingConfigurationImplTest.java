@@ -101,7 +101,7 @@ public class CascadingConfigurationImplTest extends TestCase {
     public void testPropertyMetadata() {
         view.property(SERVER, "com.openexchange.test.property", String.class).set("published", "true");
         
-        assertEquals("true", view.property("com.openexchange.test.property", String.class).get("published"));
+        assertTrue(view.property("com.openexchange.test.property", String.class).get("published", boolean.class));
         
         view.property(SERVER, "com.openexchange.test.property", String.class).set("final", "server");
         view.property(CONTEXT, "com.openexchange.test.property", String.class).set("final", "context");
@@ -137,5 +137,7 @@ public class CascadingConfigurationImplTest extends TestCase {
         
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
+    
+    
     
 }

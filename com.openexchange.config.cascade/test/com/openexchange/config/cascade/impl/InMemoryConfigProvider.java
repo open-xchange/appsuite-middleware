@@ -49,7 +49,9 @@
 
 package com.openexchange.config.cascade.impl;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 
@@ -65,8 +67,8 @@ public class InMemoryConfigProvider implements ConfigProviderService{
     ConcurrentHashMap<String, ConcurrentHashMap<String, String>> metadata = new ConcurrentHashMap<String, ConcurrentHashMap<String, String>>();
     
     
-    public ConfigProperty<String> get(final String property, final int context, final int user) {
-        return new ConfigProperty<String>() {
+    public BasicProperty get(final String property, final int context, final int user) {
+        return new BasicProperty() {
 
             public String get() {
                 return values.get(property);
@@ -100,6 +102,15 @@ public class InMemoryConfigProvider implements ConfigProviderService{
             }
             
         };
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.openexchange.config.cascade.ConfigProviderService#getAllProperties(int, int)
+     */
+    public Map<String, BasicProperty> getAllProperties(int context, int user) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

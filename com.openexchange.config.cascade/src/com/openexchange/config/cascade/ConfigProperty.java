@@ -61,9 +61,12 @@ public interface ConfigProperty<T> {
 
     T get();
 
-    void set(String metadataName, String value);
+    <M> void set(String metadataName, M value);
+
+    <M> M get(String metadataName, Class<M> type);
 
     String get(String metadataName);
+
     
     public boolean isDefined();
 }

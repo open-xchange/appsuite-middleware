@@ -51,8 +51,10 @@ package com.openexchange.config.cascade.osgi;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 
@@ -75,7 +77,7 @@ public class TrackingProvider implements ConfigProviderService {
         this.tracker = providers;
     }
 
-    public ConfigProperty<String> get(String property, int context, int user) {
+    public BasicProperty get(String property, int context, int user) {
         ServiceReference[] serviceReferences = tracker.getServiceReferences();
         
         Arrays.sort(serviceReferences, new Comparator<ServiceReference>() {
@@ -98,10 +100,10 @@ public class TrackingProvider implements ConfigProviderService {
             
         });
         
-        ConfigProperty<String> first = null;
+        BasicProperty first = null;
         for (ServiceReference ref : serviceReferences) {
             ConfigProviderService delegate = (ConfigProviderService) tracker.getService(ref);
-            ConfigProperty<String> prop = delegate.get(property, context, user);
+            BasicProperty prop = delegate.get(property, context, user);
             if (first == null) {
                 first = prop;
             }
@@ -110,7 +112,7 @@ public class TrackingProvider implements ConfigProviderService {
             }
         }
         if(first == null) {
-            first = new ConfigProperty<String>() {
+            first = new BasicProperty() {
 
                 public String get() {
                     return null;
@@ -134,5 +136,13 @@ public class TrackingProvider implements ConfigProviderService {
             };
         }
         return first;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.config.cascade.ConfigProviderService#getAllProperties(int, int)
+     */
+    public Map<String, BasicProperty> getAllProperties(int context, int user) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -158,8 +158,18 @@ public class ConfigCascade implements ConfigViewFactory {
                     }
                     return null;
                 }
+                
+                public <M> M get(String metadataName, Class<M> m) {
+                    for(ConfigProviderService provider : getConfigProviders(null)) {
+                        String value = provider.get(property, context, user).get(metadataName);
+                        if (value != null) {
+                            return stringParser.parse(value, m);
+                        }
+                    }
+                    return null;
+                }
 
-                public void set(String metadataName, String value) {
+                public <M> void set(String metadataName, M value) {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
