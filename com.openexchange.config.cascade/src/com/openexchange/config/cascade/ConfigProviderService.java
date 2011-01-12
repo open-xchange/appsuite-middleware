@@ -59,8 +59,8 @@ import java.util.Collection;
  */
 public interface ConfigProviderService {
 
-    BasicProperty get(String property, int context, int user);
+    BasicProperty get(String property, int context, int user) throws ConfigCascadeException;
     
-    Collection<String> getAllPropertyNames(int context, int user);
+    Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException;
 
 }

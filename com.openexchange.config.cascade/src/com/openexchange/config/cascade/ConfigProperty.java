@@ -57,17 +57,17 @@ package com.openexchange.config.cascade;
  */
 public interface ConfigProperty<T> {
 
-    void set(T value);
+    ConfigProperty<T> set(T value) throws ConfigCascadeException;
 
-    T get();
+    T get() throws ConfigCascadeException;
 
-    <M> void set(String metadataName, M value);
+    <M> ConfigProperty<T> set(String metadataName, M value) throws ConfigCascadeException;
 
-    <M> M get(String metadataName, Class<M> type);
+    <M> M get(String metadataName, Class<M> type) throws ConfigCascadeException;
 
-    String get(String metadataName);
+    String get(String metadataName) throws ConfigCascadeException;
 
-    public <M> ConfigProperty<M> to(Class<M> otherType);
+    public <M> ConfigProperty<M> to(Class<M> otherType) throws ConfigCascadeException;
     
-    public boolean isDefined();
+    public boolean isDefined() throws ConfigCascadeException;
 }

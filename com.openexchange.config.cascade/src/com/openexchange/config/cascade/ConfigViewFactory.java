@@ -56,5 +56,5 @@ package com.openexchange.config.cascade;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ConfigViewFactory {
-    public ConfigView getView(int user, int context);
+    public ConfigView getView(int user, int context) throws ConfigCascadeException;
 }

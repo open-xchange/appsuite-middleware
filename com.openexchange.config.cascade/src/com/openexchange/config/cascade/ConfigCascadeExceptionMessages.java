@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,17 +49,26 @@
 
 package com.openexchange.config.cascade;
 
+import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * {@link ComposedConfigProperty}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ConfigCascadeExceptionMessages} - Exception messages for {@link ConfigCascadeException} that needs to be translated.
+ * 
+ * @author francisco.laguna@open-xchange.com
  */
-public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
-    public ComposedConfigProperty<T> precedence(Scope...scopes) throws ConfigCascadeException;
-    public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws ConfigCascadeException;
-    
-    public ComposedConfigProperty<T> set(T value) throws ConfigCascadeException;
-    public <M> ComposedConfigProperty<T> set(String metadataName, M value) throws ConfigCascadeException;
-    
+public final class ConfigCascadeExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // Could not coerce value %1$s into class %2$s
+    public static final String COULD_NOT_COERCE_VALUE_MSG = "Could not coerce value %1$s into class %2$s";
+
+    /**
+     * Initializes a new {@link ConfigCascadeExceptionMessages}.
+     */
+    private ConfigCascadeExceptionMessages() {
+        super();
+    }
+
 }

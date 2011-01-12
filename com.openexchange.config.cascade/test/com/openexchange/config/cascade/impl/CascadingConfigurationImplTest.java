@@ -51,6 +51,7 @@ package com.openexchange.config.cascade.impl;
 
 import java.util.Map;
 import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import static com.openexchange.config.cascade.Scope.*;
@@ -80,7 +81,7 @@ public class CascadingConfigurationImplTest extends TestCase {
         view = cascade.getView(1, 23);
     }
     
-    public void testCascadingProperty() {
+    public void testCascadingProperty() throws ConfigCascadeException {
         view.set(SERVER, "com.openexchange.test.property", "Rosebud");
         assertEquals("Rosebud", view.get("com.openexchange.test.property", String.class));
     
@@ -100,7 +101,7 @@ public class CascadingConfigurationImplTest extends TestCase {
     
     }
     
-    public void testPropertyMetadata() {
+    public void testPropertyMetadata() throws ConfigCascadeException {
         view.property(SERVER, "com.openexchange.test.property", String.class).set("published", "true");
         
         assertTrue(view.property("com.openexchange.test.property", String.class).get("published", boolean.class));
@@ -115,7 +116,7 @@ public class CascadingConfigurationImplTest extends TestCase {
     }
 
     
-    public void testFinalProperty() {
+    public void testFinalProperty() throws ConfigCascadeException {
         // The metadata key "final" points to the Scope where the search iteration should stop, effectively prohibiting that a value is overridden
         view.set(SERVER, "com.openexchange.test.property", "Rosebud");
         view.set(CONTEXT, "com.openexchange.test.property", "Lemongrass");
@@ -127,7 +128,7 @@ public class CascadingConfigurationImplTest extends TestCase {
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
     
-    public void testFinalPropertyInversesSearchOrder() {
+    public void testFinalPropertyInversesSearchOrder() throws ConfigCascadeException {
         // The metadata key "final" points to the Scope where the search iteration should stop, effectively prohibiting that a value is overridden
         view.set(SERVER, "com.openexchange.test.property", "Rosebud");
         view.set(CONTEXT, "com.openexchange.test.property", "Lemongrass");
@@ -140,13 +141,21 @@ public class CascadingConfigurationImplTest extends TestCase {
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
     
-    public void testAllProperties() {
+    public void testAllProperties() throws ConfigCascadeException {
         view.set(SERVER, "com.openexchange.test.property1", "Rosebud");
         view.set(SERVER, "com.openexchange.test.property2", "Rosebud");
         view.set(SERVER, "com.openexchange.test.property3", "Rosebud");
-        view.set(SERVER, "com.openexchange.test.property4", "Rosebud");
+        view.property(SERVER, "com.openexchange.test.property4", String.class)
+            .set("Rosebud")
+            .set("final", "server");
         
-        
+        view.set(CONTEXT, "com.openexchange.test.property2", "Lemongrass");
+        view.set(CONTEXT, "com.openexchange.test.property3", "Lemongrass");
+        view.set(CONTEXT, "com.openexchange.test.property4", "Lemongrass");
+
+        view.set(USER, "com.openexchange.test.property3", "Rootbeer");
+        view.set(USER, "com.openexchange.test.property4", "Rootbeer");
+
         Map<String, ComposedConfigProperty<String>> allProps = view.all();
         
         assertNotNull(allProps);
@@ -155,6 +164,12 @@ public class CascadingConfigurationImplTest extends TestCase {
         for(int i = 1; i <= 4; i++) {
             assertTrue(allProps.containsKey("com.openexchange.test.property"+i));
         }
+        
+        assertEquals("Rosebud", allProps.get("com.openexchange.test.property1").get());
+        assertEquals("Lemongrass", allProps.get("com.openexchange.test.property2").get());
+        assertEquals("Rootbeer", allProps.get("com.openexchange.test.property3").get());
+        assertEquals("Rosebud", allProps.get("com.openexchange.test.property4").get());
+        
     }
     
     

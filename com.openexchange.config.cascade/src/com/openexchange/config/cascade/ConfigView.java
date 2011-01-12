@@ -59,14 +59,14 @@ import java.util.Map;
  */
 public interface ConfigView {
 
-    <T> void set(Scope scope, String property, T value);
+    <T> void set(Scope scope, String property, T value) throws ConfigCascadeException;
 
-    <T> T get(String property, Class<T> coerceTo);
+    <T> T get(String property, Class<T> coerceTo) throws ConfigCascadeException;
 
-    <T> ConfigProperty<T> property(Scope scope, String property, Class<T> coerceTo);
+    <T> ConfigProperty<T> property(Scope scope, String property, Class<T> coerceTo) throws ConfigCascadeException;
 
-    <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo);
+    <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) throws ConfigCascadeException;
 
-    Map<String, ComposedConfigProperty<String>> all();
+    Map<String, ComposedConfigProperty<String>> all() throws ConfigCascadeException;
     
 }

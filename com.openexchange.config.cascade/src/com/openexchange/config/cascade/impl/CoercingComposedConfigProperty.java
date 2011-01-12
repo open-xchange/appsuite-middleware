@@ -50,6 +50,8 @@
 package com.openexchange.config.cascade.impl;
 
 import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.Scope;
 import com.openexchange.tools.strings.StringParser;
 
@@ -76,50 +78,51 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
         this.delegate = d;
     }
 
-    public ComposedConfigProperty<T> precedence(Scope... scopes) {
+    public ComposedConfigProperty<T> precedence(Scope... scopes) throws ConfigCascadeException {
         initDelegate(delegate.precedence(scopes));
         return this;
     }
     
-    public T get() {
+    public T get() throws ConfigCascadeException {
         String value = delegate.get();
         return parse(value, coerceTo);
     }
 
-    private <S> S parse(String value, Class<S> s) {
+    private <S> S parse(String value, Class<S> s) throws ConfigCascadeException {
         if (value == null) {
             return null;
         }
 
         S parsed = stringParser.parse(value, s);
         if (parsed == null) {
-            // TOOD: Throw Exception
-            return null;
+            throw ConfigCascadeExceptionCodes.COULD_NOT_COERCE_VALUE.create(value, s.getName());
         }
         return parsed;
     }
 
-    public String get(String metadataName) {
+    public String get(String metadataName) throws ConfigCascadeException {
         return delegate.get(metadataName);
     }
 
-    public <M> M get(String metadataName, Class<M> m) {
+    public <M> M get(String metadataName, Class<M> m) throws ConfigCascadeException {
         return parse(delegate.get(metadataName), m);
     }
 
-    public boolean isDefined() {
+    public boolean isDefined() throws ConfigCascadeException {
         return delegate.isDefined();
     }
 
-    public void set(T value) {
+    public CoercingComposedConfigProperty<T> set(T value) throws ConfigCascadeException {
         delegate.set(value.toString()); // We assume good toString methods that allow reparsing
+        return this;
     }
 
-    public <M> void set(String metadataName, M value) {
+    public <M> CoercingComposedConfigProperty<T> set(String metadataName, M value) throws ConfigCascadeException {
         delegate.set(metadataName, value);
+        return this;
     }
 
-    public <M> ComposedConfigProperty<M> to(Class<M> otherType) {
+    public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws ConfigCascadeException {
         return delegate.to(otherType);
     }
 

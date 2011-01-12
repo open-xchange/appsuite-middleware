@@ -50,11 +50,15 @@
 package com.openexchange.config.cascade.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigProviderService;
@@ -115,15 +119,15 @@ public class ConfigCascade implements ConfigViewFactory {
             this.context = context;
         }
 
-        public <T> void set(Scope scope, String property, T value) {
+        public <T> void set(Scope scope, String property, T value) throws ConfigCascadeException {
             ((ConfigProperty<T>)property(scope, property, value.getClass())).set(value); 
         }
 
-        public <T> T get(String property, Class<T> coerceTo) {
+        public <T> T get(String property, Class<T> coerceTo)  throws ConfigCascadeException{
             return property(property, coerceTo).get();
         }
 
-        public <T> ConfigProperty<T> property(Scope scope, String property, Class<T> coerceTo) {
+        public <T> ConfigProperty<T> property(Scope scope, String property, Class<T> coerceTo)  throws ConfigCascadeException{
             return new CoercingConfigProperty<T>(coerceTo, providers.get(scope).get(property, context, user), stringParser);
         }
 
@@ -132,7 +136,7 @@ public class ConfigCascade implements ConfigViewFactory {
 
                 private Scope[] overriddenScopes;
 
-                public String get() {
+                public String get() throws ConfigCascadeException{
                     Scope finalScope = getFinalScope();
                     for(ConfigProviderService provider : getConfigProviders(finalScope)) {
                         String value = provider.get(property, context, user).get();
@@ -143,7 +147,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return null;
                 }
 
-                private Scope getFinalScope() {
+                private Scope getFinalScope() throws ConfigCascadeException{
                     String scopeS = (String) property(property, String.class).precedence(SERVER, CONTEXT, USER).get("final");
                     if(scopeS == null) {
                         return null;
@@ -151,7 +155,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return Scope.valueOf(scopeS.toUpperCase());
                 }
 
-                public String get(String metadataName) {
+                public String get(String metadataName) throws ConfigCascadeException {
                     for(ConfigProviderService provider : getConfigProviders(null)) {
                         String value = provider.get(property, context, user).get(metadataName);
                         if (value != null) {
@@ -161,21 +165,25 @@ public class ConfigCascade implements ConfigViewFactory {
                     return null;
                 }
                 
-                public <M> M get(String metadataName, Class<M> m) {
+                public <M> M get(String metadataName, Class<M> m) throws ConfigCascadeException {
                     for(ConfigProviderService provider : getConfigProviders(null)) {
                         String value = provider.get(property, context, user).get(metadataName);
                         if (value != null) {
-                            return stringParser.parse(value, m);
+                            M parsed = stringParser.parse(value, m);
+                            if(parsed == null) {
+                                throw ConfigCascadeExceptionCodes.COULD_NOT_COERCE_VALUE.create(value, m.getName());
+                            }
+                            return parsed;
                         }
                     }
                     return null;
                 }
 
-                public <M> void set(String metadataName, M value) {
+                public <M> ComposedConfigProperty<String> set(String metadataName, M value) {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
-                public void set(String value) {
+                public ComposedConfigProperty<String> set(String value) {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
@@ -202,7 +210,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return p;
                 }
 
-                public boolean isDefined() {
+                public boolean isDefined() throws ConfigCascadeException {
                     Scope finalScope = getFinalScope();
                     for(ConfigProviderService provider : getConfigProviders(finalScope)) {
                         boolean defined = provider.get(property, context, user).isDefined();
@@ -220,11 +228,18 @@ public class ConfigCascade implements ConfigViewFactory {
             }, stringParser);
         }
 
-        public Map<String, ComposedConfigProperty<String>> all() {
-            //Map<String, BasicProperty> allProperties = providers.get(0).getAllProperties(context, user);
+        public Map<String, ComposedConfigProperty<String>> all() throws ConfigCascadeException {
+            Set<String> names = new HashSet<String>();
+            for (ConfigProviderService provider : getConfigProviders()) {
+                names.addAll(provider.getAllPropertyNames(context, user));
+            }
             
+            Map<String, ComposedConfigProperty<String>> properties = new HashMap<String, ComposedConfigProperty<String>>();
+            for(String name : names) {
+                properties.put(name, property(name, String.class));
+            }
             
-            return null;
+            return properties;
         }
     }
 

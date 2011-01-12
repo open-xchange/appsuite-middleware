@@ -56,13 +56,13 @@ package com.openexchange.config.cascade;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface BasicProperty {
-    void set(String value);
+    void set(String value) throws ConfigCascadeException;
 
-    String get();
+    String get() throws ConfigCascadeException;
 
-    void set(String metadataName, String value);
+    void set(String metadataName, String value) throws ConfigCascadeException;
 
-    String get(String metadataName);
+    String get(String metadataName) throws ConfigCascadeException;
     
-    public boolean isDefined();
+    public boolean isDefined() throws ConfigCascadeException;
 }

@@ -106,12 +106,8 @@ public class InMemoryConfigProvider implements ConfigProviderService{
     }
 
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.cascade.ConfigProviderService#getAllPropertyNames(int, int)
-     */
     public Collection<String> getAllPropertyNames(int context, int user) {
-        // TODO Auto-generated method stub
-        return null;
+        return values.keySet();
     }
 
 

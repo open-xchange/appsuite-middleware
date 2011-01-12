@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,19 +47,49 @@
  *
  */
 
-package com.openexchange.config.cascade;
+package com.openexchange.config.cascade.exception;
 
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 
 /**
- * {@link ComposedConfigProperty}
+ * {@link ConfigCascadeExceptionFactory} - Factory for creating {@link ConfigCascadeException}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author francisco.laguna@open-xchange.com
  */
-public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
-    public ComposedConfigProperty<T> precedence(Scope...scopes) throws ConfigCascadeException;
-    public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws ConfigCascadeException;
-    
-    public ComposedConfigProperty<T> set(T value) throws ConfigCascadeException;
-    public <M> ComposedConfigProperty<T> set(String metadataName, M value) throws ConfigCascadeException;
-    
+public final class ConfigCascadeExceptionFactory extends Exceptions<ConfigCascadeException> {
+
+    private static final ConfigCascadeExceptionFactory SINGLETON = new ConfigCascadeExceptionFactory();
+
+    /**
+     * Prevent instantiation.
+     */
+    private ConfigCascadeExceptionFactory() {
+        super();
+    }
+
+    /**
+     * @return the singleton instance.
+     */
+    public static ConfigCascadeExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected ConfigCascadeException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        return new ConfigCascadeException(message, cause, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void knownExceptions() {
+        declareAll(ConfigCascadeExceptionCodes.values());
+    }
 }

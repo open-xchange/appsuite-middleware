@@ -56,6 +56,7 @@ import java.util.Map;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 
@@ -78,7 +79,7 @@ public class TrackingProvider implements ConfigProviderService {
         this.tracker = providers;
     }
 
-    public BasicProperty get(String property, int context, int user) {
+    public BasicProperty get(String property, int context, int user) throws ConfigCascadeException {
         ServiceReference[] serviceReferences = tracker.getServiceReferences();
         
         Arrays.sort(serviceReferences, new Comparator<ServiceReference>() {
@@ -142,7 +143,7 @@ public class TrackingProvider implements ConfigProviderService {
     /* (non-Javadoc)
      * @see com.openexchange.config.cascade.ConfigProviderService#getAllPropertyNames(int, int)
      */
-    public Collection<String> getAllPropertyNames(int context, int user) {
+    public Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException {
         // TODO Auto-generated method stub
         return null;
     }
