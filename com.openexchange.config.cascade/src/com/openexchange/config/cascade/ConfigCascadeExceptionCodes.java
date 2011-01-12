@@ -65,6 +65,8 @@ public enum ConfigCascadeExceptionCodes implements OXErrorMessage {
      */
     UNEXPECTED_ERROR(ConfigCascadeExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
     COULD_NOT_COERCE_VALUE(ConfigCascadeExceptionMessages.COULD_NOT_COERCE_VALUE_MSG, Category.CODE_ERROR, 2),
+    CAN_NOT_DEFINE_METADATA(ConfigCascadeExceptionMessages.CAN_NOT_DEFINE_METADATA_MSG, Category.CODE_ERROR, 3),
+    CAN_NOT_SET_PROPERTY(ConfigCascadeExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, Category.CODE_ERROR, 4),
     ;
 
     private final Category category;
