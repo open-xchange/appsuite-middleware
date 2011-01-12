@@ -125,7 +125,6 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb install
 
 mkdir -p %{buildroot}/var/log/open-xchange
 mkdir -m 750 -p %{buildroot}/var/spool/open-xchange/uploads
-chown open-xchange:root %{buildroot}/var/spool/open-xchange/uploads
 
 # generate list of config files for config package
 rm -f %{configfiles}
