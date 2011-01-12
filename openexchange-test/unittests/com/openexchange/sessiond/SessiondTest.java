@@ -174,7 +174,9 @@ public class SessiondTest extends TestCase {
             public String getHash() {
                 return "123";
             }
-            
+            public String getClient() {
+                return "test";
+            }
         });
     }
     
@@ -208,6 +210,9 @@ public class SessiondTest extends TestCase {
             }
             public String getHash() {
                 return "123";
+            }
+            public String getClient() {
+                return "test";
             }
         });
         sessiondCon.refreshSession(sessionId);
@@ -244,6 +249,9 @@ public class SessiondTest extends TestCase {
             public String getHash() {
                 return "123";
             }
+            public String getClient() {
+                return "test";
+            }
         });
         sessiondCon.removeSession(sessionId);
     }
@@ -278,6 +286,9 @@ public class SessiondTest extends TestCase {
             }
             public String getHash() {
                 return "123";
+            }
+            public String getClient() {
+                return "test";
             }
         });
         sessiondCon.refreshSession(sessionId);
