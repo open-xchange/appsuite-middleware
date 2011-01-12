@@ -224,7 +224,7 @@ public class HTMLServiceActivator extends DeferredActivator {
         return new Object[] { htmlCharMap, htmlEntityMap };
     }
 
-    private static Object[] getDefaultHTMLEntityMaps() {
+    public static Object[] getDefaultHTMLEntityMaps() {
         final Map<Character, String> htmlCharMap = new HashMap<Character, String>();
         final Map<String, Character> htmlEntityMap = new HashMap<String, Character>();
         final Properties htmlEntities = new Properties();
