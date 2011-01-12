@@ -953,7 +953,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
         }
 
-        if (encodedPersonal != null) {
+        if (encodedPersonal != null && encodedPersonal.length() > 0) {
             if (null == personal) {
                 try {
                     personal = MimeUtility.decodeText(encodedPersonal);
@@ -1008,7 +1008,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     @Override
     public String toUnicodeString() {
         final String p = getPersonal();
-        if (p != null) {
+        if (p != null && p.length() > 0) {
             if (quoted(p)) {
                 return new StringBuilder(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
             }
@@ -1125,7 +1125,11 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     private static boolean quoted(final String s) {
-        return ('"' == s.charAt(0) && '"' == s.charAt(s.length() - 1));
+        final int length = s.length();
+        if (length <= 0) {
+            return false;
+        }
+        return ('"' == s.charAt(0) && '"' == s.charAt(length - 1));
     }
 
     private static boolean checkQuotedPersonal(final String p) {
