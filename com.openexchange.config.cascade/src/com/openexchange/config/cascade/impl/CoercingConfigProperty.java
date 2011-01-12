@@ -50,6 +50,7 @@
 package com.openexchange.config.cascade.impl;
 
 import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.tools.strings.StringParser;
 
@@ -109,6 +110,10 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T> {
 
     public <M> void set(String metadataName, M value) {
         delegate.set(metadataName, value.toString());
+    }
+
+    public <M> ConfigProperty<M> to(Class<M> otherType) {
+        return new CoercingConfigProperty<M>(otherType, delegate, parser);
     }
 
 }

@@ -67,6 +67,7 @@ public interface ConfigProperty<T> {
 
     String get(String metadataName);
 
+    public <M> ConfigProperty<M> to(Class<M> otherType);
     
     public boolean isDefined();
 }

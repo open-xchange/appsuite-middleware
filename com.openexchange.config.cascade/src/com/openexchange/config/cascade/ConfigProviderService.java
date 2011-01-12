@@ -49,7 +49,7 @@
 
 package com.openexchange.config.cascade;
 
-import java.util.Map;
+import java.util.Collection;
 
 
 /**
@@ -61,6 +61,6 @@ public interface ConfigProviderService {
 
     BasicProperty get(String property, int context, int user);
     
-    Map<String, BasicProperty> getAllProperties(int context, int user);
+    Collection<String> getAllPropertyNames(int context, int user);
 
 }

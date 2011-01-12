@@ -119,4 +119,8 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
         delegate.set(metadataName, value);
     }
 
+    public <M> ComposedConfigProperty<M> to(Class<M> otherType) {
+        return delegate.to(otherType);
+    }
+
 }

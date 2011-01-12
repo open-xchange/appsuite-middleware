@@ -51,7 +51,9 @@ package com.openexchange.config.cascade.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -210,8 +212,19 @@ public class ConfigCascade implements ConfigViewFactory {
                     }
                     return false;
                 }
+
+                public <M> ComposedConfigProperty<M> to(Class<M> otherType) {
+                   return new CoercingComposedConfigProperty<M>(otherType, this, stringParser);
+                }
                 
             }, stringParser);
+        }
+
+        public Map<String, ComposedConfigProperty<String>> all() {
+            //Map<String, BasicProperty> allProperties = providers.get(0).getAllProperties(context, user);
+            
+            
+            return null;
         }
     }
 

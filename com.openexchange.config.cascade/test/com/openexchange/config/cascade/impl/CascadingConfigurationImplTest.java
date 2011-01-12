@@ -49,6 +49,8 @@
 
 package com.openexchange.config.cascade.impl;
 
+import java.util.Map;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import static com.openexchange.config.cascade.Scope.*;
@@ -136,6 +138,23 @@ public class CascadingConfigurationImplTest extends TestCase {
         
         
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
+    }
+    
+    public void testAllProperties() {
+        view.set(SERVER, "com.openexchange.test.property1", "Rosebud");
+        view.set(SERVER, "com.openexchange.test.property2", "Rosebud");
+        view.set(SERVER, "com.openexchange.test.property3", "Rosebud");
+        view.set(SERVER, "com.openexchange.test.property4", "Rosebud");
+        
+        
+        Map<String, ComposedConfigProperty<String>> allProps = view.all();
+        
+        assertNotNull(allProps);
+        assertEquals(4, allProps.size());
+        
+        for(int i = 1; i <= 4; i++) {
+            assertTrue(allProps.containsKey("com.openexchange.test.property"+i));
+        }
     }
     
     

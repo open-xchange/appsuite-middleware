@@ -57,4 +57,5 @@ package com.openexchange.config.cascade;
  */
 public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
     public ComposedConfigProperty<T> precedence(Scope...scopes);
+    public <M> ComposedConfigProperty<M> to(Class<M> otherType);
 }

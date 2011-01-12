@@ -49,6 +49,8 @@
 
 package com.openexchange.config.cascade;
 
+import java.util.Map;
+
 
 /**
  * {@link ConfigView}
@@ -65,4 +67,6 @@ public interface ConfigView {
 
     <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo);
 
+    Map<String, ComposedConfigProperty<String>> all();
+    
 }

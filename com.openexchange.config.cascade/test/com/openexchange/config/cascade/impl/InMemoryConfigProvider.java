@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade.impl;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.cascade.BasicProperty;
@@ -106,11 +107,14 @@ public class InMemoryConfigProvider implements ConfigProviderService{
 
 
     /* (non-Javadoc)
-     * @see com.openexchange.config.cascade.ConfigProviderService#getAllProperties(int, int)
+     * @see com.openexchange.config.cascade.ConfigProviderService#getAllPropertyNames(int, int)
      */
-    public Map<String, BasicProperty> getAllProperties(int context, int user) {
+    public Collection<String> getAllPropertyNames(int context, int user) {
         // TODO Auto-generated method stub
         return null;
     }
+
+
+
 
 }
