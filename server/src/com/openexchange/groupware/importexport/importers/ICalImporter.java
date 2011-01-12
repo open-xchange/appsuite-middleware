@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,7 +110,9 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (changes to new interface, bugfixes, maintenance)
  */
 public class ICalImporter extends AbstractImporter {
-
+	private static final int APP = 0;
+	private static final int TASK = 1;
+	
     private static final Log LOG = LogFactory.getLog(ICalImporter.class);
 
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
@@ -168,12 +171,8 @@ public class ICalImporter extends AbstractImporter {
         return true;
     }
 
-    public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
-        int appointmentFolderId = -1;
-        int taskFolderId = -1;
-
-        boolean importAppointment = false;
-        boolean importTask = false;
+    private int[] determineFolders(ServerSession session, List<String> folders, Format format) throws ImportExportException{
+    	int[] result = new int[]{-1,-1};
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
         final Iterator<String> iterator = folders.iterator();
         while (iterator.hasNext()) {
@@ -185,19 +184,25 @@ public class ICalImporter extends AbstractImporter {
                 throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, I(folderId));
             }
             if (fo.getModule() == FolderObject.CALENDAR) {
-                appointmentFolderId = folderId;
-                importAppointment = true;
+                result[APP] = folderId;
             } else if (fo.getModule() == FolderObject.TASK) {
-                taskFolderId = folderId;
-                importTask = true;
+                result[TASK] = folderId;
             } else {
                 throw ImportExportExceptionCodes.CANNOT_IMPORT.create(fo.getFolderName(), format);
             }
         }
+        return result;
+    }
+    public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+    	int[] res = determineFolders(session, folders, format);
+        int appointmentFolderId = res[APP];
+        int taskFolderId = res[TASK];
+
+        
 
         AppointmentSQLInterface appointmentInterface = null;
 
-        if (importAppointment) {
+        if (appointmentFolderId != -1) {
             if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
                 throw ImportExportExceptionCodes.CALENDAR_DISABLED.create(new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Calendar"));
             }
@@ -206,7 +211,7 @@ public class ICalImporter extends AbstractImporter {
 
         TasksSQLInterface taskInterface = null;
 
-        if (importTask) {
+        if (taskFolderId != -1) {
             if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
                 throw ImportExportExceptionCodes.TASKS_DISABLED.create( new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Task"));
             }
@@ -228,7 +233,7 @@ public class ICalImporter extends AbstractImporter {
         final List<ConversionError> errors = new ArrayList<ConversionError>();
         final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
-        if (importAppointment) {
+        if (appointmentFolderId != -1) {
             List<CalendarDataObject> appointments;
             try {
                 appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings);
@@ -252,6 +257,9 @@ public class ICalImporter extends AbstractImporter {
                 warningList.add(warning);
             }
 
+            Map uid2id = new HashMap<String,Integer>();
+            HashMap<String, LinkedList<CalendarDataObject>> waitingLounge = new HashMap<String,LinkedList<CalendarDataObject>>();
+            
             int index = 0;
             final Iterator<CalendarDataObject> iter = appointments.iterator();
             
@@ -308,7 +316,7 @@ public class ICalImporter extends AbstractImporter {
                 });
             }
         }
-        if (importTask) {
+        if (taskFolderId != -1) {
             List<Task> tasks;
             try {
                 tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
