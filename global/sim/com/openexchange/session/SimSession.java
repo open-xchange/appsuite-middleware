@@ -188,4 +188,8 @@ public class SimSession implements Session {
         this.userId = userId;
     }
 
+    public String getClient() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

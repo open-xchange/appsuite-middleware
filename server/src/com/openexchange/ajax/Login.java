@@ -50,6 +50,8 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
+import static com.openexchange.ajax.SessionServlet.removeJSESSIONID;
+import static com.openexchange.ajax.SessionServlet.removeOXCookies;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -97,7 +99,6 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
@@ -108,7 +109,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Servlet doing the login and logout stuff.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 
@@ -190,8 +191,8 @@ public class Login extends AJAXServlet {
             }
             try {
                 Session session = LoginPerformer.getInstance().lookupSession(sessionId);
-                if(session != null) {
-                    final String secret = SessionServlet.extractSecret(session.getHash(), req.getCookies());
+                if (session != null) {
+                    final String secret = SessionServlet.extractSecret(req, session.getHash(), session.getClient());
 
                     if (secret == null || !session.getSecret().equals(secret)) {
                         sendError(resp);
@@ -200,9 +201,8 @@ public class Login extends AJAXServlet {
 
                     LoginPerformer.getInstance().doLogout(sessionId);
                     // Drop relevant cookies
-                    SessionServlet.removeOXCookies(session.getHash(), req, resp);
-                    SessionServlet.removeJSESSIONID(req, resp);
-                    
+                    removeOXCookies(session.getHash(), req, resp);
+                    removeJSESSIONID(req, resp);
                 }
             } catch (final LoginException e) {
                 LOG.error("Logout failed", e);
@@ -234,7 +234,7 @@ public class Login extends AJAXServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-            // Remove old cookies to prevent usage of the old autologin cookie 
+            // Remove old cookies to prevent usage of the old autologin cookie
             SessionServlet.removeOXCookies(session.getHash(), req, resp);
             try {
                 final Context context = ContextStorage.getInstance().getContext(session.getContextId());
@@ -254,16 +254,15 @@ public class Login extends AJAXServlet {
                 return;
             }
 
-            session.setHash(HashCalculator.getHash(req));
-            
             final String oldIP = session.getLocalIp();
             final String newIP = req.getRemoteAddr();
             if (!newIP.equals(oldIP)) {
                 LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
                 session.setLocalIp(newIP);
             }
-            
-            writeSecretCookie(resp, session, req.isSecure());
+
+            final String hash = HashCalculator.getHash(req, session.getClient());
+            writeSecretCookie(resp, session, hash, req.isSecure());
 
             if(ACTION_REDIRECT.equals(action)) {
                 String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
@@ -403,9 +402,7 @@ public class Login extends AJAXServlet {
                 LOG.debug(e.getMessage(), e);
                 if (SessionServlet.isIpCheckError(e) && null != session) {
                     try {
-                        /*
-                         * Drop Open-Xchange cookies
-                         */
+                        // Drop Open-Xchange cookies
                         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                         SessionServlet.removeOXCookies(session.getHash(), req, resp);
                         SessionServlet.removeJSESSIONID(req, resp);
@@ -460,7 +457,7 @@ public class Login extends AJAXServlet {
 
     /**
      * Updates session's IP address if different to specified IP address.
-     * 
+     *
      * @param newIP The possibly new IP address
      * @param session The session to update if IP addresses differ
      */
@@ -475,7 +472,7 @@ public class Login extends AJAXServlet {
 
     protected String addFragmentParameter(String usedUIWebPath, final String param, final String value) {
         final int fragIndex = usedUIWebPath.indexOf('#');
-        
+
         // First get rid of the query String, so we can reappend it later
         final int questionMarkIndex = usedUIWebPath.indexOf('?', fragIndex);
         String query = "";
@@ -489,7 +486,7 @@ public class Login extends AJAXServlet {
             return usedUIWebPath+"#"+param+"="+value+query;
         }
         // Alright, we already have a fragment, let's append a new parameer
-        
+
         return usedUIWebPath+"&"+param+"="+value+query;
     }
 
@@ -512,22 +509,20 @@ public class Login extends AJAXServlet {
 
         final Session session = SessionServlet.getSession(req, sessionId, sessiond);
 
-        if(type == CookieType.SESSION) {
-            writeSessionCookie(resp, session, req.isSecure());
+        if (type == CookieType.SESSION) {
+            writeSessionCookie(resp, session, session.getHash(), req.isSecure());
         } else {
-            writeSecretCookie(resp, session, req.isSecure());
+            writeSecretCookie(resp, session, session.getHash(), req.isSecure());
         }
-        /*
-         * Refresh HTTP session, too
-         */
+        // Refresh HTTP session, too
         req.getSession();
-        
+
         final Response response = new Response();
         response.setData("1");
 
         ResponseWriter.write(response, resp.getWriter());
     }
-    
+
     private void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -562,18 +557,18 @@ public class Login extends AJAXServlet {
     /**
      * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-session-"</code> and a secret cookie identifier.
-     * 
+     *
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
      */
-    protected static void writeSecretCookie(final HttpServletResponse resp, final Session session, final boolean secure) {
-        final Cookie cookie = new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret());
+    protected static void writeSecretCookie(final HttpServletResponse resp, final Session session, String hash, final boolean secure) {
+        final Cookie cookie = new Cookie(SECRET_PREFIX + hash, session.getSecret());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
     }
 
-    protected static void writeSessionCookie(final HttpServletResponse resp, final Session session, final boolean secure) {
-        final Cookie cookie = new Cookie(SESSION_PREFIX + session.getHash(), session.getSessionID());
+    protected static void writeSessionCookie(final HttpServletResponse resp, final Session session, String hash, final boolean secure) {
+        final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
     }
@@ -629,8 +624,8 @@ public class Login extends AJAXServlet {
                 final Session session = result.getSession();
                 // Store associated session
                 SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
-                writeSecretCookie(resp, session, req.isSecure());
-                
+                writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+
                 // Login response is unfortunately not conform to default responses.
                 ((JSONObject) response.getData()).write(resp.getWriter());
             }
@@ -698,9 +693,7 @@ public class Login extends AJAXServlet {
                 if (hash != null) {
                     return hash;
                 }
-
                 return hash = HashCalculator.getHash(req);
-
             }
         };
         return loginRequest;
@@ -723,7 +716,7 @@ public class Login extends AJAXServlet {
 
     /**
      * Parses the specified parameter to a <code>boolean</code> value.
-     * 
+     *
      * @param parameter The parameter value
      * @return <code>true</code> if parameter is <b>not</b> <code>null</code> and is (ignore-case) one of the values <code>"true"</code>,
      *         <code>"1"</code>, <code>"yes"</code> or <code>"on"</code>; otherwise <code>false</code>
@@ -731,5 +724,4 @@ public class Login extends AJAXServlet {
     private static boolean parseBoolean(final String parameter) {
         return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
     }
-
 }

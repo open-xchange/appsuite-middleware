@@ -198,13 +198,21 @@ public interface Session {
     /**
      * @return The HashCode distinguishing this session from others in the same store.
      */
-    public String getHash();
+    String getHash();
 
     /**
      * Updates the hash value of this session.
      * 
      * @param hash The new hash value
      */
-    public void setHash(String hash);
+    void setHash(String hash);
+
+    /**
+     * The client is remembered through the whole session. It should identify what client uses the backend. Normally this is the web
+     * frontend but there may be other clients especially those that synchronize their data with OX. The client is a parameter passed to the
+     * backend during the login request. 
+     * @return the client identifier of the client using the backend.
+     */
+    String getClient();
 
 }

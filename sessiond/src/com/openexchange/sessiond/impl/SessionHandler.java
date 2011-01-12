@@ -183,14 +183,14 @@ public final class SessionHandler {
      * @return The session ID associated with newly created session
      * @throws SessiondException If creating a new session fails
      */
-    protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login, final String authId, final String hash) throws SessiondException {
+    protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login, final String authId, final String hash, final String client) throws SessiondException {
         checkMaxSessPerUser(userId, context);
         checkAuthId(login, authId);
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
         final SessionImpl session =
             new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, sessionIdGenerator.createSecretId(
                 loginName,
-                Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash);
+                Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
         // Add session
         sessionData.addSession(session, noLimit);
         // Post event for created session

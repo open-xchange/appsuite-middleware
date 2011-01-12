@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,30 @@
  *
  */
 
-package com.openexchange.login.internal;
-
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.login.LoginRequest;
-import com.openexchange.sessiond.AddSessionParameter;
+package com.openexchange.configuration;
 
 /**
- * Implements {@link AddSessionParameter}.
+ * {@link CookieHash}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-final class AddSessionParameterImpl implements AddSessionParameter {
+public enum CookieHash {
 
-    private final String username;
+    CALCULATE("calculate"),
+    REMEMBER("remember");
 
-    private final LoginRequest request;
+    private final String value;
 
-    private final User user;
-
-    private final Context ctx;
-
-    AddSessionParameterImpl(String username, LoginRequest request, User user, Context ctx) {
-        this.username = username;
-        this.request = request;
-        this.user = user;
-        this.ctx = ctx;
+    CookieHash(String value) {
+        this.value = value;
     }
 
-    public String getClientIP() {
-        return request.getClientIP();
-    }
-
-    public Context getContext() {
-        return ctx;
-    }
-
-    public String getFullLogin() {
-        return request.getLogin();
-    }
-
-    public String getUserLoginInfo() {
-        return username;
-    }
-
-    public String getPassword() {
-        return request.getPassword();
-    }
-
-    public int getUserId() {
-        return user.getId();
-    }
-
-    public String getAuthId() {
-        return request.getAuthId();
-    }
-
-    public String getHash() {
-        return request.getHash();
-    }
-
-    public String getClient() {
-        return request.getClient();
+    public static final CookieHash parse(String value) {
+        for (CookieHash hash : CookieHash.values()) {
+            if (hash.value.equals(value)) {
+                return hash;
+            }
+        }
+        return null;
     }
 }

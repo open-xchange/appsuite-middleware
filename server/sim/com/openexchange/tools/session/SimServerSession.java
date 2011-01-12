@@ -56,7 +56,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
-
 /**
  * {@link SimServerSession}
  *
@@ -68,20 +67,19 @@ public class SimServerSession implements ServerSession {
     private Context context;
     private User user;
     private UserConfiguration userConfig;
-    
+
     public SimServerSession(Context context, User user, UserConfiguration userConfig) {
         super();
         this.context = context;
         this.user = user;
         this.userConfig = userConfig;
     }
-    
-    
+
     public SimServerSession(int ctxId, int uid) {
         this(new SimContext(ctxId), null, null);
         this.user = new MockUser(uid);
     }
-    
+
     public Context getContext() {
         return context;
     }
@@ -158,50 +156,34 @@ public class SimServerSession implements ServerSession {
         throw new UnsupportedOperationException();
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#getHash()
-     */
     public String getHash() {
         // TODO Auto-generated method stub
         return null;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
-     */
     public void setLocalIp(String ip) {
         // TODO Auto-generated method stub
-        
+
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#setHash(java.lang.String)
-     */
     public void setHash(String hash) {
         // TODO Auto-generated method stub
-        
     }
 
-
-    
     public void setContext(Context context) {
         this.context = context;
     }
 
-
-    
     public void setUser(User user) {
         this.user = user;
     }
 
-
-    
     public void setUserConfig(UserConfiguration userConfig) {
         this.userConfig = userConfig;
     }
-    
-    
+
+    public String getClient() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

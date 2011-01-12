@@ -125,9 +125,9 @@ public final class ImageServlet extends HttpServlet {
             final String errorMsg = "Image not found";
             if(sessionId != null) {
                 final Session session = sessiondService.getSession(sessionId);
-                final String secret = SessionServlet.extractSecret(session.getHash(), req.getCookies());
-          
-                if(session.getSecret().equals(secret)) {
+                final String secret = SessionServlet.extractSecret(req, session.getHash(), session.getClient());
+
+                if (session.getSecret().equals(secret)) {
                     final ImageData imageData = imageService.getImageData(session, uid);
                     if(imageData != null) {
                         outputImageData(imageData, session, resp);

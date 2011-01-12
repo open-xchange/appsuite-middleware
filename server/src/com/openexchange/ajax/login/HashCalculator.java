@@ -61,22 +61,22 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.encoding.Base64;
 
-
 /**
  * {@link HashCalculator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HashCalculator {
+
     private static final Log LOG = LogFactory.getLog(HashCalculator.class);
-    
-    public static String getHash(HttpServletRequest req) {
+
+    public static String getHash(HttpServletRequest req, String client) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(getUserAgent(req).getBytes("UTF-8"));
-            md.update(getClient(req).getBytes("UTF-8"));
+            md.update(client.getBytes("UTF-8"));
             String fieldList = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
-                "com.openexchange.sessiond.hash.fields",
+                "com.openexchange.cookie.hash.fields",
                 "");
             String[] fields = fieldList.split("\\s*,\\s*");
             for (String field : fields) {
@@ -85,9 +85,7 @@ public class HashCalculator {
                     md.update(header.getBytes("UTF-8"));
                 }
             }
-
             byte[] digest = md.digest();
-
             return Base64.encode(digest).replaceAll("\\W", "");
         } catch (NoSuchAlgorithmException e) {
             LOG.fatal(e.getMessage(), e);
@@ -97,9 +95,13 @@ public class HashCalculator {
         return "";
     }
 
-    private static String getClient(HttpServletRequest req) {
+    public static String getHash(HttpServletRequest req) {
+        return getHash(req, getClient(req));
+    }
+
+    public static String getClient(HttpServletRequest req) {
         String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
-        if(parameter == null) {
+        if (parameter == null) {
             return "default";
         }
         return parameter;
@@ -107,7 +109,7 @@ public class HashCalculator {
 
     private static String getUserAgent(HttpServletRequest req) {
         String header = req.getHeader(Header.USER_AGENT);
-        if(header == null) {
+        if (header == null) {
             return "";
         }
         return header;

@@ -57,6 +57,11 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+/**
+ * {@link PublicationSession}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class PublicationSession implements Session {
 
     private final Publication publication;
@@ -131,27 +136,20 @@ public class PublicationSession implements Session {
         throw new UnsupportedOperationException();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#getHash()
-     */
     public String getHash() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
-     */
     public void setLocalIp(String ip) {
-        // TODO Auto-generated method stub
-        
+        // Nothing to do here.
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#setHash(java.lang.String)
-     */
     public void setHash(String hash) {
         // TODO Auto-generated method stub
-        
+    }
+
+    public String getClient() {
+        return null;
     }
 }

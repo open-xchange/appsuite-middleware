@@ -94,8 +94,10 @@ public class SessionObject implements Session {
     private String login;
 
     private String authId;
-    
+
     private String hash;
+
+    private String client;
 
     private final Map<String, Object> parameters;
 
@@ -260,13 +262,16 @@ public class SessionObject implements Session {
     public void setAuthId(String authId) {
         this.authId = authId;
     }
-    
-    
+
     public void setHash(String hash) {
         this.hash = hash;
     }
-    
+
     public String getHash() {
         return hash;
+    }
+
+    public String getClient() {
+        return client;
     }
 }

@@ -95,7 +95,9 @@ public final class SessionImpl implements Session {
     private final String authId;
 
     private String hash;
-    
+
+    private final String client;
+
     private final Map<String, Object> parameters;
     
     private static final Log LOG = LogFactory.getLog(SessionImpl.class);
@@ -112,7 +114,7 @@ public final class SessionImpl implements Session {
      * @param randomToken The random token
      * @param localIp The local IP
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, String client) {
         this.userId = userId;
         this.loginName = loginName;
         this.password = password;
@@ -124,6 +126,7 @@ public final class SessionImpl implements Session {
         this.login = login;
         this.authId = authId;
         this.hash = hash;
+        this.client = client;
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
     }
@@ -146,6 +149,7 @@ public final class SessionImpl implements Session {
         localIp = cachedSession.getLocalIp();
         authId = cachedSession.getAuthId();
         hash = cachedSession.getHash();
+        client = cachedSession.getClient();
         final Map<String, Serializable> params = cachedSession.getParameters();
         parameters = new ConcurrentHashMap<String, Object>(params.size());
         for (final Entry<String, Serializable> entry : params.entrySet()) {
@@ -160,7 +164,7 @@ public final class SessionImpl implements Session {
      * @return An appropriate instance of {@link CachedSession}
      */
     public CachedSession createCachedSession() {
-        return new CachedSession(userId, loginName, obfuscate( password ), contextId, sessionId, secret, randomToken, localIp, login, authId, hash, parameters);
+        return new CachedSession(userId, loginName, obfuscate( password ), contextId, sessionId, secret, randomToken, localIp, login, authId, hash, client, parameters);
     }
 
     private String obfuscate(String string) {
@@ -275,8 +279,12 @@ public final class SessionImpl implements Session {
     public String getHash() {
         return hash;
     }
-    
+
     public void setHash(final String hash) {
         this.hash = hash;
+    }
+
+    public String getClient() {
+        return client;
     }
 }

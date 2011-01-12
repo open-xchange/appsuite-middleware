@@ -267,7 +267,7 @@ public final class ServletConfigLoader {
         pathProps = new HashMap<String, Map<String, String>>();
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
-        globalProps.put(ServerConfig.Property.IP_CHECK.getPropertyName(), ServerConfig.getInstance().isCheckIP().toString());
+        globalProps.put(Property.IP_CHECK.getPropertyName(), ServerConfig.getProperty(Property.IP_CHECK));
     }
 
     /**
@@ -287,8 +287,9 @@ public final class ServletConfigLoader {
         defaultContext = servletContext;
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
-        globalProps.put(ServerConfig.Property.IP_CHECK.getPropertyName(), ServerConfig.getInstance().isCheckIP().toString());
-        globalProps.put(ServerConfig.Property.UI_WEB_PATH.getPropertyName(), ServerConfig.getProperty(Property.UI_WEB_PATH));
+        globalProps.put(Property.IP_CHECK.getPropertyName(), ServerConfig.getProperty(Property.IP_CHECK));
+        globalProps.put(Property.UI_WEB_PATH.getPropertyName(), ServerConfig.getProperty(Property.UI_WEB_PATH));
+        globalProps.put(Property.COOKIE_HASH.getPropertyName(), ServerConfig.getProperty(Property.COOKIE_HASH));
     }
 
     /**

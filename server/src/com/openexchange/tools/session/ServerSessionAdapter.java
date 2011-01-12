@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ServerSessionAdapter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -86,7 +86,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     * 
+     *
      * @param session The delegate session
      * @throws ContextException If context look-up fails
      */
@@ -102,7 +102,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     * 
+     *
      * @param session The delegate session
      * @param ctx The session's context object
      */
@@ -118,7 +118,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     * 
+     *
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
@@ -136,7 +136,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     * 
+     *
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
@@ -160,7 +160,7 @@ public class ServerSessionAdapter implements ServerSession {
     public String getLocalIp() {
         return session().getLocalIp();
     }
-    
+
     public void setLocalIp(String ip) {
         session().setLocalIp(ip);
     }
@@ -223,9 +223,13 @@ public class ServerSessionAdapter implements ServerSession {
     public String getLogin() {
         return session().getLogin();
     }
-    
+
     public String getHash() {
         return session().getHash();
+    }
+
+    public String getClient() {
+        return session.getClient();
     }
 
     public User getUser() {

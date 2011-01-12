@@ -110,8 +110,13 @@ public interface AddSessionParameter {
 
     /**
      * Gets the hash.
-     * 
+     *
      * @return The hash
      */
     String getHash();
+
+    /**
+     * @return the identifier of the client using the session.
+     */
+    String getClient();
 }

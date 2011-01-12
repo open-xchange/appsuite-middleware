@@ -128,7 +128,7 @@ public final class ServerConfig {
 
     private void reinit() {
         // UPLOAD_DIRECTORY
-        uploadDirectory = props.getProperty(Property.UploadDirectory.getPropertyName(), "/tmp/");
+        uploadDirectory = getPropertyInternal(Property.UploadDirectory);
         if (!uploadDirectory.endsWith("/")) {
             uploadDirectory += "/";
         }
@@ -146,28 +146,32 @@ public final class ServerConfig {
         }
         // MAX_FILE_UPLOAD_SIZE
         try {
-            maxFileUploadSize = Integer.parseInt(getProperty(Property.MaxFileUploadSize.getPropertyName()));
+            maxFileUploadSize = Integer.parseInt(getPropertyInternal(Property.MaxFileUploadSize));
         } catch (final NumberFormatException e) {
             maxFileUploadSize = 10000;
         }
         // MAX_UPLOAD_IDLE_TIME_MILLIS
         try {
-            maxUploadIdleTimeMillis = Integer.parseInt(getProperty(Property.MaxUploadIdleTimeMillis.getPropertyName()));
+            maxUploadIdleTimeMillis = Integer.parseInt(getPropertyInternal(Property.MaxUploadIdleTimeMillis));
         } catch (final NumberFormatException e) {
             maxUploadIdleTimeMillis = 300000;
         }
         // PrefetchEnabled
-        prefetchEnabled = Boolean.parseBoolean(props.getProperty(Property.PrefetchEnabled.getPropertyName(), Boolean.FALSE.toString()));
+        prefetchEnabled = Boolean.parseBoolean(getPropertyInternal(Property.PrefetchEnabled));
         // Default encoding
-        defaultEncoding = props.getProperty(Property.DefaultEncoding.getPropertyName(), "UTF-8");
+        defaultEncoding = getPropertyInternal(Property.DefaultEncoding);
         // JMX port
-        jmxPort = Integer.parseInt(props.getProperty(Property.JMX_PORT.getPropertyName(), "9999"));
+        jmxPort = Integer.parseInt(getPropertyInternal(Property.JMX_PORT));
         // JMX bind address
-        jmxBindAddress = props.getProperty(Property.JMX_BIND_ADDRESS.getPropertyName(), "localhost");
-        checkIP = Boolean.valueOf(props.getProperty(Property.IP_CHECK.getPropertyName(), Boolean.TRUE.toString()));
-        uiWebPath = props.getProperty(Property.UI_WEB_PATH.getPropertyName(), "/ox6/index.html");
-        cookieTTL = (int) ConfigTools.parseTimespan(props.getProperty(Property.COOKIE_TTL.getPropertyName(), "1W"));
-        cookieHttpOnly = Boolean.parseBoolean(props.getProperty(Property.COOKIE_HTTP_ONLY.getPropertyName(), Boolean.TRUE.toString()));
+        jmxBindAddress = getProperty(Property.JMX_BIND_ADDRESS);
+        checkIP = Boolean.valueOf(getPropertyInternal(Property.IP_CHECK));
+        uiWebPath = getPropertyInternal(Property.UI_WEB_PATH);
+        cookieTTL = (int) ConfigTools.parseTimespan(getPropertyInternal(Property.COOKIE_TTL));
+        cookieHttpOnly = Boolean.parseBoolean(getPropertyInternal(Property.COOKIE_HTTP_ONLY));
+    }
+
+    private String getPropertyInternal(Property property) {
+        return props.getProperty(property.getPropertyName(), property.getDefaultValue());
     }
 
     /**
@@ -220,6 +224,9 @@ public final class ServerConfig {
             break;
         case COOKIE_HTTP_ONLY:
             value = String.valueOf(SINGLETON.cookieHttpOnly);
+            break;
+        case IP_CHECK:
+            value = SINGLETON.checkIP.toString();
             break;
         default:
             value = getProperty(property.getPropertyName());
@@ -310,84 +317,83 @@ public final class ServerConfig {
         return value;
     }
 
-    public Boolean isCheckIP() {
-        return checkIP;
-    }
-
     public static enum Property {
         /**
          * Upload directory.
          */
-        UploadDirectory("UPLOAD_DIRECTORY"),
+        UploadDirectory("UPLOAD_DIRECTORY", "/tmp/"),
         /**
          * Max upload file size.
          */
         @Deprecated
-        MaxFileUploadSize("MAX_UPLOAD_FILE_SIZE"),
+        MaxFileUploadSize("MAX_UPLOAD_FILE_SIZE", "10000"),
         /**
          * Enable/Disable SearchIterator's ResultSet prefetch.
          */
-        PrefetchEnabled("PrefetchEnabled"),
-        /**
-         * Implementation of the file storage.
-         */
-        FileStorageImpl("FileStorageImpl"),
+        PrefetchEnabled("PrefetchEnabled", Boolean.FALSE.toString()),
         /**
          * Default encoding.
          */
-        DefaultEncoding("DefaultEncoding"),
+        DefaultEncoding("DefaultEncoding", "UTF-8"),
         /**
          * The maximum size of accepted uploads. Max be overridden in
          * specialized module configs and user settings.
          */
-        MAX_UPLOAD_SIZE("MAX_UPLOAD_SIZE"),
+        MAX_UPLOAD_SIZE("MAX_UPLOAD_SIZE", "0"),
         /**
          * JMXPort
          */
-        JMX_PORT("JMXPort"),
+        JMX_PORT("JMXPort", "9999"),
         /**
          * JMXBindAddress
          */
-        JMX_BIND_ADDRESS("JMXBindAddress"),
+        JMX_BIND_ADDRESS("JMXBindAddress", "localhost"),
         /**
          * Max idle time for uploaded files in milliseconds
          */
-        MaxUploadIdleTimeMillis("MAX_UPLOAD_IDLE_TIME_MILLIS"),
+        MaxUploadIdleTimeMillis("MAX_UPLOAD_IDLE_TIME_MILLIS", "300000"),
         /**
          * Number of characters a search pattern must contain to prevent slow
          * search queries and big responses in large contexts.
          */
-        MINIMUM_SEARCH_CHARACTERS("com.openexchange.MinimumSearchCharacters"),
+        MINIMUM_SEARCH_CHARACTERS("com.openexchange.MinimumSearchCharacters", "0"),
         /**
          * On session validation of every request the client IP address is compared with the client IP address used for the login request.
          * If this connfiguration parameter is set to <code>true</code> and the client IP addresses do not match the request will be denied.
          * Setting this parameter to <code>false</code> will only log the different client IP addresses with debug level.
          */
-        IP_CHECK("com.openexchange.IPCheck"),
+        IP_CHECK("com.openexchange.IPCheck", Boolean.TRUE.toString()),
         /**
          * Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The
          * default conforms to the path where the UI is installed by the standard packages on the web server.
          */
-        UI_WEB_PATH("com.openexchange.UIWebPath"),
+        UI_WEB_PATH("com.openexchange.UIWebPath", "/ox6/index.html"),
         /**
          * The cookie time-to-live
          */
-        COOKIE_TTL("com.openexchange.cookie.ttl"),
+        COOKIE_TTL("com.openexchange.cookie.ttl", "1W"),
         /**
          * The cookie HttpOnly flag
          */
-        COOKIE_HTTP_ONLY("com.openexchange.cookie.httpOnly"),
-        
-        ;
+        COOKIE_HTTP_ONLY("com.openexchange.cookie.httpOnly", Boolean.TRUE.toString()),
+        COOKIE_HASH_FIELDS("com.openexchange.cookie.hash.fields", ""),
+        COOKIE_HASH("com.openexchange.cookie.hash", "calculate");
 
-        private String propertyName;
+        private final String propertyName;
 
-        private Property(final String propertyName) {
+        private final String defaultValue;
+
+        private Property(final String propertyName, final String defaultValue) {
             this.propertyName = propertyName;
+            this.defaultValue = defaultValue;
         }
 
         public String getPropertyName() {
             return propertyName;
+        }
+
+        String getDefaultValue() {
+            return defaultValue;
         }
     }
 }

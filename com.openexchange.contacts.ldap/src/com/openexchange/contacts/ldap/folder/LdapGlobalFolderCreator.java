@@ -260,6 +260,10 @@ public class LdapGlobalFolderCreator {
                 return null;
             }
 
+            public String getClient() {
+                return null;
+            }
+
             public void setLocalIp(String ip) {
                 // TODO Auto-generated method stub
                 

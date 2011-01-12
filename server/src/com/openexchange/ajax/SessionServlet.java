@@ -67,10 +67,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.CookieHash;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -112,6 +115,8 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private volatile boolean checkIP = true;
 
+    private static CookieHash cookieHash;
+
     private final List<IPRange> ranges = new CopyOnWriteArrayList<IPRange>();
 
     /**
@@ -144,7 +149,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
         }
-
+        cookieHash = CookieHash.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
     protected void initializeSession(final HttpServletRequest req) throws SessiondException, AbstractOXException {
@@ -229,9 +234,7 @@ public abstract class SessionServlet extends AJAXServlet {
     protected static void handleSessiondException(final SessiondException e, final HttpServletRequest req, final HttpServletResponse resp) {
         if (isIpCheckError(e)) {
             try {
-                /*
-                 * Drop Open-Xchange cookies
-                 */
+                // Drop Open-Xchange cookies
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 final String sessionId = getSessionId(req);
                 final ServerSession session = getSession(req, sessionId, sessiondService);
@@ -336,7 +339,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (null == session) {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        final String secret = extractSecret(session.getHash(), req.getCookies());
+        final String secret = extractSecret(req, session.getHash(), session.getClient());
 
         if (secret == null || !session.getSecret().equals(secret)) {
             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
@@ -358,13 +361,15 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Extracts the secret string from specified cookies using given hash string.
      * 
-     * @param hash The hash string identifying appropriate cookie
-     * @param cookies The cookies
+     * @param req the HTTP servlet request object.
+     * @param hash remembered hash from session.
+     * @param client the remembered client from the session.
      * @return The secret string or <code>null</code>
      */
-    public static String extractSecret(final String hash, final Cookie[] cookies) {
+    public static String extractSecret(HttpServletRequest req, String hash, String client) {
+        Cookie[] cookies = req.getCookies();
         if (null != cookies) {
-            final String cookieName = Login.SECRET_PREFIX + hash;
+            final String cookieName = Login.SECRET_PREFIX + getHash(req, hash, client);
             for (final Cookie cookie : cookies) {
                 if (cookieName.equals(cookie.getName())) {
                     return cookie.getValue();
@@ -372,6 +377,20 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         return null;
+    }
+
+    public static String getHash(HttpServletRequest req, String hash, String client) {
+        final String retval;
+        switch (cookieHash) {
+        default:
+        case CALCULATE:
+            retval = HashCalculator.getHash(req, client);
+            break;
+        case REMEMBER:
+            retval = hash;
+            break;
+        }
+        return retval;
     }
 
     /**
