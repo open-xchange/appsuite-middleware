@@ -58,18 +58,16 @@ import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -108,32 +106,17 @@ public final class SharedPrefixFolder {
         } catch (final NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
-        final SearchIterator<FolderObject> searchIterator;
         try {
-            searchIterator =
-                OXFolderIteratorSQL.getVisibleSharedFolders(
-                    user.getId(),
-                    user.getGroups(),
-                    userConfiguration.getAccessibleModules(),
-                    sharedOwner,
-                    ctx,
-                    null,
-                    con);
-        } catch (final OXException e) {
+            return OXFolderIteratorSQL.hasVisibleSharedFolders(
+                user.getId(),
+                user.getGroups(),
+                userConfiguration.getAccessibleModules(),
+                sharedOwner,
+                ctx,
+                null,
+                con);
+        } catch (OXException e) {
             throw new FolderException(e);
-        } catch (final AbstractOXException e) {
-            throw new FolderException(e);
-        }
-        try {
-            return searchIterator.hasNext();
-        } catch (AbstractOXException e) {
-            throw new FolderException(e);
-        } finally {
-            try {
-                searchIterator.close();
-            } catch (final AbstractOXException e) {
-                LOG.error("Failed closing search iterator.", e);
-            }
         }
     }
 
