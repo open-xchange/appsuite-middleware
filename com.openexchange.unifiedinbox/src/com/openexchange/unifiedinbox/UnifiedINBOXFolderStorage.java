@@ -170,6 +170,10 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                     nestedAccountId,
                     nestedFullname));
                 mailFolder.setName(getMailAccountName(nestedAccountId));
+                mailFolder.setSubfolders(false);
+                mailFolder.setSubscribedSubfolders(false);
+                UnifiedINBOXFolderConverter.setPermissions(mailFolder);
+                UnifiedINBOXFolderConverter.setOwnPermission(mailFolder, session.getUserId());
                 return mailFolder;
             } finally {
                 mailAccess.close(true);
@@ -343,6 +347,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         } catch (final MailAccountException e) {
             throw new UnifiedINBOXException(e);
         }
+        final Session s = session;
         final int unifiedInboxAccountId = access.getAccountId();
         final int length = accounts.length;
         final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
@@ -368,6 +373,8 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                         // Get mail folder
                         final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
                         mailFolder.setFullname(UnifiedINBOXUtility.generateNestedFullname(unifiedInboxAccountId, parentFullname, mailAccount.getId(), mailFolder.getFullname()));
+                        UnifiedINBOXFolderConverter.setPermissions(mailFolder);
+                        UnifiedINBOXFolderConverter.setOwnPermission(mailFolder, s.getUserId());
                         mailFolder.setSubfolders(false);
                         mailFolder.setSubscribedSubfolders(false);
                         mailFolder.setName(mailAccount.getName());
