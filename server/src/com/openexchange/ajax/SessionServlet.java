@@ -151,6 +151,12 @@ public abstract class SessionServlet extends AJAXServlet {
                         }
                     }
                     cookieHash = CookieHash.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
+                    if (null == cookieHash) {
+                        /*
+                         * Default to calculate policy
+                         */
+                        cookieHash = CookieHash.CALCULATE;
+                    }
                     staticallyInitialized = true;
                 }
             }
