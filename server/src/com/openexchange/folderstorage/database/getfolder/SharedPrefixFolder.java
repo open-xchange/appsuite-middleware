@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -182,6 +183,88 @@ public final class SharedPrefixFolder {
         retval.setSubfolderIDs(subfolderIds.toArray(new String[subfolderIds.size()]));
         retval.setSubscribedSubfolders(!subfolderIds.isEmpty());
         return retval;
+    }
+
+    /**
+     * Gets the folder whose identifier starts with shared prefix.
+     * 
+     * @param folderIdentifier The folder identifier starting with shared prefix
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return The corresponding database folder with subfolders set
+     * @throws FolderException If returning corresponding database folder fails
+     */
+    public static int[] getSharedPrefixFolderSubfoldersAsInt(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int sharedOwner;
+        try {
+            sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
+        } catch (final NumberFormatException exc) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
+        }
+        final Queue<FolderObject> q;
+        try {
+            q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration.getAccessibleModules(),
+                    sharedOwner,
+                    ctx,
+                    null,
+                    con)).asQueue();
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+        final TIntArrayList ret = new TIntArrayList(q.size());
+        for (final FolderObject fo : q) {
+            ret.add(fo.getObjectID());
+        }
+        return ret.toNativeArray();
+    }
+ 
+    /**
+     * Gets the folder whose identifier starts with shared prefix.
+     * 
+     * @param folderIdentifier The folder identifier starting with shared prefix
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return The corresponding database folder with subfolders set
+     * @throws FolderException If returning corresponding database folder fails
+     */
+    public static String[] getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int sharedOwner;
+        try {
+            sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
+        } catch (final NumberFormatException exc) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
+        }
+        final Queue<FolderObject> q;
+        try {
+            q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration.getAccessibleModules(),
+                    sharedOwner,
+                    ctx,
+                    null,
+                    con)).asQueue();
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+        final List<String> ret = new ArrayList<String>(q.size());
+        for (final FolderObject fo : q) {
+            ret.add(String.valueOf(fo.getObjectID()));
+        }
+        return ret.toArray(new String[ret.size()]);
     }
 
 }
