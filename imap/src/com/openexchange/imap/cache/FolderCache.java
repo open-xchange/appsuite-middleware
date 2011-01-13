@@ -117,7 +117,8 @@ public final class FolderCache {
         /*
          * Check for folder
          */
-        return folderMap.get(fullName);
+        final MailFolder mailFolder = folderMap.get(fullName);
+        return (MailFolder) (null == mailFolder ? null : mailFolder.clone());
     }
 
     /**
@@ -237,7 +238,7 @@ public final class FolderCache {
         /*
          * Return
          */
-        return mailFolder;
+        return (MailFolder) mailFolder.clone();
     }
 
     private static final MailFolder loadFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
