@@ -211,7 +211,7 @@ public final class SharedPrefixFolder {
      * @return The corresponding database folder with subfolders set
      * @throws FolderException If returning corresponding database folder fails
      */
-    public static String[] getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<String[]> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -234,11 +234,11 @@ public final class SharedPrefixFolder {
         } catch (final OXException e) {
             throw new FolderException(e);
         }
-        final List<String> ret = new ArrayList<String>(q.size());
+        final List<String[]> ret = new ArrayList<String[]>(q.size());
         for (final FolderObject fo : q) {
-            ret.add(String.valueOf(fo.getObjectID()));
+            ret.add(new String[] { String.valueOf(fo.getObjectID()), fo.getFolderName() });
         }
-        return ret.toArray(new String[ret.size()]);
+        return ret;
     }
 
 }

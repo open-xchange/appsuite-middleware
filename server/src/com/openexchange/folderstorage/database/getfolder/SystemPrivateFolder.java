@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.database.getfolder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -182,13 +183,62 @@ public final class SystemPrivateFolder {
      * @return The database folder representing system private folder
      * @throws FolderException If the database folder cannot be returned
      */
-    public static String[] getSystemPrivateFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
-        final int[] ids = getSystemPrivateFolderSubfoldersAsInt(user, userConfiguration, ctx, con);
-        final String[] ret = new String[ids.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = String.valueOf(ids[i]);
+    public static List<String[]> getSystemPrivateFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        try {
+            /*
+             * The system private folder
+             */
+            final List<FolderObject> list =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                    FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+                    user.getId(),
+                    user.getGroups(),
+                    ctx,
+                    userConfiguration,
+                    null,
+                    con)).asList();
+            StringHelper stringHelper = null;
+            for (final FolderObject folderObject : list) {
+                /*
+                 * Check if folder is user's default folder and set locale-sensitive name
+                 */
+                if (folderObject.isDefaultFolder()) {
+                    final int module = folderObject.getModule();
+                    if (FolderObject.CALENDAR == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                    } else if (FolderObject.CONTACT == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                    } else if (FolderObject.TASK == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+                    }
+                }
+            }
+            /*
+             * Extract IDs
+             */
+            final List<String[]> ret = new ArrayList<String[]>(list.size());
+            for (final FolderObject folderObject : list) {
+                ret.add(new String[] {String.valueOf(folderObject.getObjectID()),folderObject.getFolderName()});
+            }
+            return ret;
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
-        return ret;
     }
 
     /**

@@ -959,10 +959,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final String[] subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
+                final int size = subfolderIds.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int i = 0; i < size; i++) {
+                    final String[] sa = subfolderIds.get(i);
+                    list.add(new DatabaseId(sa[0], i, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
