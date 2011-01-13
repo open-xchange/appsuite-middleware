@@ -196,7 +196,7 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     @Override
-    protected Object clone() {
+    public Object clone() {
         try {
             final MailFolder clone = (MailFolder) super.clone();
             {
