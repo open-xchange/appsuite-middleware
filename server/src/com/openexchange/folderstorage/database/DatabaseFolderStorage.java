@@ -898,10 +898,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final String[] subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
+                int i = 0;
+                for (String[] sa : subfolderIds) {
+                    list.add(new DatabaseId(sa[0], i++, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -909,10 +910,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final int parentId = Integer.parseInt(parentIdentifier);
 
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
-                final String[] subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder();
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(storageParameters.getUser().getLocale());
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
+                int i = 0;
+                for (String[] sa : subfolderIds) {
+                    list.add(new DatabaseId(sa[0], i++, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }

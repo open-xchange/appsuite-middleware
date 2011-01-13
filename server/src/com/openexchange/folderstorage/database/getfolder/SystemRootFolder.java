@@ -51,8 +51,11 @@ package com.openexchange.folderstorage.database.getfolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link SystemRootFolder} - Gets the system shared folder.
@@ -101,16 +104,17 @@ public final class SystemRootFolder {
      * 
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
-    public static String[] getSystemRootFolderSubfolder() {
+    public static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
         /*
          * The system root folder
          */
-        final List<String> list = new ArrayList<String>(4);
-        list.add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-        list.add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
-        list.add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
-        list.add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-        return list.toArray(new String[list.size()]);
+        final StringHelper sh = new StringHelper(locale);
+        final List<String[]> list = new ArrayList<String[]>(4);
+        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME) });
+        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME) });
+        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_SHARED_FOLDER_NAME) });
+        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME) });
+        return list;
     }
 
     /**
