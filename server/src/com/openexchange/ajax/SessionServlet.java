@@ -57,6 +57,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -109,7 +110,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
-    private static volatile boolean staticallyInitialized = false;
+    private static final AtomicBoolean STATICALLY_INITIALIZED = new AtomicBoolean();
 
     private static CookieHash cookieHash;
 
@@ -127,38 +128,33 @@ public abstract class SessionServlet extends AJAXServlet {
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
-        if (!staticallyInitialized) {
-            synchronized (SessionServlet.class) {
-                if (!staticallyInitialized) {
-                    checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-                    if (checkIP) {
-                        final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                        if (configurationService == null) {
-                            LOG.fatal("No configuration service available, can not read whitelist");
-                        } else {
-                            final String text = configurationService.getText(SESSION_WHITELIST_FILE);
-                            if (text == null) {
-                                LOG.info("No exceptions from IP Check have been defined.");
-                            } else {
-                                final String[] lines = text.split("\n");
-                                for (String line : lines) {
-                                    line = line.replaceAll("\\s", "");
-                                    if (!line.equals("") && !line.startsWith("#")) {
-                                        ranges.add(IPRange.parseRange(line));
-                                    }
-                                }
+        if (STATICALLY_INITIALIZED.compareAndSet(false, true)) {
+            checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+            if (checkIP) {
+                final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (configurationService == null) {
+                    LOG.fatal("No configuration service available, can not read whitelist");
+                } else {
+                    final String text = configurationService.getText(SESSION_WHITELIST_FILE);
+                    if (text == null) {
+                        LOG.info("No exceptions from IP Check have been defined.");
+                    } else {
+                        final String[] lines = text.split("\n");
+                        for (String line : lines) {
+                            line = line.replaceAll("\\s", "");
+                            if (!line.equals("") && !line.startsWith("#")) {
+                                ranges.add(IPRange.parseRange(line));
                             }
                         }
                     }
-                    cookieHash = CookieHash.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
-                    if (null == cookieHash) {
-                        /*
-                         * Default to calculate policy
-                         */
-                        cookieHash = CookieHash.CALCULATE;
-                    }
-                    staticallyInitialized = true;
                 }
+            }
+            cookieHash = CookieHash.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
+            if (null == cookieHash) {
+                /*
+                 * Default to calculate policy
+                 */
+                cookieHash = CookieHash.CALCULATE;
             }
         }
     }
