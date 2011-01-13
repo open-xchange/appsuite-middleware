@@ -785,14 +785,14 @@ public final class OXFolderIteratorSQL {
     /**
      * Checks existence of user-visible shared folders.
      */
-    public static boolean hasVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
+    public static boolean hasVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final SQLStuff stuff = getVisibleSharedFolders0(userId, memberInGroups, accessibleModules, owner, ctx, since, con);
         try {
             return stuff.rs.next();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
-        } catch (Exception e) {
-            throw new SearchIteratorException(SearchIteratorException.Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+        } catch (final Exception e) {
+            throw new OXFolderException(FolderCode.RUNTIME_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } finally {
             closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
         }
