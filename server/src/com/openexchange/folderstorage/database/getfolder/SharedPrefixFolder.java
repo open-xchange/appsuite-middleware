@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.database.getfolder;
 import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import com.openexchange.api2.OXException;
@@ -126,13 +125,11 @@ public final class SharedPrefixFolder {
      * 
      * @param folderIdentifier The folder identifier starting with shared prefix
      * @param user The user
-     * @param userConfiguration The user configuration
      * @param ctx The context
-     * @param con The connection
      * @return The corresponding database folder with subfolders set
      * @throws FolderException If returning corresponding database folder fails
      */
-    public static DatabaseFolder getSharedPrefixFolder(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static DatabaseFolder getSharedPrefixFolder(final String folderIdentifier, final User user, final Context ctx) throws FolderException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -157,31 +154,8 @@ public final class SharedPrefixFolder {
         retval.setID(folderIdentifier);
         retval.setParentID(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
         retval.setGlobal(false);
-
-        final Queue<FolderObject> q;
-        try {
-            q =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
-                    user.getId(),
-                    user.getGroups(),
-                    userConfiguration.getAccessibleModules(),
-                    sharedOwner,
-                    ctx,
-                    null,
-                    con)).asQueue();
-        } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
-        } catch (final OXException e) {
-            throw new FolderException(e);
-        }
-        final int size = q.size();
-        final Iterator<FolderObject> iter = q.iterator();
-        final List<String> subfolderIds = new ArrayList<String>(size);
-        for (int i = 0; i < size; i++) {
-            subfolderIds.add(String.valueOf(iter.next().getObjectID()));
-        }
-        retval.setSubfolderIDs(subfolderIds.toArray(new String[subfolderIds.size()]));
-        retval.setSubscribedSubfolders(!subfolderIds.isEmpty());
+        retval.setSubfolderIDs(null);
+        retval.setSubscribedSubfolders(true);
         return retval;
     }
 

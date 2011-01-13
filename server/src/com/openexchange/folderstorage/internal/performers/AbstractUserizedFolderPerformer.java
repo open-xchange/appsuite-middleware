@@ -260,8 +260,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         final boolean isShared;
         {
             final Type type = userizedFolder.getType();
-            if (SharedType.getInstance().equals(type) || ((userizedFolder.getCreatedBy() != getUserId()) && PrivateType.getInstance().equals(
-                type))) {
+            if (SharedType.getInstance().equals(type)) {
+                userizedFolder.setSubfolderIDs(new String[0]);
+                isShared = true;
+            } else if ((userizedFolder.getCreatedBy() != getUserId()) && PrivateType.getInstance().equals(type)) {
                 userizedFolder.setType(SharedType.getInstance());
                 userizedFolder.setSubfolderIDs(new String[0]);
                 isShared = true;

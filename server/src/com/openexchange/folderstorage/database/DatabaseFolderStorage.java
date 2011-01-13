@@ -610,7 +610,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             if (StorageType.WORKING.equals(storageType)) {
                 if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
-                    retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                    retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, ctx);
                 } else {
                     /*
                      * A numeric folder identifier
@@ -692,7 +692,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 for (int index = 0; index < size; index++) {
                     final String folderIdentifier = folderIdentifiers.get(index);
                     if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
-                        ret[index] = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                        ret[index] = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, ctx);
                     } else {
                         /*
                          * A numeric folder identifier
@@ -885,6 +885,26 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getConnection(storageParameters);
+
+            if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserConfiguration userConfiguration;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    } else {
+                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    }
+                }
+                final String[] subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
 
             final int parentId = Integer.parseInt(parentIdentifier);
 
