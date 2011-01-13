@@ -2019,6 +2019,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Create runnable task
                  */
+                final Session s = session;
+                final org.apache.commons.logging.Log l = LOG;
                 final Runnable r = new Runnable() {
 
                     public void run() {
@@ -2026,7 +2028,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             final RetentionData retentionData = retentionService.newInstance();
                             retentionData.setStartTime(new Date(startTransport));
                             retentionData.setIdentifier(transport.getTransportConfig().getLogin());
-                            retentionData.setIPAddress(session.getLocalIp());
+                            retentionData.setIPAddress(s.getLocalIp());
                             retentionData.setSenderAddress(sentMail.getFrom()[0].getAddress());
                             final Set<InternetAddress> recipients = new HashSet<InternetAddress>(Arrays.asList(sentMail.getTo()));
                             recipients.addAll(Arrays.asList(sentMail.getCc()));
@@ -2043,9 +2045,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                              */
                             retentionService.storeOnTransport(retentionData);
                         } catch (final MailException e) {
-                            LOG.error(e.getMessage(), e);
+                            l.error(e.getMessage(), e);
                         } catch (final DataRetentionException e) {
-                            LOG.error(e.getMessage(), e);
+                            l.error(e.getMessage(), e);
                         }
                     }
                 };
