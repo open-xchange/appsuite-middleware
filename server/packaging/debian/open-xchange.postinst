@@ -27,6 +27,13 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-565
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/whitelist.properties
+  if ! ox_exists_property html.tag.i $pfile; then
+      ox_set_property html.tag.i '""' $pfile
+  fi
+
   # SoftwareChange_Request-561
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/mail.properties
