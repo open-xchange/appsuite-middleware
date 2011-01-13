@@ -1318,32 +1318,33 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mail.setFlag(MailMessage.FLAG_DRAFT, true);
             }
         }
-        
-        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        if (isImport) {
-            final ArrayList<String> idList = new ArrayList<String>();
-            for (final MailMessage mail : mails) {
-                final MailImportResult mir = new MailImportResult();
-                mir.setMail(mail);
-                try {
-                    final String[] idStr = messageStorage.appendMessages(fullname, new MailMessage[] {mail});
-                    mir.setId(idStr[0]);
-                    idList.add(idStr[0]);
-                } catch (final MailException e) {
-                    mir.setException(e);                
-                }
-                mailImportResults.add(mir);
-            }
-            
-            final String[] ids = new String[idList.size()];
-            for (int i = 0; i < idList.size(); i++) {
-                ids[i] = idList.get(i);
-            }
-            
-            return ids;
-        } else {
+
+        if (!isImport) {
             return mailAccess.getMessageStorage().appendMessages(fullname, mails);
-        }        
+        }
+        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        final MailMessage[] tmp = new MailMessage[1];
+        final ArrayList<String> idList = new ArrayList<String>();
+        for (final MailMessage mail : mails) {
+            final MailImportResult mir = new MailImportResult();
+            mir.setMail(mail);
+            try {
+                tmp[0] = mail;
+                final String[] idStr = messageStorage.appendMessages(fullname, tmp);
+                mir.setId(idStr[0]);
+                idList.add(idStr[0]);
+            } catch (final MailException e) {
+                mir.setException(e);                
+            }
+            mailImportResults.add(mir);
+        }
+        
+        final String[] ids = new String[idList.size()];
+        for (int i = 0; i < idList.size(); i++) {
+            ids[i] = idList.get(i);
+        }
+        
+        return ids;        
     }
 
     @Override
