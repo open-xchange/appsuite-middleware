@@ -49,7 +49,6 @@
 
 package com.openexchange.unifiedinbox;
 
-import static com.openexchange.mail.MailPath.SEPERATOR;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -368,8 +367,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                         }
                         // Get mail folder
                         final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
-                        mailFolder.setFullname(new StringBuilder(MailFolderUtility.prepareFullname(unifiedInboxAccountId, parentFullname)).append(
-                            SEPERATOR).append(MailFolderUtility.prepareFullname(mailAccount.getId(), mailFolder.getFullname())).toString());
+                        mailFolder.setFullname(UnifiedINBOXUtility.generateNestedFullname(unifiedInboxAccountId, parentFullname, mailAccount.getId(), mailFolder.getFullname()));
                         mailFolder.setSubfolders(false);
                         mailFolder.setSubscribedSubfolders(false);
                         mailFolder.setName(mailAccount.getName());
