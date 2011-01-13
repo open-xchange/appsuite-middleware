@@ -386,6 +386,14 @@ public abstract class SessionServlet extends AJAXServlet {
         return null;
     }
 
+    /**
+     * Gets the appropriate hash for specified request.
+     * 
+     * @param req The HTTP request
+     * @param hash The previously remembered hash
+     * @param client The client identifier
+     * @return The appropriate hash
+     */
     public static String getHash(HttpServletRequest req, String hash, String client) {
         final String retval;
         switch (cookieHash) {
