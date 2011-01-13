@@ -184,6 +184,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private final String fullname;
 
+    private final int recentCount;
+
     /**
      * Initializes a new {@link NewFetchIMAPCommand}.
      * 
@@ -225,6 +227,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         command = getFetchCommand(isRev1, fp, loadBody);
         set(arr, isSequential, keepOrder);
         fullname = imapFolder.getFullName();
+        recentCount = imapFolder.getNewMessageCount();
     }
 
     /**
@@ -379,6 +382,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         retval = new MailMessage[length];
         index = 0;
         fullname = imapFolder.getFullName();
+        recentCount = imapFolder.getNewMessageCount();
     }
 
     @Override
@@ -481,6 +485,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         }
         index++;
         final IDMailMessage mail = new IDMailMessage(null, fullname);
+        mail.setRecentCount(recentCount);
         mail.setSeparator(separator);
         mail.setSeqnum(seqnum);
         boolean error = false;

@@ -377,6 +377,7 @@ public final class AllFetch {
                                 final FetchResponse fr = (FetchResponse) resp;
                                 try {
                                     final MailMessage m = new IDMailMessage(null, fullname);
+                                    m.setRecentCount(recentCount);
                                     for (final LowCostItem lowCostItem : items) {
                                         final Item item =
                                             getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
