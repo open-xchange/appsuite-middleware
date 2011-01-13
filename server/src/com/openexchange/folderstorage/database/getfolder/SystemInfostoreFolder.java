@@ -69,6 +69,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -187,13 +188,82 @@ public final class SystemInfostoreFolder {
      * @return The database folder representing system infostore folder
      * @throws FolderException If the database folder cannot be returned
      */
-    public static String[] getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
-        final int[] ids = getSystemInfostoreFolderSubfoldersAsInt(user, userConfiguration, ctx, con);
-        final String[] ret = new String[ids.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = String.valueOf(ids[i]);
+    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        try {
+            /*
+             * The system infostore folder
+             */
+            final List<FolderObject> l;
+            final int size;
+            {
+                final Queue<FolderObject> q =
+                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                        FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
+                        user.getId(),
+                        user.getGroups(),
+                        ctx,
+                        userConfiguration,
+                        null,
+                        con)).asQueue();
+                size = q.size();
+                /*
+                 * Write UserStore first
+                 */
+                final Iterator<FolderObject> iter = q.iterator();
+                l = new ArrayList<FolderObject>(size);
+                for (int j = 0; j < size; j++) {
+                    final FolderObject fobj = iter.next();
+                    if (fobj.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+                        l.add(0, fobj);
+                    } else {
+                        l.add(fobj);
+                    }
+                }
+            }
+            final StringHelper sh = new StringHelper(user.getLocale());
+            final List<String[]> subfolderIds = new ArrayList<String[]>(size);
+            final Iterator<FolderObject> iter = l.iterator();
+            for (int i = 0; i < size; i++) {
+                final FolderObject fo = iter.next();
+                final int fuid = fo.getObjectID();
+                if (fuid == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME)));
+                } else if (fuid == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
+                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
+                } else {
+                    subfolderIds.add(toArray(String.valueOf(fuid), fo.getFolderName()));
+                }
+            }
+            /*
+             * Check if user has non-tree-visible folders
+             */
+            final boolean hasNonTreeVisibleFolders = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
+                FolderObject.INFOSTORE,
+                user.getId(),
+                user.getGroups(),
+                userConfiguration,
+                ctx,
+                con);
+            if (hasNonTreeVisibleFolders) {
+                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME)));
+            }
+            return subfolderIds;
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
-        return ret;
+    }
+
+    private static String[] toArray(final String... values) {
+        final int length = values.length;
+        String[] ret = new String[length];
+        System.arraycopy(values, 0, ret, 0, length);
+        return values;
     }
 
 }
