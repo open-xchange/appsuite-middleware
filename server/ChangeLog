@@ -1,3 +1,7 @@
+* 2011-01-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #17989: Fixed caching in IMAP MAL implementation to return cloned objects to not store modifications
+
 * 2011-01-12 - thorben.betten@open-xchange.com
 
  - Bugfix #17891: Fixed possible IndexOutOfBounsdException when checking quotes in personal part of an email address
