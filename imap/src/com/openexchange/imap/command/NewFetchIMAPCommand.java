@@ -485,7 +485,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         }
         index++;
         final IDMailMessage mail = new IDMailMessage(null, fullname);
-        mail.setRecentCount(recentCount);
+        // mail.setRecentCount(recentCount);
         mail.setSeparator(separator);
         mail.setSeqnum(seqnum);
         boolean error = false;
