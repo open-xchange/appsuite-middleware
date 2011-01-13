@@ -35,9 +35,6 @@ BuildRequires:  java-sdk-sun cairo
 %if %{?fedora_version} > 8
 BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
-%if %{?fedora_version} <= 8
-BuildRequires:  java-devel-icedtea saxon
-%endif
 %endif
 %if 0%{?centos_version}
 BuildRequires:  open-xchange-xerces-sun
