@@ -427,6 +427,13 @@ public abstract class MailMessage extends MailPart {
     private boolean b_appendVCard;
 
     /**
+     * The number of recent messages in associated folder.
+     */
+    private int recentCount;
+
+    private boolean b_recentCount;
+
+    /**
      * Default constructor
      */
     protected MailMessage() {
@@ -1428,6 +1435,40 @@ public abstract class MailMessage extends MailPart {
     public void setAppendVCard(final boolean appendVCard) {
         this.appendVCard = appendVCard;
         b_appendVCard = true;
+    }
+
+    /**
+     * Gets the number of recent mails in associated folder.
+     * 
+     * @return The recent count
+     */
+    public int getRecentCount() {
+        return recentCount;
+    }
+
+    /**
+     * @return <code>true</code> if number of recent mails is set; otherwise <code>false</code>
+     */
+    public boolean containsRecentCount() {
+        return b_recentCount;
+    }
+
+    /**
+     * Removes the recent count.
+     */
+    public void removeRecentCount() {
+        recentCount = 0;
+        b_recentCount = false;
+    }
+
+    /**
+     * Sets the number of recent mails in associated folder.
+     * 
+     * @param recentCount The recent count
+     */
+    public void setRecentCount(final int recentCount) {
+        this.recentCount = recentCount;
+        b_recentCount = true;
     }
 
     /**

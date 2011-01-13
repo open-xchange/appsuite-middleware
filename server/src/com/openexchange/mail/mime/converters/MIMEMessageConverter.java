@@ -1447,6 +1447,7 @@ public final class MIMEMessageConverter {
                         }
                     }
                     mail.setUnreadMessages(f.getUnreadMessageCount());
+                    mail.setRecentCount(f.getNewMessageCount());
                 }
             }
             setHeaders(msg, mail);

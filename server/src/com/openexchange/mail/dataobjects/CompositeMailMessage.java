@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -299,6 +300,36 @@ public final class CompositeMailMessage extends MailMessage {
     @Override
     public void setUnreadMessages(final int unreadMessages) {
         delegate.setUnreadMessages(unreadMessages);
+    }
+
+    @Override
+    public boolean hasHeaders(String... names) {
+        return delegate.hasHeaders(names);
+    }
+
+    @Override
+    public Date getReceivedDateDirect() {
+        return delegate.getReceivedDateDirect();
+    }
+
+    @Override
+    public int getRecentCount() {
+        return delegate.getRecentCount();
+    }
+
+    @Override
+    public boolean containsRecentCount() {
+        return delegate.containsRecentCount();
+    }
+
+    @Override
+    public void removeRecentCount() {
+        delegate.removeRecentCount();
+    }
+
+    @Override
+    public void setRecentCount(int recentCount) {
+        delegate.setRecentCount(recentCount);
     }
 
     @Override

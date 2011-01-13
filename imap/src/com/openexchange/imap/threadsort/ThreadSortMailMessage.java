@@ -876,6 +876,36 @@ public final class ThreadSortMailMessage extends MailMessage {
         delegatee.writeTo(out);
     }
 
+    @Override
+    public boolean hasHeaders(String... names) {
+        return delegatee.hasHeaders(names);
+    }
+
+    @Override
+    public Date getReceivedDateDirect() {
+        return delegatee.getReceivedDateDirect();
+    }
+
+    @Override
+    public int getRecentCount() {
+        return delegatee.getRecentCount();
+    }
+
+    @Override
+    public boolean containsRecentCount() {
+        return delegatee.containsRecentCount();
+    }
+
+    @Override
+    public void removeRecentCount() {
+        delegatee.removeRecentCount();
+    }
+
+    @Override
+    public void setRecentCount(int recentCount) {
+        delegatee.setRecentCount(recentCount);
+    }
+
     /**
      * Adds specified child message.
      * 
