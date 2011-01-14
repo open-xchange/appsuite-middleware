@@ -1,3 +1,7 @@
+* 2011-01-14 - francisco.laguna@open-xchange.com
+
+ - Bugfix #17915: Adjusted the file storage implementation to supply the correct list of files. 
+
 * 2010-12-08 - thorben.betten@open-xchange.com
 
  - Bugfix #17557: Escaped curly brace in pattern notation
