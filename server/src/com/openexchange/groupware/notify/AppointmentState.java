@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -82,184 +83,184 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AppointmentState} - The state for appointment notifications
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class AppointmentState extends LinkableState {
 
-	private static final Log LOGGER = LogFactory.getLog(AppointmentState.class);
+    private static final Log LOGGER = LogFactory.getLog(AppointmentState.class);
 
-	private final TemplateReplacement actionRepl;
+    private final TemplateReplacement actionRepl;
 
-	private final TemplateReplacement confirmationActionRepl;
+    private final TemplateReplacement confirmationActionRepl;
 
-	private final String messageTemplate;
+    private final String messageTemplate;
 
-	private final Type type;
+    private final Type type;
 
-	/**
-	 * Initializes a new {@link AppointmentState}
-	 * 
-	 * @param actionRepl
-	 *            The action replacement
-	 * @param messageTemplate
-	 *            The message template
-	 * @param type
-	 *            The notification type
-	 */
-	public AppointmentState(final TemplateReplacement actionRepl, final String messageTemplate, final Type type) {
-		this(actionRepl, null, messageTemplate, type);
-	}
+    /**
+     * Initializes a new {@link AppointmentState}
+     *
+     * @param actionRepl
+     *            The action replacement
+     * @param messageTemplate
+     *            The message template
+     * @param type
+     *            The notification type
+     */
+    public AppointmentState(final TemplateReplacement actionRepl, final String messageTemplate, final Type type) {
+        this(actionRepl, null, messageTemplate, type);
+    }
 
-	/**
-	 * Initializes a new {@link AppointmentState}
-	 * 
-	 * @param actionRepl
-	 *            The action replacement
-	 * @param confirmationActionRepl
-	 *            The confirmation action replacement (optional)
-	 * @param messageTemplate
-	 *            The message template
-	 * @param type
-	 *            The notification type
-	 */
-	public AppointmentState(final TemplateReplacement actionRepl, final TemplateReplacement confirmationActionRepl,
-			final String messageTemplate, final Type type) {
-		super();
-		this.actionRepl = actionRepl;
-		this.confirmationActionRepl = confirmationActionRepl;
-		this.messageTemplate = messageTemplate;
-		this.type = type;
-	}
+    /**
+     * Initializes a new {@link AppointmentState}
+     *
+     * @param actionRepl
+     *            The action replacement
+     * @param confirmationActionRepl
+     *            The confirmation action replacement (optional)
+     * @param messageTemplate
+     *            The message template
+     * @param type
+     *            The notification type
+     */
+    public AppointmentState(final TemplateReplacement actionRepl, final TemplateReplacement confirmationActionRepl,
+            final String messageTemplate, final Type type) {
+        super();
+        this.actionRepl = actionRepl;
+        this.confirmationActionRepl = confirmationActionRepl;
+        this.messageTemplate = messageTemplate;
+        this.type = type;
+    }
 
-	public boolean sendMail(final UserSettingMail userSettingMail, final int owner, final int participant,
-			final int modificationUser) {
-		if (modificationUser == participant) {
-			return false;
-		}
+    public boolean sendMail(final UserSettingMail userSettingMail, final int owner, final int participant,
+            final int modificationUser) {
+        if (modificationUser == participant) {
+            return false;
+        }
 
-		switch (type) {
-		case ACCEPTED:
-			/*fall through*/
-		case DECLINED:
-			/*fall through*/
-		case TENTATIVELY_ACCEPTED:
-			return (participant == owner) ? userSettingMail.isNotifyAppointmentsConfirmOwner() : userSettingMail
-					.isNotifyAppointmentsConfirmParticipant();
-		case REMINDER:
-			return false;
-		default:
-			return userSettingMail.isNotifyAppointments();
-		}
-	}
+        switch (type) {
+        case ACCEPTED:
+            /*fall through*/
+        case DECLINED:
+            /*fall through*/
+        case TENTATIVELY_ACCEPTED:
+            return (participant == owner) ? userSettingMail.isNotifyAppointmentsConfirmOwner() : userSettingMail
+                    .isNotifyAppointmentsConfirmParticipant();
+        case REMINDER:
+            return false;
+        default:
+            return userSettingMail.isNotifyAppointments();
+        }
+    }
 
-	@Override
-	public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
-			final EmailableParticipant p) {
-		super.addSpecial(obj, oldObj, renderMap, p);
-		String location = ((Appointment) obj).getLocation();
-		if (location == null) {
-			location = "";
-		}
-		final TemplateReplacement tr = new LocationReplacement(location);
-		tr.setLocale(p.getLocale());
-		tr.setChanged(oldObj == null ? false : !ParticipantNotify.compareStrings(location, ((Appointment) oldObj)
-				.getLocation()));
-		renderMap.put(tr);
-	}
+    @Override
+    public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
+            final EmailableParticipant p) {
+        super.addSpecial(obj, oldObj, renderMap, p);
+        String location = ((Appointment) obj).getLocation();
+        if (location == null) {
+            location = "";
+        }
+        final TemplateReplacement tr = new LocationReplacement(location);
+        tr.setLocale(p.getLocale());
+        tr.setChanged(oldObj == null ? false : !ParticipantNotify.compareStrings(location, ((Appointment) oldObj)
+                .getLocation()));
+        renderMap.put(tr);
+    }
 
-	public int getModule() {
-		return Types.APPOINTMENT;
-	}
+    public int getModule() {
+        return Types.APPOINTMENT;
+    }
 
-	public DateFormat getDateFormat(final Locale locale) {
-		return tryAppendingTimeZone(DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, locale));
-	}
+    public DateFormat getDateFormat(final Locale locale) {
+        return tryAppendingTimeZone(DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, locale));
+    }
 
-	private DateFormat tryAppendingTimeZone(final DateFormat df) {
-		if (df instanceof SimpleDateFormat) {
-			final SimpleDateFormat sdf = (SimpleDateFormat) df;
-			final String format = sdf.toPattern();
-			return new SimpleDateFormat(format + ", z");
-		}
-		return df;
-	}
+    private DateFormat tryAppendingTimeZone(final DateFormat df) {
+        if (df instanceof SimpleDateFormat) {
+            final SimpleDateFormat sdf = (SimpleDateFormat) df;
+            final String format = sdf.toPattern();
+            return new SimpleDateFormat(format + ", z");
+        }
+        return df;
+    }
 
-	public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-		// Nothing to do
-	}
+    public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
+        // Nothing to do
+    }
 
-	public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-		addICALAttachment(mail, (Appointment) obj, sessObj);
-	}
+    public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
+        addICALAttachment(mail, (Appointment) obj, sessObj);
+    }
 
-	private void addICALAttachment(final MailObject mail, final Appointment obj, final ServerSession sessObj) {
-		final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
-		if (emitter == null) {
-			LOGGER.warn("Could not find ical emitter service. Skipping attachment");
-			return;
-		}
+    private void addICALAttachment(final MailObject mail, final Appointment obj, final ServerSession sessObj) {
+        final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
+        if (emitter == null) {
+            LOGGER.warn("Could not find ical emitter service. Skipping attachment");
+            return;
+        }
 
-		try {
-			final InputStream icalFile;
-			{
-				final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-				final ICalSession session = emitter.createSession();
-				emitter.writeAppointment(session, obj, sessObj.getContext(), new ArrayList<ConversionError>(),
-						new ArrayList<ConversionWarning>());
-				emitter.writeSession(session, byteArrayOutputStream);
-				icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
-			}
+        try {
+            final InputStream icalFile;
+            {
+                final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+                final ICalSession session = emitter.createSession();
+                emitter.writeAppointment(session, obj, sessObj.getContext(), new ArrayList<ConversionError>(),
+                        new ArrayList<ConversionWarning>());
+                emitter.writeSession(session, byteArrayOutputStream);
+                icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            }
 
-			final ContentType ct = new ContentType();
-			ct.setPrimaryType("text");
-			ct.setSubType("calendar");
-			ct.setCharsetParameter("utf-8");
+            final ContentType ct = new ContentType();
+            ct.setPrimaryType("text");
+            ct.setSubType("calendar");
+            ct.setCharsetParameter("utf-8");
 
-			final String filename = "appointment.ics";
+            final String filename = "appointment.ics";
 
-			mail.addFileAttachment(ct, filename, icalFile);
+            mail.addFileAttachment(ct, filename, icalFile);
 
-		} catch (final MailException e) {
-			LOGGER.error("Can't add attachment", e);
-		} catch (final ConversionError conversionError) {
-			LOGGER.error("Can't add attachment", conversionError);
-		}
-	}
+        } catch (final MailException e) {
+            LOGGER.error("Can't add attachment", e);
+        } catch (final ConversionError conversionError) {
+            LOGGER.error("Can't add attachment", conversionError);
+        }
+    }
 
-	public Template getTemplate() {
-		return new StringTemplate(messageTemplate);
-	}
+    public Template getTemplate() {
+        return new StringTemplate(messageTemplate);
+    }
 
-	public TemplateReplacement getAction() {
-		return actionRepl;
-	}
+    public TemplateReplacement getAction() {
+        return actionRepl;
+    }
 
-	public TemplateReplacement getConfirmationAction() {
-		return confirmationActionRepl;
-	}
+    public TemplateReplacement getConfirmationAction() {
+        return confirmationActionRepl;
+    }
 
-	public Type getType() {
-		return type;
-	}
+    public Type getType() {
+        return type;
+    }
 
-	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
-	    Appointment.OBJECT_ID,
-	    Appointment.CREATED_BY,
-        Appointment.MODIFIED_BY,
-        Appointment.CREATION_DATE,
-        Appointment.LAST_MODIFIED,
-        Appointment.LAST_MODIFIED_UTC,
-        Appointment.ALARM,
-        Appointment.NOTIFICATION,
-        Appointment.RECURRENCE_TYPE,
-        Appointment.CATEGORIES,
-        Appointment.SEQUENCE
+    private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
+        I(Appointment.OBJECT_ID),
+        I(Appointment.CREATED_BY),
+        I(Appointment.MODIFIED_BY),
+        I(Appointment.CREATION_DATE),
+        I(Appointment.LAST_MODIFIED),
+        I(Appointment.LAST_MODIFIED_UTC),
+        I(Appointment.ALARM),
+        I(Appointment.NOTIFICATION),
+        I(Appointment.RECURRENCE_TYPE),
+        I(Appointment.CATEGORIES),
+        I(Appointment.SEQUENCE)
     ));
-    
+
     public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
         Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);
