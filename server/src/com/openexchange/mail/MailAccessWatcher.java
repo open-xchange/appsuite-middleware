@@ -73,9 +73,9 @@ public final class MailAccessWatcher {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccessWatcher.class);
 
-    private static final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
+    private static final ConcurrentMap<MailAccess<?, ?>, Long> MAIL_ACCESSES = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
 
-    private static final AtomicBoolean initialized = new AtomicBoolean();
+    private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
 
     private static ScheduledTimerTask watcherTask;
 
@@ -83,9 +83,9 @@ public final class MailAccessWatcher {
      * Initializes and starts mail connection watcher if not done, yet
      */
     static void init() {
-        if (!initialized.get()) {
-            synchronized (initialized) {
-                if (initialized.get()) {
+        if (!INITIALIZED.get()) {
+            synchronized (INITIALIZED) {
+                if (INITIALIZED.get()) {
                     return;
                 }
                 if (MailProperties.getInstance().isWatcherEnabled()) {
@@ -96,15 +96,15 @@ public final class MailAccessWatcher {
                     if (null != timer) {
                         watcherTask =
                             timer.scheduleWithFixedDelay(
-                                new WatcherTask(mailAccesses, LOG),
+                                new WatcherTask(MAIL_ACCESSES, LOG),
                                 1000,
                                 MailProperties.getInstance().getWatcherFrequency());
                     }
-                    initialized.set(true);
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Mail connection watcher successfully established and ready for tracing");
                     }
                 }
+                INITIALIZED.set(true);
             }
         }
     }
@@ -113,23 +113,25 @@ public final class MailAccessWatcher {
      * Stops mail connection watcher if currently running
      */
     static void stop() {
-        if (initialized.get()) {
-            synchronized (initialized) {
-                if (!initialized.get()) {
+        if (INITIALIZED.get()) {
+            synchronized (INITIALIZED) {
+                if (!INITIALIZED.get()) {
                     return;
                 }
                 if (MailProperties.getInstance().isWatcherEnabled()) {
-                    watcherTask.cancel(false);
-                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                    if (null != timer) {
-                        timer.purge();
+                    if (null != watcherTask) {
+                        watcherTask.cancel(false);
+                        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                        if (null != timer) {
+                            timer.purge();
+                        }
                     }
-                    mailAccesses.clear();
-                    initialized.set(false);
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Mail connection watcher successfully stopped");
                     }
                 }
+                MAIL_ACCESSES.clear();
+                INITIALIZED.set(false);
             }
         }
     }
@@ -149,14 +151,10 @@ public final class MailAccessWatcher {
      * @param mailAccess The mail access to add
      */
     public static void addMailAccess(final MailAccess<?, ?> mailAccess) {
-        if (!initialized.get()) {
-            LOG.warn("Mail connection watcher is not running. Aborting addMailAccess()");
-            return;
-        }
         /*
          * Insert or update time stamp
          */
-        mailAccesses.put(mailAccess, Long.valueOf(System.currentTimeMillis()));
+        MAIL_ACCESSES.put(mailAccess, Long.valueOf(System.currentTimeMillis()));
     }
 
     /**
@@ -165,11 +163,7 @@ public final class MailAccessWatcher {
      * @param mailAccess The mail access to remove
      */
     public static void removeMailAccess(final MailAccess<?, ?> mailAccess) {
-        if (!initialized.get()) {
-            LOG.warn("Mail connection watcher is not running. Aborting removeMailAccess()");
-            return;
-        }
-        mailAccesses.remove(mailAccess);
+        MAIL_ACCESSES.remove(mailAccess);
     }
 
     /**
@@ -178,7 +172,7 @@ public final class MailAccessWatcher {
      * @return The number of currently tracked mail accesses
      */
     public static int getNumberOfMailAccesses() {
-        return mailAccesses.size();
+        return MAIL_ACCESSES.size();
     }
 
     private static final String INFO_PREFIX = "UNCLOSED MAIL CONNECTION AFTER #N#msec:\n";
@@ -192,13 +186,13 @@ public final class MailAccessWatcher {
      */
     private static class WatcherTask implements Runnable {
 
-        private final ConcurrentMap<MailAccess<?, ?>, Long> mailAccessMap;
+        private final ConcurrentMap<MailAccess<?, ?>, Long> map;
 
         private final org.apache.commons.logging.Log logger;
 
         public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses, final org.apache.commons.logging.Log logger) {
             super();
-            mailAccessMap = mailAccesses;
+            map = mailAccesses;
             this.logger = logger;
         }
 
@@ -208,7 +202,7 @@ public final class MailAccessWatcher {
                 final List<MailAccess<?, ?>> exceededCons = new ArrayList<MailAccess<?, ?>>();
                 final int watcherTime = MailProperties.getInstance().getWatcherTime();
                 final long now = System.currentTimeMillis();
-                for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = mailAccessMap.entrySet().iterator(); iter.hasNext();) {
+                for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = map.entrySet().iterator(); iter.hasNext();) {
                     final Entry<MailAccess<?, ?>, Long> e = iter.next();
                     final MailAccess<?, ?> mailAccess = e.getKey();
                     if (mailAccess.isConnectedUnsafe()) {
@@ -242,12 +236,12 @@ public final class MailAccessWatcher {
                                 sb.append(INFO_PREFIX3);
                                 logger.info(sb.toString());
                             } finally {
-                                mailAccessMap.remove(mailAccess);
+                                map.remove(mailAccess);
                             }
                         }
                     } else {
                         for (final MailAccess<?, ?> mailAccess : exceededCons) {
-                            mailAccessMap.remove(mailAccess);
+                            map.remove(mailAccess);
                         }
                     }
                 }
