@@ -180,18 +180,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets the proper instance of {@link MailAccess} for specified user's default mail account.
-     * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return A proper instance of {@link MailAccess}
-     * @throws MailException If instantiation fails or a caching error occurs
-     */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId) throws MailException {
-        return getInstance(userId, contextId, MailAccount.DEFAULT_ID);
-    }
-
-    /**
      * Gets the proper instance of {@link MailAccess} for session user's default mail account.
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
@@ -213,29 +201,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session) throws MailException {
         return getInstance(session, MailAccount.DEFAULT_ID);
-    }
-
-    /**
-     * Gets the proper instance of {@link MailAccess} for specified user's default mail account.
-     * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param accountId The account identifier
-     * @return A proper instance of {@link MailAccess}
-     * @throws MailException If instantiation fails or a caching error occurs
-     */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId, final int accountId) throws MailException {
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != sessiondService) {
-            final Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
-            if (!sessions.isEmpty()) {
-                return getInstance(sessions.iterator().next(), accountId);
-            }
-        }
-        /*
-         * No appropriate session found
-         */
-        throw new MailException(MailException.Code.UNEXPECTED_ERROR, "No appropriate session found.");
     }
 
     /**
@@ -267,7 +232,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
         }
         {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccessCache.getInstance().removeMailAccess(session, accountId);
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+                MailAccessCache.getInstance().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
@@ -282,6 +248,67 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Return new connection
          */
         return MailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
+    }
+
+    /**
+     * Gets the proper instance of {@link MailAccess} for specified user's default account.
+     * <p>
+     * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
+     * On finished work the final {@link #close(boolean)} must be called:
+     * 
+     * <pre>
+     * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
+     * mailAccess.connect();
+     * try {
+     *  // Do something
+     * } finally {
+     *  mailAccess.close(putToCache)
+     * }
+     * </pre>
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return An appropriate {@link MailAccess mail access}
+     * @throws MailException If instantiation fails or a caching error occurs
+     */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId) throws MailException {
+        return getInstance(userId, contextId, MailAccount.DEFAULT_ID);
+    }
+
+    /**
+     * Gets the proper instance of {@link MailAccess} for specified user and account ID.
+     * <p>
+     * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
+     * On finished work the final {@link #close(boolean)} must be called:
+     * 
+     * <pre>
+     * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
+     * mailAccess.connect();
+     * try {
+     *  // Do something
+     * } finally {
+     *  mailAccess.close(putToCache)
+     * }
+     * </pre>
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param accountId The account identifier
+     * @return An appropriate {@link MailAccess mail access}
+     * @throws MailException If instantiation fails or a caching error occurs
+     */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId, final int accountId) throws MailException {
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null != sessiondService) {
+            final Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
+            if (!sessions.isEmpty()) {
+                return getInstance(sessions.iterator().next(), accountId);
+            }
+        }
+        /*
+         * No appropriate session found.
+         */
+        throw new MailException(MailException.Code.UNEXPECTED_ERROR, "No appropriate session found.");
     }
 
     /**
