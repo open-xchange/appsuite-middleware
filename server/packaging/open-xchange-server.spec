@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 20
+%define		ox_release 21
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Jan 14 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #17915: Adjusted the file storage implementation to supply the correct list of files. 
 * Wed Dec 08 2010 - thorben.betten@open-xchange.com
  - Bugfix #17557: Escaped curly brace in pattern notation
 * Tue Dec 07 2010 - martin.herfurth@open-xchange.com
