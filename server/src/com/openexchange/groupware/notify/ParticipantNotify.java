@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -858,7 +858,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                      * Render proper message for removed participant
                      */
                     final String message = getAppointmentCreateTemplate(p, canRead, cal, session);
-                    msg.message = new StringTemplate(message).render(p.getLocale(), clone);
+                    String textMessage = new StringTemplate(message).render(p.getLocale(), clone);
+                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                 } else {
                     msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(
                         title).toString();

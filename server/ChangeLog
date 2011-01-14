@@ -1,3 +1,7 @@
+* 2011-01-14 - martin.herfurth@open-xchange.com
+
+ - Bugfix #17890: Imip invitations for newly added external participants.
+
 * 2010-01-14 - thorben.betten@open-xchange.com
 
  - Bugfix #17783: FIxed severe performance issues in bf_6_18_2
