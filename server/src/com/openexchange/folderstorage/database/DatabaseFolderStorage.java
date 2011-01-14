@@ -104,6 +104,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -121,6 +122,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -901,7 +903,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final List<String[]> subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
-                for (String[] sa : subfolderIds) {
+                for (final String[] sa : subfolderIds) {
                     list.add(new DatabaseId(sa[0], i++, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
@@ -913,7 +915,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(storageParameters.getUser().getLocale());
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
-                for (String[] sa : subfolderIds) {
+                for (final String[] sa : subfolderIds) {
                     list.add(new DatabaseId(sa[0], i++, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
@@ -1171,7 +1173,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            final int folderId = Integer.parseInt(folder.getID());
+
+            final String id = folder.getID();
+            final Context context = storageParameters.getContext();
+
+            if (DatabaseFolderStorageUtility.hasSharedPrefix(id)) {
+                final int owner = Integer.parseInt(id.substring(id.indexOf(':' + 1)));
+                throw new FolderException(new OXFolderException(OXFolderException.FolderCode.NO_ADMIN_ACCESS, OXFolderUtility.getUserName(
+                    session.getUserId(),
+                    context), UserStorage.getStorageUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId())));
+            }
+
+            final int folderId = Integer.parseInt(id);
 
             /*
              * Check for concurrent modification
@@ -1207,7 +1220,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             {
                 final String parentId = folder.getParentID();
                 if (null == parentId) {
-                    updateMe.setParentFolderID(getFolderObject(folderId, storageParameters.getContext(), con).getParentFolderID());
+                    updateMe.setParentFolderID(getFolderObject(folderId, context, con).getParentFolderID());
                 } else {
                     updateMe.setParentFolderID(Integer.parseInt(parentId));
                 }

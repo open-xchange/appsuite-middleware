@@ -1,3 +1,7 @@
+* 2011-01-14 - thorben.betten@open-xchange.com
+
+ - Bugfix #17997: Throwing appropriate error
+
 * 2011-01-13 - thorben.betten@open-xchange.com
 
  - Bugfix #17989: Fixed caching in IMAP MAL implementation to return cloned objects to not store modifications
