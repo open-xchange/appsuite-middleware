@@ -479,6 +479,71 @@ public final class IMAPCommandsCollection {
      * @return The total message count
      * @throws MessagingException If determining counts fails
      */
+    public static int getUnread(final IMAPFolder imapFolder) throws MessagingException {
+        return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
+                    /*
+                     * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
+                     */
+                    throw new com.sun.mail.iap.BadCommandException("STATUS not supported");
+                }
+                /*
+                 * Encode the mbox as per RFC2060
+                 */
+                final Argument args = new Argument();
+                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                /*
+                 * Item arguments
+                 */
+                final Argument itemArgs = new Argument();
+                final String[] items = { "UNSEEN" };
+                for (int i = 0, len = items.length; i < len; i++) {
+                    itemArgs.writeAtom(items[i]);
+                }
+                args.writeArgument(itemArgs);
+                /*
+                 * Perform command
+                 */
+                final Response[] r = protocol.command("STATUS", args);
+                final Response response = r[r.length - 1];
+                /*
+                 * Look for STATUS responses
+                 */
+                int unread = -1;
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals("STATUS")) {
+                            final int status = parseStatusResponse(ir, "UNSEEN");
+                            if (status != -1) {
+                                unread = status;
+                            }
+                            r[i] = null;
+                        }
+                    }
+                }
+                /*
+                 * Dispatch remaining untagged responses
+                 */
+                protocol.notifyResponseHandlers(r);
+                protocol.handleResult(response);
+                return Integer.valueOf(unread);
+            }
+        })).intValue();
+    }
+
+    /**
+     * Gets total message count from given IMAP folder
+     * 
+     * @param imapFolder The IMAP folder
+     * @return The total message count
+     * @throws MessagingException If determining counts fails
+     */
     public static int getTotal(final IMAPFolder imapFolder) throws MessagingException {
         return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -519,7 +584,7 @@ public final class IMAPCommandsCollection {
                         }
                         final IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals("STATUS")) {
-                            final int status = parseTotalResponse(ir);
+                            final int status = parseStatusResponse(ir, "MESSAGES");
                             if (status != -1) {
                                 total = status;
                             }
@@ -582,10 +647,11 @@ public final class IMAPCommandsCollection {
      * .
      * 
      * @param statusResponse The <code>&quot;STATUS&quot;</code> IMAP response to parse.
+     * @param counterType The counter type; either <code>MESSAGES</code>, <code>RECENT</code> or <code>UNSEEN</code>
      * @return The  number of total messages
      * @throws ParsingException If parsing STATUS response fails
      */
-    static int parseTotalResponse(final Response statusResponse) throws ParsingException {
+    static int parseStatusResponse(final Response statusResponse, final String counterType) throws ParsingException {
         /*
          * Read until opening parenthesis or EOF
          */
@@ -603,7 +669,7 @@ public final class IMAPCommandsCollection {
         int total = -1;
         do {
             final String attr = statusResponse.readAtom();
-            if (attr.equalsIgnoreCase("MESSAGES")) {
+            if (attr.equalsIgnoreCase(counterType)) {
                 total = statusResponse.readNumber();
             }
         } while (statusResponse.readByte() != ')');
