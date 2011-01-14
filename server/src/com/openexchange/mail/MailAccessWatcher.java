@@ -150,11 +150,11 @@ public final class MailAccessWatcher {
      */
     public static void addMailAccess(final MailAccess<?, ?> mailAccess) {
         if (!initialized.get()) {
-            LOG.error("Mail connection watcher is not running. Aborting addMailAccess()");
+            LOG.warn("Mail connection watcher is not running. Aborting addMailAccess()");
             return;
         }
         /*
-         * Insert or update timestamp
+         * Insert or update time stamp
          */
         mailAccesses.put(mailAccess, Long.valueOf(System.currentTimeMillis()));
     }
@@ -166,10 +166,19 @@ public final class MailAccessWatcher {
      */
     public static void removeMailAccess(final MailAccess<?, ?> mailAccess) {
         if (!initialized.get()) {
-            LOG.error("Mail connection watcher is not running. Aborting removeMailAccess()");
+            LOG.warn("Mail connection watcher is not running. Aborting removeMailAccess()");
             return;
         }
         mailAccesses.remove(mailAccess);
+    }
+
+    /**
+     * Gets the number of currently tracked mail accesses.
+     * 
+     * @return The number of currently tracked mail accesses
+     */
+    public static int getNumberOfMailAccesses() {
+        return mailAccesses.size();
     }
 
     private static final String INFO_PREFIX = "UNCLOSED MAIL CONNECTION AFTER #N#msec:\n";
