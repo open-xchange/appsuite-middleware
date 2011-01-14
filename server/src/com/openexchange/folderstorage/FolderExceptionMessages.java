@@ -151,6 +151,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // No mail folder allowed below a public folder.
     public static final String NO_PUBLIC_MAIL_FOLDER_MSG = "No mail folder allowed below a public folder.";
 
+    // No such tree with identifier "%1$s".
+    public static final String TREE_NOT_FOUND_MSG = "No such tree with identifier \"%1$s\".";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

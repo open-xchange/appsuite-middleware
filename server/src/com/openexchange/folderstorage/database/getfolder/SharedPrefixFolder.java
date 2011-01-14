@@ -49,27 +49,25 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -108,32 +106,17 @@ public final class SharedPrefixFolder {
         } catch (final NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
-        final SearchIterator<FolderObject> searchIterator;
         try {
-            searchIterator =
-                OXFolderIteratorSQL.getVisibleSharedFolders(
-                    user.getId(),
-                    user.getGroups(),
-                    userConfiguration.getAccessibleModules(),
-                    sharedOwner,
-                    ctx,
-                    null,
-                    con);
-        } catch (final OXException e) {
+            return OXFolderIteratorSQL.hasVisibleSharedFolders(
+                user.getId(),
+                user.getGroups(),
+                userConfiguration.getAccessibleModules(),
+                sharedOwner,
+                ctx,
+                null,
+                con);
+        } catch (OXException e) {
             throw new FolderException(e);
-        } catch (final AbstractOXException e) {
-            throw new FolderException(e);
-        }
-        try {
-            return searchIterator.hasNext();
-        } catch (AbstractOXException e) {
-            throw new FolderException(e);
-        } finally {
-            try {
-                searchIterator.close();
-            } catch (final AbstractOXException e) {
-                LOG.error("Failed closing search iterator.", e);
-            }
         }
     }
 
@@ -142,13 +125,11 @@ public final class SharedPrefixFolder {
      * 
      * @param folderIdentifier The folder identifier starting with shared prefix
      * @param user The user
-     * @param userConfiguration The user configuration
      * @param ctx The context
-     * @param con The connection
      * @return The corresponding database folder with subfolders set
      * @throws FolderException If returning corresponding database folder fails
      */
-    public static DatabaseFolder getSharedPrefixFolder(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static DatabaseFolder getSharedPrefixFolder(final String folderIdentifier, final User user, final Context ctx) throws FolderException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -173,7 +154,29 @@ public final class SharedPrefixFolder {
         retval.setID(folderIdentifier);
         retval.setParentID(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
         retval.setGlobal(false);
+        retval.setSubfolderIDs(null);
+        retval.setSubscribedSubfolders(true);
+        return retval;
+    }
 
+    /**
+     * Gets the folder whose identifier starts with shared prefix.
+     * 
+     * @param folderIdentifier The folder identifier starting with shared prefix
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return The corresponding database folder with subfolders set
+     * @throws FolderException If returning corresponding database folder fails
+     */
+    public static int[] getSharedPrefixFolderSubfoldersAsInt(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int sharedOwner;
+        try {
+            sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
+        } catch (final NumberFormatException exc) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
+        }
         final Queue<FolderObject> q;
         try {
             q =
@@ -190,15 +193,52 @@ public final class SharedPrefixFolder {
         } catch (final OXException e) {
             throw new FolderException(e);
         }
-        final int size = q.size();
-        final Iterator<FolderObject> iter = q.iterator();
-        final List<String> subfolderIds = new ArrayList<String>(size);
-        for (int i = 0; i < size; i++) {
-            subfolderIds.add(String.valueOf(iter.next().getObjectID()));
+        final TIntArrayList ret = new TIntArrayList(q.size());
+        for (final FolderObject fo : q) {
+            ret.add(fo.getObjectID());
         }
-        retval.setSubfolderIDs(subfolderIds.toArray(new String[subfolderIds.size()]));
-        retval.setSubscribedSubfolders(!subfolderIds.isEmpty());
-        return retval;
+        return ret.toNativeArray();
+    }
+ 
+    /**
+     * Gets the folder whose identifier starts with shared prefix.
+     * 
+     * @param folderIdentifier The folder identifier starting with shared prefix
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return The corresponding database folder with subfolders set
+     * @throws FolderException If returning corresponding database folder fails
+     */
+    public static List<String[]> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int sharedOwner;
+        try {
+            sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
+        } catch (final NumberFormatException exc) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
+        }
+        final Queue<FolderObject> q;
+        try {
+            q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration.getAccessibleModules(),
+                    sharedOwner,
+                    ctx,
+                    null,
+                    con)).asQueue();
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+        final List<String[]> ret = new ArrayList<String[]>(q.size());
+        for (final FolderObject fo : q) {
+            ret.add(new String[] { String.valueOf(fo.getObjectID()), fo.getFolderName() });
+        }
+        return ret;
     }
 
 }

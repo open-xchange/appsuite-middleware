@@ -63,7 +63,7 @@ import com.openexchange.mail.permission.MailPermission;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailFolder implements Serializable {
+public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Serial Version UID
@@ -193,6 +193,32 @@ public class MailFolder implements Serializable {
     public MailFolder() {
         super();
         defaulFolderType = DefaultFolderType.NONE;
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            final MailFolder clone = (MailFolder) super.clone();
+            {
+                final MailPermission thisOwnPerm = this.ownPermission;
+                if (thisOwnPerm != null) {
+                    clone.ownPermission = (MailPermission) thisOwnPerm.clone();
+                }
+            }
+            {
+                final List<MailPermission> thisPerms = this.permissions;
+                if (thisPerms != null) {
+                    final List<MailPermission> l = new ArrayList<MailPermission>(thisPerms.size());
+                    for (MailPermission mailPermission : thisPerms) {
+                        l.add((MailPermission) mailPermission.clone());
+                    }
+                    clone.permissions = l;
+                }
+            }
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError("Clone failed although Cloneable is implemented.");
+        }
     }
 
     /**

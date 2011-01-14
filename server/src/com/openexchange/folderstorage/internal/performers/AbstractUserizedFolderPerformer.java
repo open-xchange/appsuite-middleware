@@ -257,11 +257,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         /*
          * Type
          */
+        final int createdBy = folder.getCreatedBy();
         final boolean isShared;
         {
-            final Type type = userizedFolder.getType();
-            if (SharedType.getInstance().equals(type) || ((userizedFolder.getCreatedBy() != getUserId()) && PrivateType.getInstance().equals(
-                type))) {
+            final Type type = folder.getType();
+            if (SharedType.getInstance().equals(type)) {
+                userizedFolder.setSubfolderIDs(new String[0]);
+                isShared = true;
+            } else if ((createdBy >= 0) && (createdBy != getUserId()) && PrivateType.getInstance().equals(type)) {
                 userizedFolder.setType(SharedType.getInstance());
                 userizedFolder.setSubfolderIDs(new String[0]);
                 isShared = true;
@@ -271,7 +274,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
         // Modify parent
         if (isShared) {
-            userizedFolder.setParentID(FolderObject.SHARED_PREFIX + userizedFolder.getCreatedBy());
+            userizedFolder.setParentID(FolderObject.SHARED_PREFIX + createdBy);
             userizedFolder.setDefault(false);
             
             // Remain tree if parent is viewable, too.

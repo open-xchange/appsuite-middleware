@@ -116,6 +116,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.oxfolder.OXFolderLoader;
+import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -182,7 +184,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             } while (null != nonExistingParents && nonExistingParents.length > 0);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new FolderException(e);
         }
     }
@@ -608,7 +610,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             if (StorageType.WORKING.equals(storageType)) {
                 if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
-                    retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                    retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, ctx);
                 } else {
                     /*
                      * A numeric folder identifier
@@ -690,7 +692,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 for (int index = 0; index < size; index++) {
                     final String folderIdentifier = folderIdentifiers.get(index);
                     if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
-                        ret[index] = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                        ret[index] = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, ctx);
                     } else {
                         /*
                          * A numeric folder identifier
@@ -710,23 +712,31 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 if (!map.isEmpty()) {
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
-                        final int index = map.get(folderObject.getObjectID());
-                        ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, con);
+                        if (null != folderObject) {
+                            final int index = map.get(folderObject.getObjectID());
+                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, con);
+                        }
                     }
                 }
                 /*
                  * Set proper tree identifier
                  */
                 for (final Folder folder : ret) {
-                    folder.setTreeID(treeId);
+                    if (null != folder) {
+                        folder.setTreeID(treeId);
+                    }
                 }
                 /*
                  * Return
                  */
-                final List<Folder> l = new ArrayList<Folder>(ret.length);
-                for (final Folder folder : ret) {
+                final int length = ret.length;
+                final List<Folder> l = new ArrayList<Folder>(length);
+                for (int i = 0; i < length; i++) {
+                    final Folder folder = ret[i];
                     if (null != folder) {
                         l.add(folder);
+                    } else {
+                        storageParameters.addWarning(FolderExceptionErrorMessage.NOT_FOUND.create(Integer.valueOf(folderIdentifiers.get(i)), treeId));
                     }
                 }
                 return l;
@@ -739,13 +749,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 list.add(getUnsignedInteger(folderIdentifier));
             }
             final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toNativeArray(), ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
-            final List<Folder> ret = new ArrayList<Folder>(folders.size());
-            for (final FolderObject fo : folders) {
-                final DatabaseFolder df = new DatabaseFolder(fo);
-                df.setTreeID(treeId);
-                ret.add(df);
+            final int size = folders.size();
+            final List<Folder> ret = new ArrayList<Folder>(size);
+            for (int i = 0; i < size; i++) {
+                final FolderObject fo = folders.get(i);
+                if (null == fo) {
+                    storageParameters.addWarning(FolderExceptionErrorMessage.NOT_FOUND.create(Integer.valueOf(list.get(i)), treeId));
+                } else {
+                    final DatabaseFolder df = new DatabaseFolder(fo);
+                    df.setTreeID(treeId);
+                    ret.add(df);
+                }
             }
-
             return ret;
         } catch (final FolderException e) {
             throw e;
@@ -871,13 +886,35 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             final Connection con = getConnection(storageParameters);
 
+            if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserConfiguration userConfiguration;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    } else {
+                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    }
+                }
+                final List<String[]> subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
+                int i = 0;
+                for (String[] sa : subfolderIds) {
+                    list.add(new DatabaseId(sa[0], i++, sa[1]));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
+
             final int parentId = Integer.parseInt(parentIdentifier);
 
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
-                final String[] subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder();
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(storageParameters.getUser().getLocale());
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
+                int i = 0;
+                for (String[] sa : subfolderIds) {
+                    list.add(new DatabaseId(sa[0], i++, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -897,10 +934,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final String[] subfolderIds = VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userConfiguration, ctx, con);
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userConfiguration, ctx, con);
+                final int size = subfolderIds.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int i = 0; i < size; i++) {
+                    final String[] sa = subfolderIds.get(i);
+                    list.add(new DatabaseId(sa[0], i, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -920,10 +959,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final String[] subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
+                final int size = subfolderIds.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int i = 0; i < size; i++) {
+                    final String[] sa = subfolderIds.get(i);
+                    list.add(new DatabaseId(sa[0], i, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -943,10 +984,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final String[] subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userConfiguration, ctx, con);
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userConfiguration, ctx, con);
+                final int size = subfolderIds.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int i = 0; i < size; i++) {
+                    final String[] sa = subfolderIds.get(i);
+                    list.add(new DatabaseId(sa[0], i, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -966,10 +1009,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final String[] subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userConfiguration, ctx, con);
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userConfiguration, ctx, con);
+                final int size = subfolderIds.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int i = 0; i < size; i++) {
+                    final String[] sa = subfolderIds.get(i);
+                    list.add(new DatabaseId(sa[0], i, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -989,18 +1034,43 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final String[] subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, con);
-                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
-                for (int i = 0; i < subfolderIds.length; i++) {
-                    list.add(new DatabaseId(subfolderIds[i], i, null));
+                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, con);
+                final int size = subfolderIds.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int i = 0; i < size; i++) {
+                    final String[] sa = subfolderIds.get(i);
+                    list.add(new DatabaseId(sa[0], i, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
 
-            final List<Integer> subfolderIds = FolderObject.getSubfolderIds(parentId, storageParameters.getContext(), con);
-            final List<FolderObject> subfolders = new ArrayList<FolderObject>(subfolderIds.size());
-            for (final Integer folderId : subfolderIds) {
-                subfolders.add(getFolderObject(folderId.intValue(), storageParameters.getContext(), con));
+            /*-
+             * IDs already sorted by default_flag DESC, fname
+             * 
+             * TODO: Ensure locale-specific ordering is maintained
+             */
+            final boolean doDBSorting = true;
+            if (doDBSorting) {
+                final List<IdAndName> idAndNames = OXFolderLoader.getSubfolderIdAndNames(parentId, storageParameters.getContext(), con);
+                final int size = idAndNames.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int i = 0; i < size; i++) {
+                    final IdAndName idAndName = idAndNames.get(i);
+                    list.add(new DatabaseId(idAndName.getFolderId(), i, idAndName.getName()));
+                }
+                return list.toArray(new SortableId[size]);
+            }
+            /*
+             * Ensure locale-specific ordering is maintained
+             */
+            final List<FolderObject> subfolders;
+            {
+                final List<Integer> subfolderIds = FolderObject.getSubfolderIds(parentId, storageParameters.getContext(), con);
+                final int[] arr = new int[subfolderIds.size()];
+                for (int i = 0; i < arr.length; i++) {
+                    arr[i] = subfolderIds.get(i).intValue();
+                }
+                subfolders = getFolderObjects(arr, storageParameters.getContext(), con);
             }
             final ServerSession session;
             {
@@ -1344,12 +1414,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     private static FolderObject getFolderObject(final int folderId, final Context ctx, final Connection con) throws OXException {
         if (!FolderCacheManager.isEnabled()) {
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
         }
         final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
         FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
         if (null == fo) {
-            fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+            fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
             cacheManager.putFolderObject(fo, ctx, false, null);
         }
         return fo;
@@ -1360,7 +1430,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             /*
              * OX folder cache not enabled
              */
-            return OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con);
+            return OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con, true, true);
         }
         /*
          * Load them either from cache or from database
@@ -1379,11 +1449,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
         }
         if (!toLoad.isEmpty()) {
-            final List<FolderObject> list = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.keys(), ctx, con);
+            final List<FolderObject> list = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.keys(), ctx, con, true, true);
             for (final FolderObject folderObject : list) {
-                final int index = toLoad.get(folderObject.getObjectID());
-                ret[index] = folderObject;
-                cacheManager.putFolderObject(folderObject, ctx, false, null);
+                if (null != folderObject) {
+                    final int index = toLoad.get(folderObject.getObjectID());
+                    ret[index] = folderObject;
+                    cacheManager.putFolderObject(folderObject, ctx, false, null);
+                }
             }
         }
         return Arrays.asList(ret);

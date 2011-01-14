@@ -75,10 +75,10 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -144,7 +144,7 @@ public final class SystemSharedFolder {
             final boolean hasNext = searchIterator.hasNext();
             retval.setSubfolderIDs(hasNext ? null : new String[0]);
             retval.setSubscribedSubfolders(hasNext);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new FolderException(e);
         } finally {
             try {
@@ -166,7 +166,7 @@ public final class SystemSharedFolder {
      * @return The subfolder identifiers of database folder representing system shared folder for given user
      * @throws FolderException If the database folder cannot be returned
      */
-    public static String[] getSystemSharedFolderSubfolder(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<String[]> getSystemSharedFolderSubfolder(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         /*
          * The system shared folder
          */
@@ -223,12 +223,13 @@ public final class SystemSharedFolder {
         final List<String> sortedDisplayNames = new ArrayList<String>(displayNames.keySet());
         Collections.sort(sortedDisplayNames, new DisplayNameComparator(user.getLocale()));
         final StringBuilder sb = new StringBuilder(8);
-        final List<String> subfolderIds = new ArrayList<String>(displayNames.size());
+        final List<String[]> subfolderIds = new ArrayList<String[]>(displayNames.size());
         for (final String displayName : sortedDisplayNames) {
             sb.setLength(0);
-            subfolderIds.add(sb.append(FolderObject.SHARED_PREFIX).append(displayNames.get(displayName).intValue()).toString());
+            final int createdBy = displayNames.get(displayName).intValue();
+            subfolderIds.add(new String[] {sb.append(FolderObject.SHARED_PREFIX).append(createdBy).toString(), displayName});
         }
-        return subfolderIds.toArray(new String[subfolderIds.size()]);
+        return subfolderIds;
     }
 
     /**

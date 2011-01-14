@@ -62,6 +62,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -79,6 +80,7 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
 import com.openexchange.folderstorage.internal.performers.CreatePerformer;
@@ -124,7 +126,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     private Cache globalCache;
 
-    private Cache userCache;
+    // private Cache userCache;
 
     /**
      * Initializes a new {@link CacheFolderStorage}.
@@ -143,7 +145,7 @@ public final class CacheFolderStorage implements FolderStorage {
         try {
             cacheService = CacheServiceRegistry.getServiceRegistry().getService(CacheService.class, true);
             globalCache = cacheService.getCache("GlobalFolderCache");
-            userCache = cacheService.getCache("UserFolderCache");
+            // userCache = cacheService.getCache("UserFolderCache");
         } catch (final ServiceException e) {
             throw new FolderException(e);
         } catch (final CacheException e) {
@@ -169,6 +171,8 @@ public final class CacheFolderStorage implements FolderStorage {
                 globalCache = null;
             }
         }
+        /*-
+         * 
         if (userCache != null) {
             try {
                 userCache.clear();
@@ -181,6 +185,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 userCache = null;
             }
         }
+        */
         if (cacheService != null) {
             cacheService = null;
         }
@@ -230,7 +235,7 @@ public final class CacheFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            removeFromCache(folderId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+            removeFromCache(folderId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
         }
     }
 
@@ -284,7 +289,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Refresh parent
          */
-        removeSingleFromCache(folder.getParentID(), treeId, storageParameters.getUserId(), storageParameters.getContextId());
+        removeSingleFromCache(folder.getParentID(), treeId, storageParameters.getUserId(), storageParameters.getSession());
         final Folder parentFolder = loadFolder(treeId, folder.getParentID(), StorageType.WORKING, storageParameters);
         if (parentFolder.isCacheable()) {
             putFolder(parentFolder, treeId, storageParameters);
@@ -302,8 +307,10 @@ public final class CacheFolderStorage implements FolderStorage {
                 key = newCacheKey(id, treeId, storageParameters.getContextId());
                 globalCache.put(key, folder);
             } else {
-                key = newCacheKey(id, treeId, storageParameters.getContextId(), storageParameters.getUserId());
-                userCache.put(key, folder);
+                final FolderMap folderMap = getFolderMapFrom(storageParameters.getSession());
+                if (null != folderMap) {
+                    folderMap.put(treeId, folder);
+                }
             }
         } catch (final CacheException e) {
             throw new FolderException(e);
@@ -321,10 +328,10 @@ public final class CacheFolderStorage implements FolderStorage {
      */
     public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws FolderException {
         if (singleOnly) {
-            removeSingleFromCache(id, treeId, session.getUserId(), session.getContextId());
+            removeSingleFromCache(id, treeId, session.getUserId(), session);
         } else {
             try {
-                removeFromCache(id, treeId, session.getUserId(), session.getContextId(), new PathPerformer(
+                removeFromCache(id, treeId, session, new PathPerformer(
                     new ServerSessionAdapter(session),
                     null,
                     registry));
@@ -334,12 +341,12 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    private void removeFromCache(final String id, final String treeId, final int userId, final int contextId, final PathPerformer pathPerformer) throws FolderException {
+    private void removeFromCache(final String id, final String treeId, final Session session, final PathPerformer pathPerformer) throws FolderException {
         if (null == id) {
             return;
         }
         try {
-            List<String> ids = Collections.singletonList(id);
+            List<String> ids;
             try {
                 if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
                     final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
@@ -364,18 +371,26 @@ public final class CacheFolderStorage implements FolderStorage {
                     ids = Collections.singletonList(id);
                 }
             }
+            final int contextId = session.getContextId();
+            final FolderMap folderMap = optFolderMapFrom(session);
             if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 for (final String folderId : ids) {
                     globalCache.remove(newCacheKey(folderId, treeId, contextId));
-                    userCache.remove(newCacheKey(folderId, treeId, contextId, userId));
+                    if (null != folderMap) {
+                        folderMap.remove(folderId, treeId);
+                    }
                 }
             } else {
                 for (final String folderId : ids) {
                     globalCache.remove(newCacheKey(folderId, treeId, contextId));
-                    userCache.remove(newCacheKey(folderId, treeId, contextId, userId));
+                    if (null != folderMap) {
+                        folderMap.remove(folderId, treeId);
+                    }
                     // Now for real tree, too
                     globalCache.remove(newCacheKey(folderId, FolderStorage.REAL_TREE_ID, contextId));
-                    userCache.remove(newCacheKey(folderId, FolderStorage.REAL_TREE_ID, contextId, userId));
+                    if (null != folderMap) {
+                        folderMap.remove(folderId, FolderStorage.REAL_TREE_ID);
+                    }
                 }
             }
         } catch (final CacheException e) {
@@ -388,21 +403,27 @@ public final class CacheFolderStorage implements FolderStorage {
      * 
      * @param id The folder identifier
      * @param treeId The tree identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      * @throws FolderException If removal fails
      */
-    public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId) throws FolderException {
+    public void removeSingleFromCache(final String id, final String treeId, final int userId, final Session session) throws FolderException {
         try {
+            final int contextId = session.getContextId();
             globalCache.remove(newCacheKey(id, treeId, contextId));
             if (userId > 0) {
-                userCache.remove(newCacheKey(id, treeId, contextId, userId));
+                final FolderMap folderMap = optFolderMapFrom(session);
+                if (null != folderMap) {
+                    folderMap.remove(id, treeId);
+                }
             }
             if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 // Now for real tree, too
                 globalCache.remove(newCacheKey(id, FolderStorage.REAL_TREE_ID, contextId));
                 if (userId > 0) {
-                    userCache.remove(newCacheKey(id, FolderStorage.REAL_TREE_ID, contextId, userId));
+                    final FolderMap folderMap = optFolderMapFrom(session);
+                    if (null != folderMap) {
+                        folderMap.remove(id, treeId);
+                    }
                 }
             }
         } catch (final CacheException e) {
@@ -488,8 +509,10 @@ public final class CacheFolderStorage implements FolderStorage {
                     final CacheKey key = newCacheKey(folderId, treeId, storageParameters.getContextId());
                     globalCache.remove(key);
                 } else {
-                    final CacheKey key = newCacheKey(folderId, treeId, storageParameters.getContextId(), storageParameters.getUserId());
-                    userCache.remove(key);
+                    final FolderMap folderMap = optFolderMapFrom(session);
+                    if (null != folderMap) {
+                        folderMap.remove(folderId, treeId);
+                    }
                 }
             } catch (final CacheException e) {
                 throw new FolderException(e);
@@ -499,10 +522,10 @@ public final class CacheFolderStorage implements FolderStorage {
          * Refresh
          */
         if (null != realParentId && !FolderStorage.ROOT_ID.equals(realParentId)) {
-            removeFromCache(realParentId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+            removeFromCache(realParentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
         }
         if (!FolderStorage.ROOT_ID.equals(parentId)) {
-            removeFromCache(parentId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+            removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
             final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, storageParameters);
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, treeId, storageParameters);
@@ -643,7 +666,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Invalidate cache entry
          */
-        removeFromCache(folderId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+        removeFromCache(folderId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
@@ -655,11 +678,10 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
-        final int contextId = storageParameters.getContextId();
         /*
          * Try from cache
          */
-        Folder folder = getCloneFromCache(treeId, folderId, storageParameters.getUserId(), contextId);
+        Folder folder = getCloneFromCache(treeId, folderId, storageParameters);
         if (null != folder) {
             return folder;
         }
@@ -683,7 +705,8 @@ public final class CacheFolderStorage implements FolderStorage {
         return folder;
     }
 
-    private Folder getCloneFromCache(final String treeId, final String folderId, final int userId, final int contextId) {
+    private Folder getCloneFromCache(final String treeId, final String folderId, final StorageParameters storageParameters) {
+        final int contextId = storageParameters.getContextId();
         /*
          * Try global cache key
          */
@@ -697,7 +720,8 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Try user cache key
          */
-        folder = (Folder) userCache.get(newCacheKey(folderId, treeId, contextId, userId));
+        final FolderMap folderMap = optFolderMapFrom(storageParameters.getSession());
+        folder = null == folderMap ? null : folderMap.get(folderId, treeId);
         if (null != folder) {
             /*
              * Return a cloned version from user-bound cache
@@ -711,7 +735,6 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
-        final int contextId = storageParameters.getContextId();
         final int size = folderIds.size();
         final Folder[] ret = new Folder[size];
         final TObjectIntHashMap<String> toLoad = new TObjectIntHashMap<String>(size);
@@ -723,7 +746,7 @@ public final class CacheFolderStorage implements FolderStorage {
              * Try from cache
              */
             final String folderId = folderIds.get(i);
-            final Folder folder = getCloneFromCache(treeId, folderId, storageParameters.getUserId(), contextId);
+            final Folder folder = getCloneFromCache(treeId, folderId, storageParameters);
             if (null == folder) {
                 /*
                  * Cache miss; Load from storage
@@ -935,12 +958,11 @@ public final class CacheFolderStorage implements FolderStorage {
          * Refresh/Invalidate folder
          */
         final int userId = storageParameters.getUserId();
-        final int contextId = storageParameters.getContextId();
         if (isMove) {
-            removeSingleFromCache(oldFolderId, treeId, userId, contextId);
-            removeFromCache(oldParentId, treeId, userId, contextId, newPathPerformer(storageParameters));
+            removeSingleFromCache(oldFolderId, treeId, userId, session);
+            removeFromCache(oldParentId, treeId, session, newPathPerformer(storageParameters));
         } else {
-            removeFromCache(newFolderId, treeId, userId, contextId, newPathPerformer(storageParameters));
+            removeFromCache(newFolderId, treeId, session, newPathPerformer(storageParameters));
         }
         /*
          * Put updated folder
@@ -952,7 +974,7 @@ public final class CacheFolderStorage implements FolderStorage {
              */
             final String newParentId = updatedFolder.getParentID();
             if (null != newParentId && !newParentId.equals(oldParentId)) {
-                removeSingleFromCache(newParentId, treeId, userId, contextId);
+                removeSingleFromCache(newParentId, treeId, userId, storageParameters.getSession());
             }
         }
         if (updatedFolder.isCacheable()) {
@@ -1212,5 +1234,37 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         return new StorageParametersImpl((ServerSession) session);
     }
+
+    private static FolderMap getFolderMapFrom(final Session session) {
+        return getFolderMapFrom(session, true);
+    }
+
+    private static FolderMap optFolderMapFrom(final Session session) {
+        return getFolderMapFrom(session, false);
+    }
+
+    private static final String PARAM_FOLDER_MAP = "com.openexchange.folderstorage.cache.folderMap";
+
+    private static FolderMap getFolderMapFrom(final Session session, final boolean createIfAbsent) {
+        if (null == session) {
+            return null;
+        }
+        if (!createIfAbsent) {
+            return (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+        }
+        FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+        if (null == map) {
+            synchronized (session) {
+                map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+                if (null == map) {
+                    map = new FolderMap(1024, 300, TimeUnit.SECONDS);
+                    session.setParameter(PARAM_FOLDER_MAP, map);
+                }
+            }
+        }
+        return map;
+    }
+
+    
 
 }

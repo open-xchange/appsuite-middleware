@@ -52,6 +52,8 @@ package com.openexchange.folderstorage.database.getfolder;
 import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
@@ -65,6 +67,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -136,41 +139,41 @@ public final class SystemPublicFolder {
              * Check for presence of virtual folders
              */
             {
-                final Queue<FolderObject> tmp =
-                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
                         FolderObject.CALENDAR,
                         user.getId(),
                         user.getGroups(),
                         userConfiguration,
                         ctx,
-                        con)).asQueue();
-                if (!tmp.isEmpty()) {
+                        con);
+                if (tmp) {
                     subfolderIds.add(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
                 }
             }
             {
-                final Queue<FolderObject> tmp =
-                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
                         FolderObject.CONTACT,
                         user.getId(),
                         user.getGroups(),
                         userConfiguration,
                         ctx,
-                        con)).asQueue();
-                if (!tmp.isEmpty()) {
+                        con);
+                if (tmp) {
                     subfolderIds.add(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
                 }
             }
             {
-                final Queue<FolderObject> tmp =
-                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
                         FolderObject.TASK,
                         user.getId(),
                         user.getGroups(),
                         userConfiguration,
                         ctx,
-                        con)).asQueue();
-                if (!tmp.isEmpty()) {
+                        con);
+                if (tmp) {
                     subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
                 }
             }
@@ -196,13 +199,88 @@ public final class SystemPublicFolder {
      * @return The database folder representing system public folder
      * @throws FolderException If the database folder cannot be returned
      */
-    public static String[] getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
-        final int[] ids = getSystemPublicFolderSubfoldersAsInt(user, userConfiguration, ctx, con);
-        final String[] ret = new String[ids.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = String.valueOf(ids[i]);
+    public static List<String[]> getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        try {
+            /*
+             * The system public folder
+             */
+            final Queue<FolderObject> q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                    FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+                    user.getId(),
+                    user.getGroups(),
+                    ctx,
+                    userConfiguration,
+                    null,
+                    con)).asQueue();
+            final List<String[]> subfolderIds = new ArrayList<String[]>(q.size());
+            final StringHelper sh = new StringHelper(user.getLocale());
+            /*
+             * Add global address book and subfolders
+             */
+            subfolderIds.add(toArray(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME)));
+            for (final FolderObject folderObject : q) {
+                subfolderIds.add(toArray(String.valueOf(folderObject.getObjectID()), folderObject.getFolderName()));
+            }
+            /*
+             * Check for presence of virtual folders
+             */
+            {
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
+                        FolderObject.CALENDAR,
+                        user.getId(),
+                        user.getGroups(),
+                        userConfiguration,
+                        ctx,
+                        con);
+                if (tmp) {
+                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME)));
+                }
+            }
+            {
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
+                        FolderObject.CONTACT,
+                        user.getId(),
+                        user.getGroups(),
+                        userConfiguration,
+                        ctx,
+                        con);
+                if (tmp) {
+                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME)));
+                }
+            }
+            {
+                final boolean tmp =
+                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
+                        FolderObject.TASK,
+                        user.getId(),
+                        user.getGroups(),
+                        userConfiguration,
+                        ctx,
+                        con);
+                if (tmp) {
+                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME)));
+                }
+            }
+            return subfolderIds;
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
-        return ret;
+    }
+
+    private static String[] toArray(final String... values) {
+        final int length = values.length;
+        String[] ret = new String[length];
+        System.arraycopy(values, 0, ret, 0, length);
+        return values;
     }
 
 }

@@ -51,6 +51,8 @@ package com.openexchange.mail.cache;
 
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -74,7 +76,7 @@ public final class MailAccessCache {
     /*
      * Field members
      */
-    private TimeoutConcurrentMap<Key, MailAccess<?, ?>> timeoutMap;
+    private TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> timeoutMap;
 
     private int defaultIdleSeconds;
 
@@ -136,7 +138,7 @@ public final class MailAccessCache {
             return;
         }
         try {
-            timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<?, ?>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
+            timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
         } catch (final ServiceException e) {
             throw new MailException(e);
         }
@@ -164,7 +166,7 @@ public final class MailAccessCache {
      * @param accountId The account ID
      * @return An active instance of {@link MailAccess} or <code>null</code>
      */
-    public MailAccess<?, ?> removeMailAccess(final Session session, final int accountId) {
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
         return timeoutMap.remove(getUserKey(session.getUserId(), accountId, session.getContextId()));
     }
 
@@ -176,7 +178,7 @@ public final class MailAccessCache {
      * @param mailAccess The mail access to put into cache
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      */
-    public boolean putMailAccess(final Session session, final int accountId, final MailAccess<?, ?> mailAccess) {
+    public boolean putMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         int idleTime = mailAccess.getCacheIdleSeconds();
         if (idleTime <= 0) {
             idleTime = defaultIdleSeconds;

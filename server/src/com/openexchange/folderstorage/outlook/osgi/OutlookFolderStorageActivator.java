@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -66,12 +67,15 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
+import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -81,8 +85,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class OutlookFolderStorageActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageActivator.class);
 
     private List<ServiceRegistration> serviceRegistrations;
 
@@ -97,7 +100,9 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, MailAccountStorageService.class, ThreadPoolService.class, MessagingServiceRegistry.class, UnifiedINBOXManagement.class, ConfigurationService.class, FileStorageServiceRegistry.class };
+        return new Class<?>[] {
+            DatabaseService.class, MailAccountStorageService.class, ThreadPoolService.class, MessagingServiceRegistry.class,
+            UnifiedINBOXManagement.class, ConfigurationService.class, FileStorageServiceRegistry.class };
     }
 
     @Override
@@ -144,14 +149,14 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             // Register services
             serviceRegistrations = new ArrayList<ServiceRegistration>(2);
             // DeleteListener was added statically
-            //serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
+            // serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
 
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("tree", OutlookFolderStorage.OUTLOOK_TREE_ID);
             serviceRegistrations.add(context.registerService(FolderStorage.class.getName(), new OutlookFolderStorage(), dictionary));
             {
-                final EventHandler eventHandler = new EventHandler() {
-                    
+                final EventHandler pushMailEventHandler = new EventHandler() {
+
                     public void handleEvent(final Event event) {
                         // final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                         // final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
@@ -161,11 +166,11 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
-                serviceRegistrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
+                serviceRegistrations.add(context.registerService(EventHandler.class.getName(), pushMailEventHandler, dict));
             }
             {
-                final EventHandler eventHandler = new EventHandler() {
-                    
+                final EventHandler folderEventHandler = new EventHandler() {
+
                     public void handleEvent(final Event event) {
                         // final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                         // final String folderId = (String) event.getProperty(FolderEventConstants.PROPERTY_FOLDER);
@@ -175,7 +180,36 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, FolderEventConstants.getAllTopics());
-                serviceRegistrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
+                serviceRegistrations.add(context.registerService(EventHandler.class.getName(), folderEventHandler, dict));
+            }
+            {
+                final EventHandler sessionEventHandler = new EventHandler() {
+
+                    public void handleEvent(final Event event) {
+                        final String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : container.values()) {
+                                dropMemoryTable(session);
+                            }
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                            dropMemoryTable((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : container.values()) {
+                                dropMemoryTable(session);
+                            }
+                        }
+                    }
+
+                    private void dropMemoryTable(final Session session) {
+                        MemoryTable.dropMemoryTableFrom(session);
+                    }
+
+                };
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                serviceRegistrations.add(context.registerService(EventHandler.class.getName(), sessionEventHandler, dict));
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

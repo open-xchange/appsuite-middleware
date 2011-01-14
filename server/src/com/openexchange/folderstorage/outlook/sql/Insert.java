@@ -141,6 +141,10 @@ public final class Insert {
      * @throws FolderException If insertion fails
      */
     public static void insertFolder(final int cid, final int tree, final int user, final Folder folder, final Connection con) throws FolderException {
+        if (null == con) {
+            insertFolder(cid, tree, user, folder);
+            return;
+        }
         final String folderId = folder.getID();
         // Insert folder data
         PreparedStatement stmt = null;

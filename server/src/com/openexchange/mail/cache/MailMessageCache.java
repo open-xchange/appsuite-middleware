@@ -272,7 +272,7 @@ public final class MailMessageCache {
     /**
      * Updates cached message
      * 
-     * @param uids The messages' identifiers
+     * @param uids The messages' identifiers; pass <code>null</code>  update all cached message of given folder
      * @param accountId The account ID
      * @param fullname The fullname
      * @param userId The user identifier
@@ -282,6 +282,10 @@ public final class MailMessageCache {
      */
     public void updateCachedMessages(final String[] uids, final int accountId, final String fullname, final int userId, final int cid, final MailListField[] changedFields, final Object[] newValues) {
         if (null == cache) {
+            return;
+        }
+        if (null == uids) {
+            updateCachedMessages(accountId, fullname, userId, cid, changedFields, newValues);
             return;
         }
         final CacheKey mapKey = getMapKey(userId, cid);
@@ -294,6 +298,45 @@ public final class MailMessageCache {
                 return;
             }
             final MailMessage[] mails = map.getValues(getEntryKey(accountId, fullname), uids);
+            if ((mails != null) && (mails.length > 0)) {
+                final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
+                for (final MailMessage mail : mails) {
+                    if (mail != null) {
+                        for (int i = 0; i < updaters.length; i++) {
+                            updaters[i].updateField(mail, newValues[i]);
+                        }
+                    }
+                }
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Updates cached message
+     * 
+     * @param accountId The account ID
+     * @param fullname The fullname
+     * @param userId The user identifier
+     * @param cid The context identifier
+     * @param changedFields The changed fields
+     * @param newValues The new values
+     */
+    public void updateCachedMessages(final int accountId, final String fullname, final int userId, final int cid, final MailListField[] changedFields, final Object[] newValues) {
+        if (null == cache) {
+            return;
+        }
+        final CacheKey mapKey = getMapKey(userId, cid);
+        final Lock writeLock = getLock(mapKey).writeLock();
+        writeLock.lock();
+        try {
+            final @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+                (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
+            if (map == null) {
+                return;
+            }
+            final MailMessage[] mails = map.getValues(getEntryKey(accountId, fullname));
             if ((mails != null) && (mails.length > 0)) {
                 final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
                 for (final MailMessage mail : mails) {
@@ -400,7 +443,7 @@ public final class MailMessageCache {
     /**
      * Removes the messages appearing in given UIDs belonging to a certain folder.
      * 
-     * @param uids The mail IDs
+     * @param uids The mail IDs; pass <code>null</code> to remove all associated with folder
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
@@ -419,7 +462,11 @@ public final class MailMessageCache {
             if (map == null) {
                 return;
             }
-            map.removeValues(getEntryKey(accountId, fullname), uids);
+            if (null == uids) {
+                map.removeValues(getEntryKey(accountId, fullname));
+            } else {
+                map.removeValues(getEntryKey(accountId, fullname), uids);
+            }
         } finally {
             writeLock.unlock();
         }

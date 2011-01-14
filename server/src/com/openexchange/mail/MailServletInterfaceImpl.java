@@ -108,6 +108,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException.Code;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -1155,6 +1156,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 OrderDirection.getOrderDirection(order),
                 searchTerm,
                 FIELDS_ID_INFO);
+        /*
+         * Proceed
+         */
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
         }
@@ -1293,32 +1297,33 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mail.setFlag(MailMessage.FLAG_DRAFT, true);
             }
         }
-        
-        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        if (isImport) {
-            final ArrayList<String> idList = new ArrayList<String>();
-            for (final MailMessage mail : mails) {
-                final MailImportResult mir = new MailImportResult();
-                mir.setMail(mail);
-                try {
-                    final String[] idStr = messageStorage.appendMessages(fullname, new MailMessage[] {mail});
-                    mir.setId(idStr[0]);
-                    idList.add(idStr[0]);
-                } catch (final MailException e) {
-                    mir.setException(e);                
-                }
-                mailImportResults.add(mir);
-            }
-            
-            final String[] ids = new String[idList.size()];
-            for (int i = 0; i < idList.size(); i++) {
-                ids[i] = idList.get(i);
-            }
-            
-            return ids;
-        } else {
+
+        if (!isImport) {
             return mailAccess.getMessageStorage().appendMessages(fullname, mails);
-        }        
+        }
+        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        final MailMessage[] tmp = new MailMessage[1];
+        final ArrayList<String> idList = new ArrayList<String>();
+        for (final MailMessage mail : mails) {
+            final MailImportResult mir = new MailImportResult();
+            mir.setMail(mail);
+            try {
+                tmp[0] = mail;
+                final String[] idStr = messageStorage.appendMessages(fullname, tmp);
+                mir.setId(idStr[0]);
+                idList.add(idStr[0]);
+            } catch (final MailException e) {
+                mir.setException(e);                
+            }
+            mailImportResults.add(mir);
+        }
+        
+        final String[] ids = new String[idList.size()];
+        for (int i = 0; i < idList.size(); i++) {
+            ids[i] = idList.get(i);
+        }
+        
+        return ids;        
     }
 
     @Override
@@ -1993,6 +1998,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Create runnable task
                  */
+                final Session s = session;
+                final org.apache.commons.logging.Log l = LOG;
                 final Runnable r = new Runnable() {
 
                     public void run() {
@@ -2000,7 +2007,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             final RetentionData retentionData = retentionService.newInstance();
                             retentionData.setStartTime(new Date(startTransport));
                             retentionData.setIdentifier(transport.getTransportConfig().getLogin());
-                            retentionData.setIPAddress(session.getLocalIp());
+                            retentionData.setIPAddress(s.getLocalIp());
                             retentionData.setSenderAddress(sentMail.getFrom()[0].getAddress());
                             final Set<InternetAddress> recipients = new HashSet<InternetAddress>(Arrays.asList(sentMail.getTo()));
                             recipients.addAll(Arrays.asList(sentMail.getCc()));
@@ -2017,9 +2024,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                              */
                             retentionService.storeOnTransport(retentionData);
                         } catch (final MailException e) {
-                            LOG.error(e.getMessage(), e);
+                            l.error(e.getMessage(), e);
                         } catch (final DataRetentionException e) {
-                            LOG.error(e.getMessage(), e);
+                            l.error(e.getMessage(), e);
                         }
                     }
                 };
@@ -2331,7 +2338,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 count += (composedMail.getBcc() == null ? 0 : composedMail.getBcc().length);
 
                 if (count > maxToCcBcc) {
-                    throw new MailException(MailException.Code.RECIPIENTS_EXCEEDED, maxToCcBcc);
+                    throw new MailException(MailException.Code.RECIPIENTS_EXCEEDED, Integer.valueOf(maxToCcBcc));
                 }
             }
         }
@@ -2395,22 +2402,36 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailListField[] FIELDS_COLOR_LABEL = new MailListField[] { MailListField.COLOR_LABEL };
 
     @Override
-    public void updateMessageColorLabel(final String folder, final String[] msgUID, final int newColorLabel) throws MailException {
+    public void updateMessageColorLabel(final String folder, final String[] mailIDs, final int newColorLabel) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();
-        mailAccess.getMessageStorage().updateMessageColorLabel(fullname, msgUID, newColorLabel);
+        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        final String[] ids;
+        if (null == mailIDs) {
+            if (messageStorage instanceof IMailMessageStorageBatch) {
+                final IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
+                ids = null;
+                batch.updateMessageColorLabel(fullname, newColorLabel);
+            } else {
+                ids = getAllMessageIDs(argument);
+                messageStorage.updateMessageColorLabel(fullname, ids, newColorLabel);
+            }
+        } else {
+            ids = mailIDs;
+            messageStorage.updateMessageColorLabel(fullname, ids, newColorLabel);
+        }
         postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false);
         /*
          * Update caches
          */
-        {
+        if (null != ids) {
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
             if (null != jsonMessageCache) {
-                final List<String> updateIds = new ArrayList<String>(msgUID.length);
-                for (int i = 0; i < msgUID.length; i++) {
-                    final String uid = msgUID[i];
+                final List<String> updateIds = new ArrayList<String>(ids.length);
+                for (int i = 0; i < ids.length; i++) {
+                    final String uid = ids[i];
                     if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
                         updateIds.add(uid);
                     }
@@ -2419,8 +2440,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     /*
                      * Update color label in JSON message cache
                      */
-                    jsonMessageCache.updateColorFlag(accountId, fullname, msgUID, newColorLabel, session);
+                    jsonMessageCache.updateColorFlag(accountId, fullname, ids, newColorLabel, session);
                 }
+            }
+        } else {
+            final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
+            if (null != jsonMessageCache) {
+                /*
+                 * Update color label in JSON message cache
+                 */
+                jsonMessageCache.updateColorFlag(accountId, fullname, newColorLabel, session);
             }
         }
         try {
@@ -2429,7 +2458,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * Update cache entries
                  */
                 MailMessageCache.getInstance().updateCachedMessages(
-                    msgUID,
+                    ids,
                     accountId,
                     fullname,
                     session.getUserId(),
@@ -2468,7 +2497,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();
-        mailAccess.getMessageStorage().updateMessageFlags(fullname, mailIDs, flagBits, flagVal);
+        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        final String[] ids;
+        if (null == mailIDs) {
+            if (messageStorage instanceof IMailMessageStorageBatch) {
+                final IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
+                ids = null;
+                batch.updateMessageFlags(fullname, flagBits, flagVal);
+            } else {
+                ids = getAllMessageIDs(argument);
+                messageStorage.updateMessageFlags(fullname, ids, flagBits, flagVal);
+            }
+        } else {
+            ids = mailIDs;
+            messageStorage.updateMessageFlags(fullname, ids, flagBits, flagVal);
+        }
         postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false);
         final boolean spamAction = (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0));
         if (spamAction) {
@@ -2478,12 +2521,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Update caches
          */
-        {
+        if (null != ids) {
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
             if (null != jsonMessageCache) {
-                final List<String> updateIds = new ArrayList<String>(mailIDs.length);
-                for (int i = 0; i < mailIDs.length; i++) {
-                    final String uid = mailIDs[i];
+                final List<String> updateIds = new ArrayList<String>(ids.length);
+                for (int i = 0; i < ids.length; i++) {
+                    final String uid = ids[i];
                     if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
                         updateIds.add(uid);
                     }
@@ -2505,6 +2548,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                 }
             }
+        } else {
+            final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
+            if (null != jsonMessageCache) {
+                int flags = flagBits;
+                if ((flags & MailMessage.FLAG_SEEN) > 0) {
+                    // Strip \Seen flag from bit mask
+                    flags = (flags & ~MailMessage.FLAG_SEEN);
+                    // Invoke special method for \Seen flag
+                    final int unread = mailAccess.getUnreadMessagesCount(fullname);
+                    jsonMessageCache.switchSeenFlag(accountId, fullname, flagVal, unread, session);
+                }
+                if (flags > 0) { // Any flags left after \Seen removed?
+                    jsonMessageCache.updateFlags(accountId, fullname, flags, flagVal, session);
+                }
+            }
         }
         if (spamAction) {
             /*
@@ -2512,8 +2570,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             try {
                 if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
-                    MailMessageCache.getInstance().removeMessages(mailIDs, accountId, fullname, session.getUserId(), contextId);
-
+                    MailMessageCache.getInstance().removeMessages(ids, accountId, fullname, session.getUserId(), contextId);
                 }
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
@@ -2525,7 +2582,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      * Update cache entries
                      */
                     MailMessageCache.getInstance().updateCachedMessages(
-                        mailIDs,
+                        ids,
                         accountId,
                         fullname,
                         session.getUserId(),
@@ -2684,6 +2741,28 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         
         return mars;
+    }
+
+    private String[] getAllMessageIDs(final FullnameArgument argument) throws MailException {
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        final MailMessage[] mails =
+            mailAccess.getMessageStorage().searchMessages(
+                fullname,
+                null,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                null,
+                FIELDS_ID_INFO);
+        if ((mails == null) || (mails.length == 0)) {
+            return new String[0];
+        }
+        final String[] ret = new String[mails.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = mails[i].getMailId();
+        }
+        return ret;
     }
 
 }

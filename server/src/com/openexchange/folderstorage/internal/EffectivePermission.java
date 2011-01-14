@@ -49,10 +49,8 @@
 
 package com.openexchange.folderstorage.internal;
 
-import java.util.Collections;
-import java.util.HashSet;
+import gnu.trove.TIntHashSet;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
@@ -76,7 +74,7 @@ public final class EffectivePermission implements Permission {
     /**
      * The allowed content types.
      */
-    private Set<Integer> allowedContentTypes;
+    private TIntHashSet allowedContentTypes;
 
     /**
      * The type of the referenced folder.
@@ -115,15 +113,16 @@ public final class EffectivePermission implements Permission {
         this.type = type;
         this.userConfig = userConfig;
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
-            this.allowedContentTypes = Collections.<Integer> emptySet();
+            this.allowedContentTypes = new TIntHashSet(1);
         } else {
-            this.allowedContentTypes = new HashSet<Integer>(allowedContentTypes.size() + 1);
+            final TIntHashSet set = new TIntHashSet(allowedContentTypes.size() + 1);
             for (final ContentType allowedContentType : allowedContentTypes) {
-                this.allowedContentTypes.add(Integer.valueOf(allowedContentType.getModule()));
+                set.add(allowedContentType.getModule());
             }
             // Module SYSTEM is allowed in any case
-            this.allowedContentTypes.add(Integer.valueOf(FolderObject.SYSTEM_MODULE));
-            this.allowedContentTypes.add(Integer.valueOf(FolderObject.UNBOUND));
+            set.add(FolderObject.SYSTEM_MODULE);
+            set.add(FolderObject.UNBOUND);
+            this.allowedContentTypes = set;
         }
     }
 
@@ -176,10 +175,11 @@ public final class EffectivePermission implements Permission {
     }
 
     private boolean hasModuleAccess() {
-        if (!userConfig.hasModuleAccess(getModule())) {
+        final int module = getModule();
+        if (!userConfig.hasModuleAccess(module)) {
             return false;
         }
-        return allowedContentTypes.isEmpty() ? true : allowedContentTypes.contains(Integer.valueOf(getModule()));
+        return allowedContentTypes.isEmpty() ? true : allowedContentTypes.contains(module);
     }
 
     private int getType() {
@@ -317,8 +317,7 @@ public final class EffectivePermission implements Permission {
             clone.userConfig = (UserConfiguration) userConfig.clone();
             clone.underlyingPerm = (Permission) underlyingPerm.clone();
             clone.allowedContentTypes =
-                (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? Collections.<Integer> emptySet() : new HashSet<Integer>(
-                    allowedContentTypes);
+                (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? new TIntHashSet(1) : new TIntHashSet(allowedContentTypes.toArray());
             return clone;
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());

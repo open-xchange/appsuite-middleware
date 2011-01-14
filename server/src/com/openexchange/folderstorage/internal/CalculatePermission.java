@@ -53,6 +53,8 @@ import gnu.trove.TIntIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.folderstorage.ContentType;
@@ -60,6 +62,8 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -119,16 +123,18 @@ public final class CalculatePermission {
         if (!toLoad.isEmpty()) {
             final int[] userIds = toLoad.keys();
             try {
-                final UserConfiguration[] configurations = userConfStorage.getUserConfiguration(context, UserStorage.getInstance().getUser(context, userIds));
+                final UserConfiguration[] configurations =
+                    userConfStorage.getUserConfiguration(context, UserStorage.getInstance().getUser(context, userIds));
                 for (int i = 0; i < configurations.length; i++) {
                     final int index = toLoad.get(userIds[i]);
-                    userizedPermissions[index] = new EffectivePermission(
-                        staticPermissions[index],
-                        id,
-                        type,
-                        contentType,
-                        configurations[i],
-                        Collections.<ContentType> emptyList());
+                    userizedPermissions[index] =
+                        new EffectivePermission(
+                            staticPermissions[index],
+                            id,
+                            type,
+                            contentType,
+                            configurations[i],
+                            Collections.<ContentType> emptyList());
                 }
             } catch (final UserConfigurationException e) {
                 final Log logger = LogFactory.getLog(CalculatePermission.class);
@@ -170,7 +176,7 @@ public final class CalculatePermission {
         }
         final Permission underlyingPermission;
         {
-            final int bits = -1; //folder.getBits();
+            final int bits = -1; // folder.getBits();
             if (bits >= 0) {
                 /*
                  * Get permission from bits
@@ -198,6 +204,70 @@ public final class CalculatePermission {
             folder.getContentType(),
             userConfiguration,
             allowedContentTypes);
+    }
+
+    public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws FolderException {
+        final UserConfiguration userConfiguration;
+        try {
+            userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
+        } catch (final UserConfigurationException e) {
+            throw new FolderException(e);
+        }
+        final Permission underlyingPermission;
+        final Type type = folder.getType();
+        final ContentType contentType = folder.getContentType();
+        {
+            final int bits = -1; // folder.getBits();
+            if (bits >= 0) {
+                /*
+                 * Get permission from bits
+                 */
+                final DummyPermission p = new DummyPermission();
+                p.setNoPermissions();
+                final int[] permissionBits = parsePermissionBits(bits);
+                p.setFolderPermission(permissionBits[0]);
+                p.setReadPermission(permissionBits[1]);
+                p.setWritePermission(permissionBits[2]);
+                p.setDeletePermission(permissionBits[3]);
+                p.setAdmin(permissionBits[4] > 0 ? true : false);
+                underlyingPermission = p;
+            } else {
+                /*
+                 * Check visibility by folder
+                 */
+                if (PrivateType.getInstance().equals(type)) {
+                    final int createdBy = folder.getCreatedBy();
+                    if (createdBy <= 0 || createdBy == user.getId()) {
+                        return hasAccess(contentType, userConfiguration, allowedContentTypes);
+                    }
+                }
+                /*
+                 * Check visibility by effective permission
+                 */
+                underlyingPermission = getMaxPermission(folder.getPermissions(), userConfiguration);
+            }
+        }
+        return new EffectivePermission(underlyingPermission, folder.getID(), type, contentType, userConfiguration, allowedContentTypes).isVisible();
+    }
+
+    private static boolean hasAccess(final ContentType contentType, final UserConfiguration userConfig, final java.util.List<ContentType> allowedContentTypes) {
+        final int module = contentType.getModule();
+        if (!userConfig.hasModuleAccess(module)) {
+            return false;
+        }
+        final Set<Integer> set;
+        if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
+            set = Collections.<Integer> emptySet();
+        } else {
+            set = new HashSet<Integer>(allowedContentTypes.size() + 1);
+            for (final ContentType allowedContentType : allowedContentTypes) {
+                set.add(Integer.valueOf(allowedContentType.getModule()));
+            }
+            // Module SYSTEM is allowed in any case
+            set.add(Integer.valueOf(FolderObject.SYSTEM_MODULE));
+            set.add(Integer.valueOf(FolderObject.UNBOUND));
+        }
+        return set.isEmpty() ? true : set.contains(Integer.valueOf(module));
     }
 
     private static final int[] mapping = { 0, 2, 4, -1, 8 };
@@ -237,7 +307,7 @@ public final class CalculatePermission {
         final UserConfiguration userConfiguration = session.getUserConfiguration();
         final Permission underlyingPermission;
         {
-            final int bits = -1;//folder.getBits();
+            final int bits = -1;// folder.getBits();
             if (bits >= 0) {
                 /*
                  * Get permission from bits

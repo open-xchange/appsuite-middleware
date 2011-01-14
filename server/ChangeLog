@@ -1,3 +1,7 @@
+* 2010-01-14 - thorben.betten@open-xchange.com
+
+ - Bugfix #17783: FIxed severe performance issues in bf_6_18_2
+
 * 2011-01-11 - marcus.klein@open-xchange.com
 
  - Bugfix #17924: Using correct identifier when deleting data from database if a user is removed.

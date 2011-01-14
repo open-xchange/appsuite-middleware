@@ -90,6 +90,7 @@ import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -112,7 +113,7 @@ import com.sun.mail.imap.Rights;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPFolderStorage.class);
 
@@ -222,6 +223,68 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     }
 
     /**
+     * Decrements unread message counter from cached IMAP folder.
+     * 
+     * @param fullName The IMAP folder full name
+     */
+    public void decrementUnreadMessageCount(final String fullName) {
+        FolderCache.decrementUnreadMessageCount(fullName, session, accountId);
+    }
+
+    /**
+     * Updates the cached IMAP folder if message has changed.
+     * 
+     * @param fullName The full name
+     * @param total The message count
+     * @return <code>true</code> if updated; otherwise <code>false</code>
+     */
+    public boolean updateCacheIfDiffer(final String fullName, final int total) {
+        final MailFolder mailFolder = FolderCache.optCachedFolder(fullName, this);
+        if (null != mailFolder) {
+            try {
+                if (mailFolder.getMessageCount() != total) {
+                    FolderCache.updateCachedFolder(fullName, this);
+                    return true;
+                }
+            } catch (final MailException e) {
+                LOG.warn("Updating IMAP folder cache failed.", e);
+                FolderCache.removeCachedFolder(fullName, session, accountId);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Updates the cached IMAP folder if message has changed.
+     * 
+     * @param fullName The full name
+     */
+    public void updateCacheIfDiffer(final String fullName) {
+        final MailFolder mailFolder = FolderCache.optCachedFolder(fullName, this);
+        if (null != mailFolder) {
+            try {
+                IMAPFolder folder = (IMAPFolder) (DEFAULT_FOLDER_ID.equals(fullName) ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
+                if (!folder.exists()) {
+                    folder = checkForNamespaceFolder(fullName);
+                }
+                if (null == folder) {
+                    FolderCache.removeCachedFolder(fullName, session, accountId);
+                    return;
+                }
+                if (mailFolder.getMessageCount() != IMAPCommandsCollection.getTotal(folder)) {
+                    FolderCache.updateCachedFolder(fullName, this, folder);
+                }
+            } catch (final MessagingException e) {
+                LOG.warn("Updating IMAP folder cache failed.", e);
+                FolderCache.removeCachedFolder(fullName, session, accountId);
+            } catch (final MailException e) {
+                LOG.warn("Updating IMAP folder cache failed.", e);
+                FolderCache.removeCachedFolder(fullName, session, accountId);
+            }
+        }
+    }
+
+    /**
      * Removes the IMAP folders denoted by specified set of fullnames.
      * 
      * @param modifiedFullnames The fullnames of the folders which have been modified
@@ -244,6 +307,54 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             separator = Character.valueOf(imapStore.getDefaultFolder().getSeparator());
         }
         return separator.charValue();
+    }
+
+    public int getUnreadCounter(final String fullName) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            return 0;
+        }
+        try {
+            IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
+            synchronized (f) {
+                if (!f.exists()) {
+                    f = checkForNamespaceFolder(fullName);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                    return 0;
+                }
+                if ((f.getType() & Folder.HOLDS_MESSAGES) == 0) {
+                    return 0;
+                }
+                return IMAPCommandsCollection.getUnread(f);
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
+    }
+
+    public int getTotalCounter(final String fullName) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            return 0;
+        }
+        try {
+            IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
+            synchronized (f) {
+                if (!f.exists()) {
+                    f = checkForNamespaceFolder(fullName);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                    return 0;
+                }
+                if ((f.getType() & Folder.HOLDS_MESSAGES) == 0) {
+                    return 0;
+                }
+                return IMAPCommandsCollection.getTotal(f);
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
     }
 
     @Override

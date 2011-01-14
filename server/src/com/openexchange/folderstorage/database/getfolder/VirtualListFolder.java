@@ -50,19 +50,19 @@
 package com.openexchange.folderstorage.database.getfolder;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -109,23 +109,10 @@ public final class VirtualListFolder {
             module = FolderObject.INFOSTORE;
         }
         // Return non-isEmpty()
-        final SearchIterator<FolderObject> searchIterator;
         try {
-            searchIterator =
-                OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(module, user.getId(), user.getGroups(), userConfiguration, ctx, con);
-        } catch (final OXException e) {
+            return OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(module, user.getId(), user.getGroups(), userConfiguration, ctx, con);
+        } catch (OXException e) {
             throw new FolderException(e);
-        }
-        try {
-            return searchIterator.hasNext();
-        } catch (AbstractOXException e) {
-            throw new FolderException(e);
-        } finally {
-            try {
-                searchIterator.close();
-            } catch (final AbstractOXException e) {
-                LOG.error("Failed closing search iterator.", e);
-            }
         }
     }
 
@@ -251,14 +238,42 @@ public final class VirtualListFolder {
      * @return The subfolder identifiers of database folder representing given virtual folder
      * @throws FolderException If returning database folder fails
      */
-    public static String[] getVirtualListFolderSubfolders(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<String[]> getVirtualListFolderSubfolders(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         /*
          * Get subfolders
          */
-        final int[] subfolderIds = getVirtualListFolderSubfoldersAsInt(folderId, user, userConfiguration, ctx, con);
-        final String[] ret = new String[subfolderIds.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = String.valueOf(subfolderIds[i]);
+        final int module;
+        if (FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID == folderId) {
+            // Task
+            module = FolderObject.TASK;
+        } else if (FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID == folderId) {
+            // Calendar
+            module = FolderObject.CALENDAR;
+        } else if (FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID == folderId) {
+            // Contact
+            module = FolderObject.CONTACT;
+        } else {
+            // Infostore
+            module = FolderObject.INFOSTORE;
+        }
+        final Queue<FolderObject> q;
+        try {
+            q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                    module,
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration,
+                    ctx,
+                    con)).asQueue();
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+        final List<String[]> ret = new ArrayList<String[]>(q.size());
+        for (final FolderObject folderObject : q) {
+            ret.add(new String[] { String.valueOf(folderObject.getObjectID()), folderObject.getFolderName()});
         }
         return ret;
     }

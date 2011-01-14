@@ -558,7 +558,7 @@ public final class OXFolderUtility {
                 OCLPermission.ADMIN_PERMISSION);
             ocls.add(pownerPerm);
         }
-        folderObj.setPermissions(ocls);
+        folderObj.setPermissionsNoClone(ocls);
     }
 
     private static final int[] SORTED_STD_MODULES =

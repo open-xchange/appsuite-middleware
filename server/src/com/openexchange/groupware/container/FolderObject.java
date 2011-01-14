@@ -73,9 +73,9 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
@@ -624,6 +624,16 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Applies given permissions to this folder.
+     * 
+     * @param permissions The permissions to set
+     */
+    public void setPermissionsNoClone(final List<OCLPermission> permissions) {
+        this.permissions = new ArrayList<OCLPermission>(permissions);
+        b_permissions = true;
+    }
+
+    /**
+     * Applies given permissions to this folder.
      * <p>
      * <b>NOTE</b>: A <b><small>DEEP</small></b> copy of specified permissions is passed to this folder not a reference.
      * 
@@ -980,9 +990,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return b_subfolderIds;
     }
 
-    @SuppressWarnings("unchecked")
     public void setSubfolderIds(final ArrayList<Integer> subfolderIds) {
-        this.subfolderIds = (ArrayList) subfolderIds.clone();
+        this.subfolderIds = new ArrayList<Integer>(subfolderIds);
         b_subfolderIds = true;
     }
 

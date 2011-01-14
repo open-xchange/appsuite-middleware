@@ -186,7 +186,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * No mail folder allowed below a public folder.
      */
-    NO_PUBLIC_MAIL_FOLDER(FolderExceptionMessages.NO_PUBLIC_MAIL_FOLDER_MSG, Category.PERMISSION, 1030);
+    NO_PUBLIC_MAIL_FOLDER(FolderExceptionMessages.NO_PUBLIC_MAIL_FOLDER_MSG, Category.PERMISSION, 1030),
+    /**
+     * No such tree with identifier "%1$s".
+     */
+    TREE_NOT_FOUND(FolderExceptionMessages.TREE_NOT_FOUND_MSG, Category.PERMISSION, 1031);
 
     private final Category category;
 

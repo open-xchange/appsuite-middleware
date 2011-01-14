@@ -57,6 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
@@ -66,10 +67,9 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
-
 /**
  * {@link OXFolderLoader}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderLoader {
@@ -77,7 +77,7 @@ public final class OXFolderLoader {
     private static final String TABLE_OT = "oxfolder_tree";
 
     private static final String TABLE_OP = "oxfolder_permissions";
-    
+
     private static final Pattern PAT_RPL_TABLE = Pattern.compile("#TABLE#");
 
     /**
@@ -94,7 +94,7 @@ public final class OXFolderLoader {
     public static FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx, final Connection readCon) throws OXException {
         return loadFolderObjectFromDB(folderId, ctx, readCon, true, false);
     }
-    
+
     /**
      * Loads specified folder from database.
      * 
@@ -111,8 +111,8 @@ public final class OXFolderLoader {
     }
 
     private static final String SQL_LOAD_F =
-        "SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
-    
+        "SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag FROM #TABLE# WHERE cid = ? AND fuid = ?";
+
     /**
      * Loads specified folder from database.
      * 
@@ -185,7 +185,6 @@ public final class OXFolderLoader {
         }
     }
 
-
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
      * 
@@ -247,6 +246,57 @@ public final class OXFolderLoader {
             if (closeCon) {
                 DBPool.closeReaderSilent(ctx, readCon);
             }
+        }
+    }
+
+    /**
+     * Gets the subfolder IDs and names of specified folder.
+     * 
+     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param ctx The context
+     * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
+     * @return The subfolder IDs of specified folder
+     * @throws SQLException If a SQL error occurs
+     * @throws DBPoolingException If a pooling error occurs
+     */
+    public static final List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+        return getSubfolderIdAndNames(folderId, ctx, readConArg, TABLE_OT);
+    }
+
+    private static final String SQL_SEL2 = "SELECT fuid, fname FROM #TABLE# WHERE cid = ? AND parent = ? ORDER BY default_flag DESC, fname";
+
+    /**
+     * Gets the subfolder IDs and names of specified folder.
+     * 
+     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param ctx The context
+     * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
+     * @param table The folder's working or backup table name
+     * @return The subfolder IDs of specified folder
+     * @throws SQLException If a SQL error occurs
+     * @throws DBPoolingException If a pooling error occurs
+     */
+    public static final List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+        Connection readCon = readConArg;
+        boolean closeCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (readCon == null) {
+                readCon = DBPool.pickup(ctx);
+                closeCon = true;
+            }
+            stmt = readCon.prepareStatement(SQL_SEL2.replaceFirst("#TABLE#", table));
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            rs = stmt.executeQuery();
+            final List<IdAndName> retval = new ArrayList<IdAndName>();
+            while (rs.next()) {
+                retval.add(new IdAndName(rs.getInt(1), rs.getString(2)));
+            }
+            return retval;
+        } finally {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
         }
     }
 
@@ -313,6 +363,75 @@ public final class OXFolderLoader {
             }
         }
         return -1;
+    }
+
+    public static final class IdAndName {
+
+        private final int fuid;
+
+        private final String fname;
+
+        private final int hash;
+
+        IdAndName(int fuid, String fname) {
+            super();
+            this.fuid = fuid;
+            this.fname = fname;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((fname == null) ? 0 : fname.hashCode());
+            result = prime * result + fuid;
+            this.hash = result;
+        }
+
+        /**
+         * Gets the folder ID
+         * 
+         * @return The folder ID
+         */
+        public int getFolderId() {
+            return fuid;
+        }
+
+        /**
+         * Gets the folder name
+         * 
+         * @return The folder name
+         */
+        public String getName() {
+            return fname;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof IdAndName)) {
+                return false;
+            }
+            IdAndName other = (IdAndName) obj;
+            if (fname == null) {
+                if (other.fname != null) {
+                    return false;
+                }
+            } else if (!fname.equals(other.fname)) {
+                return false;
+            }
+            if (fuid != other.fuid) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }

@@ -51,12 +51,15 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TObjectProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -68,18 +71,95 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
-
 /**
  * {@link OXFolderBatchLoader}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderBatchLoader {
 
+    private static abstract class ErrorAwareTObjectProcedure<V> implements TObjectProcedure<V> {
+
+        protected OXFolderException error;
+
+        protected ErrorAwareTObjectProcedure() {
+            super();
+        }
+
+        /**
+         * Gets the possible error.
+         * 
+         * @return The error or <code>null</code> if no error occurred
+         */
+        public OXFolderException getError() {
+            return error;
+        }
+
+    }
+
+    private static final class FolderPermissionProcedure extends ErrorAwareTObjectProcedure<FolderObject> {
+
+        private final Context ctx;
+
+        private final TIntObjectHashMap<List<OCLPermission>> folderPermissions;
+
+        private final Connection readCon;
+
+        public FolderPermissionProcedure(final Context ctx, final Connection readCon, final TIntObjectHashMap<List<OCLPermission>> folderPermissions) {
+            this.ctx = ctx;
+            this.folderPermissions = folderPermissions;
+            this.readCon = readCon;
+        }
+
+        public boolean execute(final FolderObject fo) {
+            final int id = fo.getObjectID();
+            final List<OCLPermission> permissions = folderPermissions.get(id);
+            try {
+                fo.setPermissionsNoClone(permissions == null ? Arrays.asList(OXFolderLoader.getFolderPermissions(id, ctx, readCon)) : permissions);
+                return true;
+            } catch (final DBPoolingException e) {
+                error = new OXFolderException(e);
+            } catch (final SQLException e) {
+                error = new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            }
+            return false;
+        }
+    }
+
+    private static final class SubfolderProcedure extends ErrorAwareTObjectProcedure<FolderObject> {
+
+        private final Context ctx;
+
+        private final Connection readCon;
+
+        private final TIntObjectHashMap<ArrayList<Integer>> subfolderIds;
+
+        public SubfolderProcedure(final Context ctx, final Connection readCon, final TIntObjectHashMap<ArrayList<Integer>> subfolderIds) {
+            this.ctx = ctx;
+            this.readCon = readCon;
+            this.subfolderIds = subfolderIds;
+        }
+
+        public boolean execute(final FolderObject fo) {
+            final int id = fo.getObjectID();
+            final ArrayList<Integer> ids = subfolderIds.get(id);
+            try {
+                fo.setSubfolderIds(ids == null ? OXFolderLoader.getSubfolderIds(id, ctx, readCon) : ids);
+                return true;
+            } catch (final DBPoolingException e) {
+                error = new OXFolderException(e);
+            } catch (final SQLException e) {
+                error = new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            }
+            return false;
+        }
+
+    }
+
     private static final String TABLE_OT = "oxfolder_tree";
 
     private static final String TABLE_OP = "oxfolder_permissions";
-    
+
     private static final Pattern PAT_RPL_TABLE = Pattern.compile("#TABLE#");
 
     /**
@@ -96,7 +176,7 @@ public final class OXFolderBatchLoader {
     public static List<FolderObject> loadFolderObjectsFromDB(final int[] folderIds, final Context ctx, final Connection readCon) throws OXException {
         return loadFolderObjectsFromDB(folderIds, ctx, readCon, true, false);
     }
-    
+
     /**
      * Loads specified folder from database.
      * 
@@ -111,7 +191,9 @@ public final class OXFolderBatchLoader {
     public static final List<FolderObject> loadFolderObjectsFromDB(final int[] folderIds, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList) throws OXException {
         return loadFolderObjectsFromDB(folderIds, ctx, readConArg, loadPermissions, loadSubfolderList, TABLE_OT, TABLE_OP);
     }
-    
+
+    private static final int LIMIT = 1000;
+
     /**
      * Loads specified folder from database.
      * 
@@ -129,19 +211,76 @@ public final class OXFolderBatchLoader {
         try {
             Connection readCon = readConArg;
             boolean closeCon = false;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
             try {
                 if (readCon == null) {
                     readCon = DBPool.pickup(ctx);
                     closeCon = true;
                 }
+                final FolderObject[] array = new FolderObject[folderIds.length];
+                int pos = 0;
+                if ((folderIds.length - pos) > LIMIT) {
+                    final TIntIntHashMap indexes = new TIntIntHashMap(folderIds.length);
+                    for (int i = 0; i < folderIds.length; i++) {
+                        indexes.put(folderIds[i], i);
+                    }
+                    /*
+                     * Chunked loading
+                     */
+                    do {
+                        final int[] fids = new int[LIMIT];
+                        System.arraycopy(folderIds, pos, fids, 0, LIMIT);
+                        pos += LIMIT;
+                        final TIntObjectHashMap<FolderObject> map = loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+                        for (int i = 0; i < fids.length; i++) {
+                            final int fuid = fids[i];
+                            final FolderObject fo = map.get(fuid);
+                            array[indexes.get(fuid)] = fo;
+                        }
+                    } while ((folderIds.length - pos) > LIMIT);
+                    if (pos < folderIds.length) {
+                        final int len = folderIds.length - pos;
+                        final int[] fids = new int[len];
+                        System.arraycopy(folderIds, pos, fids, 0, len);
+                        final TIntObjectHashMap<FolderObject> map = loadFolderObjectsFromDB0(fids, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+                        for (int i = 0; i < fids.length; i++) {
+                            final int fuid = fids[i];
+                            final FolderObject fo = map.get(fuid);
+                            array[indexes.get(fuid)] = fo;
+                        }
+                    }
+                } else {
+                    final TIntObjectHashMap<FolderObject> map = loadFolderObjectsFromDB0(folderIds, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+                    for (int i = 0; i < folderIds.length; i++) {
+                        final int fuid = folderIds[i];
+                        final FolderObject fo = map.get(fuid);
+                        array[i] = fo;
+                    }
+                }
+                /*
+                 * Return list
+                 */
+                return Arrays.asList(array);
+            } finally {
+                if (closeCon) {
+                    DBPool.closeReaderSilent(ctx, readCon);
+                }
+            }
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(e);
+        }
+    }
+
+    private static final TIntObjectHashMap<FolderObject> loadFolderObjectsFromDB0(final int[] folderIds, final Context ctx, final Connection readCon, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
+        try {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
                 /*
                  * Compose statement
                  */
                 {
                     final StringBuilder sb = new StringBuilder(512);
-                    sb.append("SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag");
+                    sb.append("SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag, t.fuid ");
                     sb.append("FROM #TABLE# AS t INNER JOIN (");
                     sb.append("SELECT ? AS fuid");
                     for (int i = 1; i < folderIds.length; i++) {
@@ -156,10 +295,11 @@ public final class OXFolderBatchLoader {
                 }
                 stmt.setInt(pos, ctx.getContextId());
                 rs = stmt.executeQuery();
-                final List<FolderObject> list = new ArrayList<FolderObject>(folderIds.length);
                 pos = 0;
+                final TIntObjectHashMap<FolderObject> folders = new TIntObjectHashMap<FolderObject>();
                 while (rs.next()) {
-                    final FolderObject folderObj = new FolderObject(rs.getString(2), folderIds[pos++], rs.getInt(3), rs.getInt(4), rs.getInt(6));
+                    final int fuid = rs.getInt(12);
+                    final FolderObject folderObj = new FolderObject(rs.getString(2), fuid, rs.getInt(3), rs.getInt(4), rs.getInt(6));
                     folderObj.setParentFolderID(rs.getInt(1));
                     folderObj.setCreatedBy(parseStringValue(rs.getString(6), ctx));
                     folderObj.setCreationDate(new Date(rs.getLong(5)));
@@ -173,23 +313,31 @@ public final class OXFolderBatchLoader {
                     } else {
                         folderObj.setDefaultFolder(defaultFolder > 0);
                     }
-                    list.add(folderObj);
+                    folders.put(fuid, folderObj);
                 }
                 if (loadSubfolderList) {
-                    final TIntObjectHashMap<ArrayList<Integer>> map = getSubfolderIds(folderIds, ctx, readCon, table);
-                    for (final FolderObject fo : list) {
-                        fo.setSubfolderIds(map.get(fo.getObjectID()));
+                    final SubfolderProcedure procedure =
+                        new SubfolderProcedure(ctx, readCon, getSubfolderIds(folderIds, ctx, readCon, table));
+                    if (!folders.forEachValue(procedure)) {
+                        final OXFolderException error = procedure.getError();
+                        if (null != error) {
+                            throw error;
+                        }
                     }
                 }
                 if (loadPermissions) {
-                    final TIntObjectHashMap<List<OCLPermission>> map = getFolderPermissions(folderIds, ctx, readCon, permTable);
-                    for (final FolderObject fo : list) {
-                        fo.setPermissions(map.get(fo.getObjectID()));
+                    final FolderPermissionProcedure procedure =
+                        new FolderPermissionProcedure(ctx, readCon, getFolderPermissions(folderIds, ctx, readCon, permTable));
+                    if (!folders.forEachValue(procedure)) {
+                        final OXFolderException error = procedure.getError();
+                        if (null != error) {
+                            throw error;
+                        }
                     }
                 }
-                return list;
+                return folders;
             } finally {
-                closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+                closeSQLStuff(rs, stmt);
             }
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
@@ -197,7 +345,6 @@ public final class OXFolderBatchLoader {
             throw new OXFolderException(e);
         }
     }
-
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
@@ -241,7 +388,7 @@ public final class OXFolderBatchLoader {
                 for (int i = 1; i < folderIds.length; i++) {
                     sb.append(" UNION ALL SELECT ?");
                 }
-                sb.append(") AS x ON t.fuid = x.fuid WHERE cid = ?");
+                sb.append(") AS x ON p.fuid = x.fuid WHERE cid = ?");
                 stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sb.toString()).replaceFirst(table));
             }
             int pos = 1;

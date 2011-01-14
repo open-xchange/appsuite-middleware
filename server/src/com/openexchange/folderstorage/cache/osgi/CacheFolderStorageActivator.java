@@ -220,7 +220,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     }
                 }
             };
-            final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
             eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
         }
@@ -229,13 +229,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 
                 public void handleEvent(final Event event) {
                     final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
-                    final Integer contextId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_CONTEXT));
+                    // final Integer contextId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_CONTEXT));
                     final Integer userId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_USER));
                     final String folderId = (String) event.getProperty(FolderEventConstants.PROPERTY_FOLDER);
                     final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
                     try {
                         if (null == session) {
-                            tmp.removeSingleFromCache(folderId, FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue());
+                            tmp.removeSingleFromCache(folderId, FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), session);
                         } else {
                             tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                         }
@@ -244,7 +244,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     }
                 }
             };
-            final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, FolderEventConstants.getAllTopics());
             eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
         }
