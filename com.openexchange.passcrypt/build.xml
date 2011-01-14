@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="com.openexchange.secret.recovery.mail" default="install" basedir=".">
+<project name="com.openexchange.passcrypt" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -15,7 +15,7 @@
 
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-secret-recovery-mail-${version}"/>
+    <property name="composite.name" value="open-xchange-passcrypt-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>

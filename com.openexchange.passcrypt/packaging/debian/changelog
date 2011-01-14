@@ -1,4 +1,4 @@
-open-xchange-secret-recovery-mail (6.18.2.0-1) unstable; urgency=low
+open-xchange-passcrypt (6.19.0.0-1) unstable; urgency=low
 
   * initial version.
 

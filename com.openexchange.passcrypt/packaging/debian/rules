@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
-# Build open-xchange-secret-recovery-mail
+# Build open-xchange-passcrypt
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-secret-recovery-mail
+oxroot=$(CURDIR)/debian/open-xchange-passcrypt
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
