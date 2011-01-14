@@ -1,6 +1,7 @@
 * 2011-01-14 - thorben.betten@open-xchange.com
 
  - Bugfix #17997: Throwing appropriate error
+ - Bugfix #17991: Removing script tags in HTML header prior to obtaining a validated HTML representation
 
 * 2011-01-13 - thorben.betten@open-xchange.com
 

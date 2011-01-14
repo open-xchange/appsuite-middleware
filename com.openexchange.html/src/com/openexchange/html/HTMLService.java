@@ -190,6 +190,14 @@ public interface HTMLService {
     String getConformHTML(String htmlContent, String charset, boolean replaceUrls);
 
     /**
+     * Drops script tags in HTML content's header.
+     * 
+     * @param htmlContent The HTML content
+     * @return The HTML content with script tags removed
+     */
+    String dropScriptTagsInHeader(String htmlContent);
+
+    /**
      * Pretty prints specified HTML content.
      * 
      * @param htmlContent The HTML content

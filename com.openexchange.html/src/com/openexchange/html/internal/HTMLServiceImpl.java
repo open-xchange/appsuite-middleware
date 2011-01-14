@@ -168,7 +168,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 return sb.toString();
             }
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
         return content;
@@ -648,6 +648,29 @@ public final class HTMLServiceImpl implements HTMLService {
             LOG.error(e.getMessage(), e);
             return htmlContent;
         }
+    }
+
+    private static final Pattern PATTERN_BODY_START = Pattern.compile(Pattern.quote("<body"), Pattern.CASE_INSENSITIVE);
+
+    public String dropScriptTagsInHeader(final String htmlContent) {
+        final Matcher m1 = PATTERN_BODY_START.matcher(htmlContent);
+        return dropScriptTagsInHeader(htmlContent, m1.find() ? m1.start() : htmlContent.length());
+    }
+
+    private static final Pattern PATTERN_SCRIPT_TAG = Pattern.compile("<script[^>]*>" + ".*?" + "</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private String dropScriptTagsInHeader(final String htmlContent, final int end) {
+        final Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
+        if (!m.find() || m.end() >= end) {
+            return htmlContent;
+        }
+        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        do {
+            mr.appendLiteralReplacement(sb, "");
+        } while (m.find() && m.end() < end);
+        mr.appendTail(sb);
+        return sb.toString();
     }
     
     public String getConformHTML(final String htmlContent, final String charset) {

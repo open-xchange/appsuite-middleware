@@ -157,21 +157,26 @@ public final class HTMLProcessing {
         String retval = null;
         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
         if (isHtml) {
-            retval = htmlService.getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset, false);
-            if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
-                /*
-                 * Filter according to white-list
-                 */
-                retval = htmlService.filterWhitelist(retval);
-                
-                if (!usm.isAllowHTMLImages()) {
-                    retval = htmlService.filterExternalImages(retval, modified);
-                }
-                /*
-                 * Filter inlined images
-                 */
-                if (mailPath != null && session != null) {
-                    retval = filterInlineImages(retval, session, mailPath);
+            if (DisplayMode.RAW.equals(mode)) {
+                retval = content;
+            } else {
+                retval = htmlService.dropScriptTagsInHeader(content);
+                retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
+                if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
+                    /*
+                     * Filter according to white-list
+                     */
+                    retval = htmlService.filterWhitelist(retval);
+                    
+                    if (!usm.isAllowHTMLImages()) {
+                        retval = htmlService.filterExternalImages(retval, modified);
+                    }
+                    /*
+                     * Filter inlined images
+                     */
+                    if (mailPath != null && session != null) {
+                        retval = filterInlineImages(retval, session, mailPath);
+                    }
                 }
             }
             // if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
@@ -238,7 +243,7 @@ public final class HTMLProcessing {
      *            <code>Link&nbsp;[www.somewhere.com]</code>
      * @return The plain text representation of specified HTML content
      */
-    public static String html2text(String htmlContent, boolean appendHref) {
+    public static String html2text(final String htmlContent, final boolean appendHref) {
         return ServerServiceRegistry.getInstance().getService(HTMLService.class).html2text(htmlContent, appendHref);
     }
 
