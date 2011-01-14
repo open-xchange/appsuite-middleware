@@ -534,7 +534,7 @@ public final class MailFolderStorage implements FolderStorage {
                             rootFolder,
                             accountId,
                             mailAccess.getMailConfig(),
-                            session.getUser().getLocale(),
+                            storageParameters,
                             null);
                     addWarnings(mailAccess, storageParameters);
                     hasSubfolders = rootFolder.hasSubfolders();
@@ -560,7 +560,7 @@ public final class MailFolderStorage implements FolderStorage {
                         mailFolder,
                         accountId,
                         mailAccess.getMailConfig(),
-                        session.getUser().getLocale(),
+                        storageParameters,
                         new MailAccessFullnameProvider(mailAccess));
                 hasSubfolders = mailFolder.hasSubfolders();
                 /*

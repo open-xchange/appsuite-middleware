@@ -49,13 +49,13 @@
 
 package com.openexchange.folderstorage.mail;
 
-import java.util.Locale;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
@@ -65,9 +65,19 @@ import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -84,13 +94,15 @@ public final class MailFolderImpl extends AbstractFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * The mail folder content type.
      */
     public static enum MailFolderType {
-        NONE(MailContentType.getInstance(), 0),
-        ROOT(SystemContentType.getInstance(), 0),
-        INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
+        NONE(MailContentType.getInstance(), 0), ROOT(SystemContentType.getInstance(), 0), INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
         DRAFTS(DraftsContentType.getInstance(), 9),
         SENT(SentContentType.getInstance(), 10),
         SPAM(SpamContentType.getInstance(), 11),
@@ -127,14 +139,15 @@ public final class MailFolderImpl extends AbstractFolder {
 
     private MailFolderType mailFolderType;
 
-    private boolean cacheable;
+    private final boolean cacheable;
 
-    /**
-     * Initializes an empty {@link MailFolderImpl}.
-     */
-    public MailFolderImpl() {
-        super();
-    }
+    private final String fullName;
+
+    private final int accountId;
+
+    private final int userId;
+
+    private final int contextId;
 
     private static final int BIT_USER_FLAG = (1 << 29);
 
@@ -146,17 +159,41 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param mailFolder The underlying mail folder
      * @param accountId The account identifier
      * @param mailConfig The mail configuration
+     * @param user The user
+     * @param context The context
      * @param fullnameProvider The (optional) fullname provider
      * @throws FolderException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final Locale locale, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
+        this(mailFolder, accountId, mailConfig, params.getUser(), params.getContext(), fullnameProvider);
+    }
+
+    /**
+     * Initializes a new {@link MailFolderImpl} from given mail folder.
+     * <p>
+     * Subfolder identifiers and tree identifier are not set within this constructor.
+     * 
+     * @param mailFolder The underlying mail folder
+     * @param accountId The account identifier
+     * @param mailConfig The mail configuration
+     * @param user The user
+     * @param context The context
+     * @param fullnameProvider The (optional) fullname provider
+     * @throws FolderException If creation fails
+     */
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
         super();
-        final String fullname = mailFolder.getFullname();
-        id = MailFolderUtility.prepareFullname(accountId, fullname);
-        name = "INBOX".equals(fullname) ? new StringHelper(locale).getString(MailStrings.INBOX) : mailFolder.getName();
+        this.accountId = accountId;
+        userId = user.getId();
+        contextId = context.getContextId();
+        fullName = mailFolder.getFullname();
+        id = MailFolderUtility.prepareFullname(accountId, fullName);
+        name = "INBOX".equals(fullName) ? new StringHelper(user.getLocale()).getString(MailStrings.INBOX) : mailFolder.getName();
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         parent =
-            mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
+            mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(
+                accountId,
+                mailFolder.getParentFullname());
         final MailPermission[] mailPermissions = mailFolder.getPermissions();
         permissions = new Permission[mailPermissions.length];
         for (int i = 0; i < mailPermissions.length; i++) {
@@ -217,20 +254,20 @@ public final class MailFolderImpl extends AbstractFolder {
                 } else {
                     mailFolderType = MailFolderType.NONE;
                 }
-            } else if (null != fullname) {
+            } else if (null != fullName) {
                 if (null == fullnameProvider) {
                     mailFolderType = MailFolderType.ROOT;
                 } else {
                     try {
-                        if (fullname.equals(fullnameProvider.getDraftsFolder())) {
+                        if (fullName.equals(fullnameProvider.getDraftsFolder())) {
                             mailFolderType = MailFolderType.DRAFTS;
-                        } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
+                        } else if (fullName.equals(fullnameProvider.getINBOXFolder())) {
                             mailFolderType = MailFolderType.INBOX;
-                        } else if (fullname.equals(fullnameProvider.getSentFolder())) {
+                        } else if (fullName.equals(fullnameProvider.getSentFolder())) {
                             mailFolderType = MailFolderType.SENT;
-                        } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
+                        } else if (fullName.equals(fullnameProvider.getSpamFolder())) {
                             mailFolderType = MailFolderType.SPAM;
-                        } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
+                        } else if (fullName.equals(fullnameProvider.getTrashFolder())) {
                             mailFolderType = MailFolderType.TRASH;
                         } else {
                             mailFolderType = MailFolderType.NONE;
@@ -313,11 +350,77 @@ public final class MailFolderImpl extends AbstractFolder {
         return retval;
     }
 
+    private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
+
+    @Override
+    public int getUnread() {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
+        try {
+            mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+            mailAccess.connect(false);
+        } catch (final MailException e) {
+            if (DEBUG) {
+                LOG.debug("Obtaining/connecting MauilAccess instance failed. Cannot return up-to-date unread counter.", e);
+            }
+            return super.getUnread();
+        }
+        try {
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof IMailFolderStorageEnhanced) {
+                return ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(fullName);
+            }
+            return mailAccess.getMessageStorage().getUnreadMessages(fullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
+        } catch (final MailException e) {
+            if (DEBUG) {
+                LOG.debug("Cannot return up-to-date unread counter.", e);
+            }
+            return super.getUnread();
+        } catch (final Exception e) {
+            if (DEBUG) {
+                LOG.debug("Cannot return up-to-date unread counter.", e);
+            }
+            return super.getUnread();
+        } finally {
+            mailAccess.close(true);
+        }
+    }
+
+    @Override
+    public int getTotal() {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
+        try {
+            mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+            mailAccess.connect(false);
+        } catch (final MailException e) {
+            if (DEBUG) {
+                LOG.debug("Obtaining/connecting MauilAccess instance failed. Cannot return up-to-date total counter.", e);
+            }
+            return super.getTotal();
+        }
+        try {
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof IMailFolderStorageEnhanced) {
+                return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(fullName);
+            }
+            return mailAccess.getMessageStorage().searchMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
+        } catch (final MailException e) {
+            if (DEBUG) {
+                LOG.debug("Cannot return up-to-date total counter.", e);
+            }
+            return super.getTotal();
+        } catch (final Exception e) {
+            if (DEBUG) {
+                LOG.debug("Cannot return up-to-date total counter.", e);
+            }
+            return super.getTotal();
+        } finally {
+            mailAccess.close(true);
+        }
+    }
+
     @Override
     public Object clone() {
-        final MailFolderImpl clone = (MailFolderImpl) super.clone();
-        clone.cacheable = cacheable;
-        return clone;
+        return super.clone();
     }
 
     @Override
