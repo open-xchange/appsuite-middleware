@@ -72,7 +72,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class IMAPCapabilityAndGreetingCache {
 
-    private static final org.apache.commons.logging.Log LOG =
+    static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(IMAPCapabilityAndGreetingCache.class);
 
     private static volatile ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> MAP;
