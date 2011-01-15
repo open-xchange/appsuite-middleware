@@ -689,7 +689,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PATTERN_SCRIPT_TAG = Pattern.compile("<script[^>]*>" + ".*?" + "</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-    private String dropScriptTagsInHeader(final String htmlContent, final int end) {
+    private static String dropScriptTagsInHeader(final String htmlContent, final int end) {
         final Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
         if (!m.find() || m.end() >= end) {
             return htmlContent;
