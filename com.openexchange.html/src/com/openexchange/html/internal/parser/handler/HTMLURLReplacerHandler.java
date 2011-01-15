@@ -61,7 +61,7 @@ import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
- * {@link HTMLURLReplacerHandler} - The HTML white-list filter.
+ * {@link HTMLURLReplacerHandler} - Replaces any URL containing non-ASCII characters to ASCII using the procedure in RFC3490 section 4.1.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
