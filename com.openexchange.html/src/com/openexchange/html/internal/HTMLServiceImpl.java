@@ -650,6 +650,30 @@ public final class HTMLServiceImpl implements HTMLService {
         }
     }
 
+    private static final Pattern PATTERN_BASE_TAG = Pattern.compile("<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    public String checkBaseTag(final String htmlContent) {
+        final Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        do {
+            final String href = m.group(1).trim().toLowerCase(Locale.ENGLISH);
+            if (href.startsWith("http://") || href.startsWith("https://")) {
+                /*
+                 * Base tag contains an absolute URL
+                 */
+                mr.appendLiteralReplacement(sb, m.group());
+            } else {
+                mr.appendLiteralReplacement(sb, "");
+            }
+        } while (m.find());
+        mr.appendTail(sb);
+        return sb.toString();
+    }
+
     private static final Pattern PATTERN_BODY_START = Pattern.compile(Pattern.quote("<body"), Pattern.CASE_INSENSITIVE);
 
     public String dropScriptTagsInHeader(final String htmlContent) {
