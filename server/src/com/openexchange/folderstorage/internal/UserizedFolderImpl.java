@@ -78,6 +78,10 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private Integer defaultType;
 
+    private Type type;
+
+    private Permission[] permissions;
+
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
      * 
@@ -173,7 +177,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public Permission[] getPermissions() {
-        return folder.getPermissions();
+        return null == permissions ? folder.getPermissions() : permissions;
     }
 
     public String[] getSubfolderIDs() {
@@ -185,7 +189,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public Type getType() {
-        return folder.getType();
+        return null == type ? folder.getType() : type;
     }
 
     public boolean isCacheable() {
@@ -225,7 +229,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setPermissions(final Permission[] permissions) {
-        folder.setPermissions(permissions);
+        this.permissions = permissions;
     }
 
     public void setSubfolderIDs(final String[] subfolderIds) {
@@ -245,7 +249,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setType(final Type type) {
-        folder.setType(type);
+        this.type = type;
     }
 
     public Permission getOwnPermission() {
