@@ -71,8 +71,6 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
 
     private static final String COMMENT_START = "<!--";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class);
-
     private static final String CRLF = "\r\n";
 
     /*-
@@ -126,7 +124,8 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
     }
 
     public void handleError(final String errorMsg) {
-        LOG.error(errorMsg);
+        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class);
+        log.error(errorMsg);
     }
 
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
@@ -192,7 +191,8 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         } catch (final Exception e) {
-            LOG.warn("URL replacement failed.", e);
+            final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class);
+            log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);
         }
