@@ -381,13 +381,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                          * Check for access rights and subscribed status dependent on parameter "all"
                          */
                         if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                            final Permission subfolderPermission;
-                            if (null == getSession()) {
-                                subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                            final ServerSession serverSession = getSession();
+                            final boolean visible;
+                            if (null == serverSession) {
+                                visible = CalculatePermission.isVisible(subfolder, getUser(), getContext(), getAllowedContentTypes());
                             } else {
-                                subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
+                                visible = CalculatePermission.isVisible(subfolder, serverSession.getUser(), serverSession.getContext(), getAllowedContentTypes());
                             }
-                            if (subfolderPermission.isVisible()) {
+                            if (visible) {
                                 visibleSubfolderIds.add(id);
                             }
                         }
