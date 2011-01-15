@@ -86,6 +86,10 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private String parentId;
 
+    private Date creationDate;
+    
+    private Date lastModified;
+
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
      * 
@@ -133,11 +137,11 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public Date getCreationDate() {
-        return folder.getCreationDate();
+        return creationDate == null ? folder.getCreationDate() : creationDate;
     }
 
     public Date getLastModified() {
-        return folder.getLastModified();
+        return lastModified == null ? folder.getLastModified() : lastModified;
     }
 
     public int getModifiedBy() {
@@ -149,11 +153,11 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setCreationDate(final Date creationDate) {
-        folder.setCreationDate(creationDate);
+        this.creationDate = creationDate == null ? null : new Date(creationDate.getTime());
     }
 
     public void setLastModified(final Date lastModified) {
-        folder.setLastModified(lastModified);
+        this.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
     }
 
     public void setModifiedBy(final int modifiedBy) {
