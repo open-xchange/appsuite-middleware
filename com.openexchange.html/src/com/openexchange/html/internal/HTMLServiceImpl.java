@@ -719,7 +719,7 @@ public final class HTMLServiceImpl implements HTMLService {
          */
         String html = validate(htmlContent);
         /*
-         * Check for meta tag in validated html content which indicates documents content type. Add if missing.
+         * Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
          */
         final int headTagLen = TAG_S_HEAD.length();
         final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
