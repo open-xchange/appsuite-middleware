@@ -411,7 +411,7 @@ public final class HTMLServiceImpl implements HTMLService {
     private static boolean isAscii(final String s) {
         final char[] chars = s.toCharArray();
         boolean isAscci = true;
-        for (int i = 0; (i < chars.length) && isAscci; i++) {
+        for (int i = 0; isAscci && (i < chars.length); i++) {
             isAscci &= (chars[i] < 128);
         }
         return isAscci;
