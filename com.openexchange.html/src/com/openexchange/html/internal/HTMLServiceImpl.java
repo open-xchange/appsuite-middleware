@@ -742,18 +742,15 @@ public final class HTMLServiceImpl implements HTMLService {
         }
         html = processDownlevelRevealedConditionalComments(html);
         html = removeXHTMLCData(html);
-        
         /*
          * Check URLs
          */
-        if (replaceUrls) {
-            final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
-            HTMLParser.parse(html, handler);
-            return handler.getHTML();
-        } else {
+        if (!replaceUrls) {
             return html;
         }
-
+        final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
+        HTMLParser.parse(html, handler);
+        return handler.getHTML();
     }
 
     private static final Pattern PATTERN_XHTML_CDATA;

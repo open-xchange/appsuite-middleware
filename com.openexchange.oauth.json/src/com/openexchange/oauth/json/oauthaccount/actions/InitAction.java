@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,8 +108,8 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
                 callbackUrlBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
                 callbackUrlBuilder.append("?action=create&session=").append(session.getSessionID());
                 final String displayName = request.getParameter(AccountField.DISPLAY_NAME.getName());
-                callbackUrlBuilder.append('&').append(AccountField.DISPLAY_NAME.getName()).append('=').append(displayName);
-                callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(serviceId);
+                callbackUrlBuilder.append('&').append(AccountField.DISPLAY_NAME.getName()).append('=').append(urlEncode(displayName));
+                callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
                 callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
                 callbackUrl = callbackUrlBuilder.toString();
             } else {
@@ -130,6 +132,14 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             return new AJAXRequestResult(jsonInteraction);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+        }
+    }
+
+    private static String urlEncode(final String s) {
+        try {
+            return URLEncoder.encode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
         }
     }
 
