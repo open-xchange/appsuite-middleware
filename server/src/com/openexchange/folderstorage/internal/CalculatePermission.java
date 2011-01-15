@@ -126,15 +126,17 @@ public final class CalculatePermission {
                 final UserConfiguration[] configurations =
                     userConfStorage.getUserConfiguration(context, UserStorage.getInstance().getUser(context, userIds));
                 for (int i = 0; i < configurations.length; i++) {
-                    final int index = toLoad.get(userIds[i]);
-                    userizedPermissions[index] =
-                        new EffectivePermission(
+                    final int userId = userIds[i];
+                    if (toLoad.containsKey(userId)) {
+                        final int index = toLoad.get(userId);
+                        userizedPermissions[index] = new EffectivePermission(
                             staticPermissions[index],
                             id,
                             type,
                             contentType,
                             configurations[i],
                             Collections.<ContentType> emptyList());
+                    }
                 }
             } catch (final UserConfigurationException e) {
                 final Log logger = LogFactory.getLog(CalculatePermission.class);

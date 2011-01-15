@@ -103,7 +103,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
         try {
             final UserizedFolderImpl clone = (UserizedFolderImpl) super.clone();
             clone.folder = (Folder) clone.folder.clone();
-            clone.ownPermission = (Permission) clone.ownPermission.clone();
+            clone.ownPermission = ownPermission == null ? null : (Permission) ownPermission.clone();
             clone.lastModifiedUTC = null == lastModifiedUTC ? null : new Date(lastModifiedUTC.getTime());
             clone.locale = (Locale) (null == locale ? null : locale.clone());
             return clone;
