@@ -199,11 +199,12 @@ public final class IMAPCapabilityAndGreetingCache {
                     } else {
                         s.connect(key);
                     }
-                    if (imapProperties.getImapTimeout() > 0) {
+                    final int timeout = imapProperties.getImapTimeout();
+                    if (timeout > 0) {
                         /*
                          * Define timeout for blocking operations
                          */
-                        s.setSoTimeout(imapProperties.getImapTimeout());
+                        s.setSoTimeout(timeout);
                     }
                 } catch (final IOException e) {
                     throw e;
