@@ -377,20 +377,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                          * Get subfolder from appropriate storage
                          */
                         final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
-                        /*
-                         * Check for access rights and subscribed status dependent on parameter "all"
-                         */
-                        if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                            final ServerSession serverSession = getSession();
-                            final boolean visible;
-                            if (null == serverSession) {
-                                visible = CalculatePermission.isVisible(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                            } else {
-                                visible = CalculatePermission.isVisible(subfolder, serverSession.getUser(), serverSession.getContext(), getAllowedContentTypes());
-                            }
-                            if (visible) {
-                                visibleSubfolderIds.add(id);
-                            }
+                        if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) && CalculatePermission.isVisible(subfolder, getUser(), getContext(), getAllowedContentTypes())) {
+                            visibleSubfolderIds.add(id);
                         }
                     }
                 } else if (all || folder.hasSubscribedSubfolders()) { // User-only folder
