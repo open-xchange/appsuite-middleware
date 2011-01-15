@@ -84,6 +84,8 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private String[] subfolderIds;
 
+    private String parentId;
+
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
      * 
@@ -175,7 +177,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public String getParentID() {
-        return folder.getParentID();
+        return null == parentId ? folder.getParentID() : parentId;
     }
 
     public Permission[] getPermissions() {
@@ -227,7 +229,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setParentID(final String parentId) {
-        folder.setParentID(parentId);
+        this.parentId = parentId;
     }
 
     public void setPermissions(final Permission[] permissions) {
