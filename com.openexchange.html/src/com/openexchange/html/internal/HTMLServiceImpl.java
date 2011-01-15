@@ -653,6 +653,9 @@ public final class HTMLServiceImpl implements HTMLService {
     private static final Pattern PATTERN_BASE_TAG = Pattern.compile("<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     public String checkBaseTag(final String htmlContent) {
+        if (null == htmlContent) {
+            return htmlContent;
+        }
         final Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
         if (!m.find()) {
             return htmlContent;
@@ -677,6 +680,9 @@ public final class HTMLServiceImpl implements HTMLService {
     private static final Pattern PATTERN_BODY_START = Pattern.compile(Pattern.quote("<body"), Pattern.CASE_INSENSITIVE);
 
     public String dropScriptTagsInHeader(final String htmlContent) {
+        if (null == htmlContent) {
+            return htmlContent;
+        }
         final Matcher m1 = PATTERN_BODY_START.matcher(htmlContent);
         return dropScriptTagsInHeader(htmlContent, m1.find() ? m1.start() : htmlContent.length());
     }

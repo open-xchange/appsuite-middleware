@@ -50,7 +50,6 @@
 package com.openexchange.mail.text;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -158,23 +157,12 @@ public final class HTMLProcessing {
         String retval = null;
         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
         if (isHtml) {
-            
-            try {
-                final FileOutputStream out = new FileOutputStream("/home/thorben/Desktop/original.html", false);
-                out.write(content.getBytes("UTF-8"));
-                out.flush();
-                out.close();
-            } catch (final IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            
-            
             if (DisplayMode.RAW.equals(mode)) {
                 retval = content;
             } else {
                 retval = htmlService.dropScriptTagsInHeader(content);
                 retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
+                retval = htmlService.checkBaseTag(retval);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     /*
                      * Filter according to white-list

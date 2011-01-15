@@ -109,7 +109,6 @@ public interface HTMLService {
      */
     String filterWhitelist(String htmlContent, String configName);
 
-    
     /**
      * Filters externally loaded images out of specified HTML content.
      * <p>
@@ -129,7 +128,8 @@ public interface HTMLService {
      * 
      * @param htmlContent The <b>validated</b> HTML content
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
-     *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be <code>Link&nbsp;[www.somewhere.com]</code>
+     *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
+     *            <code>Link&nbsp;[www.somewhere.com]</code>
      * @return The plain text representation of specified HTML content
      * @see #getConformHTML(String, String)
      */
@@ -170,15 +170,14 @@ public interface HTMLService {
     String htmlFormat(String plainText);
 
     /**
-     * Creates valid HTML from specified HTML content conform to W3C standards.
-     * Non-ascii-URLs will be replaced with puny-code-encoded URLs.
+     * Creates valid HTML from specified HTML content conform to W3C standards. Non-ascii-URLs will be replaced with puny-code-encoded URLs.
      * 
      * @param htmlContent The HTML content
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
      */
     String getConformHTML(String htmlContent, String charset);
-    
+
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
      * 
@@ -190,12 +189,21 @@ public interface HTMLService {
     String getConformHTML(String htmlContent, String charset, boolean replaceUrls);
 
     /**
-     * Drops script tags in HTML content's header.
+     * Drops <code><i>script</i></code> tags in HTML content's header.
      * 
      * @param htmlContent The HTML content
-     * @return The HTML content with script tags removed
+     * @return The HTML content with <code><i>script</i></code> tags removed
      */
     String dropScriptTagsInHeader(String htmlContent);
+
+    /**
+     * Checks for existence of a <code><i>base</i></code> tag. Allowing it if an absolute URL is specified in <code><i>href</i></code>
+     * attribute; denying it if a relative one is specified.
+     * 
+     * @param htmlContent The HTML content
+     * @return The HTML content with a proper <code><i>base</i></code> tag
+     */
+    String checkBaseTag(String htmlContent);
 
     /**
      * Pretty prints specified HTML content.
