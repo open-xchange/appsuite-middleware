@@ -2,8 +2,7 @@
 #%# family=auto
 #%# capabilities=autoconf
 
-$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -d com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!";
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats -d com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
@@ -55,7 +54,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 }
 									
 
-open(SHOWRUNTIME,"${showexec}Context | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}Context | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -66,7 +65,7 @@ while (<SHOWRUNTIME>)
 	}
 }
 
-open(SHOWRUNTIME,"${showexec}Filestore | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}Filestore | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -77,7 +76,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}OXDBPoolCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}OXDBPoolCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -88,7 +87,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}User | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}User | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -99,7 +98,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}UserConfiguration | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}UserConfiguration | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -110,7 +109,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}UserSettingMail | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}UserSettingMail | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -121,7 +120,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}OXFolderCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}OXFolderCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -132,7 +131,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}OXFolderQueryCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}OXFolderQueryCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -143,7 +142,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}OXIMAPConCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}OXIMAPConCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -154,7 +153,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}OXMessageCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}OXMessageCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -165,7 +164,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}MailMessageCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}MailMessageCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -176,7 +175,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}MailConnectionCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}MailConnectionCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -187,7 +186,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}CalendarCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}CalendarCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {
@@ -198,7 +197,7 @@ while (<SHOWRUNTIME>)
     }
 }
 
-open(SHOWRUNTIME,"${showexec}SessionCache | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"${showruntimestats}SessionCache | head -1 |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {

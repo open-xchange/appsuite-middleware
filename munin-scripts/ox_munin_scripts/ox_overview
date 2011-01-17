@@ -2,70 +2,59 @@
 #%# family=auto
 #%# capabilities=autoconf
 
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats -x";
 
-$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -x";
-
-
-if ( $ARGV[0] and $ARGV[0] eq "autoconf")
-{
-	if (-x $showruntimestats) {
-		print "yes\n";
-		exit 0;
-	}
-	else {
-		print "no\n";
-		exit 1;
-	}
+if ($ARGV[0] and $ARGV[0] eq "autoconf") {
+    if (-x $showruntimestats) {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 1;
+    }
 }
 
-if ( $ARGV[0] and $ARGV[0] eq "config")
-{
-	print "graph_title Overview\n";
-	print "graph_args --base 1000 -l 0\n";
-	print "graph_category Open Xchange\n";
-	print "graph_vlabel Number\n";
-	print "nbofdbc.label NumberOfDBConnections\n";
-	print "nbofdbc.draw LINE1\n";
-	print "nbofajp.label NumberOfOpenAJPSockets\n";
-	print "nbofajp.draw LINE1\n";
-	print "nbofimap.label ManuallyCountedIMAPConnections\n";
-	print "nbofimap.draw LINE1\n";
-	print "nboffile.label OpenFileDescriptorCount\n";
-	print "nboffile.draw LINE1\n";
-	exit 0
-}
-									
-
-open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-	if ( $_ =~ /ConfigDB Read,NumberOfDBConnections/) {
-		s/.*\=//; 
-		$val=$_+0;
-		print "nbofdbc.value $val\n";
-		next;
-	}
-	if ( $_ =~ /GeneralMonitor,NumberOfOpenAJPSockets/) {
-	 	s/.*\=//;
-		$val=$_+0;
-	        print "nbofajp.value $val\n";
-		next;
-	}
-	if ( $_ =~ /GeneralMonitor,ManuallyCountedIMAPConnections/) {
-		s/.*\=//;
-		$val=$_+0;
-		print "nbofimap.value $val\n";
-		next;
-	}
-	if ( $_ =~ /OperatingSystem,OpenFileDescriptorCount/) {
-		s/.*\=//;
-		$val=$_+0;
-		print "nboffile.value $val\n";
-		next;
-	}
-		
+if ($ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Overview\n";
+    print "graph_args --base 1000 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    print "nbofdbc.label NumberOfDBConnections\n";
+    print "nbofdbc.draw LINE1\n";
+    print "nbofajp.label NumberOfOpenAJPSockets\n";
+    print "nbofajp.draw LINE1\n";
+    print "nbofimap.label ManuallyCountedIMAPConnections\n";
+    print "nbofimap.draw LINE1\n";
+    print "nboffile.label OpenFileDescriptorCount\n";
+    print "nboffile.draw LINE1\n";
+    exit 0
 }
 
+open(SHOWRUNTIME,"$showruntimestats |") || die "can not read monitoring output";
 
+while (<SHOWRUNTIME>) {
+    if ($_ =~ /Overview,NumConnections/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "nbofdbc.value $val\n";
+        next;
+    }
+    if ($_ =~ /GeneralMonitor,NumberOfOpenAJPSockets/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "nbofajp.value $val\n";
+        next;
+    }
+    if ($_ =~ /GeneralMonitor,ManuallyCountedIMAPConnections/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "nbofimap.value $val\n";
+        next;
+    }
+    if ($_ =~ /OperatingSystem,OpenFileDescriptorCount/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "nboffile.value $val\n";
+        next;
+    }
+}

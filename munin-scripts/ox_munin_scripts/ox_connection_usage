@@ -2,8 +2,7 @@
 #%# family=auto
 #%# capabilities=autoconf
 
-$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -x";
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats -x";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf") {
     if (-x $showruntimestats) {
@@ -35,7 +34,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     exit 0
 }
 
-open(SHOWRUNTIME,"$showexec|") || die "can not read monitoring output";
+open(SHOWRUNTIME,"$showruntimestats |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>) {
     if ( $_ =~ /Overview,MasterConnectionsFetched/) {
