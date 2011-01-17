@@ -51,6 +51,8 @@ package com.openexchange.test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import com.openexchange.ajax.framework.ParamsTest;
 import com.openexchange.groupware.importexport.ImportExportStandaloneSuite;
 import com.openexchange.groupware.infostore.WebdavFolderAliasesTest;
 import com.openexchange.pubsub.TemplateTestSuite;
@@ -166,7 +168,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
         
         tests.addTest(ImportExportStandaloneSuite.suite());
-
+        tests.addTestSuite(ParamsTest.class);
         tests.addTest(TemplateTestSuite.suite());
         
         // Slow Tests
