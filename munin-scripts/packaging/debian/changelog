@@ -1,3 +1,9 @@
+open-xchange-munin-scripts (0.1-4) unstable; urgency=low
+
+  * new build including latest changes
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 17 Jan 2011 17:52:41 +0100
+
 open-xchange-munin-scripts (0.1-3) unstable; urgency=low
 
   * new build with fix for rpm packages

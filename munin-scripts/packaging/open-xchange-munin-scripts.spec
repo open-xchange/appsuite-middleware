@@ -4,7 +4,7 @@
 Name:           open-xchange-munin-scripts
 BuildArch:	noarch
 Version:	0.1
-Release:	1
+Release:	4
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
