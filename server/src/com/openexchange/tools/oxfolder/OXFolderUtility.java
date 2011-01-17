@@ -657,6 +657,37 @@ public final class OXFolderUtility {
     }
 
     /**
+     * Checks if specified permission lists are different.
+     * 
+     * @param storageList The storage-version permissions
+     * @param updateList The update-version permissions
+     * @return <code>true</code> if different; otherwise <code>false</code>
+     */
+    public static boolean isDifferent(final List<OCLPermission> storageList, final List<OCLPermission> updateList) {
+        final int ssize = storageList.size();
+        for (final OCLPermission update : updateList) {
+            boolean found = false;
+            for (int i = 0; i < ssize && !found; i++) {
+                final OCLPermission storage = storageList.get(i);
+                if (storage.getEntity() == update.getEntity()) {
+                    found = true;
+                    if (!update.equalsPermission(storage)) {
+                        return true;
+                    }
+
+                }
+            }
+            if (!found) {
+                return true;
+            }
+        }
+        /*
+         * Same
+         */
+        return false;
+    }
+
+    /**
      * Gets those entities which are new or updated in given update list compared to given storage list or whole update list if storage list
      * is <code>null</code>.
      * 
