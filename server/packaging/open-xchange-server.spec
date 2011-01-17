@@ -273,13 +273,6 @@ if [ ${1:-0} -eq 2 ]; then
       echo "application/vnd.openxmlformats-officedocument.wordprocessingml.document docx" >> $pfile
    fi
 
-   # SoftwareChange_Request-486
-   # -----------------------------------------------------------------------
-   pfile=/opt/open-xchange/etc/groupware/whitelist.properties
-   if ox_exists_property html.tag.base $pfile; then
-      ox_remove_property html.tag.base $pfile
-   fi
-
    # SoftwareChange_Request-479
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/smtp.properties
