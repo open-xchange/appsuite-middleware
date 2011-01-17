@@ -51,7 +51,9 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Class representing a context.
@@ -113,6 +115,10 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     
     private HashSet<String> login_mappings;
     
+    private Map<String, Map<String, String>> userAttributes = null;
+
+    private boolean userAttribtuesset;
+
     private boolean listrun;
 
     public Context() {
@@ -456,6 +462,60 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      */
     public boolean isWriteDatabaseset() {
         return writeDatabaseset;
+    }
+    
+    /**
+     * Sets a generic user attribute
+     */
+    public void setUserAttribute(String namespace, String name, String value) {
+        getNamespace(namespace).put(name, value);
+        userAttribtuesset = true;
+    }
+    
+    /**
+     * Read a generic user attribute
+     */
+    public String getUserAttribute(String namespace, String name) {
+        return getNamespace(namespace).get(name);
+    }
+    
+    public Map<String, Map<String, String>> getUserAttributes() {
+        if(userAttributes == null) {
+            userAttributes = new HashMap<String, Map<String, String>>();
+        }
+        return userAttributes;
+    }
+    
+    public void setUserAttributes(Map<String, Map<String, String>> userAttributes) {
+        this.userAttribtuesset = true;
+        this.userAttributes = userAttributes;
+    }
+    
+    public Map<String, String> getNamespace(String namespace) {
+        if(userAttributes == null) {
+            userAttributes = new HashMap<String, Map<String, String>>();
+        }
+        Map<String, String> ns = userAttributes.get(namespace);
+        if(ns == null) {
+            ns = new HashMap<String, String>();
+            userAttributes.put(namespace, ns);
+        }
+        return ns;
+    }
+    
+    public SOAPUserAttributes getUserAttributesForSOAP() {
+        return new SOAPUserAttributes(userAttributes);
+    }
+    
+    public void setUserAttributesForSOAP(SOAPUserAttributes userAttributes) {
+        this.userAttributes = userAttributes.toMap();
+    }
+    
+    /**
+     * Used to check if the user attributes have been modified
+     */
+    public boolean isUserAttributesset() {
+        return userAttribtuesset;
     }
 
     /* (non-Javadoc)
