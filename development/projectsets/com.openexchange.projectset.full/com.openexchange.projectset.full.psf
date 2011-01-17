@@ -2,6 +2,7 @@
 <psf version="2.0">
 <provider id="org.eclipse.team.svn.core.svnnature">
 <project reference="1.0.1,https://svn.open-xchange.com/open-xchange/com.openexchange.outlook.updater/trunk,com.openexchange.outlook.updater,f0a43fb92adf001e1a6e851cd1b1b247;https:/svn.open-xchange.com/open-xchange/com.openexchange.outlook.updater;https:/svn.open-xchange.com/open-xchange/com.openexchange.outlook.updater;branches;tags;trunk;true;0fe20564-ae94-414e-a2b9-406510c16165;https://svn.open-xchange.com/open-xchange;;false;;;22"/>
+<project reference="1.0.1,https://svn.open-xchange.com/open-xchange/open-xchange-munin/trunk,open-xchange-munin,70b508662edf001e1a6e851cd1b1b247;https://svn.open-xchange.com/open-xchange;Open-Xchange;branches;tags;trunk;true;0fe20564-ae94-414e-a2b9-406510c16165;https://svn.open-xchange.com/open-xchange;;false;;;0"/>
 </provider>
 <provider id="org.eclipse.team.cvs.core.cvsnature">
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.authentication.imap,com.openexchange.authentication.imap"/>
