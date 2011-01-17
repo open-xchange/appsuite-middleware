@@ -64,12 +64,17 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.threadpool.ThreadPoolInformationMBean;
 
 public class StatisticTools extends AbstractJMXTools {
 
     private static final char OPT_STATS_SHORT = 'x';
 
     private static final String OPT_STATS_LONG = "xchangestats";
+    
+    private static final char OPT_TPSTATS_SHORT = 'p';
+    
+    private static final String OPT_TPSTATS_LONG = "threadpoolstats";
 
     private static final char OPT_RUNTIME_STATS_SHORT = 'r';
 
@@ -100,6 +105,8 @@ public class StatisticTools extends AbstractJMXTools {
     private static final String OPT_DOOPERATIONS_STATS_LONG = "dooperation";
     
     private CLIOption xchangestats = null;
+    
+    private CLIOption threadpoolstats = null;
 
     private CLIOption runtimestats = null;
 
@@ -130,6 +137,11 @@ public class StatisticTools extends AbstractJMXTools {
         if (null != parser.getOptionValue(this.xchangestats)) {
             final MBeanServerConnection initConnection = initConnection(admin, env);
             showOXData(initConnection, admin);
+            count++;
+        }
+        if (null != parser.getOptionValue(this.threadpoolstats)) {
+            final MBeanServerConnection initConnection = initConnection(admin, env);
+            showThreadPoolData(initConnection);
             count++;
         }
         if (null != parser.getOptionValue(this.runtimestats)) {
@@ -201,6 +213,7 @@ public class StatisticTools extends AbstractJMXTools {
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
         this.xchangestats = setShortLongOpt(parser, OPT_STATS_SHORT, OPT_STATS_LONG, "shows Open-Xchange stats", false, NeededQuadState.notneeded);
+        this.threadpoolstats = setShortLongOpt(parser, OPT_TPSTATS_SHORT, OPT_TPSTATS_LONG, "shows OX-Server threadpool stats", false, NeededQuadState.notneeded);
         this.runtimestats = setShortLongOpt(parser, OPT_RUNTIME_STATS_SHORT, OPT_RUNTIME_STATS_LONG, "shows Java runtime stats", false, NeededQuadState.notneeded);
         this.osstats = setShortLongOpt(parser, OPT_OS_STATS_SHORT, OPT_OS_STATS_LONG, "shows operating system stats", false, NeededQuadState.notneeded);
         this.threadingstats = setShortLongOpt(parser, OPT_THREADING_STATS_SHORT, OPT_THREADING_STATS_LONG, "shows threading stats", false, NeededQuadState.notneeded);
@@ -229,6 +242,10 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(getStats(mbc, "com.openexchange.database.internal.ConnectionPool"));
             System.out.print(getStats(mbc, "com.openexchange.database.internal.Overview"));
         }
+    }
+    
+    private void showThreadPoolData(MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
+        System.out.print(getStats(mbc, ThreadPoolInformationMBean.THREAD_POOL_DOMAIN + ".ThreadPoolInformation"));
     }
     
     @SuppressWarnings("unchecked")
