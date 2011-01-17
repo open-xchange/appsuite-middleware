@@ -27,6 +27,13 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-568
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
+  if ox_exists_property FileStorageImpl $pfile; then
+      ox_remove_property FileStorageImpl $pfile
+  fi
+
   # SoftwareChange_Request-570
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/server.properties
