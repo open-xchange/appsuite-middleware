@@ -368,13 +368,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     throwException = true;
                 }
             } else {
-                ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, folderObj.getModule(), readCon, ctx);
+                final ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, folderObj.getModule(), readCon, ctx);
                 /*
                  * Check if the user can see one of these folders. In this case throw a duplicate folder exception
                  */
-                for (int f : folders) {
+                for (final int f : folders) {
                     final FolderObject toCheck = getOXFolderAccess().getFolderObject(f);
-                    EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
+                    final EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
                     if (permission.isFolderVisible()) {
                         throwException = true;
                         break;
@@ -537,17 +537,36 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     OXFolderUtility.getUserName(session, user),
                     Integer.valueOf(ctx.getContextId()));
             }
-            if (!perm.isFolderAdmin()) {
-                if (!perm.getUnderlyingPermission().isFolderAdmin()) {
-                    throw new OXFolderPermissionException(
-                        FolderCode.NO_ADMIN_ACCESS,
-                        OXFolderUtility.getUserName(session, user),
-                        OXFolderUtility.getFolderName(fo),
-                        Integer.valueOf(ctx.getContextId()));
+            {
+                final boolean isRenameOnly = false;
+                if (isRenameOnly) {
+                    if (!perm.isFolderAdmin() && !perm.canCreateSubfolders()) {
+                        final OCLPermission underlyingPermission = perm.getUnderlyingPermission();
+                        if (!underlyingPermission.isFolderAdmin() && !underlyingPermission.canCreateSubfolders()) {
+                            throw new OXFolderPermissionException(
+                                FolderCode.NO_RENAME_ACCESS,
+                                OXFolderUtility.getUserName(session, user),
+                                OXFolderUtility.getFolderName(fo),
+                                Integer.valueOf(ctx.getContextId()));
+                        }
+                        throw new OXFolderException(FolderCode.NO_RENAME_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                            session,
+                            user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
+                    }
+                } else {
+                    if (!perm.isFolderAdmin()) {
+                        if (!perm.getUnderlyingPermission().isFolderAdmin()) {
+                            throw new OXFolderPermissionException(
+                                FolderCode.NO_ADMIN_ACCESS,
+                                OXFolderUtility.getUserName(session, user),
+                                OXFolderUtility.getFolderName(fo),
+                                Integer.valueOf(ctx.getContextId()));
+                        }
+                        throw new OXFolderException(FolderCode.NO_ADMIN_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                            session,
+                            user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
+                    }
                 }
-                throw new OXFolderException(FolderCode.NO_ADMIN_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
-                    session,
-                    user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
             }
         }
         final FolderObject storageVersion = getFolderFromMaster(fo.getObjectID());
@@ -950,13 +969,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     throwException = true;
                 }
             } else {
-                ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageObj.getModule(), readCon, ctx);
+                final ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageObj.getModule(), readCon, ctx);
                 /*
                  * Check if the user can see one of these folders. In this case throw a duplicate folder exception
                  */
-                for (int f : folders) {
+                for (final int f : folders) {
                     final FolderObject toCheck = getOXFolderAccess().getFolderObject(f);
-                    EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
+                    final EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
                     if (permission.isFolderVisible()) {
                         throwException = true;
                         break;
@@ -1075,13 +1094,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     throwException = true;
                 }
             } else {
-                ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
+                final ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
                 /*
                  * Check if the user can see one of these folders. In this case throw a duplicate folder exception
                  */
-                for (int f : folders) {
+                for (final int f : folders) {
                     final FolderObject toCheck = getOXFolderAccess().getFolderObject(f);
-                    EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
+                    final EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
                     if (permission.isFolderVisible()) {
                         throwException = true;
                         break;
@@ -1685,7 +1704,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
             } catch (final SettingException e) {
                 throw new OXFolderException(e);
-            } catch (LinkException e) {
+            } catch (final LinkException e) {
                 throw new OXFolderException(e);
             }
             /*
@@ -1818,7 +1837,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             } finally {
                 db.finish();
             }
-        } catch (TransactionException e) {
+        } catch (final TransactionException e) {
             throw new InfostoreException(e);
         }
     }
