@@ -509,7 +509,16 @@ public class OXFolderException extends OXException {
         /**
          * The module of a default folder must not be changed.
          */
-        NO_DEFAULT_FOLDER_MODULE_UPDATE("The module of a default folder must not be changed.", Category.USER_INPUT, 85);
+        NO_DEFAULT_FOLDER_MODULE_UPDATE("The module of a default folder must not be changed.", Category.USER_INPUT, 85),
+        /**
+         * User %1$s must not rename folder %2$s in context %3$s
+         * <p>
+         * No necessary rename access granted for update operation
+         * </p>
+         */
+        NO_RENAME_ACCESS("User %1$s must not rename folder %2$s in context %3$s", Category.PERMISSION, 86),
+        
+        ;
 
         /**
          * Message of the exception.
