@@ -1,0 +1,210 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -d com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	if (-x $showruntimestats) {
+		print "yes\n";
+		exit 0;
+	}
+	else {
+		print "no\n";
+		exit 1;
+	}
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title Cache objects\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel Number of objects in caches\n";
+	print "a.label Context\n";
+	print "a.draw LINE1\n";
+    print "b.label Filestore\n";
+    print "b.draw LINE1\n";
+    print "c.label DBPool\n";
+    print "c.draw LINE1\n";
+    print "d.label User\n";
+    print "d.draw LINE1\n";
+    print "e.label UserConfiguration\n";
+    print "e.draw LINE1\n";
+    print "f.label UserSettingMail\n";
+    print "f.draw LINE1\n";
+    print "g.label OXFolder\n";
+    print "g.draw LINE1\n";
+    print "h.label OXFolderQuery\n";
+    print "h.draw LINE1\n";
+    print "i.label IMAP Connection\n";
+    print "i.draw LINE1\n";
+    print "j.label Message\n";
+    print "j.draw LINE1\n";
+    print "k.label Mail Message\n";
+    print "k.draw LINE1\n";
+    print "l.label Mail Connection\n";
+    print "l.draw LINE1\n";
+    print "m.label Calendar\n";
+    print "m.draw LINE1\n";
+    print "n.label Session\n";
+    print "n.draw LINE1\n";
+	exit 0
+}
+									
+
+open(SHOWRUNTIME,"${showexec}Context | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+	if ( $_ =~ /[0-9]*/) {
+		$val=$_+0;
+		print "a.value $val\n";
+		next;
+	}
+}
+
+open(SHOWRUNTIME,"${showexec}Filestore | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "b.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}OXDBPoolCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "c.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}User | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "d.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}UserConfiguration | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "e.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}UserSettingMail | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "f.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}OXFolderCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "g.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}OXFolderQueryCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "h.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}OXIMAPConCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "i.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}OXMessageCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "j.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}MailMessageCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "k.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}MailConnectionCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "l.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}CalendarCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "m.value $val\n";
+        next;
+    }
+}
+
+open(SHOWRUNTIME,"${showexec}SessionCache | head -1 |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /[0-9]*/) {
+        $val=$_+0;
+        print "n.value $val\n";
+        next;
+    }
+}

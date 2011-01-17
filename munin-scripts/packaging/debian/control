@@ -1,0 +1,21 @@
+Source: open-xchange-munin-scripts
+Section: net
+Priority: optional
+Maintainer: Holger Achtziger <holger.achtziger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: open-xchange-munin-scripts
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-common, perl, munin-node
+Description: network-wide graphing framework (user contributed plugins for node)
+ Munin is a highly flexible and powerful solution used to create graphs of
+ virtually everything imaginable throughout your network, while still
+ maintaining a rattling ease of installation and configuration.
+ .
+ This package contains Open-Xchange plugins for the Munin node.
+ .
+ Munin is written in Perl, and relies heavily on Tobi Oetiker's excellent
+ RRDtool. To see a real example of Munin in action, you can follow a link
+ from <http://munin.projects.linpro.no/> to a live installation.
+
