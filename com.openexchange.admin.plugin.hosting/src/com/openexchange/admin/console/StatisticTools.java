@@ -172,6 +172,7 @@ public class StatisticTools extends AbstractJMXTools {
             if (0 == count) {
                 final MBeanServerConnection initConnection = initConnection(admin, env);
                 showOXData(initConnection, admin);
+                showThreadPoolData(initConnection);
                 System.out.print(getStats(initConnection, "com.sun.management.UnixOperatingSystem"));
                 System.out.print(getStats(initConnection, "sun.management.RuntimeImpl"));
                 showMemoryPoolData(initConnection);
