@@ -58,7 +58,11 @@ exit 0
 
 
 %changelog
+* Mon Jan 17 2011 - steffen.templin@open-xchange.com
+ - Added munin plugin for threadpool task stats.
+* Tue Nov 23 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17525: Total number of database connections is monitored successfully again.
+* Fri Nov 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17548: AJP requests are monitored successfully again.
 * Fri Oct 08 2010 - holger.achtziger@open-xchange.com
-  - suggest aus configdb scripten entfernt
-* Wed Oct 06 2010 - holger.achtziger@open-xchange.com
-  - Initial Version
+ - initial version
