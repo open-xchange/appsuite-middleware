@@ -245,7 +245,7 @@ public class StatisticTools extends AbstractJMXTools {
     }
     
     private void showThreadPoolData(MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        System.out.print(getStats(mbc, ThreadPoolInformationMBean.THREAD_POOL_DOMAIN + ".ThreadPoolInformation"));
+        System.out.print(getStats(mbc, ThreadPoolInformationMBean.THREAD_POOL_DOMAIN + ".internal.ThreadPoolInformation"));
     }
     
     @SuppressWarnings("unchecked")
