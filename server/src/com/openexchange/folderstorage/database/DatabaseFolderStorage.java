@@ -1178,7 +1178,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Context context = storageParameters.getContext();
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(id)) {
-                final int owner = Integer.parseInt(id.substring(id.indexOf(':' + 1)));
+                final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
                 throw new FolderException(new OXFolderException(OXFolderException.FolderCode.NO_ADMIN_ACCESS, OXFolderUtility.getUserName(
                     session.getUserId(),
                     context), UserStorage.getStorageUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId())));
@@ -1222,7 +1222,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 if (null == parentId) {
                     updateMe.setParentFolderID(getFolderObject(folderId, context, con).getParentFolderID());
                 } else {
-                    updateMe.setParentFolderID(Integer.parseInt(parentId));
+                    if (DatabaseFolderStorageUtility.hasSharedPrefix(parentId)) {
+                        updateMe.setParentFolderID(getFolderObject(folderId, context, con).getParentFolderID());
+                    } else {
+                        updateMe.setParentFolderID(Integer.parseInt(parentId));
+                    }
                 }
             }
             {
