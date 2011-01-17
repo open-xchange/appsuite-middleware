@@ -657,6 +657,56 @@ public final class OXFolderUtility {
     }
 
     /**
+     * Checks if given update object indicates to perform a rename-only operation compared to storage object.
+     * 
+     * @param updateObject The update object
+     * @param storageObject The storage object
+     * @return <code>true</code> if given update object indicates to perform a rename-only operation; otherwise <code>false</code>
+     */
+    public static boolean isRenameOnly(final FolderObject updateObject, final FolderObject storageObject) {
+        if (!updateObject.containsFolderName()) {
+            return false;
+        }
+        final String newName = updateObject.getFolderName();
+        if (null == newName || newName.equals(storageObject.getFolderName())) {
+            return false;
+        }
+        /*-
+         * Ok, folder name differs. Check other fields.
+         * 
+         * Permissions
+         */
+        if (updateObject.containsPermissions()) {
+            final List<OCLPermission> updateList = Arrays.asList(updateObject.getNonSystemPermissionsAsArray());
+            if (null != updateList && isDifferent(Arrays.asList(storageObject.getNonSystemPermissionsAsArray()), updateList)) {
+                return false;
+            }
+        }
+        /*
+         * Parent
+         */
+        if (updateObject.containsParentFolderID()) {
+            final int updateParent = updateObject.getParentFolderID();
+            if (updateParent > 0 && storageObject.getParentFolderID() != updateParent) {
+                return false;
+            }
+        }
+        /*
+         * Module
+         */
+        if (updateObject.containsModule()) {
+            final int updateModule = updateObject.getModule();
+            if (updateModule > 0 && storageObject.getModule() != updateModule) {
+                return false;
+            }
+        }
+        /*
+         * Rename only
+         */
+        return true;
+    }
+
+    /**
      * Checks if specified permission lists are different.
      * 
      * @param storageList The storage-version permissions
