@@ -97,7 +97,10 @@ public abstract class ChangeCore extends ContextAbstraction {
                 parseAndSetContextQuota(parser, ctx);
                 
                 parseAndSetExtensions(parser, ctx, auth);
-                
+
+                // Dynamic Options
+                applyDynamicOptionsToContext(parser, ctx);
+
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);

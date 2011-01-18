@@ -479,9 +479,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(prep_check);
 
             try {
-               if(con!=null){
                 cache.pushConnectionForContext(ctx.getId().intValue(), con);
-               }
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
@@ -1133,7 +1131,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(prep_check);
 
             try {
-                cache.pushConnectionForContext(ctx.getId().intValue(), con);
+                if(con != null) {
+                    cache.pushConnectionForContext(ctx.getId().intValue(), con);
+                }
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
