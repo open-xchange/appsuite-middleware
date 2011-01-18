@@ -1,3 +1,7 @@
+* 2011-01-18 - martin.herfurth@open-xchange.com
+
+ - Bugfix #17535: Update of Yearly Series does no longer destroy the appointment.
+
 * 2011-01-14 - martin.herfurth@open-xchange.com
 
  - Bugfix #17890: Imip invitations for newly added external participants.
