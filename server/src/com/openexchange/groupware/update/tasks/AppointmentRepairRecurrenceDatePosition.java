@@ -55,6 +55,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -286,6 +288,10 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         }
         public boolean isReadOnly() {
             throw new UnsupportedOperationException("isReadOnly");
+        }
+
+        public Map<String, Set<String>> getAttributes() {
+            throw new UnsupportedOperationException("getAttributes");
         }
     }
 }
