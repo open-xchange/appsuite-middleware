@@ -509,6 +509,9 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     @Override
     public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
+        /*
+         * TODO: Special treatment for rename-only?
+         */
         final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, getFolderFromMaster(fo.getObjectID()));
         if (checkPermissions) {
             if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(
