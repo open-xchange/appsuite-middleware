@@ -19,6 +19,7 @@ public class Bug17261Test extends AbstractAJAXSession {
     private FolderObject secondFolder;
     private FolderTestManager ftm1;
     private FolderTestManager ftm2;
+    private String folderName;
 
     public Bug17261Test(final String name) {
         super(name);
@@ -27,9 +28,10 @@ public class Bug17261Test extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        folderName = "Bug17621 Folder" + System.currentTimeMillis();
         client2 = new AJAXClient(User.User2);
         ftm1 = new FolderTestManager(client);
-        folder = ftm1.generateFolder("Bug17621 Folder", FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
+        folder = ftm1.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
         final InsertRequest insertFolderReq = new InsertRequest(API.OUTLOOK, folder, false);
         final InsertResponse insertFolderResp = client.execute(insertFolderReq);
         
@@ -39,7 +41,7 @@ public class Bug17261Test extends AbstractAJAXSession {
     
     public void testInsertingFolderWithSameNameFromSecondUser() throws Exception {
         ftm2 = new FolderTestManager(client2);
-        secondFolder = ftm2.generateFolder("Bug17621 Folder", FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
+        secondFolder = ftm2.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
         final InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
         
@@ -57,11 +59,11 @@ public class Bug17261Test extends AbstractAJAXSession {
             OCLPermission.NO_PERMISSIONS);
         
         ftm2 = new FolderTestManager(client2);
-        secondFolder = ftm2.generateFolder("Bug17621 Folder", FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
+        secondFolder = ftm2.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
         final InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
         
-        assertNotNull("Inserting second folder should cause exception.", insertSecondFolderResp.getException());
+        assertNull("Inserting second folder should not cause an exception.", insertSecondFolderResp.getException());
         insertSecondFolderResp.fillObject(secondFolder);
         
         ftm2.deleteFolderOnServer(secondFolder);
