@@ -50,7 +50,7 @@
 package com.openexchange.concurrent;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,7 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
+public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Cloneable, Serializable {
 
     private static final long serialVersionUID = -2608324279213322648L;
 
@@ -95,7 +95,7 @@ public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
     /**
      * The backing concurrent map.
      */
-    private final ConcurrentHashMap<E, Object> map;
+    private ConcurrentHashMap<E, Object> map;
 
     /**
      * Creates a new, empty set with the specified initial capacity, load factor, and concurrency level.
@@ -140,106 +140,78 @@ public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
         addAll(t);
     }
 
+    @Override
     public Iterator<E> iterator() {
         return map.keySet().iterator();
     }
 
+    @Override
     public int size() {
         return map.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    @Override
     public boolean contains(final Object o) {
         return map.containsKey(o);
     }
 
+    @Override
     public boolean add(final E o) {
         return map.put(o, PRESENT) == null;
     }
 
+    @Override
     public boolean remove(final Object o) {
         return map.remove(o) == PRESENT;
     }
 
+    @Override
     public void clear() {
         map.clear();
     }
 
-    public boolean addAll(final Collection<? extends E> c) {
-        boolean modified = false;
-        for (final E name : c) {
-            if (add(name)) {
-                modified = true;
-            }
+    @Override
+    public Object clone() {
+        try {
+            @SuppressWarnings("unchecked")
+            final ConcurrentHashSet<E> newSet = (ConcurrentHashSet<E>) super.clone();
+            newSet.map.putAll(map);
+            return newSet;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError("Clone fialed although Cloneable is implemented.");
         }
-        return modified;
     }
 
-    public boolean containsAll(final Collection<?> c) {
-        for (final Object name : c) {
-            if (!contains(name)) {
-                return false;
-            }
+    private void writeObject(final java.io.ObjectOutputStream s) throws java.io.IOException {
+        s.defaultWriteObject();
+
+        // Write out size
+        s.writeInt(map.size());
+
+        // Write out all elements in the proper order.
+        for (final Iterator<E> i = map.keySet().iterator(); i.hasNext();) {
+            s.writeObject(i.next());
         }
-        return true;
     }
 
-    public boolean removeAll(final Collection<?> c) {
-        boolean modified = false;
+    private void readObject(final java.io.ObjectInputStream s) throws java.io.IOException, ClassNotFoundException {
+        s.defaultReadObject();
 
-        if (size() > c.size()) {
-            for (final Object name : c) {
-                modified |= remove(name);
-            }
-        } else {
-            for (final Iterator<?> i = iterator(); i.hasNext();) {
-                if (c.contains(i.next())) {
-                    i.remove();
-                    modified = true;
-                }
-            }
-        }
-        return modified;
-    }
+        map = new ConcurrentHashMap<E, Object>();
 
-    public boolean retainAll(final Collection<?> c) {
-        boolean modified = false;
-        for (final Iterator<E> e = iterator(); e.hasNext();) {
-            if (!c.contains(e.next())) {
-                e.remove();
-                modified = true;
-            }
-        }
-        return modified;
-    }
+        // Read in size
+        final int size = s.readInt();
 
-    public Object[] toArray() {
-        final Object[] result = new Object[size()];
-        final Iterator<E> e = iterator();
-        for (int i = 0; e.hasNext(); i++) {
-            result[i] = e.next();
-        }
-        return result;
-    }
-
-    public <T> T[] toArray(T[] a) {
-        final int size = size();
-        if (a.length < size) {
-            final @SuppressWarnings("unchecked") T[] newInstance = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
-            a = newInstance;
-        }
-        final Iterator<E> it = iterator();
-        final Object[] result = a;
+        // Read in all elements in the proper order.
         for (int i = 0; i < size; i++) {
-            result[i] = it.next();
+            final E e = (E) s.readObject();
+            map.put(e, PRESENT);
         }
-        if (a.length > size) {
-            a[size] = null;
-        }
-        return a;
     }
 
 }
