@@ -79,7 +79,6 @@ Requires:  java-sun
 %package -n	open-xchange
 Group:          Applications/Productivity
 Summary:	Open-Xchange server scripts and configuration
-Prereq:		/usr/sbin/useradd
 Requires:	open-xchange-authentication >= @OXVERSION@ open-xchange-charset >= @OXVERSION@ open-xchange-conversion-engine >= @OXVERSION@ open-xchange-conversion-servlet >= @OXVERSION@ open-xchange-contactcollector >= @OXVERSION@ open-xchange-i18n >= @OXVERSION@ open-xchange-mailstore >= @OXVERSION@ open-xchange-jcharset >= @OXVERSION@ open-xchange-push-udp >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-sessiond >= @OXVERSION@ open-xchange-smtp >= @OXVERSION@ open-xchange-spamhandler >= @OXVERSION@ open-xchange-user-json >= @OXVERSION@ open-xchange-settings-extensions >= @OXVERSION@ open-xchange-theme-default >= @OXVERSION@ open-xchange-folder-json >= @OXVERSION@ open-xchange-proxy-servlet >= @OXVERSION@ open-xchange-secret-recovery-json >= @OXVERSION@ open-xchange-secret-recovery-mail >= @OXVERSION@ open-xchange-tx >= @OXVERSION@ open-xchange-file-storage-json >= @OXVERSION@ open-xchange-file-storage-infostore >= @OXVERSION@ open-xchange-file-storage-config >= @OXVERSION@ open-xchange-authorization >= @OXVERSION@
 %if 0%{?suse_version}
 Requires: mysql-client >= 5.0.0
@@ -114,8 +113,6 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -p %{buildroot}/sbin
-/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
-/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb installJars
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb installExceptJars installConfig
@@ -139,10 +136,6 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %clean
 %{__rm} -rf %{buildroot}
 
-
-%pre -n open-xchange
-/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
-/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 %post -n open-xchange
 

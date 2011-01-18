@@ -47,6 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        open-xchange common jar files
+Prereq:         /usr/sbin/useradd
 Requires:	open-xchange-activation
 #
 
@@ -68,6 +69,10 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} install
+
+%pre
+/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
+/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 %clean
 %{__rm} -rf %{buildroot}

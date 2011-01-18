@@ -8,5 +8,5 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-common
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-activation
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-activation
 Description: jar files and OSGi bundles commonly used by all open-xchange packages
