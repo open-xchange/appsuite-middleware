@@ -8,17 +8,17 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-meta-oxucs
 Architecture: all
-Depends: ${oxcommon}, univention-config-registry, open-xchange-authentication-ucs, open-xchange-spamhandler-spamassassin, open-xchange-mailfilter, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-push-mailnotify
+Depends: ${oxcommon}, ${all-lang}, univention-config-registry, open-xchange-authentication-ucs, open-xchange-spamhandler-spamassassin, open-xchange-mailfilter, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-push-mailnotify
 Description: The Open-Xchange Meta package for OX into UCS integration
 
 Package: open-xchange-meta-parallels
 Architecture: all
-Depends: ${oxcommon}, open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl
+Depends: ${oxcommon}, ${all-lang}, open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
 Description: The Open-Xchange Meta package for OX into Parallels integration
 
 Package: open-xchange-meta-plesk
 Architecture: all
-Depends: ${oxcommon}, open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-upsell-generic
+Depends: ${oxcommon}, ${all-lang}, open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-upsell-generic
 Description: The Open-Xchange Meta package for OX into Plesk integration
 
 Package: open-xchange-meta-server
