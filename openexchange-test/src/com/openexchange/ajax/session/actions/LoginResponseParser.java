@@ -50,12 +50,10 @@
 package com.openexchange.ajax.session.actions;
 
 import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
@@ -72,45 +70,53 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
 
     private String jvmRoute;
     
-    LoginResponseParser(boolean failOnError) {
+    LoginResponseParser(final boolean failOnError) {
         super(failOnError);
     }
 
     @Override
-    public void checkResponse(WebResponse resp) {
+    public void checkResponse(final WebResponse resp) {
         super.checkResponse(resp);
         // Check for error messages
         try {
             super.getResponse(resp.getText());
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             try {
                 LOG.error("Invalid login body: \"" + resp.getText() + "\"");
-            } catch (IOException e1) {
+            } catch (final IOException e1) {
                 fail(e.getMessage());
             }
             fail(e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             fail(e.getMessage());
         }
         if (isFailOnError()) {
             boolean oxCookieFound = false;
-            for (String newCookie : resp.getNewCookieNames()) {
+            final String[] newCookieNames = resp.getNewCookieNames();
+            {
+                final String message = "Missing cookies in HTTP response.\n"
+                    + "Probably cookies could not be parsed with respect to RFC2109/RFC2965 specification.\n"
+                    + "Is the \"com.openexchange.cookie.httpOnly\" property (server.properties) set to \"true\"?";
+                assertNotNull(message, newCookieNames);
+                assertTrue(message, newCookieNames.length > 0);
+            }
+            for (final String newCookie : newCookieNames) {
                 if (newCookie.startsWith(Login.SECRET_PREFIX)) {
                     oxCookieFound = true;
                     break;
                 }
             }
             assertTrue("Secret cookie is missing.", oxCookieFound);
-            String jsessionId = resp.getNewCookieValue("JSESSIONID");
+            final String jsessionId = resp.getNewCookieValue("JSESSIONID");
             assertNotNull("JSESSIONID cookie is missing.", jsessionId);
-            int dotPos = jsessionId.lastIndexOf('.');
+            final int dotPos = jsessionId.lastIndexOf('.');
             assertTrue("jvmRoute is missing.", dotPos > 0);
             jvmRoute = jsessionId.substring(dotPos + 1);
         }
     }
 
     @Override
-    public LoginResponse parse(String body) throws JSONException {
+    public LoginResponse parse(final String body) throws JSONException {
         final JSONObject json = new JSONObject(body);
         final Response response = getResponse(body);
         response.setData(json);
@@ -118,9 +124,9 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
     }
 
     @Override
-    protected LoginResponse createResponse(Response response) throws JSONException {
-        LoginResponse retval = new LoginResponse(response);
-        JSONObject json = (JSONObject) response.getData();
+    protected LoginResponse createResponse(final Response response) throws JSONException {
+        final LoginResponse retval = new LoginResponse(response);
+        final JSONObject json = (JSONObject) response.getData();
         if (response.hasError()) {
             response.setData(null);
         } else {
