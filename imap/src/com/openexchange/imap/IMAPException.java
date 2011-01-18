@@ -766,7 +766,7 @@ public final class IMAPException extends MIMEMailException {
         /**
          * No rename access to mail folder %1$s
          */
-        NO_RENAME_ACCESS("No rename access to mail folder %1$s", Category.PERMISSION, 2004),
+        NO_RENAME_ACCESS("No rename access to mail folder %1$s", Category.PERMISSION, 2054),
         /**
          * No rename access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
