@@ -143,6 +143,13 @@ if [ ${1:-0} -eq 2 ]; then
 
   GLOBIGNORE='*'
 
+   # SoftwareChange_Request-579
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/admindaemon/User.properties
+   if grep "Spam=" $pfile > /dev/null; then
+      ox_set_property SPAM_MAILFOLDER_JA_JP "\u8FF7\u60D1\u30E1\u30FC\u30EB" $pfile
+   fi
+
    # SoftwareChange_Request-542
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/admindaemon/User.properties
