@@ -49,6 +49,12 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * {@link ContextImpl} - The implementation of {@link ContextExtended}.
  * 
@@ -70,6 +76,7 @@ public class ContextImpl implements ContextExtended {
     private boolean enabled = true;
     private boolean updating = false;
     private boolean readOnly = false;
+    private Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
 
     public ContextImpl(final int contextId) {
         this.contextId = contextId;
@@ -176,5 +183,18 @@ public class ContextImpl implements ContextExtended {
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
         
+    }
+
+    public Map<String, Set<String>> getAttributes() {
+        return Collections.unmodifiableMap(attributes);
+    }
+    
+    public void addAttribute(String attrName, String value) {
+        Set<String> set = attributes.get(attrName);
+        if (set == null) {
+            set = new HashSet<String>();
+            attributes.put(attrName, set);
+        }
+        set.add(value);
     }
 }

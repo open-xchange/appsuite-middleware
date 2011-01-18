@@ -47,71 +47,21 @@
  *
  */
 
-package com.openexchange.context.osgi;
+package com.openexchange.groupware.contexts.impl.sql;
 
-import java.util.Arrays;
-import java.util.Collection;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import com.openexchange.context.internal.ContextExceptionFactory;
-import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
-import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.groupware.update.CreateTableUpdateTask;
+import com.openexchange.groupware.update.Schema;
+
 
 /**
- * {@link ContextActivator}
+ * {@link ContextAttributeTableUpdateTask}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContextActivator extends HousekeepingActivator {
+public class ContextAttributeTableUpdateTask extends CreateTableUpdateTask {
 
-    /**
-     * 
-     */
-    private static final Class[] NEEDED = new Class[]{DatabaseService.class};
-    private ComponentRegistration registration;
-
-    public ContextActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return NEEDED;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.CONTEXT, "com.openexchange.context", ContextExceptionFactory.getInstance());
-        
-        DatabaseService dbase = getService(DatabaseService.class);
-        
-        ContextAttributeCreateTable createTable = new ContextAttributeCreateTable();
-        registerService(CreateTableService.class, createTable);
-        
-        final ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
-        
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-            public Collection<? extends UpdateTask> getUpdateTasks() {
-                return Arrays.asList(updateTask);
-            }
-            
-        });
-        
-        
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        registration.unregister();
-        super.stopBundle();
+    public ContextAttributeTableUpdateTask(DatabaseService dbService) {
+        super(new ContextAttributeCreateTable(), new String[0], Schema.NO_VERSION, dbService);
     }
 }

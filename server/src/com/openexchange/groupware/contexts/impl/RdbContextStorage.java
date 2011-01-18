@@ -61,6 +61,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException.Code;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.tools.update.Tools;
 
 /**
  * This class implements a storage for contexts in a relational database.
@@ -188,7 +189,37 @@ public class RdbContextStorage extends ContextStorage {
         ContextImpl context = loadContextData(contextId);
         context.setLoginInfo(getLoginInfos(context));
         context.setMailadmin(getAdmin(context));
+        loadAttributes(context);
         return context;
+    }
+
+    private void loadAttributes(ContextImpl ctx) throws ContextException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            con = DBPool.pickup(ctx);
+            if(!Tools.tableExists(con, "contextAttribute")) { 
+                // This may have to be removed in future versions
+                // Or we think of a clever way to run update tasks even prior to loading a context
+                return;
+            }
+            stmt = con.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
+            stmt.setInt(1, ctx.getContextId());
+            result = stmt.executeQuery();
+            while(result.next()) {
+                String name = result.getString(1);
+                String value = result.getString(2);
+                ctx.addAttribute(name, value);
+            }
+        } catch (final SQLException e) {
+            throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
+        } catch (DBPoolingException e) {
+            throw new ContextException(Code.NO_CONNECTION, e);
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(con);
+        }
     }
 
     public ContextImpl loadContextData(int contextId) throws ContextException {

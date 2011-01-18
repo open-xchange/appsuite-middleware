@@ -47,41 +47,18 @@
  *
  */
 
-package com.openexchange.context.osgi;
+package com.openexchange.config.cascade.context.osgi;
 
-import java.util.Arrays;
-import java.util.Collection;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import com.openexchange.context.internal.ContextExceptionFactory;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
-import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
+import java.util.Hashtable;
+import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.context.ContextConfigProvider;
+import com.openexchange.context.ContextService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
-/**
- * {@link ContextActivator}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-public class ContextActivator extends HousekeepingActivator {
+public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
-    /**
-     * 
-     */
-    private static final Class[] NEEDED = new Class[]{DatabaseService.class};
-    private ComponentRegistration registration;
-
-    public ContextActivator() {
-        super();
-    }
-
+    private static final Class<?>[] NEEDED = new Class[]{ ContextService.class};
+    
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED;
@@ -89,29 +66,15 @@ public class ContextActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.CONTEXT, "com.openexchange.context", ContextExceptionFactory.getInstance());
+        ContextService contexts = getService(ContextService.class);
         
-        DatabaseService dbase = getService(DatabaseService.class);
+        ContextConfigProvider provider = new ContextConfigProvider(contexts);
         
-        ContextAttributeCreateTable createTable = new ContextAttributeCreateTable();
-        registerService(CreateTableService.class, createTable);
+        Hashtable<String, Object> properties = new Hashtable<String,Object>();
+        properties.put("scope", "context");
         
-        final ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
-        
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+        registerService(ConfigProviderService.class, provider, properties);
+    }
 
-            public Collection<? extends UpdateTask> getUpdateTasks() {
-                return Arrays.asList(updateTask);
-            }
-            
-        });
-        
-        
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        registration.unregister();
-        super.stopBundle();
-    }
+
 }

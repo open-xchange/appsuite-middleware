@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.groupware.AbstractOXException;
@@ -163,5 +165,10 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
         } catch (final AbstractOXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    public Map<String, Set<String>> getAttributes() {
+        updateDelegate();
+        return delegate.getAttributes();
     }
 }
