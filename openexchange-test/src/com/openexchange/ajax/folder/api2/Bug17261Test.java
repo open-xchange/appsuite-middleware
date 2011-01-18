@@ -13,26 +13,25 @@ import com.openexchange.test.FolderTestManager;
 
 
 public class Bug17261Test extends AbstractAJAXSession {
-    private AJAXClient client;
+
     private AJAXClient client2;
     private FolderObject folder;
     private FolderObject secondFolder;
     private FolderTestManager ftm1;
     private FolderTestManager ftm2;
 
-    public Bug17261Test(String name) {
+    public Bug17261Test(final String name) {
         super(name);
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         client2 = new AJAXClient(User.User2);
         ftm1 = new FolderTestManager(client);
         folder = ftm1.generateFolder("Bug17621 Folder", FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
-        InsertRequest insertFolderReq = new InsertRequest(API.OUTLOOK, folder, false);
-        InsertResponse insertFolderResp = client.execute(insertFolderReq);
+        final InsertRequest insertFolderReq = new InsertRequest(API.OUTLOOK, folder, false);
+        final InsertResponse insertFolderResp = client.execute(insertFolderReq);
         
         assertNull("Inserting folder caused exception.", insertFolderResp.getException());
         insertFolderResp.fillObject(folder);   
@@ -41,8 +40,8 @@ public class Bug17261Test extends AbstractAJAXSession {
     public void testInsertingFolderWithSameNameFromSecondUser() throws Exception {
         ftm2 = new FolderTestManager(client2);
         secondFolder = ftm2.generateFolder("Bug17621 Folder", FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
-        InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
-        InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
+        final InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
+        final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
         
         assertNull("Inserting second folder caused exception.", insertSecondFolderResp.getException());
         insertSecondFolderResp.fillObject(secondFolder);
@@ -59,8 +58,8 @@ public class Bug17261Test extends AbstractAJAXSession {
         
         ftm2 = new FolderTestManager(client2);
         secondFolder = ftm2.generateFolder("Bug17621 Folder", FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
-        InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
-        InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
+        final InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
+        final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
         
         assertNotNull("Inserting second folder should cause exception.", insertSecondFolderResp.getException());
         insertSecondFolderResp.fillObject(secondFolder);
