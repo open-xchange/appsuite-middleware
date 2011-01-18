@@ -69,6 +69,17 @@ public class Bug17261Test extends AbstractAJAXSession {
         ftm2.deleteFolderOnServer(secondFolder);
     }
 
+    public void testInsertingFolderCauseException() throws Exception {
+        secondFolder = ftm1.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
+        final InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
+        final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
+        
+        assertNotNull("Inserting second folder should cause an exception.", insertSecondFolderResp.getException());
+        insertSecondFolderResp.fillObject(secondFolder);
+        
+        ftm1.deleteFolderOnServer(secondFolder);
+    }
+
     @Override
     protected void tearDown() throws Exception {
         ftm1.deleteFolderOnServer(folder);
