@@ -123,5 +123,14 @@ public class Params {
     public List<Parameter> toList() {
         return parameters;
     }
+    
+    public String toString(){
+    	StringBuffer buffy = new StringBuffer();
+    	for(Parameter p: parameters)
+    		buffy.append("&").append(p.toString());
+
+    	buffy.replace(0, 1, "?");
+    	return buffy.toString();
+    }
 
 }
