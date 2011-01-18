@@ -316,7 +316,13 @@ public final class IMAPException extends MIMEMailException {
         /**
          * A SQL error occurred: %1$s
          */
-        SQL_ERROR(IMAPCode.SQL_ERROR);
+        SQL_ERROR(IMAPCode.SQL_ERROR),
+        /**
+         * No rename access to mail folder %1$s
+         */
+        NO_RENAME_ACCESS(IMAPCode.NO_RENAME_ACCESS),
+        
+        ;
 
         private final IMAPCode imapCode;
 
@@ -756,7 +762,17 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Rename of folder "%1$s" to "%2$s" failed on server %3$s with login %4$s (user=%5$s, context=%6$s).
          */
-        RENAME_FAILED_EXT("Rename of folder \"%1$s\" to \"%2$s\" failed on server %3$s with login %4$s (user=%5$s, context=%6$s).", RENAME_FAILED);
+        RENAME_FAILED_EXT("Rename of folder \"%1$s\" to \"%2$s\" failed on server %3$s with login %4$s (user=%5$s, context=%6$s).", RENAME_FAILED),
+        /**
+         * No rename access to mail folder %1$s
+         */
+        NO_RENAME_ACCESS("No rename access to mail folder %1$s", Category.PERMISSION, 2004),
+        /**
+         * No rename access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         */
+        NO_RENAME_ACCESS_EXT("No rename access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_RENAME_ACCESS),
+
+        ;
 
         private final String message;
 
