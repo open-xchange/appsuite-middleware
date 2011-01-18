@@ -1287,14 +1287,16 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             int ret = recColl.getRecurringAppoiontmentUpdateAction(cdao, edao);
             if (ret == recColl.RECURRING_NO_ACTION) {
                 // We have to check if something has been changed in the meantime!
-                if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
+                if (!cdao.containsStartDate() || !cdao.containsEndDate()) {
                     final CalendarDataObject temp = (CalendarDataObject) edao.clone();
                     final RecurringResultsInterface rss = recColl.calculateFirstRecurring(temp);
                     if (rss != null) {
                         final RecurringResultInterface rs = rss.getRecurringResult(0);
                         if (rs != null) {
-                            cdao.setStartDate(new Date(rs.getStart()));
-                            cdao.setEndDate(new Date(rs.getEnd()));
+                            if (!cdao.containsStartDate())
+                                cdao.setStartDate(new Date(rs.getStart()));
+                            if (!cdao.containsEndDate())
+                                cdao.setEndDate(new Date(rs.getEnd()));
                         }
                     }
                 }

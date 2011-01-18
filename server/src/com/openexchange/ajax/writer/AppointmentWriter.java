@@ -76,6 +76,8 @@ public class AppointmentWriter extends CalendarWriter {
 
     private CalendarCollectionService calColl;
 
+    private boolean forTesting;
+
     /**
      * Initializes a new {@link AppointmentWriter}
      *
@@ -83,7 +85,12 @@ public class AppointmentWriter extends CalendarWriter {
      *            The user time zone
      */
     public AppointmentWriter(final TimeZone timeZone) {
+        this(timeZone, false);
+    }
+    
+    public AppointmentWriter(TimeZone timeZone, boolean forTesting) {
         super(timeZone, null);
+        this.forTesting = forTesting;
     }
 
     public CalendarCollectionService getCalendarCollectionService(){
@@ -154,7 +161,7 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (appointmentObject.containsRecurrenceType()) {
             writeRecurrenceParameter(appointmentObject, jsonObj);
-        } else {
+        } else if (!forTesting) {
             writeParameter(CalendarFields.RECURRENCE_TYPE, Appointment.NO_RECURRENCE, jsonObj);
         }
         if (appointmentObject.containsRecurrenceID()) {
