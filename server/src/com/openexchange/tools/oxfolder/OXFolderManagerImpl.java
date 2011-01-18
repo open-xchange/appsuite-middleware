@@ -512,7 +512,8 @@ final class OXFolderManagerImpl extends OXFolderManager {
         /*
          * TODO: Special treatment for rename-only?
          */
-        final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, getFolderFromMaster(fo.getObjectID()));
+        final FolderObject storageVersion = getFolderFromMaster(fo.getObjectID());
+        final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, storageVersion);
         if (checkPermissions) {
             if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(
                 session.getUserId(),
@@ -544,9 +545,9 @@ final class OXFolderManagerImpl extends OXFolderManager {
             }
             {
                 if (isRenameOnly) {
-                    if (!perm.isFolderAdmin() && !perm.canCreateSubfolders()) {
-                        final OCLPermission underlyingPermission = perm.getUnderlyingPermission();
-                        if (!underlyingPermission.isFolderAdmin() && !underlyingPermission.canCreateSubfolders()) {
+                    final EffectivePermission parentPerm = getOXFolderAccess().getFolderPermission(storageVersion.getParentFolderID(), user.getId(), userConfig);
+                    if (!perm.isFolderAdmin() && !parentPerm.canCreateSubfolders()) {
+                        if (!perm.getUnderlyingPermission().isFolderAdmin() && !parentPerm.getUnderlyingPermission().canCreateSubfolders()) {
                             throw new OXFolderPermissionException(
                                 FolderCode.NO_RENAME_ACCESS,
                                 OXFolderUtility.getUserName(session, user),
@@ -573,27 +574,26 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
             }
         }
-        final FolderObject storageVersion = getFolderFromMaster(fo.getObjectID());
         final boolean performMove = fo.containsParentFolderID();
         if (fo.containsPermissions() || fo.containsModule()) {
             if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), lastModified);
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), storageVersion, lastModified);
             }
             if (isRenameOnly) {
-                rename(fo, lastModified);
+                rename(fo, storageVersion, lastModified);
             } else {
-                update(fo, OPTION_NONE, lastModified);
+                update(fo, OPTION_NONE, storageVersion, lastModified);
             }
         } else if (fo.containsFolderName()) {
             if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), lastModified);
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), storageVersion, lastModified);
             }
-            rename(fo, lastModified);
+            rename(fo, storageVersion, lastModified);
         } else if (performMove) {
             /*
              * Perform move
              */
-            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), lastModified);
+            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), storageVersion, lastModified);
         }
         /*
          * Finally update cache
@@ -644,14 +644,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
         }
     }
 
-    private void update(final FolderObject folderObj, final int options, final long lastModified) throws OXException {
+    private void update(final FolderObject folderObj, final int options, final FolderObject storageObj, final long lastModified) throws OXException {
         if (folderObj.getObjectID() <= 0) {
             throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, OXFolderUtility.getFolderName(folderObj));
         }
         /*
          * Get storage version (and thus implicitly check existence)
          */
-        final FolderObject storageObj = getFolderFromMaster(folderObj.getObjectID());
         if (folderObj.getPermissions() == null || folderObj.getPermissions().size() == 0) {
             if (folderObj.containsPermissions()) {
                 /*
@@ -935,17 +934,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
         return ((module == FolderObject.TASK) || (module == FolderObject.CALENDAR) || (module == FolderObject.CONTACT) || (module == FolderObject.INFOSTORE));
     }
 
-    private void rename(final FolderObject folderObj, final long lastModified) throws OXException {
+    private void rename(final FolderObject folderObj, final FolderObject storageObj, final long lastModified) throws OXException {
         if (folderObj.getObjectID() <= 0) {
             throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, OXFolderUtility.getFolderName(folderObj));
         } else if (!folderObj.containsFolderName() || folderObj.getFolderName() == null || folderObj.getFolderName().trim().length() == 0) {
             throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TITLE, "", Integer.valueOf(ctx.getContextId()));
         }
         OXFolderUtility.checkFolderStringData(folderObj);
-        /*
-         * Get storage version (and thus implicitly check existence)
-         */
-        final FolderObject storageObj = getFolderFromMaster(folderObj.getObjectID());
         /*
          * Check if rename can be avoided (cause new name equals old one) and prevent default folder rename
          */
@@ -1061,11 +1056,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         return Arrays.binarySearch(a, key) >= 0;
     }
 
-    private void move(final int folderId, final int targetFolderId, final int createdBy, final long lastModified) throws OXException {
-        /*
-         * Load source folder
-         */
-        final FolderObject storageSrc = getFolderFromMaster(folderId);
+    private void move(final int folderId, final int targetFolderId, final int createdBy, final FolderObject storageSrc, final long lastModified) throws OXException {
         /*
          * Folder is already in target folder
          */
