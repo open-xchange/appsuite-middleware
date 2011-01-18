@@ -87,7 +87,7 @@ public abstract class AbstractAppointmentRequest<T extends AbstractAJAXResponse>
     protected JSONObject convert(final Appointment appointmentObj, final TimeZone timeZone)
         throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
-        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone, true);
 		appointmentWriter.writeAppointment(appointmentObj, jsonObj);
         return jsonObj;
     }
