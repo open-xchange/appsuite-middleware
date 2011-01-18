@@ -298,7 +298,7 @@ public final class IMAPException extends MIMEMailException {
          */
         CONNECT_ERROR(IMAPCode.CONNECT_ERROR),
         /**
-         * Mailbox' root folder must not be source or the destination fullname of a move operation.
+         * Mailbox' root folder must not be source or the destination full name of a move operation.
          */
         NO_ROOT_MOVE(IMAPCode.NO_ROOT_MOVE),
         /**
@@ -726,9 +726,9 @@ public final class IMAPException extends MIMEMailException {
          */
         CONNECT_ERROR(MIMEMailException.Code.CONNECT_ERROR, null),
         /**
-         * Mailbox' root folder must not be source or the destination fullname of a move operation.
+         * Mailbox' root folder must not be source or the destination full name of a move operation.
          */
-        NO_ROOT_MOVE("Mailbox' root folder must not be source or the destination fullname of a move operation.", Category.CODE_ERROR, 2048),
+        NO_ROOT_MOVE("Mailbox' root folder must not be source or the destination full name of a move operation.", Category.CODE_ERROR, 2048),
         /**
          * Sort field %1$s is not supported via IMAP SORT command
          */
