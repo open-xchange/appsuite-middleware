@@ -714,6 +714,9 @@ public final class OXFolderUtility {
      * @return <code>true</code> if different; otherwise <code>false</code>
      */
     public static boolean isDifferent(final List<OCLPermission> storageList, final List<OCLPermission> updateList) {
+        if (updateList.isEmpty()) {
+            return false;
+        }
         final int ssize = storageList.size();
         for (final OCLPermission update : updateList) {
             boolean found = false;

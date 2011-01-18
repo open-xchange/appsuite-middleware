@@ -55,7 +55,6 @@ import gnu.trove.TIntObjectProcedure;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -368,14 +367,16 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     throwException = true;
                 }
             } else {
-                final ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, folderObj.getModule(), readCon, ctx);
+                final TIntArrayList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, folderObj.getModule(), readCon, ctx);
                 /*
-                 * Check if the user can see one of these folders. In this case throw a duplicate folder exception
+                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
                  */
-                for (final int f : folders) {
-                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(f);
-                    final EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
-                    if (permission.isFolderVisible()) {
+                for (final int fuid : folders.toNativeArray()) {
+                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
+                    if (toCheck.getCreatedBy() == (folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : user.getId())) {
+                        /*
+                         * User is already owner of a private folder with the same name located below system's private folder
+                         */
                         throwException = true;
                         break;
                     }
@@ -508,6 +509,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     @Override
     public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
+        final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, getFolderFromMaster(fo.getObjectID()));
         if (checkPermissions) {
             if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(
                 session.getUserId(),
@@ -538,7 +540,6 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     Integer.valueOf(ctx.getContextId()));
             }
             {
-                final boolean isRenameOnly = false;
                 if (isRenameOnly) {
                     if (!perm.isFolderAdmin() && !perm.canCreateSubfolders()) {
                         final OCLPermission underlyingPermission = perm.getUnderlyingPermission();
@@ -573,19 +574,23 @@ final class OXFolderManagerImpl extends OXFolderManager {
         final boolean performMove = fo.containsParentFolderID();
         if (fo.containsPermissions() || fo.containsModule()) {
             if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), lastModified);
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), lastModified);
             }
-            update(fo, OPTION_NONE, lastModified);
+            if (isRenameOnly) {
+                rename(fo, lastModified);
+            } else {
+                update(fo, OPTION_NONE, lastModified);
+            }
         } else if (fo.containsFolderName()) {
             if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), lastModified);
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), lastModified);
             }
             rename(fo, lastModified);
         } else if (performMove) {
             /*
              * Perform move
              */
-            move(fo.getObjectID(), fo.getParentFolderID(), lastModified);
+            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), lastModified);
         }
         /*
          * Finally update cache
@@ -969,14 +974,16 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     throwException = true;
                 }
             } else {
-                final ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageObj.getModule(), readCon, ctx);
+                final TIntArrayList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageObj.getModule(), readCon, ctx);
                 /*
-                 * Check if the user can see one of these folders. In this case throw a duplicate folder exception
+                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
                  */
-                for (final int f : folders) {
-                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(f);
-                    final EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
-                    if (permission.isFolderVisible()) {
+                for (final int fuid : folders.toNativeArray()) {
+                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
+                    if (toCheck.getCreatedBy() == (folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : user.getId())) {
+                        /*
+                         * User is already owner of a private folder with the same name located below system's private folder
+                         */
                         throwException = true;
                         break;
                     }
@@ -1051,7 +1058,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         return Arrays.binarySearch(a, key) >= 0;
     }
 
-    private void move(final int folderId, final int targetFolderId, final long lastModified) throws OXException {
+    private void move(final int folderId, final int targetFolderId, final int createdBy, final long lastModified) throws OXException {
         /*
          * Load source folder
          */
@@ -1094,14 +1101,16 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     throwException = true;
                 }
             } else {
-                final ArrayList<Integer> folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
+                final TIntArrayList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
                 /*
-                 * Check if the user can see one of these folders. In this case throw a duplicate folder exception
+                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
                  */
-                for (final int f : folders) {
-                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(f);
-                    final EffectivePermission permission = toCheck.getEffectiveUserPermission(user.getId(), userConfig, readCon);
-                    if (permission.isFolderVisible()) {
+                for (final int fuid : folders.toNativeArray()) {
+                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
+                    if (toCheck.getCreatedBy() == (createdBy > 0 ? createdBy : user.getId())) {
+                        /*
+                         * User is already owner of a private folder with the same name located below system's private folder
+                         */
                         throwException = true;
                         break;
                     }
