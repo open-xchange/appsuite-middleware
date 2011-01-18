@@ -209,6 +209,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
 
         // Read in all elements in the proper order.
         for (int i = 0; i < size; i++) {
+            @SuppressWarnings("unchecked")
             final E e = (E) s.readObject();
             map.put(e, PRESENT);
         }
