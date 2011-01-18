@@ -111,6 +111,7 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class);
         tests.addTestSuite(com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class);
         tests.addTestSuite(com.openexchange.ajax.contact.AggregatingContactTest.class);
+        tests.addTestSuite(com.openexchange.ajax.framework.ParamsTest.class);
         return tests;
     }
 }
