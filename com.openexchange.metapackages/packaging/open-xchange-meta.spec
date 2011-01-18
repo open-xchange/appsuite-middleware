@@ -51,6 +51,8 @@ Summary:        Open-Xchange Meta packages
 
 %define oxcommon open-xchange, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-control, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
 
+%define alllang open-xchange-gui-lang-es-es, open-xchange-gui-lang-it-it, open-xchange-gui-lang-ja-jp, open-xchange-gui-lang-nl-nl, open-xchange-gui-lang-pl-pl, open-xchange-lang-es-es, open-xchange-lang-it-it, open-xchange-lang-ja-jp, open-xchange-lang-nl-nl, open-xchange-lang-pl-pl, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-online-help-pl, open-xchange-online-help-jp
+
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-server
 Group:          Applications/Productivity
@@ -168,7 +170,8 @@ Authors:
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX into Plesk integration
 Requires:	%{oxcommon}
-Requires:	open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-upsell-generic
+Requires:	%{alllang}
+Requires:	open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-upsell-generic
 
 %description -n open-xchange-meta-plesk
 The Open-Xchange Meta package for OX into Plesk integration
@@ -183,7 +186,8 @@ Authors:
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX into Parallels integration
 Requires:	%{oxcommon}
-Requires:	open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl
+Requires:	%{alllang}
+Requires:	open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
 
 %description -n open-xchange-meta-parallels
 The Open-Xchange Meta package for OX into Parallels integration
