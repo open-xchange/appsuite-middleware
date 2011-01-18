@@ -85,6 +85,8 @@ public abstract class CreateCore extends ContextAbstraction {
         setContextQuotaOption(parser, true);
         
         setFurtherOptions(parser);
+        
+        parser.allowDynamicOptions();
     }
     
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
@@ -123,6 +125,9 @@ public abstract class CreateCore extends ContextAbstraction {
                 parseAndSetContextQuota(parser, ctx);
                 
                 parseAndSetExtensions(parser, ctx, auth);
+                
+                // Dynamic Options
+                applyDynamicOptionsToContext(parser, ctx);
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);

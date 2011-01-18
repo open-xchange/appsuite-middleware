@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ServiceLoader;
@@ -505,6 +506,19 @@ public abstract class ContextAbstraction extends UserAbstraction {
         srv_data.addAll(iface.getData(ctx));
     
         return srv_data;
+    }
+    
+    protected void applyDynamicOptionsToContext(final AdminParser parser, final Context ctx) {
+        final Map<String, Map<String, String>> dynamicArguments = parser.getDynamicArguments();
+        for(final Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
+            final String namespace = namespaced.getKey();
+            for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                final String name = pair.getKey();
+                final String value = pair.getValue();
+                
+                ctx.setUserAttribute(namespace, name, value);
+            }
+        }
     }
 
 }
