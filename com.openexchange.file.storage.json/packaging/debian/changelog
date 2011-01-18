@@ -1,3 +1,9 @@
+open-xchange-file-storage-json (6.18.2.0-15) unstable; urgency=low
+
+  * second build for public ptf 2011-01-12
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 18 Jan 2011 16:44:02 +0100
+
 open-xchange-file-storage-json (6.18.2.0-14) unstable; urgency=low
 
   * build for public ptf 2011-01-12

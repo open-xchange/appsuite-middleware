@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 16
+%define		ox_release 17
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -718,8 +718,14 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jan 18 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #17535: Update of Yearly Series does no longer destroy the appointment.
+* Fri Jan 14 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #17890: Imip invitations for newly added external participants.
 * Tue Jan 11 2011 - choeger@open-xchange.com
  - Bugfix #18000: updating on RHEL and SLES does not work
+* Tue Jan 11 2011 - marcus.klein@open-xchange.com
+ - Bugfix #17924: Using correct identifier when deleting data from database if a user is removed.
 * Mon Jan 10 2011 - francisco.laguna@open-xchange.com
  - Bugfix #17915: FileStorage lists files correctly now.
 * Tue Dec 21 2010 - thorben.betten@open-xchange.com
@@ -1550,6 +1556,8 @@ fi
  - Bugfix #14425: Fixed KXML parser to properly check string length
 * Thu Jan 14 2010 - marcus.klein@open-xchange.com
  - Bugfix #15202: Added old UpdateTask 
+* Thu Jan 14 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17783: FIxed severe performance issues in bf_6_18_2
 * Wed Jan 13 2010 - martin.herfurth@open-xchange.com
  - Bugfix #15112: Intelligent contact collector settings.
 * Mon Jan 11 2010 - thorben.betten@open-xchange.com
@@ -1558,6 +1566,8 @@ fi
  - Bugfix #14922: Confirm status in public folders.
 * Mon Jan 11 2010 - choeger@open-xchange.com
  - Bugfix #15176: Crawler YML files can not be updated
+* Mon Jan 11 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17882: Retry fetching POP3 server's capabilities if cached check indicates failure
 * Wed Jan 06 2010 - martin.herfurth@open-xchange.com
  - Bugfix #15155: Changing start date of a series (server side).
 * Wed Jan 06 2010 - thorben.betten@open-xchange.com
