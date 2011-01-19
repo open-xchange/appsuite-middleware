@@ -247,7 +247,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_REFRESH = "refresh";
     
     public static final String ACTION_REFRESH_SECRET = "refreshSecret";
-
+    
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
      */
@@ -346,6 +346,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_UID = "uid";
     
     public static final String PARAMETER_SHOW_PRIVATE_APPOINTMENTS = "showPrivate";
+
+    public static final String PARAMETER_USERNAME = "name";
+    
+    public static final String PARAMETER_PASSWORD= "password";
 
 
     /**
