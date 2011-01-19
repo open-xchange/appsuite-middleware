@@ -576,7 +576,7 @@ public final class MessagingFolderWriter {
                             fo.setFolderName(folder.getName());
                             fo.setModule(FolderObject.MESSAGING);
                             fo.setType(FolderObject.MESSAGING);
-
+                            fo.setCreatedBy(-1);
                             jsonContainer.put(folderField.getColumnName(), folderField.renderJSON(folderField.getValue(fo, session)));
                         } catch (final JSONException e) {
                             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());

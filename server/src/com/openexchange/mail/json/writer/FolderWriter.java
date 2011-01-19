@@ -602,7 +602,7 @@ public final class FolderWriter {
                                 fo.setFolderName(folder.getName());
                                 fo.setModule(FolderObject.MAIL);
                                 fo.setType(FolderObject.PRIVATE);
-
+                                fo.setCreatedBy(-1);
                                 putter.put(folderField.getColumnName(), folderField.renderJSON(folderField.getValue(fo, session)));
                             } catch (final JSONException e) {
                                 throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());

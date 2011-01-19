@@ -423,6 +423,7 @@ public final class FolderWriter {
                             fo.setFolderName(folder.getName());
                             fo.setModule(folder.getContentType().getModule());
                             fo.setType(folder.getType().getType());
+                            fo.setCreatedBy(folder.getCreatedBy());
                             jsonPutter.put(additionalFolderField.getColumnName(), additionalFolderField.getValue(fo, serverSession));
                         }
                     };
@@ -520,6 +521,7 @@ public final class FolderWriter {
                             fo.setFolderName(folder.getName());
                             fo.setModule(folder.getContentType().getModule());
                             fo.setType(folder.getType().getType());
+                            fo.setCreatedBy(folder.getCreatedBy());
                             jsonPutter.put(additionalFolderField.getColumnName(), additionalFolderField.getValue(fo, serverSession));
                         }
                     };
