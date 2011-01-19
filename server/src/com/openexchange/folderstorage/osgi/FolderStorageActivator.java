@@ -52,6 +52,9 @@ package com.openexchange.folderstorage.osgi;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -74,6 +77,7 @@ import com.openexchange.folderstorage.messaging.osgi.MessagingFolderStorageActiv
 import com.openexchange.folderstorage.outlook.osgi.OutlookFolderStorageActivator;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.session.ServerSession;
 
@@ -84,10 +88,62 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class FolderStorageActivator implements BundleActivator {
 
+    private static final class Key {
+
+        public static Key valueOf(final int userId, final int cid) {
+            return new Key(userId, cid);
+        }
+        
+        private final int userId;
+        
+        private final int cid;
+        
+        private final int hash;
+
+        public Key(final int userId, final int cid) {
+            super();
+            this.userId = userId;
+            this.cid = cid;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + cid;
+            result = prime * result + userId;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (cid != other.cid) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
+
+    }
+
     private static final class DisplayNameFolderField implements AdditionalFolderField {
+
+        private final ConcurrentMap<Key, String> cache;
 
         public DisplayNameFolderField() {
             super();
+            final Lock lock = new ReentrantLock();
+            cache = new LockBasedConcurrentMap<Key, String>(lock, lock, new MaxCapacityLinkedHashMap<Key, String>(1000));
         }
 
         public Object renderJSON(final Object value) {
@@ -99,7 +155,9 @@ public final class FolderStorageActivator implements BundleActivator {
             if (createdBy <= 0) {
                 return JSONObject.NULL;
             }
-            return UserStorage.getStorageUser(createdBy, session.getContext()).getDisplayName();
+            final Context context = session.getContext();
+            final String displayName = cache.get(Key.valueOf(createdBy, context.getContextId()));
+            return null == displayName ? UserStorage.getStorageUser(createdBy, context).getDisplayName() : displayName;
         }
 
         public String getColumnName() {
