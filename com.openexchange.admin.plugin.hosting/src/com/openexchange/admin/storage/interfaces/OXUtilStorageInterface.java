@@ -178,6 +178,15 @@ public abstract class OXUtilStorageInterface {
     public abstract Filestore getFilestore(final int id) throws StorageException;
 
     /**
+     * Load a filestore. Specify whether the file store usage should be calculated by summing up all filestore usages.
+     * @param filestoreId
+     * @param loadUsage - Whether the usage must be determined. Note: This is very slow.
+     * @return
+     * @throws StorageException 
+     */
+    public abstract Filestore getFilestore(int filestoreId, boolean loadUsage) throws StorageException;
+    
+    /**
      * Unregister filestore from configbdb
      * 
      * @param store_id
@@ -318,4 +327,6 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract Server[] searchForServer(final String search_pattern) throws StorageException;
+
+   
 }

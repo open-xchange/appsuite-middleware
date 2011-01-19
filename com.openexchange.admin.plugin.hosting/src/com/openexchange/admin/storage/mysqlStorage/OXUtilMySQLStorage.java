@@ -1271,7 +1271,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @return all filestore information
      * @throws StorageException if loading the filestore information fails.
      */
-    private Filestore getFilestore(int id, boolean loadRealUsage) throws StorageException {
+    public Filestore getFilestore(int id, boolean loadRealUsage) throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();

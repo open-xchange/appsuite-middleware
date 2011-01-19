@@ -103,6 +103,10 @@ public class ContextTest extends AbstractTest {
 
         Context srv_loaded = xctx.getData(ctx, cred);
 
+        assertEquals("lemon", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
+        assertEquals("squishy", srv_loaded.getUserAttribute("com.openexchange.test", "texture"));
+        
+        
         assertTrue("Expected same context ids", ctx.getId().intValue() == srv_loaded.getId().intValue());
 
         String add_mapping = srv_loaded.getId().intValue() + "_" + System.currentTimeMillis();
@@ -110,12 +114,23 @@ public class ContextTest extends AbstractTest {
 
         String changed_context_name = srv_loaded.getName() + "_" + System.currentTimeMillis();
         srv_loaded.setName(changed_context_name);
-
+        
+        // And for good measure some dynamic attributes
+        
+        srv_loaded.setUserAttribute("com.openexchange.test", "flavor", "pistaccio");
+        srv_loaded.setUserAttribute("com.openexchange.test", "color", "green");
+        srv_loaded.setUserAttribute("com.openexchange.test", "texture", null);
+        
         // change context and load again
         xctx.change(srv_loaded, cred);
 
         Context edited_ctx = xctx.getData(ctx, cred);
 
+        assertEquals("pistaccio", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
+        assertEquals("green", srv_loaded.getUserAttribute("com.openexchange.test", "color"));
+        assertEquals(null, srv_loaded.getUserAttribute("com.openexchange.test", "texture"));
+
+        
         // ids must be correct again and the mapping should now exist
         assertTrue("Expected same context ids", edited_ctx.getId().intValue() == srv_loaded.getId().intValue());
 
@@ -429,6 +444,8 @@ public class ContextTest extends AbstractTest {
     public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
         Context ctx = getTestContextObject(context_id);        
         ctx.setMaxQuota(quota_max_in_mb);
+        ctx.setUserAttribute("com.openexchange.test", "flavor", "lemon");
+        ctx.setUserAttribute("com.openexchange.test", "texture", "squishy");
         return ctx;
     }
 
