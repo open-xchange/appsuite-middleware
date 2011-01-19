@@ -65,5 +65,19 @@ public interface ImageDataSource extends DataSource {
      * @return The registration name
      */
     String getRegistrationName();
-    
+
+    /**
+     * Gets the context identifier
+     * 
+     * @return The context identifier
+     */
+    int getUserId();
+
+    /**
+     * Gets the user identifier
+     * 
+     * @return The user identifier
+     */
+    int getContextId();
+
 }
