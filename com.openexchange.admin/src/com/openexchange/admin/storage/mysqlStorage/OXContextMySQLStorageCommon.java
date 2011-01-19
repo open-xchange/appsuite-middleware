@@ -104,7 +104,7 @@ public class OXContextMySQLStorageCommon {
     
     // TODO: The average size parameter can be removed if we have an new property handler which can
     // deal right with plugin properties
-    public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException  {
+    public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException, StorageException  {
         Connection oxdb_read = null;
         PreparedStatement prep = null;
         final int context_id = ctx.getId();
@@ -192,6 +192,7 @@ public class OXContextMySQLStorageCommon {
 
             // context id
             cs.setId(context_id);
+            loadDynamicAttributes(oxdb_read, cs);
             return cs;
         } finally {
             closePreparedStatement(prep);
@@ -204,6 +205,55 @@ public class OXContextMySQLStorageCommon {
             }
         }
     }
+    
+    /**
+     * Parses a dynamic attribute from the user_attribute table
+     * Returns a String[] with retval[0] being the namespace and retval[1] being the name
+     * @throws StorageException 
+     */
+    private String[] parseDynamicAttribute(final String name) throws StorageException {
+        final int pos = name.indexOf('/');
+        if(pos == -1) {
+            throw new StorageException("Could not parse dynamic attribute name: "+name);
+        }
+        final String[] parsed = new String[2];
+        parsed[0] = name.substring(0, pos);
+        parsed[1] = name.substring(pos+1);
+        return parsed;
+    }
+
+    private boolean isDynamicAttribute(final String name) {
+        return name.indexOf('/') >= 0;
+    }
+
+    
+    private void loadDynamicAttributes(Connection oxCon, Context ctx) throws SQLException, PoolException, StorageException {
+        ResultSet rs = null;
+        PreparedStatement stmtuserattributes = null;
+        int contextId = ctx.getId();
+        try {
+            stmtuserattributes = oxCon.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
+            stmtuserattributes.setInt(1, contextId);
+            rs = stmtuserattributes.executeQuery();
+            while (rs.next()) {
+                final String name = rs.getString("name");
+                final String value = rs.getString("value");
+                if (isDynamicAttribute(name)) {
+                    final String[] namespaced = parseDynamicAttribute(name);
+                    ctx.setUserAttribute(namespaced[0], namespaced[1], value);
+                }
+            }
+        } finally {
+            if(rs != null) {
+                rs.close();
+            }
+            if(stmtuserattributes != null) {
+                stmtuserattributes.close();
+            }
+        }
+
+    }
+
 
     public Context[] loadContexts(Collection<Integer> cids, long averageSize, List<Filter<Context, Context>> filters) throws StorageException {
         PipesAndFiltersService pnfService;
