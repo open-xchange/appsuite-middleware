@@ -142,8 +142,6 @@ public class ContactWriter extends CommonWriter {
                         final String[] argsNames = imgSource.getRequiredArguments();
                         args.put(argsNames[0], String.valueOf(contact.getParentFolderID()));
                         args.put(argsNames[1], String.valueOf(contact.getObjectID()));
-                        args.put(argsNames[2], String.valueOf(session.getUserId()));
-                        args.put(argsNames[3], String.valueOf(session.getContextId()));
                         imageURL = imageService.addImageData(session, imgSource, args).getImageURL();
                     }
                     writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
@@ -597,8 +595,6 @@ public class ContactWriter extends CommonWriter {
                             final String[] argsNames = imgSource.getRequiredArguments();
                             args.put(argsNames[0], String.valueOf(contactObject.getParentFolderID()));
                             args.put(argsNames[1], String.valueOf(contactObject.getObjectID()));
-                            args.put(argsNames[2], String.valueOf(session.getUserId()));
-                            args.put(argsNames[3], String.valueOf(session.getContextId()));
                             imageURL =
                                 ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
                                     session,

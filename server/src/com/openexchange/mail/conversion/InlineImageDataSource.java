@@ -84,7 +84,7 @@ public final class InlineImageDataSource implements ImageDataSource {
      * </ul>
      */
     private static final String[] ARGS = {
-        "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid", "com.openexchange.groupware.user", "com.openexchange.groupware.cid" };
+        "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid" };
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
@@ -136,30 +136,6 @@ public final class InlineImageDataSource implements ImageDataSource {
         }
         final MailPart mailPart;
         {
-            final int userId;
-            {
-                final String val = dataArguments.get(ARGS[3]);
-                if (val == null) {
-                    throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[3]);
-                }
-                try {
-                    userId = Integer.parseInt(val);
-                } catch (final NumberFormatException e) {
-                    throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[3], val);
-                }
-            }
-            final int ccontextId;
-            {
-                final String val = dataArguments.get(ARGS[4]);
-                if (val == null) {
-                    throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[4]);
-                }
-                try {
-                    ccontextId = Integer.parseInt(val);
-                } catch (final NumberFormatException e) {
-                    throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[4], val);
-                }
-            }
             final FullnameArgument arg = prepareMailFolderParam(dataArguments.get(ARGS[0]));
             final String fullname = arg.getFullname();
             final String mailId = dataArguments.get(ARGS[1]);

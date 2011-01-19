@@ -209,7 +209,7 @@ public final class ImageRegistry {
             }
             return imageData.touch();
         }
-        imageData = new ImageData(imageSource, imageArguments, timeToLive, id);
+        imageData = new ImageData(imageSource, imageArguments, timeToLive, id, session);
         m.put(id, imageData);
         sessions2images.put(session.getSessionID(), id);
         if (DEBUG) {
