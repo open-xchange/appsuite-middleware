@@ -691,9 +691,9 @@ public final class HTMLServiceImpl implements HTMLService {
         /*
          * Drop any subsequent <base> tag
          */
-        do {
+        while (m.find() && m.end() < end) {
             mr.appendLiteralReplacement(sb, "");
-        } while (m.find() && m.end() < end);
+        };
         mr.appendTail(sb);
         return sb.toString();
     }
