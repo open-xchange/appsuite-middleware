@@ -82,7 +82,6 @@ public final class ImageData {
     private long lastAccessed;
 
     private final int timeToLive;
-    
 
     /**
      * Initializes a new {@link ImageData} with its unique ID set to {@link DataArguments#getID()}.
@@ -91,8 +90,9 @@ public final class ImageData {
      * @param imageArguments The image arguments
      * @param timeToLive The time-to-live in milliseconds; a value less than or equal to zero is an infinite time-to-live
      * @param uniqueId This image data's unique ID; may be <code>null</code> to generate a new one
+     * @param session The session providing user information
      */
-    ImageData(final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive, final String uniqueId) {
+    ImageData(final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive, final String uniqueId, final Session session) {
         super();
         if (imageArguments == null) {
             throw new IllegalArgumentException("image arguments are null");
