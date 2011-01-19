@@ -246,21 +246,20 @@ public final class FolderCache {
         final IMAPConfig imapConfig = folderStorage.getImapConfig();
         try {
             final IMAPStore imapStore = folderStorage.getImapStore();
+            if (null != imapFolder) {
+                return IMAPFolderConverter.convertFolder(imapFolder, session, imapConfig, folderStorage.getContext());
+            }
             IMAPFolder f;
-            if (null == imapFolder) {
-                if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName) || 0 == fullName.length()) {
-                    f = (IMAPFolder) imapStore.getDefaultFolder();
-                } else {
-                    f = (IMAPFolder) imapStore.getFolder(fullName);
-                }
-                if (!f.exists()) {
-                    f = folderStorage.checkForNamespaceFolder(fullName);
-                    if (null == f) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
-                    }
-                }
+            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName) || 0 == fullName.length()) {
+                f = (IMAPFolder) imapStore.getDefaultFolder();
             } else {
-                f = imapFolder;
+                f = (IMAPFolder) imapStore.getFolder(fullName);
+            }
+            if (!f.exists()) {
+                f = folderStorage.checkForNamespaceFolder(fullName);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
             }
             return IMAPFolderConverter.convertFolder(f, session, imapConfig, folderStorage.getContext());
         } catch (final MessagingException e) {
@@ -312,7 +311,7 @@ public final class FolderCache {
         final FolderMap folderMap = entry.getValue();
         if (null != folderMap) {
             synchronized (folderMap) {
-                MailFolder mailFolder = folderMap.get(fullName);
+                final MailFolder mailFolder = folderMap.get(fullName);
                 if (null != mailFolder) {
                     final int cur = mailFolder.getUnreadMessageCount();
                     mailFolder.setUnreadMessageCount(cur > 0 ? cur - 1 : 0);
