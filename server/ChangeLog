@@ -18,14 +18,14 @@
 
  - Bugfix #17924: Using correct identifier when deleting data from database if a user is removed.
 
-* 2010-01-11 - thorben.betten@open-xchange.com
+* 2011-01-11 - thorben.betten@open-xchange.com
 
  - Bugfix #17882: Retry fetching POP3 server's capabilities if cached check indicates failure
 
 * 2011-01-11 - choeger@open-xchange.com
 
  - Bugfix #18000: updating on RHEL and SLES does not work
- 
+
 * 2011-01-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #17915: FileStorage lists files correctly now.
