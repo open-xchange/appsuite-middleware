@@ -57,6 +57,7 @@ import com.openexchange.ajax.folder.api2.Bug15995Test;
 import com.openexchange.ajax.folder.api2.Bug16163Test;
 import com.openexchange.ajax.folder.api2.Bug16243Test;
 import com.openexchange.ajax.folder.api2.Bug16303Test;
+import com.openexchange.ajax.folder.api2.Bug17225Test;
 import com.openexchange.ajax.folder.api2.Bug17261Test;
 import com.openexchange.ajax.folder.api2.ClearTest;
 import com.openexchange.ajax.folder.api2.CreateTest;
@@ -118,6 +119,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(Bug16303Test.class);
         tests.addTestSuite(Bug16724Test.class);
         tests.addTestSuite(Bug17027Test.class);
+        tests.addTestSuite(Bug17225Test.class);
         tests.addTestSuite(Bug17261Test.class);
 
         return tests;
