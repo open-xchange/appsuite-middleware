@@ -189,21 +189,21 @@ public interface HTMLService {
     String getConformHTML(String htmlContent, String charset, boolean replaceUrls);
 
     /**
-     * Drops <code><i>script</i></code> tags in HTML content's header.
+     * Drops <code>&lt;script&gt;</code> tags in HTML content's header.
      * 
      * @param htmlContent The HTML content
-     * @return The HTML content with <code><i>script</i></code> tags removed
+     * @return The HTML content with <code>&lt;script&gt;</code> tags removed
      */
     String dropScriptTagsInHeader(String htmlContent);
 
     /**
-     * Checks for existence of a <code><i>base</i></code> tag. Allowing it if an absolute URL is specified in <code><i>href</i></code>
+     * Checks for existence of a <code>&lt;base&gt;</code> tag. Allowing it if an absolute URL is specified in <code><i>href</i></code>
      * attribute <i>AND</i> <code>externalImagesAllowed</code> is set to <code>true</code>; otherwise the <code><i>base</i></code> tag is
      * removed.
      * 
      * @param htmlContent The HTML content
      * @param externalImagesAllowed <code>true</code> if external images are allowed; otherwise <code>false</code>
-     * @return The HTML content with a proper <code><i>base</i></code> tag
+     * @return The HTML content with a proper <code>&lt;base&gt;</code> tag
      */
     String checkBaseTag(String htmlContent, boolean externalImagesAllowed);
 
