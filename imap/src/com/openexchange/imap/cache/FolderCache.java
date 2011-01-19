@@ -245,10 +245,10 @@ public final class FolderCache {
         final Session session = folderStorage.getSession();
         final IMAPConfig imapConfig = folderStorage.getImapConfig();
         try {
-            final IMAPStore imapStore = folderStorage.getImapStore();
             if (null != imapFolder) {
                 return IMAPFolderConverter.convertFolder(imapFolder, session, imapConfig, folderStorage.getContext());
             }
+            final IMAPStore imapStore = folderStorage.getImapStore();
             IMAPFolder f;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName) || 0 == fullName.length()) {
                 f = (IMAPFolder) imapStore.getDefaultFolder();
