@@ -860,12 +860,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Sort them by default-flag and name: <user's default folder>, <aaa>, <bbb>, ... <zzz>
                  */
-                Collections.sort(list, new FolderObjectComparator(user.getLocale()));
+                Collections.sort(list, new FolderObjectComparator(user.getLocale(), ctx));
             } else {
                 /*
                  * Sort them by name only
                  */
-                Collections.sort(list, new FolderNameComparator(user.getLocale()));
+                Collections.sort(list, new FolderNameComparator(user.getLocale(), storageParameters.getContext()));
             }
             /*
              * Extract IDs
@@ -1086,7 +1086,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     session = new ServerSessionAdapter(s);
                 }
             }
-            Collections.sort(subfolders, new FolderObjectComparator(session.getUser().getLocale()));
+            Collections.sort(subfolders, new FolderObjectComparator(session.getUser().getLocale(), storageParameters.getContext()));
             final int size = subfolders.size();
             final List<SortableId> list = new ArrayList<SortableId>(size);
             for (int i = 0; i < size; i++) {
@@ -1552,15 +1552,28 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final Collator collator;
 
-        public FolderObjectComparator(final Locale locale) {
+        private final Context context;
+
+        public FolderObjectComparator(final Locale locale, final Context context) {
             super();
             collator = Collator.getInstance(locale);
             collator.setStrength(Collator.SECONDARY);
+            this.context = context;
         }
 
         public int compare(final FolderObject o1, final FolderObject o2) {
             if (o1.isDefaultFolder()) {
                 if (o2.isDefaultFolder()) {
+                    if (o1.getFolderName().equals(o2.getFolderName())) {
+                        /*
+                         * Sort by owner's display name
+                         */
+                        final int owner1 = o1.getCreatedBy();
+                        final int owner2 = o2.getCreatedBy();
+                        if (owner1 > 0 && owner2 > 0) {
+                            return collator.compare(UserStorage.getStorageUser(owner1, context).getDisplayName(), UserStorage.getStorageUser(owner2, context).getDisplayName());
+                        }
+                    }
                     return compareById(o1.getObjectID(), o2.getObjectID());
                 }
                 return -1;
@@ -1581,17 +1594,32 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final Collator collator;
 
-        public FolderNameComparator(final Locale locale) {
+        private final Context context;
+
+        public FolderNameComparator(final Locale locale, final Context context) {
             super();
             collator = Collator.getInstance(locale);
             collator.setStrength(Collator.SECONDARY);
+            this.context = context;
         }
 
         public int compare(final FolderObject o1, final FolderObject o2) {
             /*
              * Compare by name
              */
-            return collator.compare(o1.getFolderName(), o2.getFolderName());
+            final String folderName1 = o1.getFolderName();
+            final String folderName2 = o2.getFolderName();
+            if (folderName1.equals(folderName2)) {
+                /*
+                 * Sort by owner's display name
+                 */
+                final int owner1 = o1.getCreatedBy();
+                final int owner2 = o2.getCreatedBy();
+                if (owner1 > 0 && owner2 > 0) {
+                    return collator.compare(UserStorage.getStorageUser(owner1, context).getDisplayName(), UserStorage.getStorageUser(owner2, context).getDisplayName());
+                }
+            }
+            return collator.compare(folderName1, folderName2);
         }
 
     } // End of FolderNameComparator
