@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.contexts;
 
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 
 
@@ -109,5 +111,13 @@ public class SimContext implements Context {
 
     public boolean isReadOnly() {
         return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.contexts.Context#getAttributes()
+     */
+    public Map<String, Set<String>> getAttributes() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
