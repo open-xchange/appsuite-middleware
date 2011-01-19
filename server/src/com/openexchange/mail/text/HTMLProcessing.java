@@ -162,14 +162,20 @@ public final class HTMLProcessing {
             } else {
                 retval = htmlService.dropScriptTagsInHeader(content);
                 retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
-                retval = htmlService.checkBaseTag(retval);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
+                    final boolean externalImagesAllowed = usm.isAllowHTMLImages();
+                    retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
                     /*
                      * Filter according to white-list
                      */
                     retval = htmlService.filterWhitelist(retval);
                     
-                    if (!usm.isAllowHTMLImages()) {
+                    if (externalImagesAllowed) {
+                        /*
+                         * TODO: Does not work reliably by now
+                         */
+                        // retval = htmlService.checkExternalImages(retval);
+                    } else {
                         retval = htmlService.filterExternalImages(retval, modified);
                     }
                     /*
@@ -584,6 +590,8 @@ public final class HTMLProcessing {
                         args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
                         args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
                         args.put(argsNames[2], cid);
+                        args.put(argsNames[3], String.valueOf(session.getUserId()));
+                        args.put(argsNames[4], String.valueOf(session.getContextId()));
                         imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
                     }
                     linkBuilder.setLength(0);
@@ -651,6 +659,8 @@ public final class HTMLProcessing {
                                 args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
                                 args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
                                 args.put(argsNames[2], filename);
+                                args.put(argsNames[3], String.valueOf(session.getUserId()));
+                                args.put(argsNames[4], String.valueOf(session.getContextId()));
                                 imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
                             }
                             linkBuilder.setLength(0);
@@ -700,6 +710,8 @@ public final class HTMLProcessing {
                     args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
                     args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
                     args.put(argsNames[2], cid);
+                    args.put(argsNames[3], String.valueOf(session.getUserId()));
+                    args.put(argsNames[4], String.valueOf(session.getContextId()));
                     imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
                 }
                 linkBuilder.setLength(0);

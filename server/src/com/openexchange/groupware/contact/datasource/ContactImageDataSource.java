@@ -74,7 +74,7 @@ public final class ContactImageDataSource implements ImageDataSource {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactImageDataSource.class);
 
-    private static final String[] ARGS = { "com.openexchange.groupware.contact.folder", "com.openexchange.groupware.contact.id" };
+    private static final String[] ARGS = { "com.openexchange.groupware.contact.folder", "com.openexchange.groupware.contact.id", "com.openexchange.groupware.user", "com.openexchange.groupware.cid" };
 
     /**
      * Initializes a new {@link ContactImageDataSource}
@@ -112,6 +112,30 @@ public final class ContactImageDataSource implements ImageDataSource {
                 objectId = Integer.parseInt(val);
             } catch (final NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[1], val);
+            }
+        }
+        final int user;
+        {
+            final String val = dataArguments.get(ARGS[2]);
+            if (val == null) {
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[2]);
+            }
+            try {
+                user = Integer.parseInt(val);
+            } catch (final NumberFormatException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[2], val);
+            }
+        }
+        final int cid;
+        {
+            final String val = dataArguments.get(ARGS[3]);
+            if (val == null) {
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[3]);
+            }
+            try {
+                cid = Integer.parseInt(val);
+            } catch (final NumberFormatException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[3], val);
             }
         }
         /*
