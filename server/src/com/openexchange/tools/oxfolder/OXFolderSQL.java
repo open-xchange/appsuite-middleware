@@ -59,7 +59,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -147,7 +146,7 @@ public final class OXFolderSQL {
                 set.add(rs.getInt(1));
             }
             return set.toArray();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -366,9 +365,9 @@ public final class OXFolderSQL {
     }
 
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
-    
+
     /**
-     * Returns an {@link ArrayList} of folders whose name and module matches the given parameters in the given parent folder.
+     * Returns an {@link TIntArrayList} of folders whose name and module matches the given parameters in the given parent folder.
      * @param folderId
      * @param parent The parent folder whose subfolders shall be looked up
      * @param folderName The folder name to look for
@@ -379,12 +378,12 @@ public final class OXFolderSQL {
      * @throws DBPoolingException
      * @throws SQLException
      */
-    public static ArrayList<Integer> lookUpFolders(final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
+    public static TIntArrayList lookUpFolders(final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
     	Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        ArrayList<Integer> folderList = new ArrayList<Integer>();
+        final TIntArrayList folderList = new TIntArrayList();
         try {
             if (readCon == null) {
                 readCon = DBPool.pickup(ctx);

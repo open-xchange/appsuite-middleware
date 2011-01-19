@@ -1,3 +1,7 @@
+* 2011-01-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #17225: Ensure a shared folder's type is properly written to JSON output
+
 * 2011-01-18 - martin.herfurth@open-xchange.com
 
  - Bugfix #17535: Update of Yearly Series does no longer destroy the appointment.
@@ -6,7 +10,7 @@
 
  - Bugfix #17890: Imip invitations for newly added external participants.
 
-* 2010-01-14 - thorben.betten@open-xchange.com
+* 2011-01-14 - thorben.betten@open-xchange.com
 
  - Bugfix #17783: FIxed severe performance issues in bf_6_18_2
 

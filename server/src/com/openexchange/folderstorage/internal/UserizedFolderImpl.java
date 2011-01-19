@@ -78,6 +78,18 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private Integer defaultType;
 
+    private Type type;
+
+    private Permission[] permissions;
+
+    private String[] subfolderIds;
+
+    private String parentId;
+
+    private Date creationDate;
+    
+    private Date lastModified;
+
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
      * 
@@ -103,7 +115,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
         try {
             final UserizedFolderImpl clone = (UserizedFolderImpl) super.clone();
             clone.folder = (Folder) clone.folder.clone();
-            clone.ownPermission = (Permission) clone.ownPermission.clone();
+            clone.ownPermission = ownPermission == null ? null : (Permission) ownPermission.clone();
             clone.lastModifiedUTC = null == lastModifiedUTC ? null : new Date(lastModifiedUTC.getTime());
             clone.locale = (Locale) (null == locale ? null : locale.clone());
             return clone;
@@ -125,11 +137,11 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public Date getCreationDate() {
-        return folder.getCreationDate();
+        return creationDate == null ? folder.getCreationDate() : creationDate;
     }
 
     public Date getLastModified() {
-        return folder.getLastModified();
+        return lastModified == null ? folder.getLastModified() : lastModified;
     }
 
     public int getModifiedBy() {
@@ -141,11 +153,11 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setCreationDate(final Date creationDate) {
-        folder.setCreationDate(creationDate);
+        this.creationDate = creationDate == null ? null : new Date(creationDate.getTime());
     }
 
     public void setLastModified(final Date lastModified) {
-        folder.setLastModified(lastModified);
+        this.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
     }
 
     public void setModifiedBy(final int modifiedBy) {
@@ -169,15 +181,15 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public String getParentID() {
-        return folder.getParentID();
+        return null == parentId ? folder.getParentID() : parentId;
     }
 
     public Permission[] getPermissions() {
-        return folder.getPermissions();
+        return null == permissions ? folder.getPermissions() : permissions;
     }
 
     public String[] getSubfolderIDs() {
-        return folder.getSubfolderIDs();
+        return subfolderIds == null ? folder.getSubfolderIDs() : subfolderIds;
     }
 
     public String getTreeID() {
@@ -185,7 +197,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public Type getType() {
-        return folder.getType();
+        return null == type ? folder.getType() : type;
     }
 
     public boolean isCacheable() {
@@ -221,15 +233,15 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setParentID(final String parentId) {
-        folder.setParentID(parentId);
+        this.parentId = parentId;
     }
 
     public void setPermissions(final Permission[] permissions) {
-        folder.setPermissions(permissions);
+        this.permissions = permissions;
     }
 
     public void setSubfolderIDs(final String[] subfolderIds) {
-        folder.setSubfolderIDs(subfolderIds);
+        this.subfolderIds = subfolderIds;
     }
 
     public void setSubscribed(final boolean subscribed) {
@@ -245,7 +257,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setType(final Type type) {
-        folder.setType(type);
+        this.type = type;
     }
 
     public Permission getOwnPermission() {
