@@ -69,6 +69,7 @@ import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -1189,17 +1190,26 @@ public class CalendarRecurringTests extends TestCase {
         }
 
         assertEquals("Check correct until for !yearly " , check_until , cdao.getUntil().getTime());
+        
+        final int MONTH = Calendar.AUGUST;
+        final int DAY = 20;        
+        final Calendar cdao2Cal = TimeTools.createCalendar(TimeZone.getTimeZone(TIMEZONE));
+        cdao2Cal.set(Calendar.MONTH, MONTH);
+        cdao2Cal.set(Calendar.DAY_OF_MONTH, DAY);
 
         final CalendarDataObject cdao2 = new CalendarDataObject();
         cdao2.setTimezone(TIMEZONE);
-        CalendarTest.fillDatesInDao(cdao2);
-        cdao2.removeUntil();
+        cdao2.setStartDate(cdao2Cal.getTime());
+        // Add one hour for endDate
+        cdao2Cal.add(Calendar.HOUR, 1);
+        cdao2.setEndDate(cdao2Cal.getTime());
+        //
         cdao2.setTitle("testCorrectUntilCalculation yearly");
         cdao2.setRecurrenceType(CalendarObject.YEARLY);
         cdao2.setInterval(1);
-        cdao2.setMonth(Calendar.AUGUST);
-        cdao2.setDayInMonth(20);
-        new CalendarCollection().fillDAO(cdao);
+        cdao2.setMonth(MONTH);
+        cdao2.setDayInMonth(DAY);
+        new CalendarCollection().fillDAO(cdao2);
 
         final CalendarCollection coll = new CalendarCollection();
 
@@ -1209,8 +1219,8 @@ public class CalendarRecurringTests extends TestCase {
         // (-1) in years because internal calculation is 1-based.
         // 21st of August, because we need the 24:00:00 of the day of the last occurrence, which is 00:00:00 of the following day.
         check_until2.add(Calendar.YEAR, CalendarCollectionService.MAX_OCCURRENCESE - 1);
-        check_until2.set(Calendar.MONTH, Calendar.AUGUST);
-        check_until2.set(Calendar.DAY_OF_MONTH, 21);
+        check_until2.set(Calendar.MONTH, MONTH);
+        check_until2.set(Calendar.DAY_OF_MONTH, DAY);
 
         Date expected = new Date(coll.normalizeLong(check_until2.getTimeInMillis()));
         Date actual = cdao2.getUntil();
