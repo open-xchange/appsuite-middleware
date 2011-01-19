@@ -52,11 +52,13 @@ package com.openexchange.folderstorage.osgi;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderExceptionFactory;
@@ -71,6 +73,9 @@ import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
 import com.openexchange.folderstorage.messaging.osgi.MessagingFolderStorageActivator;
 import com.openexchange.folderstorage.outlook.osgi.OutlookFolderStorageActivator;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder storage framework.
@@ -78,6 +83,34 @@ import com.openexchange.groupware.EnumComponent;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageActivator implements BundleActivator {
+
+    private static final class DisplayNameFolderField implements AdditionalFolderField {
+
+        public DisplayNameFolderField() {
+            super();
+        }
+
+        public Object renderJSON(final Object value) {
+            return value;
+        }
+
+        public Object getValue(final FolderObject folder, final ServerSession session) {
+            final int createdBy = folder.getCreatedBy();
+            if (createdBy <= 0) {
+                return JSONObject.NULL;
+            }
+            return UserStorage.getStorageUser(createdBy, session.getContext()).getDisplayName();
+        }
+
+        public String getColumnName() {
+            return "com.openexchange.folderstoragee.displayName";
+        }
+
+        public int getColumnID() {
+            return 3030;
+        }
+
+    }
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class);
 
@@ -113,6 +146,7 @@ public final class FolderStorageActivator implements BundleActivator {
                 ContentTypeDiscoveryService.class.getName(),
                 ContentTypeRegistry.getInstance(),
                 null));
+            serviceRegistrations.add(context.registerService(AdditionalFolderField.class.getName(), new DisplayNameFolderField(), null));
             // Register service trackers
             serviceTrackers = new ArrayList<ServiceTracker>(4);
             serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new FolderStorageTracker(context)));
