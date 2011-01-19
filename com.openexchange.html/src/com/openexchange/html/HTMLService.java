@@ -198,12 +198,14 @@ public interface HTMLService {
 
     /**
      * Checks for existence of a <code><i>base</i></code> tag. Allowing it if an absolute URL is specified in <code><i>href</i></code>
-     * attribute; denying it if a relative one is specified.
+     * attribute <i>AND</i> <code>externalImagesAllowed</code> is set to <code>true</code>; otherwise the <code><i>base</i></code> tag is
+     * removed.
      * 
      * @param htmlContent The HTML content
+     * @param externalImagesAllowed <code>true</code> if external images are allowed; otherwise <code>false</code>
      * @return The HTML content with a proper <code><i>base</i></code> tag
      */
-    String checkBaseTag(String htmlContent);
+    String checkBaseTag(String htmlContent, boolean externalImagesAllowed);
 
     /**
      * Pretty prints specified HTML content.

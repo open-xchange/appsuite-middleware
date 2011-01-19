@@ -650,34 +650,53 @@ public final class HTMLServiceImpl implements HTMLService {
         }
     }
 
-    private static final Pattern PATTERN_BASE_TAG = Pattern.compile("<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BODY_START = Pattern.compile(Pattern.quote("<body"), Pattern.CASE_INSENSITIVE);
 
-    public String checkBaseTag(final String htmlContent) {
+    public String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed) {
         if (null == htmlContent) {
             return htmlContent;
         }
+        /*
+         * The <base> tag must be between the document's <head> tags. Also, there must be no more than one base element per document.
+         */
+        final Matcher m1 = PATTERN_BODY_START.matcher(htmlContent);
+        return checkBaseTag(htmlContent,externalImagesAllowed,  m1.find() ? m1.start() : htmlContent.length());
+    }
+
+    private static final Pattern PATTERN_BASE_TAG = Pattern.compile("<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
         final Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
-        if (!m.find()) {
+        if (!m.find() || m.end() >= end) {
             return htmlContent;
         }
         final StringBuilder sb = new StringBuilder(htmlContent.length());
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        do {
+        /*
+         * Check first found <base> tag
+         */
+        if (externalImagesAllowed) {
             final String href = m.group(1).trim().toLowerCase(Locale.ENGLISH);
             if (href.startsWith("http://") || href.startsWith("https://")) {
                 /*
                  * Base tag contains an absolute URL
                  */
-                mr.appendLiteralReplacement(sb, m.group());
+                mr.appendLiteralReplacement(sb, m.group(0));
             } else {
                 mr.appendLiteralReplacement(sb, "");
             }
-        } while (m.find());
+        } else {
+            mr.appendLiteralReplacement(sb, "");
+        }
+        /*
+         * Drop any subsequent <base> tag
+         */
+        do {
+            mr.appendLiteralReplacement(sb, "");
+        } while (m.find() && m.end() < end);
         mr.appendTail(sb);
         return sb.toString();
     }
-
-    private static final Pattern PATTERN_BODY_START = Pattern.compile(Pattern.quote("<body"), Pattern.CASE_INSENSITIVE);
 
     public String dropScriptTagsInHeader(final String htmlContent) {
         if (null == htmlContent) {
