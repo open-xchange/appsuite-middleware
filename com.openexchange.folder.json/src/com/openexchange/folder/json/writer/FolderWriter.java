@@ -497,16 +497,37 @@ public final class FolderWriter {
      * @return The JSON object carrying requested fields of given folder
      * @throws FolderException If writing JSON object fails
      */
-    public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder) throws FolderException {
+    public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws FolderException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
+            final int curCol = cols[i];
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
             if (null == ffw) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
+                if (additionalFolderFieldList.knows(curCol)) {
+                    final AdditionalFolderField additionalFolderField = additionalFolderFieldList.get(curCol);
+                    ffw = new FolderFieldWriter() {
+
+                        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                            final FolderObject fo = new FolderObject();
+                            final int numFolderId = getUnsignedInteger(folder.getID());
+                            if (numFolderId < 0) {
+                                fo.setFullName(folder.getID());
+                            } else {
+                                fo.setObjectID(numFolderId);
+                            }
+                            fo.setFolderName(folder.getName());
+                            fo.setModule(folder.getContentType().getModule());
+                            fo.setType(folder.getType().getType());
+                            jsonPutter.put(additionalFolderField.getColumnName(), additionalFolderField.getValue(fo, serverSession));
+                        }
+                    };
+                } else {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Unknown field: " + curCol, new Throwable());
+                    }
+                    ffw = UNKNOWN_FIELD_FFW;
                 }
-                ffw = UNKNOWN_FIELD_FFW;
             }
             ffws[i] = ffw;
         }

@@ -53,6 +53,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
@@ -110,7 +111,7 @@ public final class GetAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder);
+        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         /*
          * Return appropriate result
          */
