@@ -103,7 +103,7 @@ public final class FolderStorageActivator implements BundleActivator {
         }
 
         public String getColumnName() {
-            return "com.openexchange.folderstoragee.displayName";
+            return "com.openexchange.folderstorage.displayName";
         }
 
         public int getColumnID() {
