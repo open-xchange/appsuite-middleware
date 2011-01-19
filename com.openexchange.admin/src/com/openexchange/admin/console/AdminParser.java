@@ -467,7 +467,7 @@ public class AdminParser extends CLIParser {
         if(slashPos == -1) {
             return false;
         }
-        return slashPos < arg.indexOf('=');
+        return slashPos < arg.indexOf('=') || arg.startsWith("--remove-");
     }
 
 

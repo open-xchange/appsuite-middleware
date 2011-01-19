@@ -72,6 +72,8 @@ public abstract class ChangeCore extends ContextAbstraction {
         setContextQuotaOption(parser, false);
         
         setFurtherOptions(parser);
+        
+        parser.allowDynamicOptions();
     }
     
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
