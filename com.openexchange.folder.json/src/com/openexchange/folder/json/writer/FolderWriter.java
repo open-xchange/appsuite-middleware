@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.writer;
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.util.Collection;
@@ -498,7 +499,7 @@ public final class FolderWriter {
      * @throws FolderException If writing JSON object fails
      */
     public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws FolderException {
-        final int[] cols = null == fields ? ALL_FIELDS : fields;
+        final int[] cols = null == fields ? getAllFields(additionalFolderFieldList) : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
             final int curCol = cols[i];
@@ -541,6 +542,13 @@ public final class FolderWriter {
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static int[] getAllFields(final AdditionalFolderFieldList additionalFolderFieldList) {
+        final TIntArrayList list = new TIntArrayList();
+        list.add(ALL_FIELDS);
+        list.add(additionalFolderFieldList.getKnownFields());
+        return list.toNativeArray();
     }
 
     /**

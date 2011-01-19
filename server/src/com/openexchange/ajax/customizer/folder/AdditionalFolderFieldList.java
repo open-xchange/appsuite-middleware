@@ -103,6 +103,15 @@ public class AdditionalFolderFieldList {
     }
 
     /**
+     * Gets known fields.
+     * 
+     * @return The known fields
+     */
+    public int[] getKnownFields() {
+        return byColId.keys();
+    }
+
+    /**
      * Gets the additional folder field associated with specified column name.
      * 
      * @param col The column name
