@@ -4301,7 +4301,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             // created by the sharing user.
             boolean close_read = false;
             try {
-                if (readcon == null) {
+                if (readcon == null || readcon.isClosed()) {
                     readcon = DBPool.pickup(ctx);
                     close_read = true;
                 }
@@ -4473,7 +4473,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 // Necessary recurrence ID is present
                 boolean close_read = false;
                 try {
-                    if (readcon == null) {
+                    if (readcon == null || readcon.isClosed()) {
                         readcon = DBPool.pickup(ctx);
                         close_read = true;
                     }
@@ -4902,7 +4902,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            if (rcon == null) {
+            if (rcon == null || rcon.isClosed()) {
                 rcon = DBPool.pickup(c);
                 close_read = true;
             }

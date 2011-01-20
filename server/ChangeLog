@@ -1,3 +1,7 @@
+* 2011-01-20 - martin.herfurth@open-xchange.com
+
+ - Bugfix #17902: Closed SQL Connection was used.
+ 
 * 2011-01-18 - martin.herfurth@open-xchange.com
 
  - Bugfix #17535: Update of Yearly Series does no longer destroy the appointment.
