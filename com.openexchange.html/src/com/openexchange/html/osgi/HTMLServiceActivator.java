@@ -468,8 +468,8 @@ public class HTMLServiceActivator extends DeferredActivator {
             }
             try {
                 final StringBuilder defaultConfig = new StringBuilder(512);
-                defaultConfig.append("indent=auto\n");
-                defaultConfig.append("indent-spaces=2\n");
+                defaultConfig.append("indent=no\n");
+                defaultConfig.append("indent-spaces=0\n");
                 defaultConfig.append("wrap=0\n");
                 defaultConfig.append("markup=yes\n");
                 defaultConfig.append("clean=yes\n");
