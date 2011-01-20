@@ -3,7 +3,7 @@
 CREATE TABLE configdb_sequence (
     id INT4 UNSIGNED AUTO_INCREMENT,
     PRIMARY KEY (id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO configdb_sequence VALUES (0);
 
