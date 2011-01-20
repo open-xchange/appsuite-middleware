@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -4301,7 +4301,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             // created by the sharing user.
             boolean close_read = false;
             try {
-                if (readcon == null) {
+                if (readcon == null || readcon.isClosed()) {
                     readcon = DBPool.pickup(ctx);
                     close_read = true;
                 }
@@ -4473,7 +4473,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 // Necessary recurrence ID is present
                 boolean close_read = false;
                 try {
-                    if (readcon == null) {
+                    if (readcon == null || readcon.isClosed()) {
                         readcon = DBPool.pickup(ctx);
                         close_read = true;
                     }
@@ -4902,7 +4902,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            if (rcon == null) {
+            if (rcon == null || rcon.isClosed()) {
                 rcon = DBPool.pickup(c);
                 close_read = true;
             }
