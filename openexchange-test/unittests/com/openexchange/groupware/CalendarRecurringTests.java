@@ -1220,7 +1220,7 @@ public class CalendarRecurringTests extends TestCase {
         // 21st of August, because we need the 24:00:00 of the day of the last occurrence, which is 00:00:00 of the following day.
         check_until2.add(Calendar.YEAR, CalendarCollectionService.MAX_OCCURRENCESE - 1);
         check_until2.set(Calendar.MONTH, MONTH);
-        check_until2.set(Calendar.DAY_OF_MONTH, DAY);
+        check_until2.set(Calendar.DAY_OF_MONTH, DAY + 1);
 
         Date expected = new Date(coll.normalizeLong(check_until2.getTimeInMillis()));
         Date actual = cdao2.getUntil();
