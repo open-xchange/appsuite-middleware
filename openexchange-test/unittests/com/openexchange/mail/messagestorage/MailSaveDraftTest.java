@@ -106,7 +106,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                  * Check content
                  */
                 String content = mail.getContent().toString();
-                assertTrue("Content mismatch", "The first line".equals(content));
+                assertEquals("Content mismatch", "The first line", content);
                 /*
                  * Edit draft
                  */
@@ -152,7 +152,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                     sb.append("\nIn words:");
                     sb.append('"').append(expected).append('"').append('\n');
                     sb.append('"').append(content).append('"');
-                    assertTrue(sb.toString(), false);
+                    fail(sb.toString());
                 }
             } finally {
                 if (prevUid != null) {
