@@ -602,8 +602,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      * @param edao
      *            The storage calendar object used to set start/end date if not
      *            available in specified parameter <code>cdao</code>
+     * @throws OXException 
      */
-    private static final void handleFullTime(final CalendarDataObject cdao, final CalendarDataObject edao) {
+    private static final void handleFullTime(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (cdao.getFullTime()) {
             if (cdao.containsStartDate() && cdao.containsEndDate()) {
                 final long mod = cdao.getStartDate().getTime() % Constants.MILLI_DAY;
@@ -618,17 +619,28 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             .getStartDate().getTime()) / Constants.MILLI_DAY) * Constants.MILLI_DAY))));
                 }
             } else if (edao != null) {
-                final long mod = edao.getStartDate().getTime() % Constants.MILLI_DAY;
-                if (mod != 0) {
-                    cdao.setStartDate(new Date(edao.getStartDate().getTime() - mod));
-                } else {
-                    cdao.setStartDate(edao.getStartDate());
+                Date startDate = edao.getStartDate();
+                Date endDate = edao.getEndDate();
+                if (edao.isSequence()) {
+                    final CalendarDataObject temp = edao.clone();
+                    final RecurringResultsInterface rss = recColl.calculateFirstRecurring(temp);
+                    if (rss != null) {
+                        RecurringResultInterface recurringResult = rss.getRecurringResult(0);
+                        startDate = new Date(recurringResult.getStart());
+                        endDate = new Date(recurringResult.getEnd());
+                    }
                 }
-                if ((cdao.getStartDate().getTime() == edao.getEndDate().getTime())
-                        || (edao.getEndDate().getTime() - cdao.getStartDate().getTime() < Constants.MILLI_DAY)) {
+                final long mod = startDate.getTime() % Constants.MILLI_DAY;
+                if (mod != 0) {
+                    cdao.setStartDate(new Date(startDate.getTime() - mod));
+                } else {
+                    cdao.setStartDate(startDate);
+                }
+                if ((cdao.getStartDate().getTime() == endDate.getTime())
+                        || (endDate.getTime() - cdao.getStartDate().getTime() < Constants.MILLI_DAY)) {
                     cdao.setEndDate(new Date(cdao.getStartDate().getTime() + Constants.MILLI_DAY));
-                } else if (edao.getEndDate().getTime() % Constants.MILLI_DAY != 0) {
-                    cdao.setEndDate(new Date((cdao.getStartDate().getTime() + (((edao.getEndDate().getTime() - cdao
+                } else if (endDate.getTime() % Constants.MILLI_DAY != 0) {
+                    cdao.setEndDate(new Date((cdao.getStartDate().getTime() + (((endDate.getTime() - cdao
                             .getStartDate().getTime()) / Constants.MILLI_DAY) * Constants.MILLI_DAY))));
                 }
             }
