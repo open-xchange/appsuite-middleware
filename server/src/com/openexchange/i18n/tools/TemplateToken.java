@@ -100,7 +100,9 @@ public enum TemplateToken {
      * The module name; e.g. <i>Calendar</i>
      */
     MODULE("module"),
-    /** path to the JavaScript UI on the web server */
+    /**
+     * path to the JavaScript UI on the web server
+     */
     UI_WEB_PATH("uiwebpath"),
     /**
      * The host name for generating links to an object
