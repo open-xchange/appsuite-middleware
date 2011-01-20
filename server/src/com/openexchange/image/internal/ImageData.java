@@ -51,13 +51,18 @@ package com.openexchange.image.internal;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.groupware.notify.hostname.DefaultHostnameService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.servlet.ImageServlet;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -67,7 +72,35 @@ import com.openexchange.session.Session;
  */
 public final class ImageData {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageData.class);
+
     static final int DEFAULT_TTL = 300000;
+
+    private static volatile String hostName;
+
+    private static String getHostname() {
+        String tmp = hostName;
+        if (null == tmp) {
+            synchronized (ImageData.class) {
+                tmp = hostName;
+                if (null == tmp) {
+                    try {
+                        hostName = tmp = InetAddress.getLocalHost().getCanonicalHostName();
+                    } catch (final UnknownHostException e) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Could not reliably detect host name. Using \"localhost\" as fallbak.", e);
+                        }
+                        hostName = tmp = "localhost";
+                    }
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /*-
+     * ------------------------- Member stuff ------------------------------
+     */
 
     private final String uniqueId;
 
@@ -102,9 +135,44 @@ public final class ImageData {
         this.imageArguments = imageArguments;
         this.imageSource = imageSource;
         hash = hashCode0();
-        url =
-            new StringBuilder(64).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(
-                urlEncodeSafe(this.uniqueId, "UTF-8")).toString();
+        final StringBuilder sb = new StringBuilder(64);
+        final String prefix;
+        {
+            final DefaultHostnameService dhs = DefaultHostnameService.getInstance();
+            final String p;
+            final String sPort;
+            if (dhs.isSecure()) {
+                p = "https://";
+                final int port = dhs.getPort();
+                if (port == 443) {
+                    sPort = "";
+                } else {
+                    sPort = sb.append(':').append(port).toString();
+                    sb.setLength(0);
+                }
+            } else {
+                p = "http://";
+                final int port = dhs.getPort();
+                if (port == 80) {
+                    sPort = "";
+                } else {
+                    sPort = sb.append(':').append(port).toString();
+                    sb.setLength(0);
+                }
+            }
+            HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+            if (null == hostnameService) {
+                hostnameService = dhs;
+            }
+            String hostnameStr;
+            if ((hostnameStr = hostnameService.getHostname(session.getUserId(), session.getContextId())) == null) {
+                hostnameStr = getHostname();
+            }
+            prefix = sb.append(p).append(hostnameStr).append(sPort).toString();
+            sb.setLength(0);
+        }
+        url = sb.append(prefix).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(
+            urlEncodeSafe(this.uniqueId, "UTF-8")).toString();
         this.timeToLive = timeToLive;
         lastAccessed = System.currentTimeMillis();
     }

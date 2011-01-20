@@ -66,6 +66,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.notify.hostname.DefaultHostnameService;
 import com.openexchange.tools.codec.QuotedPrintable;
 import com.openexchange.tools.regex.RFC2616Regex;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
@@ -213,18 +214,32 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
          * Determine remote_host
          */
         servletRequest.setRemoteHost(parseString("remote_host"));
-        /*
-         * Determine server_name
-         */
-        servletRequest.setServerName(parseString("server_name"));
-        /*
-         * Determine server_name
-         */
-        servletRequest.setServerPort(parseInt());
-        /*
-         * Determine is_ssl
-         */
-        servletRequest.setSecure(parseBoolean());
+        {
+            /*
+             * Determine server_name
+             */
+            final String serverName = parseString("server_name");
+            servletRequest.setServerName(serverName);
+            /*
+             * Determine server_port
+             */
+            final int port = parseInt();
+            servletRequest.setServerPort(port);
+            /*
+             * Determine is_ssl
+             */
+            final boolean secure = parseBoolean();
+            servletRequest.setSecure(secure);
+            /*
+             * Initialize default host name service
+             */
+            final DefaultHostnameService dhs = DefaultHostnameService.getInstance();
+            if (dhs.performInitialization()) {
+                dhs.setHostName(serverName);
+                dhs.setPort(port);
+                dhs.setSecure(secure);
+            }
+        }
         /*
          * Determine num_headers
          */
