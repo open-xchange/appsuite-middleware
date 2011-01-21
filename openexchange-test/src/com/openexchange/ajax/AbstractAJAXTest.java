@@ -72,6 +72,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.ajax.framework.OxHttpClient;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.test.AjaxInit;
@@ -162,6 +163,7 @@ public abstract class AbstractAJAXTest extends TestCase {
     protected WebConversation getWebConversation() {
         if (null == webConversation) {
             webConversation = newWebConversation();
+            webConversation.setUserAgent(OxHttpClient.USER_AGENT);
         }
         return webConversation;
     }

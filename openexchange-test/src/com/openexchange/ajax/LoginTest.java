@@ -50,11 +50,24 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -64,7 +77,12 @@ import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.meterware.httpunit.cookies.CookieJar;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.OxHttpClient;
+import com.openexchange.ajax.framework.Params;
 
 /**
  * This class contains the login test. It also contains static methods to made
@@ -102,34 +120,46 @@ public class LoginTest extends AbstractAJAXTest {
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
      */
-    public static JSONObject login(final WebConversation conversation,
+    private static JSONObject login(final WebConversation conversation,
         final String hostname, final String login, final String password)
         throws IOException, SAXException, JSONException {
         
         checkNotLoggedIn(conversation.getCookieNames());
         
         LOG.trace("Logging in.");
-        final WebRequest req = new PostMethodWebRequest(PROTOCOL
-            + hostname + LOGIN_URL);
-        req.setParameter("action", "login");
-        req.setParameter("name", login);
-        req.setParameter("password", password);
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        final JSONObject json;
-        try {
-            json = new JSONObject(body);
-        } catch (final JSONException e) {
-            LOG.error("Can't parse this body to JSON: \"" + body + '\"');
-            throw e;
-        }
-        assertFalse(json.optString("error"), json.has("error"));
-        assertTrue("Session ID is missing: " + body, json.has(
-            Login.PARAMETER_SESSION));
-        assertTrue("Random is missing: " + body, json.has(LoginFields.PARAM_RANDOM));
-        return json;
+        	//do request
+        	DefaultHttpClient newClient = new OxHttpClient();
+        	newClient.setCookieStore(new BasicCookieStore());
+         	
+         	Params params = new Params(
+         			AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN,
+         			AJAXServlet.PARAMETER_USERNAME, login,
+         			AJAXServlet.PARAMETER_PASSWORD, password
+         			);
+         	HttpGet loginRequest = new HttpGet(PROTOCOL + hostname + LOGIN_URL + params.toString());
+        	HttpResponse response = newClient.execute(loginRequest);
+            assertEquals("Login: Response code is not okay.", HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+
+            String responseBody = EntityUtils.toString(response.getEntity());
+            
+            List<Cookie> cookies = newClient.getCookieStore().getCookies();
+            for(Cookie cookie: cookies){
+            	conversation.putCookie(cookie.getName(), cookie.getValue());
+            }
+            
+            
+            JSONObject json;
+			try {
+            	json =  new JSONObject(responseBody);
+	        } catch (final JSONException e) {
+	            LOG.error("Can't parse this body to JSON: \"" + responseBody + '\"');
+	            throw e;
+	        }
+	        assertFalse(json.optString("error"), json.has("error"));
+	        assertTrue("Session ID is missing: " + responseBody, json.has(
+	            Login.PARAMETER_SESSION));
+	        assertTrue("Random is missing: " + responseBody, json.has(LoginFields.PARAM_RANDOM));
+	        return json;
     }
 
     private static void checkNotLoggedIn(String[] cookieNames) {
@@ -151,14 +181,25 @@ public class LoginTest extends AbstractAJAXTest {
     public static void logout(final WebConversation conversation,
         final String hostname, final String sessionId)
         throws IOException, SAXException {
+    	
         LOG.trace("Logging out.");
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL
-            + hostname + LOGIN_URL);
-        req.setParameter(AJAXServlet.PARAMETER_ACTION, "logout");
-        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
+    	//do request
+    	DefaultHttpClient newClient = new OxHttpClient();
+    	
+    	CookieStore cookieStore = new BasicCookieStore();
+    	CookieJar cookieJar = conversation.getCookieJar();
+    	com.openexchange.ajax.framework.Executor.syncCookies(cookieStore, cookieJar, hostname);
+
+		newClient.setCookieStore(cookieStore );
+
+     	Params params = new Params(
+     			AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGOUT,
+     			AJAXServlet.PARAMETER_SESSION, sessionId
+     			);
+     	HttpGet logoutRequest = new HttpGet(PROTOCOL + hostname + LOGIN_URL + params.toString());
+    	HttpResponse response = newClient.execute(logoutRequest);
+    	
+        assertEquals("Logout: Response code is not okay.", HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
     }
 
     /**

@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.framework;
 
+import org.apache.http.client.CookieStore;
+import org.apache.http.impl.client.BasicCookieStore;
+
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
 
@@ -62,6 +65,7 @@ public class AJAXSession {
 
     private String id;
     private boolean mustLogout = true;
+	private CookieStore cookieStore;
 
     public AJAXSession() {
         this(newWebConversation(), null);
@@ -77,6 +81,7 @@ public class AJAXSession {
         this.id = id;
         this.mustLogout = id == null; // Don't auto logout when supplied with id.
         conversation.getClientProperties().setAcceptGzip(false);
+        this.cookieStore = new BasicCookieStore();
     }
 
     /**
@@ -114,4 +119,8 @@ public class AJAXSession {
         HttpUnitOptions.setScriptingEnabled(false);
         return new WebConversation();
     }
+
+	public CookieStore getCookieStore() {
+		return this.cookieStore;
+	}
 }
