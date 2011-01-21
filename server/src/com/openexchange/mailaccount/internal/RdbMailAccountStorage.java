@@ -1544,6 +1544,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
      * @return <code>true</code> if name contains an invalid character; otherwsie <code>false</code>
      */
     private static boolean isValid(final String name) {
+        /*
+         * TODO: Re-think about invalid characters
+         */
+        if (true) {
+            return true;
+        }
         if (null == name || 0 == name.length()) {
             return false;
         }
