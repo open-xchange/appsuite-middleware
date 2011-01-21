@@ -199,11 +199,7 @@ public class RdbContextStorage extends ContextStorage {
         ResultSet result = null;
         try {
             con = DBPool.pickup(ctx);
-            if(!Tools.tableExists(con, "contextAttribute")) { 
-                // This may have to be removed in future versions
-                // Or we think of a clever way to run update tasks even prior to loading a context
-                return;
-            }
+            
             stmt = con.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
@@ -213,12 +209,21 @@ public class RdbContextStorage extends ContextStorage {
                 ctx.addAttribute(name, value);
             }
         } catch (final SQLException e) {
+            try {
+                if(!Tools.tableExists(con, "contextAttribute")) { 
+                    // This would be an explanation for the exception. Will
+                    // happen once for every schema.
+                    return;
+                }
+            } catch (SQLException e1) {
+                // IGNORE
+            }
             throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
         } catch (DBPoolingException e) {
             throw new ContextException(Code.NO_CONNECTION, e);
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(con);
+            DBPool.closeReaderSilent(ctx, con);
         }
     }
 
