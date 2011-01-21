@@ -1551,8 +1551,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         boolean valid = true;
         boolean isWhitespace = true;
         for (int i = 0; valid && i < chars.length; i++) {
-            valid = (Arrays.binarySearch(CHARS_INVALID, chars[i]) < 0);
-            isWhitespace &= Character.isWhitespace(chars[i]);
+            final char c = chars[i];
+            valid = (Arrays.binarySearch(CHARS_INVALID, c) < 0);
+            isWhitespace &= Character.isWhitespace(c);
         }
         return !isWhitespace && valid;
     }
