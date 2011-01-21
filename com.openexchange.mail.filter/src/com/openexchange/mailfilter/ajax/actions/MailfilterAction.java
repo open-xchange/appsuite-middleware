@@ -53,9 +53,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -83,8 +81,8 @@ import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
-import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.Credentials;
+import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest.Parameters;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
@@ -272,6 +270,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     readScriptFromString.getRulelist(), parameters.getParameter(Parameter.FLAG), readScriptFromString
                             .isError());
             final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+            
+            changeOutgoingVacationRule(clientrules);
+            
             return CONVERTER.write(clientrules.toArray(new Rule[clientrules.size()]));
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
@@ -328,7 +329,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final JSONObject json = new JSONObject(body);
             final Rule newrule = CONVERTER.parse(json);
             
-            changeVacationRule(newrule);
+            changeIncomingVacationRule(newrule);
             
             // Now find the right position inside the array
             int position = newrule.getPosition();
@@ -476,7 +477,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uniqueid, credentials
                         .getRightUsername(), credentials.getContextString());
                 CONVERTER.parse(rightRule.getRule(), json);
-                changeVacationRule(rightRule.getRule());
+                changeIncomingVacationRule(rightRule.getRule());
             } else {
                 throw new OXMailfilterException(Code.ID_MISSING);
             }
@@ -720,13 +721,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         return sieveHandler;
     }
 
-    private void changeVacationRule(final Rule newrule) throws SieveException {
+    private void changeIncomingVacationRule(final Rule newrule) throws SieveException {
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
     
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             final IfCommand ifCommand = newrule.getIfCommand();
-            if (ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
+            final RuleComment ruleComment = newrule.getRuleComment();
+            if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
                 final List<Object> argList = new ArrayList<Object>();
                 argList.add(Rule2JSON2Rule.createTagArg("is"));
                 argList.add(Rule2JSON2Rule.createTagArg("domain"));
@@ -738,9 +740,46 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 
                 argList.add(header);
                 argList.add(Arrays.asList(split));
-                ifCommand.setTestcommand(new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>()));
+                final TestCommand testcommand = ifCommand.getTestcommand();
+                final Commands command = testcommand.getCommand();
+                final TestCommand newTestCommand = new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>());
+                if (Commands.TRUE.equals(command)) {
+                    // No test until now
+                    ifCommand.setTestcommand(newTestCommand);
+                } else {
+                    // Found other tests
+                    final ArrayList<TestCommand> arrayList = new ArrayList<TestCommand>();
+                    arrayList.add(newTestCommand);
+                    arrayList.add(testcommand);
+                    ifCommand.setTestcommand(new TestCommand(Commands.ALLOF, new ArrayList<Object>(), arrayList));
+                }
             }
         }
+    }
+
+    private void changeOutgoingVacationRule(final ArrayList<Rule> clientrules) {
+        // TODO
+//        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+//        final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
+//
+//        for (final Rule rule : clientrules) {
+//            final IfCommand ifCommand = rule.getIfCommand();
+//            final RuleComment ruleComment = rule.getRuleComment();
+//            if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
+//                final TestCommand testcommand = ifCommand.getTestcommand();
+//                if (Commands.ADDRESS.equals(testcommand)) {
+//                    // Test command found now check if it's the right one...
+//                    if (null != testcommand.getArguments()
+//                        && Rule2JSON2Rule.createTagArg("is").equals(testcommand.getArguments().get(0))
+//                        && Rule2JSON2Rule.createTagArg("domain").equals(testcommand.getArguments().get(1))
+//                        && null != testcommand.getArguments().get(3)
+//                        && testcommand.getArguments().get(3) instanceof List
+//                        && "From".equals(((List)testcommand.getArguments().get(3)).get(0))) {
+//
+//                    }
+//                }
+//            }
+//        }
     }
 
     private JSONArray getActionArray(final ArrayList<String> sieve) {
@@ -797,12 +836,12 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             if (null == command.getRequired() || sieve.contains(command.getRequired())) {
                 final JSONArray comparison = new JSONArray();
                 object.put("test", command.getCommandname());
-                final Hashtable<String, String> matchtypes = command.getMatchtypes();
-                if (null != matchtypes) {
-                    for (final Map.Entry<String, String> matchtype : matchtypes.entrySet()) {
-                        final String value = matchtype.getValue();
+                final List<String[]> jsonMatchTypes = command.getJsonMatchTypes();
+                if (null != jsonMatchTypes) {
+                    for (final String[] matchtype : jsonMatchTypes) {
+                        final String value = matchtype[0];
                         if ("".equals(value) || sieve.contains(value)) {
-                            comparison.put(matchtype.getKey().substring(1));
+                            comparison.put(matchtype[1]);
                         }
                     }
                 }

@@ -47,8 +47,11 @@
  */
 package com.openexchange.mailfilter.ajax.json;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +77,7 @@ import com.openexchange.tools.servlet.OXJSONException;
  * @author cutmasta
  *
  */
+@SuppressWarnings("unchecked")
 public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
     private final static String[] RULE_FIELDS_LIST = {
@@ -114,6 +118,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         final static String VALUES = "values";
     }
 
+    private static class CurrentDateTestFields {
+        final static String COMPARISON = "comparison";
+        final static String DATEPART = "datepart";
+        final static String DATEVALUE = "datevalue";
+    }
+    
     private static class AllofOrAnyOfTestFields {
         final static String TESTS = "tests";
     }
@@ -212,6 +222,25 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return retval;
     }
     
+    static List<String> JSONDateArrayToStringList(final JSONArray jarray) throws JSONException {
+        final ArrayList<String> retval = new ArrayList<String>(jarray.length());
+        for (int i = 0; i < jarray.length(); i++) {
+            retval.add(convertJSONDate2Sieve(jarray.getString(i)));
+        }
+        return retval;
+    }
+    
+    private static String convertJSONDate2Sieve(String string) throws JSONException {
+        try {
+            final Date date = new Date(Long.parseLong(string));
+            final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            return df.format(date);
+        } catch (NumberFormatException e) {
+            throw new JSONException("Date field \"" + string + "\" is no date value");
+        }
+        
+    }
+
     static NumberArgument createNumberArg(final String string) {
         final Token token = new Token();
         token.image = string;
@@ -398,6 +427,28 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     }
                     argList.add(JSONArrayToStringList(getJSONArray(jobj, AddressEnvelopeAndHeaderTestFields.VALUES, id)));
                     return new TestCommand(TestCommand.Commands.BODY, argList, new ArrayList<TestCommand>());
+                } else if (TestCommand.Commands.CURRENTDATE.getCommandname().equals(id)) {
+                    final List<Object> argList = new ArrayList<Object>();
+                    final String comparison = getString(jobj, CurrentDateTestFields.COMPARISON, id);
+                    if ("is".equals(comparison)) {
+                        argList.add(createTagArg(comparison));
+                    } else if ("ge".equals(comparison)) {
+                        argList.add(createTagArg("value"));
+                        argList.add(getArrayFromString("ge"));
+                    } else if ("le".equals(comparison)) {
+                        argList.add(createTagArg("value"));
+                        argList.add(getArrayFromString("le"));
+                    } else {
+                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Currentdate rule: The comparison \"" + comparison + "\" is not a valid comparison");
+                    }
+                    final String datepart = getString(jobj, CurrentDateTestFields.DATEPART, id);
+                    if ("date".equals(datepart)) {
+                        argList.add(getArrayFromString(datepart));
+                    } else {
+                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
+                    }
+                    argList.add(JSONDateArrayToStringList(getJSONArray(jobj, CurrentDateTestFields.DATEVALUE, id)));
+                    return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
                 } else if (TestCommand.Commands.ALLOF.getCommandname().equals(id)) {
                     return createAllofOrAnyofTestCommand(jobj, id, TestCommand.Commands.ALLOF);
                 } else if (TestCommand.Commands.ANYOF.getCommandname().equals(id)) {
@@ -405,6 +456,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 } else {
                     throw new JSONException("Unknown test command while creating object: " + id);
                 }
+            }
+
+            private List<String> getArrayFromString(String string) {
+                final List<String> retval = new ArrayList<String>();
+                retval.add(string);
+                return retval;
             }
 
             private TestCommand createAllofOrAnyofTestCommand(final JSONObject jobj, final String id, final Commands command) throws JSONException, SieveException, OXJSONException {
@@ -467,12 +524,42 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                             tmp.put(BodyTestFields.EXTENSIONSVALUE, JSONObject.NULL);
                             tmp.put(BodyTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(2)));
                         }
+                    } else if (TestCommand.Commands.CURRENTDATE.equals(testCommand.getCommand())) {
+                        tmp.put(GeneralFields.ID, TestCommand.Commands.CURRENTDATE.getCommandname());
+                        final String comparison = testCommand.getMatchtype().substring(1);
+                        if ("value".equals(comparison)) {
+                            tmp.put(CurrentDateTestFields.COMPARISON, ((List)testCommand.getArguments().get(testCommand.getTagarguments().size())).get(0));
+                        } else {
+                            tmp.put(CurrentDateTestFields.COMPARISON, comparison);
+                        }
+                        final List value = (List)testCommand.getArguments().get(testCommand.getArguments().size()-2);
+                        tmp.put(CurrentDateTestFields.DATEPART, value.get(0));
+                        if ("date".equals(value.get(0))) {
+                            tmp.put(CurrentDateTestFields.DATEVALUE, getJSONDateArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1)));
+                        } else {
+                            tmp.put(CurrentDateTestFields.DATEVALUE, new JSONArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1)));
+                        }
                     } else if (TestCommand.Commands.ALLOF.equals(testCommand.getCommand())) {
                         createAllofOrAnyofObjects(tmp, testCommand, TestCommand.Commands.ALLOF);
                     } else if (TestCommand.Commands.ANYOF.equals(testCommand.getCommand())) {
                         createAllofOrAnyofObjects(tmp, testCommand, TestCommand.Commands.ANYOF);
                     }
                 }
+            }
+
+            private JSONArray getJSONDateArray(final List<String> collection) throws JSONException {
+                final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+                final JSONArray retval = new JSONArray();
+                for (final String part : collection) {
+                    Date parse;
+                    try {
+                        parse = df.parse(part);
+                        retval.put(parse.getTime());
+                    } catch (ParseException e) {
+                        throw new JSONException("Error while parsing date from string \"" + part + "\"");
+                    }
+                }
+                return retval;
             }
 
             private void createAllofOrAnyofObjects(final JSONObject tmp, final TestCommand testCommand, final Commands command) throws JSONException {
