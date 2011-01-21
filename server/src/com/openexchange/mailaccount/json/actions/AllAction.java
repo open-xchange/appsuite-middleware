@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -84,27 +83,24 @@ public final class AllAction extends AbstractMailAccountAction {
         final String colString = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
-        try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
-            final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
+        MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
-            for (final MailAccount userMailAccount : userMailAccounts) {
-                final MailAccount mailAccount = userMailAccount;
-                if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
-                    tmp.add(mailAccount);
-                }
+        final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+        final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
+
+        for (final MailAccount userMailAccount : userMailAccounts) {
+            final MailAccount mailAccount = userMailAccount;
+            if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
+                tmp.add(mailAccount);
             }
-            userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
-
-            return new AJAXRequestResult(MailAccountWriter.writeArray(userMailAccounts, attributes));
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         }
+        userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
+
+        return new AJAXRequestResult(MailAccountWriter.writeArray(userMailAccounts, attributes));
     }
     
 }

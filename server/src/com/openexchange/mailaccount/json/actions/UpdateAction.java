@@ -63,7 +63,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -176,8 +175,6 @@ public final class UpdateAction extends AbstractMailAccountAction {
                 MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
             return new AJAXRequestResult(jsonAccount);
-        } catch (final AbstractOXException e) {
-            throw new MailAccountException(e);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }

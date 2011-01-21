@@ -68,7 +68,6 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -139,8 +138,6 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
                 return new AJAXRequestResult(actionValidateTree(accountDescription, session));
             }
             return new AJAXRequestResult(actionValidateBoolean(accountDescription, session));
-        } catch (final AbstractOXException e) {
-            throw new MailAccountException(e);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         } catch (final GeneralSecurityException e) {

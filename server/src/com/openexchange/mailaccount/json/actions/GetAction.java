@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
@@ -108,8 +107,6 @@ public final class GetAction extends AbstractMailAccountAction {
 
             final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
             return new AJAXRequestResult(jsonAccount);
-        } catch (final AbstractOXException exc) {
-            throw new OXException(exc);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }

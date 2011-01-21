@@ -56,7 +56,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -106,8 +105,6 @@ public final class ListAction extends AbstractMailAccountAction {
             }
 
             return new AJAXRequestResult(MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes));
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }

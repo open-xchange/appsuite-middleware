@@ -53,7 +53,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
@@ -109,8 +108,6 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
             // Create a mail access instance
             final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
             return new AJAXRequestResult(actionValidateTree0(mailAccess, session));
-        } catch (final AbstractOXException exc) {
-            throw new OXException(exc);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }

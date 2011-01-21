@@ -984,6 +984,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
         }
+        // Check name
+        final String name = mailAccount.getName();
+        if (!isValid(name)) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_NAME, name);
+        }
         Connection con = null;
         try {
             con = Database.get(cid, true);
@@ -1007,7 +1012,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
                 int pos = 1;
-                stmt.setString(pos++, mailAccount.getName());
+                stmt.setString(pos++, name);
                 stmt.setString(pos++, mailAccount.generateMailServerURL());
                 stmt.setString(pos++, mailAccount.getLogin());
                 setOptionalString(stmt, pos++, encryptedPassword);
@@ -1053,7 +1058,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.close();
                 stmt = con.prepareStatement(UPDATE_TRANSPORT_ACCOUNT);
                 int pos = 1;
-                stmt.setString(pos++, mailAccount.getName());
+                stmt.setString(pos++, name);
                 stmt.setString(pos++, transportURL);
                 stmt.setString(pos++, mailAccount.getLogin());
                 setOptionalString(stmt, pos++, encryptedTransportPassword);
@@ -1431,12 +1436,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
             while (rs.next()) {
                 final String password = rs.getString(2);
-                int id = rs.getInt(1);
+                final int id = rs.getInt(1);
                 if (id != MailAccount.DEFAULT_ID) {
                     try {
                         // If we can decrypt the password with the newSecret, we don't need to do anything about this account
                         MailPasswordUtil.decrypt(password, newSecret);
-                    } catch (GeneralSecurityException x) {
+                    } catch (final GeneralSecurityException x) {
                         // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
                         final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
                         update.setString(1, transcribed);
