@@ -611,6 +611,13 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         Attribute.PERSONAL_LITERAL);
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
+        if (attributes.contains(Attribute.NAME_LITERAL)) {
+            // Check name
+            final String name = mailAccount.getName();
+            if (!isValid(name)) {
+                throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_NAME, name);
+            }
+        }
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
             final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
             final boolean containsPersonal = attributes.contains(Attribute.PERSONAL_LITERAL);
