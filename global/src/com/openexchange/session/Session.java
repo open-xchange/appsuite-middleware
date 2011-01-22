@@ -62,7 +62,7 @@ public interface Session {
      * Usage for locking session might look like:
      * 
      * <pre>
-     * import java.uitl.concurrent.locks.Lock
+     * import java.util.concurrent.locks.Lock
      * ...
      * final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
      * if (null == lock) {
