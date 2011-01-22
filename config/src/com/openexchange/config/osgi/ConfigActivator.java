@@ -49,8 +49,10 @@
 
 package com.openexchange.config.osgi;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -69,7 +71,7 @@ public final class ConfigActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigActivator.class);
 
-    private ServiceRegistration registration;
+    private List<ServiceRegistration> registrations;
 
     /**
      * Default constructor
@@ -81,13 +83,15 @@ public final class ConfigActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.configread");
         try {
+            registrations = new ArrayList<ServiceRegistration>(2);
+
             final ConfigurationService configService = new ConfigurationImpl();
-            registration = context.registerService(ConfigurationService.class.getName(), configService, null);
+            registrations.add(context.registerService(ConfigurationService.class.getName(), configService, null));
 
             final Dictionary<String, Object> properties = new Hashtable<String,Object>(1);
             properties.put("scope", "server");
             ConfigProviderServiceImpl.setConfigService(configService);
-            context.registerService(ConfigProviderService.class.getName(), new ConfigProviderServiceImpl(), properties);
+            registrations.add(context.registerService(ConfigProviderService.class.getName(), new ConfigProviderServiceImpl(), properties));
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -97,9 +101,11 @@ public final class ConfigActivator implements BundleActivator {
     public void stop(final BundleContext context) throws Exception {
         LOG.info("stopping bundle: com.openexchange.configread");
         try {
-            if (null != registration) {
-                registration.unregister();
-                registration = null;
+            if (null != registrations) {
+                while (!registrations.isEmpty()) {
+                    registrations.remove(0).unregister();
+                }
+                registrations = null;
             }
             FileWatcher.dropTimer();
         } catch (final Throwable t) {
