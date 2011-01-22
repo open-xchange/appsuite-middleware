@@ -1,3 +1,7 @@
+* 2011-01-22 - thorben.betten@open-xchange.com
+
+ - Bugfix #18012: Checking for multiple-mail-account permission prior to listing accounts in Outlook folder tree
+
 * 2011-01-20 - martin.herfurth@open-xchange.com
 
  - Bugfix #17902: Closed SQL Connection was used.
