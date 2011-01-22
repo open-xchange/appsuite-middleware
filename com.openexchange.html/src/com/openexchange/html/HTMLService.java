@@ -198,7 +198,7 @@ public interface HTMLService {
 
     /**
      * Checks for existence of a <code>&lt;base&gt;</code> tag. Allowing it if an absolute URL is specified in <code><i>href</i></code>
-     * attribute <i>AND</i> <code>externalImagesAllowed</code> is set to <code>true</code>; otherwise the <code><i>base</i></code> tag is
+     * attribute <b><small>AND</small></b> <code>externalImagesAllowed</code> is set to <code>true</code>; otherwise the <code>&lt;base&gt;</code> tag is
      * removed.
      * 
      * @param htmlContent The HTML content
