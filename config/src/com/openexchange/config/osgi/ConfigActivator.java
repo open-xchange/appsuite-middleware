@@ -49,6 +49,7 @@
 
 package com.openexchange.config.osgi;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -80,13 +81,13 @@ public final class ConfigActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.configread");
         try {
-            ConfigurationService configService = new ConfigurationImpl();
+            final ConfigurationService configService = new ConfigurationImpl();
             registration = context.registerService(ConfigurationService.class.getName(), configService, null);
-            Hashtable<String, Object> properties = new Hashtable<String,Object>();
+
+            final Dictionary<String, Object> properties = new Hashtable<String,Object>(1);
             properties.put("scope", "server");
             ConfigProviderServiceImpl.setConfigService(configService);
             context.registerService(ConfigProviderService.class.getName(), new ConfigProviderServiceImpl(), properties);
-            
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
