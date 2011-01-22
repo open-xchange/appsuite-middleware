@@ -62,9 +62,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -116,6 +116,9 @@ import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -1582,10 +1585,26 @@ public final class OutlookFolderStorage implements FolderStorage {
         });
         taskCount++;
         /*
+         * User configuration
+         */
+        final UserConfiguration userConfiguration;
+        {
+            final Session s = parameters.getSession();
+            if (s instanceof ServerSession) {
+                userConfiguration = ((ServerSession) s).getUserConfiguration();
+            } else {
+                try {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), parameters.getContext());
+                } catch (final UserConfigurationException e) {
+                    throw new FolderException(e);
+                }
+            }
+        }
+        /*
          * Obtain external mail accounts with running thread
          */
         final List<String> accountSubfolderIDs;
-        {
+        if (userConfiguration.isMultipleMailAccounts()) {
             final MailAccountStorageService mass = OutlookServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class);
             if (null == mass) {
                 accountSubfolderIDs = Collections.emptyList();
@@ -1630,6 +1649,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                     }
                 }
             }
+        } else {
+            accountSubfolderIDs = Collections.emptyList();
         }
         /*
          * Obtain external messaging accounts with running thread
