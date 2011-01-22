@@ -172,12 +172,12 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 /*
                  * AJP cycle still intact?
                  */
-                if (ajpCon.isDirty() || endResponseSent) {
+                if (endResponseSent) {
                     /*
                      * Caught in another cycle! Abort immediately
                      */
                     // ajpCon.dropOutstandingData();
-                    AJPv13Exception e = new AJPv13Exception(AJPCode.IO_ERROR, false, "Broken AJP cyle. Detected outgoing data available with first AJP package.");
+                    final AJPv13Exception e = new AJPv13Exception(AJPCode.IO_ERROR, false, "Broken AJP cyle. Detected outgoing data available with first AJP package.");
                     LOG.error(e.getMessage(), e);
                 }
                 /*

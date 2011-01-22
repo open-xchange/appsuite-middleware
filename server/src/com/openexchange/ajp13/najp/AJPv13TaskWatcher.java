@@ -379,7 +379,7 @@ public class AJPv13TaskWatcher {
                 ajpConnection.blockOutputStream(true);
                 try {
                     final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
-                    final OutputStream out = ajpConnection.getNeutralOutputStream();
+                    final OutputStream out = ajpConnection.getOutputStream();
                     if (ajpRequestHandler.isHeadersSent()) {
                         /*
                          * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data

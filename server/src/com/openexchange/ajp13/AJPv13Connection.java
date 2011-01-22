@@ -92,14 +92,6 @@ public interface AJPv13Connection {
     public OutputStream getOutputStream() throws IOException;
 
     /**
-     * Gets the neutral output stream to AJP client
-     * 
-     * @return The neutral output stream to AJP client
-     *  @throws IOException If neutral output stream cannot be returned
-     */
-    public OutputStream getNeutralOutputStream() throws IOException;
-
-    /**
      * Set whether to enable blocking access to output stream or not.
      * 
      * @param block <code>true</code> to enable blocking access; otherwise <code>false</code>

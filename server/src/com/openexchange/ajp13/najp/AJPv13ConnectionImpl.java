@@ -142,15 +142,6 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
     }
 
     /**
-     * Checks if data has already been written.
-     * 
-     * @return <code>true</code> if data has already been written; otherwise <code>false</code>
-     */
-    public boolean isDirty() {
-        return outputStream.isDirty();
-    }
-
-    /**
      * Resets this connection instance and prepares it for next upcoming AJP cycle. That is associated request handler will be set to
      * <code>null</code>, its state is set to <code>IDLE</code> and the output stream is going to be flushed.
      * 
@@ -171,7 +162,6 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
                 } catch (final IOException e) {
                     LOG.debug(e.getMessage(), e);
                 }
-                outputStream.clear();
             }
             state = IDLE_STATE;
             packageNumber = 0;
@@ -269,21 +259,6 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         blocker.acquire();
         try {
             return outputStream;
-        } finally {
-            blocker.release();
-        }
-    }
-
-    /**
-     * Gets the neutral output stream to AJP client
-     * 
-     * @return The neutral output stream to AJP client
-     *  @throws IOException If neutral output stream cannot be returned
-     */
-    public OutputStream getNeutralOutputStream() throws IOException {
-        blocker.acquire();
-        try {
-            return outputStream.getNeutralOutputStream();
         } finally {
             blocker.release();
         }

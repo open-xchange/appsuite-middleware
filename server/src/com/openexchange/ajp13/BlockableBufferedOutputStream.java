@@ -70,8 +70,6 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     private volatile long lastAccessed;
 
-    private volatile boolean dirty;
-
     /**
      * Initializes a new {@link BlockableBufferedOutputStream}.
      * 
@@ -117,29 +115,6 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     }
 
     /**
-     * Checks if this stream is dirty. Already data written.
-     * 
-     * @return <code>true</code> if this stream is dirty; otherwise <code>false</code>
-     */
-    public boolean isDirty() {
-        return dirty;
-    }
-
-    /**
-     * Clears this stream and removes dirty flag.
-     */
-    public void clear() {
-        blocker.acquire();
-        try {
-            count = 0;
-            Arrays.fill(buf, (byte) 0);
-            dirty = false;
-        } finally {
-            blocker.release();
-        }
-    }
-
-    /**
      * Flush the internal buffer
      * 
      * @throws IOException
@@ -159,25 +134,6 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      */
     @Override
     public void write(final int b) throws IOException {
-        blocker.acquire();
-        try {
-            dirty = true;
-            if (count >= buf.length) {
-                flushBuffer();
-            }
-            buf[count++] = (byte) b;
-        } finally {
-            blocker.release();
-        }
-    }
-
-    /**
-     * Writes the specified byte to this buffered output stream without touching dirty flag.
-     * 
-     * @param b the byte to be written.
-     * @exception IOException if an I/O error occurs.
-     */
-    protected void writeNeutral(final int b) throws IOException {
         blocker.acquire();
         try {
             if (count >= buf.length) {
@@ -204,42 +160,6 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      */
     @Override
     public void write(final byte b[], final int off, final int len) throws IOException {
-        blocker.acquire();
-        try {
-            dirty = true;
-            if (len >= buf.length) {
-                /*
-                 * If the request length exceeds the size of the output buffer, flush the output buffer and then write the data directly. In
-                 * this way buffered streams will cascade harmlessly.
-                 */
-                flushBuffer();
-                out.write(b, off, len);
-                return;
-            }
-            if (len > buf.length - count) {
-                flushBuffer();
-            }
-            System.arraycopy(b, off, buf, count, len);
-            count += len;
-        } finally {
-            blocker.release();
-        }
-    }
-
-    /**
-     * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code> to this buffered output stream without touching dirty flag.
-     * <p>
-     * Ordinarily this method stores bytes from the given array into this stream's buffer, flushing the buffer to the underlying output
-     * stream as needed. If the requested length is at least as large as this stream's buffer, however, then this method will flush the
-     * buffer and write the bytes directly to the underlying output stream. Thus redundant <code>BufferedOutputStream</code>s will not copy
-     * data unnecessarily.
-     * 
-     * @param b the data.
-     * @param off the start offset in the data.
-     * @param len the number of bytes to write.
-     * @exception IOException if an I/O error occurs.
-     */
-    protected void writeNeutral(final byte b[], final int off, final int len) throws IOException {
         blocker.acquire();
         try {
             if (len >= buf.length) {
@@ -271,24 +191,6 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     public void flush() throws IOException {
         blocker.acquire();
         try {
-            dirty = true;
-            flushBuffer();
-            out.flush();
-            lastAccessed = System.currentTimeMillis();
-        } finally {
-            blocker.release();
-        }
-    }
-
-    /**
-     * Flushes this buffered output stream. This forces any buffered output bytes to be written out to the underlying output stream without touching dirty flag.
-     * 
-     * @exception IOException if an I/O error occurs.
-     * @see java.io.FilterOutputStream#out
-     */
-    protected void flushNeutral() throws IOException {
-        blocker.acquire();
-        try {
             flushBuffer();
             out.flush();
             lastAccessed = System.currentTimeMillis();
@@ -301,7 +203,6 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     public void close() throws IOException {
         blocker.acquire();
         try {
-            dirty = false;
             super.close();
         } finally {
             blocker.release();
@@ -317,46 +218,6 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      */
     public long getLastAccessed() {
         return lastAccessed;
-    }
-
-    /**
-     * Gets an {@link OutputStream} view on this blockable output stream that does not touch dirty flag.
-     * 
-     * @return A neutral {@link OutputStream} view on this blockable output stream
-     */
-    public OutputStream getNeutralOutputStream() {
-        return new NeutralOutputStream();
-    }
-
-    /**
-     * {@link NeutralOutputStream} - A delegate output stream invoking neutral write methods of underlying {@link BlockableBufferedOutputStream} instance.
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    private final class NeutralOutputStream extends OutputStream {
-
-        /**
-         * Initializes a new {@link NeutralOutputStream}.
-         */
-        public NeutralOutputStream() {
-            super();
-        }
-
-        @Override
-        public void write(int b) throws IOException {
-            writeNeutral(b);
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            writeNeutral(b, off, len);
-        }
-
-        @Override
-        public void flush() throws IOException {
-            flushNeutral();
-        }
-
     }
 
 }
