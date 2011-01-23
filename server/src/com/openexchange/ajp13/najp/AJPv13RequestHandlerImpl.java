@@ -172,7 +172,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 /*
                  * AJP cycle still intact?
                  */
-                if (endResponseSent) {
+                if (false && endResponseSent) {
                     /*
                      * Caught in another cycle! Abort immediately
                      */
