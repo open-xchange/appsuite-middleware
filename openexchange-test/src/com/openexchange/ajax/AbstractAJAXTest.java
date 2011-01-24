@@ -163,7 +163,6 @@ public abstract class AbstractAJAXTest extends TestCase {
     protected WebConversation getWebConversation() {
         if (null == webConversation) {
             webConversation = newWebConversation();
-            webConversation.setUserAgent(OxHttpClient.USER_AGENT);
         }
         return webConversation;
     }
@@ -186,7 +185,10 @@ public abstract class AbstractAJAXTest extends TestCase {
     protected WebConversation newWebConversation() {
         HttpUnitOptions.setDefaultCharacterSet("UTF-8");
         HttpUnitOptions.setScriptingEnabled(false);
-        return new WebConversation();
+        
+        WebConversation conv = new WebConversation();
+        conv.setUserAgent(OxHttpClient.USER_AGENT);
+        return conv;
     }
 
     /**
