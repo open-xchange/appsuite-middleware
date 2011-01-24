@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 
 import org.apache.jsieve.NumberArgument;
@@ -234,6 +235,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         try {
             final Date date = new Date(Long.parseLong(string));
             final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
             return df.format(date);
         } catch (NumberFormatException e) {
             throw new JSONException("Date field \"" + string + "\" is no date value");
@@ -549,6 +551,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
             private JSONArray getJSONDateArray(final List<String> collection) throws JSONException {
                 final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+                df.setTimeZone(TimeZone.getTimeZone("UTC"));
                 final JSONArray retval = new JSONArray();
                 for (final String part : collection) {
                     Date parse;
