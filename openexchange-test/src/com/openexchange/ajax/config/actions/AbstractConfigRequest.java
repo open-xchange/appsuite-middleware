@@ -70,9 +70,6 @@ abstract class AbstractConfigRequest<T extends AbstractAJAXResponse> implements 
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return CONFIG_URL;
     }

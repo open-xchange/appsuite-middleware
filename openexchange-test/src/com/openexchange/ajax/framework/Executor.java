@@ -58,9 +58,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import junit.framework.Assert;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -70,12 +68,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
@@ -85,10 +80,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -121,6 +113,10 @@ public class Executor extends Assert {
         return execute(client.getSession(), request);
     }
 
+    public static <T extends AbstractAJAXResponse> T execute(final AJAXClient client, final AJAXRequest<T> request, final String protocol, final String hostname) throws AjaxException, IOException, JSONException {
+        return execute(client.getSession(), request, protocol, hostname);
+    }
+
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
         final AJAXRequest<T> request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -137,7 +133,7 @@ public class Executor extends Assert {
     }
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
-            final String protocol, final String hostname) throws AjaxException, IOException, SAXException,
+            final String protocol, final String hostname) throws AjaxException, IOException,
             JSONException {
 
         final String urlString = protocol + "://" + hostname + request.getServletPath();

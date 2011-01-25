@@ -55,16 +55,21 @@ package com.openexchange.ajax.config.actions;
  */
 public class GetRequest extends AbstractConfigRequest<GetResponse> {
 
-    private final Tree param;
+    private final String path;
 
     public GetRequest(final Tree param) {
         super();
-        this.param = param;
+        this.path = param.getPath();
+    }
+
+    public GetRequest(String path) {
+        super();
+        this.path = path;
     }
 
     @Override
     public String getServletPath() {
-        return super.getServletPath() + param.getPath();
+        return super.getServletPath() + path;
     }
 
     public Object getBody() {
