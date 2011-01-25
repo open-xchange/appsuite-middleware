@@ -65,18 +65,12 @@ public abstract class AbstractAJAXSession extends TestCase {
         super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(User.User1);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void tearDown() throws Exception {
         if (client != null) {
@@ -86,16 +80,10 @@ public abstract class AbstractAJAXSession extends TestCase {
         super.tearDown();
     }
 
-    /**
-     * @return the session
-     */
     public AJAXSession getSession() {
         return client.getSession();
     }
 
-    /**
-     * @return the client
-     */
     protected AJAXClient getClient() {
         return client;
     }
