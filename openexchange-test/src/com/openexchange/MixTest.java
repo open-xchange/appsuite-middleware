@@ -62,6 +62,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
@@ -130,9 +131,9 @@ public final class MixTest {
             while (true) {
                 LoginResponse resp = null;
                 try {
-                    resp = LoginTools.login(session, request);
+                    resp = Executor.execute(session, request);
                     final String sessionId = resp.getSessionId();
-                    LoginTools.logout(session, new LogoutRequest(sessionId));
+                    Executor.execute(session, new LogoutRequest(sessionId));
                 } catch (final AssertionFailedError e) {
                     
                     System.out.println("Login failed! " + e.getMessage());

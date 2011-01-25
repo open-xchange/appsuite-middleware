@@ -51,14 +51,13 @@ package com.openexchange.ajax.framework;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -84,7 +83,7 @@ public class AJAXClient {
         this.mustLogout = session.mustLogout();
     }
 
-    public AJAXClient(final User user) throws ConfigurationException, AjaxException, IOException, SAXException, JSONException {
+    public AJAXClient(final User user) throws ConfigurationException, AjaxException, IOException, JSONException {
         AJAXConfig.init();
         String login = AJAXConfig.getProperty(user.getLogin());
         if (null == login) {
@@ -146,9 +145,9 @@ public class AJAXClient {
         }
     }
 
-    public void logout() throws AjaxException, IOException, SAXException, JSONException {
+    public void logout() throws AjaxException, IOException, JSONException {
         if (null != session.getId()) {
-            LoginTools.logout(session, new LogoutRequest(session.getId()));
+            execute(new LogoutRequest(session.getId()));
             session.setId(null);
         }
         session.getConversation().clearContents();
