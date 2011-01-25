@@ -109,8 +109,6 @@ public abstract class AbstractStep implements Step{
             fail("AjaxException during task creation: " + e.getLocalizedMessage());
         } catch (IOException e) {
             fail("IOException during task creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task creation: " + e.getLocalizedMessage());
         } catch (JSONException e) {
             fail("JsonException during task creation: " + e.getLocalizedMessage());
         }

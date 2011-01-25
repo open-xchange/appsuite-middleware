@@ -177,7 +177,7 @@ public class AJAXClient {
         return values;
     }
 
-    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) throws AjaxException, IOException, SAXException, JSONException {
+    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) throws AjaxException, IOException, JSONException {
         if (hostname != null && protocol != null) {
             // TODO: Maybe assume http as default protocol
             return Executor.execute(getSession(), request, getProtocol(), getHostname());

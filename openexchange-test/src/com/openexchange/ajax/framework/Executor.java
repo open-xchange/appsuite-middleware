@@ -109,7 +109,7 @@ public class Executor extends Assert {
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXClient client,
         final AJAXRequest<T> request) throws AjaxException, IOException,
-        SAXException, JSONException {
+        JSONException {
         return execute(client.getSession(), request);
     }
 
@@ -119,7 +119,7 @@ public class Executor extends Assert {
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
         final AJAXRequest<T> request) throws AjaxException, IOException,
-        SAXException, JSONException {
+        JSONException {
         return execute(session, request,
             AJAXConfig.getProperty(Property.PROTOCOL),
             AJAXConfig.getProperty(Property.HOSTNAME));
@@ -127,7 +127,7 @@ public class Executor extends Assert {
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
         final AJAXRequest<T> request, final String hostname) throws AjaxException,
-        IOException, SAXException, JSONException {
+        IOException, JSONException {
         return execute(session, request, AJAXConfig
             .getProperty(Property.PROTOCOL), hostname);
     }

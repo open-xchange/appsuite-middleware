@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -171,10 +170,6 @@ public class ResourceTestManager implements TestManager {
             setLastException(e);
             if (failOnError)
                 fail("IOException during resource creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            setLastException(e);
-            if (failOnError)
-                fail("SAXException during resource creation: " + e.getLocalizedMessage());
         } catch (JSONException e) {
             setLastException(e);
             if (failOnError)

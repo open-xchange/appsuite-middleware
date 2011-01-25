@@ -213,10 +213,6 @@ public class CalendarTestManager implements TestManager {
             setLastException(e);
             if (failOnError)
                 fail("IOException during task creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            setLastException(e);
-            if (failOnError)
-                fail("SAXException during task creation: " + e.getLocalizedMessage());
         } catch (JSONException e) {
             setLastException(e);
             if (failOnError)

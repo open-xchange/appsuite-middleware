@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -243,8 +242,6 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
             fail(e.toString());
         } catch (IOException e) {
             fail(e.toString());
-        } catch (SAXException e) {
-            fail(e.toString());
         } catch (JSONException e) {
             fail(e.toString());
         }
@@ -259,8 +256,6 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         } catch (AjaxException e) {
             fail(e.toString());
         } catch (IOException e) {
-            fail(e.toString());
-        } catch (SAXException e) {
             fail(e.toString());
         } catch (JSONException e) {
             fail(e.toString());

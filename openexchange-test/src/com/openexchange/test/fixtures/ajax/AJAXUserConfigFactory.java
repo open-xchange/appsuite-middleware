@@ -51,7 +51,6 @@ package com.openexchange.test.fixtures.ajax;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.LoginTools;
@@ -72,8 +71,6 @@ public class AJAXUserConfigFactory implements TestUserConfigFactory {
         } catch (AjaxException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
