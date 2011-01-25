@@ -249,7 +249,7 @@ public class FunctionTests extends AbstractAJAXSession {
         final GetResponse response = client.execute(new GetRequest(Tree.AvailableTimeZones));
         JSONObject json = response.getJSON();
         for (Entry<String, Object> entry : json.entrySet()) {
-            LOG.debug("Time zone: " + entry.getKey() + ", localized name: " + entry.getValue());
+            LOG.info("Time zone: " + entry.getKey() + ", localized name: " + entry.getValue());
         }
     }
 
