@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Javolution - Java(TM) Solution for Real-Time and Embedded Systems
+Bundle-SymbolicName: javolution
+Bundle-Version: 6.19.0.0
+Bundle-Vendor: Javolution (http://javolution.org/)
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Eclipse-BuddyPolicy: registered
+Bundle-ClassPath: .,
+ lib/javolution-5.5.1.jar
+Export-Package: javolution.util;uses:="javolution.context,javax.realtime,javolution.lang,javolution.xml,javolution.text";version=5.5.1,
+ javolution.xml.stream;uses:="javolution.text,javax.realtime,javolution.xml.sax,javolution.lang,javolution.util,javolution.context,javolution.io";version=5.5.1,
+ javolution.xml;uses:="javolution.util,javolution.text,javolution.lang,javolution.xml.stream,javolution.xml.sax,javolution.context";version=5.5.1,
+ javolution.io;uses:="javolution.text,javolution.lang";version=5.5.1,
+ javolution.text;uses:="javolution.util,javolution.lang,javolution.context,javolution.xml,javolution.io,javax.realtime";version=5.5.1,
+ javolution.testing;uses:="javolution.text,javolution.lang,javolution.context,javolution.util";version=5.5.1,
+ javolution.xml.sax;uses:="javolution.text,org.xml.sax,javolution.lang,javolution.xml.stream";version=5.5.1,
+ javolution.lang;uses:="javolution.context,javolution.xml.stream,javolution.xml,javolution.util,javolution.text";version=5.5.1,
+ javolution.context;uses:="javolution.lang,javax.realtime,javolution.xml,javolution.util,javolution.text,javolution.xml.stream";version=5.5.1,
+ javolution.xml.ws;uses:="javolution.xml.stream,javolution.xml,javolution.io,javolution.text";version=5.5.1,
+ javax.realtime;version=5.5.1
