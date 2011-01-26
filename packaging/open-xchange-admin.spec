@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -396,9 +396,11 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Jan 20 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18029: Corrected ENGINE to InnoDB of a table in ConfigDB.
 * Mon Dec 20 2010 - choeger@open-xchange.com
- - Bugfix #17849 - An infostore folder named XXXXXX already exists below folder userstore
-   SoftwareChange_Request-542: Removed DISPLAYNAME_UNIQUE
+ - Bugfix #17849: An infostore folder named XXXXXX already exists below folder userstore SoftwareChange_Request-542: Removed
+   DISPLAYNAME_UNIQUE
 * Mon Dec 13 2010 - thorben.betten@open-xchange.com
  - Bugfix #17600: Added missing keys to contact tables
 * Thu Dec 09 2010 - thorben.betten@open-xchange.com
