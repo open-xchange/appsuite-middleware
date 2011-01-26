@@ -79,7 +79,6 @@ import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -176,6 +175,13 @@ public class Executor extends Assert {
     	HttpResponse response = newClient.execute(httpRequest);
         long requestDuration = System.currentTimeMillis() - startRequest;
 
+        try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			System.out.println("InterruptedException while sleeping between test requests. Does that help?");
+			e.printStackTrace();
+		} //emulating HttpUnit to avoid the Apache bug that mixes package up
+		
         AbstractAJAXParser<? extends T> parser = request.getParser();
         parser.checkResponse(response);
         String responseBody = EntityUtils.toString(response.getEntity());
