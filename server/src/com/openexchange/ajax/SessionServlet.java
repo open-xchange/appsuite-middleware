@@ -83,6 +83,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -183,6 +184,19 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         checkIP(session, req.getRemoteAddr());
         rememberSession(req, session);
+        rememberRequestInfo(req, session);
+    }
+
+    /**
+     * Remembers specified HTTP request's information: host name, port and secure.
+     * 
+     * @param req The HTTP request
+     * @param session The session to store to
+     */
+    protected static void rememberRequestInfo(final ServletRequest req, final ServerSession session) {
+        session.setParameter(HostnameService.PARAM_HOST_NAME, req.getServerName());
+        session.setParameter(HostnameService.PARAM_PORT, Integer.valueOf(req.getServerPort()));
+        session.setParameter(HostnameService.PARAM_SECURE, Boolean.valueOf(req.isSecure()));
     }
 
     /**
@@ -373,8 +387,8 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param client the remembered client from the session.
      * @return The secret string or <code>null</code>
      */
-    public static String extractSecret(HttpServletRequest req, String hash, String client) {
-        Cookie[] cookies = req.getCookies();
+    public static String extractSecret(final HttpServletRequest req, final String hash, final String client) {
+        final Cookie[] cookies = req.getCookies();
         if (null != cookies) {
             final String cookieName = Login.SECRET_PREFIX + getHash(req, hash, client);
             for (final Cookie cookie : cookies) {
@@ -394,7 +408,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param client The client identifier
      * @return The appropriate hash
      */
-    public static String getHash(HttpServletRequest req, String hash, String client) {
+    public static String getHash(final HttpServletRequest req, final String hash, final String client) {
         final String retval;
         switch (cookieHash) {
         default:
@@ -445,7 +459,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
     
-    public static void removeJSESSIONID(HttpServletRequest req, HttpServletResponse resp) {
+    public static void removeJSESSIONID(final HttpServletRequest req, final HttpServletResponse resp) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
             return;
@@ -469,7 +483,12 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the remembered session.
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {
-        return (ServerSession) req.getAttribute(SESSION_KEY);
+        final ServerSession session = (ServerSession) req.getAttribute(SESSION_KEY);
+        if (null == session) {
+            return null;
+        }
+        rememberRequestInfo(req, session);
+        return session;
     }
 
 }

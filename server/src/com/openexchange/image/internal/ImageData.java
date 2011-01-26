@@ -58,11 +58,9 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataSource;
-import com.openexchange.groupware.notify.hostname.DefaultHostnameService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.servlet.ImageServlet;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -138,38 +136,42 @@ public final class ImageData {
         final StringBuilder sb = new StringBuilder(64);
         final String prefix;
         {
-            final DefaultHostnameService dhs = DefaultHostnameService.getInstance();
-            final String p;
-            final String sPort;
-            if (dhs.isSecure()) {
-                p = "https://";
-                final int port = dhs.getPort();
-                if (port == 443) {
-                    sPort = "";
-                } else {
-                    sPort = sb.append(':').append(port).toString();
-                    sb.setLength(0);
-                }
+            final String hostName = (String) session.getParameter(HostnameService.PARAM_HOST_NAME);
+            final Integer port = (Integer) session.getParameter(HostnameService.PARAM_PORT);
+            final Boolean secure = (Boolean) session.getParameter(HostnameService.PARAM_SECURE);
+            if ((hostName == null) || (port == null) || (secure == null)) {
+                /*
+                 * Compose relative URL
+                 */
+                prefix = "";
             } else {
-                p = "http://";
-                final int port = dhs.getPort();
-                if (port == 80) {
-                    sPort = "";
+                /*
+                 * Compose absolute URL
+                 */
+                final String p;
+                final String sPort;
+                if (secure.booleanValue()) {
+                    p = "https://";
+                    final int por = port.intValue();
+                    if (por == 443) {
+                        sPort = "";
+                    } else {
+                        sPort = sb.append(':').append(por).toString();
+                        sb.setLength(0);
+                    }
                 } else {
-                    sPort = sb.append(':').append(port).toString();
-                    sb.setLength(0);
+                    p = "http://";
+                    final int por = port.intValue();
+                    if (por == 80) {
+                        sPort = "";
+                    } else {
+                        sPort = sb.append(':').append(por).toString();
+                        sb.setLength(0);
+                    }
                 }
+                prefix = sb.append(p).append(hostName).append(sPort).toString();
+                sb.setLength(0);
             }
-            HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-            if (null == hostnameService) {
-                hostnameService = dhs;
-            }
-            String hostnameStr;
-            if ((hostnameStr = hostnameService.getHostname(session.getUserId(), session.getContextId())) == null) {
-                hostnameStr = getHostname();
-            }
-            prefix = sb.append(p).append(hostnameStr).append(sPort).toString();
-            sb.setLength(0);
         }
         url = sb.append(prefix).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(
             urlEncodeSafe(this.uniqueId, "UTF-8")).toString();
