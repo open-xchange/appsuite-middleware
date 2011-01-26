@@ -1,0 +1,652 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajp13.stable;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.ServletException;
+import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
+import com.openexchange.ajp13.servlet.UploadServletException;
+import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.monitoring.MonitoringInfo;
+
+/**
+ * {@link AJPv13Listener} - The AJP listener processes an accepted socket connection of an AJP client (web server) in a separate thread for
+ * the whole socket's lifetime.
+ * <p>
+ * Each starting AJP cycle is delegated to a dedicated AJP connection until the end of the AJP cycle is reached (<code>END RESPONSE</code>
+ * package sent).
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+final class AJPv13Listener implements Runnable {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Listener.class);
+
+    private static final AtomicInteger numRunning = new AtomicInteger();
+
+    private static final class AJPv13ListenerExecutor implements Executor {
+
+        private static final int NAME_LENGTH = 17;
+
+        private static String getThreadName(final int threadNumber, final StringBuilder sb) {
+            for (int i = threadNumber; i < 10000; i *= 10) {
+                sb.append('0');
+            }
+            return sb.append(threadNumber).toString();
+        }
+
+        private final int num;
+
+        private AJPv13ListenerThread listenerThread;
+
+        public AJPv13ListenerExecutor(final int num) {
+            super();
+            this.num = num;
+        }
+
+        public void execute(final Runnable command) {
+            listenerThread = new AJPv13ListenerThread(command);
+            listenerThread.setName(getThreadName(this.num, new StringBuilder(NAME_LENGTH).append("AJPListener-")));
+            listenerThread.start();
+        }
+
+        public boolean isAlive() {
+            if (null == listenerThread) {
+                return false;
+            }
+            return listenerThread.isAlive();
+        }
+
+        public boolean isDead() {
+            if (null == listenerThread) {
+                return false;
+            }
+            return listenerThread.isDead();
+        }
+
+        public void setDead(final boolean dead) {
+            if (null == listenerThread) {
+                return;
+            }
+            listenerThread.setDead(dead);
+        }
+
+        public void interrupt() {
+            if (null == listenerThread) {
+                return;
+            }
+            listenerThread.interrupt();
+        }
+
+        public boolean isNull() {
+            return null == listenerThread;
+        }
+
+        public StackTraceElement[] getStackTrace() {
+            return listenerThread.getStackTrace();
+        }
+
+        public String getName() {
+            if (null == listenerThread) {
+                return null;
+            }
+            return listenerThread.getName();
+        }
+    }
+
+    /*-
+     * Members
+     */
+
+    private Socket client;
+
+    private final AJPv13ListenerExecutor listenerExecutor;
+
+    private AJPv13ConnectionImpl ajpCon;
+
+    private volatile boolean processing;
+
+    private volatile long processingStart;
+
+    private volatile boolean waitingOnAJPSocket;
+
+    private final AtomicBoolean listenerStarted;
+
+    private final boolean pooled;
+
+    private final int num;
+
+    private final Lock listenerLock;
+
+    private final Condition resumeRunning;
+
+    /**
+     * Initializes a new {@link AJPv13Listener}.
+     * 
+     * @param num The listener's number
+     */
+    AJPv13Listener(final int num) {
+        this(num, false);
+    }
+
+    /**
+     * Initializes a new {@link AJPv13Listener}.
+     * 
+     * @param num The listener's number
+     * @param pooled <code>true</code> to mark this listener as pooled (initially put into pool); otherwise <code>false</code>
+     */
+    AJPv13Listener(final int num, final boolean pooled) {
+        super();
+        listenerStarted = new AtomicBoolean();
+        this.num = num;
+        listenerLock = new ReentrantLock();
+        resumeRunning = listenerLock.newCondition();
+        processing = false;
+        waitingOnAJPSocket = false;
+        this.pooled = pooled;
+        listenerExecutor = new AJPv13ListenerExecutor(num);
+    }
+
+    /**
+     * Starts this listener.
+     * 
+     * @param client The client socket to listen on
+     * @return <code>true</code> if this listener could be successfully started; otherwise <code>false</code>
+     */
+    boolean startListener(final Socket client) {
+        if (waitingOnAJPSocket || processing) {
+            /*
+             * Listener is already running
+             */
+            return false;
+        }
+        /*
+         * Assign a newly accepted client socket
+         */
+        this.client = client;
+        if (listenerStarted.get()) {
+            if (!listenerExecutor.isAlive() || listenerExecutor.isDead()) {
+                /*
+                 * Listener has died or has been interrupted before
+                 */
+                this.client = null;
+                return false;
+            }
+            /*
+             * Listener has already been started and is waiting to resume to work
+             */
+            listenerLock.lock();
+            try {
+                resumeRunning.signal();
+            } finally {
+                listenerLock.unlock();
+            }
+        } else {
+            /*
+             * Listener gets started the first time
+             */
+            if (!listenerStarted.compareAndSet(false, true)) {
+                /*
+                 * Another thread started this worker in the meantime
+                 */
+                return false;
+            }
+            listenerExecutor.execute(this);
+        }
+        return true;
+    }
+
+    /**
+     * Stops the listener by interrupting its worker, marks it as dead and removes listener from pool (if pooled).
+     * <p>
+     * <b>NOTE: </b>This could lead to an unpredicted behavior in overall system. Please use with care.
+     * </p>
+     */
+    boolean stopListener() {
+        terminateAndClose();
+        if (listenerStarted.compareAndSet(true, false)) {
+            return true;
+        }
+        listenerExecutor.setDead(true);
+        if (pooled) {
+            AJPv13ListenerPool.removeListener(num);
+        }
+        try {
+            listenerExecutor.interrupt();
+            return true;
+        } catch (final Exception e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(e.getMessage(), e);
+            }
+            return false;
+        } finally {
+            processing = false;
+            waitingOnAJPSocket = false;
+        }
+    }
+
+    private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
+
+    /**
+     * @return the stack trace of this listener's running thread
+     */
+    StackTraceElement[] getStackTrace() {
+        if (listenerExecutor.isNull() || !listenerExecutor.isAlive() || listenerExecutor.isDead()) {
+            return EMPTY_STACK_TRACE;
+        }
+        return listenerExecutor.getStackTrace();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    public void run() {
+        boolean keepOnRunning = true;
+        changeNumberOfRunningAJPListeners(true);
+        while (keepOnRunning && client != null && !listenerExecutor.isDead()) {
+            AJPv13ServerImpl.LISTENER_MONITOR.incrementNumActive();
+            final long start = System.currentTimeMillis();
+            /*
+             * Assign a connection to this listener which is either fetched from connection pool (if configured) or newly created
+             */
+            ajpCon = AJPv13Config.useAJPConnectionPool() ? AJPv13ConnectionPool.getAJPv13Connection(this) : new AJPv13ConnectionImpl(this);
+            try {
+                client.setKeepAlive(true);
+                waitingOnAJPSocket = true;
+                /*
+                 * Keep on processing underlying stream's data as long as accepted client socket is alive, its input is not shut down and no
+                 * communication failure occurred.
+                 */
+                while (client != null && !client.isClosed()) {
+                    try {
+                        ajpCon.processRequest();
+                        ajpCon.createResponse();
+                        if (!ajpCon.getAjpRequestHandler().isEndResponseSent()) {
+                            LOG.error("Detected AJP cycle (request/response) without terminating END_RESPONSE package!", new Throwable());
+                            /*
+                             * Just for safety reason to ensure END_RESPONSE package is going to be sent.
+                             */
+                            writeEndResponse(client, false);
+                        }
+                    } catch (final UploadServletException e) {
+                        LOG.error(e.getMessage(), e);
+                        closeAndKeepAlive((HttpServletResponseWrapper) e.getRes(), e.getData().getBytes("UTF-8"));
+                    } catch (final ServletException e) {
+                        LOG.error(e.getMessage(), e);
+                        closeAndKeepAlive();
+                    } catch (final AJPv13Exception e) {
+                        if (e.keepAlive()) {
+                            LOG.error(e.getMessage(), e);
+                            closeAndKeepAlive();
+                        } else {
+                            /*
+                             * Leave outer while loop since connection shall be closed
+                             */
+                            throw e;
+                        }
+                    } catch (final IOException e) {
+                        /*
+                         * Obviously a socket communication error occurred
+                         */
+                        throw new AJPv13SocketClosedException(AJPv13Exception.AJPCode.IO_ERROR, e, e.getMessage());
+                    } catch (final Throwable e) {
+                        /*
+                         * Catch every exception
+                         */
+                        final AbstractOXException logMe;
+                        if (e instanceof AbstractOXException) {
+                            logMe = (AbstractOXException) e;
+                        } else {
+                            logMe = new AJPv13Exception(e);
+                        }
+                        LOG.error(logMe.getMessage(), logMe);
+                        closeAndKeepAlive();
+                    }
+                    ajpCon.resetConnection(false);
+                    AJPv13ServerImpl.LISTENER_MONITOR.decrementNumProcessing();
+                    AJPv13ServerImpl.LISTENER_MONITOR.addProcessingTime(System.currentTimeMillis() - processingStart);
+                    AJPv13ServerImpl.LISTENER_MONITOR.incrementNumRequests();
+                    processing = false;
+                    if (null != client) {
+                        client.getOutputStream().flush();
+                    }
+                } // End of loop processing an AJP socket's data
+            } catch (final AJPv13SocketClosedException e) {
+                /*
+                 * Just as debug info
+                 */
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e.getMessage(), e);
+                }
+            } catch (final AJPv13Exception e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final Throwable e) {
+                /*
+                 * Catch Throwable to catch every throwable object.
+                 */
+                final AJPv13Exception wrapper = new AJPv13Exception(e);
+                LOG.error(wrapper.getMessage(), wrapper);
+            } finally {
+                terminateAndClose();
+                waitingOnAJPSocket = false;
+                if (processing) {
+                    AJPv13ServerImpl.LISTENER_MONITOR.decrementNumProcessing();
+                    AJPv13ServerImpl.LISTENER_MONITOR.addProcessingTime(System.currentTimeMillis() - processingStart);
+                    AJPv13ServerImpl.LISTENER_MONITOR.incrementNumRequests();
+                    processing = false;
+                }
+                AJPv13Server.decrementNumberOfOpenAJPSockets();
+                AJPv13ServerImpl.LISTENER_MONITOR.decrementNumActive();
+            }
+            /*
+             * Put back listener into pool if listener was initially put into pool. Use an enforced put if mod_jk is enabled.
+             */
+            if (pooled && AJPv13ListenerPool.putBack(this)) {
+                /*
+                 * Listener could be successfully put into pool, so put him asleep
+                 */
+                listenerLock.lock();
+                try {
+                    final long duration = System.currentTimeMillis() - start;
+                    AJPv13ServerImpl.LISTENER_MONITOR.addUseTime(duration);
+                    resumeRunning.await();
+                    if (listenerExecutor.isDead()) {
+                        keepOnRunning = false;
+                    }
+                } catch (final InterruptedException e) {
+                    if (listenerStarted.get()) {
+                        if (listenerExecutor.isDead()) {
+                            LOG.debug("An AJP listener was interrupted due to bundle stop");
+                        } else {
+                            LOG.error("An AJP listener was interrupted. Maybe caused by a bundle stop", e);
+                        }
+                    }
+                    keepOnRunning = false;
+                    // Restore interrupted status
+                    Thread.currentThread().interrupt();
+                } finally {
+                    listenerLock.unlock();
+                }
+            } else {
+                /*
+                 * Listener could NOT be put back or was newly created to process an opened socket. Leave run() method and let this listener
+                 * die since he finished working and socket is closed.
+                 */
+                final long duration = System.currentTimeMillis() - start;
+                AJPv13ServerImpl.LISTENER_MONITOR.addUseTime(duration);
+                keepOnRunning = false;
+            }
+        }
+        changeNumberOfRunningAJPListeners(false);
+        AJPv13Watcher.removeListener(num);
+    }
+
+    private void closeAndKeepAlive(final HttpServletResponseWrapper resp, final byte[] data) throws AJPv13Exception, IOException {
+        if (null != client) {
+            if (null != resp) {
+                /*
+                 * Send response headers
+                 */
+                writeSendHeaders(client, resp);
+            }
+            if (null != data) {
+                /*
+                 * Send response body
+                 */
+                writeSendBody(client, data);
+            }
+            /*
+             * Send END_RESPONSE package
+             */
+            writeEndResponse(client, false);
+            ajpCon.getAjpRequestHandler().setEndResponseSent();
+        }
+    }
+
+    private void closeAndKeepAlive() throws AJPv13Exception, IOException {
+        if (null != client) {
+            /*
+             * Send END_RESPONSE package
+             */
+            writeEndResponse(client, false);
+            ajpCon.getAjpRequestHandler().setEndResponseSent();
+        }
+    }
+
+    /**
+     * Writes connection-terminating AJP END_RESPONSE package to web server, closes the AJP connection and accepted client socket as well.
+     */
+    private void terminateAndClose() {
+        try {
+            /*
+             * Release AJP connection
+             */
+            if (ajpCon != null) {
+                ajpCon.removeListener();
+                if (AJPv13Config.useAJPConnectionPool()) {
+                    AJPv13ConnectionPool.putBackAJPv13Connection(ajpCon);
+                }
+                ajpCon = null;
+            }
+        } catch (final Exception e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
+        try {
+            /*
+             * Terminate AJP cycle and close socket
+             */
+            if (client != null) {
+                if (!client.isClosed()) {
+                    writeEndResponse(client, true);
+                    client.close();
+                }
+                client = null;
+            }
+        } catch (final Exception e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
+    }
+
+    private static void writeEndResponse(final Socket client, final boolean closeConnection) throws AJPv13Exception, IOException {
+        client.getOutputStream().write(AJPv13Response.getEndResponseBytes(closeConnection));
+        client.getOutputStream().flush();
+    }
+
+    private static void writeSendHeaders(final Socket client, final HttpServletResponseWrapper resp) throws AJPv13Exception, IOException {
+        client.getOutputStream().write(AJPv13Response.getSendHeadersBytes(resp));
+        client.getOutputStream().flush();
+    }
+
+    private static void writeSendBody(final Socket client, final byte[] data) throws AJPv13Exception, IOException {
+        client.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(data));
+        client.getOutputStream().flush();
+    }
+
+    /**
+     * @return listener name
+     */
+    String getListenerName() {
+        return listenerExecutor.getName();
+    }
+
+    /**
+     * @return listener's last timestamp when processing started
+     */
+    long getProcessingStartTime() {
+        return processingStart;
+    }
+
+    /**
+     * @return listener's number
+     */
+    int getListenerNumber() {
+        return num;
+    }
+
+    /**
+     * @return <code>true</code> if listener is currently processing, otherwise <code>false</code>
+     */
+    boolean isProcessing() {
+        return processing;
+    }
+
+    /**
+     * Sets this listener's processing flag
+     */
+    void markProcessing() {
+        processing = true;
+        waitingOnAJPSocket = false;
+        processingStart = System.currentTimeMillis();
+        AJPv13ServerImpl.LISTENER_MONITOR.incrementNumProcessing();
+    }
+
+    /**
+     * Mark this listener as non-processing
+     */
+    void markNonProcessing() {
+        if (processing) {
+            processing = false;
+            waitingOnAJPSocket = true;
+            AJPv13ServerImpl.LISTENER_MONITOR.decrementNumProcessing();
+        }
+    }
+
+    /**
+     * Increments number of AJP tasks waiting for incoming AJP data.
+     */
+    void incrementWaiting() {
+        AJPv13ServerImpl.LISTENER_MONITOR.incrementNumWaiting();
+    }
+
+    /**
+     * Decrements number of AJP tasks waiting for incoming AJP data.
+     */
+    void decrementWaiting() {
+        AJPv13ServerImpl.LISTENER_MONITOR.decrementNumWaiting();
+    }
+
+    /**
+     * @return <code>true</code> if listener is currently listening to client socket's input stream, otherwise <code>false</code>
+     */
+    boolean isWaitingOnAJPSocket() {
+        return waitingOnAJPSocket;
+    }
+
+    /**
+     * @return This listener's accepted client socket
+     */
+    Socket getSocket() {
+        return client;
+    }
+
+    /**
+     * Discards the socket.
+     */
+    void discardSocket() {
+        if (client != null) {
+            try {
+                client.close();
+            } catch (final IOException e) {
+                LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe)", e);
+            }
+            client = null;
+        }
+    }
+
+    /**
+     * @return <code>true</code> if this listener has been started; otherwise <code>false</code>
+     */
+    boolean isListenerStarted() {
+        return listenerStarted.get();
+    }
+
+    /**
+     * @return <code>true</code> if this listener is pooled; otherwise <code>false</code>
+     */
+    boolean isPooled() {
+        return pooled;
+    }
+
+    /**
+     * Increments/decrements the number of running AJP listeners.
+     * 
+     * @param increment whether to increment or to decrement
+     */
+    static void changeNumberOfRunningAJPListeners(final boolean increment) {
+        MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning.decrementAndGet());
+    }
+
+    /**
+     * Gets the number of running AJP listeners.
+     * 
+     * @return The number of running AJP listeners
+     */
+    static int getNumberOfRunningAJPListeners() {
+        return numRunning.get();
+    }
+
+}
