@@ -62,6 +62,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
 import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.servlet.ServletConfigLoader;
+import com.openexchange.ajp13.servlet.http.HttpManagersInit;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.internal.JCSCacheService;
@@ -165,8 +167,6 @@ import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.tools.file.internal.LocalFileStorageFactory;
-import com.openexchange.tools.servlet.ServletConfigLoader;
-import com.openexchange.tools.servlet.http.HttpManagersInit;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
@@ -412,11 +412,11 @@ public final class Init {
 
     private static void startAndInjectHTMLService() {
         if (null == ServerServiceRegistry.getInstance().getService(HTMLService.class)) {
-            ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
+            final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
             Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
-            Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
-            Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
-            HTMLService service = new HTMLServiceImpl(properties, (Map<Character, String>) maps[0], (Map<String, Character>) maps[1]);
+            final Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
+            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
+            final HTMLService service = new HTMLServiceImpl(properties, (Map<Character, String>) maps[0], (Map<String, Character>) maps[1]);
             services.put(HTMLService.class, service);
             ServerServiceRegistry.getInstance().addService(HTMLService.class, service);
         }
@@ -513,7 +513,7 @@ public final class Init {
             registry.registerComponent(EnumComponent.DB_POOLING, "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
             final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
             final TimerService timerService = (TimerService) services.get(TimerService.class);
-            CacheService cacheService = (CacheService) services.get(CacheService.class);
+            final CacheService cacheService = (CacheService) services.get(CacheService.class);
             com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
             final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
             services.put(DatabaseService.class, dbService);
@@ -526,9 +526,9 @@ public final class Init {
         /*
          * May be invoked multiple times
          */
-        FileStorageFactory fileStorageStarter = new LocalFileStorageFactory();
+        final FileStorageFactory fileStorageStarter = new LocalFileStorageFactory();
         FileStorage.setFileStorageStarter(fileStorageStarter); 
-        DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
+        final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
         QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
     }
 
@@ -592,11 +592,11 @@ public final class Init {
         if (null == ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class)) {
             // Initialize mail account storage
             new MailAccountStorageInit().start();
-            MailAccountStorageService storageService = MailAccountStorageInit.newMailAccountStorageService();
+            final MailAccountStorageService storageService = MailAccountStorageInit.newMailAccountStorageService();
             services.put(MailAccountStorageService.class, storageService);
             ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, storageService);
     
-            UnifiedINBOXManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
+            final UnifiedINBOXManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
             services.put(UnifiedINBOXManagement.class, unifiedINBOXManagement);
             ServerServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, unifiedINBOXManagement);
         }
@@ -639,7 +639,7 @@ public final class Init {
 
     private static void startAndInjectFolderService() {
         if (null == ServerServiceRegistry.getInstance().getService(FolderService.class)) {
-            FolderService fs = new FolderServiceImpl();
+            final FolderService fs = new FolderServiceImpl();
             services.put(FolderService.class, fs);
             ServerServiceRegistry.getInstance().addService(FolderService.class, fs);
         }

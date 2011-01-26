@@ -1,12 +1,12 @@
 package com.openexchange.tools.servlet;
 
 import java.io.File;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-
 import junit.framework.TestCase;
-
+import com.openexchange.ajp13.servlet.ServletConfigLoader;
+import com.openexchange.ajp13.servlet.ServletConfigWrapper;
+import com.openexchange.ajp13.servlet.ServletContextWrapper;
 import com.openexchange.test.TestInit;
 
 public class ServletConfigLoaderTest extends TestCase {
