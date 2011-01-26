@@ -63,10 +63,10 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
-import com.openexchange.ajp13.servlet.UploadServletException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.tools.servlet.UploadServletException;
 
 /**
  * {@link AJPv13Listener} - The AJP listener processes an accepted socket connection of an AJP client (web server) in a separate thread for

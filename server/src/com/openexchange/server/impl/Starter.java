@@ -92,14 +92,6 @@ public class Starter implements Initialization {
      */
     new com.openexchange.charset.CustomCharsetProviderInit(),
     /**
-     * Starts AJP server
-     */
-    com.openexchange.groupware.impl.BackendServicesInit.getInstance(),
-    /**
-     * Starts HTTP managers
-     */
-    com.openexchange.tools.servlet.http.HttpManagersInit.getInstance(),
-    /**
      * Setup of ContextStorage and LoginInfo.
      */
     com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),

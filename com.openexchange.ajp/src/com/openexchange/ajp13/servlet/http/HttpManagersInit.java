@@ -55,14 +55,17 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.OXServletException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
@@ -101,7 +104,7 @@ public final class HttpManagersInit implements Initialization {
             LOG.error(this.getClass().getName() + " already started");
             return;
         }
-        initServletMappings();
+        initServletMappings(false);
         HttpSessionManagement.init();
         if (LOG.isInfoEnabled()) {
             LOG.info("HTTP servlet manager successfully initialized");
@@ -120,45 +123,50 @@ public final class HttpManagersInit implements Initialization {
         }
     }
 
-    private void initServletMappings() throws OXServletException {
+    private void initServletMappings(final boolean readFromFile) throws OXServletException {
         try {
-            final String servletMappingDir = SystemConfig.getProperty(SystemConfig.Property.ServletMappingDir);
-            if (servletMappingDir == null) {
-                throw new OXServletException(
-                    OXServletException.Code.MISSING_SERVLET_DIR,
-                    SystemConfig.Property.ServletMappingDir.getPropertyName());
-            }
-            final File dir = new File(servletMappingDir);
-            if (!dir.exists()) {
-                throw new OXServletException(OXServletException.Code.DIR_NOT_EXISTS, servletMappingDir);
-            } else if (!dir.isDirectory()) {
-                throw new OXServletException(OXServletException.Code.NO_DIRECTORY, servletMappingDir);
-            }
-            final File[] propFiles = dir.listFiles(new FilenameFilter() {
-
-                public boolean accept(final File dir, final String name) {
-                    return toLowerCase(name).endsWith(".properties");
-
+            final Map<String, Constructor<?>> servletConstructorMap;
+            if (readFromFile) {
+                final String servletMappingDir = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(SystemConfig.Property.ServletMappingDir.getPropertyName());
+                if (servletMappingDir == null) {
+                    throw new OXServletException(
+                        OXServletException.Code.MISSING_SERVLET_DIR,
+                        SystemConfig.Property.ServletMappingDir.getPropertyName());
                 }
-            });
-            final Map<String, Constructor<?>> servletConstructorMap = new HashMap<String, Constructor<?>>();
-            for (int i = 0; i < propFiles.length; i++) {
-                /*
-                 * Read properties from file
-                 */
-                final Properties properties = getPropertiesFromFile(propFiles[i]);
-                /*
-                 * Initialize servlets' default constructors
-                 */
-                final int size = properties.size();
-                final Iterator<Entry<Object, Object>> iterator = properties.entrySet().iterator();
-                for (int k = 0; k < size; k++) {
-                    final Entry<Object, Object> entry = iterator.next();
-                    addServletClass(
-                        prepareServletPath(entry.getKey().toString().trim()),
-                        entry.getValue().toString().trim(),
-                        servletConstructorMap);
+                final File dir = new File(servletMappingDir);
+                if (!dir.exists()) {
+                    throw new OXServletException(OXServletException.Code.DIR_NOT_EXISTS, servletMappingDir);
+                } else if (!dir.isDirectory()) {
+                    throw new OXServletException(OXServletException.Code.NO_DIRECTORY, servletMappingDir);
                 }
+                final File[] propFiles = dir.listFiles(new FilenameFilter() {
+
+                    public boolean accept(final File dir, final String name) {
+                        return toLowerCase(name).endsWith(".properties");
+
+                    }
+                });
+                servletConstructorMap = new HashMap<String, Constructor<?>>();
+                for (int i = 0; i < propFiles.length; i++) {
+                    /*
+                     * Read properties from file
+                     */
+                    final Properties properties = getPropertiesFromFile(propFiles[i]);
+                    /*
+                     * Initialize servlets' default constructors
+                     */
+                    final int size = properties.size();
+                    final Iterator<Entry<Object, Object>> iterator = properties.entrySet().iterator();
+                    for (int k = 0; k < size; k++) {
+                        final Entry<Object, Object> entry = iterator.next();
+                        addServletClass(
+                            prepareServletPath(entry.getKey().toString().trim()),
+                            entry.getValue().toString().trim(),
+                            servletConstructorMap);
+                    }
+                }
+            } else {
+                servletConstructorMap = Collections.emptyMap();
             }
             /*
              * Initialize HTTP servlet manager

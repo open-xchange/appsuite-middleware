@@ -63,6 +63,8 @@ import java.util.Properties;
 import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 
@@ -286,10 +288,11 @@ public final class ServletConfigLoader {
         defaultConfig = servletConfig;
         defaultContext = servletContext;
         this.directory = directory;
+        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
         globalProps = loadDirProps(this.directory);
-        globalProps.put(Property.IP_CHECK.getPropertyName(), ServerConfig.getProperty(Property.IP_CHECK));
-        globalProps.put(Property.UI_WEB_PATH.getPropertyName(), ServerConfig.getProperty(Property.UI_WEB_PATH));
-        globalProps.put(Property.COOKIE_HASH.getPropertyName(), ServerConfig.getProperty(Property.COOKIE_HASH));
+        globalProps.put(Property.IP_CHECK.getPropertyName(), configurationService.getProperty(Property.IP_CHECK.getPropertyName()));
+        globalProps.put(Property.UI_WEB_PATH.getPropertyName(), configurationService.getProperty(Property.UI_WEB_PATH.getPropertyName()));
+        globalProps.put(Property.COOKIE_HASH.getPropertyName(), configurationService.getProperty(Property.COOKIE_HASH.getPropertyName()));
     }
 
     /**

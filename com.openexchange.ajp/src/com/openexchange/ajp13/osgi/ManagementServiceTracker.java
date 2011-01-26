@@ -47,21 +47,17 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.ajp13.osgi;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import com.openexchange.groupware.update.tools.UpdateTaskMBeanInit;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.management.ManagementService;
-import com.openexchange.report.internal.ReportingInit;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link ManagementServiceTracker}
@@ -71,8 +67,6 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
     private static final Log LOG = LogFactory.getLog(ManagementServiceTracker.class);
-
-    private ObjectName gadObjectName;
 
     /**
      * Initializes a new {@link ManagementServiceTracker}
@@ -88,13 +82,17 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
         /*
          * Add management service to server's service registry
          */
-        ServerServiceRegistry.getInstance().addService(ManagementService.class, managementService);
+        AJPv13ServiceRegistry.getInstance().addService(ManagementService.class, managementService);
         try {
             /*
              * Add all mbeans since management service is now available
              */
-            gadObjectName = OXFolderProperties.registerRestorerMBean(managementService);
-            managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
+            managementService.registerMBean(
+                getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true),
+                AJPv13Monitors.AJP_MONITOR_SERVER_THREADS);
+            managementService.registerMBean(
+                getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true),
+                AJPv13Monitors.getListenerMonitor());
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
@@ -102,28 +100,22 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        new ReportingInit(managementService).start();
-        new UpdateTaskMBeanInit(managementService).start();
     }
 
     @Override
     protected void removedServiceInternal(final ManagementService managementService) {
-        new UpdateTaskMBeanInit(managementService).stop();
-        new ReportingInit(managementService).stop();
         try {
             /*
              * Remove all mbeans since management service now disappears
              */
-            managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
-            OXFolderProperties.unregisterRestorerMBean(gadObjectName, managementService);
+            managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
-        } finally {
-            gadObjectName = null;
         }
     }
 

@@ -55,6 +55,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
@@ -66,6 +67,7 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Attachment;
@@ -188,10 +190,8 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
-import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
@@ -255,7 +255,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class
+            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class
         };
 
     private final List<ServiceRegistration> registrationList;
@@ -526,7 +526,6 @@ public final class ServerActivator extends DeferredActivator {
         }
         // Register server's services
         registrationList.add(context.registerService(CharsetProvider.class.getName(), new CustomCharsetProvider(), null));
-        registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
         final GroupService groupService = new GroupServiceImpl();
         registrationList.add(context.registerService(GroupService.class.getName(), groupService, null));
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
@@ -546,7 +545,6 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(ContextService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ContextService.class,
             true), null));
-        registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
         {
             registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
@@ -684,6 +682,11 @@ public final class ServerActivator extends DeferredActivator {
         
         ServerServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();
+
+        /*
+         * Register servlets
+         */
+        registerServlets(getService(HttpService.class));
         
         /*
          * Register components
@@ -773,6 +776,40 @@ public final class ServerActivator extends DeferredActivator {
             }
         }
         return false;
+    }
+
+    private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
+        http.registerServlet("/infostore", new com.openexchange.webdav.Infostore(), null, null);
+        http.registerServlet("/servlet/webdav.ical", new com.openexchange.webdav.ical(), null, null);
+        http.registerServlet("/servlet/webdav.vcard", new com.openexchange.webdav.vcard(), null, null);
+        http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);
+        http.registerServlet("/servlet/webdav.folders", new com.openexchange.webdav.folders(), null, null);
+        http.registerServlet("/servlet/webdav.calendar", new com.openexchange.webdav.calendar(), null, null);
+        http.registerServlet("/servlet/webdav.contacts", new com.openexchange.webdav.contacts(), null, null);
+        http.registerServlet("/servlet/webdav.tasks", new com.openexchange.webdav.tasks(), null, null);
+        http.registerServlet("/servlet/webdav.groupuser", new com.openexchange.webdav.groupuser(), null, null);
+        http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
+        http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
+        http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
+        http.registerServlet("/ajax/login", new com.openexchange.ajax.Login(), null, null);
+        http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
+        http.registerServlet("/ajax/contacts", new com.openexchange.ajax.Contact(), null, null);
+        http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);
+        http.registerServlet("/ajax/calendar", new com.openexchange.ajax.Appointment(), null, null);
+        http.registerServlet("/ajax/config", new com.openexchange.ajax.ConfigMenu(), null, null);
+        http.registerServlet("/ajax/attachment", new com.openexchange.ajax.Attachment(), null, null);
+        http.registerServlet("/ajax/reminder", new com.openexchange.ajax.Reminder(), null, null);
+        http.registerServlet("/ajax/group", new com.openexchange.ajax.Group(), null, null);
+        http.registerServlet("/ajax/resource", new com.openexchange.ajax.Resource(), null, null);
+        http.registerServlet("/ajax/link", new com.openexchange.ajax.Link(), null, null);
+        http.registerServlet("/ajax/multiple", new com.openexchange.ajax.Multiple(), null, null);
+        http.registerServlet("/ajax/quota", new com.openexchange.ajax.Quota(), null, null);
+        http.registerServlet("/ajax/control", new com.openexchange.ajax.ConfigJump(), null, null);
+        http.registerServlet("/ajax/file", new com.openexchange.ajax.AJAXFile(), null, null);
+        http.registerServlet("/ajax/import", new com.openexchange.ajax.ImportServlet(), null, null);
+        http.registerServlet("/ajax/export", new com.openexchange.ajax.ExportServlet(), null, null);
+        http.registerServlet("/ajax/image", new com.openexchange.image.servlet.ImageServlet(), null, null);
+        http.registerServlet("/ajax/sync", new com.openexchange.ajax.SyncServlet(), null, null);
     }
 
 }

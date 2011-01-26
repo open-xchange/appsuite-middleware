@@ -63,6 +63,7 @@ import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.ServletRequestWrapper;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * HttpServletRequestWrapper

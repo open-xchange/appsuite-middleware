@@ -57,7 +57,7 @@ import java.net.InetAddress;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.configuration.SystemConfig;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -163,7 +163,7 @@ public final class AJPv13Config implements Initialization {
 
     private void init() throws AJPv13Exception {
         final Properties ajpProperties = new Properties();
-        final String ajpPropFile = SystemConfig.getProperty(AJP_PROP_FILE);
+        final String ajpPropFile = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AJP_PROP_FILE);
         if (ajpPropFile != null) {
             try {
                 FileInputStream fis = null;
@@ -297,7 +297,7 @@ public final class AJPv13Config implements Initialization {
                  */
                 servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
                 if (servletConfigs == null || "null".equalsIgnoreCase((servletConfigs = servletConfigs.trim()))) {
-                    servletConfigs = SystemConfig.getProperty("CONFIGPATH") + "/servletConfig";
+                    servletConfigs = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("CONFIGPATH") + "/servletConfig";
                 }
                 final File servletConfigsFile = new File(servletConfigs);
                 if ((!servletConfigsFile.exists() || !servletConfigsFile.isDirectory()) && LOG.isWarnEnabled()) {

@@ -61,7 +61,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.helper.BrowserDetector;
-import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.encoding.Helper;
 
@@ -218,10 +217,15 @@ public final class Tools {
         return message.toString();
     }
 
+    /**
+     * The name of the JSESSIONID cookie
+     */
+    private static final String JSESSIONID_COOKIE = "JSESSIONID";
+
     private static final CookieNameMatcher OX_COOKIE_MATCHER = new CookieNameMatcher() {
 
         public boolean matches(final String cookieName) {
-            return (null != cookieName && (cookieName.startsWith(Login.SESSION_PREFIX) || AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookieName)));
+            return (null != cookieName && (cookieName.startsWith(Login.SESSION_PREFIX) || JSESSIONID_COOKIE.equals(cookieName)));
         }
     };
 
@@ -256,12 +260,12 @@ public final class Tools {
             }
         }
     }
-    public static void setHeaderForFileDownload(String userAgent, HttpServletResponse resp, String fileName) throws UnsupportedEncodingException {
+    public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName) throws UnsupportedEncodingException {
         setHeaderForFileDownload(userAgent, resp, fileName, null);
     }
 
-    public static void setHeaderForFileDownload(String userAgent, HttpServletResponse resp, String fileName, String contentDisposition) throws UnsupportedEncodingException {
-        BrowserDetector detector = new BrowserDetector(userAgent);
+    public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName, String contentDisposition) throws UnsupportedEncodingException {
+        final BrowserDetector detector = new BrowserDetector(userAgent);
         if(contentDisposition == null) {
             contentDisposition = "attachment";
         }

@@ -55,7 +55,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -176,7 +175,7 @@ public class Infostore extends OXServlet {
         removeCookie(req, resp);
         try {
             LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (LoginException e) {
+        } catch (final LoginException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -184,7 +183,7 @@ public class Infostore extends OXServlet {
     private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {
 
         public boolean matches(final String cookieName) {
-            return (COOKIE_SESSIONID.equals(cookieName) || AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookieName));
+            return (COOKIE_SESSIONID.equals(cookieName) || "JSESSIONID".equals(cookieName));
         }
     };
 

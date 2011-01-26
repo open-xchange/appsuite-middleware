@@ -70,7 +70,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.CookieHash;
 import com.openexchange.configuration.ServerConfig;
@@ -464,7 +463,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (cookies == null) {
             return;
         }
-        final String jsessionidCookie = AJPv13RequestHandler.JSESSIONID_COOKIE;
+        final String jsessionidCookie = "JSESSIONID";
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
             if (jsessionidCookie.equals(name)) {

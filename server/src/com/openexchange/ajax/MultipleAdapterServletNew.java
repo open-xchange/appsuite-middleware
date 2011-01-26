@@ -72,13 +72,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -247,7 +247,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 retval.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
-        retval.setRoute(AJPv13Config.getJvmRoute()); // Maybe use system name service
+        retval.setRoute(ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName()); // Maybe use system name service
         /*
          * Pass all parameters to AJAX request object
          */

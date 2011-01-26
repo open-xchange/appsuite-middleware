@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajp13.stable.AJPv13ListenerThread;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -131,6 +130,9 @@ public class RequestDBProvider implements DBProvider {
     }
     
     private void checkThreadDeath() {
+        /*-
+         * TODO:
+         * 
         final Thread current = Thread.currentThread();
         if (current instanceof AJPv13ListenerThread) {
             final AJPv13ListenerThread ajpv13Thread = (AJPv13ListenerThread) current;
@@ -150,6 +152,7 @@ public class RequestDBProvider implements DBProvider {
                 
             }
         }
+        */
     }
 
     public void rollback() throws DBPoolingException{

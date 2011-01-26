@@ -47,61 +47,27 @@
  *
  */
 
-package com.openexchange.mailaccount.json.init;
+package com.openexchange.ajp13;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mailaccount.Constants;
-import com.openexchange.mailaccount.json.servlet.MailAccountServlet;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.systemname.SystemNameService;
 
 /**
- * Registers the mail account servlet.
+ * {@link JVMRouteSystemNameImpl} - The {@link SystemNameService system name} implementation that uses the JVM route.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountServletInit implements Initialization {
-
-    private static final Log LOG = LogFactory.getLog(MailAccountServletInit.class);
-
-    private static final String ALIAS = "ajax/" + Constants.getModule();
-
-    private final AtomicBoolean started = new AtomicBoolean();
+public final class JVMRouteSystemNameImpl implements SystemNameService {
 
     /**
-     * Initializes a new {@link MailAccountServletInit}.
+     * Initializes a new {@link JVMRouteSystemNameImpl}
      */
-    public MailAccountServletInit() {
+    public JVMRouteSystemNameImpl() {
         super();
     }
 
-    public void start() throws AbstractOXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
-        }
-        try {
-            final HttpService httpService = ServerServiceRegistry.getInstance().getService(HttpService.class, true);
-            httpService.registerServlet(ALIAS, new MailAccountServlet(), null, null);
-            LOG.info("Mail account servlet successfully registered.");
-        } catch (final ServletException e) {
-            LOG.error("Mail account servlet could not be registered on server start-up.", e);
-        } catch (final NamespaceException e) {
-            LOG.error("Mail account servlet could not be registered on server start-up.", e);
-        }
+    public String getSystemName() {
+        return AJPv13Config.getJvmRoute();
     }
 
-    public void stop() throws AbstractOXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
-        }
-        final HttpService httpService = ServerServiceRegistry.getInstance().getService(HttpService.class, true);
-        httpService.unregister(ALIAS);
-        LOG.info("Mail account servlet successfully unregistered.");
-    }
 }

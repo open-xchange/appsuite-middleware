@@ -67,7 +67,6 @@ import com.openexchange.ajax.request.FolderRequest;
 import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.json.OXJSONWriter;
@@ -78,6 +77,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -204,7 +204,7 @@ public class Multiple extends SessionServlet {
                     jsonObj.put(MultipleHandler.HOSTNAME, null == hn ? req.getServerName() : hn);
                 }
             }
-            jsonObj.put(MultipleHandler.ROUTE, AJPv13Config.getJvmRoute());
+            jsonObj.put(MultipleHandler.ROUTE, ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
             
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
             if (null != multipleHandler) {
@@ -316,7 +316,7 @@ public class Multiple extends SessionServlet {
                     jsonWriter.endObject();
                 }
             } else if (MODULE_ATTACHMENTS.equals(module)) {
-                    AttachmentRequest request = new AttachmentRequest(session, jsonWriter);
+                    final AttachmentRequest request = new AttachmentRequest(session, jsonWriter);
                     request.action(action, new JSONSimpleRequest(jsonObj));
             } else {
                 final AjaxException ajaxException = new AjaxException(AjaxException.Code.UNKNOWN_MODULE, module);
@@ -338,9 +338,9 @@ public class Multiple extends SessionServlet {
         if (null != registry) {
             final MultipleHandlerFactoryService factoryService = registry.getFactoryService(module);
             if (null != factoryService) {
-                MultipleHandler multipleHandler = factoryService.createMultipleHandler();
+                final MultipleHandler multipleHandler = factoryService.createMultipleHandler();
                 if(PathAware.class.isInstance(multipleHandler)) {
-                    PathAware pa = (PathAware) multipleHandler;
+                    final PathAware pa = (PathAware) multipleHandler;
                     pa.setPath(module.substring(factoryService.getSupportedModule().length()));
                 }
                 return multipleHandler;

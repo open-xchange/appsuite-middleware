@@ -50,14 +50,26 @@
 package com.openexchange.ajp13.osgi;
 
 import static com.openexchange.ajp13.AJPv13ServiceRegistry.getServiceRegistry;
+import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.JVMRouteSystemNameImpl;
+import com.openexchange.ajp13.monitoring.AJPv13Monitors;
+import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
+import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
+import com.openexchange.ajp13.xajp.XAJPv13Server;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.management.ManagementService;
+import com.openexchange.server.Initialization;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.systemname.SystemNameService;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -67,11 +79,24 @@ import com.openexchange.timer.TimerService;
  */
 public final class AJPv13Activator extends DeferredActivator {
 
+    /**
+     * The logger.
+     */
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class);
+
+    private static final int AJP_MODE_STABLE = 1;
+
+    private static final int AJP_MODE_THREAD_POOL = 2;
+
+    private static final int AJP_MODE_NIO = 3;
+
+    private List<Initialization> inits;
+
+    private int mode;
+
     private List<ServiceTracker> trackers;
 
     private List<ServiceRegistration> registrations;
-
-    private ScheduledTimerTask scheduledTimerTask;
 
     /**
      * Initializes a new {@link AJPv13Activator}.
@@ -82,8 +107,7 @@ public final class AJPv13Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            ConfigurationService.class, TimerService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -122,12 +146,48 @@ public final class AJPv13Activator extends DeferredActivator {
                     }
                 }
             }
-            
-            
-            
-            
-            
-
+            inits = new ArrayList<Initialization>(2);
+            /*
+             * Set starter dependent on mode
+             */
+            mode = AJP_MODE_THREAD_POOL;
+            switch (mode) {
+            case AJP_MODE_STABLE:
+                inits.add(new AJPStableStarter());
+                break;
+            case AJP_MODE_THREAD_POOL:
+                inits.add(new NAJPStarter());
+                break;
+            case AJP_MODE_NIO:
+                inits.add(new XAJPStarter());
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown AJP mode: " + mode);
+            }
+            inits.add(com.openexchange.ajp13.servlet.http.HttpManagersInit.getInstance());
+            /*
+             * Start
+             */
+            for (final Initialization initialization : inits) {
+                initialization.start();
+            }
+            if (LOG.isInfoEnabled()) {
+                final String prefix = ((AJP_MODE_STABLE == mode) ? "Stable AJP server " : ((AJP_MODE_NIO == mode) ? "NIO AJP server " : "New AJP server "));
+                LOG.info(new StringBuilder(32).append(prefix).append("successfully started.").toString());
+            }
+            /*
+             * Start trackers
+             */
+            trackers = new ArrayList<ServiceTracker>(1);
+            trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceTracker(context)));
+            /*
+             * Register services
+             */
+            registrations = new ArrayList<ServiceRegistration>(1);
+            final HttpServiceImpl http = new HttpServiceImpl();
+            registrations.add(context.registerService(HttpService.class.getName(), http, null));
+            http.registerServlet("/servlet/TestServlet", new com.openexchange.ajp13.TestServlet(), null, null);
+            registrations.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class).error(e.getMessage(), e);
             throw e;
@@ -137,11 +197,22 @@ public final class AJPv13Activator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            
-            
-            
-            
-            
+            if (registrations != null) {
+                while (!registrations.isEmpty()) {
+                    registrations.remove(0).unregister();
+                }
+                registrations = null;
+            }
+            if (inits != null) {
+                while (!inits.isEmpty()) {
+                    inits.remove(0).stop();
+                }
+                inits = null;
+            }
+            if (LOG.isInfoEnabled()) {
+                final String prefix = ((AJP_MODE_STABLE == mode) ? "Stable AJP server " : ((AJP_MODE_NIO == mode) ? "NIO AJP server " : "New AJP server "));
+                LOG.info(new StringBuilder(32).append(prefix).append("successfully stopped.").toString());
+            }
             /*
              * Clear service registry
              */
@@ -150,6 +221,83 @@ public final class AJPv13Activator extends DeferredActivator {
             org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class).error(e.getMessage(), e);
             throw e;
         }
+    }
+
+    private static final class AJPStableStarter implements Initialization {
+
+        public AJPStableStarter() {
+            super();
+        }
+
+        public void start() throws AbstractOXException {
+            AJPv13Server.setInstance(new com.openexchange.ajp13.stable.AJPv13ServerImpl());
+            AJPv13Config.getInstance().start();
+            AJPv13Monitors.setListenerMonitor(com.openexchange.ajp13.stable.AJPv13ServerImpl.getListenerMonitor());
+            AJPv13Server.startAJPServer();
+        }
+
+        public void stop() throws AbstractOXException {
+            AJPv13Server.stopAJPServer();
+            AJPv13Monitors.releaseListenerMonitor();
+            AJPv13Config.getInstance().stop();
+            AJPv13Server.releaseInstrance();
+        }
+    }
+
+    private static final class NAJPStarter implements Initialization {
+
+        public NAJPStarter() {
+            super();
+        }
+
+        public void start() throws AbstractOXException {
+            /*
+             * Proper synchronous queue
+             */
+            String property = System.getProperty("java.specification.version");
+            if (null == property) {
+                property = System.getProperty("java.runtime.version");
+                if (null == property) {
+                    // JRE not detectable, use fallback
+                    AJPv13SynchronousQueueProvider.initInstance(false);
+                } else {
+                    // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
+                    AJPv13SynchronousQueueProvider.initInstance(!property.startsWith("1.5"));
+                }
+            } else {
+                // "java.specification.version=1.5" OR "java.specification.version=1.6"
+                AJPv13SynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
+            }
+            AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+            AJPv13Config.getInstance().start();
+            AJPv13Server.startAJPServer();
+        }
+
+        public void stop() throws AbstractOXException {
+            com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
+            AJPv13Config.getInstance().stop();
+            AJPv13Server.releaseInstrance();
+            AJPv13SynchronousQueueProvider.releaseInstance();
+        }
+    }
+
+    private static final class XAJPStarter implements Initialization {
+
+        public XAJPStarter() {
+            super();
+        }
+
+        public void start() throws AbstractOXException {
+            AJPv13Config.getInstance().start();
+            XAJPv13Server.getInstance().start();
+        }
+
+        public void stop() throws AbstractOXException {
+            AJPv13Config.getInstance().stop();
+            XAJPv13Server.getInstance().close();
+            XAJPv13Server.releaseInstance();
+        }
+
     }
 
 }

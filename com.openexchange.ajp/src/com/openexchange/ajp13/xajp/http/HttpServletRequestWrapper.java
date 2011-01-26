@@ -60,8 +60,8 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
 import com.openexchange.ajp13.servlet.http.HttpSessionWrapper;
-import com.openexchange.ajp13.servlet.http.Tools;
 import com.openexchange.ajp13.xajp.XAJPv13Session;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link HttpServletRequestWrapper}

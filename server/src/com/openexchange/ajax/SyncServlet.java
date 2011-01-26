@@ -50,14 +50,12 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -68,8 +66,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.sync.FolderSyncInterface;
 import com.openexchange.api2.sync.RdbFolderSyncInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -81,7 +79,6 @@ import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
-import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -130,13 +127,7 @@ public class SyncServlet extends PermissionServlet {
 			actionPut(req, resp);
 		} catch (final AbstractOXException e) {
 			LOG.error("SyncServlet.doPut()", e);
-			final Writer writer;
-			if (((HttpServletResponseWrapper) resp).getOutputSelection() == HttpServletResponseWrapper.OUTPUT_STREAM) {
-				writer = resp.getWriter();
-			} else {
-				writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
-						.getCharacterEncoding())), true);
-			}
+			final Writer writer = resp.getWriter();
 			final Response response = new Response();
 			response.setException(e);
 			try {
@@ -147,13 +138,7 @@ public class SyncServlet extends PermissionServlet {
 		} catch (final Exception e) {
 			final AbstractOXException wrapper = getWrappingOXException(e);
 			LOG.error(wrapper.getMessage(), wrapper);
-			final Writer writer;
-			if (((HttpServletResponseWrapper) resp).getOutputSelection() == HttpServletResponseWrapper.OUTPUT_STREAM) {
-				writer = resp.getWriter();
-			} else {
-				writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
-						.getCharacterEncoding())), true);
-			}
+			final Writer writer = resp.getWriter();
 			final Response response = new Response();
 			response.setException(wrapper);
 			try {
@@ -302,13 +287,7 @@ public class SyncServlet extends PermissionServlet {
 
 	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final AbstractOXException e)
 			throws IOException {
-		final Writer writer;
-		if (resp.getOutputSelection() == HttpServletResponseWrapper.OUTPUT_STREAM) {
-			writer = resp.getWriter();
-		} else {
-			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
-					.getCharacterEncoding())), true);
-		}
+		final Writer writer = resp.getWriter();
 		final Response response = new Response();
 		response.setException(e);
 		try {
