@@ -349,7 +349,12 @@ public class Executor extends Assert {
     }
 
     private static int getSleep() {
-        String sleepS = AJAXConfig.getProperty(Property.SLEEP);
+        String sleepS;
+        try {
+            sleepS = AJAXConfig.getProperty(Property.SLEEP);
+        } catch (NullPointerException e) {
+            sleepS = null;
+        }
         int sleep;
         try {
             sleep = Integer.parseInt(sleepS);
