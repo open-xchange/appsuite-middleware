@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -732,9 +732,29 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jan 25 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18080: Considering module when checking public folder access
+* Sat Jan 22 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18012: Checking for multiple-mail-account permission prior to listing accounts in Outlook folder tree
+* Thu Jan 20 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #17902: Closed SQL Connection was used.
+* Tue Jan 18 2011 - choeger@open-xchange.com
+ - Bugfix #18044: wrong file ownerships after initial installation
+* Tue Jan 18 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #17535: Update of Yearly Series does no longer destroy the appointment.
+* Mon Jan 17 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18035: Allowing surrounding quotes when parsing Content-Type header
+* Fri Jan 14 2011 - thorben.betten@open-xchange.com
+ - Bugfix #17997: Throwing appropriate error
+ - Bugfix #17991: Removing script tags in HTML header prior to obtaining a validated HTML representation
+* Thu Jan 13 2011 - thorben.betten@open-xchange.com
+ - Bugfix #17989: Fixed caching in IMAP MAL implementation to return cloned objects to not store modifications
 * Wed Jan 12 2011 - martin.herfurth@open-xchange.com
  - Bugfix #17883: Reminder in shared folders.
+* Wed Jan 12 2011 - marcus.klein@open-xchange.com
  - TA5701 of US 5504: Made session handling more restrictive. Hash used in cookies will now be recalculated for every request.
+* Wed Jan 12 2011 - thorben.betten@open-xchange.com
+ - Bugfix #17891: Fixed possible IndexOutOfBounsdException when checking quotes in personal part of an email address
 * Tue Jan 11 2011 - choeger@open-xchange.com
  - Bugfix #18000: updating on RHEL and SLES does not work
 * Tue Jan 11 2011 - marcus.klein@open-xchange.com

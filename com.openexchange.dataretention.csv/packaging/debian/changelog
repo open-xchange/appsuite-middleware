@@ -1,3 +1,9 @@
+open-xchange-dataretention-csv (6.19.0.0-2) unstable; urgency=low
+
+  * build for 6.19.0-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 26 Jan 2011 14:48:07 +0100
+
 open-xchange-dataretention-csv (6.19.0.0-1) unstable; urgency=low
 
   * build for 6.19.0-rev1
