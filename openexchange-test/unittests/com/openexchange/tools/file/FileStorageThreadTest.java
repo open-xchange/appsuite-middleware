@@ -31,8 +31,7 @@ public class FileStorageThreadTest extends TestCase {
         super.setUp();
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        FileStorage fm = new LocalFileStorage(tempFile.toURI());    
-        fm = null;
+        new LocalFileStorage(tempFile.toURI()); // initialize file storage    
         
         for (int i = 0; i < fmr.length; i++) {
             fmr[i] = new FMRunner();
@@ -65,13 +64,13 @@ public class FileStorageThreadTest extends TestCase {
     	rmdir(new File("file:" + tempFile.toString()));
     }
     
-    private static void rmdir(final File tempFile) {
-        if (tempFile.isDirectory()) {
-            for (final File f : tempFile.listFiles()) {
+    private static void rmdir(final File dir) {
+        if (dir.isDirectory()) {
+            for (final File f : dir.listFiles()) {
                 rmdir(f);
             }
         }
-        tempFile.delete();
+        dir.delete();
     }
     
     private static final class FMRunner implements Runnable {

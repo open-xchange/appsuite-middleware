@@ -174,6 +174,7 @@ public class UnitTests {
         tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
         tests.addTestSuite(com.openexchange.groupware.calendar.SlowCalendarTests.class);
         tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
+        tests.addTestSuite(com.openexchange.tools.file.FileStorageThreadTest.class);
         tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
         tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
         tests.addTest(com.openexchange.test.LostAndFoundUnitTests.suite());
