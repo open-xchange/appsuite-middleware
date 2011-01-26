@@ -95,9 +95,15 @@ public class AJAXConfig extends AbstractConfig {
      */
     public static enum Property {
         /**
+         * http or https.
+         */
+        PROTOCOL("protocol"),
+        /**
          * Server host.
          */
         HOSTNAME("hostname"),
+        /** Executor sleeps this amount of time after every request to prevent Apache problems */
+        SLEEP("sleep"),
         /**
          * User login.
          */
@@ -106,10 +112,6 @@ public class AJAXConfig extends AbstractConfig {
          * User password.
          */
         PASSWORD("password"),
-        /**
-         * http or https.
-         */
-        PROTOCOL("protocol"),
         /**
          * Second user login.
          */

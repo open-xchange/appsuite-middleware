@@ -176,7 +176,7 @@ public class Executor extends Assert {
         long requestDuration = System.currentTimeMillis() - startRequest;
 
         try {
-			Thread.sleep(500);
+			Thread.sleep(getSleep());
 		} catch (InterruptedException e) {
 			System.out.println("InterruptedException while sleeping between test requests. Does that help?");
 			e.printStackTrace();
@@ -346,5 +346,16 @@ public class Executor extends Assert {
 
     private static InputStream createBody(final Object body) throws UnsupportedEncodingException {
         return new ByteArrayInputStream(body.toString().getBytes(ENCODING));
+    }
+
+    private static int getSleep() {
+        String sleepS = AJAXConfig.getProperty(Property.SLEEP);
+        int sleep;
+        try {
+            sleep = Integer.parseInt(sleepS);
+        } catch (NumberFormatException e) {
+            sleep = 500;
+        }
+        return sleep;
     }
 }
