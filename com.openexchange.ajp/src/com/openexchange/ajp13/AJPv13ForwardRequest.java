@@ -67,7 +67,6 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.tools.codec.QuotedPrintable;
@@ -802,9 +801,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
     }
 
     private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) throws UnsupportedEncodingException {
-        return URLDecoder.decode(
-            queryStringValue,
-            charEnc == null ? AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
-                Property.DefaultEncoding.getPropertyName()) : charEnc);
+        return URLDecoder.decode(queryStringValue, charEnc == null ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charEnc);
     }
+
 }

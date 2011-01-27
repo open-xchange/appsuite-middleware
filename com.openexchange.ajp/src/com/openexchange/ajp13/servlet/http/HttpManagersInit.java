@@ -63,9 +63,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.servlet.OXServletException;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
@@ -127,7 +126,7 @@ public final class HttpManagersInit implements Initialization {
         try {
             final Map<String, Constructor<?>> servletConstructorMap;
             if (readFromFile) {
-                final String servletMappingDir = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(SystemConfig.Property.ServletMappingDir.getPropertyName());
+                final String servletMappingDir = AJPv13Config.getSystemProperty(SystemConfig.Property.ServletMappingDir);
                 if (servletMappingDir == null) {
                     throw new OXServletException(
                         OXServletException.Code.MISSING_SERVLET_DIR,

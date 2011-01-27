@@ -58,6 +58,8 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -163,164 +165,171 @@ public final class AJPv13Config implements Initialization {
 
     private void init() throws AJPv13Exception {
         final Properties ajpProperties = new Properties();
-        final String ajpPropFile = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AJP_PROP_FILE);
-        if (ajpPropFile != null) {
+        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (configurationService == null) {
+            LOG.warn("Missing configuration service.", new Throwable());
+            return;
+        }
+        final String ajpPropFile = configurationService.getProperty(AJP_PROP_FILE);
+        if (ajpPropFile == null) {
+            LOG.warn("Missing configuration property: " + AJP_PROP_FILE);
+            return;
+        }
+        try {
+            FileInputStream fis = null;
             try {
-                FileInputStream fis = null;
-                try {
-                    fis = new FileInputStream(new File(ajpPropFile));
-                    ajpProperties.load(fis);
-                } finally {
-                    if (fis != null) {
-                        fis.close();
-                    }
+                fis = new FileInputStream(new File(ajpPropFile));
+                ajpProperties.load(fis);
+            } finally {
+                if (fis != null) {
+                    fis.close();
                 }
-                final String falseStr = "false";
-                final String trueStr = "true";
-                /*
-                 * AJP_PORT
-                 */
-                port = Integer.parseInt(ajpProperties.getProperty("AJP_PORT", "8009").trim());
-                /*
-                 * AJP_SERVER_THREAD_SIZE
-                 */
-                serverThreadSize = Integer.parseInt(ajpProperties.getProperty("AJP_SERVER_THREAD_SIZE", "20").trim());
-                if (serverThreadSize < 0) {
-                    /*
-                     * At least one server thread should accept opened sockets
-                     */
-                    serverThreadSize = 1;
-                }
-                /*
-                 * AJP_MAX_NUM_OF_SOCKETS
-                 */
-                maxNumOfSockets = Integer.parseInt(ajpProperties.getProperty("AJP_MAX_NUM_OF_SOCKETS", "50").trim());
-                if (maxNumOfSockets < 0) {
-                    /*
-                     * Use default value on invalid property value
-                     */
-                    maxNumOfSockets = 50;
-                }
-                /*
-                 * AJP_MOD_JK
-                 */
-                modJK = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_MOD_JK", falseStr).trim(), 0, 4);
-                /*
-                 * AJP_LISTENER_POOL_SIZE
-                 */
-                listenerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_POOL_SIZE", "20").trim());
-                if (listenerPoolSize < 0) {
-                    listenerPoolSize = 0;
-                }
-                /*
-                 * AJP_LISTENER_READ_TIMEOUT
-                 */
-                listenerReadTimeout = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_READ_TIMEOUT", "60000").trim());
-                if (listenerReadTimeout < 0) {
-                    listenerReadTimeout = 0;
-                }
-                /*
-                 * AJP_CONNECTION_POOL / AJP_CONNECTION_POOL_SIZE
-                 */
-                connectionPool = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_CONNECTION_POOL", trueStr).trim(), 0, 4);
-                connectionPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_CONNECTION_POOL_SIZE", "5").trim());
-                if (connectionPoolSize < 0) {
-                    connectionPoolSize = 0;
-                }
-                /*
-                 * AJP_REQUEST_HANDLER_POOL / AJP_REQUEST_HANDLER_POOL_SIZE
-                 */
-                requestHandlerPool = trueStr.regionMatches(
-                    true,
-                    0,
-                    ajpProperties.getProperty("AJP_REQUEST_HANDLER_POOL", trueStr).trim(),
-                    0,
-                    4);
-                requestHandlerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_REQUEST_HANDLER_POOL_SIZE", "5").trim());
-                if (requestHandlerPoolSize < 0) {
-                    requestHandlerPoolSize = 0;
-                }
-                /*
-                 * AJP_WATCHER_ENABLED
-                 */
-                watcherEnabled = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_WATCHER_ENABLED", falseStr).trim(), 0, 4);
-                /*
-                 * AJP_WATCHER_PERMISSION
-                 */
-                watcherPermission = trueStr.regionMatches(
-                    true,
-                    0,
-                    ajpProperties.getProperty("AJP_WATCHER_PERMISSION", falseStr).trim(),
-                    0,
-                    4);
-                /*
-                 * AJP_WATCHER_MAX_RUNNING_TIME
-                 */
-                watcherMaxRunningTime = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_MAX_RUNNING_TIME", "30000").trim());
-                if (watcherMaxRunningTime < 0) {
-                    watcherMaxRunningTime = 30000;
-                }
-                /*
-                 * AJP_WATCHER_FREQUENCY
-                 */
-                watcherFrequency = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_FREQUENCY", "30000").trim());
-                if (watcherFrequency < 0) {
-                    watcherFrequency = 30000;
-                }
-                /*
-                 * SERVLET_POOL_SIZE
-                 */
-                servletPoolSize = Integer.parseInt(ajpProperties.getProperty("SERVLET_POOL_SIZE", "50").trim());
-                if (servletPoolSize < 0) {
-                    servletPoolSize = 1;
-                }
-                /*
-                 * AJP_JVM_ROUTE
-                 */
-                jvmRoute = ajpProperties.getProperty("AJP_JVM_ROUTE");
-                if (jvmRoute == null) {
-                    LOG.error(AJPv13Exception.AJPCode.MISSING_JVM_ROUTE.getMessage());
-                } else {
-                    jvmRoute = jvmRoute.trim();
-                }
-                /*
-                 * AJP_CHECK_MAGIC_BYTES_STRICT
-                 */
-                checkMagicBytesStrict = trueStr.regionMatches(
-                    true,
-                    0,
-                    ajpProperties.getProperty("AJP_CHECK_MAGIC_BYTES_STRICT", trueStr).trim(),
-                    0,
-                    4);
-                /*
-                 * AJP_SERVLET_CONFIG_DIR
-                 */
-                servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
-                if (servletConfigs == null || "null".equalsIgnoreCase((servletConfigs = servletConfigs.trim()))) {
-                    servletConfigs = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("CONFIGPATH") + "/servletConfig";
-                }
-                final File servletConfigsFile = new File(servletConfigs);
-                if ((!servletConfigsFile.exists() || !servletConfigsFile.isDirectory()) && LOG.isWarnEnabled()) {
-                    LOG.warn(servletConfigsFile + " does not exist or is not a directory");
-                }
-                /*
-                 * AJP_BIND_ADDR
-                 */
-                final String bindAddr = ajpProperties.getProperty("AJP_BIND_ADDR", "localhost").trim();
-                ajpBindAddr = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
-                /*
-                 * AJP_LOG_FORWARD_REQUEST
-                 */
-                logForwardRequest = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_LOG_FORWARD_REQUEST", falseStr).trim());
-                /*
-                 * Log info
-                 */
-                logInfo();
-            } catch (final FileNotFoundException e) {
-                throw new AJPv13Exception(AJPv13Exception.AJPCode.FILE_NOT_FOUND, true, e, ajpPropFile);
-            } catch (final IOException e) {
-                throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, true, e, e.getMessage());
             }
+            final String falseStr = "false";
+            final String trueStr = "true";
+            /*
+             * AJP_PORT
+             */
+            port = Integer.parseInt(ajpProperties.getProperty("AJP_PORT", "8009").trim());
+            /*
+             * AJP_SERVER_THREAD_SIZE
+             */
+            serverThreadSize = Integer.parseInt(ajpProperties.getProperty("AJP_SERVER_THREAD_SIZE", "20").trim());
+            if (serverThreadSize < 0) {
+                /*
+                 * At least one server thread should accept opened sockets
+                 */
+                serverThreadSize = 1;
+            }
+            /*
+             * AJP_MAX_NUM_OF_SOCKETS
+             */
+            maxNumOfSockets = Integer.parseInt(ajpProperties.getProperty("AJP_MAX_NUM_OF_SOCKETS", "50").trim());
+            if (maxNumOfSockets < 0) {
+                /*
+                 * Use default value on invalid property value
+                 */
+                maxNumOfSockets = 50;
+            }
+            /*
+             * AJP_MOD_JK
+             */
+            modJK = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_MOD_JK", falseStr).trim(), 0, 4);
+            /*
+             * AJP_LISTENER_POOL_SIZE
+             */
+            listenerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_POOL_SIZE", "20").trim());
+            if (listenerPoolSize < 0) {
+                listenerPoolSize = 0;
+            }
+            /*
+             * AJP_LISTENER_READ_TIMEOUT
+             */
+            listenerReadTimeout = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_READ_TIMEOUT", "60000").trim());
+            if (listenerReadTimeout < 0) {
+                listenerReadTimeout = 0;
+            }
+            /*
+             * AJP_CONNECTION_POOL / AJP_CONNECTION_POOL_SIZE
+             */
+            connectionPool = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_CONNECTION_POOL", trueStr).trim(), 0, 4);
+            connectionPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_CONNECTION_POOL_SIZE", "5").trim());
+            if (connectionPoolSize < 0) {
+                connectionPoolSize = 0;
+            }
+            /*
+             * AJP_REQUEST_HANDLER_POOL / AJP_REQUEST_HANDLER_POOL_SIZE
+             */
+            requestHandlerPool = trueStr.regionMatches(
+                true,
+                0,
+                ajpProperties.getProperty("AJP_REQUEST_HANDLER_POOL", trueStr).trim(),
+                0,
+                4);
+            requestHandlerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_REQUEST_HANDLER_POOL_SIZE", "5").trim());
+            if (requestHandlerPoolSize < 0) {
+                requestHandlerPoolSize = 0;
+            }
+            /*
+             * AJP_WATCHER_ENABLED
+             */
+            watcherEnabled = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_WATCHER_ENABLED", falseStr).trim(), 0, 4);
+            /*
+             * AJP_WATCHER_PERMISSION
+             */
+            watcherPermission = trueStr.regionMatches(
+                true,
+                0,
+                ajpProperties.getProperty("AJP_WATCHER_PERMISSION", falseStr).trim(),
+                0,
+                4);
+            /*
+             * AJP_WATCHER_MAX_RUNNING_TIME
+             */
+            watcherMaxRunningTime = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_MAX_RUNNING_TIME", "30000").trim());
+            if (watcherMaxRunningTime < 0) {
+                watcherMaxRunningTime = 30000;
+            }
+            /*
+             * AJP_WATCHER_FREQUENCY
+             */
+            watcherFrequency = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_FREQUENCY", "30000").trim());
+            if (watcherFrequency < 0) {
+                watcherFrequency = 30000;
+            }
+            /*
+             * SERVLET_POOL_SIZE
+             */
+            servletPoolSize = Integer.parseInt(ajpProperties.getProperty("SERVLET_POOL_SIZE", "50").trim());
+            if (servletPoolSize < 0) {
+                servletPoolSize = 1;
+            }
+            /*
+             * AJP_JVM_ROUTE
+             */
+            jvmRoute = ajpProperties.getProperty("AJP_JVM_ROUTE");
+            if (jvmRoute == null) {
+                LOG.error(AJPv13Exception.AJPCode.MISSING_JVM_ROUTE.getMessage());
+            } else {
+                jvmRoute = jvmRoute.trim();
+            }
+            /*
+             * AJP_CHECK_MAGIC_BYTES_STRICT
+             */
+            checkMagicBytesStrict = trueStr.regionMatches(
+                true,
+                0,
+                ajpProperties.getProperty("AJP_CHECK_MAGIC_BYTES_STRICT", trueStr).trim(),
+                0,
+                4);
+            /*
+             * AJP_SERVLET_CONFIG_DIR
+             */
+            servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
+            if (servletConfigs == null || "null".equalsIgnoreCase((servletConfigs = servletConfigs.trim()))) {
+                servletConfigs = configurationService.getProperty("CONFIGPATH") + "/servletConfig";
+            }
+            final File servletConfigsFile = new File(servletConfigs);
+            if ((!servletConfigsFile.exists() || !servletConfigsFile.isDirectory()) && LOG.isWarnEnabled()) {
+                LOG.warn(servletConfigsFile + " does not exist or is not a directory");
+            }
+            /*
+             * AJP_BIND_ADDR
+             */
+            final String bindAddr = ajpProperties.getProperty("AJP_BIND_ADDR", "localhost").trim();
+            ajpBindAddr = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
+            /*
+             * AJP_LOG_FORWARD_REQUEST
+             */
+            logForwardRequest = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_LOG_FORWARD_REQUEST", falseStr).trim());
+            /*
+             * Log info
+             */
+            logInfo();
+        } catch (final FileNotFoundException e) {
+            throw new AJPv13Exception(AJPv13Exception.AJPCode.FILE_NOT_FOUND, true, e, ajpPropFile);
+        } catch (final IOException e) {
+            throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, true, e, e.getMessage());
         }
     }
 
@@ -443,6 +452,28 @@ public final class AJPv13Config implements Initialization {
      */
     public static InetAddress getAJPBindAddress() {
         return instance.ajpBindAddr;
+    }
+
+    /**
+     * Gets the specified server property.
+     * 
+     * @param property The server property
+     * @return The property value
+     */
+    public static String getServerProperty(final ServerConfig.Property property) {
+        final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return service == null ? property.getDefaultValue() : service.getProperty(property.getPropertyName(), property.getDefaultValue());
+    }
+
+    /**
+     * Gets the specified system property.
+     * 
+     * @param property The system property
+     * @return The property value
+     */
+    public static String getSystemProperty(final SystemConfig.Property property) {
+        final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return service == null ? null : service.getProperty(property.getPropertyName());
     }
 
 }
