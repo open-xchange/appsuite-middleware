@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.openexchange.groupware.settings.extensions
 Bundle-Version: 6.19.0.0
 Bundle-Activator: com.openexchange.groupware.settings.extensions.osgi.Activator
 Bundle-Vendor: Open-Xchange GmbH
-Import-Package: com.openexchange.config,
- com.openexchange.config.cascade,
+Import-Package: com.openexchange.config.cascade,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
