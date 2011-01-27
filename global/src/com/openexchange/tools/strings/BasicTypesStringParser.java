@@ -66,19 +66,19 @@ public class BasicTypesStringParser implements StringParser {
         }
         try {
             if(t == Integer.class || t == int.class) {
-                return (T) Integer.getInteger(s);
+                return (T) new Integer(s);
             } else if (t == Long.class || t == long.class) {
-                return (T) Long.getLong(s);
+                return (T) new Long(s);
             } else if (t == Short.class || t == short.class) {
-                return (T) new Short(Short.parseShort(s));
+                return (T) new Short(s);
             } else if (t == Float.class || t == float.class) {
-                return (T) new Float(Float.parseFloat(s));
+                return (T) new Float(s);
             } else if (t == Double.class || t == double.class) {
-                return (T) new Double(Double.parseDouble(s));
+                return (T) new Double(s);
             } else if (t == Byte.class || t == byte.class) {
-                return (T) new Byte(Byte.parseByte(s));
+                return (T) new Byte(s);
             } else if (t == Boolean.class || t == boolean.class) {
-                return (T) new Boolean(Boolean.getBoolean(s));
+                return (T) new Boolean(s);
             }
         } catch (NumberFormatException x) {
             return null;
