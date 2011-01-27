@@ -686,7 +686,9 @@ public final class ServerActivator extends DeferredActivator {
         /*
          * Register servlets
          */
-        registerServlets(getService(HttpService.class));
+        if (!adminBundleInstalled.booleanValue()) {
+            registerServlets(getService(HttpService.class));
+        }
         
         /*
          * Register components
