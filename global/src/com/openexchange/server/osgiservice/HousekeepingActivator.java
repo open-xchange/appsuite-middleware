@@ -118,14 +118,13 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
     
     protected void openTrackers() {
-        Iterator<ServiceTracker> iter = serviceTrackers.iterator();
-        while (iter.hasNext()) {
-            iter.next().open();
+        for (ServiceTracker tracker : new LinkedList<ServiceTracker>(serviceTrackers)) {
+            tracker.open();
         }
     }
     
     protected void closeTrackers() {
-        for (ServiceTracker tracker : serviceTrackers) {
+        for (ServiceTracker tracker : new LinkedList<ServiceTracker>(serviceTrackers)) {
             tracker.close();
         }
     }
