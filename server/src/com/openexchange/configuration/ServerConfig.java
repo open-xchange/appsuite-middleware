@@ -109,7 +109,7 @@ public final class ServerConfig {
         return SINGLETON;
     }
 
-    public void initialize(ConfigurationService confService) {
+    public void initialize(final ConfigurationService confService) {
         final Properties newProps = confService.getFile(FILENAME);
         if (null == newProps) {
             LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
@@ -170,7 +170,7 @@ public final class ServerConfig {
         cookieHttpOnly = Boolean.parseBoolean(getPropertyInternal(Property.COOKIE_HTTP_ONLY));
     }
 
-    private String getPropertyInternal(Property property) {
+    private String getPropertyInternal(final Property property) {
         return props.getProperty(property.getPropertyName(), property.getDefaultValue());
     }
 
@@ -258,7 +258,7 @@ public final class ServerConfig {
         return value;
     }
 
-    public static Integer getInteger(Property property) throws ConfigurationException {
+    public static Integer getInteger(final Property property) throws ConfigurationException {
         final Integer value;
         switch (property) {
         case MaxFileUploadSize:
@@ -275,12 +275,12 @@ public final class ServerConfig {
             break;
         default:
             try {
-                String prop = getProperty(property.getPropertyName());
+                final String prop = getProperty(property.getPropertyName());
                 if (prop == null) {
                     throw new ConfigurationException(Code.PROPERTY_MISSING, property.getPropertyName());
                 }
                 value = Integer.valueOf(getProperty(property.getPropertyName()));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 throw new ConfigurationException(Code.PROPERTY_NOT_AN_INTEGER, property.getPropertyName());
             }
         }
@@ -392,7 +392,7 @@ public final class ServerConfig {
             return propertyName;
         }
 
-        String getDefaultValue() {
+        public String getDefaultValue() {
             return defaultValue;
         }
     }

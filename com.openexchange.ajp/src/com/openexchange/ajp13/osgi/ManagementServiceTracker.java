@@ -85,7 +85,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
         AJPv13ServiceRegistry.getInstance().addService(ManagementService.class, managementService);
         try {
             /*
-             * Add all mbeans since management service is now available
+             * Add all MBeans since management service is now available
              */
             managementService.registerMBean(
                 getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true),
@@ -106,10 +106,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
     protected void removedServiceInternal(final ManagementService managementService) {
         try {
             /*
-             * Remove all mbeans since management service now disappears
+             * Remove all MBeans since management service now disappears
              */
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
+            AJPv13ServiceRegistry.getInstance().removeService(ManagementService.class);
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {

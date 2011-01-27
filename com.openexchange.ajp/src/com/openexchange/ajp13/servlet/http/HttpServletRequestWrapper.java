@@ -323,6 +323,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         if (null != configurationService && configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false)) {
             final int maxAge = (int) (ConfigTools.parseTimespan(configurationService.getProperty("com.openexchange.cookie.ttl", "1W")) / 1000);
             sessionCookie.setMaxAge(maxAge);
+        } else {
+            sessionCookie.setMaxAge(-1); // cookies auto-expire
         }
     }
 
