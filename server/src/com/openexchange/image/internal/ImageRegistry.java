@@ -104,9 +104,9 @@ public final class ImageRegistry {
     }
 
     private final ConcurrentMap<String, ConcurrentMap<String, ImageData>> sessionBoundImagesMap;
-    
+
     private final SessionToImageRegistry sessions2images;
-    
+
     private final Object sessionLock;
 
     private ScheduledTimerTask[] tasks;
@@ -217,9 +217,10 @@ public final class ImageRegistry {
         }
         return imageData;
     }
-    
+
     /**
      * Removes imageId-sessionId pairs from the image registry.
+     * 
      * @param sessionId
      * @return True if at least one imageId-sessionId pair has been removed.
      */
@@ -286,17 +287,20 @@ public final class ImageRegistry {
         }
         return imageData.touch();
     }
+
     /**
      * Retrieves the session a certain image was filed under, if it was filed under a session at all
+     * 
      * @param uniqueID The image data's unique ID
-     * @return The session ID the uid was filed under or null, if no such ID could be determined
+     * @return The session ID the UID was filed under or <code>null</code>, if no such ID could be determined
      */
     public String getSessionForUID(final String uniqueID) {
         return sessions2images.getSessionId(uniqueID);
     }
-    
+
     /**
      * Tries to retrieve any image filed under any session, regardless which.
+     * 
      * @param uniqueID The image data's unique ID
      * @return The image data bound to specified session and registered to specified unique ID, or <code>null</code> if none present
      */
@@ -317,7 +321,6 @@ public final class ImageRegistry {
         return addImageData(session, (ImageDataSource) objects[0], (DataArguments) objects[1]);
     }
 
-    
     private static String urlDecodeSafe(final String text, final String charset) {
         try {
             return URLDecoder.decode(text, charset);
@@ -327,7 +330,7 @@ public final class ImageRegistry {
             return text;
         }
     }
-    
+
     /**
      * Clears the registry.
      */
