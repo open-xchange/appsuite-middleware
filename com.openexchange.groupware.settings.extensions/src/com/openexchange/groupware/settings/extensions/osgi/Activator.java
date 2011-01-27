@@ -56,20 +56,34 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.extensions.PropertiesPublisher;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 
-import java.util.Properties;
+import java.util.Map;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Activator implements BundleActivator {
 
+    /**
+     * 
+     */
+    private static final String PREFERENCE_PATH = "preferencePath";
     private PropertiesPublisher propPublisher;
     private ServicePublisher services;
-    private static final String SETTINGS_FOLDER = "settings";
     private BundleContext context;
     private ServiceTracker serviceTracker;
 
@@ -88,14 +102,84 @@ public class Activator implements BundleActivator {
         services.removeAllServices();
     }
 
-    public void handleConfigurationUpdate(final ConfigurationService configuration) {
+    public void handleConfigurationUpdate(final ConfigViewFactory viewFactory) {
         LOG.info("Updating configtree");
-        final Properties propertiesToPublishInConfigTree = configuration.getPropertiesInFolder(SETTINGS_FOLDER);
-        propPublisher.publish( propertiesToPublishInConfigTree );
+        try {
+            ConfigView view = viewFactory.getView();
+            Map<String, ComposedConfigProperty<String>> all = view.all();
+            for(Map.Entry<String,ComposedConfigProperty<String>> entry : all.entrySet()) {
+                String propertyName = entry.getKey();
+                ComposedConfigProperty<String> property = entry.getValue();
+                if (isPreferenceItem(property)) {
+                    export(viewFactory, property, propertyName);
+                }
+            }
+        } catch (ConfigCascadeException x) {
+            LOG.error(x.getMessage(), x);
+        }
+        
+        
+    }
+
+    private void export(final ConfigViewFactory viewFactory, ComposedConfigProperty<String> property, final String propertyName) throws ConfigCascadeException {
+        
+        final String[] path = property.get(PREFERENCE_PATH).split("/");
+        final boolean writable = property.get("final") == null || property.get("final").equals("user");
+        
+        PreferencesItemService prefItem = new PreferencesItemService() {
+
+            public String[] getPath() {
+                return path;
+            }
+
+            public IValueHandler getSharedValue() {
+                return new IValueHandler() {
+
+                    public int getId() {
+                        return NO_ID;
+                    }
+
+                    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                        try {
+                            String string = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
+                            setting.setSingleValue(string);
+                        } catch (ConfigCascadeException e) {
+                            throw new SettingException(e);
+                        }
+                    }
+
+                    public boolean isAvailable(UserConfiguration userConfig) {
+                        return true;
+                    }
+
+                    public boolean isWritable() {
+                        return writable;
+                    }
+
+                    public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
+                        if(null != setting.getSingleValue()) {
+                            try {
+                                viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, setting.getSingleValue().toString());
+                            } catch (ConfigCascadeException e) {
+                                throw new SettingException(e);
+                            }
+                        }
+                    }
+                    
+                };
+            }
+            
+        };
+        
+        services.publishService(PreferencesItemService.class, prefItem);
+    }
+
+    private boolean isPreferenceItem(ComposedConfigProperty<String> property) throws ConfigCascadeException {
+        return property.get(PREFERENCE_PATH) != null;
     }
 
     private void registerListenerForConfigurationService() {
-        serviceTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationTracker(context, this));
+        serviceTracker = new ServiceTracker(context, ConfigViewFactory.class.getName(), new ConfigurationTracker(context, this));
         serviceTracker.open();
     }
 
@@ -116,8 +200,8 @@ public class Activator implements BundleActivator {
 
         public Object addingService(final ServiceReference serviceReference) {
             final Object addedService = context.getService(serviceReference);
-            if(ConfigurationService.class.isAssignableFrom(addedService.getClass())) {
-                activator.handleConfigurationUpdate((ConfigurationService) addedService);
+            if(ConfigViewFactory.class.isAssignableFrom(addedService.getClass())) {
+                activator.handleConfigurationUpdate((ConfigViewFactory) addedService);
             }
             return addedService;
         }
