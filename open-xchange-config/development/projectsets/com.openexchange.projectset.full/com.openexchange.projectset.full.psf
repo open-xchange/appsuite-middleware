@@ -79,5 +79,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.config.cascade,com.openexchange.config.cascade"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.config.cascade.context,com.openexchange.config.cascade.context"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.config.cascade.user,com.openexchange.config.cascade.user"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.http.jetty,com.openexchange.http.jetty"/>
 </provider>
 </psf>
