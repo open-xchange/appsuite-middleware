@@ -51,9 +51,7 @@ package com.openexchange.image.internal;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -70,31 +68,7 @@ import com.openexchange.session.Session;
  */
 public final class ImageData {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageData.class);
-
     static final int DEFAULT_TTL = 300000;
-
-    private static volatile String hostName;
-
-    private static String getHostname() {
-        String tmp = hostName;
-        if (null == tmp) {
-            synchronized (ImageData.class) {
-                tmp = hostName;
-                if (null == tmp) {
-                    try {
-                        hostName = tmp = InetAddress.getLocalHost().getCanonicalHostName();
-                    } catch (final UnknownHostException e) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Could not reliably detect host name. Using \"localhost\" as fallbak.", e);
-                        }
-                        hostName = tmp = "localhost";
-                    }
-                }
-            }
-        }
-        return tmp;
-    }
 
     /*-
      * ------------------------- Member stuff ------------------------------
