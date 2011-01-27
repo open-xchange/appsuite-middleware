@@ -55,14 +55,11 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import junit.framework.TestCase;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -70,12 +67,13 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUploadParser;
-import com.openexchange.ajax.framework.OxHttpClient;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This class implements inheritable methods for AJAX tests.
@@ -187,7 +185,7 @@ public abstract class AbstractAJAXTest extends TestCase {
         HttpUnitOptions.setScriptingEnabled(false);
         
         WebConversation conv = new WebConversation();
-        conv.setUserAgent(OxHttpClient.USER_AGENT);
+        conv.setUserAgent(AJAXSession.USER_AGENT);
         return conv;
     }
 
@@ -196,9 +194,9 @@ public abstract class AbstractAJAXTest extends TestCase {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
+     * @throws AjaxException 
      */
-    protected String getSessionId() throws IOException, SAXException,
-        JSONException {
+    protected String getSessionId() throws IOException, JSONException, AjaxException {
         if (null == sessionId) {
             sessionId = LoginTest.getSessionId(getWebConversation(),
                     getHostName(), getLogin(), getPassword());

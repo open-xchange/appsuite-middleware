@@ -74,6 +74,7 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.test.OXTestToolkit;
+import com.openexchange.tools.servlet.AjaxException;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
 
@@ -355,7 +356,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		
 	}
 	
-	public void refreshSessionId() throws IOException, SAXException, JSONException{
+	public void refreshSessionId() throws IOException, JSONException, AjaxException {
 		sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(),
                 getLogin(), getPassword());
 	}

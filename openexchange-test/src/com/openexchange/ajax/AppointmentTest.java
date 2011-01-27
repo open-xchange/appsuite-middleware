@@ -1246,7 +1246,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
     }
 
-    protected AJAXClient getClient() throws JSONException, IOException, SAXException {
+    protected AJAXClient getClient() throws JSONException, IOException, AjaxException {
         return new AJAXClient(
                 new AJAXSession(getWebConversation(), getSessionId())
         );

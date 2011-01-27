@@ -723,7 +723,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     }
 
-    public void testUnknownAction() throws IOException, SAXException, JSONException {
+    public void testUnknownAction() throws IOException, SAXException, JSONException, AjaxException {
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FOLDER_URL);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
         req.setParameter(AJAXServlet.PARAMETER_ACTION, "unknown");
@@ -737,7 +737,7 @@ public class FolderTest extends AbstractAJAXTest {
         getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
     }
 
-    public void testGetRootFolders() throws OXException, IOException, SAXException, JSONException {
+    public void testGetRootFolders() throws OXException, IOException, SAXException, JSONException, AjaxException {
         final int[] assumedIds = { 1, 2, 3, 9 };
         final List<FolderObject> l = getRootFolders(getWebConversation(), getHostName(), getSessionId(), true);
         assertFalse(l == null || l.size() == 0);

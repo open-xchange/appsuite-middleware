@@ -57,21 +57,12 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class LogoutRequest extends AbstractRequest<LogoutResponse> {
 
-    /**
-     * Default constructor.
-     * @param sessionId session identifier.
-     */
-    public LogoutRequest(final String sessionId) {
+    public LogoutRequest() {
         super(new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_LOGOUT),
-            new Parameter(AJAXServlet.PARAMETER_SESSION, sessionId)
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGOUT)
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public LogoutParser getParser() {
         return new LogoutParser();
     }

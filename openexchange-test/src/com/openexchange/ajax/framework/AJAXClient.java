@@ -68,6 +68,8 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public class AJAXClient {
 
+    public static final String VERSION = "6.19.0";
+
     private final AJAXSession session;
 
     private final UserValues values = new UserValues(this);
@@ -101,7 +103,7 @@ public class AJAXClient {
             throw new ConfigurationException(Code.PROPERTY_MISSING, user.getPassword().getPropertyName());
         }
         session = new AJAXSession();
-        session.setId(execute(new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), "6.15.0")).getSessionId());
+        session.setId(execute(new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), VERSION)).getSessionId());
     }
 
     public enum User {
@@ -147,7 +149,7 @@ public class AJAXClient {
 
     public void logout() throws AjaxException, IOException, JSONException {
         if (null != session.getId()) {
-            execute(new LogoutRequest(session.getId()));
+            execute(new LogoutRequest());
             session.setId(null);
         }
         session.getConversation().clearContents();

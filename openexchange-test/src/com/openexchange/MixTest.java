@@ -132,8 +132,9 @@ public final class MixTest {
                 LoginResponse resp = null;
                 try {
                     resp = Executor.execute(session, request);
-                    final String sessionId = resp.getSessionId();
-                    Executor.execute(session, new LogoutRequest(sessionId));
+                    session.setId(resp.getSessionId());
+                    Executor.execute(session, new LogoutRequest());
+                    session.setId(null);
                 } catch (final AssertionFailedError e) {
                     
                     System.out.println("Login failed! " + e.getMessage());

@@ -151,7 +151,7 @@ public class AlwaysTest extends AbstractAJAXTest {
      * @throws JSONException
      */
     private void listMails(final String folderId, final int max)
-        throws IOException, SAXException, JSONException {
+        throws IOException, SAXException, JSONException, AjaxException {
         final JSONObject json = MailTest.getAllMails(getWebConversation(),
             getHostName(), getSessionId(), folderId, listAttributes,
             false);

@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -163,17 +164,12 @@ public class Executor extends Assert {
             throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
         }
         
-        DefaultHttpClient newClient = new OxHttpClient();
+        DefaultHttpClient newClient = session.getHttpClient();
 
-    	CookieStore cookieStore = session.getCookieStore();
-    	newClient.setCookieStore(cookieStore); 
-    	final WebConversation conv = session.getConversation();
-    	syncCookies(newClient, conv, hostname);
-    	
-    	
         long startRequest = System.currentTimeMillis();
     	HttpResponse response = newClient.execute(httpRequest);
         long requestDuration = System.currentTimeMillis() - startRequest;
+        syncCookies(newClient, session.getConversation());
 
         try {
 			Thread.sleep(getSleep());
@@ -196,12 +192,6 @@ public class Executor extends Assert {
         return retval;
     }
 
-    private static void syncCookies(DefaultHttpClient newClient, WebConversation conv, String hostname) {
-		CookieStore cookieStore = newClient.getCookieStore();
-		CookieJar cookieJar = conv.getCookieJar();
-		syncCookies(cookieStore, cookieJar, hostname);
-	}
-
 	public static void syncCookies(CookieStore cookieStore, CookieJar cookieJar, String hostname) {
 		List<Cookie> cookies1 = cookieStore.getCookies();
 		Set<String> storedNames = new HashSet<String>();
@@ -218,6 +208,41 @@ public class Executor extends Assert {
 				myCookie.setDomain(hostname);
 				cookieStore.addCookie(myCookie);
 			}
+	}
+
+	public static void syncCookies(WebConversation conversation, DefaultHttpClient httpClient) {
+	    String[] cookies = conversation.getCookieNames();
+        CookieStore cookieStore = httpClient.getCookieStore();
+        Set<String> storedNames = new HashSet<String>();
+        for (Cookie cookie : cookieStore.getCookies()) {
+            storedNames.add(cookie.getName());
+        }
+        for (String name: cookies) {
+            if (!storedNames.contains(name)) {
+                com.meterware.httpunit.cookies.Cookie cookie = conversation.getCookieDetails(name);
+                BasicClientCookie2 newCookie = new BasicClientCookie2(name, cookie.getValue());
+                newCookie.setDomain(cookie.getDomain());
+                newCookie.setExpiryDate(new Date(cookie.getExpiredTime()));
+                newCookie.setPath(cookie.getPath());
+                cookieStore.addCookie(newCookie);
+            }
+        }
+	}
+
+	public static void syncCookies(DefaultHttpClient httpClient, WebConversation conversation) {
+	    
+        Set<String> storedNames = new HashSet<String>();
+        for (String name : conversation.getCookieNames()) {
+            storedNames.add(name);
+        }
+        CookieStore cookieStore = httpClient.getCookieStore();
+        CookieJar cookieJar = conversation.getCookieJar();
+        for (Cookie cookie : cookieStore.getCookies()) {
+            String name = cookie.getName();
+            if (!storedNames.contains(name)) {
+                cookieJar.putSingleUseCookie(name, cookie.getValue(), cookie.getDomain(), cookie.getPath());
+            }
+        }
 	}
 
 	public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,

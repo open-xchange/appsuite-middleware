@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.framework;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.impl.client.BasicCookieStore;
-
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.impl.client.DefaultHttpClient;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
 
@@ -61,14 +61,19 @@ import com.meterware.httpunit.WebConversation;
  */
 public class AJAXSession {
 
+    /**
+     * User Agent displayed to server - needs to be consistent during a test run for security purposes
+     */
+    public static final String USER_AGENT = "OX6 HTTP API Testing Agent";
+
     private final WebConversation conversation;
+    private final DefaultHttpClient httpClient;
 
     private String id;
     private boolean mustLogout = true;
-	private CookieStore cookieStore;
 
     public AJAXSession() {
-        this(newWebConversation(), null);
+        this(newWebConversation(), newHttpClient(), null);
     }
 
     public AJAXSession(final WebConversation conversation) {
@@ -76,12 +81,15 @@ public class AJAXSession {
     }
 
     public AJAXSession(final WebConversation conversation, final String id) {
+        this(conversation, newHttpClient(conversation), id);
+    }
+
+    public AJAXSession(WebConversation conversation, DefaultHttpClient httpClient, String id) {
         super();
         this.conversation = conversation;
+        this.httpClient = httpClient;
         this.id = id;
         this.mustLogout = id == null; // Don't auto logout when supplied with id.
-        conversation.getClientProperties().setAcceptGzip(false);
-        this.cookieStore = new BasicCookieStore();
     }
 
     /**
@@ -89,6 +97,10 @@ public class AJAXSession {
      */
     public WebConversation getConversation() {
         return conversation;
+    }
+
+    public DefaultHttpClient getHttpClient() {
+        return httpClient;
     }
 
     /**
@@ -117,10 +129,23 @@ public class AJAXSession {
     public static WebConversation newWebConversation() {
         HttpUnitOptions.setDefaultCharacterSet("UTF-8");
         HttpUnitOptions.setScriptingEnabled(false);
-        return new WebConversation();
+        WebConversation retval = new WebConversation();
+        retval.getClientProperties().setAcceptGzip(false);
+        retval.getClientProperties().setUserAgent(USER_AGENT);
+        return retval;
     }
 
-	public CookieStore getCookieStore() {
-		return this.cookieStore;
-	}
+    public static DefaultHttpClient newHttpClient() {
+        DefaultHttpClient retval = new DefaultHttpClient();
+        retval.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY); //OX cookies work with all browsers, meaning they are a mix of the Netscape draft and the RFC
+        retval.getParams().setParameter("User-Agent", USER_AGENT); //needs to be consistent
+        retval.getParams().setParameter("http.useragent", USER_AGENT); //needs to be consistent
+        return retval;
+    }
+
+    public static DefaultHttpClient newHttpClient(WebConversation conversation) {
+        DefaultHttpClient retval = newHttpClient();
+        Executor.syncCookies(conversation, retval);
+        return retval;
+    }
 }

@@ -113,7 +113,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		return folderObj.getCreatedBy();
 	}
 
-	public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, SAXException, JSONException{
+	public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, AjaxException {
 		final StringBuilder bob = new StringBuilder("http://");
 		bob.append(getHostName());
 		bob.append("/ajax/");
@@ -125,7 +125,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		return bob.toString();
 	}
 	
-	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, SAXException, JSONException{
+	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, AjaxException, JSONException{
 		final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 		
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
