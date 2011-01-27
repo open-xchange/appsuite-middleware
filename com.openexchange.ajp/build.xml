@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.ajp" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -22,8 +23,6 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-	<property name="conf.install.dir" value="${prefix}/etc/groupware"/>
-	<property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
