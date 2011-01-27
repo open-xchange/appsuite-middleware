@@ -122,4 +122,20 @@ public class SimConfigurationService implements ConfigurationService {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.config.ConfigurationService#getYaml(java.lang.String)
+     */
+    public Object getYaml(String filename) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.config.ConfigurationService#getYamlInDirectory(java.lang.String)
+     */
+    public Map<String, Object> getYamlInFolder(String dirName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

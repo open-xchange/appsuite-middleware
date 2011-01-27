@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -66,6 +67,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
@@ -126,7 +128,19 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Maps property names to the file path of the .properties file containing the property.
      */
     private final Map<String, String> propertiesFiles;
+    
+    /**
+     * Maps objects to yaml filename, with a path
+     */
+    
+     final Map<String, Object> yamlFiles;
+    
+    /**
+     * Maps filenames to whole file paths for yaml lookup
+     */
 
+     final Map<String, String> yamlPaths;
+     
     /**
      * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
      */
@@ -148,6 +162,9 @@ public final class ConfigurationImpl implements ConfigurationService {
         texts = new ConcurrentHashMap<String, String>();
         properties = new HashMap<String, String>();
         propertiesFiles = new HashMap<String, String>();
+        yamlFiles = new HashMap<String, Object>();
+        yamlPaths = new HashMap<String, String>();
+        
         final FileFilter fileFilter = new PropertyFileFilter();
         dirs = new File[directories.length];
         for (int i = 0; i < directories.length; i++) {
@@ -160,11 +177,45 @@ public final class ConfigurationImpl implements ConfigurationService {
             } else if (!dirs[i].isDirectory()) {
                 throw new IllegalArgumentException(MessageFormat.format("Not a directory: {0}", directories[i]));
             }
-            processDirectory(dirs[i], fileFilter);
+            processDirectory(dirs[i], fileFilter, new FileProcessor() {
+
+                public void processFile(File file) {
+                    processPropertiesFile(file);
+                }
+                
+            });
+            
+            processDirectory(dirs[i], new FileFilter() {
+
+                public boolean accept(File pathname) {
+                    return pathname.isDirectory() || pathname.getName().endsWith(".yml") || pathname.getName().endsWith(".yaml");
+                }
+                
+            },
+            
+            new FileProcessor() {
+
+                public void processFile(File file) {
+                    Object o = null;
+                    try {
+                        o = Yaml.load(file);
+                    } catch (FileNotFoundException e) {
+                        // IGNORE
+                        return;
+                    }
+                    yamlPaths.put(file.getName(), file.getPath());
+                    yamlFiles.put(file.getPath(), o);
+                }
+                
+            });
         }
     }
+    
+    private static interface FileProcessor {
+        public void processFile(File file);
+    }
 
-    private void processDirectory(final File dir, final FileFilter fileFilter) {
+    private void processDirectory(final File dir, final FileFilter fileFilter, FileProcessor processor) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
             LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
@@ -172,14 +223,14 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
         for (final File file : files) {
             if (file.isDirectory()) {
-                processDirectory(file, fileFilter);
+                processDirectory(file, fileFilter, processor);
             } else {
-                processPropertiesFile(file);
+                processor.processFile(file);
             }
         }
     }
 
-    private void processPropertiesFile(final File propFile) {
+    void processPropertiesFile(final File propFile) {
         try {
             final Properties tmp = loadProperties(propFile);
             final String propFilePath = propFile.getPath();
@@ -427,5 +478,30 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         }
         return null;
+    }
+
+    public Object getYaml(String filename) {
+        String path = yamlPaths.get(filename);
+        if (path == null) {
+            return null;
+        }
+        return yamlFiles.get(path);
+    }
+
+
+    public Map<String, Object> getYamlInFolder(String folderName) {
+        final Map<String, Object> retval = new HashMap<String, Object>();
+        final Iterator<Entry<String, String>> iter = yamlPaths.entrySet().iterator();
+        String fldName = folderName;
+        for (final File dir : dirs) {
+            fldName = dir.getAbsolutePath() + "/" + fldName + "/";
+            while (iter.hasNext()) {
+                final Entry<String, String> entry = iter.next();
+                if (entry.getValue().startsWith(fldName)) {
+                    retval.put(entry.getKey(), yamlFiles.get(entry.getValue()));
+                }
+            }
+        }
+        return retval;
     }
 }

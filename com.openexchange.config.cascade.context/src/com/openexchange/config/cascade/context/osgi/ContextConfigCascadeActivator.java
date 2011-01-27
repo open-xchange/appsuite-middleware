@@ -50,14 +50,16 @@
 package com.openexchange.config.cascade.context.osgi;
 
 import java.util.Hashtable;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.context.ContextConfigProvider;
+import com.openexchange.config.cascade.context.ContextSetConfigProvider;
 import com.openexchange.context.ContextService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
-    private static final Class<?>[] NEEDED = new Class[]{ ContextService.class};
+    private static final Class<?>[] NEEDED = new Class[]{ ContextService.class, ConfigurationService.class};
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -67,13 +69,28 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         ContextService contexts = getService(ContextService.class);
+        ConfigurationService configuration = getService(ConfigurationService.class);
+
+        {
+            ContextConfigProvider provider = new ContextConfigProvider(contexts);
         
-        ContextConfigProvider provider = new ContextConfigProvider(contexts);
+            Hashtable<String, Object> properties = new Hashtable<String,Object>();
+            properties.put("scope", "context");
         
-        Hashtable<String, Object> properties = new Hashtable<String,Object>();
-        properties.put("scope", "context");
+            registerService(ConfigProviderService.class, provider, properties);
+        }
         
-        registerService(ConfigProviderService.class, provider, properties);
+        {
+            ContextSetConfigProvider provider = new ContextSetConfigProvider(contexts, configuration);
+        
+            Hashtable<String, Object> properties = new Hashtable<String,Object>();
+            properties.put("scope", "contextSets");
+        
+            registerService(ConfigProviderService.class, provider, properties);
+        }
+        
+        
+        
     }
 
 

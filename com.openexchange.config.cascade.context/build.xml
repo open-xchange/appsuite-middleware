@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="com.openexchange.configread" default="install" basedir=".">
+<project name="com.openexchange.config.cascade.context" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -7,15 +7,13 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
-    <property name="lib.dir" value="lib"/>
-
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-configread-${version}"/>
+    <property name="composite.name" value="open-xchange-config-cascade-context${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -30,22 +28,19 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="commonjar" value="common.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
-    <property name="ccascadejar" value="com.openexchange.config.cascade.jar"/>
+    <property name="configjar" value="com.openexchange.configread.jar"/>
+    <property name="cascadejar" value="com.openexchange.config.cascade.jar"/>
+    <property name="serverjar" value="com.openexchange.server.jar"/>
 
-	<!-- Third Party Libs -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
-        <exclude name="CVS"/>
-    </fileset>
-	
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-        <pathelement location="${bundlesdir}/${ccascadejar}"/>
-    	<fileset refid="3rdpartyjars"/>
+        <pathelement location="${bundlesdir}/${configjar}"/>
+        <pathelement location="${bundlesdir}/${cascadejar}"/>
+    	<pathelement location="${bundlesdir}/${serverjar}"/>
     </path>
 
     <!-- Compile -->

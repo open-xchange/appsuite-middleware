@@ -51,6 +51,7 @@ package com.openexchange.config.cascade.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
@@ -83,7 +84,9 @@ public class TrackingProvider implements ConfigProviderService {
 
     public BasicProperty get(String property, int context, int user) throws ConfigCascadeException {
         ServiceReference[] serviceReferences = tracker.getServiceReferences();
-        
+        if(serviceReferences == null) {
+            serviceReferences = new ServiceReference[0];
+        }
         Arrays.sort(serviceReferences, new Comparator<ServiceReference>() {
 
             public int compare(ServiceReference o1, ServiceReference o2) {
@@ -144,6 +147,9 @@ public class TrackingProvider implements ConfigProviderService {
 
     public Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException {
         Object[] services = tracker.getServices();
+        if(services == null) {
+            return Collections.emptyList();
+        }
         Set<String> allNames = new HashSet<String>();
         
         for (Object object : services) {

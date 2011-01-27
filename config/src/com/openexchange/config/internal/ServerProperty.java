@@ -49,12 +49,15 @@
 
 package com.openexchange.config.internal;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.config.cascade.BasicProperty;
 
 /**
  * {@link ServerProperty}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ServerProperty implements BasicProperty {
 
@@ -62,12 +65,14 @@ public class ServerProperty implements BasicProperty {
 
     private boolean defined;
 
+    private Map<String, String> metadata = new HashMap<String, String>();
+    
     public String get() {
         return value;
     }
 
     public String get(String metadataName) {
-        throw new UnsupportedOperationException();
+        return metadata.get(metadataName);
     }
 
     public void setDefined(boolean defined) {
@@ -83,7 +88,7 @@ public class ServerProperty implements BasicProperty {
     }
 
     public void set(String metadataName, String value) {
-        throw new UnsupportedOperationException();
+        metadata.put(metadataName, value);
     }
 
 }

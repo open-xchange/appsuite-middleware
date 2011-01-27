@@ -52,7 +52,6 @@ package com.openexchange.config.cascade.impl;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
-import com.openexchange.config.cascade.Scope;
 import com.openexchange.tools.strings.StringParser;
 
 
@@ -78,7 +77,7 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
         this.delegate = d;
     }
 
-    public ComposedConfigProperty<T> precedence(Scope... scopes) throws ConfigCascadeException {
+    public ComposedConfigProperty<T> precedence(String... scopes) throws ConfigCascadeException {
         initDelegate(delegate.precedence(scopes));
         return this;
     }

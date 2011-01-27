@@ -84,6 +84,9 @@ public class UserConfigProvider implements ConfigProviderService {
     }
 
     public BasicProperty get(final String property, final int context, final int userId) throws ConfigCascadeException {
+        if(context == NO_CONTEXT && userId == NO_USER) {
+            return NO_PROPERTY;
+        }
         try {
             final Context ctx = contexts.getContext(context);
             final User user = users.getUser(userId, ctx);

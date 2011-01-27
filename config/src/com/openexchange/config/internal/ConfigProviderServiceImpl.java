@@ -50,11 +50,17 @@
 package com.openexchange.config.internal;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
 
 /**
@@ -64,13 +70,36 @@ import com.openexchange.config.cascade.ConfigProviderService;
  */
 public class ConfigProviderServiceImpl implements ConfigProviderService {
 
-    private static ConfigurationService configService;
+    private static final String META = "meta";
 
-    public BasicProperty get(String property, int context, int user) {
+    private static final String SETTINGS = "settings";
+
+    private static final String PREFRENCE_PATH = "preferencePath";
+
+    private static final String VALUE = "value";
+
+    private ConfigurationService configService;
+    
+    private ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
+
+    public ConfigProviderServiceImpl(ConfigurationService configService) {
+        setConfigService(configService);
+    }
+    
+    public ServerProperty get(String property, int context, int user) {
+        ServerProperty basicProperty = properties.get(property);
+        if (basicProperty != null) {
+            return basicProperty;
+        }
         ServerProperty retval = new ServerProperty();
         String value = configService.getProperty(property);
-        retval.setDefined(value == null);
+        retval.setDefined(value != null);
         retval.set(value);
+        
+        ServerProperty alreadyDefined = properties.putIfAbsent(property, retval);
+        if(alreadyDefined != null) {
+            return alreadyDefined;
+        }
         return retval;
     }
 
@@ -80,11 +109,46 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         while (propertyNames.hasNext()) {
             retval.add(propertyNames.next());
         }
+        retval.addAll(properties.keySet());
         return retval;
     }
 
-    public static void setConfigService(ConfigurationService configService) {
-        ConfigProviderServiceImpl.configService = configService;
+    public void setConfigService(ConfigurationService configService) {
+        this.configService = configService;
+        initSettings(configService);
+        initMetadata(configService);
+    }
+
+    private void initSettings(ConfigurationService config) {
+        Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
+        for(Object propName : propertiesInFolder.keySet()) {
+            get((String) propName, -1, -1).set(PREFRENCE_PATH, (String) propName);
+        }
+        
+    }
+
+    private void initMetadata(ConfigurationService config) {
+        Map<String, Object> yamlInFolder = config.getYamlInFolder(META);
+        for(Object o : yamlInFolder.values()) {
+            Map<String, Object> metadataDef = (Map<String, Object>) o;
+            for(Map.Entry<String, Object> entry : metadataDef.entrySet()) {
+                String propertyName = entry.getKey();
+                Map<String, Object> metadata = (Map<String, Object>) entry.getValue();
+                ServerProperty basicProperty = get(propertyName, -1, -1);
+                for(Map.Entry<String, Object> metadataProp : metadata.entrySet()) {
+                    if(metadataProp.getValue() != null) {
+                        basicProperty.set(metadataProp.getKey(), metadataProp.getValue().toString());
+                    }
+                }
+                
+                String value = basicProperty.get(VALUE);
+                if (value == null) {
+                    value = config.getProperty(propertyName);
+                }
+                basicProperty.set(value);
+                basicProperty.setDefined(value != null);    
+            }
+        }
     }
 
 }

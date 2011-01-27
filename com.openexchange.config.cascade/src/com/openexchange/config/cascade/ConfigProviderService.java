@@ -58,6 +58,33 @@ import java.util.Collection;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ConfigProviderService {
+    
+    public static final int NO_CONTEXT = -1;
+    public static final int NO_USER = -1;
+    
+    public static final BasicProperty NO_PROPERTY = new BasicProperty() {
+
+        public String get() throws ConfigCascadeException {
+            return null;
+        }
+
+        public String get(String metadataName) throws ConfigCascadeException {
+            return null;
+        }
+
+        public boolean isDefined() throws ConfigCascadeException {
+            return false;
+        }
+
+        public void set(String value) throws ConfigCascadeException {
+            
+        }
+
+        public void set(String metadataName, String value) throws ConfigCascadeException {
+            
+        }
+        
+    };
 
     BasicProperty get(String property, int context, int user) throws ConfigCascadeException;
     

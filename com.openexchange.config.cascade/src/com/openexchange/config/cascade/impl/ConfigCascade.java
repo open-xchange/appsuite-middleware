@@ -63,24 +63,24 @@ import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.Scope;
 import com.openexchange.tools.strings.StringParser;
-import static com.openexchange.config.cascade.Scope.*;
-
 
 /**
  * {@link ConfigCascade}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigCascade implements ConfigViewFactory {
 
-    ConcurrentHashMap<Scope, ConfigProviderService> providers = new ConcurrentHashMap<Scope, ConfigProviderService>();
-    Scope[] searchPath = Scope.searchPath();
+    ConcurrentHashMap<String, ConfigProviderService> providers = new ConcurrentHashMap<String, ConfigProviderService>();
+
+    String[] searchPath = null;
+
     private List<ConfigProviderService> path;
+
     StringParser stringParser;
-    
-    public void setProvider(Scope scope, ConfigProviderService configProvider) {
+
+    public void setProvider(String scope, ConfigProviderService configProvider) {
         providers.put(scope, configProvider);
     }
 
@@ -88,30 +88,35 @@ public class ConfigCascade implements ConfigViewFactory {
         return new View(user, context);
     }
 
-    public void setSearchPath(Scope...searchPath) {
+    public ConfigView getView() {
+        return new View(-1, -1);
+    }
+
+    public void setSearchPath(String... searchPath) {
         this.searchPath = searchPath;
         this.path = null;
     }
-    
+
     protected List<ConfigProviderService> getConfigProviders() {
         if (path != null) {
             return path;
         }
-        
+
         List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
-        for(Scope scope : searchPath) {
+        for (String scope : searchPath) {
             p.add(providers.get(scope));
         }
         return path = p;
     }
-    
+
     public void setStringParser(StringParser stringParser) {
         this.stringParser = stringParser;
     }
- 
-    
+
     private final class View implements ConfigView {
+
         int context;
+
         int user;
 
         public View(int user, int context) {
@@ -119,26 +124,26 @@ public class ConfigCascade implements ConfigViewFactory {
             this.context = context;
         }
 
-        public <T> void set(Scope scope, String property, T value) throws ConfigCascadeException {
-            ((ConfigProperty<T>)property(scope, property, value.getClass())).set(value); 
+        public <T> void set(String scope, String property, T value) throws ConfigCascadeException {
+            ((ConfigProperty<T>) property(scope, property, value.getClass())).set(value);
         }
 
-        public <T> T get(String property, Class<T> coerceTo)  throws ConfigCascadeException{
+        public <T> T get(String property, Class<T> coerceTo) throws ConfigCascadeException {
             return property(property, coerceTo).get();
         }
 
-        public <T> ConfigProperty<T> property(Scope scope, String property, Class<T> coerceTo)  throws ConfigCascadeException{
+        public <T> ConfigProperty<T> property(String scope, String property, Class<T> coerceTo) throws ConfigCascadeException {
             return new CoercingConfigProperty<T>(coerceTo, providers.get(scope).get(property, context, user), stringParser);
         }
 
         public <T> ComposedConfigProperty<T> property(final String property, Class<T> coerceTo) {
             return new CoercingComposedConfigProperty<T>(coerceTo, new ComposedConfigProperty<String>() {
 
-                private Scope[] overriddenScopes;
+                private String[] overriddenStrings;
 
-                public String get() throws ConfigCascadeException{
-                    Scope finalScope = getFinalScope();
-                    for(ConfigProviderService provider : getConfigProviders(finalScope)) {
+                public String get() throws ConfigCascadeException {
+                    String finalScope = getFinalScope();
+                    for (ConfigProviderService provider : getConfigProviders(finalScope)) {
                         String value = provider.get(property, context, user).get();
                         if (value != null) {
                             return value;
@@ -147,16 +152,12 @@ public class ConfigCascade implements ConfigViewFactory {
                     return null;
                 }
 
-                private Scope getFinalScope() throws ConfigCascadeException{
-                    String scopeS = (String) property(property, String.class).precedence(SERVER, CONTEXT, USER).get("final");
-                    if(scopeS == null) {
-                        return null;
-                    }
-                    return Scope.valueOf(scopeS.toUpperCase());
+                private String getFinalScope() throws ConfigCascadeException {
+                    return property(property, String.class).precedence("server", "context", "user").get("final");
                 }
 
                 public String get(String metadataName) throws ConfigCascadeException {
-                    for(ConfigProviderService provider : getConfigProviders(null)) {
+                    for (ConfigProviderService provider : getConfigProviders(null)) {
                         String value = provider.get(property, context, user).get(metadataName);
                         if (value != null) {
                             return value;
@@ -164,13 +165,13 @@ public class ConfigCascade implements ConfigViewFactory {
                     }
                     return null;
                 }
-                
+
                 public <M> M get(String metadataName, Class<M> m) throws ConfigCascadeException {
-                    for(ConfigProviderService provider : getConfigProviders(null)) {
+                    for (ConfigProviderService provider : getConfigProviders(null)) {
                         String value = provider.get(property, context, user).get(metadataName);
                         if (value != null) {
                             M parsed = stringParser.parse(value, m);
-                            if(parsed == null) {
+                            if (parsed == null) {
                                 throw ConfigCascadeExceptionCodes.COULD_NOT_COERCE_VALUE.create(value, m.getName());
                             }
                             return parsed;
@@ -187,32 +188,29 @@ public class ConfigCascade implements ConfigViewFactory {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
-                public ComposedConfigProperty<String> precedence(Scope... scopes) {
-                    overriddenScopes = scopes;
+                public ComposedConfigProperty<String> precedence(String... scopes) {
+                    overriddenStrings = scopes;
                     return this;
                 }
-                
-                private List<ConfigProviderService> getConfigProviders(Scope finalScope) {
-                    Scope[] s = (overriddenScopes != null) ? overriddenScopes : searchPath;
-                    
+
+                private List<ConfigProviderService> getConfigProviders(String finalScope) {
+                    String[] s = (overriddenStrings != null) ? overriddenStrings : searchPath;
+
                     List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
                     boolean collect = false;
-                    for(Scope scope : s) {
-                        collect = collect || finalScope == null || finalScope == scope;
+                    for (String scope : s) {
+                        collect = collect || finalScope == null || finalScope.equals(scope);
 
-                        if(collect) {
+                        if (collect) {
                             p.add(providers.get(scope));
-                            if(scope == finalScope) {
-                                return p;
-                            }
                         }
                     }
                     return p;
                 }
 
                 public boolean isDefined() throws ConfigCascadeException {
-                    Scope finalScope = getFinalScope();
-                    for(ConfigProviderService provider : getConfigProviders(finalScope)) {
+                    String finalScope = getFinalScope();
+                    for (ConfigProviderService provider : getConfigProviders(finalScope)) {
                         boolean defined = provider.get(property, context, user).isDefined();
                         if (defined) {
                             return defined;
@@ -222,9 +220,9 @@ public class ConfigCascade implements ConfigViewFactory {
                 }
 
                 public <M> ComposedConfigProperty<M> to(Class<M> otherType) {
-                   return new CoercingComposedConfigProperty<M>(otherType, this, stringParser);
+                    return new CoercingComposedConfigProperty<M>(otherType, this, stringParser);
                 }
-                
+
             }, stringParser);
         }
 
@@ -233,15 +231,14 @@ public class ConfigCascade implements ConfigViewFactory {
             for (ConfigProviderService provider : getConfigProviders()) {
                 names.addAll(provider.getAllPropertyNames(context, user));
             }
-            
+
             Map<String, ComposedConfigProperty<String>> properties = new HashMap<String, ComposedConfigProperty<String>>();
-            for(String name : names) {
+            for (String name : names) {
                 properties.put(name, property(name, String.class));
             }
-            
+
             return properties;
         }
     }
-
 
 }

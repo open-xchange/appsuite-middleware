@@ -47,76 +47,31 @@
  *
  */
 
-package com.openexchange.config.cascade.context;
+package com.openexchange.config.cascade.context.matching;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
-import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
-import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 
+
 /**
- * {@link ContextConfigProvider}
- * 
+ * {@link Negation}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
+public class Negation extends ContextSetTerm {
 
-    private static final String DYNAMIC_ATTR_PREFIX = "config/";
+    private ContextSetTerm term;
 
-    public ContextConfigProvider(ContextService contexts) {
-        super(contexts);
+    public Negation(ContextSetTerm term) {
+        this.term = term;
     }
 
     @Override
-    public BasicProperty get(final String property, final Context ctx) {
-
-        return new BasicProperty() {
-
-            public String get() {
-                Map<String, Set<String>> attributes = ctx.getAttributes();
-
-                Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
-                if (set == null || set.isEmpty()) {
-                    return null;
-                }
-                return set.iterator().next();
-            }
-
-            public String get(String metadataName) throws ConfigCascadeException {
-                return null;
-            }
-
-            public boolean isDefined() throws ConfigCascadeException {
-                return get() != null;
-            }
-
-            public void set(String value) throws ConfigCascadeException {
-                throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, "user");
-            }
-
-            public void set(String metadataName, String value) throws ConfigCascadeException {
-                throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
-            }
-
-        };
-
+    public boolean matches(Context ctx) {
+        return !term.matches(ctx);
     }
-
-    public Collection<String> getAllPropertyNames(Context ctx) {
-        Map<String, Set<String>> attributes = ctx.getAttributes();
-        Set<String> allNames = new HashSet<String>();
-        int snip = DYNAMIC_ATTR_PREFIX.length();
-        for (String name : attributes.keySet()) {
-            if (name.startsWith(DYNAMIC_ATTR_PREFIX)) {
-                allNames.add(name.substring(snip));
-            }
-        }
-        return allNames;
+    
+    public String toString() {
+        return "!("+term.toString()+")";
     }
 
 }

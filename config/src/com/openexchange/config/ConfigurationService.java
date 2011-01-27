@@ -50,6 +50,8 @@
 package com.openexchange.config;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.cascade.ConfigProviderService;
 
@@ -190,4 +192,20 @@ public interface ConfigurationService {
      * @return The number of properties in this property list.
      */
     public int size();
+    
+    /**
+     * Loads a file and parses it with a YAML parser. The type of object returned depends on the layout of the yaml file 
+     * and should be known to clients of this service.
+     * @param filename
+     * @return The parsed data
+     */
+    public Object getYaml(String filename);
+
+    /**
+     * Loads all files in a directory and parses them with a YAML parser. The type of the objects returned depends on the layout 
+     * of the yaml files. 
+     * @param dirName
+     * @return A map mapping filename to the object that was parsed.
+     */
+    public Map<String, Object> getYamlInFolder(String dirName);
 }

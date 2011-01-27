@@ -51,10 +51,14 @@ package com.openexchange.config.cascade.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.Scope;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.strings.StringParser;
@@ -70,6 +74,8 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
     
     static final Log LOG = LogFactory.getLog(ConfigCascadeActivator.class);
+
+    private boolean configured = false;
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -78,7 +84,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
-        ConfigCascade configCascade = new ConfigCascade();
+        final ConfigCascade configCascade = new ConfigCascade();
         
         final ServiceTracker stringParsers = track(StringParser.class);
         
@@ -96,17 +102,78 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             
         });
         
-        ServiceTracker serverProviders = track(context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope=server))"));
-        ServiceTracker contextProviders = track(context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope=context))"));
-        ServiceTracker userProviders = track(context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope=user))"));
+        ServiceTracker serverProviders = track(createFilter("server"), new ServiceTrackerCustomizer() {
+
+            public Object addingService(ServiceReference reference) {
+                ConfigProviderService provider = (ConfigProviderService) context.getService(reference);
+                if (isServerProvider(reference)) {
+                    String scopes = getScopes(provider);
+                    configure(scopes, configCascade);
+                }
+                return provider;
+            }
+
+            public void modifiedService(ServiceReference reference, Object service) {
+                // IGNORE
+            }
+
+            public void removedService(ServiceReference reference, Object service) {
+            
+            }
+            
+        });
         
-        configCascade.setProvider(Scope.SERVER, new TrackingProvider(serverProviders));
-        configCascade.setProvider(Scope.CONTEXT, new TrackingProvider(contextProviders));
-        configCascade.setProvider(Scope.USER, new TrackingProvider(userProviders));
+        configCascade.setProvider("server", new TrackingProvider(serverProviders));
         
         openTrackers();
     
         registerService(ConfigViewFactory.class, configCascade);
+    }
+    
+    boolean isServerProvider(ServiceReference reference) {
+        Object scope = reference.getProperty("scope");
+        return scope != null && scope.equals("server");
+    }
+    
+    String getScopes(ConfigProviderService config) {
+        try {
+            return config.get("com.openexchange.config.cascade.scopes", ConfigProviderService.NO_CONTEXT, ConfigProviderService.NO_USER).get();
+        } catch (ConfigCascadeException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+    
+    void configure(String scopes, ConfigCascade cascade) {
+        if(configured) {
+            return;
+        }
+        if (scopes == null) {
+            scopes = "user, context, server";
+        }
+        configured = true;
+        
+        String[] searchPath = scopes.split("\\s*,\\s*");
+        cascade.setSearchPath(searchPath);
+   
+        for (String scope : searchPath) {
+            if(scope.equals("server")) {
+                continue;
+            }
+            
+            ServiceTracker tracker = track(createFilter(scope));
+            cascade.setProvider(scope, new TrackingProvider(tracker));
+            tracker.open();
+        }
+    }
+    
+    Filter createFilter(String scope) {
+        try {
+            return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");
+        } catch (InvalidSyntaxException e) {
+            LOG.fatal(e.getMessage(), e);
+        }
+        return null;
     }
 
 }

@@ -47,18 +47,32 @@
  *
  */
 
-package com.openexchange.config.cascade;
+package com.openexchange.config.cascade.context.matching;
 
+import java.util.Set;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link Scope}
- *
+ * {@link HasTag}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public enum Scope {
-    SERVER, CONTEXT, USER;
-    
-    public static Scope[] searchPath() {
-        return new Scope[]{USER, CONTEXT, SERVER};
+public class HasTag extends ContextSetTerm {
+
+    private String tag;
+
+    public HasTag(String tag) {
+        this.tag = tag;
+    }
+
+    @Override
+    public boolean matches(Context context) {
+        Set<String> tags = getSpecification(context);
+        return tags.contains(tag);
+    }
+
+    @Override
+    public String toString() {
+        return tag;
     }
 }
