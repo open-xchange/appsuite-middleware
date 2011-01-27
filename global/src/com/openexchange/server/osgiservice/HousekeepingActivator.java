@@ -50,6 +50,7 @@
 package com.openexchange.server.osgiservice;
 
 import java.util.Dictionary;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.Filter;
@@ -117,8 +118,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
     
     protected void openTrackers() {
-        for (ServiceTracker tracker : serviceTrackers) {
-            tracker.open();
+        Iterator<ServiceTracker> iter = serviceTrackers.iterator();
+        while (iter.hasNext()) {
+            iter.next().open();
         }
     }
     
