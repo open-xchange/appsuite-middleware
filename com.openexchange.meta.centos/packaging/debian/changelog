@@ -1,11 +1,5 @@
-open-xchange-meta-centos (1.0.0-1) unstable; urgency=low
-
-  * first release
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 07 Dec 2010 11:14:01 +0100
-
-open-xchange-meta-centos (1.0.0-0) unstable; urgency=low
+open-xchange-meta-centos (6.19.0.0-0) unstable; urgency=low
 
   * new package
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  6 Dec 2010 13:07:12 +0100
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 27 Jan 2011 15:27:12 +0100
