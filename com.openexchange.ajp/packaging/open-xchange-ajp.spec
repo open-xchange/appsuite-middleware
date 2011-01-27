@@ -1,7 +1,7 @@
 
 # norootforbuild
 
-Name:           open-xchange-folder-json
+Name:           open-xchange-ajp
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-management >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@
