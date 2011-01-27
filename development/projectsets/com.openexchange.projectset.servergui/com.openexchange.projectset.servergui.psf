@@ -25,5 +25,8 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.folder.json,com.openexchange.folder.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.authorization.standard,com.openexchange.authorization.standard"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.proxy.servlet,com.openexchange.proxy.servlet"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.config.cascade,com.openexchange.config.cascade"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.config.cascade.context,com.openexchange.config.cascade.context"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.config.cascade.user,com.openexchange.config.cascade.user"/>
 </provider>
 </psf>
