@@ -54,6 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.http.jetty.JettyHttpService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.systemname.SystemNameService;
 
 
 /**
@@ -72,11 +73,20 @@ public class JettyActivator extends HousekeepingActivator{
     @Override
     protected void startBundle() throws Exception {
         try {
-            JettyHttpService httpService = new JettyHttpService(8080);
+            JettyHttpService httpService = new JettyHttpService(8088);
             
             httpService.start();
             
             registerService(HttpService.class, httpService);
+            
+            registerService(SystemNameService.class, new SystemNameService() {
+
+                public String getSystemName() {
+                    return "IMPLEMENTME";
+                }
+                
+            });
+            
         } catch (Throwable t) {
             LOG.fatal(t.getMessage(), t);
         }
