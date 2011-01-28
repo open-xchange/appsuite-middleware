@@ -75,6 +75,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.apache.http.message.BasicNameValuePair;
@@ -312,13 +313,13 @@ public class Executor extends Assert {
     }
         
     private static void addUPLOADParameter(HttpPost postMethod, AJAXRequest<?> request) throws IOException, JSONException {
-    	List<NameValuePair> pairs = new LinkedList<NameValuePair>();
     	MultipartEntity parts = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
     	
         for (final Parameter param : request.getParameters()) {
             if (param instanceof FieldParameter) {
+                
                 final FieldParameter fparam = (FieldParameter) param;
-                pairs.add( new BasicNameValuePair(fparam.getFieldName(), fparam.getFieldContent()));
+                parts.addPart(fparam.getFieldName(), new StringBody(fparam.getFieldContent()));
             }
             if (param instanceof FileParameter) {
             	FileParameter fparam = (FileParameter) param;
