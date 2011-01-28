@@ -24,6 +24,9 @@
     <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
     <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
 
+    <!-- Bundle dependencies -->
+    <property name="configreadBundle" value="com.openexchange.configread"/>
+
 	<!-- JAR names for classpath -->
 	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
 	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar" />
@@ -39,7 +42,7 @@
 		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
 		<pathelement location="${bundlesdir}/${globaljar}" />
 		<pathelement location="${bundlesdir}/${serverjar}" />
-		<pathelement location="${bundlesdir}/${configjar}"/>
+		<pathelement location="${bundlesdir}/${configreadBundle}/${configjar}"/>
 	</path>
 
 	<!-- Compile -->

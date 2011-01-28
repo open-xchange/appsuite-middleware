@@ -20,6 +20,9 @@
 	<property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="templateInstallCopyDir" value="${destdir}/${prefix}/templates"/>
 
+    <!-- Bundle dependencies -->
+    <property name="configreadBundle" value="com.openexchange.configread"/>
+
 	<!-- JAR names for classpath -->
 	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
@@ -43,7 +46,7 @@
 		<pathelement location="${bundlesDir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesDir}/${servletjar}"/>
 		<pathelement location="${bundlesDir}/${globaljar}"/>
-	    <pathelement location="${bundlesDir}/${configreadjar}"/>
+	    <pathelement location="${bundlesDir}/${configreadBundle}/${configreadjar}"/>
 		<pathelement location="${bundlesDir}/${serverjar}"/>
         <pathelement location="${bundlesDir}/${templatingBundle}/${templatingjar}"/>
 	    <pathelement location="${bundlesDir}/${genconfjar}"/>

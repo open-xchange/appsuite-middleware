@@ -6,6 +6,7 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
+    <property name="configreadBundle" value="com.openexchange.configread"/>
 	<property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configjar" value="com.openexchange.configread.jar"/>
@@ -33,7 +34,7 @@
         <pathelement location="${bundlesdir}/${osgijar}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
         <pathelement location="${bundlesdir}/${globaljar}"/>
-		<pathelement location="${bundlesdir}/${configjar}"/>
+		<pathelement location="${bundlesdir}/${configreadBundle}/${configjar}"/>
 		<pathelement location="${bundlesdir}/${monitoringjar}"/>
         <pathelement location="${bundlesdir}/${cachingjar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>

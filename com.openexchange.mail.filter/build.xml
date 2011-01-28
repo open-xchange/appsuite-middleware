@@ -19,9 +19,10 @@
     <property name="jsievejavaprefix" value="org.apache"/>
     <!-- This is the location for Ubuntu only it may differ on other distributions -->
     <property name="javacc.jar" value="lib/javacc.jar"/>
-	
+
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
+    <property name="configreadBundle" value="com.openexchange.configread"/>
 
 	<!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -46,7 +47,7 @@
 		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
 		<pathelement location="${bundlesdir}/${serverbundle}"/>
 		<pathelement location="${bundlesdir}/${globalbundle}"/>
-		<pathelement location="${bundlesdir}/${configbundle}"/>
+		<pathelement location="${bundlesdir}/${configreadBundle}/${configbundle}"/>
 		<pathelement location="${bundlesdir}/${servletbundle}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mail}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>

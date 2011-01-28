@@ -25,6 +25,7 @@
 	<!-- Bundle dependencies -->
 	<property name="commonBundle" value="com.openexchange.common"/>
 	<property name="xercesBundle" value="com.openexchange.xerces.sun"/>
+    <property name="configreadBundle" value="com.openexchange.configread"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
@@ -46,7 +47,7 @@
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-    	<pathelement location="${bundlesdir}/${configreadjar}"/>
+    	<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsiojar}"/>

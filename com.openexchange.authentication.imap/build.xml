@@ -26,6 +26,9 @@
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
     <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
+    <!-- Bundle dependencies -->
+    <property name="configreadBundle" value="com.openexchange.configread"/>
+
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
@@ -33,7 +36,7 @@
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
-        <property name="mailjar" value="mail-1.4.3.jar" />
+    <property name="mailjar" value="mail-1.4.3.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -42,8 +45,8 @@
         <pathelement location="${bundlesdir}/${commonjar}"/>
 		<pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${serverjar}"/>
-		<pathelement location="${bundlesdir}/${configreadjar}"/>
-	        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
+		<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
     </path>
 
     <!-- Compile -->

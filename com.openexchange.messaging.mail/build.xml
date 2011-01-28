@@ -22,6 +22,7 @@
 
 	<!-- Bundle dependencies -->
 	<property name="commonBundle" value="com.openexchange.common" />
+    <property name="configreadBundle" value="com.openexchange.configread"/>
 
 	<!-- JAR names for classpath -->
 	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -65,7 +66,7 @@
 
 		<pathelement location="${bundlesdir}/${threadpooljar}" />
 		<pathelement location="${bundlesdir}/${globaljar}" />
-		<pathelement location="${bundlesdir}/${configreadjar}" />
+		<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}" />
 		<pathelement location="${bundlesdir}/${genericonfjar}" />
 		<pathelement location="${bundlesdir}/${genericonfstoragejar}" />
 		<pathelement location="${bundlesdir}/${messagingjar}" />

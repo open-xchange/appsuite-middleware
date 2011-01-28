@@ -18,7 +18,6 @@
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
     <property name="composite.name" value="open-xchange-publish-microformats-${version}"/>
-
     <property name="templatingdir" value="${prefix}/templates"/>
 
     <!-- Install Constants -->
@@ -26,6 +25,10 @@
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 	<property name="conf.install.dir" value="${prefix}/etc/groupware"/>
 	<property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
+
+    <!-- Bundle dependencies -->
+    <property name="configreadBundle" value="com.openexchange.configread"/>
+    <property name="templatingBundle" value="com.openexchange.templating"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -43,9 +46,6 @@
     <property name="htmljar" value="com.openexchange.html.jar"/>
     <property name="txjar" value="com.openexchange.tx.jar"/>
 
-    <!-- Bundle dependencies -->
-    <property name="templatingBundle" value="com.openexchange.templating"/>
-
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -59,7 +59,7 @@
         <pathelement location="${bundlesdir}/${publishbasicjar}"/>
         <pathelement location="${bundlesdir}/${templatingBundle}/${templatingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-    	<pathelement location="${bundlesdir}/${configreadjar}"/>
+    	<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
         <pathelement location="${bundlesdir}/${htmljar}"/>
         <pathelement location="${bundlesdir}/${txjar}"/>
     </path>
