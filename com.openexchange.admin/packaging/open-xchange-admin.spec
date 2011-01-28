@@ -159,6 +159,7 @@ if [ ${1:-0} -eq 2 ]; then
 
    # -----------------------------------------------------------------------
    # bugfix id#16667
+   # SoftwareChange_Request-587 IT_IT
    pfile=/opt/open-xchange/etc/admindaemon/User.properties
    ox_system_type
    type=$?
@@ -168,7 +169,7 @@ if [ ${1:-0} -eq 2 ]; then
       ofile="${pfile}.rpmnew"
    fi
    if [ -n "$ofile" ] && [ -e "$ofile" ]; then
-      for ll in JA_JP PL_PL; do
+      for ll in JA_JP PL_PL IT_IT; do
 	  nl=
 	  vstr="SENT_MAILFOLDER TRASH_MAILFOLDER DRAFTS_MAILFOLDER SPAM_MAILFOLDER CONFIRMED_SPAM_MAILFOLDER CONFIRMED_HAM_MAILFOLDER"
 	  for pp in $vstr; do
