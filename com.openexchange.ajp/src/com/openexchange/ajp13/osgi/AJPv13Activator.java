@@ -189,6 +189,7 @@ public final class AJPv13Activator extends DeferredActivator {
             /*-
              * Alternative approach for HttpService:
              * 
+             * http://www.eclipse.org/equinox/server/
              * http://www.eclipse.org/equinox/server/http_in_equinox.php
              * 
              * http://docs.codehaus.org/display/JETTY/OSGi+Tips
