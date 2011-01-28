@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.systemname.internal;
 
-import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 
 /**
@@ -67,7 +68,8 @@ public final class JVMRouteSystemNameImpl implements SystemNameService {
     }
 
     public String getSystemName() {
-        return AJPv13Config.getJvmRoute();
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return service == null ? "OX1" : service.getProperty("AJP_JVM_ROUTE", "OX1");
     }
 
 }

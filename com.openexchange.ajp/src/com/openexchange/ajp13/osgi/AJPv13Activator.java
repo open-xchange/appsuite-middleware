@@ -57,7 +57,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.JVMRouteSystemNameImpl;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
 import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
@@ -68,7 +67,6 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
-import com.openexchange.systemname.SystemNameService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -187,7 +185,6 @@ public final class AJPv13Activator extends DeferredActivator {
             final HttpServiceImpl http = new HttpServiceImpl();
             registrations.add(context.registerService(HttpService.class.getName(), http, null));
             http.registerServlet("/servlet/TestServlet", new com.openexchange.ajp13.TestServlet(), null, null);
-            registrations.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class).error(e.getMessage(), e);
             throw e;

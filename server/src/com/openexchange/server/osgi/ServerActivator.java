@@ -190,6 +190,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
+import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -255,7 +256,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class
+            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class
         };
 
     private final List<ServiceRegistration> registrationList;
@@ -642,6 +643,9 @@ public final class ServerActivator extends DeferredActivator {
             props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
             registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
         }
+
+        // Register SystemNameService
+        registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
 
         // Register DBProvider
 
