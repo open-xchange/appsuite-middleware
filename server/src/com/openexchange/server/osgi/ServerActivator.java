@@ -190,7 +190,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
-import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -256,7 +255,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class
+            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class
         };
 
     private final List<ServiceRegistration> registrationList;
@@ -432,7 +431,6 @@ public final class ServerActivator extends DeferredActivator {
             context,
             FolderDeleteListenerService.class.getName(),
             new FolderDeleteListenerServiceTrackerCustomizer(context)));
-        
         
         /*
          * Register EventHandler
@@ -644,25 +642,18 @@ public final class ServerActivator extends DeferredActivator {
             registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
         }
 
-        // Register SystemNameService
-        registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
-
         // Register DBProvider
-
         registrationList.add(context.registerService(DBProvider.class.getName(), new DBPoolProvider(), null));
         registrationList.add(context.registerService(WhiteboardFactoryService.class.getName(), new WhiteboardDBProvider.Factory(), null));
 
         // Register Infostore
-
         registrationList.add(context.registerService(InfostoreFacade.class.getName(), Infostore.FACADE, null));
         registrationList.add(context.registerService(InfostoreSearchEngine.class.getName(), Infostore.SEARCH_ENGINE, null));
 
         // Register AttachmentBase
-        
         registrationList.add(context.registerService(AttachmentBase.class.getName(), Attachment.ATTACHMENT_BASE, null));
         
         // Register ContactSQL
-
         registrationList.add(context.registerService(ContactInterfaceFactory.class.getName(), new RdbContactInterfaceFactory(), null));
 
         // Register event factory service

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,32 @@
  *
  */
 
-package com.openexchange.systemname.internal;
+package com.openexchange.systemname.osgi;
 
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.systemname.SystemNameService;
 
 /**
- * {@link JVMRouteSystemNameImpl} - The {@link SystemNameService system name} implementation that uses the JVM route.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link SystemNameActivator}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class JVMRouteSystemNameImpl implements SystemNameService {
+public final class SystemNameActivator implements BundleActivator {
 
-    private final ConfigurationService configurationService;
+    private ServiceTracker tracker;
 
-    /**
-     * Initializes a new {@link JVMRouteSystemNameImpl}
-     * @param configurationService 
-     */
-    public JVMRouteSystemNameImpl(ConfigurationService configurationService) {
+    public SystemNameActivator() {
         super();
-        this.configurationService = configurationService;
     }
 
-    public String getSystemName() {
-        return configurationService.getProperty("AJP_JVM_ROUTE", "OX1");
+    public void start(BundleContext context) throws Exception {
+        tracker = new ServiceTracker(context, ConfigurationService.class.getName(), new SystemNameServiceRegisterer(context));
+        tracker.open();
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
     }
 }

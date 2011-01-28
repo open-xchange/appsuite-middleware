@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,42 @@
  *
  */
 
-package com.openexchange.systemname.internal;
+package com.openexchange.systemname.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.systemname.SystemNameService;
+import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 
 /**
- * {@link JVMRouteSystemNameImpl} - The {@link SystemNameService system name} implementation that uses the JVM route.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link SystemNameServiceRegisterer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class JVMRouteSystemNameImpl implements SystemNameService {
+public final class SystemNameServiceRegisterer implements ServiceTrackerCustomizer {
 
-    private final ConfigurationService configurationService;
+    private final BundleContext context;
+    private ServiceRegistration registration;
 
-    /**
-     * Initializes a new {@link JVMRouteSystemNameImpl}
-     * @param configurationService 
-     */
-    public JVMRouteSystemNameImpl(ConfigurationService configurationService) {
+    public SystemNameServiceRegisterer(BundleContext context) {
         super();
-        this.configurationService = configurationService;
+        this.context = context;
     }
 
-    public String getSystemName() {
-        return configurationService.getProperty("AJP_JVM_ROUTE", "OX1");
+    public Object addingService(ServiceReference reference) {
+        ConfigurationService configService = (ConfigurationService) context.getService(reference);
+        registration = context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(configService), null);
+        return configService;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        registration.unregister();
     }
 }

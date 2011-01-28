@@ -70,6 +70,7 @@ public class Activator extends CompositeBundleActivator {
         new com.openexchange.context.osgi.ContextActivator(),
         new com.openexchange.groupware.update.osgi.Activator(),
         new com.openexchange.groupware.reminder.osgi.Activator(),
+        new com.openexchange.systemname.osgi.SystemNameActivator(),
         new com.openexchange.server.osgi.ServerActivator(),
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
         new com.openexchange.groupware.contact.osgi.ContactActivator(),
