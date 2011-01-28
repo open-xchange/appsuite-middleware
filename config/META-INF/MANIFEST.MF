@@ -15,4 +15,5 @@ Import-Package: com.openexchange.config.cascade,
 Export-Package: com.openexchange.config
 Bundle-Activator: com.openexchange.config.osgi.ConfigActivator
 Bundle-ClassPath: com.openexchange.configread.jar,
- lib/jyaml-1.3.jar
+ lib/jyaml-1.3.jar,
+ .
