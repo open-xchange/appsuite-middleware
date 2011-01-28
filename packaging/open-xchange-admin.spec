@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 17
+%define		ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -400,6 +400,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Jan 28 2011 - marcus.klein@open-xchange.com
+ - Added Italian translations for standard mail folder names.
 * Tue Jan 18 2011 - marcus.klein@open-xchange.com
  - Bugfix #17709: Corrected the Japanese translation for the spam folder name.
 * Mon Dec 20 2010 - choeger@open-xchange.com
