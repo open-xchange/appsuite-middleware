@@ -54,7 +54,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
@@ -90,7 +93,23 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
     }
 
     public String getBody() throws JSONException {
-        return writeJSON(getMetadata());
+        final JSONObject originalObject = new JSONObject(writeJSON(getMetadata()));
+        final JSONObject retVal = new JSONObject();
+        final Set<String> set = originalObject.keySet();
+
+        for (String string : set) {
+            final Object test = originalObject.get(string);
+            if (test != JSONObject.NULL) {
+                if (test instanceof JSONArray && ((JSONArray) test).length() > 0) {
+                    retVal.put(string, test);
+                    continue;
+                } else {
+                    retVal.put(string, test);
+                }
+            }
+        }
+
+        return retVal.toString();
     }
 
     public Method getMethod() {
