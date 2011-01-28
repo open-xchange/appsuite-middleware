@@ -26,6 +26,7 @@
 	<!-- Bundle dependencies -->
 	<property name="commonBundle" value="com.openexchange.common" />
     <property name="templatingBundle" value="com.openexchange.templating"/>
+    <property name="configreadBundle" value="com.openexchange.configread"/>
 
 	<!-- JAR names for classpath -->
 	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -37,13 +38,6 @@
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
-	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
-
-	<!-- Third party libs 
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
-        <exclude name="CVS"/>
-    </fileset> -->
 
 	<!-- Classpath -->
 	<path id="project.classpath">
@@ -56,9 +50,7 @@
 	    <pathelement location="${bundlesdir}/${templatingBundle}/${templatingjar}"/>
 		<pathelement location="${bundlesdir}/${pushjar}" />
 		<pathelement location="${bundlesdir}/${serverjar}" />
-		<pathelement location="${bundlesdir}/${configreadjar}" />
-		<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}" /> -->
-		<!-- <fileset refid="3rdpartyjars"/> -->
+		<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}" />
 	</path>
 
 	<!-- Compile -->
