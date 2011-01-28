@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.contexts;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
@@ -63,6 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 public class SimContext implements Context {
     
     private int id;
+    private Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
     
     public SimContext(int id) {
         super();
@@ -113,11 +117,11 @@ public class SimContext implements Context {
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.contexts.Context#getAttributes()
-     */
     public Map<String, Set<String>> getAttributes() {
-        // TODO Auto-generated method stub
-        return null;
+        return attributes;
+    }
+    
+    public void setAttribute(String key, String value) {
+        attributes.put(key, new HashSet<String>(Arrays.asList(value)));
     }
 }
