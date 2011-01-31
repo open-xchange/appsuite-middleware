@@ -96,9 +96,9 @@ public class ContactFieldsForJapaneseKanaSearch extends UpdateTaskAdapter {
 
     protected Column[] getColumns() {
         return new Column[] {
-            new Column("kanaFirstName", "VARCHAR(128)"),
-            new Column("kanaLastName", "VARCHAR(128)"),
-            new Column("kanaCompany", "VARCHAR(512)")
+            new Column("yomiFirstName", "VARCHAR(128)"),
+            new Column("yomiLastName", "VARCHAR(128)"),
+            new Column("yomiCompany", "VARCHAR(512)")
         };
     }
 }
