@@ -84,7 +84,7 @@ public class IDManglerTest extends TestCase {
     public void testSpecialCharacters() {
         String id = IDMangler.mangle(
             "com.openexchange.some.service",
-            "someFolder/folder/with/slashes and whitespace and f�nny ch�r�cter$",
+            "someFolder/folder/with/slashes and whitespace and f§)($nny ch$§§$ØÏÏÍr§$ter$",
             "someId");
         assertNotNull(id);
 
@@ -92,7 +92,7 @@ public class IDManglerTest extends TestCase {
 
         assertEquals(Arrays.asList(
             "com.openexchange.some.service",
-            "someFolder/folder/with/slashes and whitespace and f�nny ch�r�cter$",
+            "someFolder/folder/with/slashes and whitespace and f§)($nny ch$§§$ØÏÏÍr§$ter$",
             "someId"), unmangled);
     }
 
