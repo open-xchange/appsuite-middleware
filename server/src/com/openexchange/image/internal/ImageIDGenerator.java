@@ -87,7 +87,7 @@ final class ImageIDGenerator {
         final StringBuilder sb = new StringBuilder(64);
         final String[] requiredArguments = imageSource.getRequiredArguments();
         sb.append(imageSource.getRegistrationName());
-        for (String arg : requiredArguments) {
+        for (final String arg : requiredArguments) {
             sb.append(DELIM).append(imageArguments.get(arg));
         }
         sb.append(DELIM).append(authId);
@@ -111,7 +111,7 @@ final class ImageIDGenerator {
     static Object[] parseId(final String uniqueId, final ConversionService service) {
         final String[] args;
         {
-            String toSplit = null;
+            String toSplit;
             try {
                 final byte[] plain = Base64.decodeBase64(uniqueId.getBytes("US-ASCII"));
                 toSplit = new String(plain, "UTF-8");
