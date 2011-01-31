@@ -1,3 +1,7 @@
+* 2011-01-31 - marcus.klein@open-xchange.com
+
+ - TA5815 of US 5768: Started adding the easy login request to the normal login servlet.
+ 
 * 2011-01-25 - thorben.betten@open-xchange.com
 
  - Bugfix #18080: Considering module when checking public folder access

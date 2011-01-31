@@ -57,7 +57,6 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -71,7 +70,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.CookieHash;
+import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
@@ -82,7 +81,6 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -110,13 +108,11 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
-    private static final AtomicBoolean STATICALLY_INITIALIZED = new AtomicBoolean();
+    private boolean checkIP = true;
 
-    private static CookieHash cookieHash;
+    private CookieHashSource hashSource;
 
-    private static volatile boolean checkIP = true;
-
-    private static final List<IPRange> ranges = new CopyOnWriteArrayList<IPRange>();
+    private final List<IPRange> ranges = new CopyOnWriteArrayList<IPRange>();
 
     /**
      * Initializes a new {@link SessionServlet}.
@@ -128,35 +124,27 @@ public abstract class SessionServlet extends AJAXServlet {
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
-        if (STATICALLY_INITIALIZED.compareAndSet(false, true)) {
-            checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-            if (checkIP) {
-                final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (configurationService == null) {
-                    LOG.fatal("No configuration service available, can not read whitelist");
+        checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        if (checkIP) {
+            final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (configurationService == null) {
+                LOG.fatal("No configuration service available, can not read whitelist");
+            } else {
+                final String text = configurationService.getText(SESSION_WHITELIST_FILE);
+                if (text == null) {
+                    LOG.info("No exceptions from IP Check have been defined.");
                 } else {
-                    final String text = configurationService.getText(SESSION_WHITELIST_FILE);
-                    if (text == null) {
-                        LOG.info("No exceptions from IP Check have been defined.");
-                    } else {
-                        final String[] lines = text.split("\n");
-                        for (String line : lines) {
-                            line = line.replaceAll("\\s", "");
-                            if (!line.equals("") && !line.startsWith("#")) {
-                                ranges.add(IPRange.parseRange(line));
-                            }
+                    final String[] lines = text.split("\n");
+                    for (String line : lines) {
+                        line = line.replaceAll("\\s", "");
+                        if (!line.equals("") && !line.startsWith("#")) {
+                            ranges.add(IPRange.parseRange(line));
                         }
                     }
                 }
             }
-            cookieHash = CookieHash.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
-            if (null == cookieHash) {
-                /*
-                 * Default to calculate policy
-                 */
-                cookieHash = CookieHash.CALCULATE;
-            }
         }
+        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
     protected void initializeSession(final HttpServletRequest req) throws SessiondException, AbstractOXException {
@@ -183,19 +171,6 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         checkIP(session, req.getRemoteAddr());
         rememberSession(req, session);
-        rememberRequestInfo(req, session);
-    }
-
-    /**
-     * Remembers specified HTTP request's information: host name, port and secure.
-     * 
-     * @param req The HTTP request
-     * @param session The session to store to
-     */
-    protected static void rememberRequestInfo(final ServletRequest req, final ServerSession session) {
-        session.setParameter(HostnameService.PARAM_HOST_NAME, req.getServerName());
-        session.setParameter(HostnameService.PARAM_PORT, Integer.valueOf(req.getServerPort()));
-        session.setParameter(HostnameService.PARAM_SECURE, Boolean.valueOf(req.isSecure()));
     }
 
     /**
@@ -251,7 +226,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param req The HTTP request
      * @param resp The HTTP response
      */
-    protected static void handleSessiondException(final SessiondException e, final HttpServletRequest req, final HttpServletResponse resp) {
+    protected void handleSessiondException(final SessiondException e, final HttpServletRequest req, final HttpServletResponse resp) {
         if (isIpCheckError(e)) {
             try {
                 // Drop Open-Xchange cookies
@@ -354,12 +329,25 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public static ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
+    public ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
+        return getSession(hashSource, req, sessionId, sessiondService);
+    }
+
+    /**
+     * Finds appropriate local session.
+     * 
+     * @param hashSource defines how the cookie should be found 
+     * @param sessionId identifier of the session.
+     * @param sessiondService The SessionD service
+     * @return the session.
+     * @throws SessionException if the session can not be found.
+     */
+    public static ServerSession getSession(CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        final String secret = extractSecret(req, session.getHash(), session.getClient());
+        final String secret = extractSecret(hashSource, req, session.getHash(), session.getClient());
 
         if (secret == null || !session.getSecret().equals(secret)) {
             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
@@ -386,10 +374,10 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param client the remembered client from the session.
      * @return The secret string or <code>null</code>
      */
-    public static String extractSecret(final HttpServletRequest req, final String hash, final String client) {
-        final Cookie[] cookies = req.getCookies();
+    public static String extractSecret(CookieHashSource cookieHash, HttpServletRequest req, String hash, String client) {
+        Cookie[] cookies = req.getCookies();
         if (null != cookies) {
-            final String cookieName = Login.SECRET_PREFIX + getHash(req, hash, client);
+            final String cookieName = Login.SECRET_PREFIX + getHash(cookieHash, req, hash, client);
             for (final Cookie cookie : cookies) {
                 if (cookieName.equals(cookie.getName())) {
                     return cookie.getValue();
@@ -402,12 +390,13 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Gets the appropriate hash for specified request.
      * 
+     * @param cookieHash defines how the cookie should be found.
      * @param req The HTTP request
      * @param hash The previously remembered hash
      * @param client The client identifier
      * @return The appropriate hash
      */
-    public static String getHash(final HttpServletRequest req, final String hash, final String client) {
+    public static String getHash(CookieHashSource cookieHash, HttpServletRequest req, String hash, String client) {
         final String retval;
         switch (cookieHash) {
         default:
@@ -458,7 +447,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
     
-    public static void removeJSESSIONID(final HttpServletRequest req, final HttpServletResponse resp) {
+    public static void removeJSESSIONID(HttpServletRequest req, HttpServletResponse resp) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
             return;
@@ -482,12 +471,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the remembered session.
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {
-        final ServerSession session = (ServerSession) req.getAttribute(SESSION_KEY);
-        if (null == session) {
-            return null;
-        }
-        rememberRequestInfo(req, session);
-        return session;
+        return (ServerSession) req.getAttribute(SESSION_KEY);
     }
 
 }

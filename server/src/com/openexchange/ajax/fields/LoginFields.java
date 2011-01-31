@@ -56,13 +56,23 @@ package com.openexchange.ajax.fields;
  */
 public class LoginFields {
 
+    public static final String NAME_PARAM = "name";
+
+    public static final String PASSWORD_PARAM = "password";
+
+    public static final String UI_WEB_PATH_PARAM = "uiWebPath";
+
+    public static final String LOGIN_PARAM = "login";
+
     public static final String AUTHID_PARAM = "authId";
 
     public static final String CLIENT_PARAM = "client";
 
     public static final String VERSION_PARAM = "version";
 
-    public static final String PARAM_RANDOM = "random";
+    public static final String RANDOM_PARAM = "random";
+
+    public static final String AUTOLOGIN_PARAM = "autologin";
 
     private LoginFields() {
         super();

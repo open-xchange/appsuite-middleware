@@ -89,7 +89,7 @@ public final class LoginWriter {
      */
     public static void write(Session session, JSONObject json) throws JSONException {
         json.put(AJAXServlet.PARAMETER_SESSION, session.getSessionID());
-        json.put(LoginFields.PARAM_RANDOM, session.getRandomToken());
+        json.put(LoginFields.RANDOM_PARAM, session.getRandomToken());
     }
 
 }

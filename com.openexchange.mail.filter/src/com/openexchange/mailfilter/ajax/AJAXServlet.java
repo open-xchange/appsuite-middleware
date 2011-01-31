@@ -50,6 +50,8 @@
 package com.openexchange.mailfilter.ajax;
 
 import java.io.IOException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,6 +61,8 @@ import org.json.JSONException;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.configuration.CookieHashSource;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
@@ -89,8 +93,16 @@ public abstract class AJAXServlet extends HttpServlet {
      */
     public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
 
+    private CookieHashSource hashSource;
+
     protected AJAXServlet() {
         super();
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
     protected static void sendError(final HttpServletResponse resp) throws IOException {
@@ -110,7 +122,7 @@ public abstract class AJAXServlet extends HttpServlet {
             if (null == session) {
                 throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
             }
-            String secret = SessionServlet.extractSecret(req, session.getHash(), session.getClient());
+            String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
                 throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
@@ -167,7 +179,7 @@ public abstract class AJAXServlet extends HttpServlet {
             if (null == session) {
                 throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
             }
-            String secret = SessionServlet.extractSecret(req, session.getHash(), session.getClient());
+            String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
                 throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");

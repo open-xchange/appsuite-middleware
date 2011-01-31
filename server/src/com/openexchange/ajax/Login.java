@@ -79,7 +79,9 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -114,26 +116,25 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 
 public class Login extends AJAXServlet {
-	private enum CookieType {
+
+    private enum CookieType {
 		SESSION,
 		SECRET;
 	}
 	
     private static final long serialVersionUID = 7680745138705836499L;
 
-    private static final String PARAM_NAME = "name";
-
-    private static final String PARAM_PASSWORD = "password";
-
-    private static final String PARAM_UI_WEB_PATH = "uiWebPath";
-
     public static final String SESSION_PREFIX = "open-xchange-session-";
 
     public static final String SECRET_PREFIX = "open-xchange-secret-";
 
     private static final Log LOG = LogFactory.getLog(Login.class);
+    
+    public static final String ACTION_FORMLOGIN = "formlogin";
 
     private String uiWebPath;
+
+    private CookieHashSource hashSource;
 
     public Login() {
         super();
@@ -143,6 +144,7 @@ public class Login extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
+        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
     @Override
@@ -158,14 +160,12 @@ public class Login extends AJAXServlet {
                 doLogin(req, resp);
             } catch (final AjaxException e) {
                 logAndSendException(resp, e);
-                return;
             }
         } else if (ACTION_STORE.equals(action)) {
             try {
                 doStore(req, resp);
             } catch (final AbstractOXException e) {
                 logAndSendException(resp, e);
-                return;
             } catch (final JSONException e) {
                 log(RESPONSE_ERROR, e);
                 sendError(resp);
@@ -175,7 +175,6 @@ public class Login extends AJAXServlet {
                 doRefreshSecret(req, resp);
             } catch (final AbstractOXException e) {
                 logAndSendException(resp, e);
-                return;
             } catch (final JSONException e) {
                 log(RESPONSE_ERROR, e);
                 sendError(resp);
@@ -192,7 +191,7 @@ public class Login extends AJAXServlet {
             try {
                 Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                 if (session != null) {
-                    final String secret = SessionServlet.extractSecret(req, session.getHash(), session.getClient());
+                    final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
 
                     if (secret == null || !session.getSecret().equals(secret)) {
                         sendError(resp);
@@ -211,7 +210,7 @@ public class Login extends AJAXServlet {
             // The magic spell to disable caching
             Tools.disableCaching(resp);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            final String randomToken = req.getParameter(LoginFields.PARAM_RANDOM);
+            final String randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
             if (randomToken == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
@@ -265,18 +264,10 @@ public class Login extends AJAXServlet {
             writeSecretCookie(resp, session, hash, req.isSecure());
 
             if(ACTION_REDIRECT.equals(action)) {
-                String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
-                if (null == usedUIWebPath) {
-                    usedUIWebPath = uiWebPath;
-                }
-                // Prevent HTTP response splitting.
-                usedUIWebPath = usedUIWebPath.replaceAll("[\n\r]", "");
-                usedUIWebPath = addFragmentParameter(usedUIWebPath, PARAMETER_SESSION, session.getSessionID());
-                final String shouldStore = req.getParameter("store");
-                if(shouldStore != null) {
-                    usedUIWebPath = addFragmentParameter(usedUIWebPath, "store", shouldStore);
-                }
-                resp.sendRedirect(usedUIWebPath);
+                resp.sendRedirect(generateRedirectURL(
+                    req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
+                    req.getParameter("store"),
+                    session.getSessionID()));
             } else {
                 try {
                     final JSONObject json = new JSONObject();
@@ -450,6 +441,18 @@ public class Login extends AJAXServlet {
                 log(RESPONSE_ERROR, e);
                 sendError(resp);
             }
+        } else if (ACTION_FORMLOGIN.equals(action)) {
+            try {
+                doFormLogin(req, resp);
+            } catch (final AjaxException e) {
+                String errorPage = ERROR_PAGE_TEMPLATE.replace("ERROR_MESSAGE", e.getMessage());
+                resp.setContentType(CONTENTTYPE_HTML);
+                resp.getWriter().write(errorPage);
+            } catch (LoginException e) {
+                String errorPage = ERROR_PAGE_TEMPLATE.replace("ERROR_MESSAGE", e.getMessage());
+                resp.setContentType(CONTENTTYPE_HTML);
+                resp.getWriter().write(errorPage);
+            }
         } else {
             logAndSendException(resp, new AjaxException(AjaxException.Code.UnknownAction, action));
         }
@@ -507,7 +510,7 @@ public class Login extends AJAXServlet {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_SESSION);
         }
 
-        final Session session = SessionServlet.getSession(req, sessionId, sessiond);
+        final Session session = SessionServlet.getSession(hashSource, req, sessionId, sessiond);
 
         if (type == CookieType.SESSION) {
             writeSessionCookie(resp, session, session.getHash(), req.isSecure());
@@ -592,7 +595,7 @@ public class Login extends AJAXServlet {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 
-        final LoginRequest request = parseLogin(req);
+        final LoginRequest request = parseLogin(req, LoginFields.NAME_PARAM, false);
         // Perform the login
         final Response response = new Response();
         LoginResult result = null;
@@ -640,16 +643,42 @@ public class Login extends AJAXServlet {
         }
     }
 
-    private LoginRequest parseLogin(final HttpServletRequest req) throws AjaxException {
-        final String login = req.getParameter(PARAM_NAME);
+    private LoginRequest parseLogin(final HttpServletRequest req, String loginParamName, boolean strict) throws AjaxException {
+        final String login = req.getParameter(loginParamName);
         if (null == login) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_NAME);
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, loginParamName);
         }
-        final String password = req.getParameter(PARAM_PASSWORD);
+        final String password = req.getParameter(LoginFields.PASSWORD_PARAM);
         if (null == password) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_PASSWORD);
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, LoginFields.PASSWORD_PARAM);
         }
-        final String authId = null == req.getParameter(LoginFields.AUTHID_PARAM) ? UUIDs.getUnformattedString(UUID.randomUUID()) : req.getParameter(LoginFields.AUTHID_PARAM);
+        final String authId;
+        if (null == req.getParameter(LoginFields.AUTHID_PARAM)) {
+            if (strict) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, LoginFields.AUTHID_PARAM);
+            }
+            authId = UUIDs.getUnformattedString(UUID.randomUUID());
+        } else {
+            authId = req.getParameter(LoginFields.AUTHID_PARAM);
+        }
+        final String client;
+        if (null == req.getParameter(LoginFields.CLIENT_PARAM)) {
+            if (strict) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, LoginFields.CLIENT_PARAM);
+            }
+            client = "default";
+        } else {
+            client = req.getParameter(LoginFields.CLIENT_PARAM);
+        }
+        final String version;
+        if (null == req.getParameter(LoginFields.VERSION_PARAM)) {
+            if (strict) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, LoginFields.VERSION_PARAM);
+            }
+            version = null;
+        } else {
+            version = req.getParameter(LoginFields.VERSION_PARAM);
+        }
         final LoginRequest loginRequest = new LoginRequest() {
 
             private String hash = null;
@@ -675,14 +704,11 @@ public class Login extends AJAXServlet {
             }
 
             public String getClient() {
-                if (req.getParameter(LoginFields.CLIENT_PARAM) == null) {
-                    return "default";
-                }
-                return req.getParameter(LoginFields.CLIENT_PARAM);
+                return client;
             }
 
             public String getVersion() {
-                return req.getParameter(LoginFields.VERSION_PARAM);
+                return version;
             }
 
             public Interface getInterface() {
@@ -724,4 +750,62 @@ public class Login extends AJAXServlet {
     private static boolean parseBoolean(final String parameter) {
         return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
     }
+
+    private void doFormLogin(HttpServletRequest req, HttpServletResponse resp) throws AjaxException, LoginException, IOException {
+        Tools.disableCaching(resp);
+
+        final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM ,true);
+        final LoginResult result = LoginPerformer.getInstance().doLogin(request);
+        final Session session = result.getSession();
+
+        writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+
+        resp.sendRedirect(generateRedirectURL(
+            req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
+            req.getParameter(LoginFields.AUTOLOGIN_PARAM),
+            session.getSessionID()));
+    }
+
+    private String generateRedirectURL(String uiWebPathParam, String autoLoginParam, String sessionId) {
+        String retval = uiWebPathParam;
+        if (null == retval) {
+            retval = uiWebPath;
+        }
+        // Prevent HTTP response splitting.
+        retval = retval.replaceAll("[\n\r]", "");
+        retval = addFragmentParameter(retval, PARAMETER_SESSION, sessionId);
+        final String shouldStore = autoLoginParam;
+        if (shouldStore != null) {
+            retval = addFragmentParameter(retval, "store", shouldStore);
+        }
+        return retval;
+    }
+
+    private static final String ERROR_PAGE_TEMPLATE = 
+        "<html>\n" +
+        "<script type=\"text/javascript\">\n" + 
+        "// Display normal HTML for 3 seconds, then redirect via referrer.\n" + 
+        "setTimeout(redirect,3000);\n" + 
+        "function redirect(){\n" + 
+        " var referrer=document.referrer;\n" + 
+        " var redirect_url;\n" + 
+        " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + 
+        " if(referrer.indexOf(\"login=failed\")>=0){\n" + 
+        "  redirect_url=referrer;\n" + 
+        " }else{\n" + 
+        "  // Check if referrer contains multiple parameter\n" + 
+        "  if(referrer.indexOf(\"?\")<0){\n" + 
+        "   redirect_url=referrer+\"?login=failed\";\n" + 
+        "  }else{\n" + 
+        "   redirect_url=referrer+\"&login=failed\";\n" + 
+        "  }\n" + 
+        " }\n" + 
+        " // Redirect to referrer\n" +
+        " window.location.href=redirect_url;\n" + 
+        "}\n" + 
+        "</script>\n" + 
+        "<body>\n" + 
+        "<h1>ERROR_MESSAGE</h1>\n" + 
+        "</body>\n" + 
+        "</html>\n";
 }

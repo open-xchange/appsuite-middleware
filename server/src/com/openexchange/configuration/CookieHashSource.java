@@ -50,27 +50,27 @@
 package com.openexchange.configuration;
 
 /**
- * {@link CookieHash}
+ * {@link CookieHashSource}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum CookieHash {
+public enum CookieHashSource {
 
     CALCULATE("calculate"),
     REMEMBER("remember");
 
     private final String value;
 
-    CookieHash(String value) {
+    CookieHashSource(String value) {
         this.value = value;
     }
 
-    public static final CookieHash parse(String value) {
-        for (CookieHash hash : CookieHash.values()) {
+    public static final CookieHashSource parse(String value) {
+        for (CookieHashSource hash : CookieHashSource.values()) {
             if (hash.value.equals(value)) {
                 return hash;
             }
         }
-        return null;
+        return CALCULATE;
     }
 }

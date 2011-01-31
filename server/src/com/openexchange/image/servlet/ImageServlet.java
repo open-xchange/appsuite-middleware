@@ -52,12 +52,15 @@ package com.openexchange.image.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.helper.CombinedInputStream;
+import com.openexchange.configuration.CookieHashSource;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataProperties;
@@ -95,11 +98,19 @@ public final class ImageServlet extends HttpServlet {
      */
     public static final String PARAMETER_UID = "uid";
 
+    private CookieHashSource hashSource;
+
     /**
      * Initializes a new {@link ImageServlet}
      */
     public ImageServlet() {
         super();
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
     @Override
@@ -125,7 +136,7 @@ public final class ImageServlet extends HttpServlet {
             final String errorMsg = "Image not found";
             if(sessionId != null) {
                 final Session session = sessiondService.getSession(sessionId);
-                final String secret = SessionServlet.extractSecret(req, session.getHash(), session.getClient());
+                final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
 
                 if (session.getSecret().equals(secret)) {
                     final ImageData imageData = imageService.getImageData(session, uid);
