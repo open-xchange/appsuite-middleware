@@ -350,5 +350,13 @@ public final class InternalList {
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
         // new com.openexchange.folderstorage.virtual.VirtualTreeMigrationTask()
+
+        // +++++++++++++++++++++++++++++++++ Version 6.20 starts here. +++++++++++++++++++++++++++++++++
+        
+        // Transforms the "info" field to a TEXT field. This fields seems not to be used anywhere.
+        new com.openexchange.groupware.update.tasks.ContactInfoField2Text(),
+        
+        // Creates new Contact fields (First Name, Last Name, Company) for Kana based search in japanese environments.
+        new com.openexchange.groupware.update.tasks.ContactFieldsForJapaneseKanaSearch(),
     };
 }
