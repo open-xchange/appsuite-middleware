@@ -132,12 +132,12 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
         } else {
             retval.setJvmRoute(jvmRoute);
             retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
-            retval.setRandom(json.getString(LoginFields.PARAM_RANDOM));
+            retval.setRandom(json.getString(LoginFields.RANDOM_PARAM));
         }
         if (isFailOnError()) {
             assertFalse(response.getErrorMessage(), response.hasError());
             assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
-            assertTrue("Random is missing.", json.has(LoginFields.PARAM_RANDOM));
+            assertTrue("Random is missing.", json.has(LoginFields.RANDOM_PARAM));
         }
         return retval;
     }
