@@ -603,12 +603,18 @@ public class ContactRequest {
         }
     }
 
+    // Removes virtual columns or exchanges them agains real columns
     private int[] removeVirtual(final int[] columns) {
         final TIntArrayList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col != Contact.LAST_MODIFIED_UTC) {
+            if (col == Contact.LAST_MODIFIED_UTC) {
+                // SKIP
+            } else if (col == Contact.IMAGE1_URL) {
+                helper.add(Contact.IMAGE1);
+            } else {
                 helper.add(col);
             }
+            
         }
         return helper.toNativeArray();
     }
