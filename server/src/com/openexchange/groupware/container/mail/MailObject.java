@@ -383,10 +383,11 @@ public class MailObject {
             /*
              * Set content and its type
              */
+            final String subType = ct.getSubType();
             if (multipart == null) {
-                if ("html".equalsIgnoreCase(ct.getSubType()) || "htm".equalsIgnoreCase(ct.getSubType())) {
+                if ("html".equalsIgnoreCase(subType) || "htm".equalsIgnoreCase(subType)) {
                     msg.setContent(text, ct.toString());
-                } else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
+                } else if ("plain".equalsIgnoreCase(subType) || "enriched".equalsIgnoreCase(subType)) {
                     if (!ct.containsCharsetParameter()) {
                         msg.setText((String) text);
                     } else {
@@ -399,9 +400,9 @@ public class MailObject {
                 }
             } else {
                 final MimeBodyPart textPart = new MimeBodyPart();
-                if ("html".equalsIgnoreCase(ct.getSubType()) || "htm".equalsIgnoreCase(ct.getSubType())) {
+                if ("html".equalsIgnoreCase(subType) || "htm".equalsIgnoreCase(subType)) {
                     textPart.setContent(text, ct.toString());
-                } else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
+                } else if ("plain".equalsIgnoreCase(subType) || "enriched".equalsIgnoreCase(subType)) {
                     if (!ct.containsCharsetParameter()) {
                         textPart.setText((String) text);
                     } else {
