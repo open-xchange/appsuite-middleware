@@ -91,12 +91,12 @@ public class UserTest extends AbstractAJAXTest {
     private static final String USER_URL = "/ajax/contacts";
 
     public void testSearch() throws Exception {
-        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), "*", getSessionId());
+        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
     }
 
     public void testList() throws Exception {
-        com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), "*", getSessionId());
+        com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
 
         final int[] id = new int[users.length];
@@ -109,12 +109,12 @@ public class UserTest extends AbstractAJAXTest {
     }
 
     public void testSearchUsers() throws Exception {
-        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), "*", getSessionId());
+        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
     }
 
     public void testGet() throws Exception {
-        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), "*", getSessionId());
+        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
         loadUser(getWebConversation(), users[0].getId(), PROTOCOL + getHostName(), getSessionId());
     }

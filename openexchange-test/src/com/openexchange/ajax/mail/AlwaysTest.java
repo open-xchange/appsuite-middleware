@@ -122,7 +122,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
     }
 
     public void testFolderListing() throws Throwable {

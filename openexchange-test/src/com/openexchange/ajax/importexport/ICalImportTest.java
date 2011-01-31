@@ -91,7 +91,7 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
+		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
 		
 		boolean found = false;
 		
@@ -159,7 +159,7 @@ public class ICalImportTest extends AbstractICalTest {
 
 
 
-        final AJAXSession aSession = new AJAXSession(getWebConversation(), getSessionId());
+        final AJAXSession aSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
         final AJAXClient client = new AJAXClient(aSession);
         final ICalImportRequest request = new ICalImportRequest(appointmentFolderId, new ByteArrayInputStream(icalText.toString().getBytes("UTF-8")), false);
 	    final ICalImportResponse iResponse = client.execute(request);
@@ -232,7 +232,7 @@ public class ICalImportTest extends AbstractICalTest {
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
 		
-		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
+		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
 		
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());

@@ -33,7 +33,7 @@ public class UpdatesTest extends ContactTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC};
 
         final Contact contactObj = createContactObject("testLastModifiedUTC");

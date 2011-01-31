@@ -93,7 +93,7 @@ public abstract class ReminderTest extends AbstractAJAXTest {
      */
     @Deprecated
     public static ReminderObject[] listReminder(final WebConversation webConversation, final Date end, final TimeZone timeZone, final String host, final String sessionId) throws IOException, SAXException, JSONException, OXJSONException, AjaxException {
-        final AJAXSession session = new AJAXSession(webConversation, sessionId);
+        final AJAXSession session = new AJAXSession(webConversation, host, sessionId);
         final RangeRequest request = new RangeRequest(end);
         final RangeResponse response = Executor.execute(session, request, host);
         return response.getReminder(timeZone);

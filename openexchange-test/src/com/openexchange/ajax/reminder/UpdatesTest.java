@@ -116,7 +116,7 @@ public class UpdatesTest extends ReminderTest {
         final long expectedAlarm = startTime - (45*60*1000);
         assertEquals("alarm is not equals", new Date(expectedAlarm), reminderObj[pos].getDate());
 
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         final GetResponse aGetR = client.execute(new GetRequest(folderId, targetId));
         client.execute(new DeleteRequest(targetId, folderId, aGetR.getTimestamp()));
     }

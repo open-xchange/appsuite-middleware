@@ -167,7 +167,7 @@ public final class ConfigTools extends Assert {
         final String hostName, final String sessionId) throws IOException,
         SAXException, JSONException, AjaxException, ConfigurationException {
         AJAXConfig.init();
-        final AJAXSession session = new AJAXSession(conversation, sessionId);
+        final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         return Executor.execute(session, new GetRequest(Tree.Identifier), hostName).getInteger();
     }
 
@@ -191,7 +191,7 @@ public final class ConfigTools extends Assert {
         final String hostName, final String sessionId) throws IOException,
         SAXException, JSONException, AjaxException, ConfigurationException {
         AJAXConfig.init();
-        final AJAXSession session = new AJAXSession(conversation, sessionId);
+        final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         final String value = ConfigTools.get(session, new GetRequest(Tree
             .TimeZone)).getString();
         return TimeZone.getTimeZone(value);
@@ -212,7 +212,7 @@ public final class ConfigTools extends Assert {
         final String hostName, final String sessionId) throws IOException,
         SAXException, JSONException, AjaxException, ConfigurationException {
         AJAXConfig.init();
-        final AJAXSession session = new AJAXSession(conversation, sessionId);
+        final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         final Boolean value = ConfigTools.get(session, new GetRequest(Tree
             .MailFilter)).getBoolean();
         return value;

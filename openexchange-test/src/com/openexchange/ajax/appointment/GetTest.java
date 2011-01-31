@@ -217,7 +217,7 @@ public class GetTest extends AppointmentTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
 
         final Appointment appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
         appointmentObj.setStartDate(new Date());

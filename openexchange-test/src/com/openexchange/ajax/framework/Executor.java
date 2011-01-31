@@ -165,12 +165,12 @@ public class Executor extends Assert {
             throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
         }
         
-        DefaultHttpClient newClient = session.getHttpClient();
+        DefaultHttpClient httpClient = session.getHttpClient();
 
         long startRequest = System.currentTimeMillis();
-    	HttpResponse response = newClient.execute(httpRequest);
+    	HttpResponse response = httpClient.execute(httpRequest);
         long requestDuration = System.currentTimeMillis() - startRequest;
-        syncCookies(newClient, session.getConversation());
+        syncCookies(httpClient, session.getConversation());
 
         try {
 			Thread.sleep(getSleep());
@@ -193,25 +193,7 @@ public class Executor extends Assert {
         return retval;
     }
 
-	public static void syncCookies(CookieStore cookieStore, CookieJar cookieJar, String hostname) {
-		List<Cookie> cookies1 = cookieStore.getCookies();
-		Set<String> storedNames = new HashSet<String>();
-		for(Cookie c : cookies1){
-			cookieJar.putCookie(c.getName(), c.getValue());
-			storedNames.add(c.getName());
-		}
-		
-		String[] cookies2 = cookieJar.getCookieNames();
-		BasicClientCookie2 myCookie;
-		for(String name: cookies2)
-			if(! storedNames.contains(name)){
-				myCookie = new BasicClientCookie2(name, cookieJar.getCookieValue(name));
-				myCookie.setDomain(hostname);
-				cookieStore.addCookie(myCookie);
-			}
-	}
-
-	public static void syncCookies(WebConversation conversation, DefaultHttpClient httpClient) {
+	public static void syncCookies(WebConversation conversation, DefaultHttpClient httpClient, String hostname) {
 	    String[] cookies = conversation.getCookieNames();
         CookieStore cookieStore = httpClient.getCookieStore();
         Set<String> storedNames = new HashSet<String>();
@@ -222,16 +204,13 @@ public class Executor extends Assert {
             if (!storedNames.contains(name)) {
                 com.meterware.httpunit.cookies.Cookie cookie = conversation.getCookieDetails(name);
                 BasicClientCookie2 newCookie = new BasicClientCookie2(name, cookie.getValue());
-                newCookie.setDomain(cookie.getDomain());
-                newCookie.setExpiryDate(new Date(cookie.getExpiredTime()));
-                newCookie.setPath(cookie.getPath());
+                newCookie.setDomain(hostname);
                 cookieStore.addCookie(newCookie);
             }
         }
 	}
 
 	public static void syncCookies(DefaultHttpClient httpClient, WebConversation conversation) {
-	    
         Set<String> storedNames = new HashSet<String>();
         for (String name : conversation.getCookieNames()) {
             storedNames.add(name);
@@ -241,7 +220,7 @@ public class Executor extends Assert {
         for (Cookie cookie : cookieStore.getCookies()) {
             String name = cookie.getName();
             if (!storedNames.contains(name)) {
-                cookieJar.putSingleUseCookie(name, cookie.getValue(), cookie.getDomain(), cookie.getPath());
+                cookieJar.putCookie(name, cookie.getValue());
             }
         }
 	}

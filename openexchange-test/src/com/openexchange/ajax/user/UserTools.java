@@ -84,19 +84,19 @@ public final class UserTools extends Assert {
         super();
     }
 
-    public static UserImpl4Test[] searchUser(WebConversation webCon, String searchpattern, String session) throws AjaxException, IOException, SAXException, JSONException {
+    public static UserImpl4Test[] searchUser(WebConversation webCon, String host, String searchpattern, String session) throws AjaxException, IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern(searchpattern);
         search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
-        final AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
+        final AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
         final SearchResponse response = Executor.execute(client, request);
     	assertNotNull("timestamp", response.getTimestamp());
     	return response.getUser();
     }
 
     public static Contact getUserContact(WebConversation webCon, String host, String session, int userId) throws AjaxException, IOException, SAXException, JSONException {
-        AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
+        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
         client.setHostname(host);
         GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
         GetResponse response = client.execute(request);
@@ -104,7 +104,7 @@ public final class UserTools extends Assert {
     }
 
     public static User getUser(WebConversation webCon, String host, String session, int userId) throws AjaxException, IOException, SAXException, JSONException {
-        AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
+        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
         client.setHostname(host);
         return new UserResolver(client).getUser(userId);
     }

@@ -66,7 +66,7 @@ public class PortalSearchTest extends AppointmentTest {
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
-		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getSessionId());
+		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
 		final NewAppointmentSearchRequest request = new NewAppointmentSearchRequest(start, end, 10000, timeZone, columns);
 		final NewAppointmentSearchResponse response = (NewAppointmentSearchResponse)Executor.execute(ajaxSession, request);
 		

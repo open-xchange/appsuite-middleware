@@ -34,7 +34,7 @@ public class MultipleTest extends ContactTest {
 		contactObj.setSurName("testMultipleInsert");
 		contactObj.setParentFolderID(contactFolderId);
 		
-		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getSessionId());
+		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
 		final InsertRequest insertRequest1 = new InsertRequest(contactObj, true);
 		final InsertRequest insertRequest2 = new InsertRequest(contactObj, true);
 		final InsertRequest insertRequest3 = new InsertRequest(contactObj, true);

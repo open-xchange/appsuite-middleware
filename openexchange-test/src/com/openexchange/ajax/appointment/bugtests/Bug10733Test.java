@@ -48,7 +48,7 @@ public class Bug10733Test extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 
-		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getSessionId());
+		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
 		final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, false);
 
 		final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);

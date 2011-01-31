@@ -75,7 +75,7 @@ public class GroupTest {
      */
     @Deprecated
     public static final Group[] searchGroup(final WebConversation conv, final String pattern, String protocol, final String host, final String session) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        AJAXClient client = new AJAXClient(new AJAXSession(conv, session));
+        AJAXClient client = new AJAXClient(new AJAXSession(conv, host, session));
         if (protocol.endsWith("://")) {
             client.setProtocol(protocol.substring(0, protocol.length() - 3));
         } else {

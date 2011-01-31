@@ -118,8 +118,7 @@ public final class TaskTools extends Assert {
     public static int getPrivateTaskFolder(final WebConversation conversation,
         final String hostName, final String sessionId)
         throws IOException, SAXException, JSONException, AjaxException {
-        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
-            sessionId));
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostName, sessionId));
         return client.getValues().getPrivateTaskFolder();
     }
 
@@ -138,7 +137,7 @@ public final class TaskTools extends Assert {
     @Deprecated
     public static Response insertTask(final WebConversation conversation, final String hostName, final String sessionId, final Task task) throws JSONException, IOException, SAXException, AjaxException {
         LOG.trace("Inserting task.");
-        final AJAXClient client = new AJAXClient(new AJAXSession(conversation, sessionId));
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostName, sessionId));
         final InsertResponse insertR = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
         return insertR.getResponse();
     }
@@ -185,8 +184,7 @@ public final class TaskTools extends Assert {
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
         IOException, SAXException, AjaxException {
-        final TimeZone timeZone = new AJAXClient(new AJAXSession(conversation,
-            sessionId)).getValues().getTimeZone();
+        final TimeZone timeZone = new AJAXClient(new AJAXSession(conversation, hostName, sessionId)).getValues().getTimeZone();
         final JSONObject jsonObj = new JSONObject();
         new TaskWriter( timeZone).writeTask(task, jsonObj);
         return updateTask(conversation, hostName, sessionId, folderId, task
@@ -208,8 +206,7 @@ public final class TaskTools extends Assert {
         final int taskId) throws IOException, SAXException, JSONException,
         AjaxException, OXJSONException {
         LOG.trace("Getting task.");
-        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
-            sessionId));
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostName, sessionId));
         final GetResponse getR = get(client, new GetRequest(folderId,
             taskId));
         final Response response = getR.getResponse();
@@ -239,7 +236,7 @@ public final class TaskTools extends Assert {
         final int folder, final int task) throws IOException, SAXException,
         JSONException {
         LOG.trace("Deleting tasks.");
-        final AJAXSession session = new AJAXSession(conversation, sessionId);
+        final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         final AJAXClient client = new AJAXClient(session);
         final DeleteRequest request = new DeleteRequest(folder, task,
             lastUpdate);
@@ -254,8 +251,7 @@ public final class TaskTools extends Assert {
         final String hostName, final String sessionId, final String protocol, 
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return Executor.execute(new AJAXSession(conversation, 
-            sessionId), request, protocol, hostName);
+        return Executor.execute(new AJAXSession(conversation, hostName, sessionId), request, protocol, hostName);
     }
     
     /**
@@ -304,8 +300,7 @@ public final class TaskTools extends Assert {
         final String hostName, final String sessionId, final String protocol, 
         final AllRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return Executor.execute(new AJAXSession(conversation, 
-            sessionId), request, protocol, hostName);
+        return Executor.execute(new AJAXSession(conversation, hostName, sessionId), request, protocol, hostName);
     }
 
     public static void confirmTask(final WebConversation conversation,

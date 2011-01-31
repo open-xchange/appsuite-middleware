@@ -109,7 +109,7 @@ public class GetTest extends ContactTest {
         assertNotNull("contact object is null", loadContact);
         assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
         assertTrue("object id not set", loadContact.getObjectID() > 0);
-        AJAXClient client =  new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        AJAXClient client =  new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         com.openexchange.ajax.user.actions.GetResponse response =client.execute(
             new com.openexchange.ajax.user.actions.GetRequest(userId, client.getValues().getTimeZone()));
         loadContact = response.getContact();
@@ -120,7 +120,7 @@ public class GetTest extends ContactTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
 
         final Contact contactObj = createContactObject("testNew");
         final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());

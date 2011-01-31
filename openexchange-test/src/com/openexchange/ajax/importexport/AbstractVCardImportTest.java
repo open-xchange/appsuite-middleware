@@ -73,7 +73,7 @@ public abstract class AbstractVCardImportTest extends AbstractVCardTest {
     public AbstractVCardImportTest(final String name) throws Exception {
         super(name);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
     }
 
     @Override

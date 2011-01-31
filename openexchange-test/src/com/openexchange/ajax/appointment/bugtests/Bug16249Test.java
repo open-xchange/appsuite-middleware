@@ -215,7 +215,7 @@ public class Bug16249Test extends AttachmentTest {
     public void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, String host, final String session) throws Exception, AjaxException, IOException, SAXException {
         host = appendPrefix(host);
 
-        final AJAXSession ajaxSession = new AJAXSession(webCon, session);
+        final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, 0, new Date(Long.MAX_VALUE));
         deleteRequest.setFailOnError(false);
         final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);

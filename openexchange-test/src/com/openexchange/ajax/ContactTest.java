@@ -840,7 +840,7 @@ public class ContactTest extends AbstractAJAXTest {
     }
 
     public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, String protocol, String host, final String session) throws Exception {
-        AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
+        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
         if (protocol.endsWith("://")) {
             client.setProtocol(protocol.substring(0, protocol.length() - 3));
         } else {

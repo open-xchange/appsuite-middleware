@@ -278,7 +278,7 @@ public class ListTest extends AppointmentTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         final int cols[] = new int[]{ Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC};
 
         final Appointment appointmentObj = createAppointmentObject("testShowLastModifiedUTC");

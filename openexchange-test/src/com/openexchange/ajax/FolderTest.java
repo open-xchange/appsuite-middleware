@@ -185,7 +185,7 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static List<FolderObject> getSubfolders(WebConversation conversation, String protocol, String hostname, String sessionId, String parentIdentifier, boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
-        AJAXClient client = new AJAXClient(new AJAXSession(conversation, sessionId));
+        AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, sessionId));
         client.setProtocol(protocol);
         client.setHostname(hostname);
         return FolderTools.getSubFolders(client, parentIdentifier, ignoreMailfolder);
@@ -1352,7 +1352,7 @@ public class FolderTest extends AbstractAJAXTest {
     // Node 2652
 
     public void testLastModifiedUTCInGet() throws JSONException, AjaxException, IOException, SAXException {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // Load an existing folder
         final GetRequest getRequest = new GetRequest(API.OX_OLD,
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
@@ -1364,7 +1364,7 @@ public class FolderTest extends AbstractAJAXTest {
     // Node 2652
 
     public void testLastModifiedUTCInList() throws JSONException, IOException, SAXException, AjaxException {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // List known folder
         final ListRequest listRequest = new ListRequest(API.OX_OLD,
             "" + FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
@@ -1385,7 +1385,7 @@ public class FolderTest extends AbstractAJAXTest {
     // Node 2652
 
     public void testLastModifiedUTCInUpdates() throws JSONException, AjaxException, IOException, SAXException {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // List known folder
         final UpdatesRequest updatesRequest = new UpdatesRequest(API.OX_OLD,
             FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,

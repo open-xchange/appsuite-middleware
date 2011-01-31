@@ -394,9 +394,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     public static void deleteAppointment(final WebConversation webCon, final int id,
             final int inFolder, final int recurrencePosition, final Date modified, String host, final String session)
             throws Exception {
-        host = appendPrefix(host);
-
-        final AJAXSession ajaxSession = new AJAXSession(webCon, session);
+        final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrencePosition, modified);
         deleteRequest.setFailOnError(false);
         final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
@@ -407,9 +405,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date recurrenceDatePosition, final Date modified, String host, final String session) throws Exception, AjaxException, IOException, SAXException {
-        host = appendPrefix(host);
-
-        final AJAXSession ajaxSession = new AJAXSession(webCon, session);
+        final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrenceDatePosition, modified);
         deleteRequest.setFailOnError(false);
         final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
@@ -1247,9 +1243,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     protected AJAXClient getClient() throws JSONException, IOException, AjaxException {
-        return new AJAXClient(
-                new AJAXSession(getWebConversation(), getSessionId())
-        );
+        return new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
     }
     
     protected Appointment link(Appointment base, Appointment update){

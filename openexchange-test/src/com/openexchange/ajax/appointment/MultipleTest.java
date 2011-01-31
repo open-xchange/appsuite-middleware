@@ -34,7 +34,7 @@ public class MultipleTest extends AppointmentTest {
 		final Appointment appointmentObj = createAppointmentObject("testMultipleInsert");
 		appointmentObj.setIgnoreConflicts(true);
 		
-		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getSessionId());
+		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
 		final InsertRequest insertRequest1 = new InsertRequest(appointmentObj, timeZone, true);
 		final InsertRequest insertRequest2 = new InsertRequest(appointmentObj, timeZone, true);
 		final InsertRequest insertRequest3 = new InsertRequest(appointmentObj, timeZone, true);
@@ -69,7 +69,7 @@ public class MultipleTest extends AppointmentTest {
 	 * Inserts a lot of appointments with 1 multiple request.
 	 */
 	public void _testTonnenInsert() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         final InsertRequest[] inserts = new InsertRequest[1000];
         for (int i = 0; i < inserts.length; i++) {
             final Appointment appointmentObj = createAppointmentObject("testMultipleInsert");

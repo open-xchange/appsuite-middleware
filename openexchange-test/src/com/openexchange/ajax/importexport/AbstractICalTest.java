@@ -205,14 +205,14 @@ public class AbstractICalTest extends AbstractAJAXTest {
     }
 
     public static ImportResult[] importICal(final WebConversation webCon, final InputStream input, final int folderId, final String host, final String session) throws AjaxException, IOException, SAXException, JSONException {
-        final AJAXSession aSession = new AJAXSession(webCon, session);
+        final AJAXSession aSession = new AJAXSession(webCon, host, session);
         final ICalImportRequest request = new ICalImportRequest(folderId, input);
         final ICalImportResponse iResponse = Executor.execute(aSession, request, host);
         return iResponse.getImports();
     }
 
-    public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, AjaxException, JSONException {
-        final AJAXSession aSession = new AJAXSession(webCon, session);
+    public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, String host, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, AjaxException, JSONException {
+        final AJAXSession aSession = new AJAXSession(webCon, host, session);
         final ICalExportRequest request = new ICalExportRequest(folderId);
         final ICalExportResponse response = Executor.execute(aSession, request);
 

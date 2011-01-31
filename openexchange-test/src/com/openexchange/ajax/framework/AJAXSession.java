@@ -76,12 +76,8 @@ public class AJAXSession {
         this(newWebConversation(), newHttpClient(), null);
     }
 
-    public AJAXSession(final WebConversation conversation) {
-        this(conversation, null);
-    }
-
-    public AJAXSession(final WebConversation conversation, final String id) {
-        this(conversation, newHttpClient(conversation), id);
+    public AJAXSession(final WebConversation conversation, String hostname, final String id) {
+        this(conversation, newHttpClient(conversation, hostname), id);
     }
 
     public AJAXSession(WebConversation conversation, DefaultHttpClient httpClient, String id) {
@@ -143,9 +139,9 @@ public class AJAXSession {
         return retval;
     }
 
-    public static DefaultHttpClient newHttpClient(WebConversation conversation) {
+    public static DefaultHttpClient newHttpClient(WebConversation conversation, String hostname) {
         DefaultHttpClient retval = newHttpClient();
-        Executor.syncCookies(conversation, retval);
+        Executor.syncCookies(conversation, retval, hostname);
         return retval;
     }
 }
