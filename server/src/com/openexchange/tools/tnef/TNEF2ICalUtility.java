@@ -252,7 +252,7 @@ public final class TNEF2ICalUtility {
      * @throws IOException If an I/O error occurs
      */
     public static <V> V findProp(final int id, final MAPIProps mapiProps) throws IOException {
-        return findProp(id, null, mapiProps);
+        return findProp(id, (V) null, mapiProps);
     }
 
     /**
@@ -305,7 +305,7 @@ public final class TNEF2ICalUtility {
      * @throws IOException If an I/O error occurs
      */
     public static <V> V findNamedProp(final String name, final MAPIProps mapiProps) throws IOException {
-        return findNamedProp(name, null, mapiProps);
+        return findNamedProp(name, (V) null, mapiProps);
     }
 
     /**
