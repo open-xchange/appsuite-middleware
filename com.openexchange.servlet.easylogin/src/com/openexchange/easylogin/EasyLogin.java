@@ -62,6 +62,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
@@ -290,6 +291,8 @@ public class EasyLogin extends HttpServlet {
         try {
             result = LoginPerformer.getInstance().doLogin(new LoginRequest() {
 
+                private String hash = null;
+
                 public String getUserAgent() {
                     return req.getHeader("user-agent");
                 }
@@ -323,7 +326,10 @@ public class EasyLogin extends HttpServlet {
                 }
 
                 public String getHash() {
-                    return null;
+                    if (hash != null) {
+                        return hash;
+                    }
+                    return hash = HashCalculator.getHash(req, client);
                 }
             });
         } catch (LoginException e) {
