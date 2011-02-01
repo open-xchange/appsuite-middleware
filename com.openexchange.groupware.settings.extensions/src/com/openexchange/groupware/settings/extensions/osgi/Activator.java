@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.settings.extensions.osgi;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -62,7 +64,6 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.extensions.PropertiesPublisher;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
@@ -82,7 +83,6 @@ public class Activator implements BundleActivator {
      * 
      */
     private static final String PREFERENCE_PATH = "preferencePath";
-    private PropertiesPublisher propPublisher;
     private ServicePublisher services;
     private BundleContext context;
     private ServiceTracker serviceTracker;
@@ -91,8 +91,6 @@ public class Activator implements BundleActivator {
 
     public void start(final BundleContext bundleContext) throws Exception {
         services = new OSGiServicePublisher(bundleContext);
-        propPublisher = new PropertiesPublisher();
-        propPublisher.setServicePublisher(services);
         context = bundleContext;
         registerListenerForConfigurationService();
     }
@@ -141,8 +139,17 @@ public class Activator implements BundleActivator {
 
                     public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
                         try {
-                            String string = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
-                            setting.setSingleValue(string);
+                            Object value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
+                            
+                            try {
+                                // Let's turn this into a nice object, if it conforms to JSON
+                                value = new JSONObject("{value: "+value+"}").get("value");
+
+                            } catch (JSONException x) {
+                                // Ah well, let's pretend it's a string.
+                            }
+                            
+                            setting.setSingleValue(value);
                         } catch (ConfigCascadeException e) {
                             throw new SettingException(e);
                         }

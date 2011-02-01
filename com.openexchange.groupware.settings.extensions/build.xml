@@ -33,6 +33,7 @@
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="cascadejar" value="com.openexchange.config.cascade.jar" />
     <property name="serverjar" value="com.openexchange.server.jar"/>
+    <property name="jsonjar" value="json.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -41,6 +42,7 @@
 		<pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${cascadejar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>
 
     <!-- Compile -->
