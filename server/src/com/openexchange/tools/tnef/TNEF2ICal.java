@@ -68,8 +68,10 @@ import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.parameter.CuType;
 import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
+import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Action;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Categories;
@@ -371,62 +373,51 @@ public final class TNEF2ICal {
              */
             final VEvent event = new VEvent();
             final PropertyList eventPropertyList = event.getProperties();
-            String s = findProp(MAPIProp.PR_DISPLAY_TO, mapiProps);
+            /*
+             * Look for organizer property
+             */
+            String s = getEmailAddress(findPropString(MAPIProp.PR_SENDER_EMAIL_ADDRESS, mapiProps));
+            if (isEmpty(s) && !bIsReply) {
+                s = sSenderSearchKeyEmail;
+            }
+            // TODO: Use the common name?
+            final String organizer;
+            if (!isEmpty(s)) {
+                organizer = s;
+                eventPropertyList.add(new Organizer(s));
+            } else {
+                organizer = null;
+            }
+            /*
+             * Attendees
+             */
+            s = findProp(MAPIProp.PR_DISPLAY_TO, mapiProps);
             final String[] attendees = null == s ? new String[0] : s.split(" *; *");
             if (attendees.length > 0) {
                 for (final String sAttendee : attendees) {
                     final String addr = getEmailAddress(sAttendee);
                     if (null != addr) {
                         s = addr;
-                        final Attendee attendee = new Attendee(s);
-                        if (bIsReply) {
-                            if (bCompatMethodAccepted) {
-                                attendee.getParameters().add(PartStat.ACCEPTED);
-                            }
-                            if (bCompatMethodDeclined) {
-                                attendee.getParameters().add(PartStat.DECLINED);
-                            }
-                            if (bCompatMethodAcceptedCond) {
-                                attendee.getParameters().add(PartStat.TENTATIVE);
-                            }
-                        } else {
-                            attendee.getParameters().add(PartStat.NEEDS_ACTION);
-                            attendee.getParameters().add(Role.REQ_PARTICIPANT);
-                        }
+                        final Attendee attendee = generateAttendee(
+                            bCompatMethodAccepted,
+                            bCompatMethodAcceptedCond,
+                            bCompatMethodDeclined,
+                            bIsReply,
+                            s);
                         eventPropertyList.add(attendee);
                     }
                 }
             } else {
                 s = sSenderSearchKeyEmail;
                 if (!isEmpty(s)) {
-                    final Attendee attendee = new Attendee(s);
-                    if (bIsReply) {
-                        if (bCompatMethodAccepted) {
-                            attendee.getParameters().add(PartStat.ACCEPTED);
-                        }
-                        if (bCompatMethodDeclined) {
-                            attendee.getParameters().add(PartStat.DECLINED);
-                        }
-                        if (bCompatMethodAcceptedCond) {
-                            attendee.getParameters().add(PartStat.TENTATIVE);
-                        }
-                    } else {
-                        attendee.getParameters().add(PartStat.NEEDS_ACTION);
-                        attendee.getParameters().add(Role.REQ_PARTICIPANT);
-                    }
+                    final Attendee attendee = generateAttendee(
+                        bCompatMethodAccepted,
+                        bCompatMethodAcceptedCond,
+                        bCompatMethodDeclined,
+                        bIsReply,
+                        s);
                     eventPropertyList.add(attendee);
                 }
-            }
-            /*
-             * Look for organizer property
-             */
-            s = getEmailAddress(findPropString(MAPIProp.PR_SENDER_EMAIL_ADDRESS, mapiProps));
-            if (isEmpty(s) && !bIsReply) {
-                s = sSenderSearchKeyEmail;
-            }
-            // TODO: Use the common name?
-            if (!isEmpty(s)) {
-                eventPropertyList.add(new Organizer(s));
             }
             /*
              * Time zone ID
@@ -530,7 +521,10 @@ public final class TNEF2ICal {
                  */
                 d = findNamedProp("0x8560", mapiProps);
                 vAlarm.getProperties().add(new Trigger(new DateTime(d)));
-
+                /*
+                 * Reminder
+                 */
+                vAlarm.getProperties().add(new Description("Reminder"));
                 event.getAlarms().add(vAlarm);
             }
             /*
@@ -549,5 +543,26 @@ public final class TNEF2ICal {
             return null;
         }
     }
-    
+
+    private static Attendee generateAttendee(final boolean bCompatMethodAccepted, final boolean bCompatMethodAcceptedCond, final boolean bCompatMethodDeclined, final boolean bIsReply, final String s) throws URISyntaxException {
+        final Attendee attendee = new Attendee(s);
+        if (bIsReply) {
+            if (bCompatMethodAccepted) {
+                attendee.getParameters().add(PartStat.ACCEPTED);
+            }
+            if (bCompatMethodDeclined) {
+                attendee.getParameters().add(PartStat.DECLINED);
+            }
+            if (bCompatMethodAcceptedCond) {
+                attendee.getParameters().add(PartStat.TENTATIVE);
+            }
+        } else {
+            attendee.getParameters().add(PartStat.NEEDS_ACTION);
+            attendee.getParameters().add(Role.REQ_PARTICIPANT);
+            attendee.getParameters().add(Rsvp.TRUE);
+        }
+        attendee.getParameters().add(CuType.INDIVIDUAL);
+        return attendee;
+    }
+
 }
