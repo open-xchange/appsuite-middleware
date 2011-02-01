@@ -57,6 +57,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -3876,6 +3878,15 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     final public HashSet<String> getAliases() {
         return this.aliases;
+    }
+    
+    
+    final public void setAliasesForSOAP(List<String> aliases) {
+    	this.aliases = new HashSet<String>(aliases);
+    }
+    
+    final public List<String> getAliasesForSOAP() {
+    	return new LinkedList<String>(this.aliases);
     }
 
     /**
