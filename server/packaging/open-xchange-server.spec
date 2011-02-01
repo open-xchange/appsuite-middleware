@@ -731,6 +731,8 @@ fi
 %dir /opt/open-xchange/etc/groupware/servletmappings
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
+%doc doc/examples
+
 %changelog
 * Tue Jan 25 2011 - thorben.betten@open-xchange.com
  - Bugfix #18080: Considering module when checking public folder access
