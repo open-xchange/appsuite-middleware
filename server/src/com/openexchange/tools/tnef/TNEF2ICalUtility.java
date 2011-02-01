@@ -54,17 +54,18 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import javax.mail.internet.AddressException;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.freeutils.tnef.MAPIProp;
 import net.freeutils.tnef.MAPIPropName;
 import net.freeutils.tnef.MAPIProps;
-
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link TNEF2ICalUtility}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TNEF2ICalUtility {
@@ -74,6 +75,34 @@ public final class TNEF2ICalUtility {
      */
     private TNEF2ICalUtility() {
         super();
+    }
+
+    /**
+     * Gets the valid email address from given string
+     * 
+     * @param s The string which is possibly an email address
+     * @return The valid email address or <code>null</code>
+     */
+    public static String getEmailAddress(final String s) {
+        if (isEmpty(s)) {
+            return null;
+        }
+        String address;
+        {
+            final int pos = s.indexOf(':');
+            if (pos >= 0) {
+                address = s.substring(pos + 1).trim();
+            } else {
+                address = s.trim();
+            }
+        }
+        try {
+            final String verifiedAddr = new QuotedInternetAddress(address, false).getAddress();
+            return new StringBuilder(48).append("mailto:").append(verifiedAddr).toString();
+        } catch (final AddressException e) {
+            // No valid email address
+            return null;
+        }
     }
 
     /**
@@ -383,5 +412,64 @@ public final class TNEF2ICalUtility {
         }
         return fallback;
     }
-    
+
+    /**
+     * Creates a String containing the hexadecimal representation of the given bytes.
+     * 
+     * @param bytes a byte array whose content is to be displayed
+     * @return a String containing the hexadecimal representation of the given bytes
+     */
+    public static String toHexString(final byte[] bytes) {
+        return toHexString(bytes, 0, bytes != null ? bytes.length : 0, -1);
+    }
+
+    /**
+     * Creates a String containing the hexadecimal representation of the given bytes.
+     * <p>
+     * If {@code max} is non-negative and {@code bytes.length > max}, then the first {@code max} bytes are returned, followed by a
+     * human-readable indication that there are {@code bytes.length} total bytes of data including those that are not returned.
+     * 
+     * @param bytes a byte array whose content is to be displayed
+     * @param max the maximum number of bytes to be displayed (-1 means no limit)
+     * @return a String containing the hexadecimal representation of the given bytes
+     */
+    public static String toHexString(final byte[] bytes, final int max) {
+        return toHexString(bytes, 0, bytes != null ? bytes.length : 0, max);
+    }
+
+    /**
+     * Creates a String containing the hexadecimal representation of the given bytes.
+     * <p>
+     * If {@code max} is non-negative and {@code len > max}, then the first {@code max} bytes are returned, followed by a human-readable
+     * indication that there are {@code len} total bytes of data including those that are not returned.
+     * <p>
+     * In particular, {@code offset + len} can extend beyond the array boundaries, as long as {@code offset + max} is still within them,
+     * resulting in {@code max} bytes returned followed by an indication that there are {@code len} total data bytes (including those that
+     * are not returned).
+     * 
+     * @param bytes a byte array whose content is to be displayed
+     * @param offset the offset within the byte array to start at
+     * @param len the number of bytes
+     * @param max the maximum number of bytes to be displayed (-1 means no limit)
+     * @return a String containing the hexadecimal representation of the given bytes
+     */
+    public static String toHexString(final byte[] bytes, final int offset, final int len, final int max) {
+        if (bytes == null) {
+            return "[null]";
+        }
+        final int count = max > -1 && max < len ? max : len;
+        final StringBuilder s = new StringBuilder(count * 2);
+        for (int i = 0; i < count; i++) {
+            final String b = Integer.toHexString(bytes[offset + i] & 0xFF).toUpperCase();
+            if (b.length() == 1) {
+                s.append('0');
+            }
+            s.append(b);
+        }
+        if (count < len) {
+            s.append("... (" + len + " bytes)");
+        }
+        return s.toString();
+    }
+
 }

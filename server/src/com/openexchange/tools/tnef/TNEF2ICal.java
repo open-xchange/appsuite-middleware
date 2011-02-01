@@ -472,9 +472,13 @@ public final class TNEF2ICal {
              * 
              * Is "0x0023" OK  -  or should we look for "0x0003" ??
              */
-            final RawInputStream ris = findNamedProp("0x23", mapiProps);
-            s = toHexString(ris.toByteArray());
-            eventPropertyList.add(new Uid(s));
+            {
+                final RawInputStream ris = findNamedProp("0x23", mapiProps);
+                if (ris != null) {
+                    s = toHexString(ris.toByteArray());
+                    eventPropertyList.add(new Uid(s));
+                }
+            }
             /*-
              * PENDING(khz): is this value in local timezone? Must it be
              * adjusted? Most likely this is a bug in the server or in
@@ -486,24 +490,30 @@ public final class TNEF2ICal {
              * Categories
              */
             s = findPropString(MAPIProp.PR_KEYWORD, mapiProps);
-            if (s != null) {
+            if (!isEmpty(s)) {
                 eventPropertyList.add(new Categories(s));
             }
             /*
              * Description
              */
             s = findPropString(MAPIProp.PR_BODY, mapiProps);
-            eventPropertyList.add(new Description(s));
+            if (!isEmpty(s)) {
+                eventPropertyList.add(new Description(s));
+            }
             /*
              * Summary
              */
             s = findPropString(MAPIProp.PR_CONVERSATION_TOPIC, mapiProps);
-            eventPropertyList.add(new Summary(s));
+            if (!isEmpty(s)) {
+                eventPropertyList.add(new Summary(s));
+            }
             /*
              * Priority
              */
             s = findPropString(MAPIProp.PR_PRIORITY, mapiProps);
-            eventPropertyList.add(new Priority(Integer.parseInt(s.trim())));
+            if (!isEmpty(s)) {
+                eventPropertyList.add(new Priority(Integer.parseInt(s.trim())));
+            }
             /*
              * Is reminder flag set?
              */
