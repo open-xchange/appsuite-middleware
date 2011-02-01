@@ -100,9 +100,10 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
         for (String string : set) {
             final Object test = originalObject.get(string);
             if (test != JSONObject.NULL) {
-                if (test instanceof JSONArray && ((JSONArray) test).length() > 0) {
-                    retVal.put(string, test);
-                    continue;
+                if (test instanceof JSONArray) {
+                    if (((JSONArray) test).length() > 0) {
+                        retVal.put(string, test);
+                    }
                 } else {
                     retVal.put(string, test);
                 }
