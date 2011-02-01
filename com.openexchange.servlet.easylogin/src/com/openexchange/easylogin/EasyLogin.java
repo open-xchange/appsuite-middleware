@@ -53,15 +53,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -293,6 +286,7 @@ public class EasyLogin extends HttpServlet {
 
     private void doJavaLogin(final HttpServletRequest req, HttpServletResponse resp, final String authID, final String login, final String password) throws IOException {
         final LoginResult result;
+        final String client = getClient(req);
         try {
             result = LoginPerformer.getInstance().doLogin(new LoginRequest() {
 
@@ -321,7 +315,7 @@ public class EasyLogin extends HttpServlet {
                 }
 
                 public String getClient() {
-                    return null;
+                    return client;
                 }
 
                 public String getVersion() {
@@ -366,10 +360,6 @@ public class EasyLogin extends HttpServlet {
         sb.append("&store=").append(store);
 
         // Client
-        String client = getParameter(req, clientParam);
-        if (client == null) {
-            client = defaultClient;
-        }
         if (client != null) {
             sb.append("&client=").append(client);
         }
@@ -377,71 +367,12 @@ public class EasyLogin extends HttpServlet {
         resp.sendRedirect(sb.toString());
     }
 
-    @SuppressWarnings("unused")
-    private void doHTTPLogin(final HttpServletResponse resp, PrintWriter out, final String password, final String login, final String authID) throws MalformedURLException, IOException {
-        String urlString = "https://" + loadBalancer + ajaxRoot + "/login?action=login&name=" + login + "&password=" + password + "&" + AUTH_ID_PARAMETER + "=" + authID;
-        URL url = new URL(urlString);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setDoOutput(true);
-        con.connect();
-        int i = 1;
-        String hdrKey = null;
-        String jSessionID = "";
-
-        while ((hdrKey = con.getHeaderFieldKey(i)) != null) {
-            if (hdrKey.equals("Set-Cookie")) {
-                String content = con.getHeaderField(i);
-                String key = "";
-                String value = "";
-                Pattern keyPattern = Pattern.compile(("([^=]*)"));
-                Matcher keyMatcher = keyPattern.matcher(content);
-                if (keyMatcher.find()) {
-                    key = keyMatcher.group(1);
-                }
-                Pattern valuePattern = Pattern.compile("=([^;]*)");
-                Matcher valueMatcher = valuePattern.matcher(content);
-                if (valueMatcher.find()) {
-                    value = valueMatcher.group(1);
-                }
-                LOG.info("Getting cookie : " + key + "=" + value);
-                if (content.startsWith("JSESSIONID")) {
-                    jSessionID = value;
-                    LOG.info("jSessionID : " + jSessionID);
-                }
-            }
-            i++;
+    private String getClient(HttpServletRequest req) {
+        String retval = getParameter(req, clientParam);
+        if (retval == null) {
+            retval = defaultClient;
         }
-
-        // get the random token from the response
-        String randomToken = "";
-        BufferedReader rd = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String line;
-        String errorMessage = null;
-        while ((line = rd.readLine()) != null) {
-            Pattern randomPattern = Pattern.compile("\"random\":\"([^\"]*)");
-            Matcher randomMatcher = randomPattern.matcher(line);
-            if (randomMatcher.find()) {
-                randomToken = randomMatcher.group(1);
-                LOG.info("randomToken : " + randomToken);
-            }
-            Pattern errorPattern = Pattern.compile("\"error\":\"([^\"]*)\"");
-            Matcher errorMatcher = errorPattern.matcher(line);
-            if (errorMatcher.find()) {
-                errorMessage = errorMatcher.group(1);
-            }
-        }
-        rd.close();
-        con.disconnect();
-
-        if (errorMessage == null) {
-            // send redirect if login worked
-            LOG.info("Login worked, sending redirect");
-            resp.sendRedirect(ajaxRoot + "/login;jsessionid=" + jSessionID + "?action=redirect&random=" + randomToken);
-        } else {
-            LOG.info("Login did not work, sending errorPage");
-            String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", errorMessage);
-            out.write(errorPage);
-        }
+        return retval;
     }
 
     static public String getFileContents(File file) {

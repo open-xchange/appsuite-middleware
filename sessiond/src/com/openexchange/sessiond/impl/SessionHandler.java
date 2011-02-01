@@ -261,15 +261,19 @@ public final class SessionHandler {
         sessionControl.getSession().setPassword(newPassword);
     }
 
-    protected static Session getSessionByRandomToken(final String randomToken, final String localIp) {
+    protected static Session getSessionByRandomToken(final String randomToken, final String newIP) {
         final SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken);
         if (null == sessionControl) {
             return null;
         }
         // Set local IP
         final Session session = sessionControl.getSession();
-        LOG.info("Changing IP of session " + session.getSessionID() + " from " + session.getLocalIp() + " to " + localIp + '.');
-        session.setLocalIp(localIp);
+
+        final String oldIP = session.getLocalIp();
+        if (!newIP.equals(oldIP)) {
+            LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+            session.setLocalIp(newIP);
+        }
         return sessionControl.getSession();
     }
 

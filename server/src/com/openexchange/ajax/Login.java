@@ -253,17 +253,14 @@ public class Login extends AJAXServlet {
                 return;
             }
 
-            final String oldIP = session.getLocalIp();
-            final String newIP = req.getRemoteAddr();
-            if (!newIP.equals(oldIP)) {
-                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
-                session.setLocalIp(newIP);
+            String client = req.getParameter(LoginFields.CLIENT_PARAM);
+            if (null == client) {
+                client = session.getClient();
             }
-
             final String hash = HashCalculator.getHash(req, session.getClient());
             writeSecretCookie(resp, session, hash, req.isSecure());
 
-            if(ACTION_REDIRECT.equals(action)) {
+            if (ACTION_REDIRECT.equals(action)) {
                 resp.sendRedirect(generateRedirectURL(
                     req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
                     req.getParameter("store"),
@@ -474,23 +471,24 @@ public class Login extends AJAXServlet {
     }
 
     protected String addFragmentParameter(String usedUIWebPath, final String param, final String value) {
-        final int fragIndex = usedUIWebPath.indexOf('#');
+        String retval = usedUIWebPath;
+        final int fragIndex = retval.indexOf('#');
 
         // First get rid of the query String, so we can reappend it later
-        final int questionMarkIndex = usedUIWebPath.indexOf('?', fragIndex);
+        final int questionMarkIndex = retval.indexOf('?', fragIndex);
         String query = "";
-        if(questionMarkIndex > 0) {
-            query = usedUIWebPath.substring(questionMarkIndex);
-            usedUIWebPath = usedUIWebPath.substring(0, questionMarkIndex);
+        if (questionMarkIndex > 0) {
+            query = retval.substring(questionMarkIndex);
+            retval = retval.substring(0, questionMarkIndex);
         }
         // Now let's see, if this url already contains a fragment
-        if(!usedUIWebPath.contains("#")) {
+        if (!retval.contains("#")) {
             // Apparently it didn't, so we can append our own
-            return usedUIWebPath+"#"+param+"="+value+query;
+            return retval + "#" + param + "=" + value + query;
         }
-        // Alright, we already have a fragment, let's append a new parameer
+        // Alright, we already have a fragment, let's append a new parameter
 
-        return usedUIWebPath+"&"+param+"="+value+query;
+        return retval + "&" + param + "=" + value + query;
     }
 
     /**
