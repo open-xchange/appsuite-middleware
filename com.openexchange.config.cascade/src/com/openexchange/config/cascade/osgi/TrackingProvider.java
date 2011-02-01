@@ -82,7 +82,7 @@ public class TrackingProvider implements ConfigProviderService {
         this.tracker = providers;
     }
 
-    public BasicProperty get(String property, int context, int user) throws ConfigCascadeException {
+    public BasicProperty get(final String property, int context, int user) throws ConfigCascadeException {
         ServiceReference[] serviceReferences = tracker.getServiceReferences();
         if(serviceReferences == null) {
             serviceReferences = new ServiceReference[0];
@@ -134,12 +134,12 @@ public class TrackingProvider implements ConfigProviderService {
                 }
 
                 public void set(String value) {
-                    throw new UnsupportedOperationException();
+                    throw new UnsupportedOperationException("Can't save setting "+property+". No ConfigProvider is specified for this value");
                 }
 
                 public void set(String metadataName, String value) {
-                    throw new UnsupportedOperationException();    
-                }                
+                    throw new UnsupportedOperationException("Can't save metadata "+metadataName+" on property "+property+". No ConfigProvider is specified for this value");    
+                }  
             };
         }
         return first;
