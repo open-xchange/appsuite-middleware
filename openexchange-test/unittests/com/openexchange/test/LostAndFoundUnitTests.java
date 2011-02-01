@@ -70,7 +70,6 @@ import com.openexchange.groupware.infostore.database.DocumentMetadataImplTest;
 import com.openexchange.groupware.infostore.database.JSONDocumentMetadataTest;
 import com.openexchange.groupware.notify.AddICalAttachmentTest;
 import com.openexchange.groupware.notify.OnlyResources;
-import com.openexchange.groupware.settings.extensions.PropertiesPublisherTest;
 import com.openexchange.groupware.tasks.TestTaskTest;
 import com.openexchange.json.JSONWriterTest;
 import com.openexchange.mail.MailConverterTest;
@@ -96,7 +95,6 @@ public class LostAndFoundUnitTests {
         tests.addTestSuite(MailConverterTest.class);
         tests.addTestSuite(JSONWriterTest.class);
         tests.addTestSuite(TestTaskTest.class);
-        tests.addTestSuite(PropertiesPublisherTest.class);
         tests.addTestSuite(OnlyResources.class);
         tests.addTestSuite(AddICalAttachmentTest.class);
         tests.addTestSuite(JSONDocumentMetadataTest.class);
