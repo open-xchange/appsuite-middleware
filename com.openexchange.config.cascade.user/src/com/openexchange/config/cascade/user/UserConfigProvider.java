@@ -50,6 +50,7 @@
 package com.openexchange.config.cascade.user;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -131,6 +132,9 @@ public class UserConfigProvider implements ConfigProviderService {
     }
 
     public Collection<String> getAllPropertyNames(int context, int userId) throws ConfigCascadeException {
+        if(context == NO_CONTEXT && userId == NO_CONTEXT) {
+            return Collections.emptyList();
+        }
         try {
             final User user = users.getUser(userId, contexts.getContext(context));
             Map<String, Set<String>> attributes = user.getAttributes();
