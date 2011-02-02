@@ -1,3 +1,9 @@
+open-xchange-activation (6.19.0.0-3) unstable; urgency=low
+
+  * build for 6.19.0-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  2 Feb 2011 14:04:43 +0100
+
 open-xchange-activation (6.19.0.0-2) unstable; urgency=low
 
   * build for 6.19.0-rev3

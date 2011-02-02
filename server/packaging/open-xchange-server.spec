@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -734,6 +734,8 @@ fi
 %doc doc/examples
 
 %changelog
+* Tue Feb 01 2011 - marcus.klein@open-xchange.com
+ - TA5815 of US 5768: Added the easy login request to the login servlet. This makes the additional easylogin servlet obsolete.
 * Tue Jan 25 2011 - thorben.betten@open-xchange.com
  - Bugfix #18080: Considering module when checking public folder access
 * Sat Jan 22 2011 - thorben.betten@open-xchange.com
