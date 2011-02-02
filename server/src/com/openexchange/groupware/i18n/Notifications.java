@@ -629,6 +629,9 @@ public class Notifications implements LocalizableStrings {
     /*-
      * MISC
      */
+ 
+    // Reminder
+    public static final String REMINDER = "Reminder";
 
     // No resources have been scheduled.
     public static final String NO_RESOURCES = "No resources have been scheduled.";
