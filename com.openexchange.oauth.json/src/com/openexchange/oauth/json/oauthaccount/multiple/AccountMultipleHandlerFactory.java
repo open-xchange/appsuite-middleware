@@ -61,7 +61,7 @@ import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
  */
 public final class AccountMultipleHandlerFactory implements MultipleHandlerFactoryService {
 
-    public static final String MODULE = "oauth/account";
+    public static final String MODULE = "oauth/accounts";
 
     public AccountMultipleHandlerFactory() {
         super();
