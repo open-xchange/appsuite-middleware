@@ -86,6 +86,6 @@ public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
 
     private static final String[] createdTables = { "oauthAccounts" };
 
-    private static final String[] createStatements = { "CREATE TABLE oauthAccounts (" + "cid INT4 UNSIGNED NOT NULL," + "user INT4 UNSIGNED NOT NULL," + "id INT4 UNSIGNED NOT NULL," + "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "accessToken VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "accessSecret VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "serviceId VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "PRIMARY KEY (cid, id)," + "INDEX (cid, user)," + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+    private static final String[] createStatements = { "CREATE TABLE oauthAccounts (" + "cid INT4 UNSIGNED NOT NULL," + "user INT4 UNSIGNED NOT NULL," + "id INT4 UNSIGNED NOT NULL," + "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "accessToken VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "accessSecret VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "PRIMARY KEY (cid, id)," + "INDEX (cid, user)," + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
 
 }

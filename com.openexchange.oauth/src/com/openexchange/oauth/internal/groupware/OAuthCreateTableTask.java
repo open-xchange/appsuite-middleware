@@ -86,7 +86,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
         + "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "accessToken VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "accessSecret VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "serviceId VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, id),"
         + "INDEX (cid, user),"
         + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
