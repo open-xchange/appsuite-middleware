@@ -72,6 +72,7 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.AJPv13Utility;
+import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
@@ -546,10 +547,15 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
-    public void doWriteHeaders(final OutputStream out) throws AJPv13Exception, IOException {
+    public void doWriteHeaders(final BlockableBufferedOutputStream out) throws AJPv13Exception, IOException {
         if (!headersSent) {
-            out.write(AJPv13Response.getSendHeadersBytes(response));
-            out.flush();
+            out.acquire();
+            try {
+                out.write(AJPv13Response.getSendHeadersBytes(response));
+                out.flush();
+            } finally {
+                out.release();
+            }
             response.setCommitted(true);
             headersSent = true;
         }

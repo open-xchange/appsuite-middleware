@@ -64,6 +64,7 @@ import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -380,7 +381,7 @@ public class AJPv13TaskWatcher {
                 try {
                     if (!ajpRequestHandler.isEndResponseSent()) {
                         final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
-                        final OutputStream out = ajpConnection.getOutputStream();
+                        final BlockableBufferedOutputStream out = ajpConnection.getOutputStream();
                         if (ajpRequestHandler.isHeadersSent()) {
                             /*
                              * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data
@@ -413,7 +414,7 @@ public class AJPv13TaskWatcher {
             }
         } // End of keepAlive()
 
-        private void keepAliveSendAvailableData(final String remoteAddress, final OutputStream out, final byte[] remainingData) throws IOException, AJPv13Exception {
+        private void keepAliveSendAvailableData(final String remoteAddress, final BlockableBufferedOutputStream out, final byte[] remainingData) throws IOException, AJPv13Exception {
             AJPv13Request.writeChunked(remainingData, out);
             if (info) {
                 log.info(new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
@@ -421,7 +422,7 @@ public class AJPv13TaskWatcher {
             }
         }
 
-        private void keepAliveSendEmptyBody(final String remoteAddress, final OutputStream out) throws IOException, AJPv13Exception {
+        private void keepAliveSendEmptyBody(final String remoteAddress, final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
             AJPv13Request.writeEmpty(out);
             if (info) {
                 log.info(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(

@@ -50,7 +50,6 @@
 package com.openexchange.ajp13.najp;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -68,6 +67,7 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.AJPv13Utility;
+import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
@@ -321,9 +321,14 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 /*
                  * We received an unsupported prefix code before, thus ajpRequest is null. Terminate AJP cycle.
                  */
-                final OutputStream out = ajpCon.getOutputStream();
-                out.write(AJPv13Response.getEndResponseBytes());
-                out.flush();
+                final BlockableBufferedOutputStream out = ajpCon.getOutputStream();
+                out.acquire();
+                try {
+                    out.write(AJPv13Response.getEndResponseBytes());
+                    out.flush();
+                } finally {
+                    out.release();
+                }
                 endResponseSent = true;
                 return;
             }
@@ -547,12 +552,17 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * @throws AJPv13Exception If composing the <code>SEND_HEADERS</code> package fails
      * @throws IOException If an I/O error occurs
      */
-    public void doWriteHeaders(final OutputStream out) throws AJPv13Exception, IOException {
+    public void doWriteHeaders(final BlockableBufferedOutputStream out) throws AJPv13Exception, IOException {
         ajpConblocker.acquire();
         try {
             if (!headersSent) {
-                out.write(AJPv13Response.getSendHeadersBytes(response));
-                out.flush();
+                out.acquire();
+                try {
+                    out.write(AJPv13Response.getSendHeadersBytes(response));
+                    out.flush();
+                } finally {
+                    out.release();
+                }
                 response.setCommitted(true);
                 headersSent = true;
             }

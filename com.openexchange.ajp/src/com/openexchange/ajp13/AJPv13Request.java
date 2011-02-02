@@ -108,15 +108,20 @@ public abstract class AJPv13Request {
              */
             if (ajpRequestHandler.isFormData()) {
                 if (!ajpRequestHandler.isAllDataRead()) {
-                    final OutputStream ajpOut = ajpConnection.getOutputStream();
-                    do {
-                        ajpOut.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
-                        ajpOut.flush();
-                        /*
-                         * Trigger request handler to process expected incoming data package
-                         */
-                        ajpRequestHandler.processPackage();
-                    } while (!ajpRequestHandler.isAllDataRead());
+                    final BlockableBufferedOutputStream ajpOut = ajpConnection.getOutputStream();
+                    ajpOut.acquire();
+                    try {
+                        do {
+                            ajpOut.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
+                            ajpOut.flush();
+                            /*
+                             * Trigger request handler to process expected incoming data package
+                             */
+                            ajpRequestHandler.processPackage();
+                        } while (!ajpRequestHandler.isAllDataRead());
+                    } finally {
+                        ajpOut.release();
+                    }
                 }
                 /*
                  * Turn form's post data into request parameters
@@ -128,7 +133,7 @@ public abstract class AJPv13Request {
              */
             ajpRequestHandler.doServletService();
         }
-        final OutputStream out = ajpConnection.getOutputStream();
+        final BlockableBufferedOutputStream out = ajpConnection.getOutputStream();
         /*
          * Send response headers first.
          */
@@ -169,15 +174,20 @@ public abstract class AJPv13Request {
      * @throws IOException If an I/O error occurs
      * @throws AJPv13Exception If an AJP error occurs
      */
-    public static void writeChunked(final byte[] data, final OutputStream out) throws IOException, AJPv13Exception {
-        int offset = 0;
-        final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
-        while (offset < data.length) {
-            final int b = (data.length - offset);
-            final int curLen = ((maxLen <= b) ? maxLen : b);
-            out.write(AJPv13Response.getSendBodyChunkBytes(data, offset, curLen));
-            out.flush();
-            offset += curLen;
+    public static void writeChunked(final byte[] data, final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
+        out.acquire();
+        try {
+            int offset = 0;
+            final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+            while (offset < data.length) {
+                final int b = (data.length - offset);
+                final int curLen = ((maxLen <= b) ? maxLen : b);
+                out.write(AJPv13Response.getSendBodyChunkBytes(data, offset, curLen));
+                out.flush();
+                offset += curLen;
+            }
+        } finally {
+            out.release();
         }
     }
 
@@ -190,9 +200,14 @@ public abstract class AJPv13Request {
      * @throws IOException If an I/O error occurs
      * @throws AJPv13Exception If an AJP error occurs
      */
-    public static void writeEmpty(final OutputStream out) throws IOException, AJPv13Exception {
-        out.write(AJPv13Response.getSendBodyChunkBytes(EMPTY));
-        out.flush();
+    public static void writeEmpty(final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
+        out.acquire();
+        try {
+            out.write(AJPv13Response.getSendBodyChunkBytes(EMPTY));
+            out.flush();
+        } finally {
+            out.release();
+        }
     }
 
     /**
@@ -203,10 +218,15 @@ public abstract class AJPv13Request {
      * @param flushStream Whether to flush the output stream
      * @throws IOException If an I/O error occurs
      */
-    protected static final void writeResponse(final byte[] responseBytes, final OutputStream out, final boolean flushStream) throws IOException {
-        out.write(responseBytes);
-        if (flushStream) {
-            out.flush();
+    protected static final void writeResponse(final byte[] responseBytes, final BlockableBufferedOutputStream out, final boolean flushStream) throws IOException {
+        out.acquire();
+        try {
+            out.write(responseBytes);
+            if (flushStream) {
+                out.flush();
+            }
+        } finally {
+            out.release();
         }
     }
 
@@ -219,7 +239,7 @@ public abstract class AJPv13Request {
      * @throws IOException If an I/O error occurs
      * @throws AJPv13Exception If an AJP error occurs
      */
-    protected static final void writeResponse(final AJPv13Response response, final OutputStream out, final boolean flushStream) throws IOException, AJPv13Exception {
+    protected static final void writeResponse(final AJPv13Response response, final BlockableBufferedOutputStream out, final boolean flushStream) throws IOException, AJPv13Exception {
         writeResponse(response.getResponseBytes(), out, flushStream);
     }
 

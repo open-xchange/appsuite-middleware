@@ -50,7 +50,6 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.concurrent.locks.Lock;
 import javax.servlet.ServletOutputStream;
@@ -274,7 +273,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
      */
     private void responseToWebServer(final byte[] data, final int off, final int len) throws IOException {
         try {
-            final OutputStream out = ajpCon.getOutputStream();
+            final BlockableBufferedOutputStream out = ajpCon.getOutputStream();
             /*
              * Ensure headers are written first
              */
@@ -282,14 +281,19 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             /*
              * Send data cut into MAX_BODY_CHUNK_SIZE pieces
              */
-            int offset = off;
-            final int lenIndex = off + len;
-            final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
-            while (offset < lenIndex) {
-                final int curLen = Math.min(maxLen, (lenIndex - offset));
-                out.write(AJPv13Response.getSendBodyChunkBytes(data, offset, curLen));
-                out.flush();
-                offset += curLen;
+            out.acquire();
+            try {
+                int offset = off;
+                final int lenIndex = off + len;
+                final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+                while (offset < lenIndex) {
+                    final int curLen = Math.min(maxLen, (lenIndex - offset));
+                    out.write(AJPv13Response.getSendBodyChunkBytes(data, offset, curLen));
+                    out.flush();
+                    offset += curLen;
+                }
+            } finally {
+                out.release();
             }
         } catch (final SocketException e) {
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
@@ -320,7 +324,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
      */
     private void responseChunkToWebServer(final byte[] data, final int off, final int len) throws IOException {
         try {
-            final OutputStream out = ajpCon.getOutputStream();
+            final BlockableBufferedOutputStream out = ajpCon.getOutputStream();
             /*
              * Ensure headers are written first
              */
@@ -328,8 +332,13 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             /*
              * Send data
              */
-            out.write(AJPv13Response.getSendBodyChunkBytes(data, off, len));
-            out.flush();
+            out.acquire();
+            try {
+                out.write(AJPv13Response.getSendBodyChunkBytes(data, off, len));
+                out.flush();
+            } finally {
+                out.release();
+            }
         } catch (final SocketException e) {
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
                 LOG.error(e.getMessage(), e);

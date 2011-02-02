@@ -51,7 +51,6 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -175,7 +174,7 @@ public interface AJPv13RequestHandler {
      * @throws AJPv13Exception If composing the <code>SEND_HEADERS</code> package fails
      * @throws IOException If an I/O error occurs
      */
-    public void doWriteHeaders(final OutputStream out) throws AJPv13Exception, IOException;
+    public void doWriteHeaders(final BlockableBufferedOutputStream out) throws AJPv13Exception, IOException;
 
     /**
      * Gets the response output stream's data and clears it

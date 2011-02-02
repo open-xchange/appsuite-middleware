@@ -52,7 +52,6 @@ package com.openexchange.ajp13.najp;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
@@ -135,7 +134,12 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
     public void dropOutstandingData() {
         blocker.acquire();
         try {
-            outputStream.dropBuffer();
+            outputStream.acquire();
+            try {
+                outputStream.dropBuffer();
+            } finally {
+                outputStream.release();
+            }
         } finally {
             blocker.release();
         }
@@ -157,10 +161,13 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
                 resetRequestHandler(releaseRequestHandler);
             }
             if (outputStream != null) {
+                outputStream.acquire();
                 try {
                     outputStream.flush();
                 } catch (final IOException e) {
                     LOG.debug(e.getMessage(), e);
+                } finally {
+                    outputStream.release();
                 }
             }
             state = IDLE_STATE;
@@ -255,7 +262,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
-    public OutputStream getOutputStream() throws IOException {
+    public BlockableBufferedOutputStream getOutputStream() throws IOException {
         blocker.acquire();
         try {
             return outputStream;
@@ -337,10 +344,13 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      */
     private void discardStreams() {
         if (outputStream != null) {
+            outputStream.acquire();
             try {
                 outputStream.close();
             } catch (final IOException e) {
                 LOG.warn("Output stream could not be closed", e);
+            } finally {
+                outputStream.release();
             }
         }
         if (inputStream != null) {

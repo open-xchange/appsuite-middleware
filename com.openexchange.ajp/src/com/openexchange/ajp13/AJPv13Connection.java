@@ -52,7 +52,6 @@ package com.openexchange.ajp13;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 
 public interface AJPv13Connection {
@@ -89,7 +88,7 @@ public interface AJPv13Connection {
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
-    public OutputStream getOutputStream() throws IOException;
+    public BlockableBufferedOutputStream getOutputStream() throws IOException;
 
     /**
      * Set whether to enable blocking access to output stream or not.

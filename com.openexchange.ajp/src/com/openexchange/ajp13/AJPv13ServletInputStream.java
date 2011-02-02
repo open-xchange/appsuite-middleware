@@ -309,9 +309,14 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
                 return false;
             }
             {
-                final OutputStream ajpOut = ajpCon.getOutputStream();
-                ajpOut.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
-                ajpOut.flush();
+                final BlockableBufferedOutputStream ajpOut = ajpCon.getOutputStream();
+                ajpOut.acquire();
+                try {
+                    ajpOut.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
+                    ajpOut.flush();
+                } finally {
+                    ajpOut.release();
+                }
             }
             /*
              * Trigger request handler to process expected incoming data package which in turn calls the setData() method.

@@ -51,7 +51,6 @@ package com.openexchange.ajp13.stable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import javax.servlet.ServletException;
@@ -219,7 +218,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
-    public OutputStream getOutputStream() throws IOException {
+    public BlockableBufferedOutputStream getOutputStream() throws IOException {
         if (outputStream == null) {
             throw new IOException("Output stream not available");
         }

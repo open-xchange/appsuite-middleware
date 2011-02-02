@@ -53,7 +53,6 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import com.openexchange.concurrent.Blockable;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.concurrent.NonBlockingBlocker;
@@ -64,7 +63,7 @@ import com.openexchange.concurrent.NonBlockingBlocker;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class BlockableBufferedOutputStream extends BufferedOutputStream implements Blockable {
+public class BlockableBufferedOutputStream extends BufferedOutputStream implements Blocker {
 
     private final Blocker blocker;
 
@@ -101,17 +100,20 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
         blocker.unblock();
     }
 
+    public void acquire() {
+        blocker.acquire();
+    }
+
+    public void release() {
+        blocker.release();
+    }
+
     /**
      * Drops the buffer.
      */
     public void dropBuffer() {
-        blocker.acquire();
-        try {
-            count = 0;
-            Arrays.fill(buf, (byte) 0);
-        } finally {
-            blocker.release();
-        }
+        count = 0;
+        Arrays.fill(buf, (byte) 0);
     }
 
     /**
@@ -134,15 +136,10 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      */
     @Override
     public void write(final int b) throws IOException {
-        blocker.acquire();
-        try {
-            if (count >= buf.length) {
-                flushBuffer();
-            }
-            buf[count++] = (byte) b;
-        } finally {
-            blocker.release();
+        if (count >= buf.length) {
+            flushBuffer();
         }
+        buf[count++] = (byte) b;
     }
 
     /**
@@ -160,25 +157,20 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      */
     @Override
     public void write(final byte b[], final int off, final int len) throws IOException {
-        blocker.acquire();
-        try {
-            if (len >= buf.length) {
-                /*
-                 * If the request length exceeds the size of the output buffer, flush the output buffer and then write the data directly. In
-                 * this way buffered streams will cascade harmlessly.
-                 */
-                flushBuffer();
-                out.write(b, off, len);
-                return;
-            }
-            if (len > buf.length - count) {
-                flushBuffer();
-            }
-            System.arraycopy(b, off, buf, count, len);
-            count += len;
-        } finally {
-            blocker.release();
+        if (len >= buf.length) {
+            /*
+             * If the request length exceeds the size of the output buffer, flush the output buffer and then write the data directly. In
+             * this way buffered streams will cascade harmlessly.
+             */
+            flushBuffer();
+            out.write(b, off, len);
+            return;
         }
+        if (len > buf.length - count) {
+            flushBuffer();
+        }
+        System.arraycopy(b, off, buf, count, len);
+        count += len;
     }
 
     /**
@@ -189,24 +181,14 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      */
     @Override
     public void flush() throws IOException {
-        blocker.acquire();
-        try {
-            flushBuffer();
-            out.flush();
-            lastAccessed = System.currentTimeMillis();
-        } finally {
-            blocker.release();
-        }
+        flushBuffer();
+        out.flush();
+        lastAccessed = System.currentTimeMillis();
     }
 
     @Override
     public void close() throws IOException {
-        blocker.acquire();
-        try {
-            super.close();
-        } finally {
-            blocker.release();
-        }
+        super.close();
     }
 
     /**
