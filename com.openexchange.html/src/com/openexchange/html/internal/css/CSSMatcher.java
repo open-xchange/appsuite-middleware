@@ -335,8 +335,13 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        final Matcher m = PATTERN_STYLE_LINE.matcher(cssBuilder.toString());
-        final MatcherReplacer mr = new MatcherReplacer(m, cssBuilder.toString());
+        final Matcher m;
+        final MatcherReplacer mr;
+        {
+            final String str = cssBuilder.toString();
+            m = PATTERN_STYLE_LINE.matcher(str);
+            mr = new MatcherReplacer(m, str);
+        }
         cssBuilder.setLength(0);
         final StringBuilder elemBuilder = new StringBuilder(128);
         while (m.find()) {
