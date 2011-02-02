@@ -74,7 +74,7 @@ public final class LocaleTools {
 
     /**
      * Splits the full locale identifier into its parts and creates the corresponding locale. Currently the fullIdentifier must match the
-     * pattern <code>language_country</code>.
+     * pattern <code>&lt;language&gt; + &quot;_&quot; + &lt;country&gt; + &quot;_&quot; + &lt;variant&gt;</code>.
      * 
      * @param fullIdentifier full locale identifier compliant to RFC 2798 and 2068.
      * @return the locale or <code>null</code> if the pattern doesn't match.
