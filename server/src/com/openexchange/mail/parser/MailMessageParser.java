@@ -97,6 +97,7 @@ import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.tools.tnef.TNEF2ICal;
 
 /**
  * {@link MailMessageParser} - A callback parser to parse instances of {@link MailMessage} by invoking the <code>handleXXX()</code> methods
@@ -505,6 +506,37 @@ public final class MailMessageParser {
                      * Stop to further process TNEF attachment
                      */
                     return;
+                } else if (TNEF2ICal.isVPart(messageClassName)) {
+                    final net.fortuna.ical4j.model.Calendar calendar = TNEF2ICal.tnef2VPart(message);
+                    if (null != calendar) {
+                        /*
+                         * VPart successfully converted. Generate appropriate body part.
+                         */
+                        final TNEFBodyPart part = new TNEFBodyPart();
+                        {
+                            final String text = calendar.toString();
+                            part.setText(text, "UTF-8", "calendar");
+                            part.setSize(text.length());
+                        }
+                        /*
+                         * Determine VPart's method
+                         */
+                        final net.fortuna.ical4j.model.Property method = calendar.getProperties().getProperty(net.fortuna.ical4j.model.Property.METHOD);
+                        if (null == method) {
+                            part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/calendar; charset=UTF-8");
+                        } else {
+                            part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString());
+                        }
+                        part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                        /*
+                         * Parse part
+                         */
+                        parseMailContent(MIMEMessageConverter.convertPart(part), handler, prefix, partCount++);
+                        /*
+                         * Stop to further process TNEF attachment
+                         */
+                        return;
+                    }
                 }
                 /*
                  * Look for body. Usually the body is the RTF text.
