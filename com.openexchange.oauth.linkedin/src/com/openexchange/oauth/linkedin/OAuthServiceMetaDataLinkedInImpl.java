@@ -75,5 +75,13 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     public String getId() {
         return "com.openexchange.socialplugin.linkedin";
     }
+    
+    public String getAPIKey() {
+        return "Ra7yTqolxUk_6UVpIAIsbv6kwLpIZCdNeUYxAA1n2Lnf05Dkr7D41dw-ivK-z4vA";
+    }
+
+    public String getAPISecret() {
+        return "vEPBnxJvXvqf9NsBby0kZ1hcgQCM7JBO7iCjlw4KIDhw_7lwPIln7zIvtP3dbL-i";
+    }
 
 }
