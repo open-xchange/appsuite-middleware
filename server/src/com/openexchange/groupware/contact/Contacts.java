@@ -7556,7 +7556,7 @@ public final class Contacts {
                 return null;
             }
         };
-        /** ************** * intfield08 * * ************ */
+        /** ************** * useCount * * ************ */
         mapping[Contact.USE_COUNT] = new Mapper() {
 
             public String getDBFieldName() {
@@ -7592,6 +7592,141 @@ public final class Contacts {
 
             public String getReadableTitle() {
                 return null;
+            }
+        };
+        /** ************** * yomiFirstName * * ************ */
+        mapping[Contact.YOMI_FIRST_NAME] = new Mapper() {
+
+            public String getDBFieldName() {
+                return "yomiFirstName";
+            }
+
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+                final String t = rs.getString(pos);
+                if (!rs.wasNull()) {
+                    co.setYomiFirstName(t);
+                }
+            }
+
+            public boolean containsElement(final Contact co) {
+                return co.containsYomiFirstName();
+            }
+
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+                ps.setString(pos, co.getYomiFirstName());
+            }
+
+            public boolean compare(final Contact co, final Contact original) {
+                final String x = co.getYomiFirstName();
+                final String y = original.getYomiFirstName();
+
+                if (null == x) {
+                    if (null == y) {
+                        return true;
+                    }
+                    return false;
+                } else if (null == y) {
+                    return false;
+                }
+                return (x.equals(y));
+            }
+
+            public String getValueAsString(final Contact co) {
+                return co.getYomiFirstName();
+            }
+
+            public String getReadableTitle() {
+                return "Yomi First Name";
+            }
+        };
+        /** ************** * yomiLastName * * ************ */
+        mapping[Contact.YOMI_LAST_NAME] = new Mapper() {
+
+            public String getDBFieldName() {
+                return "yomiLastName";
+            }
+
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+                final String t = rs.getString(pos);
+                if (!rs.wasNull()) {
+                    co.setYomiLastName(t);
+                }
+            }
+
+            public boolean containsElement(final Contact co) {
+                return co.containsYomiLastName();
+            }
+
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+                ps.setString(pos, co.getYomiLastName());
+            }
+
+            public boolean compare(final Contact co, final Contact original) {
+                final String x = co.getYomiLastName();
+                final String y = original.getYomiLastName();
+
+                if (null == x) {
+                    if (null == y) {
+                        return true;
+                    }
+                    return false;
+                } else if (null == y) {
+                    return false;
+                }
+                return (x.equals(y));
+            }
+
+            public String getValueAsString(final Contact co) {
+                return co.getYomiLastName();
+            }
+
+            public String getReadableTitle() {
+                return "Yomi Last Name";
+            }
+        };
+        /** ************** * Yomi Company * * ************ */
+        mapping[Contact.YOMI_COMPANY] = new Mapper() {
+
+            public String getDBFieldName() {
+                return "yomiCompany";
+            }
+
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+                final String t = rs.getString(pos);
+                if (!rs.wasNull()) {
+                    co.setYomiCompany(t);
+                }
+            }
+
+            public boolean containsElement(final Contact co) {
+                return co.containsYomiCompany();
+            }
+
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+                ps.setString(pos, co.getYomiCompany());
+            }
+
+            public boolean compare(final Contact co, final Contact original) {
+                final String x = co.getYomiCompany();
+                final String y = original.getYomiCompany();
+
+                if (null == x) {
+                    if (null == y) {
+                        return true;
+                    }
+                    return false;
+                } else if (null == y) {
+                    return false;
+                }
+                return (x.equals(y));
+            }
+
+            public String getValueAsString(final Contact co) {
+                return co.getYomiCompany();
+            }
+
+            public String getReadableTitle() {
+                return "Yomi Company";
             }
         };
     }

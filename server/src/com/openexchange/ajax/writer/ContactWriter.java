@@ -221,6 +221,9 @@ public class ContactWriter extends CommonWriter {
             contact.containsMarkAsDistributionlist());
         writeParameter(ContactFields.USE_COUNT, contact.getUseCount(), json);
         writeParameter(ContactFields.FILE_AS, contact.getFileAs(), json, contact.containsFileAs());
+        writeParameter(ContactFields.YOMI_FIRST_NAME, contact.getYomiFirstName(), json);
+        writeParameter(ContactFields.YOMI_LAST_NAME, contact.getYomiLastName(), json);
+        writeParameter(ContactFields.YOMI_COMPANY, contact.getYomiCompany(), json);
 
         final JSONArray jsonLinkArray = getLinksAsJSONArray(contact);
         if (jsonLinkArray != null) {
@@ -1144,6 +1147,27 @@ public class ContactWriter extends CommonWriter {
                 } else {
                     jsonArray.put(jsonDistributionListArray);
                 }
+            }
+        });
+
+        m.put(Contact.YOMI_FIRST_NAME, new ContactFieldWriter() {
+
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getYomiFirstName(), jsonArray);
+            }
+        });
+
+        m.put(Contact.YOMI_LAST_NAME, new ContactFieldWriter() {
+
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getYomiLastName(), jsonArray);
+            }
+        });
+
+        m.put(Contact.YOMI_COMPANY, new ContactFieldWriter() {
+
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getYomiCompany(), jsonArray);
             }
         });
 

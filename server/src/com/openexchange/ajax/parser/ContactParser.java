@@ -909,6 +909,30 @@ public class ContactParser extends CommonParser {
             public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setFileAs(parseString(jsonobject, ContactFields.FILE_AS));
             }
+        },
+        new JSONAttributeMapper() {
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.YOMI_FIRST_NAME);
+            }
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
+                contactobject.setYomiFirstName(parseString(jsonobject, ContactFields.YOMI_FIRST_NAME));
+            }
+        },
+        new JSONAttributeMapper() {
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.YOMI_LAST_NAME);
+            }
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
+                contactobject.setYomiLastName(parseString(jsonobject, ContactFields.YOMI_LAST_NAME));
+            }
+        },
+        new JSONAttributeMapper() {
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.YOMI_COMPANY);
+            }
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
+                contactobject.setYomiCompany(parseString(jsonobject, ContactFields.YOMI_COMPANY));
+            }
         }
     };
 }
