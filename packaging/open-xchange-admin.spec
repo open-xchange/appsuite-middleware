@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -397,6 +397,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Jan 27 2011 - marcus.klein@open-xchange.com
+ - Added Italian translations for standard mail folder names.
 * Thu Jan 20 2011 - marcus.klein@open-xchange.com
  - Bugfix #18029: Corrected ENGINE to InnoDB of a table in ConfigDB.
 * Mon Dec 20 2010 - choeger@open-xchange.com
