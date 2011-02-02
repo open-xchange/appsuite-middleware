@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jsieve.SieveException;
+import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.TokenMgrError;
 import org.json.JSONArray;
@@ -757,29 +758,48 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
     }
 
-    private void changeOutgoingVacationRule(final ArrayList<Rule> clientrules) {
-        // TODO
-//        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-//        final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
-//
-//        for (final Rule rule : clientrules) {
-//            final IfCommand ifCommand = rule.getIfCommand();
-//            final RuleComment ruleComment = rule.getRuleComment();
-//            if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
-//                final TestCommand testcommand = ifCommand.getTestcommand();
-//                if (Commands.ADDRESS.equals(testcommand)) {
-//                    // Test command found now check if it's the right one...
-//                    if (null != testcommand.getArguments()
-//                        && Rule2JSON2Rule.createTagArg("is").equals(testcommand.getArguments().get(0))
-//                        && Rule2JSON2Rule.createTagArg("domain").equals(testcommand.getArguments().get(1))
-//                        && null != testcommand.getArguments().get(3)
-//                        && testcommand.getArguments().get(3) instanceof List
-//                        && "From".equals(((List)testcommand.getArguments().get(3)).get(0))) {
-//
-//                    }
-//                }
-//            }
-//        }
+    private void changeOutgoingVacationRule(final ArrayList<Rule> clientrules) throws SieveException {
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
+        
+        if (null != vacationdomains && 0 != vacationdomains.length()) {
+            for (final Rule rule : clientrules) {
+                final IfCommand ifCommand = rule.getIfCommand();
+                final RuleComment ruleComment = rule.getRuleComment();
+                if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
+                    final TestCommand testcommand = ifCommand.getTestcommand();
+                    if (Commands.ADDRESS.equals(testcommand.getCommand())) {
+                        // Test command found now check if it's the right one...
+                        if (checkOwnVacation(testcommand.getArguments())) {
+                            ifCommand.setTestcommand(new TestCommand(TestCommand.Commands.TRUE, new ArrayList<Object>(), new ArrayList<TestCommand>()));
+                        }
+                    } else if (Commands.ALLOF.equals(testcommand.getCommand())) {
+                        // In this case we find "our" rule at the first place
+                        final List<TestCommand> testcommands = testcommand.getTestcommands();
+                        if (null != testcommands && testcommands.size() > 1) {
+                            final TestCommand testCommand2 = testcommands.get(0);
+                            if (checkOwnVacation(testCommand2.getArguments())) {
+                                // now remove...
+                                if (2 == testcommands.size()) {
+                                    // If this is one of two convert the rule
+                                    ifCommand.setTestcommand(testcommands.get(1));
+                                } else if (testcommands.size() > 2) {
+                                    // If we have more than one just remove it...
+                                    testcommands.remove(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean checkOwnVacation(final List<Object> arguments) {
+        return null != arguments
+            && null != arguments.get(0) && arguments.get(0) instanceof TagArgument && ":is".equals(((TagArgument)arguments.get(0)).getTag())
+            && null != arguments.get(1) && arguments.get(1) instanceof TagArgument && ":domain".equals(((TagArgument)arguments.get(1)).getTag())
+            && null != arguments.get(2) && arguments.get(2) instanceof List<?> && "From".equals(((List<?>)arguments.get(2)).get(0));
     }
 
     private JSONArray getActionArray(final ArrayList<String> sieve) {
