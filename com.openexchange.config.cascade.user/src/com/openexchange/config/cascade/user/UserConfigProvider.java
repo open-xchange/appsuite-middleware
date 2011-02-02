@@ -97,7 +97,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
                 public String get() {
                     Map<String, Set<String>> attributes = user.getAttributes();
-
+                    
                     Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
                     if (set == null || set.isEmpty()) {
                         return null;

@@ -59,7 +59,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.exception.ConfigCascadeExceptionFactory;
 import com.openexchange.config.cascade.impl.ConfigCascade;
+import com.openexchange.exceptions.StringComponent;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.strings.StringParser;
 
@@ -76,6 +79,8 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     static final Log LOG = LogFactory.getLog(ConfigCascadeActivator.class);
 
     private boolean configured = false;
+
+    private ComponentRegistration componentRegistration;
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -84,6 +89,9 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
+        componentRegistration = new ComponentRegistration(context, new StringComponent("CCA"), "com.openexchange.config.cascade", ConfigCascadeExceptionFactory.getInstance());
+        
+        
         final ConfigCascade configCascade = new ConfigCascade();
         
         final ServiceTracker stringParsers = track(StringParser.class);
@@ -128,6 +136,14 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         openTrackers();
     
         registerService(ConfigViewFactory.class, configCascade);
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        if(componentRegistration != null) {
+            componentRegistration.unregister();
+        }
+        super.stopBundle();
     }
     
     boolean isServerProvider(ServiceReference reference) {
