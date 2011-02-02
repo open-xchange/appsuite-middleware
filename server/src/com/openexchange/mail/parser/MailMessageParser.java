@@ -65,6 +65,8 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
+import net.fortuna.ical4j.model.Property;
 import net.freeutils.tnef.Attachment;
 import net.freeutils.tnef.Attr;
 import net.freeutils.tnef.MAPIProp;
@@ -528,6 +530,13 @@ public final class MailMessageParser {
                             part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString());
                         }
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                        {
+                            final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
+                            final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
+                            if (summary != null) {
+                                part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                            }
+                        }
                         /*
                          * Parse part
                          */
