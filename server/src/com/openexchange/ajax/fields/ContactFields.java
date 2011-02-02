@@ -259,5 +259,11 @@ public interface ContactFields extends CommonFields {
     String USE_COUNT = "useCount";
 
     String FILE_AS = "fileas";
+    
+    String YOMI_FIRST_NAME = "yomiFirstName";
+    
+    String YOMI_LAST_NAME = "yomiLastName";
+    
+    String YOMI_COMPANY = "yomiCompany";
 
 }

@@ -296,6 +296,13 @@ public class Contact extends CommonObject implements Serializable {
      * The same as USAGE_COUNT, but with respect to the global addressbook (only for searching purpose).
      */
     public static final int USE_COUNT_GLOBAL_FIRST = 609;
+    
+    /**
+     * Additional fields for kana based search in japanese environments.
+     */
+    public static final int YOMI_FIRST_NAME = 610;
+    public static final int YOMI_LAST_NAME = 611;
+    public static final int YOMI_COMPANY = 612;
 
     public static final int[] CONTENT_COLUMNS = {
         DISPLAY_NAME, GIVEN_NAME, SUR_NAME, MIDDLE_NAME, SUFFIX, TITLE, STREET_HOME, POSTAL_CODE_HOME, CITY_HOME, STATE_HOME, COUNTRY_HOME,
@@ -308,7 +315,7 @@ public class Contact extends CommonObject implements Serializable {
         TELEPHONE_RADIO, TELEPHONE_TELEX, TELEPHONE_TTYTDD, INSTANT_MESSENGER1, INSTANT_MESSENGER2, TELEPHONE_IP, TELEPHONE_ASSISTANT,
         COMPANY, IMAGE1, USERFIELD01, USERFIELD02, USERFIELD03, USERFIELD04, USERFIELD05, USERFIELD06, USERFIELD07, USERFIELD08,
         USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18,
-        USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST
+        USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY
     };
     public static final int[] ALL_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[]{
         // From ContactObject itself
@@ -527,6 +534,12 @@ public class Contact extends CommonObject implements Serializable {
     protected String imageContentType;
 
     protected boolean mark_as_distributionlist;
+    
+    protected String yomiFirstName;
+    
+    protected String yomiLastName;
+    
+    protected String yomiCompany;
 
     protected boolean b_display_name;
 
@@ -745,6 +758,12 @@ public class Contact extends CommonObject implements Serializable {
     protected int useCount;
 
     protected boolean b_useCount;
+    
+    protected boolean b_yomiFirstName;
+    
+    protected boolean b_yomiLastName;
+    
+    protected boolean b_yomiCompany;
 
     protected DistributionListEntryObject[] dlists;
 
@@ -1169,7 +1188,19 @@ public class Contact extends CommonObject implements Serializable {
     public int getUseCount() {
         return useCount;
     }
+    
+    public String getYomiFirstName() {
+        return yomiFirstName;
+    }
+    
+    public String getYomiLastName() {
+        return yomiLastName;
+    }
 
+    public String getYomiCompany() {
+        return yomiCompany;
+    }
+    
     // SET METHODS
     public void setDisplayName(final String display_name) {
         this.display_name = display_name;
@@ -1707,6 +1738,21 @@ public class Contact extends CommonObject implements Serializable {
         this.useCount = useCount;
         b_useCount = true;
     }
+    
+    public void setYomiFirstName(String yomiFirstName) {
+        this.yomiFirstName = yomiFirstName;
+        b_yomiFirstName = true;
+    }
+    
+    public void setYomiLastName(String yomiLastName) {
+        this.yomiLastName = yomiLastName;
+        b_yomiLastName = true;
+    }
+    
+    public void setYomiCompany(String yomiCompany) {
+        this.yomiCompany = yomiCompany;
+        b_yomiCompany = true;
+    }
 
     // REMOVE METHODS
     public void removeDisplayName() {
@@ -2230,6 +2276,21 @@ public class Contact extends CommonObject implements Serializable {
         useCount = 0;
         b_useCount = false;
     }
+    
+    public void removeYomiFirstName() {
+        yomiFirstName = null;
+        b_yomiFirstName = false;
+    }
+    
+    public void removeYomiLastName() {
+        yomiLastName = null;
+        b_yomiLastName = false;
+    }
+    
+    public void removeYomiCompany() {
+        yomiCompany = null;
+        b_yomiCompany = false;
+    }
 
     // CONTAINS METHODS
     public boolean containsDisplayName() {
@@ -2651,6 +2712,18 @@ public class Contact extends CommonObject implements Serializable {
 
     public boolean containsUseCount() {
         return b_useCount;
+    }
+    
+    public boolean containsYomiFirstName() {
+        return b_yomiFirstName;
+    }
+    
+    public boolean containsYomiLastName() {
+        return b_yomiLastName;
+    }
+    
+    public boolean containsYomiCompany() {
+        return b_yomiCompany;
     }
 
     @Override
@@ -3163,6 +3236,21 @@ public class Contact extends CommonObject implements Serializable {
             differingFields.add(I(USERFIELD20));
         }
 
+        if ((!containsYomiFirstName() && other.containsYomiFirstName()) || (containsYomiFirstName() && other.containsYomiFirstName() && getYomiFirstName() != other.getYomiFirstName() && (getYomiFirstName() == null || !getYomiFirstName().equals(
+            other.getYomiFirstName())))) {
+            differingFields.add(I(YOMI_FIRST_NAME));
+        }
+
+        if ((!containsYomiLastName() && other.containsYomiLastName()) || (containsYomiLastName() && other.containsYomiLastName() && getYomiLastName() != other.getYomiLastName() && (getYomiLastName() == null || !getYomiLastName().equals(
+            other.getYomiLastName())))) {
+            differingFields.add(I(YOMI_LAST_NAME));
+        }
+
+        if ((!containsYomiCompany() && other.containsYomiCompany()) || (containsYomiCompany() && other.containsYomiCompany() && getYomiCompany() != other.getYomiCompany() && (getYomiCompany() == null || !getYomiCompany().equals(
+            other.getYomiCompany())))) {
+            differingFields.add(I(YOMI_COMPANY));
+        }
+
         return differingFields;
     }
 
@@ -3485,6 +3573,15 @@ public class Contact extends CommonObject implements Serializable {
         case USE_COUNT:
             setUseCount(((Integer) value).intValue());
             break;
+        case YOMI_FIRST_NAME:
+            setYomiFirstName((String) value);
+            break;
+        case YOMI_LAST_NAME:
+            setYomiLastName((String) value);
+            break;
+        case YOMI_COMPANY:
+            setCompany((String) value);
+            break;
         default:
             super.set(field, value);
 
@@ -3702,6 +3799,12 @@ public class Contact extends CommonObject implements Serializable {
             return Integer.valueOf( getNumberOfLinks() );
         case USE_COUNT:
             return Integer.valueOf(getUseCount());
+        case YOMI_FIRST_NAME:
+            return getYomiFirstName();
+        case YOMI_LAST_NAME:
+            return getYomiLastName();
+        case YOMI_COMPANY:
+            return getYomiCompany();
         default:
             return super.get(field);
 
@@ -3917,6 +4020,12 @@ public class Contact extends CommonObject implements Serializable {
             return containsNumberOfLinks();
         case USE_COUNT:
             return containsUseCount();
+        case YOMI_FIRST_NAME:
+            return containsYomiFirstName();
+        case YOMI_LAST_NAME:
+            return containsYomiLastName();
+        case YOMI_COMPANY:
+            return containsYomiCompany();
         default:
             return super.contains(field);
 
@@ -4234,6 +4343,15 @@ public class Contact extends CommonObject implements Serializable {
             break;
         case USE_COUNT:
             removeUseCount();
+            break;
+        case YOMI_FIRST_NAME:
+            removeYomiFirstName();
+            break;
+        case YOMI_LAST_NAME:
+            removeYomiLastName();
+            break;
+        case YOMI_COMPANY:
+            removeYomiCompany();
             break;
         default:
             super.remove(field);
