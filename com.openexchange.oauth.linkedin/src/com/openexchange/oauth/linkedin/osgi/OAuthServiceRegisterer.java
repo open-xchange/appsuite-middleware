@@ -86,7 +86,7 @@ public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
     }
 
     public void removedService(ServiceReference reference, Object service) {
-        activator.setLinkedInMetadata(null);
+        activator.setOauthService(null);
         context.ungetService(reference);
     }
 
