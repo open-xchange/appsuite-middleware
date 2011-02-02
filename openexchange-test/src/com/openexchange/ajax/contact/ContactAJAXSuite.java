@@ -72,6 +72,7 @@ public class ContactAJAXSuite extends TestSuite {
         tests.addTestSuite(BasicManagedContactTests.class);
         tests.addTestSuite(ExemplaryContactTestManagerTest.class);
         tests.addTestSuite(ContactAttachmentTests.class);
+        tests.addTestSuite(YomiTest.class);
         
         tests.addTest(ContactBugTestSuite.suite());
         return tests;
