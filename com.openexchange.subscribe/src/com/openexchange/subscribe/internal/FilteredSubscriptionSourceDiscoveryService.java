@@ -47,107 +47,96 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.internal;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.subscribe.CompositeSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.internal.FilteredSubscriptionSourceDiscoveryService;
 
 
 /**
- * {@link OSGiSubscriptionSourceDiscoveryCollector}
+ * {@link FilteredSubscriptionSourceDiscoveryService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerCustomizer, SubscriptionSourceDiscoveryService {
+public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private BundleContext context;
-    private ServiceTracker tracker;
-    private List<ServiceReference> references = new ArrayList<ServiceReference>();
-    
-    private CompositeSubscriptionSourceDiscoveryService delegate = new CompositeSubscriptionSourceDiscoveryService();
-    
-    
-    private Set<SubscriptionSourceDiscoveryService> blacklist = new HashSet<SubscriptionSourceDiscoveryService>();
-    
-    public OSGiSubscriptionSourceDiscoveryCollector(BundleContext context) {
-        this.context = context;
-        this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), this);
-        tracker.open();
-    }
-    
-    public void close() {
-        delegate.clear();
-        for(ServiceReference reference : references) {
-            context.ungetService(reference);
-        }
-        tracker.close();
-    }
-    
-    public Object addingService(ServiceReference reference) {
-        SubscriptionSourceDiscoveryService service = (SubscriptionSourceDiscoveryService) context.getService(reference);
-        if(blacklist.contains(service) || service.getClass() == getClass()) {
-            context.ungetService(reference);
-            return service;
-        }
-        delegate.addSubscriptionSourceDiscoveryService(service);
-        return service;
-    }
+    private static final Log LOG = LogFactory.getLog(FilteredSubscriptionSourceDiscoveryService.class);
 
-    public void modifiedService(ServiceReference reference, Object service) {
-
-    }
-
-    public void removedService(ServiceReference reference, Object service) {
-        delegate.removeSubscriptionSourceDiscoveryService((SubscriptionSourceDiscoveryService) service);
-        references.remove(reference);
-        context.ungetService(reference);
+    public static ConfigViewFactory CONFIG_VIEW_FACTORY;
+    
+    public SubscriptionSourceDiscoveryService delegate = null;
+    private ConfigView config;
+    
+    public FilteredSubscriptionSourceDiscoveryService(int user, int context, SubscriptionSourceDiscoveryService delegate) throws ConfigCascadeException {
+        this.config = CONFIG_VIEW_FACTORY.getView(user, context);
+        this.delegate = delegate;
     }
     
-  
-    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
-        return delegate.getSource(context, subscriptionId);
-    }
-
     public SubscriptionSource getSource(String identifier) {
-        return delegate.getSource(identifier);
+        if (accepts(identifier)) {
+            return delegate.getSource(identifier);
+        }
+        return null;
+    }
+
+    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
+        SubscriptionSource source = delegate.getSource(context, subscriptionId);
+        
+        return filter(source);
     }
 
     public List<SubscriptionSource> getSources() {
-        return delegate.getSources();
+        return filter(delegate.getSources());
     }
 
+
     public List<SubscriptionSource> getSources(int folderModule) {
-        return delegate.getSources(folderModule);
+        return filter(delegate.getSources(folderModule));
     }
 
     public boolean knowsSource(String identifier) {
-        return delegate.knowsSource(identifier);
+        return accepts(identifier) ? delegate.knowsSource(identifier) : false;
     }
     
     public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
         return delegate.filter(user, context);
     }
-
-    public void addSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
-        delegate.addSubscriptionSourceDiscoveryService(service);
-    }
-
-    public void removeSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
-        delegate.removeSubscriptionSourceDiscoveryService(service);
+    
+    protected boolean accepts(String identifier) {
+        try {
+            ComposedConfigProperty<Boolean> property = config.property(identifier, boolean.class);
+            if(property.isDefined()) {
+                return property.get();
+            }
+            return false;
+        } catch (ConfigCascadeException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
     }
     
+    protected SubscriptionSource filter(SubscriptionSource source) {
+        return accepts(source.getId()) ? source : null;
+    }
     
+    protected List<SubscriptionSource> filter(List<SubscriptionSource> sources) {
+        List<SubscriptionSource> filtered = new ArrayList<SubscriptionSource>(sources.size());
+        for (SubscriptionSource subscriptionSource : sources) {
+            if (accepts(subscriptionSource.getId())) {
+                filtered.add(subscriptionSource);
+            }
+        }
+        return filtered;
+    }
+
 }

@@ -96,6 +96,10 @@ public class WhiteboardSubscriptionSourceDiscoveryService implements Subscriptio
         return getDelegate().knowsSource(identifier);
     }
     
+    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+        return getDelegate().filter(user, context);
+    }
+    
     private SubscriptionSourceDiscoveryService getDelegate() {
         return (SubscriptionSourceDiscoveryService) tracker.getService();
     }

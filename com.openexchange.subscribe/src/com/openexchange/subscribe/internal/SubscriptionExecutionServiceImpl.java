@@ -93,6 +93,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     public void executeSubscription(String sourceId, Context context, int subscriptionId) throws AbstractOXException {
         SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
         Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
+        boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
+        if(!knowsSource) {
+            throw INACTIVE_SOURCE.create();
+        }
         Collection data = subscribeService.getContent(subscription);
 
         storeData(data, subscription);
@@ -141,7 +145,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         }
         SubscribeService subscribeService = source.getSubscribeService();
         Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
-        Collection data = subscribeService.getContent(subscription);
+        boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
+        if(!knowsSource) {
+            throw INACTIVE_SOURCE.create();
+        }        Collection data = subscribeService.getContent(subscription);
         storeData(data, subscription);
 
     }

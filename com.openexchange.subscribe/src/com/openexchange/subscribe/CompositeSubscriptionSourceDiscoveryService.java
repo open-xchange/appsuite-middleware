@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.subscribe.internal.FilteredSubscriptionSourceDiscoveryService;
 
 
 /**
@@ -145,6 +146,10 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
 
     public void clear() {
         services.clear();
+    }
+
+    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+        return new FilteredSubscriptionSourceDiscoveryService(user, context, this);
     }
 
 }

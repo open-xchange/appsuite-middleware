@@ -67,4 +67,6 @@ public interface SubscriptionSourceDiscoveryService {
     public SubscriptionSource getSource(String identifier);
     public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException;
     public boolean knowsSource(String identifier);
+    
+    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException;
 }

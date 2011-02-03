@@ -61,6 +61,7 @@ import java.util.TreeSet;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.subscribe.internal.FilteredSubscriptionSourceDiscoveryService;
 
 
 /**
@@ -97,6 +98,10 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
 
     public boolean knowsSource(String identifier) {
         return services.containsKey(identifier);
+    }
+    
+    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+        return new FilteredSubscriptionSourceDiscoveryService(user, context, this);
     }
 
     public void addSubscribeService(SubscribeService service) {
@@ -153,6 +158,5 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
             set.remove(set.first());
         }
     }
-
 
 }

@@ -47,68 +47,30 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.osgi;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.subscribe.internal.FilteredSubscriptionSourceDiscoveryService;
+
 
 /**
- * {@link SimSubscriptionSourceDiscoveryService}
- * 
+ * {@link FilterActivator}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SimSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
+public class FilterActivator extends HousekeepingActivator {
 
-    private Map<String, SubscriptionSource> sources = new HashMap<String, SubscriptionSource>();
+    private static final Class[] NEEDED_SERVICES = new Class[]{ConfigViewFactory.class};
 
-    private List<String> loadedSources = new LinkedList<String>();
-
-    private String lookupIdentifier;
-
-    public SubscriptionSource getSource(String identifier) {
-        loadedSources.add(identifier);
-        return sources.get(identifier);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
     }
 
-    public List<SubscriptionSource> getSources(int folderModule) {
-        return new ArrayList<SubscriptionSource>(sources.values());
-    }
-
-    public boolean knowsSource(String identifier) {
-        return sources.containsKey(identifier);
-    }
-
-    public void addSource(SubscriptionSource source) {
-        sources.put(source.getId(), source);
-    }
-
-    public SubscriptionSource getSource(Context context, int subscriptionId) {
-        return getSource(lookupIdentifier);
-    }
-
-    public void setLookupIdentifier(String lookupIdentifier) {
-        this.lookupIdentifier = lookupIdentifier;
-    }
-
-    public List<String> getLoadedSources() {
-        return loadedSources;
-    }
-
-    public void clearSim() {
-        loadedSources.clear();
-    }
-
-    public List<SubscriptionSource> getSources() {
-        return getSources(-1);
-    }
-
-    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
-        return this;
+    @Override
+    protected void startBundle() throws Exception {
+        FilteredSubscriptionSourceDiscoveryService.CONFIG_VIEW_FACTORY = getService(ConfigViewFactory.class);
     }
 
 }

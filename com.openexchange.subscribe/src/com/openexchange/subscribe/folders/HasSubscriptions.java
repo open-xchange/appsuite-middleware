@@ -89,9 +89,8 @@ public class HasSubscriptions implements AdditionalFolderField {
         if (!session.getUserConfiguration().isSubscription()) {
             return Boolean.FALSE;
         }
-
-        final List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
         try {
+            final List<SubscriptionSource> sources = discovery.filter(session.getUserId(), session.getContextId()).getSources(folder.getModule());
             SecretService secretService = SubscriptionServiceRegistry.getInstance().getService(SecretService.class);
             
             for (final SubscriptionSource subscriptionSource : sources) {
