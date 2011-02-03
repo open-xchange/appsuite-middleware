@@ -50,6 +50,8 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
 import gnu.trove.TIntLongHashMap;
 import gnu.trove.TLongArrayList;
 import gnu.trove.TLongIntHashMap;
@@ -1342,8 +1344,7 @@ public final class IMAPCommandsCollection {
                 final int[] newMsgSeqNums;
                 {
                     int[] tmp = handleSearchResponses(r, p);
-                    final int len = tmp.length;
-                    if (limit > 0 && limit < len) {
+                    if (limit > 0 && limit < tmp.length) {
                         try {
                             /*
                              * Sort exceeding list on server
@@ -1351,7 +1352,27 @@ public final class IMAPCommandsCollection {
                             if (((IMAPStore) folder.getStore()).hasCapability("SORT")) {
                                 final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
                                 final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
-                                tmp = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, tmp);
+                                if (tmp.length > 256) {
+                                    /*
+                                     * Sort all
+                                     */
+                                    final TIntHashSet set = new TIntHashSet(tmp);
+                                    tmp = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria);
+                                    final TIntArrayList list = new TIntArrayList(limit);
+                                    for (int i = 0, k = 0; i < tmp.length && k < limit; i++) {
+                                        final int seqNum = tmp[i];
+                                        if (set.contains(seqNum)) {
+                                            list.add(seqNum);
+                                            k++;
+                                        }
+                                    }
+                                    tmp = list.toNativeArray();
+                                } else {
+                                    /*
+                                     * Sort specified sequence numbers
+                                     */
+                                    tmp = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, tmp);
+                                }
                             }
                             /*
                              * Copy to fitting array
