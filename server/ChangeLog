@@ -2,6 +2,7 @@
 
  - Bugfix #18229: Splitting IMAP SORT command to fit into max. allowed length
  - Bugfix #18232: Fixed AJP ping
+ - Bugfix #18147: Fixed permission of Unified Mail's INBOX folder
 
 * 2011-02-01 - marcus.klein@open-xchange.com
 
