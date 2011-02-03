@@ -60,7 +60,7 @@ import org.scribe.oauth.OAuthService;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthException;
-import com.openexchange.oauth.linkedin.LinkedInConnectionsService;
+import com.openexchange.oauth.linkedin.LinkedInSubscribeService;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 import junit.framework.TestCase;
 /**
@@ -70,13 +70,13 @@ import junit.framework.TestCase;
  */
 public class LinkedInConnectionTest extends TestCase {
     
-    private LinkedInConnectionsService linkedIn;
+    private LinkedInSubscribeService linkedIn;
     
     public void setUp(){
         Activator activator = new Activator();
         OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
         activator.setLinkedInMetadata(linkedInMetadata);
-        linkedIn = new LinkedInConnectionsService(activator);
+        linkedIn = new LinkedInSubscribeService(activator);
         activator.setOauthService(new MockOAuthService());
     }
     
