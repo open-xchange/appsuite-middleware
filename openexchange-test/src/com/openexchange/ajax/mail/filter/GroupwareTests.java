@@ -13,10 +13,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.meterware.httpunit.cookies.CookieListener;
+import com.meterware.httpunit.cookies.CookieProperties;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.LoginFields;
 
@@ -26,13 +29,22 @@ public class GroupwareTests extends AJAXTest {
     private static final String AUTHPASSWORD = "secret";
 
 //    private static final String AUTHNAME = "user2@oxtest41.de";
-    private static final String AUTHNAME = "test1@1";
+    private static final String AUTHNAME = "sieve@777";
 
     private final static String HOSTNAME = "localhost";
     
     private static final String LOGIN_URL = "/ajax/login";
 
     public WebconversationAndSessionID login() throws MalformedURLException, IOException, SAXException, JSONException {
+        HttpUnitOptions.setDefaultCharacterSet("UTF-8");
+        HttpUnitOptions.setScriptingEnabled(false);
+        CookieProperties.setPathMatchingStrict(false);
+        CookieProperties.addCookieListener(new CookieListener() {
+            
+            public void cookieRejected(String cookieName, int reason, String attribute) {
+                System.out.println("Cookie: " + cookieName + " was rejected due to " + reason + " ; attribute " + attribute);
+            }
+        });
         final WebConversation conversation = new WebConversation();
         final String login = AUTHNAME;
         final String password = AUTHPASSWORD;
@@ -42,6 +54,13 @@ public class GroupwareTests extends AJAXTest {
         req.setParameter("name", login);
         req.setParameter("password", password);
         final WebResponse resp = conversation.getResponse(req);
+        System.out.println(resp);
+        for (final String cookie : resp.getNewCookieNames()) {
+            System.out.println("Found new cookie: " + cookie);
+        }
+        for (final String cookie : conversation.getCookieNames()) {
+            System.out.println("Found Cookie: " + cookie);
+        }
         System.out.println("Session:" + conversation.getCookieValue("JSESSIONID"));
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();
@@ -58,7 +77,7 @@ public class GroupwareTests extends AJAXTest {
         System.out.println(json);
         return new WebconversationAndSessionID(conversation, (String)json.get(Login.PARAMETER_SESSION));
     }
-
+    
     @Override
     protected String getHostname() {
         return HOSTNAME;
