@@ -6,7 +6,7 @@ BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@
 BuildRequires:  open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@
-BuildRequires:  open-xchange-crypto  >= @OXVERSION@ open-xchange-secret  >= @OXVERSION@ open-xchange-secret-recovery >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-tx >= @OXVERSION@
+BuildRequires:  open-xchange-crypto  >= @OXVERSION@ open-xchange-secret  >= @OXVERSION@ open-xchange-secret-recovery >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-tx >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -48,7 +48,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Basic subscribe implementation
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@ open-xchange-secret  >= @OXVERSION@ open-xchange-secret-recovery >= @OXVERSION@ open-xchange-tx >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@ open-xchange-secret  >= @OXVERSION@ open-xchange-secret-recovery >= @OXVERSION@ open-xchange-tx >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@
 #
 
 %description

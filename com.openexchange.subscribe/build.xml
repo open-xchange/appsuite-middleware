@@ -41,7 +41,8 @@
 	<property name="txjar" value="com.openexchange.tx.jar"/>
     <property name="commonjar" value="common.jar"/>
 	<property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
-
+	<property name="cascadejar" value="com.openexchange.config.cascade.jar"/>
+	
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -60,7 +61,8 @@
     	<pathelement location="${bundlesdir}/${secretrecovjar}"/>
     	<pathelement location="${bundlesdir}/${calendarjar}"/>
     	<pathelement location="${bundlesdir}/${txjar}"/>
-    </path>
+    	<pathelement location="${bundlesdir}/${cascadejar}"/>
+  	</path>
 
     <!-- Compile -->
     <target name="prepare">
