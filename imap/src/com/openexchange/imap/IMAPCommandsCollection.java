@@ -1402,7 +1402,7 @@ public final class IMAPCommandsCollection {
                 try {
                     final MailFields set = new MailFields(fields);
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
-                    final MailField sort = MailField.toField(sortField.getListField());
+                    final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
                     final FetchProfile fp;
                     if (null == sort) {
                         fp = getFetchProfile(fields, fastFetch);
