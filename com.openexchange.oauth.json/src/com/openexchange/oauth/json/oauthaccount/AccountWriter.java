@@ -81,8 +81,6 @@ public class AccountWriter {
         accountJSON.put(AccountField.ID.getName(), account.getId());
         accountJSON.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         accountJSON.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
-        accountJSON.put(AccountField.TOKEN.getName(), account.getToken());
-        accountJSON.put(AccountField.SECRET.getName(), account.getSecret());
         return accountJSON;
     }
 
