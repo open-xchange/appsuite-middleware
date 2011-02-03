@@ -60,7 +60,7 @@ import org.w3c.dom.Element;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FormElement {
-
+    // Known Custom Widgets:  oauthAccount
     public static enum Widget {
         INPUT("input"), PASSWORD("password"), CHECKBOX("checkbox"), LINK("link"), TEXT("text"), CUSTOM("custom");
 

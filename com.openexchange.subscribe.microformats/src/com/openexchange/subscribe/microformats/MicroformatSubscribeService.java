@@ -98,7 +98,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         if (!objectParsers.isEmpty()) {
             data = read(htmlData);
             htmlData = new StringReader(data);
-        }
+        } 
 
         OXMFParser parser = parserFactory.getParser();
         configureParser(parser);

@@ -65,6 +65,7 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceCollector;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.external.parser.ListingParser;
+import com.openexchange.subscribe.internal.FilteredSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
@@ -117,6 +118,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
 
     public boolean knowsSource(String identifier) {
         return sources.knowsSource(identifier);
+    }
+    
+    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+        return null;
     }
     
     public void refresh() throws SubscriptionException {
@@ -251,5 +256,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
         }
     }
+    
+    
 
 }
