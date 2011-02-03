@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.internal;
+package com.openexchange.subscribe.helpers;
 
 import java.util.ArrayList;
 import java.util.List;

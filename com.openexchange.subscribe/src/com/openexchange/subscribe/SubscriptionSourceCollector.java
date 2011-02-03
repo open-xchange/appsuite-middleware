@@ -61,7 +61,7 @@ import java.util.TreeSet;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.subscribe.internal.FilteredSubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoveryService;
 
 
 /**

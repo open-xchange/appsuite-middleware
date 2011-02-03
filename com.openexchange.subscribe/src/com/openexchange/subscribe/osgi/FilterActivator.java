@@ -51,7 +51,7 @@ package com.openexchange.subscribe.osgi;
 
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.subscribe.internal.FilteredSubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoveryService;
 
 
 /**

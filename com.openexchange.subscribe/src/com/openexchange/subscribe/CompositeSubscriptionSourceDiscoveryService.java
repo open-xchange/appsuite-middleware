@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.subscribe.internal.FilteredSubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoveryService;
 
 
 /**
