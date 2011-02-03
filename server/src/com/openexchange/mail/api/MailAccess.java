@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -86,8 +85,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static final long serialVersionUID = -2580495494392812083L;
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccess.class);
-
-    private static final AtomicInteger COUNTER = new AtomicInteger();
 
     /*-
      * ############### MEMBERS ###############
@@ -315,21 +312,21 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return the global access counter
      */
     public static final int getCounter() {
-        return COUNTER.get();
+        return MailAccessWatcher.getNumberOfMailAccesses();
     }
 
     /**
      * Increments the global access counter.
      */
     protected static final void incrementCounter() {
-        COUNTER.incrementAndGet();
+        // No-op
     }
 
     /**
      * Decrements the global access counter.
      */
     protected static final void decrementCounter() {
-        COUNTER.decrementAndGet();
+        // No-op
     }
 
     /**
