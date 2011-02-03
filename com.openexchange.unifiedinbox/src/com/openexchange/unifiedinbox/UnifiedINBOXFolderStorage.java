@@ -519,22 +519,21 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         return locale;
     }
 
-    private static String getLocalizedName(final String fullname) throws UnifiedINBOXException {
-        // TODO: Return real localized name
+    private String getLocalizedName(final String fullname) throws UnifiedINBOXException {
         if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
-            return UnifiedINBOXAccess.INBOX;
+            return I18n.getInstance().translate(getLocale(), NameStrings.NAME_INBOX);
         }
         if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
-            return UnifiedINBOXAccess.DRAFTS;
+            return I18n.getInstance().translate(getLocale(), NameStrings.NAME_DRAFTS);
         }
         if (UnifiedINBOXAccess.SENT.equals(fullname)) {
-            return UnifiedINBOXAccess.SENT;
+            return I18n.getInstance().translate(getLocale(), NameStrings.NAME_SENT);
         }
         if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
-            return UnifiedINBOXAccess.SPAM;
+            return I18n.getInstance().translate(getLocale(), NameStrings.NAME_SPAM);
         }
         if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
-            return UnifiedINBOXAccess.TRASH;
+            return I18n.getInstance().translate(getLocale(), NameStrings.NAME_TRASH);
         }
         throw new UnifiedINBOXException(UnifiedINBOXException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX, fullname);
     }
