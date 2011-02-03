@@ -16,6 +16,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInConnectionsService;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
+import com.openexchange.subscribe.SubscribeService;
 
 public class Activator implements BundleActivator {
 
@@ -62,7 +63,10 @@ public class Activator implements BundleActivator {
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
+        
+        registerMockSubscriptionSource();
     }
+
 
     /*
      * (non-Javadoc)
@@ -121,5 +125,14 @@ public class Activator implements BundleActivator {
         this.linkedInMetadata = linkedInMetadata;
     }
     
+    
+    
+    /**
+     * Delete Me! Register a non functioning subscription source so frontend work can continue
+     */
+    private void registerMockSubscriptionSource() {
+        services.add(bundleContext.registerService(SubscribeService.class.getName(), new DummySubscribeService(), null));
+    }
+
     
 }

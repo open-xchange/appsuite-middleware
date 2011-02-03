@@ -124,7 +124,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
 
     protected JSONValue listSources(final JSONObject req, final ServerSession session) throws AbstractOXException  {
         final int module = getModule(req);
-        final List<SubscriptionSource> sources = discoverer.getSources(module);
+        final List<SubscriptionSource> sources = getDiscovery(session).getSources(module);
         final String[] columns = getColumns(req);
         final JSONArray json = new SubscriptionSourceJSONWriter(createTranslator(session)).writeJSONArray(sources, columns);
         return json;
@@ -148,7 +148,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         if(identifier == null) {
             MISSING_PARAMETER.throwException("id");
         }
-        final SubscriptionSource source = discoverer.getSource(identifier);
+        final SubscriptionSource source = getDiscovery(session).getSource(identifier);
         final JSONObject data = new SubscriptionSourceJSONWriter(createTranslator(session)).writeJSON(source);
         return data;
     }
@@ -168,5 +168,9 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
             return FolderObject.INFOSTORE;
         }
         return -1;
+    }
+    
+    protected SubscriptionSourceDiscoveryService getDiscovery(ServerSession session) throws AbstractOXException {
+        return discoverer.filter(session.getUserId(), session.getContextId());
     }
 }

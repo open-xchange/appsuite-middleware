@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.Translator;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -73,9 +74,13 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
 
     private final Translator translator;
 
+    private FormDescriptionWriter formWriter;
+
     public SubscriptionSourceJSONWriter(Translator translator) {
         super();
         this.translator = translator;
+        formWriter = new FormDescriptionWriter(translator);
+        
     }
 
     public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException {
@@ -102,7 +107,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
                     row.put(source.getIcon());
                 } else if (FORM_DESCRIPTION.equals(field)) {
                     try {
-                        row.put(parseFormElements(source.getFormDescription()));
+                        row.put(formWriter.write(source.getFormDescription()));
                     } catch (JSONException e) {
                         JSONEXCEPTION.throwException(e);
                     }
@@ -122,7 +127,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
 
         retval.put(ID, source.getId());
         retval.put(DISPLAY_NAME, source.getDisplayName());
-        retval.put(FORM_DESCRIPTION, parseFormElements(source.getFormDescription()));
+        retval.put(FORM_DESCRIPTION,  formWriter.write(source.getFormDescription()));
         if (source.getIcon() != null) {
             retval.put(ICON, source.getIcon());
         }
@@ -142,22 +147,6 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         }
     }
 
-    private JSONArray parseFormElements(DynamicFormDescription formDescription) throws JSONException {
-        JSONArray retval = new JSONArray();
-        for (Iterator<FormElement> iter = formDescription.iterator(); iter.hasNext();) {
-            FormElement element = iter.next();
-            JSONObject jsonElement = new JSONObject();
-            jsonElement.put(NAME, element.getName());
-            jsonElement.put(DISPLAY_NAME, translator.translate(element.getDisplayName()));
-            jsonElement.put(WIDGET, element.getWidget().getKeyword());
-            jsonElement.put(MANDATORY, element.isMandatory());
-            if (element.getDefaultValue() != null) {
-                jsonElement.put(DEFAULT, element.getDefaultValue());
-            }
-            retval.put(jsonElement);
-        }
-        return retval;
-    }
 
     private void validate(SubscriptionSource source) throws SubscriptionJSONException {
         List<String> missingFields = new ArrayList<String>();
