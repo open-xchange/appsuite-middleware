@@ -53,8 +53,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,6 +72,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
@@ -292,20 +293,25 @@ public class Executor extends Assert {
     }
         
     private static void addUPLOADParameter(HttpPost postMethod, AJAXRequest<?> request) throws IOException, JSONException {
-    	MultipartEntity parts = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        MultipartEntity parts = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
     	
         for (final Parameter param : request.getParameters()) {
             if (param instanceof FieldParameter) {
                 
                 final FieldParameter fparam = (FieldParameter) param;
-                parts.addPart(fparam.getFieldName(), new StringBody(fparam.getFieldContent()));
+                final StringBody body = new StringBody(fparam.getFieldContent(), Charset.forName("UTF-8"));
+                parts.addPart(new FormBodyPart(fparam.getFieldName(), body));
             }
             if (param instanceof FileParameter) {
             	FileParameter fparam = (FileParameter) param;
             	InputStream is = fparam.getInputStream();
-            	InputStreamBody body = new InputStreamBody(is, fparam.getMimeType());
-            	
-            	parts.addPart(fparam.getFileName(), body);
+            	InputStreamBody body;
+            	if(null != fparam.getMimeType() && !"".equals(fparam.getMimeType())) {
+            	    body = new InputStreamBody(is, fparam.getMimeType(), fparam.getValue());
+            	} else {
+            	    body = new InputStreamBody(is, fparam.getValue());
+            	}
+            	parts.addPart(new FormBodyPart(fparam.getName(), body));
             }
         }
         postMethod.setEntity(parts);
