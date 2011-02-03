@@ -1,3 +1,9 @@
+open-xchange-authorization-standard (6.18.2.0-10) unstable; urgency=low
+
+  * second build for public ptf 2011-01-26
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 03 Feb 2011 12:25:15 +0000
+
 open-xchange-authorization-standard (6.18.2.0-9) unstable; urgency=low
 
   * build for public ptf 2011-01-26

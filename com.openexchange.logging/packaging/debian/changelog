@@ -1,3 +1,9 @@
+open-xchange-logging (6.18.2.0-12) unstable; urgency=low
+
+  * second build for public ptf 2011-01-26
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 03 Feb 2011 12:25:52 +0000
+
 open-xchange-logging (6.18.2.0-11) unstable; urgency=low
 
   * build for public ptf 2011-01-26
