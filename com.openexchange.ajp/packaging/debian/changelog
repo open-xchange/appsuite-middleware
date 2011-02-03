@@ -1,3 +1,9 @@
+open-xchange-ajp (6.19.0.0-2) unstable; urgency=low
+
+  * second build for 6.19.0-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 03 Feb 2011 14:25:16 +0000
+
 open-xchange-ajp (6.19.0.0-1) unstable; urgency=low
 
   * build for 6.19.0-rev3
