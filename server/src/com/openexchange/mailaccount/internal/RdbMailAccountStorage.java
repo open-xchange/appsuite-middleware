@@ -380,10 +380,37 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     public MailAccount getMailAccount(final int id, final int user, final int cid) throws MailAccountException {
-        final AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
-        fillMailAccount(retval, id, user, cid);
-        fillTransportAccount(retval, id, user, cid);
-        return retval;
+        try {
+            final Connection rcon;
+            try {
+                rcon = Database.get(cid, false);
+            } catch (final DBPoolingException e) {
+                throw new MailAccountException(e);
+            }
+            try {
+                return getMailAccount(id, user, cid, rcon);
+            } finally {
+                Database.back(cid, false, rcon);
+            }
+        } catch (final MailAccountException mae) {
+            if (MailAccountExceptionMessages.NOT_FOUND.getDetailNumber() != mae.getDetailNumber()) {
+                throw mae;
+            }
+            /*
+             * Read-only failed, retry with read-write connection
+             */
+            final Connection wcon;
+            try {
+                wcon = Database.get(cid, true);
+            } catch (final DBPoolingException dbe) {
+                throw new MailAccountException(dbe);
+            }
+            try {
+                return getMailAccount(id, user, cid, wcon);
+            } finally {
+                Database.back(cid, true, wcon);
+            }
+        }
     }
 
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws MailAccountException {
