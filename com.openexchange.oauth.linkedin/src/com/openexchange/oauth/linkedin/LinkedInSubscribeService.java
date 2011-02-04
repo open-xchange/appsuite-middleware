@@ -128,8 +128,11 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
     @Override
     public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
         String accountId = (String) subscription.getConfiguration().get("account");
-        subscription.getConfiguration().put("account",Integer.parseInt(accountId));
-        subscription.setDisplayName("LinkedIn"); //FIXME use account displayName
+        if (null != accountId){
+            Integer accountIdInt = Integer.parseInt(accountId);
+            if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
+            subscription.setDisplayName("LinkedIn"); //FIXME use account displayName
+        }        
         super.modifyOutgoing(subscription);
     }
 
@@ -214,7 +217,9 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
                     contact.setGivenName(getTextValue(person, "first-name"));
                     contact.setSurName(getTextValue(person, "last-name"));
                     try {
-                        OXContainerConverter.loadImageFromURL(contact, getTextValue(person, "picture-url"));
+                        String imageUrl = getTextValue(person, "picture-url");
+                        if (null != imageUrl) OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                        //System.out.println("Image-Url: " + getTextValue(person, "picture-url"));
                     } catch (ConverterException e) {
                         LOG.error(e);
                     }
