@@ -110,36 +110,6 @@ public class ExceptionsTest extends TestCase {
 
     }
 
-    public void testThrowExceptionByCode() {
-        final NullPointerException cause = new NullPointerException();
-        try {
-            exceptions.throwException(12, cause, "arg1", "arg2", "arg3");
-            fail("Didn't throw exception");
-        } catch (final OXTestException exception) {
-            assertEquals(12, exception.getDetailNumber());
-            assertEquals(component, exception.getComponent());
-            assertEquals(AbstractOXException.Category.USER_INPUT, exception.getCategory());
-            assertEquals(cause, exception.getCause());
-            assertEquals("MESSAGE12", exception.getOrigMessage());
-            assertMessageArgs(exception, "arg1", "arg2", "arg3");
-        }
-    }
-
-    public void testThrowExceptionByErrorMessage() {
-        final NullPointerException cause = new NullPointerException();
-        try {
-            exceptions.throwException(errorMessage.getDetailNumber(), cause,"arg11", "arg12", "arg13", "arg14");
-            fail("Didn't throw exception");
-        } catch (final OXTestException exception) {
-            assertEquals(13, exception.getDetailNumber());
-            assertEquals(component, exception.getComponent());
-            assertEquals(AbstractOXException.Category.CODE_ERROR, exception.getCategory());
-            assertEquals(cause, exception.getCause());
-            assertEquals("MESSAGE13", exception.getOrigMessage());
-            assertMessageArgs(exception, "arg11", "arg12", "arg13", "arg14");
-        }
-    }
-
     public void testLookupErrorMessage() {
         ErrorMessage msg = exceptions.findMessage(12);
         assertEquals(12, msg.getDetailNumber());
