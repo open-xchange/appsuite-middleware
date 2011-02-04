@@ -103,7 +103,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         cacheLock = new ReentrantLock(true);
     }
 
-    private static CacheKey newCacheKey(final CacheService cacheService, final int id, final int user, final int cid) {
+    static CacheKey newCacheKey(final CacheService cacheService, final int id, final int user, final int cid) {
         return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
     }
 
@@ -139,6 +139,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (cacheService == null) {
             return delegate.getDefaultMailAccount(user, cid);
         }
+        final RdbMailAccountStorage d = delegate;
+        final Lock l = cacheLock;
         final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
 
             public Serializable getKey() {
@@ -146,11 +148,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             }
 
             public MailAccount load() throws MailAccountException {
-                return delegate.getDefaultMailAccount(user, cid);
+                return d.getDefaultMailAccount(user, cid);
             }
 
             public Lock getCacheLock() {
-                return cacheLock;
+                return l;
             }
         };
         try {
@@ -168,6 +170,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (cacheService == null) {
             return delegate.getMailAccount(id, user, cid);
         }
+        final RdbMailAccountStorage d = delegate;
+        final Lock l = cacheLock;
         final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
 
             public Serializable getKey() {
@@ -175,11 +179,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             }
 
             public MailAccount load() throws MailAccountException {
-                return delegate.getMailAccount(id, user, cid);
+                return d.getMailAccount(id, user, cid);
             }
 
             public Lock getCacheLock() {
-                return cacheLock;
+                return l;
             }
         };
         try {
