@@ -120,7 +120,9 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
     public void modifyIncoming(Subscription subscription) throws SubscriptionException {
         super.modifyIncoming(subscription);
         Integer accountId = (Integer) subscription.getConfiguration().get("account");
-        subscription.getConfiguration().put("account", accountId.toString());
+        if(accountId != null) {
+            subscription.getConfiguration().put("account", accountId.toString());
+        }
     }
     
     @Override
