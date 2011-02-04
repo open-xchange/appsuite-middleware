@@ -1,6 +1,7 @@
 * 2011-02-04 - thorben.betten@open-xchange.com
 
  - Bugfix #18212: Retry with read-write connection if read-only connection fails to read newly created mail account
+ - Bugfix #18155: Quoting "NIL" argument
 
 * 2011-02-03 - thorben.betten@open-xchange.com
 

@@ -41,7 +41,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Vector;
 import com.sun.mail.util.ASCIIUtility;
 
@@ -189,7 +188,22 @@ public class Argument {
     }
     }
 
-    private static final byte[] BYTES_NIL = "NIL".getBytes();
+    private static final char[] UPPER_NIL = { 'N', 'I', 'L' };
+
+    private static final char[] LOWER_NIL = { 'n', 'i', 'l' };
+
+    private static boolean isNIL(final byte[] bytes) {
+        final int len = bytes.length;
+        if (len != UPPER_NIL.length) {
+            return false;
+        }
+        boolean matches = true;
+        for (int i = 0; matches && i < len; i++) {
+            final byte b = bytes[i];
+            matches &= (b == ((byte) UPPER_NIL[i]) || b == ((byte) LOWER_NIL[i]));
+        }
+        return matches;
+    }
 
     /**
      * Write out given String as either an Atom, QuotedString or Literal
@@ -209,7 +223,7 @@ public class Argument {
         boolean quote = len == 0 ? true: false;
     boolean escape = false;
 
-    if (Arrays.equals(bytes, BYTES_NIL)) {
+    if (isNIL(bytes)) {
         quote = true;
     }
 
