@@ -1403,12 +1403,7 @@ public final class IMAPCommandsCollection {
                     final MailFields set = new MailFields(fields);
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
-                    final FetchProfile fp;
-                    if (null == sort) {
-                        fp = getFetchProfile(fields, fastFetch);
-                    } else {
-                        fp = getFetchProfile(fields, sort, fastFetch);
-                    }
+                    final FetchProfile fp = null == sort ? getFetchProfile(fields, fastFetch) : getFetchProfile(fields, sort, fastFetch);
                     newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
                 } catch (final MessagingException e) {
                     throw wrapException(e, null);
