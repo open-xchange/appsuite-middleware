@@ -145,14 +145,6 @@ public abstract class Exceptions<T extends AbstractOXException> {
         return create(code, null, args);
     }
 
-    public void throwException(final int code, final Object... args) throws T {
-        throw create(code, args);
-    }
-
-    public void throwException(final int code, final Throwable cause, final Object... args) throws T {
-        throw create(code, cause, args);
-    }
-
     public T create(final OXErrorMessage message, final Object... args) {
         return create(message.getDetailNumber(), args);
     }
