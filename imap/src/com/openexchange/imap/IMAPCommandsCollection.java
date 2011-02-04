@@ -2665,7 +2665,7 @@ public final class IMAPCommandsCollection {
         /*
          * Determine if quoting (and escaping) has to be done
          */
-        final boolean quote = PATTERN_QUOTE_ARG.matcher(lfolder).find();
+        final boolean quote = PATTERN_QUOTE_ARG.matcher(lfolder).find() || "NIL".equalsIgnoreCase(lfolder);
         final boolean escape = PATTERN_ESCAPE_ARG.matcher(lfolder).find();
         final StringBuilder sb = new StringBuilder(lfolder.length() + 8);
         if (escape) {
