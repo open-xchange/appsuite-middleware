@@ -109,11 +109,25 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
 
         DynamicFormDescription form = new DynamicFormDescription();
 
-        FormElement oauthAccount = FormElement.custom("oauthAccount", "Account", "The OAuthAccount to use");
+        FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
         oauthAccount.setOption("type", new OAuthServiceMetaDataLinkedInImpl().getId());
         form.add(oauthAccount);
 
         source.setFormDescription(form);
+    }
+    
+    @Override
+    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
+        super.modifyIncoming(subscription);
+        Integer accountId = (Integer) subscription.getConfiguration().get("account");
+        subscription.getConfiguration().put("account", accountId.toString());
+    }
+    
+    @Override
+    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
+        String accountId = (String) subscription.getConfiguration().get("account");
+        subscription.getConfiguration().put("account",Integer.parseInt(accountId));
+        super.modifyOutgoing(subscription);
     }
 
     public List<Contact> getData(int user, int contextId) {
