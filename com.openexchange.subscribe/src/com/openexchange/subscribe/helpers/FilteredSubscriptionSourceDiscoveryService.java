@@ -113,6 +113,8 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
     }
     
     protected boolean accepts(String identifier) {
+        return true;
+        /*
         try {
             ComposedConfigProperty<Boolean> property = config.property(identifier, boolean.class);
             if(property.isDefined()) {
@@ -122,7 +124,7 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
         } catch (ConfigCascadeException e) {
             LOG.error(e.getMessage(), e);
             return false;
-        }
+        }*/
     }
     
     protected SubscriptionSource filter(SubscriptionSource source) {
