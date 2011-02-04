@@ -68,6 +68,12 @@ public class SimpleCredentials implements Cloneable {
     private TestUserConfigFactory userConfigFactory = null;
 	private ContactFinder contactFinder;
 	private Locale locale = null;
+	private int userId = 0;
+	private int contactId = 0;
+	private String privateAppointmentFolderId = null;
+	private String privateTaskFolderId = null;
+	private String privateContactFolderId = null;
+	private String privateInfostoreFolderId = null;
 
     public SimpleCredentials(TestUserConfigFactory userConfigFactory, ContactFinder contactFinder) {
         super();
@@ -114,7 +120,45 @@ public class SimpleCredentials implements Cloneable {
     }
 
     public int getUserId() {
-        return getConfig().getInt(Tree.Identifier);
+        if(0 == userId) {
+            userId = getConfig().getInt(Tree.Identifier);
+        }
+        return userId;
+    }
+    
+    public int getContactId() {
+        if(0 == contactId) {
+            contactId = getConfig().getInt(Tree.Identifier);
+        }
+        return contactId;
+    }
+
+    public String getPrivateAppointmentFolderId() {
+        if (null == privateAppointmentFolderId) {
+            privateAppointmentFolderId = getConfig().getString(Tree.PrivateAppointmentFolder);
+        }
+        return privateAppointmentFolderId;
+    }
+
+    public String getPrivateTaskFolderId() {
+        if (null == privateTaskFolderId) {
+            privateTaskFolderId = getConfig().getString(Tree.PrivateTaskFolder);
+        }
+        return privateTaskFolderId;
+    }
+
+    public String getPrivateContactFolderId() {
+        if (null == privateContactFolderId) {
+            privateContactFolderId = getConfig().getString(Tree.PrivateContactFolder);
+        }
+        return privateContactFolderId;
+    }
+
+    public String getPrivateInfostoreFolderId() {
+        if (null == privateInfostoreFolderId) {
+            privateInfostoreFolderId = getConfig().getString(Tree.PrivateInfostoreFolder);
+        }
+        return privateInfostoreFolderId;
     }
 
     public boolean hasFullGroupware() {
@@ -152,6 +196,7 @@ public class SimpleCredentials implements Cloneable {
         return calendar;
     }
 
+    @Override
     public boolean equals(final Object o) {
         if (this == o) { 
         	return true; 
@@ -164,16 +209,19 @@ public class SimpleCredentials implements Cloneable {
 	    	(null != this.password ? this.password.equals(that.password) : null == that.password);
     }
 
+    @Override
     public int hashCode() {
         int result;
         result = (login != null ? login.hashCode() : 0);
         return result;
     }
 
+    @Override
     public String toString() {
         return String.format("SimpleCredentials[%s]", null != this.getLogin() ? this.getLogin() : "");
     }
 
+    @Override
     public Object clone() {
         try {
             return super.clone();
