@@ -127,6 +127,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
     public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
         String accountId = (String) subscription.getConfiguration().get("account");
         subscription.getConfiguration().put("account",Integer.parseInt(accountId));
+        subscription.setDisplayName("LinkedIn"); //FIXME use account displayName
         super.modifyOutgoing(subscription);
     }
 
