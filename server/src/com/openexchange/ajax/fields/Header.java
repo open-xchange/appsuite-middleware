@@ -58,6 +58,8 @@ public class Header {
 
     public static final String USER_AGENT = "user-agent";
 
+    public static final String AUTH_HEADER = "authorization";
+
     public Header() {
         super();
     }

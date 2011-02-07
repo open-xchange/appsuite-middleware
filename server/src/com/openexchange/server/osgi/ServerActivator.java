@@ -788,7 +788,6 @@ public final class ServerActivator extends DeferredActivator {
         http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
-        http.registerServlet("/ajax/login", new com.openexchange.ajax.Login(), null, null);
         http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
         http.registerServlet("/ajax/contacts", new com.openexchange.ajax.Contact(), null, null);
         http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);

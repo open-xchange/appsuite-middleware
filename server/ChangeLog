@@ -1,3 +1,7 @@
+* 2011-02-07 - marcus.klein@open-xchange.com
+
+ - TA5815 of US 5768: Added a HTTP authorization header based login.
+
 * 2011-02-04 - thorben.betten@open-xchange.com
 
  - Bugfix #18212: Retry with read-write connection if read-only connection fails to read newly created mail account

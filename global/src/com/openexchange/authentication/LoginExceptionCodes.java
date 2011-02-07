@@ -49,19 +49,7 @@
 
 package com.openexchange.authentication;
 
-import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.CLASS_NOT_FOUND_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENIED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.DATABASE_DOWN_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.INSTANTIATION_FAILED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.MISSING_PROPERTY_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_ACTIVE_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_FOUND_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.*;
 import com.openexchange.authentication.exception.LoginExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -100,7 +88,9 @@ public enum LoginExceptionCodes implements OXErrorMessage {
     /** User is not activated. */
     USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.PERMISSION, 13),
     /** Client "%1$s" is not activated. */
-    CLIENT_DENIED(CLIENT_DENIED_MSG, Category.USER_CONFIGURATION, 14);
+    CLIENT_DENIED(CLIENT_DENIED_MSG, Category.USER_CONFIGURATION, 14),
+    /** Method "%1$s" in HTTP header authorization is not supported. */
+    UNKNOWN_HTTP_AUTHORIZATION(UNKNOWN_HTTP_AUTHORIZATION_MSG, Category.TRY_AGAIN, 15);
 
     final String message;
 

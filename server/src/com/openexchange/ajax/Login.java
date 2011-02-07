@@ -53,6 +53,8 @@ import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.ajax.SessionServlet.removeJSESSIONID;
 import static com.openexchange.ajax.SessionServlet.removeOXCookies;
 import static com.openexchange.login.Interface.HTTP_JSON;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
@@ -94,6 +96,7 @@ import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
@@ -104,8 +107,11 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.http.Authorization;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -128,13 +134,16 @@ public class Login extends AJAXServlet {
 
     public static final String SECRET_PREFIX = "open-xchange-secret-";
 
+    private static final String ACTION_FORMLOGIN = "formlogin";
+
     private static final Log LOG = LogFactory.getLog(Login.class);
     
-    public static final String ACTION_FORMLOGIN = "formlogin";
-
     private String uiWebPath;
-
     private CookieHashSource hashSource;
+    private String autoLogin;
+    private String defaultClient;
+    private String clientVersion;
+    private String errorPageTemplate;
 
     public Login() {
         super();
@@ -145,6 +154,22 @@ public class Login extends AJAXServlet {
         super.init(config);
         uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
         hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
+        autoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
+        defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
+        clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
+        String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
+        if (null == templateFileLocation) {
+            errorPageTemplate = ERROR_PAGE_TEMPLATE;
+        } else {
+            File templateFile = new File(templateFileLocation);
+            try {
+                errorPageTemplate = IOTools.getFileContents(templateFile);
+                LOG.info("Found an error page template at " + templateFileLocation);
+            } catch (FileNotFoundException e) {
+                LOG.error("Could not find an error page template at " + templateFileLocation + ", using default.");
+                errorPageTemplate = ERROR_PAGE_TEMPLATE;
+            }
+        }
     }
 
     @Override
@@ -442,11 +467,19 @@ public class Login extends AJAXServlet {
             try {
                 doFormLogin(req, resp);
             } catch (final AjaxException e) {
-                String errorPage = ERROR_PAGE_TEMPLATE.replace("ERROR_MESSAGE", e.getMessage());
+                String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                 resp.setContentType(CONTENTTYPE_HTML);
                 resp.getWriter().write(errorPage);
             } catch (LoginException e) {
-                String errorPage = ERROR_PAGE_TEMPLATE.replace("ERROR_MESSAGE", e.getMessage());
+                String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
+                resp.setContentType(CONTENTTYPE_HTML);
+                resp.getWriter().write(errorPage);
+            }
+        } else if (req.getHeader(Header.AUTH_HEADER) != null) {
+            try {
+                doAuthHeaderLogin(req, resp);
+            } catch (LoginException e) {
+                String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                 resp.setContentType(CONTENTTYPE_HTML);
                 resp.getWriter().write(errorPage);
             }
@@ -750,18 +783,66 @@ public class Login extends AJAXServlet {
     }
 
     private void doFormLogin(HttpServletRequest req, HttpServletResponse resp) throws AjaxException, LoginException, IOException {
-        Tools.disableCaching(resp);
-
         final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM ,true);
         final LoginResult result = LoginPerformer.getInstance().doLogin(request);
         final Session session = result.getSession();
 
+        Tools.disableCaching(resp);
         writeSecretCookie(resp, session, session.getHash(), req.isSecure());
-
         resp.sendRedirect(generateRedirectURL(
             req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
             req.getParameter(LoginFields.AUTOLOGIN_PARAM),
             session.getSessionID()));
+    }
+
+    private void doAuthHeaderLogin(final HttpServletRequest req, HttpServletResponse resp) throws LoginException, IOException {
+        String auth = req.getHeader(Header.AUTH_HEADER);
+        final Credentials creds;
+        if (Authorization.checkForBasicAuthorization(auth)) {
+            creds = Authorization.decode(auth);
+        } else {
+            throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create();
+        }
+        final String client = defaultClient;
+        final String version = clientVersion;
+        final LoginRequest request = new LoginRequest() {
+            private String hash;
+            public String getVersion() {
+                return version;
+            }
+            public String getUserAgent() {
+                return req.getHeader(Header.USER_AGENT);
+            }
+            public String getPassword() {
+                return creds.getPassword();
+            }
+            public String getLogin() {
+                return creds.getLogin();
+            }
+            public Interface getInterface() {
+                return Interface.HTTP_JSON;
+            }
+            public String getHash() {
+                if (hash != null) {
+                    return hash;
+                }
+                return hash = HashCalculator.getHash(req, client);
+            }
+            public String getClientIP() {
+                return req.getRemoteAddr();
+            }
+            public String getClient() {
+                return client;
+            }
+            public String getAuthId() {
+                return UUIDs.getUnformattedString(UUID.randomUUID());
+            }
+        };
+        final LoginResult result = LoginPerformer.getInstance().doLogin(request);
+        final Session session = result.getSession();
+        Tools.disableCaching(resp);
+        writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+        resp.sendRedirect(generateRedirectURL(null, autoLogin, session.getSessionID()));
     }
 
     private String generateRedirectURL(String uiWebPathParam, String autoLoginParam, String sessionId) {
@@ -782,8 +863,8 @@ public class Login extends AJAXServlet {
     private static final String ERROR_PAGE_TEMPLATE = 
         "<html>\n" +
         "<script type=\"text/javascript\">\n" + 
-        "// Display normal HTML for 3 seconds, then redirect via referrer.\n" + 
-        "setTimeout(redirect,3000);\n" + 
+        "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + 
+        "setTimeout(redirect,5000);\n" + 
         "function redirect(){\n" + 
         " var referrer=document.referrer;\n" + 
         " var redirect_url;\n" + 

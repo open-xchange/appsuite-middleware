@@ -79,7 +79,8 @@ public class Activator extends CompositeBundleActivator {
         new com.openexchange.groupware.links.osgi.LinkActivator(),
         new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
         new com.openexchange.consistency.osgi.ConsistencyActivator(),
-        new com.openexchange.authorization.osgi.AuthorizationActivator()
+        new com.openexchange.authorization.osgi.AuthorizationActivator(),
+        new com.openexchange.ajax.login.osgi.LoginActivator()
     };
 
     public Activator() {

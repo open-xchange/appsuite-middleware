@@ -1,4 +1,5 @@
 /etc/default/open-xchange-groupware
+/opt/open-xchange/etc/common/foldercache.properties
 /opt/open-xchange/etc/groupware/cache.ccf
 /opt/open-xchange/etc/groupware/importerExporter.xml
 /opt/open-xchange/etc/groupware/mailcache.ccf
@@ -12,12 +13,12 @@
 /opt/open-xchange/etc/groupware/contact.properties
 /opt/open-xchange/etc/groupware/event.properties
 /opt/open-xchange/etc/groupware/file-logging.properties
-/opt/open-xchange/etc/common/foldercache.properties
 /opt/open-xchange/etc/groupware/HTMLEntities.properties
 /opt/open-xchange/etc/groupware/imap.properties
 /opt/open-xchange/etc/groupware/infostore.properties
 /opt/open-xchange/etc/groupware/javamail.properties
 /opt/open-xchange/etc/groupware/ldap.properties
+/opt/open-xchange/etc/groupware/login.properties
 /opt/open-xchange/etc/groupware/mail.properties
 /opt/open-xchange/etc/groupware/mailjsoncache.properties
 /opt/open-xchange/etc/groupware/notification.properties

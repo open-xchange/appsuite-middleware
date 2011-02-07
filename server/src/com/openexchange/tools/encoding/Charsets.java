@@ -69,10 +69,12 @@ public final class Charsets {
      */
     public static final Charset US_ASCII = Charset.forName("US-ASCII");
 
+    public static final String UTF_8_NAME = "UTF-8";
+
     /**
      * UTF-8 character set.
      */
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
+    public static final Charset UTF_8 = Charset.forName(UTF_8_NAME);
 
     /**
      * The charset cache.

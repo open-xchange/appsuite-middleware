@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,79 +47,36 @@
  *
  */
 
-package com.openexchange.tools.io;
+package com.openexchange.ajax.login.osgi;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Scanner;
-import com.openexchange.tools.encoding.Charsets;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 
-public class IOTools {
+/**
+ * {@link LoginActivator}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class LoginActivator implements BundleActivator {
 
-    private IOTools() {
+    private ServiceTracker tracker;
+
+    public LoginActivator() {
         super();
     }
 
-    public static final void reallyBloodySkip(final InputStream is, long bytes) throws IOException {
-        while (bytes > 0) {
-            final long skipped = is.skip(bytes);
-            if (skipped < 0) {
-                return;
-            }
-            bytes -= skipped;
-        }
+    public void start(BundleContext context) throws Exception {
+        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + "))");
+        tracker = new ServiceTracker(context, filter, new LoginServletRegisterer(context));
+        tracker.open();
     }
 
-    public static final void copy(InputStream in, OutputStream out) throws IOException {
-        BufferedInputStream inputStream = new BufferedInputStream(in);
-        BufferedOutputStream outputStream = new BufferedOutputStream(out);
-        
-        int i = -1;
-        int count = 0;
-        while((i = inputStream.read()) != -1) {
-            count++;
-            outputStream.write(i);
-        }
-        
-        outputStream.flush();
-    }
-
-    public static final byte[] getBytes(InputStream stream) throws IOException {
-        BufferedInputStream in = new BufferedInputStream(stream);
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            int i;
-            while((i = in.read()) != -1) {
-                out.write(i);
-            }
-            
-            return out.toByteArray();
-        } finally {
-            in.close();
-        }
-        
-    }
-
-    public static final String getFileContents(File file) throws FileNotFoundException {
-        StringBuilder sb = new StringBuilder();
-        Scanner scanner = null;
-        try {
-            scanner = new Scanner(file, Charsets.UTF_8_NAME);
-            while (scanner.hasNextLine()) {
-                sb.append(scanner.nextLine());
-                sb.append('\n');
-            }
-        } finally {
-            if (null != scanner) {
-                scanner.close();
-            }
-        }
-        return sb.toString();
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
     }
 }

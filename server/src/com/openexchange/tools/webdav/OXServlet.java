@@ -59,6 +59,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.JDOMException;
+import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.java.util.UUIDs;
@@ -69,8 +70,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.StringCollection;
-import com.openexchange.tools.encoding.Base64;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.webdav.digest.Authorization;
 import com.openexchange.tools.webdav.digest.DigestUtility;
 import com.openexchange.webdav.WebdavException;
@@ -158,16 +158,6 @@ public abstract class OXServlet extends WebDavServlet {
     private static final String digestRealm = "Open-Xchange";
 
     protected static final String COOKIE_SESSIONID = "sessionid";
-
-    /**
-     * Name of the header containing the authorization data.
-     */
-    private static final String AUTH_HEADER = "authorization";
-
-    /**
-     * Basic type for authorization.
-     */
-    private static final String BASIC_AUTH = "basic";
 
     /**
      * Digest type for authorization.
@@ -278,25 +268,6 @@ public abstract class OXServlet extends WebDavServlet {
     }
 
     /**
-     * Checks if the client sends a correct basic authorization header.
-     * 
-     * @param auth Authorization header.
-     * @return <code>true</code> if the client sent a correct authorization header.
-     */
-    private static boolean checkForBasicAuthorization(final String auth) {
-        if (null == auth) {
-            return false;
-        }
-        if (auth.length() <= BASIC_AUTH.length()) {
-            return false;
-        }
-        if (!auth.substring(0, BASIC_AUTH.length()).equalsIgnoreCase(BASIC_AUTH)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Checks if the client sends a correct digest authorization header.
      * 
      * @param auth Authorization header.
@@ -313,18 +284,6 @@ public abstract class OXServlet extends WebDavServlet {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Checks if the login contains only valid values.
-     * 
-     * @param pass password of the user
-     * @return false if the login contains illegal values.
-     */
-    protected static boolean checkLogin(final String pass) {
-        // check if the user wants to login without password.
-        // ldap bind doesn't fail with empty password. so check it here.
-        return (pass != null && !StringCollection.isEmpty(pass));
     }
 
     /**
@@ -354,30 +313,19 @@ public abstract class OXServlet extends WebDavServlet {
     }
 
     private LoginRequest parseLogin(final HttpServletRequest req) throws WebdavException, IOException {
-        final String auth = req.getHeader(AUTH_HEADER);
+        final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Authentication header missing.");
             }
             throw new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, "Authorization");
         }
-        if (checkForBasicAuthorization(auth)) {
-            /*
-             * Basic auth
-             */
-            final byte[] decoded = Base64.decode(auth.substring(6));
-            final String userpass = new String(decoded, "UTF-8").trim();
-            final int delimiter = userpass.indexOf(':');
-            String login = "";
-            String pass = "";
-            if (-1 != delimiter) {
-                login = userpass.substring(0, delimiter);
-                pass = userpass.substring(delimiter + 1);
-            }
-            if (!checkLogin(pass)) {
+        if (com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization(auth)) {
+            Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(auth);
+            if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
                 throw new WebdavException(WebdavException.Code.EMPTY_PASSWORD);
             }
-            return new LoginRequestImpl(login, pass, getInterface(), req);
+            return new LoginRequestImpl(creds.getLogin(), creds.getPassword(), getInterface(), req);
         }
         if (checkForDigestAuthorization(auth)) {
             /*
@@ -390,7 +338,7 @@ public abstract class OXServlet extends WebDavServlet {
              */
             final String userName = authorization.getUser();
             final String password = digestUtility.getPasswordByUserName(userName);
-            if (!checkLogin(password)) {
+            if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(password)) {
                 throw new WebdavException(WebdavException.Code.UNSUPPORTED_AUTH_MECH, "Digest");
             }
             /*

@@ -97,7 +97,7 @@ public final class LoginExceptionMessages implements LocalizableStrings {
 
     // Indicates an unresolvable user
     // %1$s is replaced with the login name of the user.
-    // %1$s is replaced with the unique context identifier.
+    // %2$s is replaced with the unique context identifier.
     public static final String USER_NOT_FOUND_MSG = "User %1$s could not be found in context %2$s.";
 
     // Indicates a deactivated user
@@ -106,6 +106,10 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Indicates whether indicated client is allowed to perform a login
     // E.g. 'Client "OLOX20" is not activated.'
     public static final String CLIENT_DENIED_MSG = "Client \"%1$s\" is not activated.";
+
+    // This message is thrown when the login request with a HTTP authorization header contains a authorization method that is not supported.
+    // %1$s is replaved with the not supported HTTP authorization header method.
+    public static final String UNKNOWN_HTTP_AUTHORIZATION_MSG = "Method \"%1$s\" in HTTP header authorization is not supported.";
 
     private LoginExceptionMessages() {
         super();
