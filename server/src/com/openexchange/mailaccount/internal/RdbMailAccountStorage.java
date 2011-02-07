@@ -54,7 +54,9 @@ import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1157,6 +1159,8 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 I(user),
                 I(cid));
         }
+        checkDuplicateMailAccount(mailAccount, user, cid, con);
+        checkDuplicateTransportAccount(mailAccount, user, cid, con);
         // Check name
         final String name = mailAccount.getName();
         if (!isValid(name)) {
@@ -1382,6 +1386,134 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
+        }
+    }
+
+    private void checkDuplicateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Connection con) throws MailAccountException {
+        final String server = mailAccount.getMailServer();
+        if (isEmpty(server)) {
+            /*
+             * No mail server specified
+             */
+            return;
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, url, login FROM user_mail_account WHERE cid = ? AND user = ?");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, user);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return;
+            }
+            InetAddress addr;
+            try {
+                addr = InetAddress.getByName(server);
+            } catch (final UnknownHostException e) {
+                LOG.warn(e.getMessage(), e);
+                addr = null;
+            }
+            final int port = mailAccount.getMailPort();
+            final String login = mailAccount.getLogin();
+            do {
+                final int id = (int) result.getLong(1);
+                final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+                current.parseMailServerURL(result.getString(2));
+                if (checkMailServer(server, addr, current) && current.getMailPort() == port && login.equals(current.getLogin())) {
+                    throw MailAccountExceptionMessages.DUPLICATE_MAIL_ACCOUNT.create(I(user), I(cid));
+                }
+            } while (result.next());
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private static boolean checkMailServer(final String server, final InetAddress addr, final AbstractMailAccount current) {
+        final String mailServer = current.getMailServer();
+        if (isEmpty(mailServer)) {
+            return false;
+        }
+        if (null == addr) {
+            /*
+             * Check by server string
+             */
+            return server.equalsIgnoreCase(mailServer);
+        }
+        try {
+            return addr.equals(InetAddress.getByName(mailServer));
+        } catch (final UnknownHostException e) {
+            LOG.warn(e.getMessage(), e);
+            /*
+             * Check by server string
+             */
+            return server.equalsIgnoreCase(mailServer);
+        }
+    }
+
+    private void checkDuplicateTransportAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Connection con) throws MailAccountException {
+        final String server = mailAccount.getTransportServer();
+        if (isEmpty(server)) {
+            /*
+             * No transport server specified
+             */
+            return;
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, url, login FROM user_transport_account WHERE cid = ? AND user = ?");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, user);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return;
+            }
+            InetAddress addr;
+            try {
+                addr = InetAddress.getByName(server);
+            } catch (final UnknownHostException e) {
+                LOG.warn(e.getMessage(), e);
+                addr = null;
+            }
+            final int port = mailAccount.getTransportPort();
+            final String login = mailAccount.getTransportLogin();
+            do {
+                final int id = (int) result.getLong(1);
+                final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+                current.parseTransportServerURL(result.getString(2));
+                if (checkTransportServer(server, addr, current) && current.getTransportPort() == port && login.equals(current.getTransportLogin())) {
+                    throw MailAccountExceptionMessages.DUPLICATE_TRANSPORT_ACCOUNT.create(I(user), I(cid));
+                }
+            } while (result.next());
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private static boolean checkTransportServer(final String server, final InetAddress addr, final AbstractMailAccount current) {
+        final String transportServer = current.getTransportServer();
+        if (isEmpty(transportServer)) {
+            return false;
+        }
+        if (null == addr) {
+            /*
+             * Check by server string
+             */
+            return server.equalsIgnoreCase(transportServer);
+        }
+        try {
+            return addr.equals(InetAddress.getByName(transportServer));
+        } catch (final UnknownHostException e) {
+            LOG.warn(e.getMessage(), e);
+            /*
+             * Check by server string
+             */
+            return server.equalsIgnoreCase(transportServer);
         }
     }
 
