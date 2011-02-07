@@ -311,9 +311,9 @@ public class MobileConfigServlet extends HttpServlet {
             writer.println("<table>");
             writer.println("<tr>");
             if (Locale.ENGLISH.equals(locale)) {
-                writer.println("<td><h1>" + String.valueOf(msg.getGerman()) + "</h1></td>");
-            } else if (Locale.GERMAN.equals(locale)) {
                 writer.println("<td><h1>" + String.valueOf(msg.getEnglish()) + "</h1></td>");
+            } else if (Locale.GERMAN.equals(locale)) {
+                writer.println("<td><h1>" + String.valueOf(msg.getGerman()) + "</h1></td>");
             }
             writer.println("</tr>");
             writer.println("</table>");
