@@ -107,8 +107,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
             lock.unlock();
         }
         if (needsRegistration) {
-            LOG.info("Registering login servlet.");
-            Hashtable<String, String> params = new Hashtable<String, String>();
+            Dictionary<String, String> params = new Hashtable<String, String>();
             addProperty(params, Property.UI_WEB_PATH);
             addProperty(params, Property.COOKIE_HASH);
             addProperty(params, ConfigurationProperty.HTTP_AUTH_AUTOLOGIN);
@@ -116,6 +115,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
             addProperty(params, ConfigurationProperty.HTTP_AUTH_VERSION);
             addProperty(params, ConfigurationProperty.ERROR_PAGE_TEMPLATE);
             try {
+                LOG.info("Registering login servlet.");
                 httpService.registerServlet(SERVLET_PATH, new Login(), params, null);
             } catch (ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
@@ -133,7 +133,10 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
 
     private void addProperty(Dictionary<String, String> params, com.openexchange.login.ConfigurationProperty property) {
         String propertyName = property.getPropertyName();
-        params.put(propertyName, configService.getProperty(propertyName, property.getDefaultValue()));
+        String value = configService.getProperty(propertyName, property.getDefaultValue());
+        if (null != value) {
+            params.put(propertyName, value);
+        }
     }
 
     public void modifiedService(ServiceReference reference, Object service) {
