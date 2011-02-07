@@ -106,11 +106,11 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Invalid mail account name: %1$s
     public static final String INVALID_NAME_MSG = "Invalid mail account name: %1$s";
 
-    // Duplicate mail account.
-    public static final String DUPLICATE_MAIL_ACCOUNT_MSG = "Duplicate mail account.";
+    // Duplicate mail account for user %1$s in context %2$s.
+    public static final String DUPLICATE_MAIL_ACCOUNT_MSG = "Duplicate mail account for user %1$s in context %2$s.";
 
-    // Duplicate transport account.
-    public static final String DUPLICATE_TRANSPORT_ACCOUNT_MSG = "Duplicate transport account..";
+    // Duplicate transport account for user %1$s in context %2$s.
+    public static final String DUPLICATE_TRANSPORT_ACCOUNT_MSG = "Duplicate transport account for user %1$s in context %2$s.";
 
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.

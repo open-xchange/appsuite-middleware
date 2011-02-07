@@ -124,14 +124,13 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
      */
     INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CODE_ERROR, 16),
     /**
-     * Duplicate mail account.
+     * Duplicate mail account for user %1$s in context %2$s.
      */
     DUPLICATE_MAIL_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_MAIL_ACCOUNT_MSG, Category.CODE_ERROR, 17),
     /**
-     * Duplicate transport account.
+     * Duplicate transport account for user %1$s in context %2$s.
      */
-    DUPLICATE_TRANSPO_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CODE_ERROR, 17);
-    
+    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CODE_ERROR, 17);    
 
     /**
      * Message of the exception.
