@@ -734,6 +734,9 @@ public class ContactRequest {
         searchObj.setLastModifiedRange(DataParser.parseJSONDateArray(jData, "lastmodifiedrange"));
         searchObj.setCatgories(DataParser.parseString(jData, "categories"));
         searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
+        searchObj.setYomiCompany(DataParser.parseString(jData, ContactFields.YOMI_COMPANY));
+        searchObj.setYomiFirstname(DataParser.parseString(jData, ContactFields.YOMI_FIRST_NAME));
+        searchObj.setYomiLastName(DataParser.parseString(jData, ContactFields.YOMI_LAST_NAME));
 
         final int[] internalColumns = checkLastModified(columnsToLoad);
 
