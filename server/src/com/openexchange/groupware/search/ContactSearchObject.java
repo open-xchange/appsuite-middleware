@@ -54,14 +54,20 @@ import java.util.Date;
 public class ContactSearchObject extends SearchObject {
 
     private String surname = null;
+    
+    private String yomiSurname = null;
 
     private String displayName = null;
 
     private String givenname = null;
+    
+    private String yomiGivenname = null;
 
     private String company = null;
+    
+    private String yomiCompany = null;
 
-    private String email1 = null;
+	private String email1 = null;
 
     private String email2 = null;
 
@@ -316,5 +322,29 @@ public class ContactSearchObject extends SearchObject {
     public final void setStartLetter(final boolean startLetter) {
         this.startLetter = startLetter;
     }
+    
+    public String getYomiLastName() {
+		return yomiSurname;
+	}
+
+	public void setYomiLastName(String yomiFirstName) {
+		this.yomiSurname = yomiFirstName;
+	}
+
+	public String getYomiFirstName() {
+		return yomiGivenname;
+	}
+
+	public void setYomiFirstname(String yomiFirstName) {
+		this.yomiGivenname = yomiFirstName;
+	}
+
+	public String getYomiCompany() {
+		return yomiCompany;
+	}
+
+	public void setYomiCompany(String yomiCompany) {
+		this.yomiCompany = yomiCompany;
+	}
 
 }
