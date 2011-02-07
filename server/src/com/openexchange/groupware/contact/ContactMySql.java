@@ -225,7 +225,6 @@ public class ContactMySql implements ContactSql {
             injectors.get(i).inject(ps, i + 1);
         }
         injectors.clear();
-
         if (DEBUG) {
             final String sql = ps.toString();
             LOG.debug(new StringBuilder().append("\nContactSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
@@ -1927,6 +1926,39 @@ public class ContactMySql implements ContactSql {
 
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
+                if (cso.getYomiFirstName() != null && cso.getYomiFirstName().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.YOMI_FIRST_NAME].getDBFieldName();
+
+                    String value = StringCollection.prepareForSearch(cso.getYomiFirstName());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                            injectors.add(new StringSQLInjector(value));
+                        } else {
+                            /*
+                             * Don't force starting '%' to let optimizer use appropriate index
+                             */
+                            value = StringCollection.prepareForSearch(cso.getYomiFirstName(), false, true, true);
+                            injectors.add(new StringSQLInjector(value));
+                        }
+                    }
+                }
+                return Contact.YOMI_FIRST_NAME;
+            }
+
+        });
+
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
                 if (cso.getSurname() != null && cso.getSurname().length() > 0) {
                     final String searchHabit = instance.search_habit;
                     final List<SQLInjector> injectors = instance.injectors;
@@ -1952,6 +1984,38 @@ public class ContactMySql implements ContactSql {
                     }
                 }
                 return Contact.SUR_NAME;
+            }
+
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getYomiLastName() != null && cso.getYomiLastName().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.YOMI_LAST_NAME].getDBFieldName();
+
+                    String value = StringCollection.prepareForSearch(cso.getYomiLastName());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                            injectors.add(new StringSQLInjector(value));
+                        } else {
+                            /*
+                             * Don't force starting '%' to let optimizer use appropriate index
+                             */
+                            value = StringCollection.prepareForSearch(cso.getYomiLastName(), false, true, true);
+                            injectors.add(new StringSQLInjector(value));
+                        }
+                    }
+                }
+                return Contact.YOMI_LAST_NAME;
             }
 
         });
@@ -2149,6 +2213,32 @@ public class ContactMySql implements ContactSql {
                     }
                 }
                 return Contact.COMPANY;
+            }
+
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getYomiCompany() != null && cso.getYomiCompany().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.YOMI_COMPANY].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getYomiCompany());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append("( co.").append(field).append(" LIKE ? ) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new StringSQLInjector(value));
+                    }
+                }
+                return Contact.YOMI_COMPANY;
             }
 
         });
