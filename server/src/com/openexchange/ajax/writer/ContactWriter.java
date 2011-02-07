@@ -50,6 +50,8 @@
 package com.openexchange.ajax.writer;
 
 import gnu.trove.TIntObjectHashMap;
+
+import java.util.Iterator;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +60,8 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -96,7 +100,19 @@ public class ContactWriter extends CommonWriter {
 
     public void writeContact(final Contact contact, final JSONObject json, final Session session) throws JSONException {
         writeCommonFields(contact, json);
-
+        /* TODO: Refactoring - this can be done with ContactGetter rather easily. sadly not now when 50% of our tests are broken due to the big HttpUnit/HttpClient rewrite
+        EXAMPLE:
+        
+        Iterator<String> keys = json.keys();
+        ContactSetter cs = new ContactSetter();
+        //extend: We'll need to nest several specialized setters here, e.g. one for dates
+        while(keys.hasNext()){
+        	String jsonKey = keys.next(); 
+        	ContactField field = ContactField.getByAjaxName(jsonKey);
+        	field.doSwitch(cs, contact, json.get(jsonKey));
+        }
+        */	
+        
         writeParameter(ContactFields.LAST_NAME, contact.getSurName(), json);
         writeParameter(ContactFields.FIRST_NAME, contact.getGivenName(), json);
         writeParameter(ContactFields.ANNIVERSARY, contact.getAnniversary(), json);
@@ -214,6 +230,9 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.USERFIELD19, contact.getUserField19(), json);
         writeParameter(ContactFields.USERFIELD20, contact.getUserField20(), json);
         writeParameter(ContactFields.USER_ID, contact.getInternalUserId(), json);
+        writeParameter(ContactFields.YOMI_LAST_NAME, contact.getYomiLastName(), json);
+        writeParameter(ContactFields.YOMI_FIRST_NAME, contact.getYomiFirstName(), json);
+        writeParameter(ContactFields.YOMI_COMPANY, contact.getYomiCompany(), json);
         writeParameter(
             ContactFields.MARK_AS_DISTRIBUTIONLIST,
             contact.getMarkAsDistribtuionlist(),
@@ -367,11 +386,25 @@ public class ContactWriter extends CommonWriter {
                 writeValue(contactObject.getSurName(), jsonArray);
             }
         });
+        
+        m.put(Contact.YOMI_FIRST_NAME, new ContactFieldWriter() {
+
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getYomiFirstName(), jsonArray);
+            }
+        });
 
         m.put(Contact.GIVEN_NAME, new ContactFieldWriter() {
 
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getGivenName(), jsonArray);
+            }
+        });
+
+        m.put(Contact.YOMI_LAST_NAME, new ContactFieldWriter() {
+
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getYomiLastName(), jsonArray);
             }
         });
 
@@ -470,6 +503,13 @@ public class ContactWriter extends CommonWriter {
 
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCompany(), jsonArray);
+            }
+        });
+
+        m.put(Contact.YOMI_COMPANY, new ContactFieldWriter() {
+
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getYomiCompany(), jsonArray);
             }
         });
 
