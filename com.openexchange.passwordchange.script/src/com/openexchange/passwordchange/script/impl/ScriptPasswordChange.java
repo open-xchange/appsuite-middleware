@@ -146,10 +146,24 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		LOG.debug("Executing following command to change password: "+Arrays.toString(cmd));
 		
 		try {
-			if(executePasswordUpdateShell(cmd)!=0){
-				LOG.error("Passwordchange script returned exit code != 0");
-				throw new UserException(new ServiceException(ServiceException.Code.IO_ERROR));
-			}
+		    int ret = executePasswordUpdateShell(cmd);
+		    if(ret!=0) {
+		        LOG.error("Passwordchange script returned exit code != 0, ret="+ret);
+		        switch(ret){
+		        case 1:
+		            throw new UserException(new PasswordException(PasswordException.Code.PASSWORD_FAILED," failed with return code "+ret+" "));
+		        case 2:
+		            throw new UserException(new PasswordException(PasswordException.Code.PASSWORD_SHORT));
+		        case 3:
+		            throw new UserException(new PasswordException(PasswordException.Code.PASSWORD_WEAK));
+		        case 4:
+		            throw new UserException(new PasswordException(PasswordException.Code.PASSWORD_NOUSER));
+		        case 5:
+		            throw new UserException(new PasswordException(PasswordException.Code.LDAP_ERROR));
+		        default:
+		            throw new UserException(new ServiceException(ServiceException.Code.IO_ERROR));
+		        }
+		    }
 		} catch (IOException e) {
 			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
 			throw new UserException(new ServiceException(ServiceException.Code.IO_ERROR, e));			
