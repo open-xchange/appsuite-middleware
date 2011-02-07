@@ -87,6 +87,14 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    public void setAttribute(String name, String value, int userId, Context context) throws UserException {
+        try {
+            UserStorage.getInstance().setAttribute(name, value, userId, context);
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
+    }
+
     public User getUser(int uid, Context context) throws UserException {
         try {
             return UserStorage.getInstance().getUser(uid, context);

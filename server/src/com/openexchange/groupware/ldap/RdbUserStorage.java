@@ -499,6 +499,12 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws LdapException {
+        final String attrName = new StringBuilder("attr_").append(name).toString();
+        setAttribute(attrName, value, userId, context);
+    }
+    
+    @Override
+    public void setAttribute(final String name, final String value, final int userId, final Context context) throws LdapException {
         if (null == name) {
             throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, "Attribute name is null.");
         }
@@ -512,8 +518,7 @@ public class RdbUserStorage extends UserStorage {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         try {
-            final String attrName = new StringBuilder("attr_").append(name).toString();
-            setAttribute(attrName, value, context.getContextId(), userId, con);
+            setAttribute(name, value, context.getContextId(), userId, con);
             
             con.commit();
         } catch (final SQLException e) {

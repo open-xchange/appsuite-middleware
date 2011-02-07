@@ -251,6 +251,17 @@ public abstract class UserStorage {
     public abstract void setUserAttribute(String name, String value, int userId, Context context) throws LdapException;
 
     /**
+     * Sets specified unscoped attribute.
+     * 
+     * @param name The attribute name
+     * @param value The attribute value
+     * @param userId The user identifier
+     * @param context The context
+     * @throws LdapException If user attribute cannot be set
+     */
+    public abstract void setAttribute(String name, String value, int userId, Context context) throws LdapException;
+
+    /**
      * Searches a user by its email address. This is used for converting iCal to
      * appointments.
      * @param email the email address of the user.

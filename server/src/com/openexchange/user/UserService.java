@@ -85,6 +85,17 @@ public interface UserService {
     void setUserAttribute(String name, String value, int userId, Context context) throws UserException;
 
     /**
+     * Sets specified unscoped user attribute.
+     * 
+     * @param name The attribute name
+     * @param value The attribute value
+     * @param userId The user identifier
+     * @param context The context
+     * @throws LdapException If user attribute cannot be set
+     */
+    void setAttribute(String name, String value, int userId, Context context) throws UserException;
+
+    /**
      * Searches for a user whose login matches the given uid.
      * 
      * @param loginInfo Login name of the user.
@@ -188,5 +199,6 @@ public interface UserService {
      * @throws UserException if password check mechanism has problems.
      */
     boolean authenticate(User user, String password) throws UserException;
+
 
 }

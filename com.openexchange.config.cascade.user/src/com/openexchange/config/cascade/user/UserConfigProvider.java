@@ -115,7 +115,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
                 public void set(String value) throws ConfigCascadeException {
                     try {
-                        users.setUserAttribute(DYNAMIC_ATTR_PREFIX+property, value, userId, ctx);
+                        users.setAttribute(DYNAMIC_ATTR_PREFIX+property, value, userId, ctx);
                     } catch (UserException e) {
                         throw new ConfigCascadeException(e);
                     }

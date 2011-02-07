@@ -157,4 +157,12 @@ public class SimUserService implements UserService {
 
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.user.UserService#setAttribute(java.lang.String, java.lang.String, int, com.openexchange.groupware.contexts.Context)
+     */
+    public void setAttribute(String name, String value, int userId, Context context) throws UserException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

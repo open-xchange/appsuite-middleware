@@ -276,6 +276,16 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
+    public void setAttribute(String name, String value, int userId, Context context) throws LdapException {
+        delegate.setAttribute(name, value, userId, context);
+        try {
+            invalidateUser(context, userId);
+        } catch (final UserException e) {
+            throw new LdapException(e);
+        }
+    }
+    
+    @Override
     public int getUserId(final String uid, final Context context) throws LdapException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
@@ -400,4 +410,5 @@ public class CachingUserStorage extends UserStorage {
     Lock getCacheLock() {
         return cacheLock;
     }
+
 }
