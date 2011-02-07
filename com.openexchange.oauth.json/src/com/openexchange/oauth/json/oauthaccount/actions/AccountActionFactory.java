@@ -93,6 +93,7 @@ public final class AccountActionFactory implements AJAXActionServiceFactory {
         tmp.put("update", new UpdateAction());
         tmp.put("delete", new DeleteAction());
         tmp.put("init", new InitAction());
+        tmp.put("reauthorize", new ReauthorizeAction());
         return Collections.unmodifiableMap(tmp);
     }
 

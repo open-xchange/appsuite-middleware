@@ -58,11 +58,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
@@ -86,10 +88,22 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
 
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
+            final OAuthService oAuthService = getOAuthService();
+            
+            final String accountId = request.getParameter("id");
+            OAuthAccount account = null;
+            
+            if(accountId != null) {
+                account = oAuthService.getAccount(
+                    Tools.getUnsignedInteger(accountId),
+                    session.getUserId(),
+                    session.getContextId());
+            }
+            
             /*
              * Parse parameters
              */
-            final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
+            final String serviceId = (account != null) ? account.getMetaData().getId() : request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
             }
@@ -106,7 +120,8 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
                 callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
                 callbackUrlBuilder.append(request.getHostname());
                 callbackUrlBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
-                callbackUrlBuilder.append("?action=create&respondWithHTML=true&session=").append(session.getSessionID());
+                String action = (account != null) ? "reauthorize&id="+account.getId() : "create";
+                callbackUrlBuilder.append("?action=").append(action).append("&respondWithHTML=true&session=").append(session.getSessionID());
                 final String displayName = request.getParameter(AccountField.DISPLAY_NAME.getName());
                 if(displayName!=null) {
                     callbackUrlBuilder.append('&').append(AccountField.DISPLAY_NAME.getName()).append('=').append(urlEncode(displayName));
@@ -120,7 +135,6 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             /*
              * Invoke
              */
-            final OAuthService oAuthService = getOAuthService();
             final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl);
             final OAuthToken requestToken = interaction.getRequestToken();
             session.setParameter(uuid, requestToken.getSecret());
