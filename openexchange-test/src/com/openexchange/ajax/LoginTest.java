@@ -127,7 +127,8 @@ public class LoginTest extends AbstractAJAXTest {
     @Deprecated
     public static String getSessionId(final WebConversation conversation, final String hostname, final String login, final String password) throws IOException, JSONException, AjaxException {
         LoginRequest request = new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION);
-        AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, null));
+        // an empty string is passed to put temporary AJAXSession not in mustLogout mode. Logout is done with above logout() method.
+        AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, "no logout"));
         client.setHostname(hostname);
         client.setProtocol(AJAXConfig.getProperty(Property.PROTOCOL));
         LoginResponse response = client.execute(request);
