@@ -58,8 +58,8 @@ package com.openexchange.ajax.folder.actions;
 public enum API {
 
     OX_OLD("/ajax/folders", -1),
-    OX_NEW("/ajax/folders2", 0),
-    OUTLOOK("/ajax/folders2", 1);
+    OX_NEW("/ajax/folders", 0),
+    OUTLOOK("/ajax/folders", 1);
 
     private String url;
     private int treeId;
