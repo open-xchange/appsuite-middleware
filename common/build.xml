@@ -94,7 +94,7 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/org.eclipse.osgi.services.ini" message="${bundlesdir}/org.eclipse.osgi.services_3.1.200.v20070605.jar@start${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/org.eclipse.osgi.services.ini" message="${bundlesdir}/org.eclipse.osgi.services_3.2.100.v20100503.jar@start${line.separator}"/>
         <echo file="${destdir}/${gwbundle.d}/org.eclipse.equinox.event.ini" message="${bundlesdir}/org.eclipse.equinox.event_1.0.100.v20070516.jar@start${line.separator}"/>
         <echo file="${destdir}/${gwbundle.d}/org.apache.commons.cli.ini" message="${bundlesdir}/org.apache.commons.cli_1.0.0.v20080604-1500.jar@start${line.separator}"/>
         <echo file="${destdir}/${gwbundle.d}/org.apache.commons.lang.ini" message="${bundlesdir}/org.apache.commons.lang_2.4.0.v20081016-1030.jar@start${line.separator}"/>
@@ -108,7 +108,7 @@
         <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
 
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/org.eclipse.osgi.services.ini" message="${bundlesdir}/org.eclipse.osgi.services_3.1.200.v20070605.jar@start${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/org.eclipse.osgi.services.ini" message="${bundlesdir}/org.eclipse.osgi.services_3.2.100.v20100503.jar@start${line.separator}"/>
         <echo file="${destdir}/${adbundle.d}/org.eclipse.equinox.event.ini" message="${bundlesdir}/org.eclipse.equinox.event_1.0.100.v20070516.jar@start${line.separator}"/>
         <echo file="${destdir}/${adbundle.d}/org.apache.commons.cli.ini" message="${bundlesdir}/org.apache.commons.cli_1.0.0.v20080604-1500.jar@start${line.separator}"/>
         <echo file="${destdir}/${adbundle.d}/org.apache.commons.lang.ini" message="${bundlesdir}/org.apache.commons.lang_2.4.0.v20081016-1030.jar@start${line.separator}"/>
