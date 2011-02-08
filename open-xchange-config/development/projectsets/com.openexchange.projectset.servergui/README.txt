@@ -6,7 +6,7 @@
 
    Bundle "org.eclipse.equinox.event" must be available at Plug-in Development's
    target platform.
-   If not, copy "com.openexchange.common/jars/org.eclipse.equinox.event_1.0.100.v20070516.jar"
+   If not, copy "com.openexchange.common/jars/org.eclipse.equinox.event_1.2.0.v20100503.jar"
    to "${eclipse-installation-dir}/plugins". Reload target platform or restart
    eclipse.
 
