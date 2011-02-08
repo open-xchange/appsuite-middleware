@@ -50,12 +50,9 @@
 package com.openexchange.mobile.configuration.json.action.sms.osgi;
 
 import static com.openexchange.mobile.configuration.json.action.sms.osgi.ActionServiceRegistry.getServiceRegistry;
-
 import java.util.Hashtable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
@@ -82,7 +79,7 @@ public class ActionActivator extends DeferredActivator {
 	}
 
 	@Override
-	protected void handleAvailability(Class<?> clazz) {
+	protected void handleAvailability(final Class<?> clazz) {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
@@ -90,7 +87,7 @@ public class ActionActivator extends DeferredActivator {
 	}
 
 	@Override
-	protected void handleUnavailability(Class<?> clazz) {
+	protected void handleUnavailability(final Class<?> clazz) {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Re-available service: " + clazz.getName());
 		}
@@ -115,7 +112,7 @@ public class ActionActivator extends DeferredActivator {
 				}
 			}
 			
-	        final Hashtable<Object, ActionTypes> ht = new Hashtable<Object, ActionTypes>();
+	        final Hashtable<String, ActionTypes> ht = new Hashtable<String, ActionTypes>();
 	        ht.put("action", ActionTypes.TELEPHONE);
 	        context.registerService(ActionService.class.getName(), new ActionSMS(), ht);
 		} catch (final Throwable t) {
