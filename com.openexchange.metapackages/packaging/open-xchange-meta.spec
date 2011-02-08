@@ -195,6 +195,20 @@ Authors:
 
 
 # ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-outlook
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for Outlook OXtender
+Requires:	open-xchange-outlook-updater, open-xchange-outlook-updater-oxtender2, open-xchange-usm, open-xchange-folder-json
+
+%description -n open-xchange-meta-outlook
+The Open-Xchange Meta package for Outlook OXtender
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
 
 
 %description
@@ -257,6 +271,10 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-meta-mobility
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-outlook
 %defattr(-,root,root)
 %doc README.TXT
 

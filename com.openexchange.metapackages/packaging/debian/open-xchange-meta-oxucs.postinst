@@ -22,7 +22,7 @@ setUCRVars() {
     eval $(ucr shell)
     
     descrarr=( "OXtender for MS Outlook" "OXtender for Business Mobility" )
-    pkgarr=( "open-xchange-outlook-updater" "open-xchange-meta-mobility" )
+    pkgarr=( "open-xchange-meta-outlook" "open-xchange-meta-mobility" )
     if [ "$(ucr get repository/online/component/ox/description)" != "Open-Xchange Server" ]; then
 	ucr set repository/online/component/ox/description="Open-Xchange Server"
     fi
@@ -47,6 +47,7 @@ setUCRVars() {
 	    fi
 	else
 	    # OXAE
+	    ucr set "repository/online/component/${repo}/server=oxae-update.open-xchange.com"
 	    if [ "$repo" == "oxmobility" ]; then
 		defpkg="$defpkg univention-ox-usm"
 	    fi
