@@ -147,7 +147,7 @@ public final class ServletConfigLoader {
      * @return The path with wildcard characters stripped off
      */
     private static String ignoreWildcards(final String path) {
-        return path.replaceAll("\\*|\\?", "");
+        return path == null ? null : path.replaceAll("\\*|\\?", "");
     }
 
     /**
@@ -408,7 +408,7 @@ public final class ServletConfigLoader {
     }
 
     private ServletConfigWrapper lookupByClassAndPath(final String clazz, final String path) {
-        if (clazzGuardian.contains(clazz) && pathGuardian.contains(path) && (globalProps == null)) {
+        if ((path == null) || (clazzGuardian.contains(clazz) && pathGuardian.contains(path) && (globalProps == null))) {
             return null;
         }
         /*

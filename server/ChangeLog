@@ -1,3 +1,7 @@
+* 2011-02-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #18291: Fixed NPE on call to an unregistered servlet path
+
 * 2011-02-07 - marcus.klein@open-xchange.com
 
  - TA5815 of US 5768: Added a HTTP authorization header based login.
