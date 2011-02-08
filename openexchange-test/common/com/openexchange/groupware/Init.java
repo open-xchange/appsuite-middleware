@@ -62,6 +62,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
 import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpManagersInit;
 import com.openexchange.caching.CacheException;
@@ -345,6 +346,7 @@ public final class Init {
         final ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+        AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
     }
 
     private static void startAndInjectThreadPoolBundle() {
