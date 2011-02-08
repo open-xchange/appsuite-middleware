@@ -8,12 +8,12 @@
 #
 # Antje Faber, 2006.
 # Antje Faber, 2007.
-# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010.
+# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-12-09 10:57+0100\n"
+"PO-Revision-Date: 2011-02-08 15:33+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -113,14 +113,12 @@ msgstr ""
 "$s verschoben werden."
 
 msgid "AJP connection is not set to status \"ASSIGNED\""
-msgstr "AJP-Verbindung nicht auf Status \"ASSIGNED\" gesetzt"
+msgstr "Der Status der AJP-Verbindung ist nicht auf \"ASSIGNED\" gesetzt."
 
 msgid ""
 "AJP server socket could not be bound to port %1$d. Probably another process "
 "is already listening on this port."
 msgstr ""
-"AJP Server Socket konnte nicht an Port %1$d angebunden werden. "
-"Möglicherweise lauscht bereits ein anderer Prozess auf diesem Port."
 
 msgid ""
 "Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure "
@@ -267,9 +265,9 @@ msgstr "Erinnerung mit ID %1$s konnte nicht im Kontext %2$d gefunden werden."
 msgid "Can not generate uid."
 msgstr "UID konnte nicht generiert werden"
 
-msgid "Can not insert appointment with this uid. Uid already exists."
+msgid "Can not insert appointment with uid %1$s. Uid already exists."
 msgstr ""
-"Ein Termin mit dieser uid kann nicht eingefügt werden. Die uid ist bereits "
+"Ein Termin mit der uid %1$s kann nicht eingefügt werden. Die uid ist bereits "
 "vorhanden."
 
 msgid "Can not resolve resource: %1$s"
@@ -438,7 +436,7 @@ msgid "Context ID is not a number: %1$s."
 msgstr "Kontext-ID ist keine Zahl: %1$s."
 
 msgid "Cookie JSESSIONID contains non-matching JVM route: %1$s not equal to %2$s"
-msgstr "Cookie JSESSIONID enthält nicht passende JVM-Route: %1$s ist ungleich %2$s"
+msgstr ""
 
 msgid ""
 "Corrupt AJP package #%1$d: First two bytes do not indicate a package from "
@@ -446,10 +444,6 @@ msgid ""
 "Wrong AJP package's data:\n"
 "%4$s"
 msgstr ""
-"Schadhaftes AJP-Paket #%1$d: Ersten zwei Bytes zeigen kein Paket vom Server "
-"an Container an: %2$s %3$s\n"
-"Falsche AJP-Paketdaten:\n"
-"%4$s"
 
 msgid "Could not bind connection to local port %1$s"
 msgstr "Verbindung konnte nicht an lokalen Port %1$s angebunden werden"
@@ -460,8 +454,9 @@ msgstr "PartModifier-Instanz konnte nicht aus dem Namen %1$s erstellt werden"
 msgid "Could not find participant for this object."
 msgstr "Kein Teilnehmer für dieses Objekt gefunden"
 
+#, fuzzy
 msgid "Couldn't find servlet class \"%s\""
-msgstr "Servlet-Klasse \"%s\" konnte nicht gefunden werden"
+msgstr "Der Ordner %1$s konnte nicht in das Format %2$s exportiert werden."
 
 msgid "Couldn't reach the filestore"
 msgstr "Kein Zugriff auf Dateispeicher"
@@ -549,7 +544,7 @@ msgid "Empty \"CLASS\" element."
 msgstr "Leeres Element \"CLASS\"."
 
 msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
-msgstr "Leeres SEND_BODY_CHUNK-Paket DARF NICHT geschickt werden"
+msgstr "Leeres SEND_BODY_CHUNK-Paket DARF NICHT gesendet werden"
 
 msgid "Empty passwords are not allowed."
 msgstr "Leere Passwörter sind nicht zulässig."
@@ -565,6 +560,18 @@ msgstr "Fehler bei der Kommunikation mit spamd: \"%s\""
 
 msgid "Error during use of a subsystem"
 msgstr "Fehler bei der Verwendung eines Subsystems."
+
+msgid ""
+"Error processing %1$s mail server response for login %2$s (user=%3$s, "
+"context=%4$s). The administrator has been informed."
+msgstr ""
+"Fehler beim Verarbeiten der %1$s Mailserver-Antwort für Login %2$s (Benutzer="
+"%3$s, Kontext=%4$s). Der Administrator wurde informiert."
+
+msgid "Error processing mail server response. The administrator has been informed."
+msgstr ""
+"Fehler beim Verarbeiten der Mailserver-Antwort. Der Administrator wurde "
+"informiert."
 
 msgid "Error while getting spamd provider from service: \"%s\""
 msgstr "Fehler beim Abrufen des spamd-Providers vom Dienst: \"%s\""
@@ -970,7 +977,7 @@ msgstr ""
 "Entfernen einer Anlage."
 
 msgid "Integer value exceeds max allowed value (65535): %1$d"
-msgstr "Ganzzahlenwert übersteigt maximal erlaubten Wert (65535): %1$d"
+msgstr "Ganzzahliger Wert übersteigt den maximal erlaubten Wert (65535): %1$d."
 
 msgid "Internal error: Wrong arguments are given to the tell command: \"%s\""
 msgstr "Interner Fehler: Dem tell-Befehl wurden falsche Argumente übergeben: \"%s\""
@@ -1003,10 +1010,10 @@ msgid "Invalid constructor argument. Instance of %1$s not supported"
 msgstr "Ungültiges Constructor-Argument. Instanz von %1$s nicht unterstützt."
 
 msgid "Invalid content-type header value: %1$s"
-msgstr "Ungültiger Content-type header-Wert: %1$s"
+msgstr "Ungültiger Content-Type Header-Wert: %1$s"
 
 msgid "Invalid cookie header value: %1$s"
-msgstr "Ungültiger Cookie-Header-Wert: %1$s"
+msgstr "Ungültiger Cookie-Header-Wert %1$s"
 
 msgid "Invalid cookie."
 msgstr "Ungültiges Cookie"
@@ -1079,6 +1086,9 @@ msgstr "JSON-Fehler: %s"
 
 msgid "Length is not a number: %1$s."
 msgstr "Length ist keine Zahl: %1$s."
+
+msgid "Loading one or more users failed."
+msgstr "Das Laden eines oder mehrerer Benutzer ist fehlgeschlagen."
 
 msgid "Magic bytes are not a number: %1$s."
 msgstr "Magic Bytes sind keine Zahl: %1$s."
@@ -1257,7 +1267,7 @@ msgid "Missing parameter in user's mail config: %1$s"
 msgstr "Fehlender Parameter in der Mail-Konfiguration des Benutzers: %1$s"
 
 msgid "Missing payload data in client's body chunk package"
-msgstr "Keine Nutzinformationsdaten im Chunk-Paket des Client body"
+msgstr "Fehlende Nutzdaten im Body Chunk-Paket des Client"
 
 msgid "Missing property %1$s in imap.properties."
 msgstr "Fehlende Eigenschaft %1$s in imap.properties."
@@ -1266,7 +1276,7 @@ msgid "Missing property %1$s in system.properties."
 msgstr "Fehlende Eigenschaft %1$s in system.properties."
 
 msgid "Missing property %s in 'system.properties'"
-msgstr "Fehlende Eigenschaft %s in 'system.properties'"
+msgstr "Fehlende Eigenschaft %s in system.properties."
 
 msgid "Missing property AJP_JVM_ROUTE in file \"ajp.properties\""
 msgstr "Fehlende Eigenschaft AJP_JVM_ROUTE in Datei \"ajp.properties\""
@@ -1319,8 +1329,6 @@ msgstr ""
 
 msgid "Name \"%s\" already mapped to \"%s\". Ignoring servlet class \"%s\""
 msgstr ""
-"Name \"%s\" wurde bereits zu \"%s\" zugeordnet. Servlet-Klasse \"%s\" wird "
-"ignoriert."
 
 msgid "New password contains invalid characters"
 msgstr "Neues Passwort enthält ungültige Zeichen"
@@ -1332,7 +1340,7 @@ msgid "No attachment was found with id %1$s in message"
 msgstr "Keine Anlage mit der ID %1$s in Nachricht gefunden"
 
 msgid "No attribute name could be found for code: %1$d"
-msgstr "Kein Attributname gefunden für Code: %1$d"
+msgstr "Kein Attribut-Name gefunden für Code: %1$d"
 
 msgid "No cache found for region name: %1$s"
 msgstr "Kein Cache gefunden für Bereichsname: %1$s"
@@ -1358,12 +1366,9 @@ msgid ""
 "No data provided from web server: input stream returned \"-1\" while reading "
 "AJP magic bytes in package #%1$d. Wait for input data took %2$dmsec."
 msgstr ""
-"Keine Daten vom Web-Server bereitgestellt: Eingabe-Stream gab beim Lesen von "
-"AJP magic bytes im Paket #%1$d \"-1\" zurück. Warten auf Eingabedaten "
-"dauerte %2$dmsec. "
 
 msgid "No default constructor specified in servlet class \"%s\""
-msgstr "Kein Standard-Constructor in der Servlet-Klasse \"%s\" angegeben"
+msgstr ""
 
 msgid "No default folder could be found in module %1$s for user %2$s in context %3$s"
 msgstr "Kein Standardordner gefunden im Modul %1$s für Benutzer %2$s im Kontext %3$s"
@@ -1413,9 +1418,7 @@ msgid "No send address could be found in user configuration"
 msgstr "In der Benutzerkonfiguration konnte keine Senderadresse gefunden werden."
 
 msgid "No servlet class name found for key \"%s\". Please check servlet mappings."
-msgstr ""
-"Kein Servlet-Klassenname für  den Schlüssel \"%s\" gefunden. Bitte "
-"überprüfen Sie die Servlet-Zuordnungen."
+msgstr "Kein class-Name des Servlet für Key \"%s\" gefunden. Bitte prüfen Sie die Servlet Mappings."
 
 msgid "No storage access because mail connection is not connected"
 msgstr "Kein Speicherzugriff wegen fehlender Mail-Verbindung."
@@ -1533,7 +1536,9 @@ msgstr "Prozentangabe ist %d, muss jedoch zwischen 0 und 100 liegen"
 msgid ""
 "Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
 "'Send' again."
-msgstr "Beschränken Sie Ihre Empfänger auf %1$s  (inklusive An/Cc/Bcc) und klicken Sie erneut auf 'Senden'."
+msgstr ""
+"Beschränken Sie Ihre Empfänger auf %1$s  (inklusive An/Cc/Bcc) und klicken "
+"Sie erneut auf 'Senden'."
 
 msgid "Port %1$s was unreachable on remote server"
 msgstr "Keine Verbindung zu Port %1$s auf entferntem Server"
@@ -1656,7 +1661,7 @@ msgid "Resolving user name \"%1$s\" failed."
 msgstr "Der Benutzername \"%1$s\" konnte nicht aufgelöst werden."
 
 msgid "Response package exceeds max package size value of 8192k: %1$s"
-msgstr "Antwortpaket übersteigt den maximalen Wert für die Paketgröße von 8192k: %1$s"
+msgstr "Das Antwort-Paket übersteigt den maximalen Wert der Paketgröße von 8192k: %1$s"
 
 msgid "Root folder must not be modified or deleted"
 msgstr "Root-Ordner kann nicht geändert oder gelöscht werden"
@@ -1691,7 +1696,7 @@ msgid "SearchIterator NULL"
 msgstr "SearchIterator NULL"
 
 msgid "SecurityException while loading servlet class \"%s\""
-msgstr "SecurityException beim Laden der Servlet-Klasse \"%s\""
+msgstr "SecurityException beim Laden der Servlet class: \"%s\"."
 
 msgid "Sent quota exceeded, you are only allowed to send 1 mail in %1$s seconds."
 msgstr ""
@@ -1705,12 +1710,10 @@ msgid "Service initialization failed"
 msgstr "Initialisieren des Dienstes fehlgeschlagen"
 
 msgid "Servlet mapping directory does not exist: %s"
-msgstr "Servlet-Zuordnungsverzeichnis nicht vorhanden: %s"
+msgstr "Mapping-Verzeichnis des Servlet ist nicht vorhanden: %s"
 
 msgid "Servlet mappings could not be loaded due to following error: %s"
-msgstr ""
-"Servlet-Zuordnungen konnten aufgrund folgenden Fehlers nicht initialisiert "
-"werden: %s"
+msgstr "Servlet mappings konnten aufgrund folgenden Fehlers nicht geladen werden: %s"
 
 msgid "Session attempts to instantiate a provider that doesn't exist: %1$s"
 msgstr "Sitzung versucht, Instanz für nicht vorhandenen Provider zu erstellen: %1$s"
@@ -1739,8 +1742,8 @@ msgid ""
 "Socket closed by web server. Wait for input data of package #%1$d took %2"
 "$dmsec."
 msgstr ""
-"Socket vom Webserver geschlossen. Warten auf Eingabedaten von Paket #%1$d "
-"dauerte %2$dmsec."
+"Socket durch Webserver geschlossen. Warten auf Eingabedaten des Pakets #%1$d dauerte %2"
+"$dmsec."
 
 msgid "Some callbacks threw exceptions: %s"
 msgstr "Einige Callbacks gaben Ausnahmefehler zurück: %s"
@@ -1765,7 +1768,7 @@ msgid "Store already closed: %1$s"
 msgstr "Speicher bereits geschlossen: %1$s"
 
 msgid "String parse exception: No ending 0x00 found"
-msgstr "String Parse-Ausnahme: Keine Endung 0x00 gefunden"
+msgstr ""
 
 msgid "System folder %1$s cannot be moved in context %2$s"
 msgstr "Der Systemordner %1$s kann im Kontext %2$s nicht verschoben werden"
@@ -2011,9 +2014,10 @@ msgid ""
 "Corresponding AJP forward package:\n"
 "%3$s"
 msgstr ""
-"Unerwartetes Paket mit leerem Body von Webserver erhalten. Total-Received: %"
-"1  Content-Length: %2$d.\n"
-"Zugehöriges AJP Weiterleitungs-Paket:\n"
+"Unerwartetes leeres body-Paket vom Webserver erhalten. "
+"Total-Received: %1$d "
+"| Content-Length: %2$d.\n"
+"Zugehöriges AJP Weiterleitungspaket:\n"
 "%3$s"
 
 #. Unexpected error: %1$s
@@ -2039,8 +2043,9 @@ msgstr "Unbekannte Klasse: %1$s"
 msgid "Unknown IMAP server: %1$s"
 msgstr "Unbekannter IMAP-Server: %1$s"
 
+#, fuzzy
 msgid "Unknown Request Prefix Code: %1$s"
-msgstr "Unbekannter Anfrage-Präfix-Code: %1$s"
+msgstr "Unbekannter Anfrage-Typ: %1$s."
 
 msgid "Unknown action value: %1$s"
 msgstr "Unbekannter Aktionswert: %1$s"
@@ -2099,7 +2104,7 @@ msgid "Unnecessary recurrence information for recurrence type \"no recurrence\".
 msgstr "Unnötige Serieninformationen für den Serientyp \"keine Serie\"."
 
 msgid "Unparseable header field %1$s in forward request package"
-msgstr "Nicht analysierbares Header-Feld %1$s im Weiterleitung-Request-Paket"
+msgstr ""
 
 msgid "Unsupported MIME type %1$s"
 msgstr "Nicht unterstützter MIME-Typ %1$s"
@@ -2228,6 +2233,11 @@ msgid ""
 msgstr ""
 "Aufgrund der Benutzerkonfiguration hat Benutzer %1$s keine Berechtigung, den "
 "Ordner %2$s im Kontext %3$s freizugeben."
+
+msgid "User %1$s must not rename folder %2$s in context %3$s"
+msgstr ""
+"Benutzer %1$s hat keine Berechtigung zum Umbenennen des Ordners %2$s im "
+"Kontext %3$s"
 
 msgid "User ID is not a number: %1$s."
 msgstr "Benutzer-ID ist keine Zahl: %1$s."
@@ -2392,6 +2402,20 @@ msgstr "Sie haben keine ausreichenden Rechte für Termine im Ordner %1$d."
 
 msgid "clientLastModified IS NULL. Abort action!"
 msgstr "clientLastModified IST NULL. Aktion abbrechen!"
+
+#. Could not coerce value %1$s into class %2$s
+msgid "Could not coerce value %1$s into class %2$s"
+msgstr ""
+
+#. Can not define metadata %1$s in scope %2$s
+#, fuzzy
+msgid "Can not define metadata %1$s in scope %2$s"
+msgstr "Benutzer mit ID %1$s konnte nicht im Kontext %2$d gefunden werden."
+
+#. Can not set property %1$s in scope %2$s
+#, fuzzy
+msgid "Can not set property %1$s in scope %2$s"
+msgstr "Aktion für Ordner %1$s im Kontext %2$s nicht ausführbar"
 
 msgid "The given type of %1$s is not supported"
 msgstr "Der angegebene Typ %1$s wird nicht unterstützt."
@@ -2782,35 +2806,6 @@ msgstr ""
 msgid "Message %1$s not found in folder %2$s."
 msgstr "Nachricht %1$s nicht im Ordner %2$s gefunden."
 
-#. Duplicate proxy registration: %1$s
-msgid "Duplicate proxy registration: %1$s"
-msgstr "Proxy-Registrationsduplikat: %1$s"
-
-#. Malformed URL: %1$s
-msgid "Malformed URL: %1$s"
-msgstr "Inkorrekte URL: %1$s"
-
-#. HTTP request to VoipNow server %1$s failed. Status line: %2$s
-msgid "HTTP request to VoipNow server %1$s failed. Status line: %2$s"
-msgstr "HTTP-Anfrage an VoipNow-Server %1$s fehlgeschlagen. Statuszeile: %2$s"
-
-#. Malformed URI: %1$s
-msgid "Malformed URI: %1$s"
-msgstr "Inkorrekte URL: %1$s"
-
-#. Invalid session identifier: %1$s
-msgid "Invalid session identifier: %1$s"
-msgstr "Ungültige Session-ID: %1$s"
-
-#. Missing property: %1$s
-msgid "Missing property: %1$s"
-msgstr "Fehlende Eigenschaft: %1$s"
-
-#. Invalid property value in property \"%1$s\": %2$s
-#. Invalid property value in property "%1$s": %2$s
-msgid "Invalid property value in property \"%1$s\": %2$s"
-msgstr "Ungültiger Eigenschafts-Wert in Eigenschaft \"%1$s\": %2$s"
-
 #. Response is not of type: %1$s
 msgid "Response is not of type: %1$s"
 msgstr "Antwort ist nicht vom Typ: %1$s."
@@ -2827,6 +2822,7 @@ msgstr "Nicht gefunden. %1$s"
 msgid "The source and destination URIs are equal: %1$s."
 msgstr "Die Quell- und Ziel-URIs sind identisch: %1$s."
 
+#. Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.
 msgid ""
 "Conflict. The resource cannot be created until one or more parental "
 "directories have been created: %1$s."
@@ -2860,6 +2856,7 @@ msgstr "Ungültige URL: %1$s"
 msgid "Unsupported protocol for SmartDrive server access: %1$s"
 msgstr "Nicht unterstütztes Protokoll für den SmartDrive Server-Zugriff: %1$s"
 
+#. SmartDrive user "%1$s" is not authenticated for stateful access to SmarTDrive server "%2$s".
 msgid ""
 "SmartDrive user \"%1$s\" is not authenticated for stateful access to "
 "SmarTDrive server \"%2$s\"."
@@ -2874,6 +2871,51 @@ msgstr "Diese Ressource ist keine Datei."
 #. This resource is not a directory
 msgid "This resource is not a directory"
 msgstr "Diese Ressource ist kein Verzeichnis."
+
+#. Unknown OAuth service meta data: %1$s
+msgid "Unknown OAuth service meta data: %1$s"
+msgstr "Unbekannte OAuth Service-Metadaten: %1$s"
+
+#. Account not found with identifier %1$s for user %2$s in context %3$s.
+msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
+msgstr "Kein Account mit der ID %1$s für Benutzer %2$s im Kontext %3$s gefunden"
+
+#. Unsupported OAuth service: %1$s
+msgid "Unsupported OAuth service: %1$s"
+msgstr "Nicht unterstützter OAuth-Dienst: %1$s."
+
+#. Missing argument: %1$s
+msgid "Missing argument: %1$s"
+msgstr "Fehlendes Argument: %1$s"
+
+#. Duplicate proxy registration: %1$s
+msgid "Duplicate proxy registration: %1$s"
+msgstr "Proxy-Registrationsduplikat: %1$s"
+
+#. Malformed URL: %1$s
+msgid "Malformed URL: %1$s"
+msgstr "Inkorrekte URL: %1$s"
+
+#. HTTP request to VoipNow server %1$s failed. Status line: %2$s
+msgid "HTTP request to VoipNow server %1$s failed. Status line: %2$s"
+msgstr "HTTP-Anfrage an VoipNow-Server %1$s fehlgeschlagen. Statuszeile: %2$s"
+
+#. Malformed URI: %1$s
+msgid "Malformed URI: %1$s"
+msgstr "Inkorrekte URL: %1$s"
+
+#. Invalid session identifier: %1$s
+msgid "Invalid session identifier: %1$s"
+msgstr "Ungültige Session-ID: %1$s"
+
+#. Missing property: %1$s
+msgid "Missing property: %1$s"
+msgstr "Fehlende Eigenschaft: %1$s"
+
+#. Invalid property value in property \"%1$s\": %2$s
+#. Invalid property value in property "%1$s": %2$s
+msgid "Invalid property value in property \"%1$s\": %2$s"
+msgstr "Ungültiger Eigenschafts-Wert in Eigenschaft \"%1$s\": %2$s"
 
 #. A parsing error occurred: %1$s.
 msgid "A parsing error occurred: %1$s."
@@ -3092,6 +3134,10 @@ msgstr "Benutzer ist nicht aktiviert."
 msgid "Client \"%1$s\" is not activated."
 msgstr "Client \"%1$s\" ist nicht aktiviert."
 
+#. ID generation failed
+msgid "ID generation failed"
+msgstr "Erstellen der ID fehlgeschlagen"
+
 msgid "Sessiond Exception"
 msgstr "Sessiond-Ausnahme"
 
@@ -3207,9 +3253,8 @@ msgstr "Bitte prüfen Sie, ob die Datei korrekt formatiert ist."
 msgid "Please make sure the file is readable by the groupware."
 msgstr "Bitte stellen Sie sicher, dass die Datei für die Groupware lesbar ist."
 
-#, fuzzy
-msgid "User is disabled"
-msgstr "Benutzer ist nicht aktiviert."
+msgid "User is deactivated"
+msgstr "Benutzer ist deaktiviert"
 
 msgid "Password expired"
 msgstr "Passwort ist abgelaufen"
@@ -3451,6 +3496,10 @@ msgstr ""
 #. No mail folder allowed below a public folder.
 msgid "No mail folder allowed below a public folder."
 msgstr "Kein Mail-Ordner unterhalb eines öffentlichen Ordners erlaubt."
+
+#. No such tree with identifier "%1$s".
+msgid "No such tree with identifier \"%1$s\"."
+msgstr "Baum mit ID \"%1$s\" nicht vorhanden"
 
 msgid "Invalid SQL Query: %s"
 msgstr "Ungültige SQL-Anfrage: %s"
