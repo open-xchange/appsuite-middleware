@@ -373,34 +373,26 @@ public class AppointmentTest extends AbstractAJAXTest {
         return objectId;
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id,
-            final int inFolder, final String host, final String session) throws Exception {
-
-        deleteAppointment(webCon, id, inFolder, new Date(System.currentTimeMillis()+APPEND_MODIFIED), host, session);
-    }
-    public static void deleteAppointment(final WebConversation webCon, final int id,
-            final int inFolder, final Date modified, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        deleteAppointment(webCon, id, inFolder, 0, host, session);
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final String host, final String session) throws Exception {
+        deleteAppointment(webCon, id, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session);
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id,
-            final int inFolder, final int recurrencePosition, final String host, final String session)
-            throws Exception {
-
-        deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(System.currentTimeMillis()+APPEND_MODIFIED), host, session);
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date modified, String host, final String session) throws Exception {
+        deleteAppointment(webCon, id, inFolder, 0, modified, host, session);
     }
-    public static void deleteAppointment(final WebConversation webCon, final int id,
-            final int inFolder, final int recurrencePosition, final Date modified, String host, final String session)
-            throws Exception {
+
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final String host, final String session) throws Exception {
+        deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session);
+    }
+
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final Date modified, String host, final String session) throws TestException, AjaxException, IOException, JSONException {
         final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrencePosition, modified);
         deleteRequest.setFailOnError(false);
         final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
 
         if (response.hasError()) {
-            throw new Exception("json error: " + response.getResponse().getErrorMessage());
+            throw new TestException("json error: " + response.getResponse().getErrorMessage());
         }
     }
 
