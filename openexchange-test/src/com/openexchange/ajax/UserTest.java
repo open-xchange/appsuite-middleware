@@ -116,7 +116,7 @@ public class UserTest extends AbstractAJAXTest {
     public void testGet() throws Exception {
         final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
-        loadUser(getWebConversation(), users[0].getId(), PROTOCOL + getHostName(), getSessionId());
+        loadUser(getWebConversation(), users[0].getId(), getHostName(), getSessionId());
     }
 
     public static UserImpl4Test[] listUser(final WebConversation webCon, final int[] id, final String host, final String session) throws Exception {
