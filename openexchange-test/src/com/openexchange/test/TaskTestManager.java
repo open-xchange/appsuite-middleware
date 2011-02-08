@@ -121,8 +121,6 @@ public class TaskTestManager implements TestManager{
             //no matter, fix it in finally block
         } catch (IOException e) {
             //no matter, fix it in finally block
-        } catch (SAXException e) {
-            //no matter, fix it in finally block
         } catch (JSONException e) {
             //no matter, fix it in finally block
         } finally {

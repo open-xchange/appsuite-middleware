@@ -128,8 +128,6 @@ public class CalendarTestManager implements TestManager {
             // wait for finally block
         } catch (IOException e) {
             // wait for finally block
-        } catch (SAXException e) {
-            // wait for finally block
         } catch (JSONException e) {
             // wait for finally block
         } finally {
