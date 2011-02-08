@@ -195,6 +195,15 @@ public class Executor extends Assert {
     }
 
 	public static void syncCookies(WebConversation conversation, DefaultHttpClient httpClient, String hostname) {
+	    // workaround for tests that prepend the protocol
+	    final String domain;
+	    if (hostname.startsWith("http://")) {
+	        domain = hostname.substring(7);
+	    } else if (hostname.startsWith("https://")) {
+	        domain = hostname.substring(8);
+	    } else {
+	        domain = hostname;
+	    }
 	    String[] cookies = conversation.getCookieNames();
         CookieStore cookieStore = httpClient.getCookieStore();
         Set<String> storedNames = new HashSet<String>();
@@ -205,7 +214,7 @@ public class Executor extends Assert {
             if (!storedNames.contains(name)) {
                 com.meterware.httpunit.cookies.Cookie cookie = conversation.getCookieDetails(name);
                 BasicClientCookie2 newCookie = new BasicClientCookie2(name, cookie.getValue());
-                newCookie.setDomain(hostname);
+                newCookie.setDomain(domain);
                 cookieStore.addCookie(newCookie);
             }
         }
