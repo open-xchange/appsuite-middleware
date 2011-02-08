@@ -296,7 +296,7 @@ EOF
       # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
       ox_exists_property OSGIBUNDLE $pfile || {
-	  ox_set_property OSGIBUNDLE /opt/open-xchange/bundles/org.eclipse.osgi_3.3.0.v20070530.jar $pfile
+	  ox_set_property OSGIBUNDLE /opt/open-xchange/bundles/org.eclipse.osgi_3.6.1.R36x_v20100806.jar $pfile
       }
       ox_exists_property BUNDLELIBPATH $pfile || {
 	  ox_set_property BUNDLELIBPATH /opt/open-xchange/bundles/com.openexchange.common/lib $pfile
