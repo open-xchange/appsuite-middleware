@@ -454,7 +454,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), login, tmpPass);
             } catch (final AuthenticationFailedException e) {
                 /*
-                 * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
+                 * Remember failed authentication's credentials (for a short amount of time) to quicken subsequent connect trials
                  */
                 failedAuths.put(new LoginAndPass(login, tmpPass), new StampAndError(e, System.currentTimeMillis()));
                 throw e;
