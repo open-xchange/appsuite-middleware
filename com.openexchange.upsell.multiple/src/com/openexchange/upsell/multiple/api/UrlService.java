@@ -9,7 +9,7 @@ import com.openexchange.session.Session;
 
 public interface UrlService {
 	
-	// parameter we will send either in mail or url
+	// parameters from UI/USER/SESSION
 	public static String MAP_ATTR_USER = "_USER_";
 	public static String MAP_ATTR_PWD = "_PWD_";
 	public static String MAP_ATTR_MAIL = "_MAIL_";
