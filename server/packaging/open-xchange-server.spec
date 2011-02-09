@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -746,6 +746,19 @@ fi
 %doc doc/examples
 
 %changelog
+* Tue Feb 08 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18291: Fixed NPE on call to an unregistered servlet path
+* Mon Feb 07 2011 - marcus.klein@open-xchange.com
+ - TA5815 of US 5768: Added a HTTP authorization header based login.
+* Fri Feb 04 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18212: Retry with read-write connection if read-only connection fails to read newly created mail account
+ - Bugfix #18155: Quoting "NIL" argument
+* Thu Feb 03 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18229: Splitting IMAP SORT command to fit into max. allowed length
+ - Bugfix #18232: Fixed AJP ping
+ - Bugfix #18147: Fixed permission of Unified Mail's INBOX folder
+ - Bugfix #17951: i18n of Unified Mail's default folders
+ - Bugfix #18072: Fixed mail access counter
 * Tue Feb 01 2011 - marcus.klein@open-xchange.com
  - TA5815 of US 5768: Added the easy login request to the login servlet. This makes the additional easylogin servlet obsolete.
 * Tue Jan 25 2011 - thorben.betten@open-xchange.com

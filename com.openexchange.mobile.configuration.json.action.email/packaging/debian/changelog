@@ -1,3 +1,9 @@
+open-xchange-mobile-configuration-json-action-email (6.19.0.0-4) unstable; urgency=low
+
+  * build for 6.19.0-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 09 Feb 2011 13:28:51 +0000
+
 open-xchange-mobile-configuration-json-action-email (6.19.0.0-3) unstable; urgency=low
 
   * build for 6.19.0-rev3
