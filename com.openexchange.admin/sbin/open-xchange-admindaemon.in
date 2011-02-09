@@ -65,6 +65,8 @@ test -f $OXFUNCTIONS || {
 
 test -f $OXCONFIG && . $OXCONFIG
 
+OSGIBUNDLE=@oxosgibundle@
+
 ox_set_JAVA_BIN
 
 
