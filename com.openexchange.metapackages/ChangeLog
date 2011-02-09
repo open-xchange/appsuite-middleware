@@ -1,3 +1,7 @@
+* 2011-02-09 - choeger@open-xchange.com
+
+ - Bugfix #18276 - new outlook oxtender 2 is not installed
+
 * 2010-11-24 - choeger@open-xchange.com
 
  - Bugfix #17556 - Installation on RHEL5 fails, no java installed
