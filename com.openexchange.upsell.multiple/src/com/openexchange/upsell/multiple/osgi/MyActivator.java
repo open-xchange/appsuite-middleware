@@ -50,17 +50,18 @@
 package com.openexchange.upsell.multiple.osgi;
 
 import static com.openexchange.upsell.multiple.osgi.MyServiceRegistry.getServiceRegistry;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.upsell.multiple.api.UrlService;
 import com.openexchange.user.UserService;
 
 public class MyActivator extends DeferredActivator {
@@ -72,9 +73,12 @@ public class MyActivator extends DeferredActivator {
 	
 	private MyServletRegisterer servletRegisterer;
 	
+	private List<ServiceTracker> serviceTrackerList;
+	
 
 	public MyActivator() {
-		super();		
+		super();
+		serviceTrackerList = new ArrayList<ServiceTracker>();
 	}
 	
 	@Override
@@ -128,7 +132,14 @@ public class MyActivator extends DeferredActivator {
 			servletRegisterer = new MyServletRegisterer();
 			servletRegisterer.registerServlet();
 			
+            serviceTrackerList.add(new ServiceTracker(context, UrlService.class.getName(), new UrlServiceInstallationServiceListener(context)));
 			
+            // Open service trackers
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.open();
+            }
+
+            
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -140,6 +151,14 @@ public class MyActivator extends DeferredActivator {
 	protected void stopBundle() throws Exception {
 		try {
 			
+            /*
+             * Close service trackers
+             */
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.close();
+            }
+            serviceTrackerList.clear();
+
 			
 			// stop info/sso servlet 
 			servletRegisterer.unregisterServlet();

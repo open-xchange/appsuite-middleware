@@ -14,18 +14,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -46,6 +43,8 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.upsell.multiple.api.UrlGeneratorException;
+import com.openexchange.upsell.multiple.api.UrlService;
 import com.openexchange.upsell.multiple.osgi.MyServiceRegistry;
 
 /*
@@ -140,22 +139,6 @@ public final class MyServletRequest  {
 	private static final String PROPERTY_RMI_MASTERADMIN = "com.openexchange.upsell.multiple.rmi.masteradmin";
 	private static final String PROPERTY_RMI_MASTERADMIN_PWD = "com.openexchange.upsell.multiple.rmi.masteradmin.pass";
 	private static final String PROPERTY_RMI_DOWNGRADE_NAME = "com.openexchange.upsell.multiple.rmi.downgrade.accessname";
-	
-	
-	
-	// parameter we will send either in mail or url
-	private static String MAP_ATTR_USER = "_USER_";
-	private static String MAP_ATTR_PWD = "_PWD_";
-	private static String MAP_ATTR_MAIL = "_MAIL_";
-	private static String MAP_ATTR_LOGIN = "_LOGIN_";
-	private static String MAP_ATTR_IMAP_LOGIN = "_IMAPLOGIN_";
-	private static String MAP_ATTR_CID = "_CID_";
-	private static String MAP_ATTR_USERID = "_USERID_";
-	private static String MAP_ATTR_CLICKED_FEATURE = "_CLICKED_FEATURE_";
-	private static String MAP_ATTR_UPSELL_PLAN = "_UPSELL_PLAN_";
-	private static String MAP_ATTR_LANGUAGE = "_LANG_";
-	private static String MAP_ATTR_PURCHASE_TYPE = "_PURCHASE_TYPE_"; // buy or trial button clicked
-	private static String MAP_ATTR_INVITE = "_INVITE_";
 	
 	public MyServletRequest(final Session sessionObj, final Context ctx) throws OXException, ServiceException {		
 		
@@ -405,11 +388,36 @@ public final class MyServletRequest  {
 	private Object actionGetStaticRedirectURL(JSONObject jsonObject,String request_src_hostname) throws ServiceException, JSONException {
 		JSONObject jsonResponseObject = new JSONObject();
 		
+		// Default implementation to generate the redirect URL
+		// this checks for configured url in file or configured url in admin user attributes
 		String STATIC_URL_RAW = getRedirectURL();
 				
+		
 		try {
 			
-			jsonResponseObject.put("upsell_static_redirect_url",parseText(STATIC_URL_RAW,jsonObject,true)); // parsed url with all parameter
+			String url = parseText(STATIC_URL_RAW,jsonObject,true);
+			
+			
+			// now check for custom implementations of the URL
+            final UrlService urlservice = MyServiceRegistry.getServiceRegistry().getService(UrlService.class);
+            UrlService provider = null;
+            if (null != urlservice) {
+            	if(LOG.isDebugEnabled()){
+                	LOG.debug("Found URLGenerator service. Using it now to generate redirect Upsell URL instead of default.");
+                }
+                // We have a special service providing login information, so we use that one...
+                try {
+                	// pass the parameters to the external implementation
+                    url = urlservice.generateUrl(getParameterMap(jsonObject),this.sessionObj,this.user,this.admin,this.ctx);
+                    if(LOG.isDebugEnabled()){
+                    	LOG.debug("Using custom redirect URL from URLGenerator service. URL: "+url);
+                    }
+                } catch (final UrlGeneratorException e) {
+                	LOG.error("Fatal error occured, generating redirect URL from custom implementation failed!", e);
+                }
+            }
+
+            jsonResponseObject.put("upsell_static_redirect_url",url); // parsed url with all parameter
 		} catch (URIException e) {
 			LOG.error("Error encoding static redirect URL", e);
 		} catch (UnsupportedEncodingException e) {
@@ -517,29 +525,29 @@ public final class MyServletRequest  {
 		
 		Map<String, String> bla = new HashMap<String, String>();
 		
-		bla.put(MAP_ATTR_USER,this.sessionObj.getUserlogin()); // users username 
-		bla.put(MAP_ATTR_PWD,this.sessionObj.getPassword()); // password
-		bla.put(MAP_ATTR_MAIL,this.user.getMail()); // users email addy
-		bla.put(MAP_ATTR_LOGIN,this.sessionObj.getLogin()); // users full login from UI mask
-		bla.put(MAP_ATTR_IMAP_LOGIN,this.user.getImapLogin()); // imap login 
-		bla.put(MAP_ATTR_CID,""+ctx.getContextId()); // context id
-		bla.put(MAP_ATTR_USERID,""+this.sessionObj.getUserId()); // user id 
-		bla.put(MAP_ATTR_LANGUAGE,""+this.user.getPreferredLanguage()); // user id 
+		bla.put(UrlService.MAP_ATTR_USER,this.sessionObj.getUserlogin()); // users username 
+		bla.put(UrlService.MAP_ATTR_PWD,this.sessionObj.getPassword()); // password
+		bla.put(UrlService.MAP_ATTR_MAIL,this.user.getMail()); // users email addy
+		bla.put(UrlService.MAP_ATTR_LOGIN,this.sessionObj.getLogin()); // users full login from UI mask
+		bla.put(UrlService.MAP_ATTR_IMAP_LOGIN,this.user.getImapLogin()); // imap login 
+		bla.put(UrlService.MAP_ATTR_CID,""+ctx.getContextId()); // context id
+		bla.put(UrlService.MAP_ATTR_USERID,""+this.sessionObj.getUserId()); // user id 
+		bla.put(UrlService.MAP_ATTR_LANGUAGE,""+this.user.getPreferredLanguage()); // user id 
 		
 		if(jsondata!=null && jsondata.has("purchase_type")){
-			bla.put(MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
+			bla.put(UrlService.MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
 		}
 		
 		if(jsondata!=null && jsondata.has("invite")){
-			bla.put(MAP_ATTR_INVITE,jsondata.getString("invite"));
+			bla.put(UrlService.MAP_ATTR_INVITE,jsondata.getString("invite"));
 		}
 		
 		if(jsondata!=null && jsondata.has("feature_clicked")){
-			bla.put(MAP_ATTR_CLICKED_FEATURE,jsondata.getString("feature_clicked")); // the feature the user clicked on like calender, infostore, mobility etc.
+			bla.put(UrlService.MAP_ATTR_CLICKED_FEATURE,jsondata.getString("feature_clicked")); // the feature the user clicked on like calender, infostore, mobility etc.
 
 		}
 		if(jsondata!=null && jsondata.has("upsell_plan")){
-			bla.put(MAP_ATTR_UPSELL_PLAN,jsondata.getString("upsell_plan")); //the upsell package the user wants to buy
+			bla.put(UrlService.MAP_ATTR_UPSELL_PLAN,jsondata.getString("upsell_plan")); //the upsell package the user wants to buy
 		}
 		
 		

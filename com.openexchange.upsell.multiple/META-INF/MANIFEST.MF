@@ -56,3 +56,4 @@ Bundle-ClassPath: .,
  com.openexchange.upsell.multiple.jar,
  lib/ox_admin_hosting_rmiclient.jar,
  lib/ox_admin_rmiclient.jar
+Export-Package: com.openexchange.upsell.multiple.api
