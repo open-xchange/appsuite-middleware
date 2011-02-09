@@ -49,6 +49,13 @@
 
 package com.openexchange.oauth.linkedin;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -57,6 +64,7 @@ import org.scribe.builder.api.LinkedInApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthException;
@@ -119,7 +127,34 @@ public class LinkedInConnectionTest extends TestCase {
     }
     
     public void testUsageOfExistingAccount(){
-        linkedIn.getData(1,1);
+        linkedIn.getData(1,1,1);
+    }
+    
+    public void testXMLParsing(){
+                       
+        try {            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("/Users/karstenwill/Documents/Development/ox_projectset_workspace/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
+            String string = "";
+            String line;
+            while ((line = reader.readLine()) != null) {
+                string += line + "\n";
+            }
+            List<Contact> contacts = linkedIn.parseIntoContacts(string);
+            System.out.println("No of contacts : " + contacts.size());
+            for (Contact contact : contacts){
+                if (contact.getSurName().equals("Geck")){
+                    System.out.println("Birthday : " + contact.getBirthday());
+                    System.out.println("telephone_home1  : " + contact.getTelephoneHome1());
+                    System.out.println("note  : " + contact.getNote());
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }                       
     }
 
 }

@@ -52,7 +52,9 @@ package com.openexchange.oauth.linkedin;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -136,28 +138,21 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
         super.modifyOutgoing(subscription);
     }
 
-    public List<Contact> getData(int user, int contextId) {
+    public List<Contact> getData(int user, int contextId, int accountId) {
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(activator.getLinkedInMetadata().getAPIKey()).apiSecret(
             activator.getLinkedInMetadata().getAPISecret()).build();
 
-        List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
+        //List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
         OAuthAccount account = null;
         try {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            accounts = oAuthService.getAccounts(activator.getLinkedInMetadata().getId(), user, contextId);
+            account = oAuthService.getAccount(accountId, user, contextId);
         } catch (OAuthException e) {
             LOG.error(e);
         }
 
-        // There are accounts for this service already. take the first one
-        if (null != accounts && accounts.size() >= 1) {
-            account = accounts.get(0);
-        }
-        // TODO: (Possibly) There are no accounts for this service yet. create one and save it
-        else {
-
-        }
+        
 
         // get the connections (contacts) with the given access token
         Token accessToken = new Token(account.getToken(), account.getSecret());
@@ -165,6 +160,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
         service.signRequest(accessToken, request);
         Response response = request.send();
 
+        //System.out.println(response.getBody());
         // parse the returned xml into neat little contacts
         contacts = parseIntoContacts(response.getBody());
         return contacts;
@@ -188,7 +184,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
     }
 
     public Collection<?> getContent(Subscription subscription) throws SubscriptionException {
-        return getData(subscription.getUserId(), subscription.getContext().getContextId());
+        return getData(subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -199,8 +195,8 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
         return FolderObject.CONTACT == folderModule;
     }
 
-    private List<Contact> parseIntoContacts(String body) {
-        final List<Contact> contactObjects = new ArrayList<Contact>();
+    public List<Contact> parseIntoContacts(String body) {
+        final List<Contact> contacts = new ArrayList<Contact>();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
         try {
@@ -216,17 +212,18 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
                     Contact contact = new Contact();
                     contact.setGivenName(getTextValue(person, "first-name"));
                     contact.setSurName(getTextValue(person, "last-name"));
+                    System.out.println("Current contact : " + contact.getGivenName() + " " + contact.getSurName());
+                    if (null != getTextValue(person, "main-address")) contact.setNote(getTextValue(person, "main-address"));                   
                     try {
                         String imageUrl = getTextValue(person, "picture-url");
                         if (null != imageUrl) OXContainerConverter.loadImageFromURL(contact, imageUrl);
-                        //System.out.println("Image-Url: " + getTextValue(person, "picture-url"));
                     } catch (ConverterException e) {
                         LOG.error(e);
                     }
 
                     // get the current job and company
                     NodeList positions = person.getElementsByTagName("positions");
-                    if (positions != null && positions.getLength() > 0) {
+                    if (null != positions && positions.getLength() > 0) {
                         Element position = (Element) positions.item(0);
                         contact.setTitle(getTextValue(position, "title"));
                         NodeList companies = position.getElementsByTagName("company");
@@ -235,6 +232,51 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
                             contact.setCompany(getTextValue(company, "name"));
                         }
                     }
+                    
+                    // get the first IM-account
+                    NodeList imAccounts = person.getElementsByTagName("im-account");
+                    if (null != imAccounts && imAccounts.getLength() > 0 ){
+                        Element imAccount = (Element) imAccounts.item(0);
+                        contact.setInstantMessenger1(getTextValue(imAccount, "im-account-name") + " ("+getTextValue(imAccount, "im-account-type")+")");
+                    }
+                    
+                    // parse the phone numbers, saving the first occurrence of "home" and "work"
+                    NodeList phoneNumbers = person.getElementsByTagName("phone-number");
+                    if (null != phoneNumbers && phoneNumbers.getLength() > 0 ){
+                        for (int p = 0; p < phoneNumbers.getLength(); p++){
+                            Element phoneNumber = (Element) phoneNumbers.item(p); 
+                            if (null != getTextValue(phoneNumber, "phone-type")){
+                                if (getTextValue(phoneNumber, "phone-type").equals("work")) {
+                                    contact.setTelephoneBusiness1(getTextValue(phoneNumber, "phone-number"));
+                                }
+                                else if (getTextValue(phoneNumber, "phone-type").equals("home")){
+                                    contact.setTelephoneHome1(getTextValue(phoneNumber, "phone-number"));
+                                }
+                            }     
+                        }
+                    }
+                    
+                    // get the birthdate
+                    NodeList dateOfBirths = person.getElementsByTagName("date-of-birth");
+                    if (null != dateOfBirths && dateOfBirths.getLength() > 0){
+                        Element dateOfBirth = (Element) dateOfBirths.item(0);
+                        int year = 0;
+                        if (null != getTextValue(dateOfBirth, "year")){
+                            year = Integer.parseInt(getTextValue(dateOfBirth, "year")) - 1900;
+                        }
+                        int month = 0;
+                        if (null != getTextValue(dateOfBirth, "month")){
+                            month = Integer.parseInt(getTextValue(dateOfBirth, "month")) -1;                            
+                        }
+                        int date = 0;
+                        if (null != getTextValue(dateOfBirth, "day")){
+                            date = Integer.parseInt(getTextValue(dateOfBirth, "day"));                            
+                        }
+                        contact.setBirthday(new Date(year, month, date));
+                    }
+                    
+                    contacts.add(contact);
+                    //System.out.println("---");
                 }
             }
         } catch (ParserConfigurationException pce) {
@@ -244,7 +286,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
         } catch (IOException ioe) {
             LOG.error(ioe);
         }
-        return contactObjects;
+        return contacts;
     }
 
     private String getTextValue(Element ele, String tagName) {
@@ -252,7 +294,9 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
         NodeList nl = ele.getElementsByTagName(tagName);
         if (nl != null && nl.getLength() > 0) {
             Element el = (Element) nl.item(0);
-            textVal = el.getFirstChild().getNodeValue();
+            if (null != el.getFirstChild()){
+                textVal = el.getFirstChild().getNodeValue();
+            }
         }
 
         return textVal;

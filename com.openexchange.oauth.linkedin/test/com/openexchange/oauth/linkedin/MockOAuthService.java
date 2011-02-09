@@ -87,8 +87,10 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#getAccount(int, int, int)
      */
     public OAuthAccount getAccount(int accountId, int user, int contextId) {
-        // TODO Auto-generated method stub
-        return null;
+        DefaultOAuthAccount account = new DefaultOAuthAccount();
+        account.setSecret("b558fc34-ecb0-45f2-a1ca-0f3c8ea1eb1a");
+        account.setToken("23a0c108-2ea5-49e9-a23d-fb7d6d404462");
+        return account;
     }
 
     /* (non-Javadoc)
