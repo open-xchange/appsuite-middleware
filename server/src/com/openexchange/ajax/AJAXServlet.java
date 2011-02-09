@@ -248,6 +248,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     
     public static final String ACTION_REFRESH_SECRET = "refreshSecret";
     
+    public static final String ACTION_TERMSEARCH = "advancedSearch";
+
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
      */
@@ -351,7 +353,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     
     public static final String PARAMETER_PASSWORD= "password";
 
-
+    
     /**
      * The content type if the response body contains javascript data. Set it with
      * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .
