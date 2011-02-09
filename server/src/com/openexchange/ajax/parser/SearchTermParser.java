@@ -50,6 +50,7 @@
 package com.openexchange.ajax.parser;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.SearchTermFields;
 import com.openexchange.search.CompositeSearchTerm;
@@ -77,18 +78,14 @@ public final class SearchTermParser {
         super();
     }
 
-    public static void parseSingleOperands(final SingleSearchTerm singleSearchTerm, final JSONObject jsonObject, final int maxTerms) throws SearchException {
-        if (!jsonObject.hasAndNotNull(SearchTermFields.OPERANDS)) {
-            throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERANDS.create(new Object[0]);
-        }
-        final JSONArray array = jsonObject.optJSONArray(SearchTermFields.OPERANDS);
+    public static void parseSingleOperands(final SingleSearchTerm singleSearchTerm, final JSONArray array, final int maxTerms) throws SearchException {
         final int len = array.length();
-        if (len < 1) {
+        if (len < 2) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
-        } else if (len > maxTerms) {
+        } else if (len > maxTerms + 1) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
         }
-        for (int i = 0; i < len; i++) {
+        for (int i = 1; i < len; i++) {
             final JSONObject operand = array.optJSONObject(i);
             if (null == operand) {
                 singleSearchTerm.addOperand(parseConstantOperand(array.optString(i)));
@@ -102,6 +99,8 @@ public final class SearchTermParser {
         if (s == null) {
             return ConstantOperand.NULL;
         }
+/* TODO: Get type information from other operands.
+ * Disabled guessing because e.g. "True" is a female first name.
         if ("true".equalsIgnoreCase(s)) {
             return new ConstantOperand<Boolean>(Boolean.TRUE);
         } else if ("false".equalsIgnoreCase(s)) {
@@ -111,23 +110,18 @@ public final class SearchTermParser {
         } else if (isLong(s)) {
             return new ConstantOperand<Long>(Long.valueOf(s));
         } else {
+*/
             return new ConstantOperand<String>(s);
+/*
         }
+*/
     }
 
     private static Operand<?> parseOperand(final JSONObject operand) throws SearchException {
-        if (!operand.hasAndNotNull(SearchTermFields.TYPE)) {
-            throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.TYPE);
+        if (!operand.hasAndNotNull(SearchTermFields.FIELD)) {
+            throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.FIELD);
         }
-        if (!operand.hasAndNotNull(SearchTermFields.VALUE)) {
-            throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.VALUE);
-        }
-        final String type = operand.optString(SearchTermFields.TYPE);
-        final String value = operand.optString(SearchTermFields.VALUE);
-        if (Operand.Type.COLUMN.isType(type)) {
-            return new ColumnOperand(value);
-        }
-        return parseConstantOperand(value);
+        return new ColumnOperand(operand.optString(SearchTermFields.FIELD));
     }
 
     private static boolean isInteger(final String s) {
@@ -149,21 +143,25 @@ public final class SearchTermParser {
     }
 
     /**
-     * Parses specified search term JSON object.
+     * Parses specified search term JSON array.
      * 
-     * @param jsonObject The search term JSON object.
+     * @param jsonArray The search term JSON array.
      * @return The parsed instance of search term.
      * @throws SearchException If parsing fails.
      */
-    public static SearchTerm<?> parse(final JSONObject jsonObject) throws SearchException {
-        if (null == jsonObject) {
+    public static SearchTerm<?> parse(final JSONArray jsonArray) throws SearchException {
+        if (null == jsonArray) {
             return null;
         }
-        if (!jsonObject.hasAndNotNull(SearchTermFields.OPERATION)) {
-            throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERATION.create(new Object[0]);
+
+        final String operation;
+        try {
+            operation = jsonArray.getString(0);
+        } catch (JSONException e) {
+            throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERATION.create(e, new Object[0]);
         }
+
         final SearchTerm<?> retval;
-        final String operation = jsonObject.optString(SearchTermFields.OPERATION);
         final CompositeOperation compositeOperation = CompositeOperation.getCompositeOperation(operation);
         if (null == compositeOperation) {
             final SingleOperation singleOperation = SingleOperation.getSingleOperation(operation);
@@ -171,29 +169,25 @@ public final class SearchTermParser {
                 throw SearchExceptionMessages.UNKNOWN_OPERATION.create(operation);
             }
             final SingleSearchTerm singleSearchTerm = singleOperation.newInstance();
-            parseSingleOperands(singleSearchTerm, jsonObject, singleOperation.getMaxOperands());
+            parseSingleOperands(singleSearchTerm, jsonArray, singleOperation.getMaxOperands());
             retval = singleSearchTerm;
         } else {
             final CompositeSearchTerm compositeSearchTerm = compositeOperation.newInstance();
-            parseCompositeOperands(compositeSearchTerm, jsonObject, compositeOperation.getMaxTerms());
+            parseCompositeOperands(compositeSearchTerm, jsonArray, compositeOperation.getMaxTerms());
             retval = compositeSearchTerm;
         }
         return retval;
     }
 
-    private static void parseCompositeOperands(final CompositeSearchTerm compositeSearchTerm, final JSONObject jsonObject, final int maxTerms) throws SearchException {
-        if (!jsonObject.hasAndNotNull(SearchTermFields.OPERANDS)) {
-            throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERANDS.create(new Object[0]);
-        }
-        final JSONArray array = jsonObject.optJSONArray(SearchTermFields.OPERANDS);
+    private static void parseCompositeOperands(final CompositeSearchTerm compositeSearchTerm, final JSONArray array, final int maxTerms) throws SearchException {
         final int len = array.length();
-        if (len < 1) {
+        if (len < 2) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
-        } else if (len > maxTerms) {
+        } else if (len > maxTerms + 1) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
         }
-        for (int i = 0; i < len; i++) {
-            final SearchTerm<?> term = parse(array.optJSONObject(i));
+        for (int i = 1; i < len; i++) {
+            final SearchTerm<?> term = parse(array.optJSONArray(i));
             if (null != term) {
                 compositeSearchTerm.addSearchTerm(term);
             }

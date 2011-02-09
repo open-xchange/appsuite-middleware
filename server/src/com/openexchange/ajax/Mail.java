@@ -2723,7 +2723,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                 }
             } else {
-                final JSONObject searchObject = ((JSONObject) searchValue).getJSONObject(PARAMETER_FILTER);
+                final JSONArray searchArray = ((JSONObject) searchValue).getJSONArray(PARAMETER_FILTER);
                 /*
                  * Search mails
                  */
@@ -2751,7 +2751,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                     final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                    it = mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchObject), true, columns);
+                    it = mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchArray), true, columns);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();

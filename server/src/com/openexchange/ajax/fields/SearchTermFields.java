@@ -56,13 +56,7 @@ package com.openexchange.ajax.fields;
  */
 public final class SearchTermFields {
 
-    public static final String OPERATION = "operation";
-
-    public static final String OPERANDS = "operands";
-
-    public static final String TYPE = "type";
-
-    public static final String VALUE = "value";
+    public static final String FIELD = "field";
 
     /**
      * Initializes a new {@link SearchTermFields}.
