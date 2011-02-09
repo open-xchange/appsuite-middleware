@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -407,6 +407,8 @@ fi
  - Added Italian translations for standard mail folder names.
 * Thu Jan 20 2011 - marcus.klein@open-xchange.com
  - Bugfix #18029: Corrected ENGINE to InnoDB of a table in ConfigDB.
+* Sun Jan 09 2011 - choeger@open-xchange.com
+ - Bugfix #18298 - admin does not start after update
 * Mon Dec 20 2010 - choeger@open-xchange.com
  - Bugfix #17849: An infostore folder named XXXXXX already exists below folder userstore SoftwareChange_Request-542: Removed
    DISPLAYNAME_UNIQUE
