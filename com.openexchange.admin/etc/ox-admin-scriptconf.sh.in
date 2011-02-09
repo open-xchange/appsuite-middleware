@@ -1,5 +1,4 @@
 LIBPATH=@oxlibpath@
-OSGIBUNDLE=@oxosgibundle@
 SYSTEMPROPERTIES=@systemproperties@
 LOGGINGPROPERTIES=@loggingproperties@
 OSGIPATH=@oxprefix@/@oxconfdir@/osgi

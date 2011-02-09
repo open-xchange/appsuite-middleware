@@ -27,6 +27,12 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # bug 18298
+  local pfile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+  if grep "OSGIBUNDLE" $pfile > /dev/null; then
+      ox_remove_property OSGIBUNDLE $pfile
+  fi
+
   # SoftwareChange_Request-579
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/admindaemon/User.properties

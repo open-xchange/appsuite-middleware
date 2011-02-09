@@ -143,6 +143,12 @@ if [ ${1:-0} -eq 2 ]; then
 
   GLOBIGNORE='*'
 
+   # bug 18298
+   pfile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+   if grep "OSGIBUNDLE" $pfile > /dev/null; then
+      ox_remove_property OSGIBUNDLE $pfile
+   fi
+
    # SoftwareChange_Request-579
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/admindaemon/User.properties
