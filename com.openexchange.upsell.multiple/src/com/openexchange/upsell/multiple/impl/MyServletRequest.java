@@ -43,6 +43,7 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.upsell.multiple.api.MapParameters;
 import com.openexchange.upsell.multiple.api.UrlGeneratorException;
 import com.openexchange.upsell.multiple.api.UrlService;
 import com.openexchange.upsell.multiple.osgi.MyServiceRegistry;
@@ -458,20 +459,20 @@ public final class MyServletRequest  {
 	}
 	
 	private String parseText(String raw_text, JSONObject json,boolean url_encode_it) throws JSONException, URIException, UnsupportedEncodingException{
-		Map<String, String> bla = getParameterMap(json);
+		Map<MapParameters, String> bla = getParameterMap(json);
 		Set a = bla.keySet();
 		Iterator itr = a.iterator();
 		
 		// loop through all params and replace
 		while (itr.hasNext()) {
 			
-			String map_key = (String) itr.next();
+			MapParameters map_key = (MapParameters) itr.next();
 			String map_val = bla.get(map_key).toString();
 			if(url_encode_it){
 				map_val = URLEncoder.encode(map_val,"UTF-8");
 			}
 			// replace the placeholder with values
-			raw_text = raw_text.replaceAll(map_key, map_val);
+			raw_text = raw_text.replaceAll(map_key.propertyName, map_val);
 			
 		}
 		
@@ -521,33 +522,33 @@ public final class MyServletRequest  {
 	 * @return
 	 * @throws JSONException 
 	 */
-	private Map<String, String> getParameterMap(JSONObject jsondata) throws JSONException{
+	private Map<MapParameters, String> getParameterMap(JSONObject jsondata) throws JSONException{
 		
-		Map<String, String> bla = new HashMap<String, String>();
+		Map<MapParameters, String> bla = new HashMap<MapParameters, String>();
 		
-		bla.put(UrlService.MAP_ATTR_USER,this.sessionObj.getUserlogin()); // users username 
-		bla.put(UrlService.MAP_ATTR_PWD,this.sessionObj.getPassword()); // password
-		bla.put(UrlService.MAP_ATTR_MAIL,this.user.getMail()); // users email addy
-		bla.put(UrlService.MAP_ATTR_LOGIN,this.sessionObj.getLogin()); // users full login from UI mask
-		bla.put(UrlService.MAP_ATTR_IMAP_LOGIN,this.user.getImapLogin()); // imap login 
-		bla.put(UrlService.MAP_ATTR_CID,""+ctx.getContextId()); // context id
-		bla.put(UrlService.MAP_ATTR_USERID,""+this.sessionObj.getUserId()); // user id 
-		bla.put(UrlService.MAP_ATTR_LANGUAGE,""+this.user.getPreferredLanguage()); // user id 
+		bla.put(MapParameters.MAP_ATTR_USER,this.sessionObj.getUserlogin()); // users username 
+		bla.put(MapParameters.MAP_ATTR_PWD,this.sessionObj.getPassword()); // password
+		bla.put(MapParameters.MAP_ATTR_MAIL,this.user.getMail()); // users email addy
+		bla.put(MapParameters.MAP_ATTR_LOGIN,this.sessionObj.getLogin()); // users full login from UI mask
+		bla.put(MapParameters.MAP_ATTR_IMAP_LOGIN,this.user.getImapLogin()); // imap login 
+		bla.put(MapParameters.MAP_ATTR_CID,""+ctx.getContextId()); // context id
+		bla.put(MapParameters.MAP_ATTR_USERID,""+this.sessionObj.getUserId()); // user id 
+		bla.put(MapParameters.MAP_ATTR_LANGUAGE,""+this.user.getPreferredLanguage()); // user id 
 		
 		if(jsondata!=null && jsondata.has("purchase_type")){
-			bla.put(UrlService.MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
+			bla.put(MapParameters.MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
 		}
 		
 		if(jsondata!=null && jsondata.has("invite")){
-			bla.put(UrlService.MAP_ATTR_INVITE,jsondata.getString("invite"));
+			bla.put(MapParameters.MAP_ATTR_INVITE,jsondata.getString("invite"));
 		}
 		
 		if(jsondata!=null && jsondata.has("feature_clicked")){
-			bla.put(UrlService.MAP_ATTR_CLICKED_FEATURE,jsondata.getString("feature_clicked")); // the feature the user clicked on like calender, infostore, mobility etc.
+			bla.put(MapParameters.MAP_ATTR_CLICKED_FEATURE,jsondata.getString("feature_clicked")); // the feature the user clicked on like calender, infostore, mobility etc.
 
 		}
 		if(jsondata!=null && jsondata.has("upsell_plan")){
-			bla.put(UrlService.MAP_ATTR_UPSELL_PLAN,jsondata.getString("upsell_plan")); //the upsell package the user wants to buy
+			bla.put(MapParameters.MAP_ATTR_UPSELL_PLAN,jsondata.getString("upsell_plan")); //the upsell package the user wants to buy
 		}
 		
 		
