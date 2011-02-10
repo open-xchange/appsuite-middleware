@@ -509,11 +509,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     @Override
     public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
-        /*
-         * TODO: Special treatment for rename-only?
-         */
-        final FolderObject storageVersion = getFolderFromMaster(fo.getObjectID());
-        final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, storageVersion);
+        final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, getFolderFromMaster(fo.getObjectID()));
         if (checkPermissions) {
             if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(
                 session.getUserId(),
@@ -545,7 +541,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             }
             {
                 if (isRenameOnly) {
-                    final EffectivePermission parentPerm = getOXFolderAccess().getFolderPermission(storageVersion.getParentFolderID(), user.getId(), userConfig);
+                    final EffectivePermission parentPerm = getOXFolderAccess().getFolderPermission(getFolderFromMaster(fo.getObjectID()).getParentFolderID(), user.getId(), userConfig);
                     if (!perm.isFolderAdmin() && !parentPerm.canCreateSubfolders()) {
                         if (!perm.getUnderlyingPermission().isFolderAdmin() && !parentPerm.getUnderlyingPermission().canCreateSubfolders()) {
                             throw new OXFolderPermissionException(
@@ -577,23 +573,23 @@ final class OXFolderManagerImpl extends OXFolderManager {
         final boolean performMove = fo.containsParentFolderID();
         if (fo.containsPermissions() || fo.containsModule()) {
             if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), storageVersion, lastModified);
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
             }
             if (isRenameOnly) {
-                rename(fo, storageVersion, lastModified);
+                rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
             } else {
-                update(fo, OPTION_NONE, storageVersion, lastModified);
+                update(fo, OPTION_NONE, getFolderFromMaster(fo.getObjectID()), lastModified);
             }
         } else if (fo.containsFolderName()) {
             if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), storageVersion, lastModified);
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
             }
-            rename(fo, storageVersion, lastModified);
+            rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
         } else if (performMove) {
             /*
              * Perform move
              */
-            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), storageVersion, lastModified);
+            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
         }
         /*
          * Finally update cache
@@ -625,7 +621,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 if (FolderObject.SYSTEM_MODULE != fo.getModule()) {
                     try {
                         new EventClient(session).modify(
-                            storageVersion,
+                            getFolderFromMaster(fo.getObjectID()),
                             fo,
                             FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false));
                     } catch (final EventException e) {
