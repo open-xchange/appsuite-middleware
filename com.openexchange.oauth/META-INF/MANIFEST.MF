@@ -35,6 +35,6 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.oauth
-Bundle-ClassPath: lib/scribe-1.0.9.jar,
+Bundle-ClassPath: lib/scribe-1.1.0.jar,
  .
 Bundle-Activator: com.openexchange.oauth.osgi.OAuthActivator

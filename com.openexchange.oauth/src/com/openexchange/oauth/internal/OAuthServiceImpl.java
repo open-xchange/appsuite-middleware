@@ -62,6 +62,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
+import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FoursquareApi;
 import org.scribe.builder.api.GoogleApi;
 import org.scribe.builder.api.LinkedInApi;
@@ -417,6 +418,8 @@ public class OAuthServiceImpl implements OAuthService {
             apiClass = YahooApi.class;
         } else if (serviceId.indexOf("foursquare") >= 0) {
             apiClass = FoursquareApi.class;
+        } else if (serviceId.indexOf("facebook") >= 0) {
+            apiClass = FacebookApi.class;
         } else {
             throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
         }
