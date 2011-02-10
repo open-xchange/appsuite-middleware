@@ -486,7 +486,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (imapConfProps.isPropagateClientIPAddress() && MailAccount.DEFAULT_ID == accountId) {
                 IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), session.getLocalIp());
             } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
-                LOG.debug(new StringBuilder(256).append("Propagating client IP address disabled on Open-Xchange server \"").append(
+                LOG.debug(new StringBuilder(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
                     IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append('"').toString());
             }
             /*
