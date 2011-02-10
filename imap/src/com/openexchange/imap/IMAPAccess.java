@@ -484,10 +484,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Propagate client IP address in case of primary mail account access
              */
             if (imapConfProps.isPropagateClientIPAddress() && MailAccount.DEFAULT_ID == accountId) {
-                IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), session.getLocalIp());
+                final String clientIP = session.getLocalIp();
+                if (!isEmpty(clientIP)) {
+                    IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), clientIP);
+                } else if (DEBUG) {
+                    LOG.debug(new StringBuilder(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
+                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n"));
+                }
             } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
                 LOG.debug(new StringBuilder(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
-                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append('"').toString());
+                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
             }
             /*
              * Add server's capabilities
@@ -923,6 +929,25 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return imapStore.toString();
         }
         return "[not connected]";
+    }
+
+    /**
+     * Checks if given string is empty.
+     * 
+     * @param s The string to check
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    private static boolean isEmpty(final String s) {
+        if (null == s) {
+            return true;
+        }
+        boolean whiteSpace = true;
+        final char[] chars = s.toCharArray();
+        final int length = chars.length;
+        for (int i = 0; whiteSpace && i < length; i++) {
+            whiteSpace &= Character.isWhitespace(chars[i]);
+        }
+        return whiteSpace;
     }
 
 }
