@@ -483,8 +483,15 @@ public final class ConfigurationImpl implements ConfigurationService {
     public Object getYaml(String filename) {
         String path = yamlPaths.get(filename);
         if (path == null) {
+            path = yamlPaths.get(filename+".yml");
+        }
+        if (path == null) {
+            path = yamlPaths.get(filename+".yaml");
+        }
+        if (path == null) {
             return null;
         }
+
         return yamlFiles.get(path);
     }
 
