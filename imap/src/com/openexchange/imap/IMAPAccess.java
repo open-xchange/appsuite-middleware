@@ -945,7 +945,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         final char[] chars = s.toCharArray();
         final int length = chars.length;
         for (int i = 0; whiteSpace && i < length; i++) {
-            whiteSpace &= Character.isWhitespace(chars[i]);
+            whiteSpace = Character.isWhitespace(chars[i]);
         }
         return whiteSpace;
     }
