@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 18
+%define		ox_release 19
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -282,6 +282,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Feb 09 2011 - choeger@open-xchange.com
+ - Bugfix #18276 - new outlook oxtender 2 is not installed
 * Wed Nov 24 2010 - choeger@open-xchange.com
  - Bugfix #17556 - Installation on RHEL5 fails, no java installed
    only provide sun-java on centos
