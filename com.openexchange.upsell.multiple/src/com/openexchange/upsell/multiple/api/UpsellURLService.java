@@ -7,7 +7,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 
 
-public interface UrlService {
+public interface UpsellURLService {
 	
 	
 
@@ -15,7 +15,7 @@ public interface UrlService {
 	 * Map contains all parameters which are available in users session and already contain the needed values.
 	 * @param parameters
 	 * @return
-	 * @throws UrlGeneratorException
+	 * @throws URLGeneratorException
 	 */
-    public String generateUrl(Map<UrlMapParameters, String> parameters,Session sessionObj, User user, User ctxadmin, Context ctx) throws UrlGeneratorException;
+    public String generateUrl(Map<UpsellURLParametersMap, String> parameters,Session sessionObj, User user, User ctxadmin, Context ctx) throws URLGeneratorException;
 }

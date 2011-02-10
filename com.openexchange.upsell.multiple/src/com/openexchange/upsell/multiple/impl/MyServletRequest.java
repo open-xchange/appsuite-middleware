@@ -43,9 +43,9 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.upsell.multiple.api.UrlMapParameters;
-import com.openexchange.upsell.multiple.api.UrlGeneratorException;
-import com.openexchange.upsell.multiple.api.UrlService;
+import com.openexchange.upsell.multiple.api.UpsellURLParametersMap;
+import com.openexchange.upsell.multiple.api.URLGeneratorException;
+import com.openexchange.upsell.multiple.api.UpsellURLService;
 import com.openexchange.upsell.multiple.osgi.MyServiceRegistry;
 
 /*
@@ -400,8 +400,8 @@ public final class MyServletRequest  {
 			
 			
 			// now check for custom implementations of the URL
-            final UrlService urlservice = MyServiceRegistry.getServiceRegistry().getService(UrlService.class);
-            UrlService provider = null;
+            final UpsellURLService urlservice = MyServiceRegistry.getServiceRegistry().getService(UpsellURLService.class);
+            UpsellURLService provider = null;
             if (null != urlservice) {
             	if(LOG.isDebugEnabled()){
                 	LOG.debug("Found URLGenerator service. Using it now to generate redirect Upsell URL instead of default.");
@@ -413,7 +413,7 @@ public final class MyServletRequest  {
                     if(LOG.isDebugEnabled()){
                     	LOG.debug("Using custom redirect URL from URLGenerator service. URL: "+url);
                     }
-                } catch (final UrlGeneratorException e) {
+                } catch (final URLGeneratorException e) {
                 	LOG.error("Fatal error occured, generating redirect URL from custom implementation failed!", e);
                 }
             }
@@ -459,14 +459,14 @@ public final class MyServletRequest  {
 	}
 	
 	private String parseText(String raw_text, JSONObject json,boolean url_encode_it) throws JSONException, URIException, UnsupportedEncodingException{
-		Map<UrlMapParameters, String> bla = getParameterMap(json);
+		Map<UpsellURLParametersMap, String> bla = getParameterMap(json);
 		Set a = bla.keySet();
 		Iterator itr = a.iterator();
 		
 		// loop through all params and replace
 		while (itr.hasNext()) {
 			
-			UrlMapParameters map_key = (UrlMapParameters) itr.next();
+			UpsellURLParametersMap map_key = (UpsellURLParametersMap) itr.next();
 			String map_val = bla.get(map_key).toString();
 			if(url_encode_it){
 				map_val = URLEncoder.encode(map_val,"UTF-8");
@@ -522,33 +522,33 @@ public final class MyServletRequest  {
 	 * @return
 	 * @throws JSONException 
 	 */
-	private Map<UrlMapParameters, String> getParameterMap(JSONObject jsondata) throws JSONException{
+	private Map<UpsellURLParametersMap, String> getParameterMap(JSONObject jsondata) throws JSONException{
 		
-		Map<UrlMapParameters, String> bla = new HashMap<UrlMapParameters, String>();
+		Map<UpsellURLParametersMap, String> bla = new HashMap<UpsellURLParametersMap, String>();
 		
-		bla.put(UrlMapParameters.MAP_ATTR_USER,this.sessionObj.getUserlogin()); // users username 
-		bla.put(UrlMapParameters.MAP_ATTR_PWD,this.sessionObj.getPassword()); // password
-		bla.put(UrlMapParameters.MAP_ATTR_MAIL,this.user.getMail()); // users email addy
-		bla.put(UrlMapParameters.MAP_ATTR_LOGIN,this.sessionObj.getLogin()); // users full login from UI mask
-		bla.put(UrlMapParameters.MAP_ATTR_IMAP_LOGIN,this.user.getImapLogin()); // imap login 
-		bla.put(UrlMapParameters.MAP_ATTR_CID,""+ctx.getContextId()); // context id
-		bla.put(UrlMapParameters.MAP_ATTR_USERID,""+this.sessionObj.getUserId()); // user id 
-		bla.put(UrlMapParameters.MAP_ATTR_LANGUAGE,""+this.user.getPreferredLanguage()); // user id 
+		bla.put(UpsellURLParametersMap.MAP_ATTR_USER,this.sessionObj.getUserlogin()); // users username 
+		bla.put(UpsellURLParametersMap.MAP_ATTR_PWD,this.sessionObj.getPassword()); // password
+		bla.put(UpsellURLParametersMap.MAP_ATTR_MAIL,this.user.getMail()); // users email addy
+		bla.put(UpsellURLParametersMap.MAP_ATTR_LOGIN,this.sessionObj.getLogin()); // users full login from UI mask
+		bla.put(UpsellURLParametersMap.MAP_ATTR_IMAP_LOGIN,this.user.getImapLogin()); // imap login 
+		bla.put(UpsellURLParametersMap.MAP_ATTR_CID,""+ctx.getContextId()); // context id
+		bla.put(UpsellURLParametersMap.MAP_ATTR_USERID,""+this.sessionObj.getUserId()); // user id 
+		bla.put(UpsellURLParametersMap.MAP_ATTR_LANGUAGE,""+this.user.getPreferredLanguage()); // user id 
 		
 		if(jsondata!=null && jsondata.has("purchase_type")){
-			bla.put(UrlMapParameters.MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
+			bla.put(UpsellURLParametersMap.MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
 		}
 		
 		if(jsondata!=null && jsondata.has("invite")){
-			bla.put(UrlMapParameters.MAP_ATTR_INVITE,jsondata.getString("invite"));
+			bla.put(UpsellURLParametersMap.MAP_ATTR_INVITE,jsondata.getString("invite"));
 		}
 		
 		if(jsondata!=null && jsondata.has("feature_clicked")){
-			bla.put(UrlMapParameters.MAP_ATTR_CLICKED_FEATURE,jsondata.getString("feature_clicked")); // the feature the user clicked on like calender, infostore, mobility etc.
+			bla.put(UpsellURLParametersMap.MAP_ATTR_CLICKED_FEATURE,jsondata.getString("feature_clicked")); // the feature the user clicked on like calender, infostore, mobility etc.
 
 		}
 		if(jsondata!=null && jsondata.has("upsell_plan")){
-			bla.put(UrlMapParameters.MAP_ATTR_UPSELL_PLAN,jsondata.getString("upsell_plan")); //the upsell package the user wants to buy
+			bla.put(UpsellURLParametersMap.MAP_ATTR_UPSELL_PLAN,jsondata.getString("upsell_plan")); //the upsell package the user wants to buy
 		}
 		
 		

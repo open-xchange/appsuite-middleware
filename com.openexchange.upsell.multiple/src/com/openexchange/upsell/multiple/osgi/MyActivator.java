@@ -61,7 +61,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
-import com.openexchange.upsell.multiple.api.UrlService;
+import com.openexchange.upsell.multiple.api.UpsellURLService;
 import com.openexchange.user.UserService;
 
 public class MyActivator extends DeferredActivator {
@@ -132,7 +132,7 @@ public class MyActivator extends DeferredActivator {
 			servletRegisterer = new MyServletRegisterer();
 			servletRegisterer.registerServlet();
 			
-            serviceTrackerList.add(new ServiceTracker(context, UrlService.class.getName(), new UrlServiceInstallationServiceListener(context)));
+            serviceTrackerList.add(new ServiceTracker(context, UpsellURLService.class.getName(), new UrlServiceInstallationServiceListener(context)));
 			
             // Open service trackers
             for (final ServiceTracker tracker : serviceTrackerList) {

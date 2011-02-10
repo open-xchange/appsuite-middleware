@@ -1,6 +1,6 @@
 package com.openexchange.upsell.multiple.api;
 
-public enum MapParameters {
+public enum UpsellURLParametersMap {
 
 	// parameters from UI/USER/SESSION
 	MAP_ATTR_USER ( "_USER_"),
@@ -18,7 +18,7 @@ public enum MapParameters {
 	
 	public String propertyName;
 
-	private MapParameters(String propertyName) {
+	private UpsellURLParametersMap(String propertyName) {
 		this.propertyName = propertyName;
 	}
 	
