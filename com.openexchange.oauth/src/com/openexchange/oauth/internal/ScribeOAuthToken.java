@@ -53,7 +53,7 @@ import org.scribe.model.Token;
 import com.openexchange.oauth.OAuthToken;
 
 /**
- * {@link ScribeOAuthToken} - TODO Short description of this class' purpose.
+ * {@link ScribeOAuthToken}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -71,27 +71,17 @@ public final class ScribeOAuthToken implements OAuthToken {
         this.token = token;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        return token.equals(obj);
-    }
-
     public String getSecret() {
-        return token.getSecret();
+        return token == null ? "" : token.getSecret();
     }
 
     public String getToken() {
-        return token.getToken();
-    }
-
-    @Override
-    public int hashCode() {
-        return token.hashCode();
+        return token == null ? "" : token.getToken();
     }
 
     @Override
     public String toString() {
-        return token.toString();
+        return token == null ? "<empty-token>" : token.toString();
     }
 
 }
