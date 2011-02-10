@@ -462,7 +462,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
-    public void syncMessages(final boolean expunge, final POP3StorageConnectCounter connectCounter) {
+    public void syncMessages(final boolean expunge, final POP3StorageConnectCounter connectCounter) throws MailException {
         POP3Store pop3Store = null;
         try {
             final POP3StoreResult result =
@@ -561,6 +561,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
             LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             warnings.add(e1);
         } catch (final MailException e) {
+            if (MIMEMailException.Code.LOGIN_FAILED.getNumber() == e.getDetailNumber() || MIMEMailException.Code.INVALID_CREDENTIALS.getNumber() == e.getDetailNumber()) {
+                throw e;
+            }
             LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             warnings.add(e);
         } finally {
