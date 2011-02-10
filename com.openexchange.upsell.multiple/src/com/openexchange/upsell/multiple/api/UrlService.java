@@ -17,5 +17,5 @@ public interface UrlService {
 	 * @return
 	 * @throws UrlGeneratorException
 	 */
-    public String generateUrl(Map<MapParameters, String> parameters,Session sessionObj, User user, User ctxadmin, Context ctx) throws UrlGeneratorException;
+    public String generateUrl(Map<UrlMapParameters, String> parameters,Session sessionObj, User user, User ctxadmin, Context ctx) throws UrlGeneratorException;
 }
