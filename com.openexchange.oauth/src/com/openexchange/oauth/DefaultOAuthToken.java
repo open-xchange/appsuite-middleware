@@ -67,6 +67,18 @@ public class DefaultOAuthToken implements OAuthToken {
         super();
     }
 
+    /**
+     * Initializes a new {@link DefaultOAuthToken}.
+     * 
+     * @param token
+     * @param secret
+     */
+    public DefaultOAuthToken(final String token, final String secret) {
+        super();
+        this.token = token;
+        this.secret = secret;
+    }
+
     public String getToken() {
         return token;
     }
