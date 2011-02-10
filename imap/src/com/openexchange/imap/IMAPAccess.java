@@ -59,6 +59,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -119,6 +120,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The logger instance for {@link IMAPAccess} class.
      */
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPAccess.class);
+
+    /**
+     * Whether debug logging is enabled for this class.
+     */
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * The string for <code>ISO-8859-1</code> character encoding.
@@ -479,6 +485,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             if (imapConfProps.isPropagateClientIPAddress() && MailAccount.DEFAULT_ID == accountId) {
                 IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), session.getLocalIp());
+            } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
+                LOG.debug(new StringBuilder(256).append("Propagating client IP address disabled on Open-Xchange server \"").append(
+                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append('"').toString());
             }
             /*
              * Add server's capabilities
