@@ -1,3 +1,7 @@
+* 2011-02-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #18212: Retry with read-write connection if read-only connection fails to read newly created mail account
+
 * 2011-01-14 - francisco.laguna@open-xchange.com
 
  - Bugfix #17915: Adjusted the file storage implementation to supply the correct list of files. 
