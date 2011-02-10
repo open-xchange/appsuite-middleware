@@ -1,0 +1,5 @@
+open-xchange-oauth-linkedin (6.20.0.0-0) unstable; urgency=low
+
+  * initial version.
+
+ -- Francisco Laguna <francisco.laguna@open-xchange.com>  Wed, 10 Feb 2010 14:51:00 +0200
