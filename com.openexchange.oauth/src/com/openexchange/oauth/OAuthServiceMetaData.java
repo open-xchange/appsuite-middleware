@@ -73,14 +73,6 @@ public interface OAuthServiceMetaData {
     String getDisplayName();
 
     /**
-     * Gets the authorization URL from specified token.
-     * 
-     * @param token The token
-     * @return The authorization URL
-     */
-    String getAuthorizationURL(OAuthToken token);
-
-    /**
      * Gets the API key.
      * 
      * @return The API key

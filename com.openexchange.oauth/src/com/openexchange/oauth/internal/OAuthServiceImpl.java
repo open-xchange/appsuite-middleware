@@ -202,7 +202,7 @@ public class OAuthServiceImpl implements OAuthService {
          */
         final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
         final OAuthToken requestToken = new ScribeOAuthToken(service.getRequestToken());
-        final String authorizationURL = metaData.getAuthorizationURL(requestToken);
+        final String authorizationURL = service.getAuthorizationUrl(new Token(requestToken.getToken(), requestToken.getSecret()));
         /*
          * Return interaction
          */
