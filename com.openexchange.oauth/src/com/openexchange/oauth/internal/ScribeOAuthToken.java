@@ -53,7 +53,8 @@ import org.scribe.model.Token;
 import com.openexchange.oauth.OAuthToken;
 
 /**
- * {@link ScribeOAuthToken}
+ * {@link ScribeOAuthToken} - AN {@link OAuthToken} backed by a Scribe {@link Token} instance. If passed instance is <code>null</code>, an
+ * empty token is assumed.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
