@@ -1,0 +1,312 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.frontend.uwa.internal;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.frontend.uwa.UWAWidget;
+import com.openexchange.frontend.uwa.UWAWidgetException;
+import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
+import com.openexchange.frontend.uwa.UWAWidgetExceptionMessages;
+import com.openexchange.frontend.uwa.UWAWidgetService;
+import com.openexchange.frontend.uwa.UWAWidget.Field;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.id.IDException;
+import com.openexchange.id.IDGeneratorService;
+import com.openexchange.modules.model.Attribute;
+import com.openexchange.modules.model.AttributeHandler;
+import com.openexchange.modules.model.Tools;
+import com.openexchange.modules.storage.memory.MemoryStorage;
+import com.openexchange.modules.storage.sql.engines.Storage;
+import com.openexchange.modules.storage.sql.engines.UserScopedStorage;
+import com.openexchange.tools.id.IDMangler;
+
+/**
+ * {@link CompositeUWAService}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class CompositeUWAService implements UWAWidgetService {
+
+    private UserWidgetSQLStorage userScope = null;
+
+    private UserWidgetSQLStorage contextScope = null;
+
+    private MemoryStorage<UWAWidget> serverScope = null;
+
+    private PositionSQLStorage positions = null;
+
+    private IDGeneratorService idGenerator;
+
+    private int ctxId;
+
+    public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws ConfigCascadeException {
+        userScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
+        contextScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, -1, ctxId);
+        positions = new PositionSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
+
+        ConfigView view = configViews.getView(userId, ctxId);
+        String filename = view.get("com.openexchange.frontend.uwa.widgetFile", String.class);
+        Map<String, Map<String, Object>> configValues = null;
+        if (filename != null) {
+            configValues = (Map<String, Map<String, Object>>) config.getYaml(filename);
+        } else {
+            configValues = Collections.emptyMap();
+        }
+
+        serverScope = new MemoryStorage<UWAWidget>(configValues, UWAWidget.METADATA);
+   
+        this.idGenerator = idGenerator;
+        this.ctxId = ctxId;
+    }
+    
+
+    private static final Set<Field> POSITION_FIELDS = EnumSet.of(Field.WIDTH, Field.HEIGHT, Field.X, Field.Y);
+
+    public List<UWAWidget> all() throws UWAWidgetException {
+        try {
+            List<UWAWidget> userWidgets = userScope.load();
+            Tools.set(userWidgets, UWAWidget.Field.PROTECTED, false);
+
+            List<UWAWidget> contextWidgets = contextScope.load();
+            Tools.set(contextWidgets, UWAWidget.Field.PROTECTED, true);
+
+            List<UWAWidget> serverWidgets = serverScope.list();
+            Tools.set(serverWidgets, UWAWidget.Field.PROTECTED, true);
+
+            List<UWAWidget> positionInformation = positions.load();
+
+            List<UWAWidget> all = new ArrayList<UWAWidget>(userWidgets.size() + contextWidgets.size() + serverWidgets.size());
+
+            all.addAll(scope("user", userWidgets));
+            all.addAll(scope("context", contextWidgets));
+            all.addAll(scope("server", serverWidgets));
+
+            Map<String, UWAWidget> positionMap = new HashMap<String, UWAWidget>();
+            for (UWAWidget widget : positionInformation) {
+                positionMap.put(widget.getId(), widget);
+            }
+
+            for (UWAWidget widget : all) {
+                UWAWidget position = positionMap.get(widget.getId());
+                if(position != null) {
+                    for (Field field : POSITION_FIELDS) {
+                        widget.set(field, position.get(field));
+                    }
+                }
+            }
+            
+            return all;
+
+        } catch (SQLException x) {
+            throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+        } catch (AbstractOXException e) {
+            throw new UWAWidgetException(e);
+        }
+    }
+
+    private List<UWAWidget> scope(String scope, List<UWAWidget> widgets) {
+        for (UWAWidget widget : widgets) {
+            scope(scope, widget);
+        }
+        return widgets;
+    }
+
+    private void scope(String scope, UWAWidget widget) {
+        widget.setId(IDMangler.mangle(scope, widget.getId()));
+    }
+
+    public void create(UWAWidget widget) throws UWAWidgetException {
+        try {
+            int dbId = idGenerator.getId("uwaWidget", ctxId);
+            String id = IDMangler.mangle("user", ""+dbId);
+            
+            widget.setId(String.valueOf(dbId));
+            userScope.create(widget);
+
+            widget.setId(id);
+            positions.create(widget);
+            
+        } catch (AbstractOXException e) {
+            throw new UWAWidgetException(e);
+        } catch (SQLException e) {
+            throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
+        }
+        
+    }
+
+    public void delete(String id) throws UWAWidgetException {
+        if (isProtected(id)) {
+            throw UWAWidgetExceptionCodes.PROTECTED.create(id);
+        }
+        
+        try {
+            List<String> components = IDMangler.unmangle(id);
+            
+            userScope.delete(components.get(1));
+            positions.delete(id);
+        } catch (SQLException x) {
+            throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+        } catch (AbstractOXException x) {
+            throw new UWAWidgetException(x);
+        }
+        
+    }
+
+    public UWAWidget get(String id) throws UWAWidgetException {
+        List<String> components = IDMangler.unmangle(id);
+        String scope = components.get(0);
+        String unscopedId = components.get(1);
+
+        UWAWidget widget = null;
+        if (scope.equals("server")) {
+            widget = serverScope.get(unscopedId);
+        } else {
+            try {
+                widget = userScope.load(unscopedId);
+            } catch (SQLException x) {
+                throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+            } catch (AbstractOXException x) {
+                throw new UWAWidgetException(x);
+            }
+            if (widget == null) {
+                throw UWAWidgetExceptionCodes.NOT_FOUND.create(id);
+            }
+        }
+
+        widget.setId(id);
+
+        try {
+            UWAWidget position = positions.load(id);
+            if (position != null) {
+                for (Field field : POSITION_FIELDS) {
+                    widget.set(field, position.get(field));
+                }
+            }
+        } catch (SQLException x) {
+            throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+        } catch (AbstractOXException x) {
+            throw new UWAWidgetException(x);
+        }
+
+        return widget;
+    }
+
+    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+        if (isProtected(widget.getId())) {
+            if (!onlyPositionFields(modified)) {
+                throw UWAWidgetExceptionCodes.PROTECTED.create(widget.getId());
+            }
+            positionUpdate(widget, modified);
+        } else {
+            regularUpdate(widget, modified);
+        }
+    }
+
+    private void regularUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+        try {
+            userScope.update(widget, modified);
+        } catch (DBPoolingException e) {
+            throw new UWAWidgetException(e);
+        } catch (SQLException e) {
+            throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
+        }
+        positionUpdate(widget, modified);
+    }
+
+    private void positionUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+        try {
+            if (positions.exists(widget.getId())) {
+                positions.update(widget, modified);
+            } else {
+                positions.create(widget);
+            }
+        } catch (AbstractOXException e) {
+            throw new UWAWidgetException(e);
+        } catch (SQLException e) {
+            throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
+        }
+    }
+
+    private boolean onlyPositionFields(List<? extends Attribute<UWAWidget>> modified) {
+        Set<Attribute<UWAWidget>> fieldSet = new HashSet<Attribute<UWAWidget>>(modified);
+        fieldSet.removeAll(POSITION_FIELDS);
+        fieldSet.remove(Field.ID);
+        return fieldSet.isEmpty();
+    }
+
+    private boolean isProtected(String scopedId) throws UWAWidgetException {
+        List<String> components = IDMangler.unmangle(scopedId);
+        String scope = components.get(0);
+
+        try {
+            return !(scope.equals("user") && userScope.isUserWidget(components.get(1)));
+        } catch (SQLException e) {
+            throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
+        } catch (AbstractOXException e) {
+            throw new UWAWidgetException(e);
+        }
+    }
+
+}
