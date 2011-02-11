@@ -10,6 +10,5 @@ Import-Package: com.openexchange.config,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
- org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.framework
 Bundle-Activator: com.openexchange.oauth.twitter.osgi.TwitterOAuthActivator
