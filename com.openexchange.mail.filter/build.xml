@@ -1,7 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.mail.filter" default="jar" basedir=".">
 
     <!-- Customizable values -->
-	<property name="destdir" value=""/>
+    <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
 
     <!-- Constants -->
@@ -9,9 +10,9 @@
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
     <property name="bundletest.name" value="${Bundle-SymbolicName}-test.jar"/>
-	<property name="composite.name" value="open-xchange-mailfilter-${version}"/>
+    <property name="composite.name" value="open-xchange-mailfilter-${version}"/>
     <property name="test.xml.dir" value="test-results" />
-	<property name="serverconfdir" value="etc/groupware"/>
+    <property name="serverconfdir" value="etc/groupware"/>
     <property name="bundle.d" value="${prefix}/${serverconfdir}/osgi/bundle.d"/>
     <property name="javacc.dir" value="${basedir}/javacc"/>
     <property name="src" value="${basedir}/src"/>
@@ -24,59 +25,58 @@
     <property name="commonBundle" value="com.openexchange.common"/>
     <property name="configreadBundle" value="com.openexchange.configread"/>
 
-	<!-- Install Constants -->
+    <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
 
-	<!-- required osgi bundles -->
+    <!-- required osgi bundles -->
     <property name="osgibundle"           value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
     <property name="osgiservicesbundle"   value="org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
-	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
-	<property name="servletbundle"        value="javax.servlet_2.4.0.v200706111738.jar"/>
-	<property name="serverbundle"         value="com.openexchange.server.jar"/>
-	<property name="globalbundle"         value="com.openexchange.global.jar"/>
-	<property name="configbundle"         value="com.openexchange.configread.jar"/>
-	<property name="commonjar"            value="common.jar"/>
+    <property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+    <property name="servletbundle"        value="javax.servlet_2.4.0.v200706111738.jar"/>
+    <property name="serverbundle"         value="com.openexchange.server.jar"/>
+    <property name="globalbundle"         value="com.openexchange.global.jar"/>
+    <property name="configbundle"         value="com.openexchange.configread.jar"/>
+    <property name="commonjar"            value="common.jar"/>
 
-	<!-- non-osgi jars -->
-	<property name="mail"     value="mail-1.4.3.jar"/>
-	<property name="jsonjar"  value="json.jar" />
+    <!-- non-osgi jars -->
+    <property name="mail"     value="mail-1.4.3.jar"/>
+    <property name="jsonjar"  value="json.jar" />
 
-	<path id="project.classpath">
+    <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgibundle}"/>
         <pathelement location="${bundlesdir}/${osgiservicesbundle}"/>
-		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
-		<pathelement location="${bundlesdir}/${serverbundle}"/>
-		<pathelement location="${bundlesdir}/${globalbundle}"/>
-		<pathelement location="${bundlesdir}/${configreadBundle}/${configbundle}"/>
-		<pathelement location="${bundlesdir}/${servletbundle}"/>
+        <pathelement location="${bundlesdir}/${commonsloggingbundle}" />
+        <pathelement location="${bundlesdir}/${serverbundle}"/>
+        <pathelement location="${bundlesdir}/${globalbundle}"/>
+        <pathelement location="${bundlesdir}/${configreadBundle}/${configbundle}"/>
+        <pathelement location="${bundlesdir}/${servletbundle}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mail}"/>
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
-		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     </path>
 
-	<!-- jars for tests -->
+    <!-- jars for tests -->
     <property name="httpunit" value="../openexchange-test/lib/httpunit-1.6.2.jar"/>
     <property name="junit" value="/usr/share/java/junit4.jar"/>
 
-	<path id="projecttest.classpath">
+    <path id="projecttest.classpath">
         <pathelement location="${bundlesdir}/${osgibundle}"/>
         <pathelement location="${bundlesdir}/${osgiservicesbundle}"/>
-		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
-		<pathelement location="${bundlesdir}/${serverbundle}"/>
-		<pathelement location="${bundlesdir}/${globalbundle}"/>
-		<pathelement location="${bundlesdir}/${configbundle}"/>
-		<pathelement location="${bundlesdir}/${servletbundle}"/>
+        <pathelement location="${bundlesdir}/${commonsloggingbundle}" />
+        <pathelement location="${bundlesdir}/${serverbundle}"/>
+        <pathelement location="${bundlesdir}/${globalbundle}"/>
+        <pathelement location="${bundlesdir}/${configbundle}"/>
+        <pathelement location="${bundlesdir}/${servletbundle}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mail}"/>
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
-    	<pathelement location="${httpunit}"/>
-    	<pathelement location="${junit}"/>
-    	<pathelement location="jar/${bundle.name}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+        <pathelement location="${httpunit}"/>
+        <pathelement location="${junit}"/>
+        <pathelement location="jar/${bundle.name}"/>
     </path>
 
-	
     <!--                    TARGETS                      -->
     <target name="prepare">
-    	<delete dir="src/org/apache/jsieve/parser/generated"/>
+        <delete dir="src/org/apache/jsieve/parser/generated"/>
         <!-- This target generated parts of the code out of the grammar file vor jjtree -->
         <mkdir dir="${src}${jsieveprefix}/jsieve/parser/generated"/>
         <java classname="jjtree" fork="yes" failonerror="true" dir="${src}">
@@ -97,13 +97,13 @@
                  <pathelement path="${java.class.path}" />
              </classpath>
         </java>
-    
+
         <delete file="${src}${jsieveprefix}/jsieve/parser/generated/sieve.jj"/>
     </target>
 
     <target name="compile" depends="prepare">
         <mkdir dir="classes"/>
-        <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
+        <javac srcdir="src" destdir="classes" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath>
                 <path refid="project.classpath"/>
             </classpath>
@@ -112,9 +112,7 @@
 
     <target name="jar" depends="compile">
         <mkdir dir="jar"/>
-        <jar jarfile="jar/${bundle.name}"
-        basedir="classes"
-        manifest="META-INF/MANIFEST.MF"/>
+        <jar jarfile="jar/${bundle.name}" basedir="classes" manifest="META-INF/MANIFEST.MF"/>
     </target>
 
     <target name="testcompile">
@@ -126,22 +124,20 @@
         </javac>
     </target>
 
-	<target name="testjar" depends="testcompile, jar">
+    <target name="testjar" depends="testcompile, jar">
         <mkdir dir="jar"/>
-        <jar jarfile="jar/${bundletest.name}"
-        basedir="classes"
-        manifest="META-INF/MANIFEST.MF"/>
+        <jar jarfile="jar/${bundletest.name}" basedir="classes" manifest="META-INF/MANIFEST.MF"/>
     </target>
 
-	<target name="clean">
-	    <delete dir="src/org/apache/jsieve/parser/generated"/>
+    <target name="clean">
+        <delete dir="src/org/apache/jsieve/parser/generated"/>
         <delete dir="classes"/>
         <delete dir="jar"/>
     </target>
 
     <target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -151,30 +147,20 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${composite.name}.tar.gz"
-        basedir="${dist-package}"
-        includes="${composite.name}/"
-        compression="gzip"/>
-    	<delete dir="${dist-package}"/>
+        <tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip"/>
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="install" depends="jar">
         <mkdir dir="${destdir}/${prefix}/${serverconfdir}"/>
-    	<copy todir="${destdir}/${prefix}/${serverconfdir}" overwrite="true">
+        <copy todir="${destdir}/${prefix}/${serverconfdir}" overwrite="true">
             <fileset dir="conf" excludes="**/*.in"/>
         </copy>
-        <!-- <chmod perm="640">
-            <fileset dir="${destdir}/${prefix}/${serverconfdir}">
-                <include name="**"/>
-            </fileset>
-        </chmod>-->
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}" file="jar/${bundle.name}" overwrite="true"/>
-		<!-- generate config.ini registry snippet -->
-    	<mkdir dir="${destdir}/${bundle.d}"/>
-    	<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <!-- generate config.ini registry snippet -->
+        <mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
-	
 
 </project>
