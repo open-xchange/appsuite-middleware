@@ -122,7 +122,7 @@ public class CompositeUWAService implements UWAWidgetService {
     }
     
 
-    private static final Set<Field> POSITION_FIELDS = EnumSet.of(Field.WIDTH, Field.HEIGHT, Field.X, Field.Y);
+    private static final Set<Field> POSITION_FIELDS = EnumSet.of(Field.ADJ);
 
     public List<UWAWidget> all() throws UWAWidgetException {
         try {

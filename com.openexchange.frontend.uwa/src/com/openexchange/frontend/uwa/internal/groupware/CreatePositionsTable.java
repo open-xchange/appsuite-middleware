@@ -59,7 +59,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public class CreatePositionsTable extends AbstractCreateTableImpl {
 
-    private static final String CREATE = "CREATE TABLE uwaWidgetPosition (cid INT4 UNSIGNED NOT NULL, user INT4 UNSIGNED NOT NULL, id VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, width INT4, height INT4, x INT4, y INT4, PRIMARY KEY (cid, user, id))  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private static final String CREATE = "CREATE TABLE uwaWidgetPosition (cid INT4 UNSIGNED NOT NULL, user INT4 UNSIGNED NOT NULL, id VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,adj TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, PRIMARY KEY (cid, user, id))  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
     @Override
     protected String[] getCreateStatements() {

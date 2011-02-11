@@ -64,44 +64,20 @@ import static com.openexchange.java.Autoboxing.*;
  */
 public class UWAWidget extends AbstractModel<UWAWidget> {
 
-    private int height, width, x, y;
-
+    private String adj;
+    
     private boolean autorefresh, standalone, visible, prot;
 
     private String title, url, parameters, id;
 
-    public int getHeight() {
-        return height;
+    public void setADJ(String adj) {
+        this.adj = adj;
     }
-
-    public void setHeight(int height) {
-        this.height = height;
+    
+    public String getADJ() {
+        return adj;
     }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
+    
     public String getId() {
         return id;
     }
@@ -171,10 +147,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> {
     }
 
     public enum Field implements Attribute<UWAWidget> {
-        HEIGHT(Integer.class),
-        WIDTH(Integer.class),
-        X(Integer.class),
-        Y(Integer.class),
+        ADJ(String.class),
         AUTOREFRESH(Boolean.class),
         ID(String.class),
         STANDALONE(Boolean.class),
@@ -192,10 +165,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> {
         
         public Object get(UWAWidget thing) {
             switch(this) {
-            case HEIGHT: return thing.getHeight();
-            case WIDTH: return thing.getWidth();
-            case X: return thing.getX();
-            case Y: return thing.getY();
+            case ADJ: return thing.getADJ();
             case AUTOREFRESH: return thing.isAutorefresh();
             case ID: return thing.getId();
             case STANDALONE: return thing.isStandalone();
@@ -219,10 +189,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> {
                 return ;
             }
             switch(this) {
-            case HEIGHT:  thing.setHeight(a2i(value)); break;
-            case WIDTH:  thing.setWidth(a2i(value)); break;
-            case X:  thing.setX(a2i(value)); break;
-            case Y:  thing.setY(a2i(value)); break;
+            case ADJ: thing.setADJ((String) value); break;
             case AUTOREFRESH:  thing.setAutorefresh(a2b(value)); break;
             case ID:  thing.setId((String) value); break;
             case STANDALONE:  thing.setStandalone(a2b(value)); break;

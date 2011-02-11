@@ -71,7 +71,7 @@ public class PositionSQLStorage extends UserScopedStorage<UWAWidget> {
     
     public PositionSQLStorage(Metadata<UWAWidget> metadata, DatabaseService dbService, int userId, int ctxId) {
         super(metadata, dbService, userId, ctxId);
-        for(Field f : EnumSet.of(Field.ID, Field.WIDTH, Field.HEIGHT, Field.X, Field.Y)) {
+        for(Field f : EnumSet.of(Field.ID, Field.ADJ)) {
             attributes.add(f);
         }
         

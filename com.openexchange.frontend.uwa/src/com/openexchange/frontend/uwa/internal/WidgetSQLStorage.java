@@ -93,7 +93,7 @@ public class WidgetSQLStorage extends UserScopedStorage<UWAWidget> {
     
     public WidgetSQLStorage(Metadata<UWAWidget> metadata, DatabaseService dbService, int userId, int ctxId) {
         super(metadata, dbService, userId, ctxId);
-        for(Field f : EnumSet.complementOf(EnumSet.of(Field.WIDTH, Field.HEIGHT, Field.X, Field.Y))) {
+        for(Field f : EnumSet.complementOf(EnumSet.of(Field.ADJ))) {
             attributes.add(f);
         }
         
