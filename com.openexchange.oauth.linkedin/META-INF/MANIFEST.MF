@@ -20,6 +20,6 @@ Import-Package: com.openexchange.config,
  org.osgi.util.tracker,
  org.w3c.dom,
  org.xml.sax
-Bundle-ClassPath: lib/scribe-1.0.9.jar,
- .
+Bundle-ClassPath: .,
+ lib/scribe-1.1.0.jar
 Export-Package: com.openexchange.oauth.linkedin
