@@ -105,8 +105,4 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         return false;
     }
 
-    public boolean needsRequestSecret() {
-        return false;
-    }
-
 }
