@@ -22,23 +22,19 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
-    <property name="xercesBundle" value="com.openexchange.xerces.sun"/>
-    <property name="xmlBundle" value="com.openexchange.xml"/>
     <property name="configreadBundle" value="com.openexchange.configread"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global.jar"/>
-    <property name="xercesjar" value="xerces.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
-    <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
     <property name="commonjar" value="common.jar"/>
-	<property name="configreadjar" value="com.openexchange.configread.jar"/>
-	<property name="oauthjar" value="com.openexchange.oauth.jar" />
-	
-     <!-- Third party libs -->
+    <property name="configreadjar" value="com.openexchange.configread.jar"/>
+    <property name="oauthjar" value="com.openexchange.oauth.jar" />
+
+    <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
         <include name="${lib.dir}/*.jar"/>
         <exclude name="CVS"/>
@@ -50,14 +46,10 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-        <pathelement location="${bundlesdir}/${xercesBundle}/lib/${xercesjar}"/>
-        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${staxapijar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
-        <pathelement location="${bundlesdir}/${subscribejar}"/>
-    	<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
-    	<pathelement location="${bundlesdir}/${oauthjar}"/>
-    	    	
+        <pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
+        <pathelement location="${bundlesdir}/${oauthjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
@@ -85,8 +77,7 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
