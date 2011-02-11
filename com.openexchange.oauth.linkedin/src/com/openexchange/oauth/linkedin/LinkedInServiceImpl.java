@@ -52,8 +52,6 @@ package com.openexchange.oauth.linkedin;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
@@ -72,78 +70,41 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthException;
+import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
-import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
- * {@link LinkedInSubscribeService}
+ * {@link LinkedInServiceImpl}
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LinkedInSubscribeService extends AbstractSubscribeService {
+public class LinkedInServiceImpl implements LinkedInService{
 
     private static final String PROTECTED_RESOURCE_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
 
     private Activator activator;
 
-    private static final Log LOG = LogFactory.getLog(LinkedInSubscribeService.class);
+    private static final Log LOG = LogFactory.getLog(LinkedInServiceImpl.class);
 
-    private final SubscriptionSource source = new SubscriptionSource();
-
-    public LinkedInSubscribeService(Activator activator) {
+    public LinkedInServiceImpl(Activator activator) {
         this.activator = activator;
-
-        source.setDisplayName("LinkedIn via OAUTH");
-        source.setFolderModule(FolderObject.CONTACT);
-        source.setId("com.openexchange.subscribe.socialplugin.linkedin");
-        source.setSubscribeService(this);
-
-        DynamicFormDescription form = new DynamicFormDescription();
-
-        FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
-        oauthAccount.setOption("type", new OAuthServiceMetaDataLinkedInImpl().getId());
-        form.add(oauthAccount);
-
-        source.setFormDescription(form);
-    }
-    
-    @Override
-    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
-        super.modifyIncoming(subscription);
-        Integer accountId = (Integer) subscription.getConfiguration().get("account");
-        if(accountId != null) {
-            subscription.getConfiguration().put("account", accountId.toString());
-        }
-    }
-    
-    @Override
-    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
-        String accountId = (String) subscription.getConfiguration().get("account");
-        if (null != accountId){
-            Integer accountIdInt = Integer.parseInt(accountId);
-            if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
-            subscription.setDisplayName("LinkedIn"); //FIXME use account displayName
-        }        
-        super.modifyOutgoing(subscription);
     }
 
-    public List<Contact> getData(int user, int contextId, int accountId) {
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.linkedin.LinkedInService#getContacts(int, int, int)
+     */
+    public List<Contact> getContacts(int user, int contextId, int accountId) {
+        OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl();
         List<Contact> contacts = new ArrayList<Contact>();
-        OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(activator.getLinkedInMetadata().getAPIKey()).apiSecret(
-            activator.getLinkedInMetadata().getAPISecret()).build();
+        OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey()).apiSecret(
+            linkedInMetaData.getAPISecret()).build();
 
-        //List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
         OAuthAccount account = null;
         try {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
@@ -152,15 +113,12 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
             LOG.error(e);
         }
 
-        
-
         // get the connections (contacts) with the given access token
         Token accessToken = new Token(account.getToken(), account.getSecret());
         OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
         service.signRequest(accessToken, request);
         Response response = request.send();
 
-        //System.out.println(response.getBody());
         // parse the returned xml into neat little contacts
         contacts = parseIntoContacts(response.getBody());
         return contacts;
@@ -173,27 +131,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
 
     public void setActivator(Activator activator) {
         this.activator = activator;
-    }
-
-    public void getAccount() {
-
-    }
-
-    public void createAccount() {
-
-    }
-
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException {
-        return getData(subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
-    }
-
-    public SubscriptionSource getSubscriptionSource() {
-        return source;
-    }
-
-    public boolean handles(int folderModule) {
-        return FolderObject.CONTACT == folderModule;
-    }
+    }  
 
     public List<Contact> parseIntoContacts(String body) {
         final List<Contact> contacts = new ArrayList<Contact>();
@@ -212,7 +150,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
                     Contact contact = new Contact();
                     contact.setGivenName(getTextValue(person, "first-name"));
                     contact.setSurName(getTextValue(person, "last-name"));
-                    System.out.println("Current contact : " + contact.getGivenName() + " " + contact.getSurName());
+                    //System.out.println("Current contact : " + contact.getGivenName() + " " + contact.getSurName());
                     if (null != getTextValue(person, "main-address")) contact.setNote(getTextValue(person, "main-address"));                   
                     try {
                         String imageUrl = getTextValue(person, "picture-url");
@@ -276,7 +214,6 @@ public class LinkedInSubscribeService extends AbstractSubscribeService {
                     }
                     
                     contacts.add(contact);
-                    //System.out.println("---");
                 }
             }
         } catch (ParserConfigurationException pce) {

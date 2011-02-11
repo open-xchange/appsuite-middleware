@@ -50,15 +50,13 @@
 package com.openexchange.oauth.linkedin;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import junit.framework.TestCase;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.model.Token;
@@ -66,11 +64,7 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.DefaultOAuthToken;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthException;
-import com.openexchange.oauth.linkedin.LinkedInSubscribeService;
 import com.openexchange.oauth.linkedin.osgi.Activator;
-import junit.framework.TestCase;
 /**
  * {@link LinkedInConnectionTest}
  *
@@ -78,13 +72,13 @@ import junit.framework.TestCase;
  */
 public class LinkedInConnectionTest extends TestCase {
     
-    private LinkedInSubscribeService linkedIn;
+    private LinkedInServiceImpl linkedIn;
     
     public void setUp(){
         Activator activator = new Activator();
-        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
-        activator.setLinkedInMetadata(linkedInMetadata);
-        linkedIn = new LinkedInSubscribeService(activator);
+//        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
+//        activator.setLinkedInMetadata(linkedInMetadata);
+        linkedIn = new LinkedInServiceImpl(activator);
         activator.setOauthService(new MockOAuthService());
     }
     
@@ -108,8 +102,7 @@ public class LinkedInConnectionTest extends TestCase {
         DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
         oAuthToken.setToken(requestToken.getToken());
         oAuthToken.setSecret(requestToken.getSecret());
-
-        // TODO: The verifier needs to come from the keyring / generic OAuth-Service here
+        
         System.out.println("https://api.linkedin.com/uas/oauth/authorize?oauth_token="+oAuthToken.getToken());
         System.out.println("And paste the verifier here");
         System.out.print(">>");
@@ -127,7 +120,7 @@ public class LinkedInConnectionTest extends TestCase {
     }
     
     public void testUsageOfExistingAccount(){
-        linkedIn.getData(1,1,1);
+        linkedIn.getContacts(1,1,1);
     }
     
     public void testXMLParsing(){

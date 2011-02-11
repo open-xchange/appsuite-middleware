@@ -12,7 +12,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.oauth,
- com.openexchange.subscribe,
  com.openexchange.tools.versit.converter,
  org.apache.commons.codec;version="1.4.0",
  org.apache.commons.codec.binary;version="1.4.0",
@@ -23,3 +22,4 @@ Import-Package: com.openexchange.config,
  org.xml.sax
 Bundle-ClassPath: lib/scribe-1.0.9.jar,
  .
+Export-Package: com.openexchange.oauth.linkedin

@@ -76,6 +76,7 @@ public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
     public Object addingService(ServiceReference reference) {
         OAuthService oauth = (OAuthService) context.getService(reference);        
         activator.setOauthService(oauth);
+        activator.registerServices();
         return oauth;
         
         

@@ -12,9 +12,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.linkedin.LinkedInSubscribeService;
+import com.openexchange.oauth.linkedin.LinkedInService;
+import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
-import com.openexchange.subscribe.SubscribeService;
 
 public class Activator implements BundleActivator {
 
@@ -27,8 +27,8 @@ public class Activator implements BundleActivator {
     private ArrayList<ServiceRegistration> services;
 
     private OAuthService oauthService;
-
-    private OAuthServiceMetaData linkedInMetadata;
+    
+    private ConfigurationService configurationService;
 
     public Activator() {
 
@@ -42,12 +42,10 @@ public class Activator implements BundleActivator {
         bundleContext = context;
         services = new ArrayList<ServiceRegistration>();
 
-        // react dynamically to the appearance/disappearance of ConfigurationService, OAuthServiceMetadata
+        // react dynamically to the appearance/disappearance of ConfigurationService
         trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationServiceRegisterer(context, this)));
-        trackers.push(new ServiceTracker(
-            context,
-            OAuthServiceMetaData.class.getName(),
-            new LinkedInMetadataServiceRegisterer(context, this)));
+        
+     // react dynamically to the appearance/disappearance of OauthService
         trackers.push(new ServiceTracker(context, OAuthService.class.getName(), new OAuthServiceRegisterer(context, this)));
 
         for (final ServiceTracker tracker : trackers) {
@@ -65,9 +63,8 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public void registerServices(ConfigurationService config) {
-        if (config != null) {
-
+    public void registerServices() {
+        if (null != oauthService && null != configurationService) {            
             final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl();
             final ServiceRegistration serviceRegistration = bundleContext.registerService(
                 OAuthServiceMetaData.class.getName(),
@@ -76,13 +73,13 @@ public class Activator implements BundleActivator {
             services.add(serviceRegistration);
             LOG.info("OAuthServiceMetaData for LinkedIn was started");
             
-            final LinkedInSubscribeService linkedInSubscribeService = new LinkedInSubscribeService(this);
+            final LinkedInService linkedInService = new LinkedInServiceImpl(this);
             final ServiceRegistration serviceRegistration2 = bundleContext.registerService(
-                SubscribeService.class.getName(),
-                linkedInSubscribeService,
+                LinkedInService.class.getName(),
+                linkedInService,
                 null);
             services.add(serviceRegistration2);
-            LOG.info("LinkedInSubscribeService was started.");                      
+            LOG.info("LinkedInService was started.");
 
         }
     }
@@ -101,11 +98,10 @@ public class Activator implements BundleActivator {
         this.oauthService = oauthService;
     }
 
-    public OAuthServiceMetaData getLinkedInMetadata() {
-        return linkedInMetadata;
-    }
-
-    public void setLinkedInMetadata(OAuthServiceMetaData linkedInMetadata) {
-        this.linkedInMetadata = linkedInMetadata;
+    /**
+     * @param configurationService
+     */
+    public void setConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
     }
 }

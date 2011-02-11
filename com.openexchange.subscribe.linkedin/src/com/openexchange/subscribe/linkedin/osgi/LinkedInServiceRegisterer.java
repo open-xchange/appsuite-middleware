@@ -47,43 +47,42 @@
  *
  */
 
-package com.openexchange.oauth.linkedin.osgi;
+package com.openexchange.subscribe.linkedin.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.oauth.linkedin.osgi.Activator;
+import com.openexchange.oauth.linkedin.LinkedInService;
 
 
 /**
- * {@link ConfigurationServiceRegisterer}
+ * {@link LinkedInServiceRegisterer}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ConfigurationServiceRegisterer implements ServiceTrackerCustomizer {
+public class LinkedInServiceRegisterer implements ServiceTrackerCustomizer {
     
     private BundleContext context;
     private Activator activator;
     
-    public ConfigurationServiceRegisterer(BundleContext context, Activator activator) {
-        super();
+    public LinkedInServiceRegisterer(BundleContext context, Activator activator){
         this.context = context;
         this.activator = activator;
     }
 
     public Object addingService(ServiceReference reference) {
-        ConfigurationService configurationService = (ConfigurationService) context.getService(reference);
-        activator.setConfigurationService(configurationService);
+        LinkedInService linkedIn = (LinkedInService) context.getService(reference);        
+        activator.setLinkedInService(linkedIn);
         activator.registerServices();
-        return configurationService;
+        return linkedIn;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
-        //nothing to do here
+    public void modifiedService(ServiceReference arg0, Object arg1) {
+      //nothing to do here
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(ServiceReference reference, Object arg1) {
+        activator.setLinkedInService(null);
         activator.unregisterServices();
         context.ungetService(reference);
     }

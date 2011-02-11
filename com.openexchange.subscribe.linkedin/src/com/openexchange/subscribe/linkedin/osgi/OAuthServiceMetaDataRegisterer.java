@@ -47,48 +47,44 @@
  *
  */
 
-package com.openexchange.oauth.linkedin.osgi;
+package com.openexchange.subscribe.linkedin.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
+import com.openexchange.oauth.linkedin.LinkedInService;
 
 
 /**
- * {@link LinkedInMetadataServiceRegisterer}
+ * {@link OAuthServiceMetaDataRegisterer}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LinkedInMetadataServiceRegisterer implements ServiceTrackerCustomizer {
+public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer {
 
     private BundleContext context;
     private Activator activator;
     
-    public LinkedInMetadataServiceRegisterer(BundleContext context, Activator activator) {
-        super();
+    public OAuthServiceMetaDataRegisterer(BundleContext context, Activator activator){
         this.context = context;
         this.activator = activator;
     }
 
     public Object addingService(ServiceReference reference) {
-        OAuthServiceMetaData metadata = (OAuthServiceMetaData) context.getService(reference);
-        if (metadata.getId().equals("com.openexchange.socialplugin.linkedin")){
-            OAuthServiceMetaDataLinkedInImpl linkedInMetadata = (OAuthServiceMetaDataLinkedInImpl) metadata;
-            activator.setLinkedInMetadata(linkedInMetadata);
-            return linkedInMetadata;
-        }
-        return null;
-        
+        OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) context.getService(reference);        
+        activator.setOAuthServiceMetadata(oAuthServiceMetaData);
+        activator.registerServices();
+        return oAuthServiceMetaData;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
-        //nothing to do here
+    public void modifiedService(ServiceReference arg0, Object arg1) {
+      //nothing to do here
     }
 
-    public void removedService(ServiceReference reference, Object service) {
-        activator.setLinkedInMetadata(null);
+    public void removedService(ServiceReference reference, Object arg1) {
+        activator.setOAuthServiceMetadata(null);
+        activator.unregisterServices();
         context.ungetService(reference);
     }
 

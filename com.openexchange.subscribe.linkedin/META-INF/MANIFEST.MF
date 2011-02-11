@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Linkedin Plug-in
+Bundle-SymbolicName: com.openexchange.subscribe.linkedin
+Bundle-Version: 6.19.0
+Bundle-Activator: com.openexchange.subscribe.linkedin.osgi.Activator
+Bundle-Vendor: OPENEXCHANGE
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.config,
+ com.openexchange.datatypes.genericonf,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.oauth,
+ com.openexchange.oauth.linkedin,
+ com.openexchange.subscribe,
+ org.apache.commons.logging,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker

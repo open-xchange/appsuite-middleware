@@ -47,45 +47,18 @@
  *
  */
 
-package com.openexchange.oauth.linkedin.osgi;
+package com.openexchange.oauth.linkedin;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.oauth.linkedin.osgi.Activator;
-
+import java.util.List;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link ConfigurationServiceRegisterer}
+ * {@link LinkedInService}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ConfigurationServiceRegisterer implements ServiceTrackerCustomizer {
-    
-    private BundleContext context;
-    private Activator activator;
-    
-    public ConfigurationServiceRegisterer(BundleContext context, Activator activator) {
-        super();
-        this.context = context;
-        this.activator = activator;
-    }
+public interface LinkedInService {
 
-    public Object addingService(ServiceReference reference) {
-        ConfigurationService configurationService = (ConfigurationService) context.getService(reference);
-        activator.setConfigurationService(configurationService);
-        activator.registerServices();
-        return configurationService;
-    }
-
-    public void modifiedService(ServiceReference reference, Object service) {
-        //nothing to do here
-    }
-
-    public void removedService(ServiceReference reference, Object service) {
-        activator.unregisterServices();
-        context.ungetService(reference);
-    }
+    public abstract List<Contact> getContacts(int user, int contextId, int accountId);
 
 }
