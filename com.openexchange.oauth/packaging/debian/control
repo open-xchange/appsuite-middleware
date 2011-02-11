@@ -9,4 +9,4 @@ Standards-Version: 3.6.1
 Package: open-xchange-oauth
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-sql (>= @OXVERSION@), open-xchange-publish (>= @OXVERSION@), open-xchange-cache (>= @OXVERSION@)
-Description: OAuth Service 
+Description: OAuth Service
