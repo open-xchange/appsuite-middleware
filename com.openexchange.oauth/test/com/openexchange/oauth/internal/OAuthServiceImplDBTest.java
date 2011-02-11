@@ -49,11 +49,11 @@
 
 package com.openexchange.oauth.internal;
 
+import static com.openexchange.junit.Assert.assertEqualAttributes;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.osgi.framework.Constants;
 import com.openexchange.context.SimContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.id.SimIDGenerator;
@@ -66,8 +66,6 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.SimOAuthServiceMetaDataRegistry;
 import com.openexchange.tools.sql.SQLTestCase;
-
-import static com.openexchange.junit.Assert.*;
 
 
 /**
@@ -96,7 +94,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
                 return "apiSecret";
             }
 
-            public String getAuthorizationURL(OAuthToken token) {
+            public String getAuthorizationURL(final OAuthToken token) {
                 return "http://www.myService.invalid/initiateHandshake?token="+token.getToken()+"&secret="+token.getSecret();
             }
 
@@ -107,12 +105,16 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             public String getId() {
                 return "com.openexchange.test";
             }
+
+            public boolean needsRequestToken() {
+                return true;
+            }
             
         });
         
         oauth = new OAuthServiceImpl(getDBProvider(), new SimIDGenerator(), registry, new SimContextService()) {
             @Override
-            protected void obtainToken(OAuthInteractionType type, Map<String, Object> arguments, DefaultOAuthAccount account) {
+            protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) {
                 account.setToken("myAccessToken");
                 account.setSecret("myAccessSecret");
             }
@@ -124,7 +126,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     // Success Cases
     
     public void testCreateAccount() throws OAuthException, DBPoolingException, SQLException {
-        OAuthAccount authAccount = createTestAccount();
+        final OAuthAccount authAccount = createTestAccount();
         
         assertNotNull(authAccount);
         assertEquals("Test OAuthAccount", authAccount.getDisplayName());
@@ -139,7 +141,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     }
 
     private OAuthAccount createTestAccount() throws OAuthException {
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
@@ -153,12 +155,12 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             }});
         
         
-        OAuthAccount authAccount = oauth.createAccount("com.openexchange.test", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1);
+        final OAuthAccount authAccount = oauth.createAccount("com.openexchange.test", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1);
         return authAccount;
     }
     
     public void testDefaultDisplayName() throws OAuthException {
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
@@ -171,16 +173,16 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             }});
         
         
-        OAuthAccount authAccount = oauth.createAccount("com.openexchange.test", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1);
+        final OAuthAccount authAccount = oauth.createAccount("com.openexchange.test", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1);
         
         assertNotNull(authAccount);
         assertEquals("The cool oauthService", authAccount.getDisplayName());
     }
     
     public void testGetAccount() throws Exception {
-        OAuthAccount authAccount = createTestAccount();
+        final OAuthAccount authAccount = createTestAccount();
         
-        OAuthAccount account = oauth.getAccount(authAccount.getId(), 23, 1);
+        final OAuthAccount account = oauth.getAccount(authAccount.getId(), 23, 1);
         
         assertNotNull(account);
         assertEqualAttributes(authAccount, account);
@@ -193,16 +195,16 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,42,3,'account1user2', '1234', '4321', 'com.openexchange.test');");
         
         
-        List<OAuthAccount> accounts = oauth.getAccounts(23, 1);
+        final List<OAuthAccount> accounts = oauth.getAccounts(23, 1);
         
         assertEquals(2, accounts.size());
         
-        DefaultOAuthAccount expected = new DefaultOAuthAccount();
+        final DefaultOAuthAccount expected = new DefaultOAuthAccount();
         expected.setToken("1234");
         expected.setSecret("4321");
         expected.setMetaData(registry.getService("com.openexchange.test"));
         
-        for(OAuthAccount account : accounts) {
+        for(final OAuthAccount account : accounts) {
             expected.setDisplayName("account"+account.getId()+"user1");
             assertTrue("Unexpected id: "+account.getId(), account.getId() == 1 || account.getId() == 2);
             assertEqualAttributes(expected, account, "displayName", "token", "secret", "metaData");
@@ -217,16 +219,16 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,42,4,'account1user2', '1234', '4321', 'com.openexchange.test');");
         
         
-        List<OAuthAccount> accounts = oauth.getAccounts("com.openexchange.test", 23, 1);
+        final List<OAuthAccount> accounts = oauth.getAccounts("com.openexchange.test", 23, 1);
         
         assertEquals(2, accounts.size());
         
-        DefaultOAuthAccount expected = new DefaultOAuthAccount();
+        final DefaultOAuthAccount expected = new DefaultOAuthAccount();
         expected.setToken("1234");
         expected.setSecret("4321");
         expected.setMetaData(registry.getService("com.openexchange.test"));
         
-        for(OAuthAccount account : accounts) {
+        for(final OAuthAccount account : accounts) {
             expected.setDisplayName("account"+account.getId()+"user1");
             assertTrue("Unexpected id: "+account.getId(), account.getId() == 1 || account.getId() == 2);
             assertEqualAttributes(expected, account, "displayName", "token", "secret", "metaData");
@@ -236,7 +238,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     public void testUpdateAccount() throws Exception {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,1,'account1', '1234', '4321', 'com.openexchange.test');");
         
-        Map<String, Object> update = new HashMap<String,Object>();
+        final Map<String, Object> update = new HashMap<String,Object>();
         update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
         oauth.updateAccount(1, update, 23, 1);
         
@@ -254,7 +256,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     // Error Cases
 
     public void testUnknownAccountMetadataOnCreate() {
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
@@ -271,7 +273,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.createAccount("com.openexchange.fantasy", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1);
             fail("Should have died");
-        } catch (OAuthException e) {
+        } catch (final OAuthException e) {
             // Hooray;
         }
     }
@@ -280,18 +282,18 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.getAccount(12, 1, 23);
             fail("Should have died");
-        } catch (OAuthException x) {
+        } catch (final OAuthException x) {
             // Hooray!
         }
     }
     
     public void testUnknownIdOnUpdate() {
         try {
-            Map<String, Object> update = new HashMap<String,Object>();
+            final Map<String, Object> update = new HashMap<String,Object>();
             update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
             oauth.updateAccount(12, update, 23, 1);
             fail("Should have died");
-        } catch (OAuthException x) {
+        } catch (final OAuthException x) {
             // Hooray!
         }
     }
@@ -300,7 +302,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.deleteAccount(12, 1, 23);
             // Don't die here, just gracefully do nothing
-        } catch (OAuthException x) {
+        } catch (final OAuthException x) {
             fail(x.getMessage());
         }
     }

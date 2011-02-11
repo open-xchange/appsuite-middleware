@@ -59,6 +59,20 @@ package com.openexchange.oauth;
 public interface OAuthToken {
 
     /**
+     * The constant for an empty token. Provides the empty string for both {@link #getToken()} and {@link #getSecret()}.
+     */
+    public static final OAuthToken EMPTY_TOKEN = new OAuthToken() {
+
+        public String getToken() {
+            return "";
+        }
+
+        public String getSecret() {
+            return "";
+        }
+    };
+
+    /**
      * Gets the token.
      * 
      * @return The token
