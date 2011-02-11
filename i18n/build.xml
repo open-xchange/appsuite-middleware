@@ -7,6 +7,7 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="confDir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -61,11 +62,9 @@
     <!-- Install targets -->
     <target name="install" depends="installJar,installConfig,installLanguages"/>
 
-    <target name="installConfig">
+    <target name="installConfig" depends="patchConfig">
         <copy todir="${destdir}/${commonConfigDir}">
-            <fileset dir="conf">
-                <exclude name="**CVS/**"/>
-            </fileset>
+            <fileset dir="${tmp.dir}/${confDir}"/>
         </copy>
         <!--<chmod perm="640">
             <fileset dir="${destdir}/${commonConfigDir}">
@@ -103,6 +102,19 @@
                 <include name="${bundle.name}"/>
             </fileset>
         </copy>
+    </target>
+
+    <target name="patchConfig" depends="prepare">
+        <property name="patchConfDir" value="${tmp.dir}/${confDir}"/>
+        <mkdir dir="${patchConfDir}"/>
+        <copy todir="${patchConfDir}" overwrite="true">
+            <fileset dir="${confDir}">
+                <exclude name="**CVS/**"/>
+            </fileset>
+        </copy>
+        <replace dir="${patchConfDir}" includes="*.properties">
+            <replacefilter token="@prefix@" value="${prefix}"/>
+        </replace>
     </target>
 
     <!-- Dist -->
