@@ -100,7 +100,7 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
              * Get request token secret from session parameters
              */
             final String oauthTokenSecret = (String) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
-            session.setParameter(uuid, null);
+            session.setParameter(OAuthConstants.SESSION_PARAM_UUID, null);
             if (oauthTokenSecret == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SECRET.getName());
             }
