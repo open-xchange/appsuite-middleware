@@ -1,3 +1,9 @@
+open-xchange-push (6.18.2.0-19) unstable; urgency=low
+
+  * build for public ptf 2011-02-14
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 11 Feb 2011 10:26:48 +0000
+
 open-xchange-push (6.18.2.0-18) unstable; urgency=low
 
   * second build for public ptf 2011-01-26
