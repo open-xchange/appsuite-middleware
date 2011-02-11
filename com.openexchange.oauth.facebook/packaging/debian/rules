@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
-# Build open-xchange-oauth-facebook
+# Build open-xchange-oauth-linkedin
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-oauth-facebook
+oxroot=$(CURDIR)/debian/open-xchange-oauth-linkedin
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
