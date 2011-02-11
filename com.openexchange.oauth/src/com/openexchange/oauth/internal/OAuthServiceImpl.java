@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -406,7 +407,7 @@ public class OAuthServiceImpl implements OAuthService {
 
 
     private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OAuthException {
-        final String serviceId = metaData.getId();
+        final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
         final Class<? extends Api> apiClass;
         if (serviceId.indexOf("twitter") >= 0) {
             apiClass = TwitterApi.class;
