@@ -202,13 +202,15 @@ public class OAuthServiceImpl implements OAuthService {
          * Get appropriate Scribe service implementation
          */
         final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
-        final OAuthToken requestToken = new ScribeOAuthToken(service.getRequestToken());
-        final String authorizationURL = service.getAuthorizationUrl(new Token(requestToken.getToken(), requestToken.getSecret()));
-        /*
-         * Return interaction
-         */
+        final Token scribeToken;
+        if (metaData.needsRequestToken()) {
+            scribeToken = service.getRequestToken();
+        } else {
+            scribeToken = null; // Empty token
+        }
+        final String authorizationURL = service.getAuthorizationUrl(scribeToken);
         return new OAuthInteractionImpl(
-            requestToken,
+            scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
             authorizationURL,
             callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
     }
@@ -404,7 +406,6 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     // Helper Methods
-
 
     private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OAuthException {
         final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);

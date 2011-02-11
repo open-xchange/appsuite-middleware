@@ -86,4 +86,11 @@ public interface OAuthServiceMetaData {
      */
     String getAPISecret();
 
+    /**
+     * Indicates if this meta data needs a request token to obtain authorization URL.
+     * 
+     * @return <code>true</code> if this meta data needs a request token to obtain authorization URL; otherwise <code>false</code> to pass <code>null</code>
+     */
+    boolean needsRequestToken();
+
 }

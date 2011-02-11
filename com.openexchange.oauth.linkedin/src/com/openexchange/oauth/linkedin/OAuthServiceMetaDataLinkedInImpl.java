@@ -50,7 +50,6 @@
 package com.openexchange.oauth.linkedin;
 
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
-import com.openexchange.oauth.OAuthToken;
 
 
 /**
@@ -63,25 +62,29 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     public OAuthServiceMetaDataLinkedInImpl(){
         super();
     }
-
-    public String getAuthorizationURL(OAuthToken token) {        
-        return "https://api.linkedin.com/uas/oauth/authorize?oauth_token="+token.getToken();
-    }
     
+    @Override
     public String getDisplayName() {
         return "LinkedIn";
     }
 
+    @Override
     public String getId() {
         return "com.openexchange.socialplugin.linkedin";
     }
     
+    @Override
     public String getAPIKey() {
         return "Ra7yTqolxUk_6UVpIAIsbv6kwLpIZCdNeUYxAA1n2Lnf05Dkr7D41dw-ivK-z4vA";
     }
 
+    @Override
     public String getAPISecret() {
         return "vEPBnxJvXvqf9NsBby0kZ1hcgQCM7JBO7iCjlw4KIDhw_7lwPIln7zIvtP3dbL-i";
+    }
+
+    public boolean needsRequestToken() {
+        return true;
     }
 
 }
