@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link FacebookOAuthServiceRegistry} - Container class for the service registry of <i>com.openexchange.messaging.facebook</i> bundle.
+ * {@link FacebookOAuthServiceRegistry} - Container class for the service registry of <i>com.openexchange.oauth.facebook</i> bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
