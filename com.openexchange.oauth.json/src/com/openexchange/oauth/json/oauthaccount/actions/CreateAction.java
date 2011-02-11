@@ -121,7 +121,7 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             /*
              * Invoke
              */
-            final Map<String, Object> arguments = new HashMap<String, Object>();
+            final Map<String, Object> arguments = new HashMap<String, Object>(3);
             arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, request.getParameter(AccountField.DISPLAY_NAME.getName()));
             arguments.put(OAuthConstants.ARGUMENT_PIN, oauthVerfifier);
             final DefaultOAuthToken token = new DefaultOAuthToken();

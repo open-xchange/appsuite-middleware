@@ -59,6 +59,8 @@ import com.openexchange.oauth.OAuthToken;
  */
 public final class ScribeOAuthToken implements OAuthToken {
 
+    private static final String EMPTY = "";
+
     private final Token token;
 
     /**
@@ -72,11 +74,11 @@ public final class ScribeOAuthToken implements OAuthToken {
     }
 
     public String getSecret() {
-        return token == null ? "" : token.getSecret();
+        return token == null ? EMPTY : token.getSecret();
     }
 
     public String getToken() {
-        return token == null ? "" : token.getToken();
+        return token == null ? EMPTY : token.getToken();
     }
 
     @Override
