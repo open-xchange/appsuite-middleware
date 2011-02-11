@@ -329,6 +329,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final MailAccountException e) {
+            rollback(con);
+            throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.back(cid, true, con);
@@ -609,6 +615,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final MailAccountException e) {
+            rollback(con);
+            throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.back(cid, true, con);
@@ -1141,6 +1153,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final MailAccountException e) {
+            rollback(con);
+            throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             autocommit(con);
@@ -1340,6 +1358,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final MailAccountException e) {
             rollback(con);
             throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.back(cid, true, con);
