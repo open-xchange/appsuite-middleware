@@ -86,10 +86,9 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.upsell.multiple,com.openexchange.upsell.generic"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/javolution,javolution"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.groupware.dataRetrieval.attachments,com.openexchange.groupware.dataRetrieval.attachments"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.oauth.facebook,com.openexchange.oauth.facebook"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.oauth.twitter,com.openexchange.oauth.twitter"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.oauth.linkedin,com.openexchange.oauth.linkedin"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.linkedin,com.openexchange.subscribe.linkedin"/>
->>>>>>> 1.88
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.oauth.facebook,com.openexchange.oauth.facebook"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.oauth.twitter,com.openexchange.oauth.twitter"/>
 </provider>
 </psf>
