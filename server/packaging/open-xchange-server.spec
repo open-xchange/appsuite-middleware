@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 21
+%define		ox_release 22
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Feb 10 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18212: Retry with read-write connection if read-only connection fails to read newly created mail account
 * Fri Jan 14 2011 - francisco.laguna@open-xchange.com
  - Bugfix #17915: Adjusted the file storage implementation to supply the correct list of files. 
 * Wed Dec 08 2010 - thorben.betten@open-xchange.com
