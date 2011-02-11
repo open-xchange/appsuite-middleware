@@ -105,6 +105,8 @@ public interface OAuthService {
      * The arguments should provide:
      * <ul>
      * <li>display name; {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}</li>
+     * <li>pin; {@link OAuthConstants#ARGUMENT_PIN}</li>
+     * <li>request token; {@link OAuthConstants#ARGUMENT_REQUEST_TOKEN}</li>
      * </ul>
      * 
      * @param serviceMetaData The identifier of service meta data
