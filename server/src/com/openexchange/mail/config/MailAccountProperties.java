@@ -85,7 +85,7 @@ public class MailAccountProperties implements IMailProperties {
         }
 
         try {
-            return Integer.parseInt(attachDisplaySizeStr);
+            return Integer.parseInt(attachDisplaySizeStr.trim());
         } catch (final NumberFormatException e) {
             LOG.error("Attachment Display Size: Non parseable value.", e);
             return MailProperties.getInstance().getMailFetchLimit();
@@ -115,7 +115,7 @@ public class MailAccountProperties implements IMailProperties {
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("Mail Access Cache idle seconds: Non parseable value.", e);
             return MailProperties.getInstance().getMailAccessCacheIdleSeconds();
@@ -129,7 +129,7 @@ public class MailAccountProperties implements IMailProperties {
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("Mail Access Cache shrinker-interval seconds: Non parseable value.", e);
             return MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
@@ -143,7 +143,7 @@ public class MailAccountProperties implements IMailProperties {
         }
 
         try {
-            return Integer.parseInt(mailFetchLimitStr);
+            return Integer.parseInt(mailFetchLimitStr.trim());
         } catch (final NumberFormatException e) {
             LOG.error("Mail Fetch Limit: Non parseable value.", e);
             return MailProperties.getInstance().getMailFetchLimit();
@@ -157,7 +157,7 @@ public class MailAccountProperties implements IMailProperties {
         }
 
         try {
-            return Integer.parseInt(watcherFreqStr);
+            return Integer.parseInt(watcherFreqStr.trim());
         } catch (final NumberFormatException e) {
             LOG.error("Watcher frequency: Non parseable value.", e);
             return MailProperties.getInstance().getWatcherFrequency();
@@ -171,7 +171,7 @@ public class MailAccountProperties implements IMailProperties {
         }
 
         try {
-            return Integer.parseInt(watcherTimeStr);
+            return Integer.parseInt(watcherTimeStr.trim());
         } catch (final NumberFormatException e) {
             LOG.error("Watcher time: Non parseable value.", e);
             return MailProperties.getInstance().getWatcherTime();
@@ -184,7 +184,7 @@ public class MailAccountProperties implements IMailProperties {
             return MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace();
         }
 
-        return Boolean.parseBoolean(allowNestedStr);
+        return Boolean.parseBoolean(allowNestedStr.trim());
     }
 
     public boolean isIgnoreSubscription() {
@@ -193,7 +193,7 @@ public class MailAccountProperties implements IMailProperties {
             return MailProperties.getInstance().isIgnoreSubscription();
         }
 
-        return Boolean.parseBoolean(ignoreSubsStr);
+        return Boolean.parseBoolean(ignoreSubsStr.trim());
     }
 
     public boolean isSupportSubscription() {
@@ -202,7 +202,7 @@ public class MailAccountProperties implements IMailProperties {
             return MailProperties.getInstance().isSupportSubscription();
         }
 
-        return Boolean.parseBoolean(supportSubsStr);
+        return Boolean.parseBoolean(supportSubsStr.trim());
     }
 
     public boolean isUserFlagsEnabled() {
@@ -211,7 +211,7 @@ public class MailAccountProperties implements IMailProperties {
             return MailProperties.getInstance().isUserFlagsEnabled();
         }
 
-        return Boolean.parseBoolean(userFlagsStr);
+        return Boolean.parseBoolean(userFlagsStr.trim());
     }
 
     public boolean isWatcherEnabled() {
@@ -220,7 +220,7 @@ public class MailAccountProperties implements IMailProperties {
             return MailProperties.getInstance().isWatcherEnabled();
         }
 
-        return Boolean.parseBoolean(watcherEnabledStr);
+        return Boolean.parseBoolean(watcherEnabledStr.trim());
     }
 
     public boolean isWatcherShallClose() {
@@ -229,7 +229,7 @@ public class MailAccountProperties implements IMailProperties {
             return MailProperties.getInstance().isWatcherShallClose();
         }
 
-        return Boolean.parseBoolean(watcherShallCloseStr);
+        return Boolean.parseBoolean(watcherShallCloseStr.trim());
     }
 
     public void waitForLoading() throws InterruptedException {
