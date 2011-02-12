@@ -143,6 +143,8 @@ public final class MailProperties implements IMailProperties {
 
     private boolean ignoreSubscription;
 
+    private boolean ignorePOP3StorageFolders;
+
     private char defaultSeparator;
 
     private String[] quoteLineColors;
@@ -247,6 +249,7 @@ public final class MailProperties implements IMailProperties {
         allowNestedDefaultFolderOnAltNamespace = false;
         defaultMimeCharset = null;
         ignoreSubscription = false;
+        ignorePOP3StorageFolders = false;
         defaultSeparator = '/';
         quoteLineColors = null;
         javaMailProperties = null;
@@ -446,6 +449,12 @@ public final class MailProperties implements IMailProperties {
             final String ignoreSubsStr = configuration.getProperty("com.openexchange.mail.ignoreSubscription", "false").trim();
             ignoreSubscription = Boolean.parseBoolean(ignoreSubsStr);
             logBuilder.append("\tIgnore Folder Subscription: ").append(ignoreSubscription).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.ignorePOP3StorageFolders", "false").trim();
+            ignorePOP3StorageFolders = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tIgnore POP3 Storage Folders: ").append(ignorePOP3StorageFolders).append('\n');
         }
 
         {
@@ -682,6 +691,10 @@ public final class MailProperties implements IMailProperties {
 
     public boolean isIgnoreSubscription() {
         return ignoreSubscription;
+    }
+
+    public boolean isIgnorePOP3StorageFolders() {
+        return ignorePOP3StorageFolders;
     }
 
     public boolean isSupportSubscription() {
