@@ -143,7 +143,7 @@ public final class MailProperties implements IMailProperties {
 
     private boolean ignoreSubscription;
 
-    private boolean ignorePOP3StorageFolders;
+    private boolean hidePOP3StorageFolders;
 
     private char defaultSeparator;
 
@@ -249,7 +249,7 @@ public final class MailProperties implements IMailProperties {
         allowNestedDefaultFolderOnAltNamespace = false;
         defaultMimeCharset = null;
         ignoreSubscription = false;
-        ignorePOP3StorageFolders = false;
+        hidePOP3StorageFolders = false;
         defaultSeparator = '/';
         quoteLineColors = null;
         javaMailProperties = null;
@@ -452,9 +452,9 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String tmp = configuration.getProperty("com.openexchange.mail.ignorePOP3StorageFolders", "false").trim();
-            ignorePOP3StorageFolders = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tIgnore POP3 Storage Folders: ").append(ignorePOP3StorageFolders).append('\n');
+            final String tmp = configuration.getProperty("com.openexchange.mail.hidePOP3StorageFolders", "false").trim();
+            hidePOP3StorageFolders = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tHide POP3 Storage Folders: ").append(hidePOP3StorageFolders).append('\n');
         }
 
         {
@@ -693,8 +693,8 @@ public final class MailProperties implements IMailProperties {
         return ignoreSubscription;
     }
 
-    public boolean isIgnorePOP3StorageFolders() {
-        return ignorePOP3StorageFolders;
+    public boolean isHidePOP3StorageFolders() {
+        return hidePOP3StorageFolders;
     }
 
     public boolean isSupportSubscription() {
