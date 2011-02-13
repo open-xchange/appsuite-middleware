@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,6 +75,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -87,6 +89,8 @@ import com.openexchange.mailaccount.json.fields.GetSwitch;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -95,7 +99,7 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class RdbMailAccountStorage implements MailAccountStorageService {
+public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RdbMailAccountStorage.class);
 
@@ -149,6 +153,75 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final String UPDATE_PASSWORD1 = "UPDATE user_mail_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String UPDATE_PASSWORD2 = "UPDATE user_transport_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
+
+    private static final String PARAM_POP3_STORAGE_FOLDERS = "com.openexchange.mailaccount.pop3Folders";
+
+    private static Object getSessionLock(final Session session) {
+        final Object lock = session.getParameter(Session.PARAM_LOCK);
+        return null == lock ? session : lock;
+    }
+
+    private static void dropPOP3StorageFolders(final int userId, final int contextId) {
+        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null != service) {
+            for (final Session session : service.getSessions(userId, contextId)) {
+                synchronized (getSessionLock(session)) {
+                    session.setParameter(PARAM_POP3_STORAGE_FOLDERS, null);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Gets the POP3 storage folders for specified session.
+     * 
+     * @param session The session
+     * @return The POP3 storage folder full names
+     * @throws MailException If an error occurs
+     */
+    @SuppressWarnings("unchecked")
+    public static Set<String> getPOP3StorageFolders(final Session session) throws MailException {
+        Set<String> set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
+        if (null == set) {
+            synchronized (getSessionLock(session)) {
+                set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
+                if (null == set) {
+                    set = getPOP3StorageFolders0(session);
+                    session.setParameter(PARAM_POP3_STORAGE_FOLDERS, set);
+                }
+            }
+        }
+        return set;
+    }
+
+    private static Set<String> getPOP3StorageFolders0(final Session session) throws MailException {
+        final int contextId = session.getContextId();
+        final Connection con;
+        try {
+            con = Database.get(contextId, false);
+        } catch (final DBPoolingException e) {
+            throw new MailException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND name = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, session.getUserId());
+            stmt.setString(3, "pop3.path");
+            rs = stmt.executeQuery();
+            final Set<String> set = new HashSet<String>(4);
+            while (rs.next()) {
+                set.add(rs.getString(1));
+            }
+            return set;
+        } catch (final SQLException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            Database.back(contextId, false, con);
+        }
+    }
 
     private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid) throws MailAccountException {
         Connection con = null;
@@ -365,6 +438,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(3, user);
             stmt.executeUpdate();
             registry.triggerOnAfterDeletion(id, properties, user, cid, con);
+            dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -889,6 +963,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
                 }
+                dropPOP3StorageFolders(user, cid);
             } catch (final SQLException e) {
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
             } finally {
@@ -1322,6 +1397,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), con);
                 }
             }
+            dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {

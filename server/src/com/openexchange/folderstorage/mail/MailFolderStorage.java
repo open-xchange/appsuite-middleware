@@ -51,10 +51,6 @@ package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,8 +67,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.cache.OXCachingException;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -123,12 +117,12 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MailFolderStorage} - The mail folder storage.
@@ -751,7 +745,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Filter against possible POP3 storage folders
              */
             if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isIgnorePOP3StorageFolders()) {
-                final Set<String> pop3StorageFolders = getPOP3StorageFolders(session);
+                final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
                 for (final Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
                     final MailFolder mailFolder = it.next();
                     if (pop3StorageFolders.contains(mailFolder.getFullname())) {
@@ -1302,35 +1296,6 @@ public final class MailFolderStorage implements FolderStorage {
             for (final MailException mailException : warnings) {
                 storageParameters.addWarning(mailException);
             }
-        }
-    }
-
-    private static Set<String> getPOP3StorageFolders(final Session session) throws MailException {
-        final int contextId = session.getContextId();
-        final Connection con;
-        try {
-            con = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw new MailException(e);
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND name = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, session.getUserId());
-            stmt.setString(3, "pop3.path");
-            rs = stmt.executeQuery();
-            final Set<String> set = new HashSet<String>();
-            while (rs.next()) {
-                set.add(rs.getString(1));
-            }
-            return set;
-        } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            Database.back(contextId, false, con);
         }
     }
 
