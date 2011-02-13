@@ -577,7 +577,19 @@ public final class MailFolderStorage implements FolderStorage {
                     /*
                      * Denoted parent is not capable to hold default folders. Therefore output as it is.
                      */
-                    final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true));
+                    final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
+                    /*
+                     * Filter against possible POP3 storage folders
+                     */
+                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                        final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                        for (final Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
+                            final MailFolder mf = it.next();
+                            if (pop3StorageFolders.contains(mf.getFullname())) {
+                                it.remove();
+                            }
+                        }            
+                    }
                     Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
                     final String[] subfolderIds = new String[children.size()];
                     int i = 0;
