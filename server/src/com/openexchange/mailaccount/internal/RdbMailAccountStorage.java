@@ -75,7 +75,9 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -719,6 +721,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         Attribute.TRASH_LITERAL);
 
     /**
+     * Contains attributes which denote the fullnames of an account's default folders.
+     */
+    private static final EnumSet<Attribute> DEFAULT_FULL_NAMES = EnumSet.of(
+        Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+        Attribute.DRAFTS_FULLNAME_LITERAL,
+        Attribute.SENT_FULLNAME_LITERAL,
+        Attribute.SPAM_FULLNAME_LITERAL,
+        Attribute.TRASH_FULLNAME_LITERAL);
+
+    /**
      * Contains attributes which are allowed to be edited for primary mail account.
      */
     private static final EnumSet<Attribute> PRIMARY_EDITABLE = EnumSet.of(
@@ -879,10 +892,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                                 stmt.setString(pos++, personal);
                             }
                         } else if (DEFAULT.contains(attribute)) {
-                            if (null == value) {
-                                stmt.setObject(pos++, "");
+                            if (DEFAULT_FULL_NAMES.contains(attribute)) {
+                                final String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
+                                stmt.setString(pos++, fullName);
                             } else {
-                                stmt.setObject(pos++, value);
+                                if (null == value) {
+                                    stmt.setObject(pos++, "");
+                                } else {
+                                    stmt.setObject(pos++, value);
+                                }
                             }
                         } else {
                             stmt.setObject(pos++, value);
