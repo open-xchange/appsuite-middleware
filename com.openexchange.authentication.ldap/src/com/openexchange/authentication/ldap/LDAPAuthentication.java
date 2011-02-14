@@ -154,7 +154,7 @@ public class LDAPAuthentication implements AuthenticationService {
         LdapContext context = null;
         String dn = null;
         String proxyAs = null;
-        if( uid.contains(proxyDelimiter)) {
+        if( proxyUser != null && proxyDelimiter != null && uid.contains(proxyDelimiter)) {
             proxyAs = uid.substring(uid.indexOf(proxyDelimiter)+proxyDelimiter.length(), uid.length());
             uid = uid.substring(0, uid.indexOf(proxyDelimiter));
             boolean foundProxy = false;
