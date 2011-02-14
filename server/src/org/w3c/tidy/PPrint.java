@@ -66,7 +66,7 @@ import java.text.NumberFormat;
  * @author Dave Raggett <a href="mailto:dsr@w3.org">dsr@w3.org </a>
  * @author Andy Quick <a href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a> (translation to Java)
  * @author Fabrizio Giustina
- * @version $Revision: 1.1 $ ($Author: thorben $)
+ * @version $Revision: 1.2 $ ($Author: thorben $)
  */
 public class PPrint
 {
@@ -178,13 +178,13 @@ public class PPrint
     /**
      * current configuration.
      */
-    private Configuration configuration;
+    private final Configuration configuration;
 
     /**
      * Instantiates a new PPrint.
      * @param configuration configuration
      */
-    public PPrint(Configuration configuration)
+    public PPrint(final Configuration configuration)
     {
         this.configuration = configuration;
     }
@@ -193,7 +193,7 @@ public class PPrint
      * @param ind
      * @return
      */
-    int cWrapLen(int ind)
+    int cWrapLen(final int ind)
     {
         /* #431953 - start RJ Wraplen adjusted for smooth international ride */
         if ("zh".equals(this.configuration.language))
@@ -219,18 +219,18 @@ public class PPrint
      * @param ch initialized to 1st byte, passed as an array to allow modification
      * @return one less that the number of bytes used by UTF-8 char
      */
-    public static int getUTF8(byte[] str, int start, int[] ch)
+    public static int getUTF8(final byte[] str, final int start, final int[] ch)
     {
 
-        int[] n = new int[1];
+        final int[] n = new int[1];
 
-        int[] bytes = new int[]{0};
+        final int[] bytes = new int[]{0};
 
         // first byte "str[0]" is passed in separately from the
         // rest of the UTF-8 byte sequence starting at "str[1]"
-        byte[] successorBytes = str;
+        final byte[] successorBytes = str;
 
-        boolean err = EncodingUtils.decodeUTF8BytesToChar(
+        final boolean err = EncodingUtils.decodeUTF8BytesToChar(
             n,
             TidyUtils.toUnsigned(str[start]),
             successorBytes,
@@ -254,11 +254,11 @@ public class PPrint
      * @param c
      * @return
      */
-    public static int putUTF8(byte[] buf, int start, int c)
+    public static int putUTF8(final byte[] buf, int start, final int c)
     {
-        int[] count = new int[]{0};
+        final int[] count = new int[]{0};
 
-        boolean err = EncodingUtils.encodeCharToUTF8Bytes(c, buf, null, count);
+        final boolean err = EncodingUtils.encodeCharToUTF8Bytes(c, buf, null, count);
         if (err)
         {
             // replacement char 0xFFFD encoded as UTF-8
@@ -273,7 +273,7 @@ public class PPrint
         return start;
     }
 
-    private void addC(int c, int index)
+    private void addC(final int c, final int index)
     {
         if (index + 1 >= lbufsize)
         {
@@ -289,7 +289,7 @@ public class PPrint
                 }
             }
 
-            int[] temp = new int[lbufsize];
+            final int[] temp = new int[lbufsize];
             if (linebuf != null)
             {
                 System.arraycopy(linebuf, 0, temp, 0, index);
@@ -306,10 +306,10 @@ public class PPrint
      * @param index actual line lenght
      * @return final line length
      */
-    private int addAsciiString(String str, int index)
+    private int addAsciiString(final String str, final int index)
     {
 
-        int len = str.length();
+        final int len = str.length();
         if (index + len >= lbufsize)
         {
             while (index + len >= lbufsize)
@@ -324,7 +324,7 @@ public class PPrint
                 }
             }
 
-            int[] temp = new int[lbufsize];
+            final int[] temp = new int[lbufsize];
             if (linebuf != null)
             {
                 System.arraycopy(linebuf, 0, temp, 0, index);
@@ -343,7 +343,7 @@ public class PPrint
      * @param fout
      * @param indent
      */
-    private void wrapLine(Out fout, int indent)
+    private void wrapLine(final Out fout, final int indent)
     {
         int i, p, q;
 
@@ -407,7 +407,7 @@ public class PPrint
      * @param indent
      * @param inString
      */
-    private void wrapAttrVal(Out fout, int indent, boolean inString)
+    private void wrapAttrVal(final Out fout, final int indent, final boolean inString)
     {
         int i, p, q;
 
@@ -466,7 +466,7 @@ public class PPrint
      * @param fout
      * @param indent
      */
-    public void flushLine(Out fout, int indent)
+    public void flushLine(final Out fout, final int indent)
     {
         int i;
 
@@ -501,7 +501,7 @@ public class PPrint
      * @param fout
      * @param indent
      */
-    public void condFlushLine(Out fout, int indent)
+    public void condFlushLine(final Out fout, final int indent)
     {
         int i;
 
@@ -536,7 +536,7 @@ public class PPrint
      * @param c
      * @param mode
      */
-    private void printChar(int c, short mode)
+    private void printChar(int c, final short mode)
     {
         String entity;
         boolean breakable = false; // #431953 - RJ
@@ -953,10 +953,10 @@ public class PPrint
      * @param start
      * @param end
      */
-    private void printText(Out fout, short mode, int indent, byte[] textarray, int start, int end)
+    private void printText(final Out fout, final short mode, final int indent, final byte[] textarray, final int start, final int end)
     {
         int i, c;
-        int[] ci = new int[1];
+        final int[] ci = new int[1];
 
         for (i = start; i < end; ++i)
         {
@@ -987,7 +987,7 @@ public class PPrint
     /**
      * @param str
      */
-    private void printString(String str)
+    private void printString(final String str)
     {
         for (int i = 0; i < str.length(); i++)
         {
@@ -1002,10 +1002,10 @@ public class PPrint
      * @param delim
      * @param wrappable
      */
-    private void printAttrValue(Out fout, int indent, String value, int delim, boolean wrappable)
+    private void printAttrValue(final Out fout, final int indent, final String value, int delim, final boolean wrappable)
     {
         int c;
-        int[] ci = new int[1];
+        final int[] ci = new int[1];
         boolean wasinstring = false;
         byte[] valueChars = null;
         int i;
@@ -1169,7 +1169,7 @@ public class PPrint
      * @param node
      * @param attr
      */
-    private void printAttribute(Out fout, int indent, Node node, AttVal attr)
+    private void printAttribute(final Out fout, int indent, final Node node, final AttVal attr)
     {
         String name;
         boolean wrappable = false;
@@ -1250,7 +1250,7 @@ public class PPrint
      * @param node
      * @param attr
      */
-    private void printAttrs(Out fout, int indent, Node node, AttVal attr)
+    private void printAttrs(final Out fout, final int indent, final Node node, AttVal attr)
     {
         // add xml:space attribute to pre and other elements
         if (configuration.xmlOut
@@ -1274,7 +1274,7 @@ public class PPrint
 
             if (attr.attribute != null)
             {
-                Attribute attribute = attr.dict;
+                final Attribute attribute = attr.dict;
 
                 if (!this.configuration.dropProprietaryAttributes
                     || !(attribute == null || TidyUtils.toBoolean(attribute.getVersions() & Dict.VERS_PROPRIETARY)))
@@ -1302,7 +1302,7 @@ public class PPrint
      * @param node current Node
      * @return <code>true</code> if the current char follows a space
      */
-    private static boolean afterSpace(Node node)
+    private static boolean afterSpace(final Node node)
     {
         Node prev;
         int c;
@@ -1339,10 +1339,10 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printTag(Lexer lexer, Out fout, short mode, int indent, Node node)
+    private void printTag(final Lexer lexer, final Out fout, final short mode, final int indent, final Node node)
     {
         String p;
-        TagTable tt = this.configuration.tt;
+        final TagTable tt = this.configuration.tt;
 
         addC('<', linelen++);
 
@@ -1403,7 +1403,7 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printEndTag(short mode, int indent, Node node)
+    private void printEndTag(final short mode, final int indent, final Node node)
     {
         String p;
 
@@ -1434,7 +1434,7 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printComment(Out fout, int indent, Node node)
+    private void printComment(final Out fout, final int indent, final Node node)
     {
         if (this.configuration.hideComments)
         {
@@ -1470,11 +1470,11 @@ public class PPrint
      * @param lexer
      * @param node
      */
-    private void printDocType(Out fout, int indent, Lexer lexer, Node node)
+    private void printDocType(final Out fout, final int indent, final Lexer lexer, final Node node)
     {
         int i, c = 0;
         short mode = 0;
-        boolean q = this.configuration.quoteMarks;
+        final boolean q = this.configuration.quoteMarks;
 
         this.configuration.quoteMarks = false;
 
@@ -1522,7 +1522,7 @@ public class PPrint
             {
                 mode |= CDATA;
             }
-            int[] ci = new int[1];
+            final int[] ci = new int[1];
 
             // look for UTF-8 multibyte character
             if (c > 0x7F)
@@ -1555,7 +1555,7 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printPI(Out fout, int indent, Node node)
+    private void printPI(final Out fout, final int indent, final Node node)
     {
         if (indent + linelen < this.configuration.wraplen)
         {
@@ -1583,7 +1583,7 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printXmlDecl(Out fout, int indent, Node node)
+    private void printXmlDecl(final Out fout, final int indent, final Node node)
     {
         if (indent + linelen < this.configuration.wraplen)
         {
@@ -1614,9 +1614,9 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printAsp(Out fout, int indent, Node node)
+    private void printAsp(final Out fout, final int indent, final Node node)
     {
-        int savewraplen = this.configuration.wraplen;
+        final int savewraplen = this.configuration.wraplen;
 
         // disable wrapping if so requested
 
@@ -1642,9 +1642,9 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printJste(Out fout, int indent, Node node)
+    private void printJste(final Out fout, final int indent, final Node node)
     {
-        int savewraplen = this.configuration.wraplen;
+        final int savewraplen = this.configuration.wraplen;
 
         // disable wrapping if so requested
 
@@ -1670,9 +1670,9 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printPhp(Out fout, int indent, Node node)
+    private void printPhp(final Out fout, final int indent, final Node node)
     {
-        int savewraplen = this.configuration.wraplen;
+        final int savewraplen = this.configuration.wraplen;
 
         // disable wrapping if so requested
 
@@ -1697,9 +1697,9 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printCDATA(Out fout, int indent, Node node)
+    private void printCDATA(final Out fout, int indent, final Node node)
     {
-        int savewraplen = this.configuration.wraplen;
+        final int savewraplen = this.configuration.wraplen;
 
         if (!this.configuration.indentCdata)
         {
@@ -1735,9 +1735,9 @@ public class PPrint
      * @param indent
      * @param node
      */
-    private void printSection(Out fout, int indent, Node node)
+    private void printSection(final Out fout, final int indent, final Node node)
     {
-        int savewraplen = this.configuration.wraplen;
+        final int savewraplen = this.configuration.wraplen;
 
         // disable wrapping if so requested
 
@@ -1769,7 +1769,7 @@ public class PPrint
      * @param node Node
      * @return <code>true</code> if node is inside an HEAD tag
      */
-    private boolean insideHead(Node node)
+    private boolean insideHead(final Node node)
     {
         if (node.tag == this.configuration.tt.tagHead)
         {
@@ -1790,7 +1790,7 @@ public class PPrint
      * @param node text node
      * @return text indent
      */
-    private int textEndsWithNewline(Lexer lexer, Node node)
+    private int textEndsWithNewline(final Lexer lexer, final Node node)
     {
         if (node.type == Node.TEXT_NODE && node.end > node.start)
         {
@@ -1803,7 +1803,7 @@ public class PPrint
                 --ix;
             }
 
-            if (node.textarray[ix] == '\n')
+            if (ix > 0 && ix < node.textarray.length && node.textarray[ix] == '\n')
             {
                 return node.end - ix - 1; // #543262 tidy eats all memory
             }
@@ -1817,7 +1817,7 @@ public class PPrint
      * @param node Node
      * @return <code>true</code> if node contains a CDATA section
      */
-    static boolean hasCDATA(Lexer lexer, Node node)
+    static boolean hasCDATA(final Lexer lexer, final Node node)
     {
         // Scan forward through the textarray. Since the characters we're
         // looking for are < 0x7f, we don't have to do any UTF-8 decoding.
@@ -1827,10 +1827,10 @@ public class PPrint
             return false;
         }
 
-        int len = node.end - node.start + 1;
-        String start = TidyUtils.getString(node.textarray, node.start, len);
+        final int len = node.end - node.start + 1;
+        final String start = TidyUtils.getString(node.textarray, node.start, len);
 
-        int indexOfCData = start.indexOf(CDATA_START);
+        final int indexOfCData = start.indexOf(CDATA_START);
         return indexOfCData > -1 && indexOfCData <= len;
     }
 
@@ -1862,7 +1862,7 @@ public class PPrint
      * @param lexer
      * @param node
      */
-    private void printScriptStyle(Out fout, short mode, int indent, Lexer lexer, Node node)
+    private void printScriptStyle(final Out fout, final short mode, int indent, final Lexer lexer, final Node node)
     {
         Node content;
         String commentStart = DEFAULT_COMMENT_START;
@@ -1883,7 +1883,7 @@ public class PPrint
 
         if (lexer.configuration.xHTML && node.content != null)
         {
-            AttVal type = node.getAttrByName("type");
+            final AttVal type = node.getAttrByName("type");
             if (type != null)
             {
                 if ("text/javascript".equalsIgnoreCase(type.value))
@@ -1907,7 +1907,7 @@ public class PPrint
             if (!hasCData)
             {
                 // disable wrapping
-                int savewraplen = lexer.configuration.wraplen;
+                final int savewraplen = lexer.configuration.wraplen;
                 lexer.configuration.wraplen = 0xFFFFFF; // a very large number
 
                 linelen = addAsciiString(commentStart, linelen);
@@ -1942,7 +1942,8 @@ public class PPrint
             if (!hasCData)
             {
                 // disable wrapping
-                int ix, savewraplen = lexer.configuration.wraplen;
+                int ix;
+                final int savewraplen = lexer.configuration.wraplen;
                 lexer.configuration.wraplen = 0xFFFFFF; // a very large number
 
                 // Add spaces to last text node to align w/ indent
@@ -1988,7 +1989,7 @@ public class PPrint
      */
     private boolean shouldIndent(Node node)
     {
-        TagTable tt = this.configuration.tt;
+        final TagTable tt = this.configuration.tt;
 
         if (!this.configuration.indentContent)
         {
@@ -2046,7 +2047,7 @@ public class PPrint
      * @param root
      * @param xml
      */
-    void printBody(Out fout, Lexer lexer, Node root, boolean xml)
+    void printBody(final Out fout, final Lexer lexer, final Node root, final boolean xml)
     {
         if (root == null)
         {
@@ -2055,7 +2056,7 @@ public class PPrint
 
         // Feature request #434940 - fix by Dave Raggett/Ignacio Vazquez-Abrams 21 Jun 01
         // Sebastiano Vigna <vigna@dsi.unimi.it>
-        Node body = root.findBody(lexer.configuration.tt);
+        final Node body = root.findBody(lexer.configuration.tt);
 
         if (body != null)
         {
@@ -2081,10 +2082,10 @@ public class PPrint
      * @param lexer
      * @param node
      */
-    public void printTree(Out fout, short mode, int indent, Lexer lexer, Node node)
+    public void printTree(final Out fout, final short mode, int indent, final Lexer lexer, final Node node)
     {
         Node content, last;
-        TagTable tt = this.configuration.tt;
+        final TagTable tt = this.configuration.tt;
 
         if (node == null)
         {
@@ -2378,9 +2379,9 @@ public class PPrint
      * @param lexer
      * @param node
      */
-    public void printXMLTree(Out fout, short mode, int indent, Lexer lexer, Node node)
+    public void printXMLTree(final Out fout, final short mode, int indent, final Lexer lexer, final Node node)
     {
-        TagTable tt = this.configuration.tt;
+        final TagTable tt = this.configuration.tt;
 
         if (node == null)
         {
@@ -2520,7 +2521,7 @@ public class PPrint
         // assume minimum of 1 slide
         int n = 1;
 
-        TagTable tt = this.configuration.tt;
+        final TagTable tt = this.configuration.tt;
 
         // fix for [431716] avoid empty slides
         if (node != null && node.content != null && node.content.tag == tt.tagH2)
@@ -2547,14 +2548,14 @@ public class PPrint
      * @param fout
      * @param indent
      */
-    private void printNavBar(Out fout, int indent)
+    private void printNavBar(final Out fout, final int indent)
     {
         String buf;
 
         condFlushLine(fout, indent);
         printString("<center><small>");
 
-        NumberFormat numberFormat = NumberFormat.getInstance();
+        final NumberFormat numberFormat = NumberFormat.getInstance();
         numberFormat.setMinimumIntegerDigits(3);
 
         if (slide > 1)
@@ -2598,12 +2599,12 @@ public class PPrint
      * @param indent
      * @param lexer
      */
-    public void printSlide(Out fout, short mode, int indent, Lexer lexer)
+    public void printSlide(final Out fout, final short mode, final int indent, final Lexer lexer)
     {
         Node content, last;
-        TagTable tt = this.configuration.tt;
+        final TagTable tt = this.configuration.tt;
 
-        NumberFormat numberFormat = NumberFormat.getInstance();
+        final NumberFormat numberFormat = NumberFormat.getInstance();
         numberFormat.setMinimumIntegerDigits(3);
 
         /* insert div for onclick handler */
@@ -2730,16 +2731,16 @@ public class PPrint
      * @param root
      * @param duration
      */
-    public void addTransitionEffect(Lexer lexer, Node root, double duration)
+    public void addTransitionEffect(final Lexer lexer, final Node root, final double duration)
     {
-        Node head = root.findHEAD(lexer.configuration.tt);
+        final Node head = root.findHEAD(lexer.configuration.tt);
         String transition;
 
         transition = "blendTrans(Duration=" + (new Double(duration)).toString() + ")";
 
         if (head != null)
         {
-            Node meta = lexer.inferredTag("meta");
+            final Node meta = lexer.inferredTag("meta");
             meta.addAttribute("http-equiv", "Page-Enter");
             meta.addAttribute("content", transition);
             head.insertNodeAtStart(meta);
@@ -2751,12 +2752,12 @@ public class PPrint
      * @param lexer Lexer
      * @param root root node
      */
-    public void createSlides(Lexer lexer, Node root)
+    public void createSlides(final Lexer lexer, final Node root)
     {
         Node body;
         String buf;
 
-        NumberFormat numberFormat = NumberFormat.getInstance();
+        final NumberFormat numberFormat = NumberFormat.getInstance();
         numberFormat.setMinimumIntegerDigits(3);
 
         body = root.findBody(lexer.configuration.tt);
@@ -2771,15 +2772,15 @@ public class PPrint
 
             try
             {
-                FileOutputStream fis = new FileOutputStream(buf);
-                Out out = OutFactory.getOut(configuration, fis);
+                final FileOutputStream fis = new FileOutputStream(buf);
+                final Out out = OutFactory.getOut(configuration, fis);
 
                 printTree(out, (short) 0, 0, lexer, root);
                 flushLine(out, 0);
 
                 fis.close();
             }
-            catch (IOException e)
+            catch (final IOException e)
             {
                 System.err.println(buf + e.toString());
             }

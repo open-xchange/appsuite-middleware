@@ -1,6 +1,7 @@
 * 2011-02-14 - thorben.betten@open-xchange.com
 
  - Bugfix #18299: Setting proper locale-sensitive folder names
+ - Bugfix #18329: Fixed ArrayIndexOutOfBoundsException in jTidy library
 
 * 2011-02-10 - thorben.betten@open-xchange.com
 
