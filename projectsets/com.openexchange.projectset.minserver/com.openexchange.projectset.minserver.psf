@@ -28,5 +28,8 @@
 <project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.tx,com.openexchange.tx"/>
 <project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.file.storage.composition,com.openexchange.file.storage.composition"/>
 <project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.authorization.standard,com.openexchange.authorization.standard"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.config.cascade,com.openexchange.config.cascade"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.crypto,com.openexchange.crypto"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.ajp,com.openexchange.ajp"/>
 </provider>
 </psf>
