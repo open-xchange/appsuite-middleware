@@ -85,6 +85,8 @@ public class LDAPAuthentication implements AuthenticationService {
         SEARCH_FILTER("searchFilter"),
         BIND_DN("bindDN"),
         BIND_DN_PASSWORD("bindDNPassword"),
+        PROXY_USER("proxyUser"),
+        PROXY_DELIMITER("proxyDelimiter"),
         REFERRAL("referral");
         
         public String name;
@@ -104,7 +106,7 @@ public class LDAPAuthentication implements AuthenticationService {
     /**
      * attribute name and base DN.
      */
-    private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, referral;
+    private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, proxyUser, proxyDelimiter, referral;
 
     private boolean subtreeSearch;
     
@@ -151,6 +153,21 @@ public class LDAPAuthentication implements AuthenticationService {
     private String bind(String uid, String password) throws LoginException {
         LdapContext context = null;
         String dn = null;
+        String proxyAs = null;
+        if( uid.contains(proxyDelimiter)) {
+            proxyAs = uid.substring(uid.indexOf(proxyDelimiter)+proxyDelimiter.length(), uid.length());
+            uid = uid.substring(0, uid.indexOf(proxyDelimiter));
+            boolean foundProxy = false;
+            for(final String pu : proxyUser.split(",")) {
+                if( pu.trim().equalsIgnoreCase(uid) ) {
+                    foundProxy = true;
+                }
+            }
+            if( ! foundProxy ) {
+                LOG.error("none of the proxy user is matching");
+                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+            }
+        }
         try {
             String samAccountName = null;
             if( subtreeSearch ) {
@@ -209,20 +226,30 @@ public class LDAPAuthentication implements AuthenticationService {
             context.reconnect(null);
             if (null != ldapReturnField && ldapReturnField.length() > 0) {
                 final Attributes userDnAttributes;
+                String puser = null;
                 if (this.adsbind) {
                     final SearchControls searchControls = new SearchControls();
                     searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
                     searchControls.setCountLimit(0);
                     searchControls.setReturningAttributes(new String[]{ldapReturnField});
                     final NamingEnumeration<SearchResult> search;
+                    NamingEnumeration<SearchResult> searchProxy = null;
                     if (null == samAccountName) {
-                        search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
+                        if( proxyAs != null ) {
+                            search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
+                            searchProxy = context.search(this.baseDN, "(displayName=" + proxyAs + ")", searchControls);
+                        } else {
+                            search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
+                        }
                     } else {
                         search = context.search(this.baseDN, "(sAMAccountName=" + samAccountName + ")", searchControls);
                     }
                     if (null != search && search.hasMoreElements()) {
                         final SearchResult next = search.next();
                         userDnAttributes = next.getAttributes();
+                        if( proxyAs != null && searchProxy != null ) {
+                            puser = (String)searchProxy.next().getAttributes().get(ldapReturnField).get();
+                        }
                     } else {
                         LOG.error("No user with displayname " + uid + " found.");
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
@@ -231,7 +258,11 @@ public class LDAPAuthentication implements AuthenticationService {
                     userDnAttributes = context.getAttributes(dn);
                 }
                 final Attribute attribute = userDnAttributes.get(ldapReturnField);
-                return (String) attribute.get();
+                if( proxyAs != null ) {
+                    return (String) attribute.get()+proxyDelimiter+puser;
+                } else {
+                    return (String) attribute.get();
+                }
             }
             return null;
         } catch (InvalidNameException e) {
@@ -294,6 +325,14 @@ public class LDAPAuthentication implements AuthenticationService {
 
         bindDN = props.getProperty(PropertyNames.BIND_DN.name);
         bindDNPassword = props.getProperty(PropertyNames.BIND_DN_PASSWORD.name);
+
+        if (props.containsKey(PropertyNames.PROXY_USER.name)) {
+            proxyUser = props.getProperty(PropertyNames.PROXY_USER.name);
+        }
+
+        if (props.containsKey(PropertyNames.PROXY_DELIMITER.name)) {
+            proxyDelimiter = props.getProperty(PropertyNames.PROXY_DELIMITER.name);
+        }
 
         if (!props.containsKey(PropertyNames.REFERRAL.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.REFERRAL.name);

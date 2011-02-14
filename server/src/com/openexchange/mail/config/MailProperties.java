@@ -179,6 +179,8 @@ public final class MailProperties implements IMailProperties {
     
     private int maxToCcBcc;
 
+    private String authProxyDelimiter;
+
     /**
      * Initializes a new {@link MailProperties}
      */
@@ -266,6 +268,7 @@ public final class MailProperties implements IMailProperties {
         rateLimitPrimaryOnly = true;
         rateLimit = 0;
         maxToCcBcc = 0;
+        authProxyDelimiter = null;
     }
 
     private void loadProperties0() throws MailConfigException {
@@ -610,6 +613,16 @@ public final class MailProperties implements IMailProperties {
             logBuilder.append("\tJavaMail Properties loaded: ").append(javaMailProperties != null).append('\n');
         }
 
+        {
+            authProxyDelimiter = configuration.getProperty("com.openexchange.mail.authProxyDelimiter");
+            if (authProxyDelimiter != null) {
+                authProxyDelimiter = authProxyDelimiter.trim();
+                if (authProxyDelimiter.length() == 0) {
+                    authProxyDelimiter = null;
+                }
+            }
+        }
+
         logBuilder.append("Global mail properties successfully loaded!");
         if (LOG.isInfoEnabled()) {
             LOG.info(logBuilder.toString());
@@ -863,6 +876,14 @@ public final class MailProperties implements IMailProperties {
 
     public int getMailAccessCacheIdleSeconds() {
         return mailAccessCacheIdleSeconds;
+    }
+
+    
+    /**
+     * @return the authProxyDelimiter
+     */
+    public final String getAuthProxyDelimiter() {
+        return authProxyDelimiter;
     }
 
 }

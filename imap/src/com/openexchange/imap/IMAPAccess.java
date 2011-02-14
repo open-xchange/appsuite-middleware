@@ -79,6 +79,7 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
@@ -424,11 +425,20 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
+            final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
             /*
              * Check for already failed authentication
              */
             final String login = config.getLogin();
-            checkFailedAuths(login, tmpPass);
+            String user = login;
+            String proxyUser = null;
+            boolean isProxyAuth = false;
+            if( proxyDelimiter != null && login.contains(proxyDelimiter) ) {
+                isProxyAuth = true;
+                proxyUser = login.substring(0, login.indexOf(proxyDelimiter));
+                user = login.substring(login.indexOf(proxyDelimiter)+proxyDelimiter.length(), login.length());
+            }
+            checkFailedAuths(user, tmpPass);
             /*
              * Get properties
              */
@@ -436,6 +446,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
                 imapProps.putAll(getMailProperties());
             }
+            if( isProxyAuth ) {
+                imapProps.put("mail.imap.sasl.enable", "true");
+                imapProps.put("mail.imap.sasl.authorizationid", user);
+                imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
+            }
+
             /*
              * Get parameterized IMAP session
              */
@@ -457,12 +473,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Get connected store
              */
             try {
-                imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), login, tmpPass);
+                if( isProxyAuth ) {
+                    imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), proxyUser, tmpPass);
+                } else {
+                    imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), user, tmpPass);
+                }
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to quicken subsequent connect trials
                  */
-                failedAuths.put(new LoginAndPass(login, tmpPass), new StampAndError(e, System.currentTimeMillis()));
+                failedAuths.put(new LoginAndPass(user, tmpPass), new StampAndError(e, System.currentTimeMillis()));
                 throw e;
             } catch (final MessagingException e) {
                 /*

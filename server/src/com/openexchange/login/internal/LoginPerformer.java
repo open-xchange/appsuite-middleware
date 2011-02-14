@@ -82,6 +82,7 @@ import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.mail.config.MailProperties;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
@@ -199,10 +200,16 @@ public final class LoginPerformer {
     }
 
     private User findUser(final Context ctx, final String userInfo) throws UserException {
+        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         final UserStorage us = UserStorage.getInstance();
         final User u;
         try {
-            final int userId = us.getUserId(userInfo, ctx);
+            int userId = 0;
+            if( proxyDelimiter != null && userInfo.contains(proxyDelimiter)) {
+                userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter)+proxyDelimiter.length(), userInfo.length()), ctx);
+            } else {
+                userId = us.getUserId(userInfo, ctx);
+            }
             u = us.getUser(userId, ctx);
         } catch (final LdapException e) {
             throw new UserException(e);

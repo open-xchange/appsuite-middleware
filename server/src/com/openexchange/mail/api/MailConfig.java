@@ -507,8 +507,14 @@ public abstract class MailConfig {
      * @throws MailConfigException If a configuration error occurs
      */
     protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
+        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         // Assign login
-        mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
+        final String slogin = session.getLoginName();
+        if(  proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
+            mailConfig.login = slogin;
+        } else {
+            mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
+        }
         // Assign password
         final String sessionPassword = session.getPassword();
         if (mailAccount.isDefaultAccount()) {
