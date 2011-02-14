@@ -59,6 +59,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -119,6 +120,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The logger instance for {@link IMAPAccess} class.
      */
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPAccess.class);
+
+    /**
+     * Whether debug logging is enabled for this class.
+     */
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * The string for <code>ISO-8859-1</code> character encoding.
@@ -478,7 +484,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Propagate client IP address in case of primary mail account access
              */
             if (imapConfProps.isPropagateClientIPAddress() && MailAccount.DEFAULT_ID == accountId) {
-                IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), session.getLocalIp());
+                final String clientIP = session.getLocalIp();
+                if (!isEmpty(clientIP)) {
+                    IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), clientIP);
+                } else if (DEBUG) {
+                    LOG.debug(new StringBuilder(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
+                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n"));
+                }
+            } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
+                LOG.debug(new StringBuilder(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
+                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
             }
             /*
              * Add server's capabilities
@@ -914,6 +929,28 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return imapStore.toString();
         }
         return "[not connected]";
+    }
+
+    /**
+     * Checks if given string is empty.
+     * 
+     * @param s The string to check
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    private static boolean isEmpty(final String s) {
+        if (null == s) {
+            return true;
+        }
+        final int length = s.length();
+        if (length == 0) {
+            return true;
+        }
+        boolean whiteSpace = true;
+        final char[] chars = s.toCharArray();
+        for (int i = 0; whiteSpace && i < length; i++) {
+            whiteSpace = Character.isWhitespace(chars[i]);
+        }
+        return whiteSpace;
     }
 
 }
