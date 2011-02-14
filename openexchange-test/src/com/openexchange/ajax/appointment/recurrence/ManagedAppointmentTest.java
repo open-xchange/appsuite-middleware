@@ -117,7 +117,7 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
         UserValues values = getClient().getValues();
         userTimeZone = values.getTimeZone();
         this.folder = folderManager.generateFolder(
-            "MAP_"+ (new Date()).getTime(),
+            "MAT_"+ (new Date()).getTime(),
             Module.CALENDAR.getFolderConstant(),
             values.getPrivateAppointmentFolder(),
             values.getUserId());
