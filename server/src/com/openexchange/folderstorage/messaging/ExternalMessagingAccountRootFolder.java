@@ -69,7 +69,7 @@ public final class ExternalMessagingAccountRootFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -7259106085690350497L;
 
-    private com.openexchange.folderstorage.messaging.MessagingFolderImpl.MessagingFolderType messagingFolderType;
+    private final com.openexchange.folderstorage.messaging.MessagingFolderImpl.MessagingFolderType messagingFolderType;
 
     /**
      * Initializes a new {@link ExternalMessagingAccountRootFolder} from given mail account.
@@ -131,7 +131,7 @@ public final class ExternalMessagingAccountRootFolder extends AbstractFolder {
 
     @Override
     public boolean isCacheable() {
-        return true;
+        return false;
     }
 
     @Override

@@ -76,7 +76,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -7259106085690350497L;
 
-    private com.openexchange.folderstorage.mail.MailFolderImpl.MailFolderType mailFolderType;
+    private final com.openexchange.folderstorage.mail.MailFolderImpl.MailFolderType mailFolderType;
 
     /**
      * Initializes a new {@link ExternalMailAccountRootFolder} from given mail account.
@@ -101,7 +101,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
             name = mailAccount.getName();
         }
         parent = FolderStorage.PRIVATE_ID;
-        MailPermissionImpl mp = new MailPermissionImpl();
+        final MailPermissionImpl mp = new MailPermissionImpl();
         mp.setEntity(session.getUserId());
         mp.setAllPermissions(Permission.CREATE_SUB_FOLDERS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
         mp.setAdmin(false);
@@ -172,7 +172,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
 
     @Override
     public boolean isCacheable() {
-        return true;
+        return false;
     }
 
     @Override
