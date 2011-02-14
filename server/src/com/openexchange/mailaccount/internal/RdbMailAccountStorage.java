@@ -76,6 +76,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
@@ -1341,12 +1342,22 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
-                setOptionalString(stmt, pos++, mailAccount.getTrash());
-                setOptionalString(stmt, pos++, mailAccount.getSent());
-                setOptionalString(stmt, pos++, mailAccount.getDrafts());
-                setOptionalString(stmt, pos++, mailAccount.getSpam());
-                setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
-                setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
+                /*
+                 * Default folder names
+                 */
+                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(id, user, cid);
+                {
+                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
+                    setOptionalString(stmt, pos++, defaultFolderNames[0]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[1]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[2]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[3]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[4]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[5]);
+                }
+                /*
+                 * Spam handler
+                 */
                 final String sh = mailAccount.getSpamHandler();
                 if (null == sh) {
                     stmt.setNull(pos++, TYPE_VARCHAR);
@@ -1354,12 +1365,22 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setString(pos++, sh);
                 }
                 stmt.setInt(pos++, mailAccount.isUnifiedINBOXEnabled() ? 1 : 0);
-                setOptionalString(stmt, pos++, mailAccount.getTrashFullname());
-                setOptionalString(stmt, pos++, mailAccount.getSentFullname());
-                setOptionalString(stmt, pos++, mailAccount.getDraftsFullname());
-                setOptionalString(stmt, pos++, mailAccount.getSpamFullname());
-                setOptionalString(stmt, pos++, mailAccount.getConfirmedSpamFullname());
-                setOptionalString(stmt, pos++, mailAccount.getConfirmedHamFullname());
+                /*
+                 * Default folder full names
+                 */
+                {
+                    final String[] defaultFolderFullnames =
+                        defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, true);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[0]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[1]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[2]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[3]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[4]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[5]);
+                }
+                /*
+                 * Personal
+                 */
                 final String personal = mailAccount.getPersonal();
                 if (isEmpty(personal)) {
                     stmt.setNull(pos++, TYPE_VARCHAR);
@@ -1427,6 +1448,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final MailException e) {
+            throw new MailAccountException(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
