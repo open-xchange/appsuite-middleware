@@ -1,5 +1,4 @@
-# possible log levels are ALL INFO DEBUG
-# Note: If JDK logging is active the DEBUG level will be called FINE
+# possible log levels are ALL INFO FINE
 .level=INFO
 
 handlers=java.util.logging.FileHandler
