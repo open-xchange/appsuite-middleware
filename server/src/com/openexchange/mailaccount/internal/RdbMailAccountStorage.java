@@ -75,7 +75,6 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
