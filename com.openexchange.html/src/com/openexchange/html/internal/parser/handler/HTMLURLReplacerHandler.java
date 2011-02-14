@@ -56,6 +56,7 @@ import java.net.URLDecoder;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.internal.parser.HTMLHandler;
@@ -198,9 +199,16 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         }
     }
 
+    private static final Pattern PATTERN_CODE_POINT = Pattern.compile("%u00([a-fA-F0-9]{2})");
+
+    private static String replaceURLCodePoints(final String s) {
+        final Matcher m = PATTERN_CODE_POINT.matcher(s);
+        return m.replaceAll("%$1");
+    }
+
     private static String urlDecode(final String s) {
         try {
-            return URLDecoder.decode(s, "ISO-8859-1");
+            return URLDecoder.decode(replaceURLCodePoints(s), "ISO-8859-1");
         } catch (final UnsupportedEncodingException e) {
             return s;
         }

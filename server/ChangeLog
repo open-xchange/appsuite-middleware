@@ -2,6 +2,7 @@
 
  - Bugfix #18299: Setting proper locale-sensitive folder names
  - Bugfix #18329: Fixed ArrayIndexOutOfBoundsException in jTidy library
+ - Bugfix #18302: Replacing URL code point
 
 * 2011-02-10 - thorben.betten@open-xchange.com
 
