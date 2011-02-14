@@ -850,14 +850,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         attribute.doSwitch(sqlBuilder);
                     }
 
-                    if (LOG.isDebugEnabled()) {
-                        final String query = sqlBuilder.getUpdateQuery();
-                        stmt = con.prepareStatement(query);
-                        LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
-                            orderedAttributes).append(" :\n").append(query));
-                    } else {
-                        stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
-                    }
+                    stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
 
                     final GetSwitch getter = new GetSwitch(mailAccount);
                     int pos = 1;
@@ -899,6 +892,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setLong(pos++, cid);
                     stmt.setLong(pos++, mailAccount.getId());
                     stmt.setLong(pos++, user);
+
+                    if (LOG.isDebugEnabled()) {
+                        final String query = stmt.toString();
+                        LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
+                            orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
+                    }
+
                     stmt.executeUpdate();
                     closeSQLStuff(stmt);
 
