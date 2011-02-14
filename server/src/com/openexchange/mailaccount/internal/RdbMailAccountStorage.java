@@ -726,12 +726,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         Attribute.PERSONAL_LITERAL);
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
+        final boolean rename;
         if (attributes.contains(Attribute.NAME_LITERAL)) {
             // Check name
             final String name = mailAccount.getName();
             if (!isValid(name)) {
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_NAME, name);
             }
+            // Check for rename operation
+            rename = !name.equals(getMailAccount(mailAccount.getId(), user, cid, con).getName());
+        } else {
+            rename = false;
         }
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
             final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
@@ -963,7 +968,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
                 }
-                dropPOP3StorageFolders(user, cid);
+                /*
+                 * Drop POP3 storage folders if a rename was performed
+                 */
+                if (rename) {
+                    dropPOP3StorageFolders(user, cid);
+                }
             } catch (final SQLException e) {
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
             } finally {
@@ -1803,12 +1813,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         /*
          * TODO: Re-think about invalid characters
          */
-        if (true) {
-            return true;
-        }
         if (null == name || 0 == name.length()) {
             return false;
         }
+        
+        if (true) {
+            return true;
+        }
+        
         final char[] chars = name.toCharArray();
         boolean valid = true;
         boolean isWhitespace = true;
