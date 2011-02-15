@@ -50,7 +50,11 @@
 package com.openexchange.imap.config;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.entity2acl.Entity2ACL;
@@ -116,6 +120,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean propagateClientIPAddress;
 
+    private Set<String> propagateHostNames;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
@@ -123,6 +129,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         super();
         newACLExtMap = new ConcurrentHashMap<String, Boolean>();
         mailProperties = MailProperties.getInstance();
+        propagateHostNames = Collections.emptySet();
     }
 
     @Override
@@ -153,6 +160,16 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String tmp = configuration.getProperty("com.openexchange.imap.propagateClientIPAddress", STR_FALSE).trim();
             propagateClientIPAddress = Boolean.parseBoolean(tmp);
             logBuilder.append("\tPropagate Client IP Address: ").append(propagateClientIPAddress).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.propagateHostNames", "").trim();
+            if (tmp.length() > 0) {
+                propagateHostNames = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(tmp.split(" *, *"))));
+            } else {
+                propagateHostNames = Collections.emptySet();
+            }
+            logBuilder.append("\tPropagate Host Names: ").append(propagateHostNames.isEmpty() ? "<none>" : propagateHostNames.toString()).append('\n');
         }
 
         {
@@ -256,6 +273,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         imapSearch = false;
         fastFetch = true;
         propagateClientIPAddress = false;
+        propagateHostNames = Collections.emptySet();
         supportsACLs = null;
         imapTimeout = 0;
         imapConnectionTimeout = 0;
@@ -273,6 +291,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     public boolean isPropagateClientIPAddress() {
         return propagateClientIPAddress;
+    }
+
+    public Set<String> getPropagateHostNames() {
+        return propagateHostNames;
     }
 
     public String getImapAuthEnc() {

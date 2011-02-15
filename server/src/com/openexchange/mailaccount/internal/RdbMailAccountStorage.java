@@ -71,6 +71,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
@@ -1511,6 +1512,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid, final Connection con) throws MailAccountException {
+        if (null == hostNames || hostNames.isEmpty()) {
+            return new int[0];
+        }
+        final Set<String> set = new HashSet<String>(hostNames.size());
+        for (final String hostName : hostNames) {
+            set.add(hostName.toLowerCase(Locale.ENGLISH));
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -1525,7 +1533,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final TIntArrayList ids = new TIntArrayList(6);
             do {
                 tmp.parseMailServerURL(result.getString(2));
-                if (hostNames.contains(tmp.getMailServer())) {
+                if (set.contains(tmp.getMailServer().toLowerCase(Locale.ENGLISH))) {
                     ids.add(result.getInt(1));
                 }
             } while (result.next());

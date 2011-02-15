@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import gnu.trove.TIntHashSet;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.util.Iterator;
@@ -503,7 +504,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Propagate client IP address in case of primary mail account access
              */
-            if (imapConfProps.isPropagateClientIPAddress() && MailAccount.DEFAULT_ID == accountId) {
+            if (imapConfProps.isPropagateClientIPAddress() && isPropagateAccount(imapConfProps)) {
                 final String clientIP = session.getLocalIp();
                 if (!isEmpty(clientIP)) {
                     IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), clientIP);
@@ -531,6 +532,25 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             decrement = true;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, config, session);
+        }
+    }
+
+    private boolean isPropagateAccount(final IIMAPProperties imapConfProps) throws MailException {
+        if (MailAccount.DEFAULT_ID == accountId) {
+            return true;
+        }
+
+        final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class);
+        if (null == storageService) {
+            return false;
+        }
+        try {
+            return new TIntHashSet(storageService.getByHostNames(
+                imapConfProps.getPropagateHostNames(),
+                session.getUserId(),
+                session.getContextId())).contains(accountId);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
         }
     }
 

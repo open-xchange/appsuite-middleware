@@ -51,6 +51,7 @@
 package com.openexchange.imap.config;
 
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 
@@ -67,6 +68,13 @@ public interface IIMAPProperties extends IMailProperties {
      * @return <code>true</code> if client's IP address should be propagated by a NOOP command; otherwise <code>false</code>
      */
     public boolean isPropagateClientIPAddress();
+
+    /**
+     * Gets the host names to propagate to.
+     * 
+     * @return The host names to propagate to
+     */
+    public Set<String> getPropagateHostNames();
 
     /**
      * Checks if fast <code>FETCH</code> is enabled.

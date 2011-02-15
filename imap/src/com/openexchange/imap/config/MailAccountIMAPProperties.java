@@ -50,7 +50,11 @@
 package com.openexchange.imap.config;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailAccountProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -188,6 +192,15 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         return Boolean.parseBoolean(tmp);
+    }
+
+    public Set<String> getPropagateHostNames() {
+        final String tmp = properties.get("com.openexchange.imap.propagateHostNames");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().getPropagateHostNames();
+        }
+
+        return Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(tmp.trim().split(" *, *"))));
     }
 
     public boolean isImapSearch() {
