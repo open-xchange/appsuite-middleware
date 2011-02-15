@@ -238,4 +238,42 @@ public final class Autoboxing {
         }
         return target;
     }
+    
+    // Type Coercion
+    
+    public static int a2i(Object anything) {
+        if(anything == null) {
+            throw new NullPointerException("Can't convert null into integer");
+        }
+        if(Integer.class.isInstance(anything)){
+            return (Integer) anything;
+        }
+        if(Byte.class.isInstance(anything)) {
+            return (Byte) anything;
+        }
+        if(Long.class.isInstance(anything)) {
+            return ((Long) anything).intValue();
+        }
+        if(String.class.isInstance(anything)) {
+            return Integer.parseInt((String) anything);
+        }
+        
+        throw new ClassCastException("I don't know how to turn "+anything+" of class "+anything.getClass().getName()+" into an int.");
+    }
+    
+    public static boolean a2b(Object anything) {
+        if(anything == null) {
+            throw new NullPointerException("Can't convert null into boolean");
+        }
+        if(Boolean.class.isInstance(anything)){
+            return (Boolean) anything;
+        }
+        
+        if(String.class.isInstance(anything)) {
+            return Boolean.parseBoolean((String) anything);
+        }
+        
+        throw new ClassCastException("I don't know how to turn "+anything+" of class "+anything.getClass().getName()+" into a boolean.");
+    }
+
 }
