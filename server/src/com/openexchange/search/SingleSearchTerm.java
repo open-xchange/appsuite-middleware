@@ -78,7 +78,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Equals comparison
          */
-        EQUALS("equals", 2, "=", new InstanceCreator() {
+        EQUALS("=", 2, "=", new InstanceCreator() {
 
             private static final long serialVersionUID = -7337346107116884060L;
 
@@ -89,7 +89,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Less-than comparison
          */
-        LESS_THAN("lt", 2, "<", new InstanceCreator() {
+        LESS_THAN("<", 2, "<", new InstanceCreator() {
 
             private static final long serialVersionUID = 3045641432242061311L;
 
@@ -100,9 +100,42 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Greater-than comparison
          */
-        GREATER_THAN("gt", 2, ">", new InstanceCreator() {
+        GREATER_THAN(">", 2, ">", new InstanceCreator() {
 
             private static final long serialVersionUID = 8960232001776390636L;
+
+            public SingleSearchTerm newInstance() {
+                return new GreaterThanTerm();
+            }
+        }),
+        /**
+         * Not-equal comparison
+         */
+        NOT_EQUALS("<>", 2, "<>", new InstanceCreator() {
+
+//            private static final long serialVersionUID = 8960232001776390636L;
+
+            public SingleSearchTerm newInstance() {
+                return new GreaterThanTerm();
+            }
+        }),
+        /**
+         * Greater-than or equal comparison
+         */
+        GREATER_OR_EQUAL(">=", 2, ">=", new InstanceCreator() {
+
+//            private static final long serialVersionUID = 8960232001776390636L;
+
+            public SingleSearchTerm newInstance() {
+                return new GreaterThanTerm();
+            }
+        }),
+        /**
+         * Less-than or equal comparison
+         */
+        LESS_OR_EQUAL("<=", 2, "<=", new InstanceCreator() {
+
+//            private static final long serialVersionUID = 8960232001776390636L;
 
             public SingleSearchTerm newInstance() {
                 return new GreaterThanTerm();
