@@ -353,6 +353,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     
     public static final String PARAMETER_PASSWORD= "password";
 
+    public static final String PARAMETER_FILTER = "filter";
     
     /**
      * The content type if the response body contains javascript data. Set it with
@@ -694,6 +695,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     private static final Set<String> UPLOAD_ACTIONS =
         new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY));
+
 
 
     /**
