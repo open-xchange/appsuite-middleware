@@ -48,7 +48,7 @@ Summary:        Open-Xchange Meta packages
 
 %define oxcommon open-xchange, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-control, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
 
-%define alllang open-xchange-gui-lang-es-es, open-xchange-gui-lang-it-it, open-xchange-gui-lang-ja-jp, open-xchange-gui-lang-nl-nl, open-xchange-gui-lang-pl-pl, open-xchange-lang-es-es, open-xchange-lang-it-it, open-xchange-lang-ja-jp, open-xchange-lang-nl-nl, open-xchange-lang-pl-pl, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-online-help-pl, open-xchange-online-help-jp
+%define alllang open-xchange-gui-lang-es-es, open-xchange-gui-lang-it-it, open-xchange-gui-lang-ja-jp, open-xchange-gui-lang-nl-nl, open-xchange-gui-lang-pl-pl, open-xchange-lang-es-es, open-xchange-lang-it-it, open-xchange-lang-ja-jp, open-xchange-lang-nl-nl, open-xchange-lang-pl-pl, open-xchange-online-help-es-es, open-xchange-online-help-nl-nl, open-xchange-online-help-pl-pl, open-xchange-online-help-ja-jp
 
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-server
@@ -109,7 +109,7 @@ Authors:
 %package -n	open-xchange-meta-gui
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX GUI
-Requires:	open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
+Requires:	open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-fr-fr
 
 
 %description -n open-xchange-meta-gui

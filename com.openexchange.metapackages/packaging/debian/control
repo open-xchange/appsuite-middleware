@@ -43,7 +43,7 @@ Description: The Open-Xchange Meta package for Messaging
 
 Package: open-xchange-meta-gui
 Architecture: all
-Depends: open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
+Depends: open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-fr-fr
 Description: The Open-Xchange Meta package for OX GUI
 
 Package: open-xchange-meta-singleserver
