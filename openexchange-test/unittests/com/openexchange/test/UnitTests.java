@@ -168,7 +168,6 @@ public class UnitTests {
         
         tests.addTest(ImportExportStandaloneSuite.suite());
         tests.addTest(TemplateTestSuite.suite());
-        tests.addTestSuite(com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class);
         
         // Slow Tests
         tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
