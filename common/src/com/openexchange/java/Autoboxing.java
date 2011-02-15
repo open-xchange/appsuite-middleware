@@ -227,7 +227,7 @@ public final class Autoboxing {
     }
     
     /**
-     * Converst an Object-array into a Long-array
+     * Converts an Object-array into a Long-array
      * @param source
      * @return
      */
@@ -237,6 +237,17 @@ public final class Autoboxing {
             target[i] = (Long) source[i];
         }
         return target;
+    }
+    
+    /**
+     * Converts a collection of integers into an int-array
+     */
+    public static int[] Coll2i(Collection<Integer> collection){
+    	int[] results = new int[collection.size()];
+    	int position = 0;
+    	for(Integer value : collection)
+    		results[position++] = value.intValue();
+    	return results;
     }
     
     // Type Coercion
