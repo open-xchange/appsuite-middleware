@@ -84,6 +84,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.ArrayIterator;
@@ -777,4 +778,18 @@ public class LdapContactInterface implements ContactInterface {
     public void separateTwoContacts(Contact master, Contact slave) throws OXException {
         throw new UnsupportedOperationException();
     }
+
+
+	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
+			SearchTerm<T> searchterm, int orderBy, String orderDir, int[] cols)
+			throws OXException {
+        throw new UnsupportedOperationException();
+	}
+
+
+	public SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy,
+			String orderDir, int[] cols) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
