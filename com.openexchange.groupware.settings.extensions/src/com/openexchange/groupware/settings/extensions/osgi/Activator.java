@@ -72,6 +72,7 @@ import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,10 +80,8 @@ import java.util.Map;
  */
 public class Activator implements BundleActivator {
 
-    /**
-     * 
-     */
     private static final String PREFERENCE_PATH = "preferencePath";
+    private static final String METADATA_PREFIX = "meta";
     private ServicePublisher services;
     private BundleContext context;
     private ServiceTracker serviceTracker;
@@ -122,7 +121,8 @@ public class Activator implements BundleActivator {
     private void export(final ConfigViewFactory viewFactory, ComposedConfigProperty<String> property, final String propertyName) throws ConfigCascadeException {
         
         final String[] path = property.get(PREFERENCE_PATH).split("/");
-        final boolean writable = property.get("final") == null || property.get("final").equals("user");
+        final boolean writable = (property.get("final") == null || property.get("final").equals("user")) && (property.get("protected") == null || ! property.get("protected", boolean.class));
+        
         
         PreferencesItemService prefItem = new PreferencesItemService() {
 
@@ -179,6 +179,108 @@ public class Activator implements BundleActivator {
         };
         
         services.publishService(PreferencesItemService.class, prefItem);
+        
+        // And let's publish the metadata as well
+        List<String> metadataNames = property.getMetadataNames();
+        for (final String metadataName : metadataNames) {
+            final String[] metadataPath = new String[path.length+2];
+            System.arraycopy(path, 0, metadataPath, 1, path.length);
+            metadataPath[metadataPath.length-1] = metadataName;
+            metadataPath[0] = METADATA_PREFIX;
+            
+            PreferencesItemService metadataItem = new PreferencesItemService() {
+
+                public String[] getPath() {
+                    return metadataPath;
+                }
+
+                public IValueHandler getSharedValue() {
+                    return new IValueHandler() {
+
+                        public int getId() {
+                            return NO_ID;
+                        }
+
+                        public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                            try {
+                                ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
+                                Object value = prop.get(metadataName);
+                                try {
+                                    // Let's turn this into a nice object, if it conforms to JSON
+                                    value = new JSONObject("{value: "+value+"}").get("value");
+
+                                } catch (JSONException x) {
+                                    // Ah well, let's pretend it's a string.
+                                }
+                                
+                                setting.setSingleValue(value);
+                            } catch (ConfigCascadeException e) {
+                                throw new SettingException(e);
+                            }
+                        }
+
+                        public boolean isAvailable(UserConfiguration userConfig) {
+                            return true;
+                        }
+
+                        public boolean isWritable() {
+                            return false;
+                        }
+
+                        public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
+                            // IGNORE
+                        }
+                        
+                    };
+                }
+                
+            };
+            
+            services.publishService(PreferencesItemService.class, metadataItem);
+        }
+        
+        // Lastly, let's publish configurability.
+        final String[] configurablePath = new String[path.length+2];
+        System.arraycopy(path, 0, configurablePath, 1, path.length);
+        configurablePath[configurablePath.length-1] = "configurable";
+        configurablePath[0] = METADATA_PREFIX;
+        
+        
+        PreferencesItemService configurableItem = new PreferencesItemService(){
+
+            public String[] getPath() {
+                return configurablePath;
+            }
+
+            public IValueHandler getSharedValue() {
+                return new IValueHandler() {
+
+                    public int getId() {
+                        return NO_ID;
+                    }
+
+                    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                        setting.setSingleValue(writable);
+                    }
+
+                    public boolean isAvailable(UserConfiguration userConfig) {
+                        return true;
+                    }
+
+                    public boolean isWritable() {
+                        return false;
+                    }
+
+                    public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
+                        // IGNORE
+                    }
+                    
+                };
+            }
+            
+        };
+        
+        services.publishService(PreferencesItemService.class, configurableItem);
     }
 
     private boolean isPreferenceItem(ComposedConfigProperty<String> property) throws ConfigCascadeException {

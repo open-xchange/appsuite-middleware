@@ -50,6 +50,8 @@
 package com.openexchange.config.cascade;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -82,6 +84,10 @@ public interface ConfigProviderService {
 
         public void set(String metadataName, String value) throws ConfigCascadeException {
             
+        }
+
+        public List<String> getMetadataNames() throws ConfigCascadeException {
+            return Collections.emptyList();
         }
         
     };

@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade.impl;
 
+import java.util.List;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
@@ -123,6 +124,10 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
 
     public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws ConfigCascadeException {
         return delegate.to(otherType);
+    }
+
+    public List<String> getMetadataNames() throws ConfigCascadeException {
+        return delegate.getMetadataNames();
     }
 
 }

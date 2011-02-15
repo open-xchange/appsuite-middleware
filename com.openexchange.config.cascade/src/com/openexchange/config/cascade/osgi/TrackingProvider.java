@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.osgi.framework.ServiceReference;
@@ -139,6 +140,10 @@ public class TrackingProvider implements ConfigProviderService {
 
                 public void set(String metadataName, String value) {
                     throw new UnsupportedOperationException("Can't save metadata "+metadataName+" on property "+property+". No ConfigProvider is specified for this value");    
+                }
+
+                public List<String> getMetadataNames() throws ConfigCascadeException {
+                    return Collections.emptyList();
                 }  
             };
         }

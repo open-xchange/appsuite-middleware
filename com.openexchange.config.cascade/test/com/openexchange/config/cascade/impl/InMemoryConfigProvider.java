@@ -50,9 +50,12 @@
 package com.openexchange.config.cascade.impl;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 
@@ -100,6 +103,10 @@ public class InMemoryConfigProvider implements ConfigProviderService{
 
             public boolean isDefined() {
                 return values.contains(property);
+            }
+
+            public List<String> getMetadataNames() throws ConfigCascadeException {
+                return Collections.emptyList();
             }
             
         };

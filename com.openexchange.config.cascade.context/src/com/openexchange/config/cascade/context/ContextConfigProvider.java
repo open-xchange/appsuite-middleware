@@ -50,7 +50,9 @@
 package com.openexchange.config.cascade.context;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
@@ -101,6 +103,10 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
             public void set(String metadataName, String value) throws ConfigCascadeException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
+            }
+
+            public List<String> getMetadataNames() throws ConfigCascadeException {
+                return Collections.emptyList();
             }
 
         };

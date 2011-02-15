@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
@@ -179,6 +180,18 @@ public class ConfigCascade implements ConfigViewFactory {
                     }
                     return null;
                 }
+                
+                public List<String> getMetadataNames() throws ConfigCascadeException {
+                    Set<String> metadataNames = new HashSet<String>();
+                    for (ConfigProviderService provider : getConfigProviders(null)) {
+                        BasicProperty basicProperty = provider.get(property, context, user);
+                        if(basicProperty != null) {
+                            metadataNames.addAll(basicProperty.getMetadataNames());
+                        }
+                    }
+                    return new ArrayList<String>(metadataNames);
+                }
+
 
                 public <M> ComposedConfigProperty<String> set(String metadataName, M value) {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
@@ -222,6 +235,7 @@ public class ConfigCascade implements ConfigViewFactory {
                 public <M> ComposedConfigProperty<M> to(Class<M> otherType) {
                     return new CoercingComposedConfigProperty<M>(otherType, this, stringParser);
                 }
+
 
             }, stringParser);
         }

@@ -113,6 +113,10 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             public void set(String metadataName, String value) throws ConfigCascadeException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, SCOPE);
             }
+
+            public List<String> getMetadataNames() throws ConfigCascadeException {
+                return Collections.emptyList();
+            }
             
         };
     }

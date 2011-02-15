@@ -49,9 +49,12 @@
 
 package com.openexchange.config.internal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
 
 /**
  * {@link ServerProperty}
@@ -89,6 +92,10 @@ public class ServerProperty implements BasicProperty {
 
     public void set(String metadataName, String value) {
         metadata.put(metadataName, value);
+    }
+
+    public List<String> getMetadataNames() throws ConfigCascadeException {
+        return new ArrayList<String>(metadata.keySet());
     }
 
 }

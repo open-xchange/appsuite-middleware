@@ -49,6 +49,8 @@
 
 package com.openexchange.config.cascade;
 
+import java.util.List;
+
 
 /**
  * {@link ConfigProperty}
@@ -66,6 +68,8 @@ public interface ConfigProperty<T> {
     <M> M get(String metadataName, Class<M> type) throws ConfigCascadeException;
 
     String get(String metadataName) throws ConfigCascadeException;
+    
+    public List<String> getMetadataNames() throws ConfigCascadeException;
 
     public <M> ConfigProperty<M> to(Class<M> otherType) throws ConfigCascadeException;
     

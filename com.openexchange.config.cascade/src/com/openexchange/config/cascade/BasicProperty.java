@@ -49,6 +49,8 @@
 
 package com.openexchange.config.cascade;
 
+import java.util.List;
+
 
 /**
  * {@link BasicProperty}
@@ -65,4 +67,6 @@ public interface BasicProperty {
     String get(String metadataName) throws ConfigCascadeException;
     
     public boolean isDefined() throws ConfigCascadeException;
+
+    List<String> getMetadataNames() throws ConfigCascadeException;
 }
