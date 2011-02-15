@@ -8,6 +8,8 @@
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="lib.dir" value="lib"/>
+	<property name="conf.dir" value="conf"/>
+		
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -19,6 +21,8 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+    <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
@@ -86,6 +90,15 @@
     <target name="install" depends="installJar,installConfig"/>
 
     <target name="installConfig">
+    	<mkdir dir="${confInstallCopyDir}"/>
+    	<copy todir="${confInstallCopyDir}" overwrite="true">
+    	   	<fileset dir="${conf.dir}">
+    	       	<include name="**"/>
+    	           <exclude name="*.in"/>
+    	           <exclude name="CVS"/>
+    	           <exclude name="osgi/**"/>
+    	   </fileset>
+    	</copy>
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
