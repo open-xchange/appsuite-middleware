@@ -23,5 +23,17 @@
 <project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.groupware.settings.extensions,com.openexchange.groupware.settings.extensions,bf_6_18_2"/>
 <project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.folder.json,com.openexchange.folder.json,bf_6_18_2"/>
 <project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.proxy.servlet,com.openexchange.proxy.servlet,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/community,Community,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.file.storage.generic,com.openexchange.file.storage.generic,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.file.storage.infostore,com.openexchange.file.storage.infostore,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.file.storage.json,com.openexchange.file.storage.json,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.datatypes.genericonf.storage,com.openexchange.datatypes.genericonf.storage,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.publish.basic,com.openexchange.publish.basic,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.publish.json,com.openexchange.publish.json,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.secret.recovery,com.openexchange.secret.recovery,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.subscribe,com.openexchange.subscribe,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.subscribe.json,com.openexchange.subscribe.json,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.templating,com.openexchange.templating,bf_6_18_2"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.templating.json,com.openexchange.templating.json,bf_6_18_2"/>
 </provider>
 </psf>
