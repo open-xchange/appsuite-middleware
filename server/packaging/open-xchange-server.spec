@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 20
+%define		ox_release 21
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -718,6 +718,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Feb 15 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18281: Error response from server if authentication of POP3 account fails
 * Thu Jan 20 2011 - martin.herfurth@open-xchange.com
  - Bugfix #17902: Closed SQL Connection was used.
 * Wed Jan 19 2011 - thorben.betten@open-xchange.com
