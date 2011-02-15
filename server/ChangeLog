@@ -1,3 +1,7 @@
+* 2011-02-15 - thorben.betten@open-xchange.com
+
+ - Bugfix #18281: Error response from server if authentication of POP3 account fails
+
 * 2011-01-20 - martin.herfurth@open-xchange.com
 
  - Bugfix #17902: Closed SQL Connection was used.

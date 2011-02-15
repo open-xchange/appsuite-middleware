@@ -166,7 +166,8 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                     LOG.debug("\n\tSynchronization successfully performed for POP3 account: " + server);
                 }
             } catch (final MailException e) {
-                LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+                throw e;
+                //LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             }
         }
         return null;
