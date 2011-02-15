@@ -84,7 +84,9 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
@@ -328,6 +330,72 @@ public class ContactTestManager implements TestManager {
      * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
      */
     public Contact[] searchAction(String pattern, int folderId) {
+    	return searchAction(pattern, folderId, Contact.ALL_COLUMNS);
+    }
+
+    public Contact[] searchAction(String pattern, int folderId, int... columns) {
+        Vector<Contact> allContacts = new Vector<Contact>();
+        SearchRequest request = new SearchRequest(pattern, folderId, columns, true);
+        try {
+            SearchResponse response = getClient().execute(request);
+            lastResponse = response;
+            final JSONArray data = (JSONArray) response.getResponse().getData();
+            this.convertJSONArray2Vector(data, allContacts);
+        } catch (Exception e) {
+            doExceptionHandling(
+                e,
+                "searching for contacts with pattern: " + pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
+        }
+        Contact[] contactArray = new Contact[allContacts.size()];
+        allContacts.copyInto(contactArray);
+        return contactArray;
+    }
+
+    
+    public Contact[] searchFirstletterAction(String firstLetter, int folderId) {
+        Vector<Contact> allContacts = new Vector<Contact>();
+        SearchRequest request = new SearchRequest(firstLetter, true, folderId, Contact.ALL_COLUMNS, -1, null, true);
+        try {
+            SearchResponse response = getClient().execute(request);
+            lastResponse = response;
+            final JSONArray data = (JSONArray) response.getResponse().getData();
+            this.convertJSONArray2Vector(data, allContacts);
+        } catch (Exception e) {
+            doExceptionHandling(
+                e,
+                "searching for contacts with first letter: " + firstLetter + ", in folder: " + Integer.toString(folderId) + e.getMessage());
+        }
+        Contact[] contactArray = new Contact[allContacts.size()];
+        allContacts.copyInto(contactArray);
+        return contactArray;
+    }
+    
+    public Contact[] searchAction(ContactSearchObject search) {
+    	return searchAction(search, Contact.ALL_COLUMNS);
+    }
+    
+    public Contact[] searchAction(ContactSearchObject search, int[] columns) {
+        Vector<Contact> allContacts = new Vector<Contact>();
+        SearchRequest request = new SearchRequest(search, columns, getFailOnError());
+        try {
+            SearchResponse response = getClient().execute(request);
+            lastResponse = response;
+            final JSONArray data = (JSONArray) response.getResponse().getData();
+            this.convertJSONArray2Vector(data, allContacts);
+        } catch (Exception e) {
+            doExceptionHandling(
+                e,
+                "searching for contacts with search-object: " +  search + ": " + e.getMessage());
+        }
+        Contact[] contactArray = new Contact[allContacts.size()];
+        allContacts.copyInto(contactArray);
+        return contactArray;
+    }
+    
+    /**
+     * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
+     */
+    public Contact[] searchAction(String pattern, int folderId, boolean initialSearch) {
         Vector<Contact> allContacts = new Vector<Contact>();
         SearchRequest request = new SearchRequest(pattern, folderId, Contact.ALL_COLUMNS, true);
         try {
@@ -369,23 +437,35 @@ public class ContactTestManager implements TestManager {
             lastException = exception;
             throw exception;
         } catch (AjaxException e) {
-            if (getFailOnError())
+            if (getFailOnError()){
+            	e.printStackTrace();
                 fail("AjaxException occured during " + action + ": " + e.getMessage());
+            }
         } catch (IOException e) {
-            if (getFailOnError())
+            if (getFailOnError()){
+            	e.printStackTrace();
                 fail("IOException occured during " + action + ": " + e.getMessage());
+            }
         } catch (SAXException e) {
-            if (getFailOnError())
+            if (getFailOnError()){
+            	e.printStackTrace();
                 fail("SAXException occured during " + action + ": " + e.getMessage());
+            }
         } catch (JSONException e) {
-            if (getFailOnError())
+            if (getFailOnError()){
+            	e.printStackTrace();
                 fail("JSONException occured during " + action + ": " + e.getMessage());
+            }
         } catch (AbstractOXException e) {
-            if (getFailOnError())
+            if (getFailOnError()){
+            	e.printStackTrace();
                 fail("AbstractOXException occured during " + action + ": " + e.getMessage());
+            }
         } catch (Exception e) {
-            if (getFailOnError())
+            if (getFailOnError()){
+            	e.printStackTrace();
                 fail("Unexpected exception occured during " + action + ": " + e.getMessage());
+            }
         }
     }
     
@@ -562,6 +642,10 @@ final class ContactMapping extends TestCase {
             put(ContactFields.MODIFIED_BY, Contact.MODIFIED_BY);
             put(ContactFields.NUMBER_OF_ATTACHMENTS, Contact.NUMBER_OF_ATTACHMENTS);
             put(ContactFields.PRIVATE_FLAG, Contact.PRIVATE_FLAG);
+         
+            put(ContactFields.YOMI_COMPANY, Contact.YOMI_COMPANY);
+            put(ContactFields.YOMI_FIRST_NAME, Contact.YOMI_FIRST_NAME);
+            put(ContactFields.YOMI_LAST_NAME, Contact.YOMI_LAST_NAME);
 
         } catch (Exception e) {
             fail(e.getMessage());

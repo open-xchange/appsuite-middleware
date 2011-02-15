@@ -77,7 +77,7 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
         this(pattern, inFolder, columns, -1, null, failOnError);
     }
 
-    public SearchRequest(final String pattern, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError) {
+    public SearchRequest(final String pattern, final boolean firstLetterOnly, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError)  {
         searchParser = new SearchParser(failOnError, columns);
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -86,8 +86,14 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
             param(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
             param(AJAXServlet.PARAMETER_ORDER, orderDir);
         }
-
+        
         try {
+        	if(firstLetterOnly){
+        		body.put("startletter", true);
+        		body.put(AJAXServlet.PARAMETER_SEARCHPATTERN, pattern);
+        		body.put(AJAXServlet.PARAMETER_FOLDERID, inFolder);
+        	}
+
             if (inFolder != -1) {
                 body.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
             }
@@ -97,7 +103,10 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
         } catch (final JSONException e) {
             throw new IllegalStateException(e); // Shouldn't happen
         }
-
+    }
+    
+    public SearchRequest(final String pattern, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError) {
+    	this(pattern, false, inFolder, columns, orderBy, orderDir, failOnError);
     }
 
     public SearchRequest(final ContactSearchObject cso, final int[] columns, boolean failOnError) {
@@ -120,9 +129,12 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
             param(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order));
         }
         try {
-            body.put(ContactFields.LAST_NAME, cso.getSurname());
+        	body.put(ContactFields.LAST_NAME, cso.getSurname());
             body.put(ContactFields.FIRST_NAME, cso.getGivenName());
             body.put(ContactFields.DISPLAY_NAME, cso.getDisplayName());
+            body.put(ContactFields.YOMI_COMPANY, cso.getYomiCompany());
+            body.put(ContactFields.YOMI_FIRST_NAME, cso.getYomiFirstName());
+            body.put(ContactFields.YOMI_LAST_NAME, cso.getYomiLastName());
             body.put(ContactFields.EMAIL1, cso.getEmail1());
             body.put(ContactFields.EMAIL2, cso.getEmail2());
             body.put(ContactFields.EMAIL3, cso.getEmail3());

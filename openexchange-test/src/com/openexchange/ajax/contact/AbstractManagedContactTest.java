@@ -49,13 +49,20 @@
 
 package com.openexchange.ajax.contact;
 
+import java.util.Date;
+
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.ContactTestManager;
+import com.openexchange.test.FolderTestManager;
 
 public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
 	protected ContactTestManager manager;
+	protected FolderTestManager folderManager;
 	protected int folderID;
 
 	public AbstractManagedContactTest(String name) {
@@ -65,17 +72,27 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 	@Override
 	public void setUp() throws Exception {
 	    super.setUp();
+	    
 	    manager = new ContactTestManager(getClient());
 	    manager.setFailOnError(false);
-	    folderID = getClient().getValues().getPrivateContactFolder();
+	    
+	    folderManager = new FolderTestManager(getClient());
+	    folderManager.setFailOnError(false);
+	    
+	    UserValues values = getClient().getValues();
+	    FolderObject folder = folderManager.generateFolder(
+	    		"ManagedContactTest_"+(new Date().getTime()), 
+	    		Module.CONTACTS.getFolderConstant(), 
+	    		values.getPrivateContactFolder(), 
+	    		values.getUserId());
+	    folder = folderManager.insertFolderOnServer(folder);
+	    folderID = folder.getObjectID();
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-	    if (null != manager) {
-	        manager.cleanUp();
-	        manager = null;
-	    }
+        manager.cleanUp();
+    	folderManager.cleanUp();
 	    super.tearDown();
 	}
 
