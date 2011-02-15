@@ -85,7 +85,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(blockSizeStr);
+            return Integer.parseInt(blockSizeStr.trim());
         } catch (final NumberFormatException e) {
             LOG.error("Block Size: Invalid value.", e);
             return IMAPProperties.getInstance().getBlockSize();
@@ -93,11 +93,12 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     public String getImapAuthEnc() {
-        final String imapAuthEncStr = properties.get("com.openexchange.imap.imapAuthEnc");
+        String imapAuthEncStr = properties.get("com.openexchange.imap.imapAuthEnc");
         if (null == imapAuthEncStr) {
             return IMAPProperties.getInstance().getImapAuthEnc();
         }
 
+        imapAuthEncStr = imapAuthEncStr.trim();
         if (Charset.isSupported(imapAuthEncStr)) {
             return imapAuthEncStr;
         }
@@ -114,7 +115,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("IMAP Connection Idle Time: Invalid value.", e);
             return IMAPProperties.getInstance().getImapConnectionIdleTime();
@@ -128,7 +129,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("IMAP Connection Timeout: Invalid value.", e);
             return IMAPProperties.getInstance().getImapConnectionTimeout();
@@ -142,7 +143,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("IMAP Temporary Down: Invalid value.", e);
             return IMAPProperties.getInstance().getImapTemporaryDown();
@@ -156,7 +157,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("IMAP Timeout: Invalid value.", e);
             return IMAPProperties.getInstance().getImapTimeout();
@@ -173,7 +174,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             return IMAPProperties.getInstance().getSupportsACLs();
         }
 
-        return BoolCapVal.parseBoolCapVal(tmp);
+        return BoolCapVal.parseBoolCapVal(tmp.trim());
     }
 
     public boolean isFastFetch() {
@@ -182,7 +183,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             return IMAPProperties.getInstance().isFastFetch();
         }
 
-        return Boolean.parseBoolean(tmp);
+        return Boolean.parseBoolean(tmp.trim());
     }
 
     public boolean isPropagateClientIPAddress() {
@@ -191,7 +192,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             return IMAPProperties.getInstance().isPropagateClientIPAddress();
         }
 
-        return Boolean.parseBoolean(tmp);
+        return Boolean.parseBoolean(tmp.trim());
     }
 
     public Set<String> getPropagateHostNames() {
@@ -209,7 +210,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             return IMAPProperties.getInstance().isImapSearch();
         }
 
-        return Boolean.parseBoolean(tmp);
+        return Boolean.parseBoolean(tmp.trim());
     }
 
     public boolean isImapSort() {
@@ -218,7 +219,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             return IMAPProperties.getInstance().isImapSort();
         }
 
-        return Boolean.parseBoolean(tmp);
+        return Boolean.parseBoolean(tmp.trim());
     }
 
 }

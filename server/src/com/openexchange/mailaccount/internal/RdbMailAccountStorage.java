@@ -1537,7 +1537,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     ids.add(result.getInt(1));
                 }
             } while (result.next());
-            return ids.toNativeArray();
+            final int[] array = ids.toNativeArray();
+            Arrays.sort(array);
+            return array;
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {

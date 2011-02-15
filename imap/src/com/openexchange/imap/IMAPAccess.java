@@ -49,9 +49,9 @@
 
 package com.openexchange.imap;
 
-import gnu.trove.TIntHashSet;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -434,10 +434,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String user = login;
             String proxyUser = null;
             boolean isProxyAuth = false;
-            if( proxyDelimiter != null && login.contains(proxyDelimiter) ) {
+            if (proxyDelimiter != null && login.contains(proxyDelimiter)) {
                 isProxyAuth = true;
                 proxyUser = login.substring(0, login.indexOf(proxyDelimiter));
-                user = login.substring(login.indexOf(proxyDelimiter)+proxyDelimiter.length(), login.length());
+                user = login.substring(login.indexOf(proxyDelimiter) + proxyDelimiter.length(), login.length());
             }
             checkFailedAuths(user, tmpPass);
             /*
@@ -447,7 +447,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
                 imapProps.putAll(getMailProperties());
             }
-            if( isProxyAuth ) {
+            if (isProxyAuth) {
                 imapProps.put("mail.imap.sasl.enable", "true");
                 imapProps.put("mail.imap.sasl.authorizationid", user);
                 imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
@@ -474,7 +474,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Get connected store
              */
             try {
-                if( isProxyAuth ) {
+                if (isProxyAuth) {
                     imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), proxyUser, tmpPass);
                 } else {
                     imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), user, tmpPass);
@@ -545,10 +545,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return false;
         }
         try {
-            return new TIntHashSet(storageService.getByHostNames(
-                imapConfProps.getPropagateHostNames(),
-                session.getUserId(),
-                session.getContextId())).contains(accountId);
+            final int[] ids = storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
+            return Arrays.binarySearch(ids, accountId) >= 0;
         } catch (final MailAccountException e) {
             throw new MailException(e);
         }
