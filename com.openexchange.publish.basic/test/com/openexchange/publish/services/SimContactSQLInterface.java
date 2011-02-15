@@ -63,6 +63,7 @@ import com.openexchange.contact.LdapServer;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -290,5 +291,18 @@ public class SimContactSQLInterface implements ContactSQLInterface {
         // TODO Auto-generated method stub
         
     }
+
+	public SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy,
+			String orderDir, int[] cols) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
+			SearchTerm<T> searchterm, int orderBy, String orderDir, int[] cols)
+			throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

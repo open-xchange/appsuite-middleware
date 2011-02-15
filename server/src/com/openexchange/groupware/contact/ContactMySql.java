@@ -66,6 +66,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contact.Contacts.Mapper;
+import com.openexchange.groupware.contact.sqlinjectors.IntSQLInjector;
+import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
+import com.openexchange.groupware.contact.sqlinjectors.StringSQLInjector;
+import com.openexchange.groupware.contact.sqlinjectors.TimestampSQLInjector;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -276,7 +280,7 @@ public class ContactMySql implements ContactSql {
         return PAT_PREP.matcher(orderBy).replaceAll("$1");
     }
 
-    private String[] getWhere() {
+    protected String[] getWhere() {
 
         if (null != where) {
             return where;
@@ -773,7 +777,7 @@ public class ContactMySql implements ContactSql {
             " AND cid = ").append(cid).toString();
     }
 
-    private static final String PREFIXED_FIELDS = "co.fid,co.cid,co.created_from,co.creating_date,co.changed_from,co.changing_date,co.intfield01";
+    public static final String PREFIXED_FIELDS = "co.fid,co.cid,co.created_from,co.creating_date,co.changed_from,co.changing_date,co.intfield01";
 
     public StringBuilder iFgetColsStringFromDeleteTable(final int[] cols) {
         final String fields = buildContactSelectString(cols);
@@ -1071,87 +1075,8 @@ public class ContactMySql implements ContactSql {
         del.execute(tmp.toString());
     }
 
-    private static interface SQLInjector {
 
-        /**
-         * Injects this injector's value into given prepared statement
-         * 
-         * @param ps The prepared statement
-         * @param parameterIndex The parameter index; the first parameter is 1, the second is 2, ...
-         * @throws SQLException If a database access error occurs
-         */
-        public void inject(PreparedStatement ps, int parameterIndex) throws SQLException;
-    }
-
-    private static final class IntSQLInjector implements SQLInjector {
-
-        private final int value;
-
-        public IntSQLInjector(final int value) {
-            super();
-            this.value = value;
-        }
-
-        public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
-            ps.setInt(parameterIndex, value);
-        }
-
-    }
-
-    private static final class StringSQLInjector implements SQLInjector {
-
-        private final String value;
-
-        /**
-         * Initializes a new {@link StringSQLInjector} which injects NULL.
-         */
-        public StringSQLInjector() {
-            super();
-            this.value = null;
-        }
-
-        public StringSQLInjector(final String value) {
-            super();
-            this.value = value;
-        }
-
-        public StringSQLInjector(final String... values) {
-            super();
-            final StringBuilder builder = new StringBuilder(values.length << 3);
-            for (int i = 0; i < values.length; i++) {
-                builder.append(values[i]);
-            }
-            this.value = builder.toString();
-        }
-
-        public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
-            if (null == value) {
-                ps.setNull(parameterIndex, Types.VARCHAR);
-            } else {
-                ps.setString(parameterIndex, value);
-            }
-        }
-
-    }
-
-    private static final class TimestampSQLInjector implements SQLInjector {
-
-        private final java.sql.Timestamp value;
-
-        public TimestampSQLInjector(final Date value) {
-            super();
-            this.value = new java.sql.Timestamp(value.getTime());
-        }
-
-        public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
-            if (null == value) {
-                ps.setNull(parameterIndex, Types.TIMESTAMP);
-            } else {
-                ps.setTimestamp(parameterIndex, value);
-            }
-        }
-
-    }
+  
 
     private static interface SearchFiller {
 

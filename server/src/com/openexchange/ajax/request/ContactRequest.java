@@ -70,6 +70,7 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
@@ -88,6 +89,7 @@ import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
@@ -101,6 +103,7 @@ import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -187,6 +190,8 @@ public class ContactRequest {
             return actionGetUser(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
             return actionSearch(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_TERMSEARCH)) {
+            return actionTermSearch(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
             return actionCopy(jsonObject);
         } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_ASSOCIATE.getName())) {
@@ -205,7 +210,8 @@ public class ContactRequest {
     }
 
 
-    public JSONValue actionGetByUuid(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
+
+	public JSONValue actionGetByUuid(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         
         Contact contactObj = getFinalContact(contactInterface, jsonObj);
@@ -671,6 +677,47 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
+    public JSONArray actionTermSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+        timestamp = new Date(0);
+
+    	String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
+    	int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+    	int[] columnsToLoad = removeVirtual(columns);
+        int[] internalColumns = checkLastModified(columnsToLoad);
+
+        String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+        TimeZone timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+        String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+
+        final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
+        JSONArray filterContent = jData.getJSONArray("filter");
+        SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
+        
+        ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
+        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchTerm, orderBy, orderDir, internalColumns);
+        
+        final JSONArray jsonResponseArray = new JSONArray();
+        try {
+            final ContactWriter contactwriter = new ContactWriter(timeZone);
+            while (it.hasNext()) {
+                final Contact contactObj = it.next();
+                final JSONArray jsonContactArray = new JSONArray();
+                contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
+                jsonResponseArray.put(jsonContactArray);
+
+                final Date clm = contactObj.getLastModified();
+                if (null != clm && timestamp.before(clm)) {
+                    timestamp = clm;
+                }
+            }
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+        }
+        return jsonResponseArray;    }
+    
     public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);

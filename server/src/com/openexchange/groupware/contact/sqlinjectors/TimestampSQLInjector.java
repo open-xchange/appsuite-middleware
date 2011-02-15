@@ -47,32 +47,33 @@
  *
  */
 
-package com.openexchange.search;
+package com.openexchange.groupware.contact.sqlinjectors;
 
-/**
- * {@link Operation} - A search term operation.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public interface Operation {
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
 
-    /**
-     * Gets this operation's string representation.
-     * 
-     * @return The operation's string representation.
-     */
-    public String getOperation();
-    
-    /**
-     * @return What the operation would look like in SQL
-     */
-    public String getSqlRepresentation();
+public class TimestampSQLInjector implements SQLInjector {
 
-    /**
-     * Checks if specified string equals this operation's string representation.
-     * 
-     * @param other The operation string to check for equality
-     * @return <code>true</code> if specified string equals this operation's string representation; otherwise <code>false</code>.
-     */
-    public boolean equalsOperation(String other);
+    private final java.sql.Timestamp value;
+
+    public TimestampSQLInjector(final Date value) {
+        super();
+        this.value = new java.sql.Timestamp(value.getTime());
+    }
+
+    public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
+        if (null == value) {
+            ps.setNull(parameterIndex, Types.TIMESTAMP);
+        } else {
+            ps.setTimestamp(parameterIndex, value);
+        }
+    }
+
+	@Override
+	public String toString() {
+		return value.toString();
+	}
+
 }

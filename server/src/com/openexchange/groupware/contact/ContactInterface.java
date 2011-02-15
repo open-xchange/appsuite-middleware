@@ -57,6 +57,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -117,6 +118,7 @@ public interface ContactInterface {
      */
     public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException;
 
+    public <T>SearchIterator<Contact> getContactsByExtendedSearch(SearchTerm<T> searchterm, int orderBy, String orderDir, int[] cols) throws OXException;
     /**
      * Lists all contacts where the firstname, lastname or the displayname match the given searchpattern
      * 
@@ -128,6 +130,17 @@ public interface ContactInterface {
      */
     SearchIterator<Contact> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
 
+    /**
+     * List all contacts where the contact matters the given search term
+     * @param term Search term 
+     * @param orderBy The field by which the result should be ordered
+     * @param orderDir "asc" or "desc"
+     * @param cols fields that will be added to the data object
+     * @return A SearchIterator
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy, String orderDir, int[] cols) throws OXException;
+    
     /**
      * Loads one contact by the given ID
      * 

@@ -62,6 +62,7 @@ import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -285,5 +286,18 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     public void addContact(Contact contact){
         contactsByUUID.put(UUID.fromString(contact.getUserField20()), contact);
     }
+
+	public SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy,
+			String orderDir, int[] cols) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
+			SearchTerm<T> searchterm, int orderBy, String orderDir, int[] cols)
+			throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

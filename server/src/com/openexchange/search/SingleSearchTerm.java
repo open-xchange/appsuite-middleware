@@ -78,7 +78,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Equals comparison
          */
-        EQUALS("equals", 2, new InstanceCreator() {
+        EQUALS("equals", 2, "=", new InstanceCreator() {
 
             private static final long serialVersionUID = -7337346107116884060L;
 
@@ -89,7 +89,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Less-than comparison
          */
-        LESS_THAN("lt", 2, new InstanceCreator() {
+        LESS_THAN("lt", 2, "<", new InstanceCreator() {
 
             private static final long serialVersionUID = 3045641432242061311L;
 
@@ -100,7 +100,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Greater-than comparison
          */
-        GREATER_THAN("gt", 2, new InstanceCreator() {
+        GREATER_THAN("gt", 2, ">", new InstanceCreator() {
 
             private static final long serialVersionUID = 8960232001776390636L;
 
@@ -111,14 +111,18 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
         private final String str;
 
+        private final String sql;
+        
         private final InstanceCreator creator;
 
         private final int maxOperands;
 
-        private SingleOperation(final String str, final int maxOperands, final InstanceCreator creator) {
+
+        private SingleOperation(final String str, final int maxOperands, final String sql, final InstanceCreator creator) {
             this.str = str;
             this.maxOperands = maxOperands;
             this.creator = creator;
+            this.sql = sql;
         }
 
         public String getOperation() {
@@ -187,6 +191,10 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         public static boolean containsOperation(final String operation) {
             return (null != getSingleOperation(operation));
         }
+
+		public String getSqlRepresentation() {
+			return sql;
+		}
     }
 
     /**
@@ -209,7 +217,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
      * 
      * @param operation The operation
      */
-    protected SingleSearchTerm(final SingleOperation operation) {
+    public SingleSearchTerm(final SingleOperation operation) {
         this(operation, DEFAULT_CAPACITY);
     }
 
@@ -219,7 +227,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
      * @param operation The operation
      * @param initialCapacity The initial capacity
      */
-    protected SingleSearchTerm(final SingleOperation operation, final int initialCapacity) {
+    public SingleSearchTerm(final SingleOperation operation, final int initialCapacity) {
         super();
         this.operation = operation;
         operands = new ArrayList<Operand<?>>(initialCapacity);

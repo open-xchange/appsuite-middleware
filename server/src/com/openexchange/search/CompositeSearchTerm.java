@@ -65,6 +65,8 @@ import com.openexchange.search.internal.terms.OrTerm;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
+	
+	private static final Integer PRETTY_BIG_NUMBER = Integer.MAX_VALUE / 2; //needed since someone used MAX_VALUE instead and then did a MAX_VALUE+1 comparison. Note: This is also wrong. Since this is going to become SQL code, it should reflect the allowed maximum length of a query... 
 
     private static interface InstanceCreator extends Serializable {
 
@@ -79,7 +81,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         /**
          * The <i><code>AND</code></i> composite type.
          */
-        AND("and", Integer.MAX_VALUE, new InstanceCreator() {
+        AND("and", PRETTY_BIG_NUMBER, "AND", new InstanceCreator() {
 
             private static final long serialVersionUID = -2839503961447478423L;
 
@@ -90,7 +92,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         /**
          * The <i><code>OR</code></i> composite type.
          */
-        OR("or", Integer.MAX_VALUE, new InstanceCreator() {
+        OR("or", PRETTY_BIG_NUMBER, "OR", new InstanceCreator() {
 
             private static final long serialVersionUID = 8612089760772780923L;
 
@@ -101,7 +103,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         /**
          * The <i><code>NOT</code></i> composite type.
          */
-        NOT("not", 1, new InstanceCreator() {
+        NOT("not", 1, "!", new InstanceCreator() {
 
             private static final long serialVersionUID = 5131782739497011902L;
 
@@ -112,14 +114,18 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
         private final String str;
 
+        private final String sql;
+        
         private final InstanceCreator creator;
 
         private final int maxTerms;
 
-        private CompositeOperation(final String str, final int maxTerms, final InstanceCreator creator) {
+
+        private CompositeOperation(final String str, final int maxTerms, final String sql, final InstanceCreator creator) {
             this.str = str;
             this.creator = creator;
             this.maxTerms = maxTerms;
+            this.sql = sql;
         }
 
         public String getOperation() {
@@ -188,6 +194,10 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         public static boolean containsOperation(final String operation) {
             return (null != getCompositeOperation(operation));
         }
+
+		public String getSqlRepresentation() {
+			return sql;
+		}
     }
 
     /**
@@ -210,7 +220,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
      * 
      * @param operation The composite operation.
      */
-    protected CompositeSearchTerm(final CompositeOperation operation) {
+    public CompositeSearchTerm(final CompositeOperation operation) {
         this(operation, DEFAULT_CAPACITY);
     }
 

@@ -78,6 +78,8 @@ public class ContactSearchObject extends SearchObject {
     private String street_business = null;
     
     private String department = null;
+    
+    private String from = null, to = null;
 
     private int ignoreOwn = 0;
 
@@ -345,6 +347,22 @@ public class ContactSearchObject extends SearchObject {
 
 	public void setYomiCompany(String yomiCompany) {
 		this.yomiCompany = yomiCompany;
+	}
+
+	public void setFrom(String from) {
+		this.from = from;
+	}
+
+	public String getFrom() {
+		return from;
+	}
+
+	public void setTo(String to) {
+		this.to = to;
+	}
+
+	public String getTo() {
+		return to;
 	}
 
 }

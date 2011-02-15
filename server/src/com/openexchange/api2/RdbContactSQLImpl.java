@@ -69,8 +69,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.print.attribute.IntegerSyntax;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
@@ -100,6 +105,7 @@ import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
+import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -110,8 +116,10 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -371,8 +379,91 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
         return new ArrayIterator<Contact>(contacts);
     }
+    
+    public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final String orderMechanism, final int[] cols) throws ContactException, OXException {
+        final ContactSql cs = new ContactMySql(session, ctx);
+        ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
+        conv.parse(searchterm);
+        
+        //generate parts of query
+        String select = generateSelect(cols);
+        String whereFolder = checkFolderRights(conv, cs);
+        String whereConditions = conv.getPreparedWhereString();
+        String order = generateOrder(order_field, orderMechanism);
+        
+        //build query
+        StringBuilder query = new StringBuilder(select);
 
-    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final String orderMechanism, final int[] cols) throws ContactException, OXException {
+        query.append("WHERE (co.cid=").append(ctx.getContextId()).append(") "); //never forget the context
+        
+       	if(whereConditions != null && whereConditions.length() > 0)
+       		query.append(" AND ").append(whereConditions);
+        if(whereFolder != null && !conv.hasFolders()){ //if the filter does not check for folders...
+        	query.append(" AND ").append(whereFolder).append(" "); //...search all folders you have access rights to
+        }
+        if(order != null)
+        	query.append(order).append(" ");
+
+        String queryStr = query.toString();
+        
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final DBPoolingException e) {
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
+        }
+        
+        Contact[] contacts;
+        ResultSet result = null;
+        PreparedStatement stmt = null;
+        try {
+			stmt = con.prepareStatement(queryStr);
+			List<SQLInjector> injectors = conv.getInjectors();
+            for (int i = 0; i < injectors.size(); i++) {
+            	injectors.get(i).inject(stmt, i+1);
+            }
+
+            result = stmt.executeQuery();
+            final List<Contact> tmp = new ArrayList<Contact>();
+            while (result.next()) {
+                final Contact contact = convertResultSet2ContactObject(result, cols, false, con);
+                tmp.add(contact);
+            }
+            contacts = tmp.toArray(new Contact[tmp.size()]);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(ctx, con);
+        }
+        return new ArrayIterator<Contact>(contacts);
+    }
+  
+
+	private String generateSelect(int[] cols) {
+        final StringBuilder fieldsBuilder = new StringBuilder();
+        for (int a = 0; a < cols.length; a++) {
+            final Mapper m = Contacts.mapping[cols[a]];
+            if (m != null) {
+            	fieldsBuilder.append("co.").append(m.getDBFieldName()).append(',');
+            }
+        }
+        int len = fieldsBuilder.length();
+        if(len > 0)
+        	fieldsBuilder.deleteCharAt(len - 1);
+        String fields = fieldsBuilder.toString();
+        
+        len = fields.length();
+        final StringBuilder sb = new StringBuilder(len + 256).append("SELECT ");
+        sb.append(ContactMySql.PREFIXED_FIELDS);
+        if (len > 0) {
+            sb.append(',').append(fields);
+        }
+        sb.append(" FROM prg_contacts AS co ");
+        return sb.toString();
+	}
+
+	public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final String orderMechanism, final int[] cols) throws ContactException, OXException {
         int[] extendedCols = cols;
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
@@ -970,6 +1061,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
     }
+    
+	public SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy, String orderDir, int[] cols) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
     public SearchIterator<Contact> getObjectsById(final int[][] object_id, final int[] cols) throws ContactException, OXException {
         final int[] myCols = checkColumns(cols);
@@ -1488,4 +1584,60 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if(e.getSQLState().equals("42S02"))
             throw ContactExceptionCodes.AGGREGATING_CONTACTS_NOT_ENABLED.create();
     }
+
+    private String generateOrder(int order_field, String orderMechanism) {
+    	if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING)
+    		return null;
+
+    	StringBuilder order = new StringBuilder();
+        order.append(" ORDER BY co.");
+        final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
+        order.append(Contacts.mapping[realOrderField].getDBFieldName());
+        order.append(' ');
+        final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+        if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
+            order.append(realOrderMechanism);
+        } else {
+            order.append("ASC");
+        }
+        return order.append(' ').toString();
+	}
+
+	private String checkFolderRights(ContactSearchtermSqlConverter conv, ContactSql cs) throws OXException {
+        
+        if(! conv.hasFolders() ){
+        	try {
+                return cs.buildAllFolderSearchString(userId, memberInGroups, session).toString();
+            } catch (final SearchIteratorException e) {
+                throw new OXException(e);
+            }
+        }
+
+        final OXFolderAccess oxfa = new OXFolderAccess(ctx);
+        
+        List<String> folders = conv.getFolders();
+        int[] folders2 = new int[folders.size()]; int i = 0;
+        final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
+        for (String folderStr : folders) {
+        	int folderId;
+        	try {
+        		folderId = Integer.parseInt(folderStr);
+        	} catch(NumberFormatException e){
+        		throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(folderStr, I(ctx.getContextId()), I(userId)));            		
+        	}
+            final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
+            if (contactFolder.getModule() != FolderObject.CONTACT) {
+                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId)));
+            }
+            final EffectivePermission oclPerm = oxfa.getFolderPermission(folderId, userId, userConfiguration);
+            if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+            }
+            if (!oclPerm.canReadOwnObjects()) {
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+            }
+            folders2[i++] = folderId;
+        }
+        return cs.buildFolderSearch(userId, memberInGroups, folders2, session);
+	}
 }

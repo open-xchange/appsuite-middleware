@@ -47,32 +47,50 @@
  *
  */
 
-package com.openexchange.search;
+package com.openexchange.groupware.contact.sqlinjectors;
 
-/**
- * {@link Operation} - A search term operation.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public interface Operation {
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+
+public class StringSQLInjector implements SQLInjector {
+
+    private final String value;
 
     /**
-     * Gets this operation's string representation.
-     * 
-     * @return The operation's string representation.
+     * Initializes a new {@link StringSQLInjector} which injects NULL.
      */
-    public String getOperation();
+    public StringSQLInjector() {
+        super();
+        this.value = null;
+    }
+
+    public StringSQLInjector(final String value) {
+        super();
+        this.value = value;
+    }
+
+    public StringSQLInjector(final String... values) {
+        super();
+        final StringBuilder builder = new StringBuilder(values.length << 3);
+        for (int i = 0; i < values.length; i++) {
+            builder.append(values[i]);
+        }
+        this.value = builder.toString();
+    }
+
+    public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
+        if (null == value) {
+            ps.setNull(parameterIndex, Types.VARCHAR);
+        } else {
+            ps.setString(parameterIndex, value);
+        }
+    }
     
-    /**
-     * @return What the operation would look like in SQL
-     */
-    public String getSqlRepresentation();
+	@Override
+	public String toString() {
+		return value;
+	}
 
-    /**
-     * Checks if specified string equals this operation's string representation.
-     * 
-     * @param other The operation string to check for equality
-     * @return <code>true</code> if specified string equals this operation's string representation; otherwise <code>false</code>.
-     */
-    public boolean equalsOperation(String other);
+
 }

@@ -47,32 +47,20 @@
  *
  */
 
-package com.openexchange.search;
+package com.openexchange.groupware.contact.sqlinjectors;
 
-/**
- * {@link Operation} - A search term operation.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public interface Operation {
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public interface SQLInjector {
 
     /**
-     * Gets this operation's string representation.
+     * Injects this injector's value into given prepared statement
      * 
-     * @return The operation's string representation.
+     * @param ps The prepared statement
+     * @param parameterIndex The parameter index; the first parameter is 1, the second is 2, ...
+     * @throws SQLException If a database access error occurs
      */
-    public String getOperation();
-    
-    /**
-     * @return What the operation would look like in SQL
-     */
-    public String getSqlRepresentation();
+    public void inject(PreparedStatement ps, int parameterIndex) throws SQLException;
 
-    /**
-     * Checks if specified string equals this operation's string representation.
-     * 
-     * @param other The operation string to check for equality
-     * @return <code>true</code> if specified string equals this operation's string representation; otherwise <code>false</code>.
-     */
-    public boolean equalsOperation(String other);
 }
