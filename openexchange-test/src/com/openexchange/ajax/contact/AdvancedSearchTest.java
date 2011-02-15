@@ -47,9 +47,9 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		ContactField field = ContactField.GIVEN_NAME;
 		ContactField folderField = ContactField.FOLDER_ID; 
 		JSONObject filter = new JSONObject(
-			"{\"filter\" : [ \"and\", " +
-				"[\"equals\" , {\"field\" : \""+field.getAjaxName()+"\"} , \"Bob\"], " +
-				"[\"equals\" , {\"field\" : \""+folderField.getAjaxName()+"\"}, "+folderID+"]" +
+			"{'filter' : [ 'and', " +
+				"['=' , {'field' : '"+field.getAjaxName()+"'} , 'Bob'], " +
+				"['=' , {'field' : '"+folderField.getAjaxName()+"'}, "+folderID+"]" +
 			"]})");
 		
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{Contact.GIVEN_NAME}, -1, null);
@@ -70,7 +70,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 	public void testSearchWithEqualsInAllFolders() throws Exception {
 		ContactField field = ContactField.SUR_NAME;
 		JSONObject filter = new JSONObject(
-			"{\"filter\" : [ \"equals\" , {\"field\" : \""+field.getAjaxName()+"\"} , \""+BOB_LASTNAME+"\"]}");
+			"{'filter' : [ '=' , {'field' : '"+field.getAjaxName()+"'} , '"+BOB_LASTNAME+"']}");
 		
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, Contact.ALL_COLUMNS, -1, null);
 		CommonSearchResponse response = getClient().execute(request);
@@ -94,9 +94,9 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		String bobby = "Robert\\\"); DROP TABLE prg_contacts; --";
 		
 		JSONObject filter = new JSONObject(
-					"{\"filter\" : [ \"or\", " +
-						"[\"equals\" , {\"field\" : \""+field.getAjaxName()+"\"} , \""+BOB_LASTNAME+"\"], " +
-						"[\"equals\" , {\"field\" : \""+field.getAjaxName()+"\"}, \""+bobby+"\"]" +
+					"{'filter' : [ 'or', " +
+						"['=' , {'field' : '"+field.getAjaxName()+"'} , '"+BOB_LASTNAME+"'], " +
+						"['=' , {'field' : '"+field.getAjaxName()+"'}, '"+bobby+"']" +
 					"]})");
 		
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, Contact.ALL_COLUMNS, -1, null);
