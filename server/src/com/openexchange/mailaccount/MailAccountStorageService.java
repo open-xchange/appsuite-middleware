@@ -51,6 +51,7 @@ package com.openexchange.mailaccount;
 
 import java.net.InetSocketAddress;
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
@@ -245,6 +246,17 @@ public interface MailAccountStorageService {
     public int getByPrimaryAddress(String primaryAddress, int user, int cid) throws MailAccountException;
 
     /**
+     * Gets those mail accounts of given user in given context whose host name occurs in specified collection of host names.
+     * 
+     * @param hostNames The host names
+     * @param user The user identifier
+     * @param cid The context identifier
+     * @return The identifiers of matching mail accounts
+     * @throws MailAccountException If look-up by host names caused an error
+     */
+    public int[] getByHostNames(Collection<String> hostNames, int user, int cid) throws MailAccountException;
+
+    /**
      * Gets the transport account for specified account ID.
      * 
      * @param id The account ID
@@ -254,7 +266,7 @@ public interface MailAccountStorageService {
      * @throws MailAccountException If transport look-up fails
      */
     public MailAccount getTransportAccountForID(int id, int user, int cid) throws MailAccountException;
-    
+
     /**
      * Checks whether the given users passwords can be decrypted with the given secret key.
      * 
@@ -265,7 +277,7 @@ public interface MailAccountStorageService {
      * @throws MailAccountException
      */
     public String checkCanDecryptPasswords(int user, int cid, String secret) throws MailAccountException;
- 
+
     /**
      * Decodes stored encrypted strings using the old secret and encode them again using the new secret.
      * 

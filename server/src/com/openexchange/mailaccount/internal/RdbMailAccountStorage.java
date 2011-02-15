@@ -54,6 +54,7 @@ import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.TIntArrayList;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -65,6 +66,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1492,6 +1494,47 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             Database.back(cid, true, con);
         }
         return retval;
+    }
+
+    public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws MailAccountException {
+        Connection con = null;
+        try {
+            con = Database.get(cid, false);
+        } catch (final DBPoolingException e) {
+            throw new MailAccountException(e);
+        }
+        try {
+            return getByHostNames(hostNames, user, cid, con);
+        } finally {
+            Database.back(cid, false, con);
+        }
+    }
+
+    private int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid, final Connection con) throws MailAccountException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, url FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, user);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return new int[0];
+            }
+            final CustomMailAccount tmp = new CustomMailAccount();
+            final TIntArrayList ids = new TIntArrayList(6);
+            do {
+                tmp.parseMailServerURL(result.getString(2));
+                if (hostNames.contains(tmp.getMailServer())) {
+                    ids.add(result.getInt(1));
+                }
+            } while (result.next());
+            return ids.toNativeArray();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
     }
 
     public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws MailAccountException {

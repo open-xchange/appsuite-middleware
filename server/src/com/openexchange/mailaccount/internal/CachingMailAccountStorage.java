@@ -54,6 +54,7 @@ import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -198,6 +199,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws MailAccountException {
         return delegate.getByPrimaryAddress(primaryAddress, user, cid);
+    }
+
+    public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws MailAccountException {
+        return delegate.getByHostNames(hostNames, user, cid);
     }
 
     public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws MailAccountException {
