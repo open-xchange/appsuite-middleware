@@ -251,7 +251,7 @@ public interface MailAccountStorageService {
      * @param hostNames The host names
      * @param user The user identifier
      * @param cid The context identifier
-     * @return The identifiers of matching mail accounts
+     * @return The binary-sorted identifiers of matching mail accounts
      * @throws MailAccountException If look-up by host names caused an error
      */
     public int[] getByHostNames(Collection<String> hostNames, int user, int cid) throws MailAccountException;
