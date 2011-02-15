@@ -55,16 +55,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
@@ -751,13 +753,30 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
+            return getAddressHeaderNonStrict(addresses);
+        }
+    }
+
+    private static InternetAddress[] getAddressHeaderNonStrict(final String addressStrings) {
+        try {
+            final InternetAddress[] addresses = QuotedInternetAddress.parseHeader(addressStrings, false);
+            final List<InternetAddress> addressList = new ArrayList<InternetAddress>(addresses.length);
+            for (final InternetAddress internetAddress : addresses) {
+                try {
+                    addressList.add(new QuotedInternetAddress(internetAddress.toString()));
+                } catch (final AddressException e) {
+                    addressList.add(internetAddress);
+                }
+            }
+            return addressList.toArray(new InternetAddress[addressList.size()]);
+        } catch (final AddressException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
                     new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
                         "\". Using plain addresses' string representation instead.").toString(),
                     e);
             }
-            return getAddressesOnParseError(addresses);
+            return getAddressesOnParseError(addressStrings);
         }
     }
 

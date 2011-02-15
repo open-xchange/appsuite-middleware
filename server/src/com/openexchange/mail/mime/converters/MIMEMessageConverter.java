@@ -2107,6 +2107,23 @@ public final class MIMEMessageConverter {
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
+            return getAddressHeaderNonStrict(addresses, addressArray);
+        }
+    }
+
+    private static InternetAddress[] getAddressHeaderNonStrict(final String addressStrings, final String[] addressArray) {
+        try {
+            final InternetAddress[] addresses = QuotedInternetAddress.parseHeader(addressStrings, false);
+            final List<InternetAddress> addressList = new ArrayList<InternetAddress>(addresses.length);
+            for (final InternetAddress internetAddress : addresses) {
+                try {
+                    addressList.add(new QuotedInternetAddress(internetAddress.toString()));
+                } catch (final AddressException e) {
+                    addressList.add(internetAddress);
+                }
+            }
+            return addressList.toArray(new InternetAddress[addressList.size()]);
+        } catch (final AddressException e) {
             if (DEBUG) {
                 LOG.debug(
                     new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
