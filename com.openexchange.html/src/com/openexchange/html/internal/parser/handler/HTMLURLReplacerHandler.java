@@ -164,7 +164,8 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
             if (m.matches()) {
                 urlBuilder.setLength(0);
                 urlBuilder.append(val.substring(0, m.start()));
-                replaceURL(urlDecode(m.group()), urlBuilder);
+                //replaceURL(urlDecode(m.group()), urlBuilder);
+                replaceURL(m.group(), urlBuilder);
                 urlBuilder.append(val.substring(m.end()));
                 attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(urlBuilder.toString()).append('"');
             } else {
@@ -203,7 +204,13 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
 
     private static String replaceURLCodePoints(final String s) {
         final Matcher m = PATTERN_CODE_POINT.matcher(s);
-        return m.replaceAll("%$1");
+        final StringBuffer buffer = new StringBuffer(s.length());
+        while (m.find()) {
+            final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
+            m.appendReplacement(buffer, Matcher.quoteReplacement(new String(chars)));
+        }
+        m.appendTail(buffer);
+        return buffer.toString();
     }
 
     private static String urlDecode(final String s) {
