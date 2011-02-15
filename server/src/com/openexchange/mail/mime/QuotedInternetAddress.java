@@ -762,7 +762,11 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (pos < 0) {
                 return idnAddress;
             }
-            return new StringBuilder(idnAddress.length() + 8).append(idnAddress.substring(0, pos)).append('@').append(
+            final int length = idnAddress.length();
+            if (pos == length - 1) {
+                return idnAddress;
+            }
+            return new StringBuilder(length + 8).append(idnAddress.substring(0, pos)).append('@').append(
                 gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1), true)).toString();
         } catch (final gnu.inet.encoding.IDNAException e) {
             throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
