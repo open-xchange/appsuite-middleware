@@ -49,6 +49,7 @@
 
 package com.openexchange;
 
+import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
 import com.openexchange.ajax.parser.TaskLastModifiedTest;
 import com.openexchange.tools.collections.OXCollectionsTest;
 import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
@@ -71,6 +72,7 @@ public class UnitTests {
         tests.addTestSuite(TaskLastModifiedTest.class);
         tests.addTestSuite(SearchIteratorDelegatorTest.class);
         tests.addTestSuite(OXCollectionsTest.class);
+        tests.addTestSuite(ContactSearchtermSqlConverterTest.class);
         return tests;
     }
 }
