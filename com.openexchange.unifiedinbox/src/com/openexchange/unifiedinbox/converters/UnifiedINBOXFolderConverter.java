@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -190,7 +190,7 @@ public final class UnifiedINBOXFolderConverter {
         {
             final MailPermission ownPermission = new DefaultMailPermission();
             ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
-            ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+            ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
             tmp.setOwnPermission(ownPermission);
         }
         {
@@ -224,6 +224,26 @@ public final class UnifiedINBOXFolderConverter {
             tmp.setSubscribedSubfolders(true);
         }
         return tmp;
+    }
+
+    public static void setOwnPermission(final MailFolder mailFolder, final int userId) {
+        final MailPermission ownPermission = new DefaultMailPermission();
+        ownPermission.setEntity(userId);
+        ownPermission.setGroupPermission(false);
+        ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+        ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        mailFolder.setOwnPermission(ownPermission);
+    }
+
+    public static void setPermissions(final MailFolder mailFolder) {
+        final MailPermission permission = new DefaultMailPermission();
+        permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        permission.setGroupPermission(true);
+        permission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+        permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        permission.setFolderAdmin(false);
+        mailFolder.removePermissions();
+        mailFolder.addPermission(permission);
     }
 
     private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, MailException {

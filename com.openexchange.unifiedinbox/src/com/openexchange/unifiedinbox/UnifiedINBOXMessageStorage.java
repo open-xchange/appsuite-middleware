@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,6 +85,7 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.copy.UnifiedINBOXMessageCopier;
+import com.openexchange.unifiedinbox.dataobjects.UnifiedMailMessage;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
@@ -416,9 +417,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             final UnifiedINBOXUID helper = new UnifiedINBOXUID();
                             for (final MailMessage accountMail : accountMails) {
-                                accountMail.setMailId(helper.setUID(mailAccount.getId(), fn, accountMail.getMailId()).toString());
-                                accountMail.setFolder(fullname);
-                                messages.add(accountMail);
+                                final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
+                                umm.setMailId(helper.setUID(mailAccount.getId(), fn, accountMail.getMailId()).toString());
+                                umm.setFolder(fullname);
+                                messages.add(umm);
                             }
                             return messages;
                         } finally {
@@ -520,9 +522,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             final UnifiedINBOXUID helper = new UnifiedINBOXUID();
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             for (final MailMessage accountMail : accountMails) {
-                                accountMail.setMailId(helper.setUID(mailAccount.getId(), fn, accountMail.getMailId()).toString());
-                                accountMail.setFolder(fullname);
-                                messages.add(accountMail);
+                                final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
+                                umm.setMailId(helper.setUID(mailAccount.getId(), fn, accountMail.getMailId()).toString());
+                                umm.setFolder(fullname);
+                                messages.add(umm);
                             }
                             return messages;
                         } finally {
@@ -851,15 +854,15 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 final String lookFor = helper.setUID(accountId, folder, mail.getMailId()).toString();
                 int pos = -1;
                 for (int l = 0; l < mailIds.length && pos == -1; l++) {
-                    final String mailId = mailIds[l];
-                    if (lookFor.equals(mailId)) {
+                    if (lookFor.equals(mailIds[l])) {
                         pos = l;
                     }
                 }
                 if (pos != -1) {
-                    toFill[pos] = mail;
-                    mail.setMailId(mailIds[pos]);
-                    mail.setFolder(uiFullname);
+                    final UnifiedMailMessage umm = new UnifiedMailMessage(mail);
+                    toFill[pos] = umm;
+                    umm.setMailId(mailIds[pos]);
+                    umm.setFolder(uiFullname);
                 }
             }
         }
