@@ -42,6 +42,26 @@ public class ContactSearchtermSqlConverterTest extends TestCase {
 		assertEquals(actualInjectors, "fieldname", "value");
 	}
 	
+	
+	public void testSingleSearchTermWithNegations(){
+		SingleSearchTerm equals = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+		equals.addOperand(new ConstantOperand<String>("fieldname"));
+		equals.addOperand(new ConstantOperand<String>("value"));
+		
+		CompositeSearchTerm not = new CompositeSearchTerm(CompositeSearchTerm.CompositeOperation.NOT);
+		not.addSearchTerm(equals);
+		
+		String expected = "( ! ( ? = ? ) )";
+
+		ContactSearchtermSqlConverter converter = new ContactSearchtermSqlConverter();
+		converter.parse(not);
+		String actualString = converter.getPreparedWhereString();
+		List<SQLInjector> actualInjectors = converter.getInjectors();
+		
+		assertEquals(expected, actualString);
+		assertEquals(actualInjectors, "fieldname", "value");
+	}
+	
 	public void testUseOfLikeInsteadOfEqualsInCaseOfAsteriskSearch(){
 		SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 		term.addOperand(new ConstantOperand<String>("fieldname"));
