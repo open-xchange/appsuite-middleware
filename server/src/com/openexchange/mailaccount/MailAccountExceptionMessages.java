@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -122,8 +122,15 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
     /**
      * Invalid mail account name: %1$s
      */
-    INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CODE_ERROR, 16);
-    
+    INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CODE_ERROR, 16),
+    /**
+     * Duplicate mail account for user %1$s in context %2$s.
+     */
+    DUPLICATE_MAIL_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_MAIL_ACCOUNT_MSG, Category.CODE_ERROR, 17),
+    /**
+     * Duplicate transport account for user %1$s in context %2$s.
+     */
+    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CODE_ERROR, 17);    
 
     /**
      * Message of the exception.

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -105,6 +105,12 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
 
     // Invalid mail account name: %1$s
     public static final String INVALID_NAME_MSG = "Invalid mail account name: %1$s";
+
+    // Duplicate mail account for user %1$s in context %2$s.
+    public static final String DUPLICATE_MAIL_ACCOUNT_MSG = "Duplicate mail account for user %1$s in context %2$s.";
+
+    // Duplicate transport account for user %1$s in context %2$s.
+    public static final String DUPLICATE_TRANSPORT_ACCOUNT_MSG = "Duplicate transport account for user %1$s in context %2$s.";
 
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.

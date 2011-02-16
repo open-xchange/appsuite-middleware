@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,6 +64,7 @@ import static com.openexchange.mail.utils.StorageUtility.INDEX_TRASH;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
@@ -131,6 +132,25 @@ public final class DefaultFolderNamesProvider {
             isSpamEnabled);
     }
 
+    /**
+     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     * 
+     * @param mailAccount The mail account providing the names
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder names as an array of {@link String}
+     */
+    public String[] getDefaultFolderNames(final MailAccountDescription mailAccount, final boolean isSpamEnabled) {
+        return getDefaultFolderNames(
+            mailAccount.getTrash(),
+            mailAccount.getSent(),
+            mailAccount.getDrafts(),
+            mailAccount.getSpam(),
+            mailAccount.getConfirmedSpam(),
+            mailAccount.getConfirmedHam(),
+            isSpamEnabled);
+    }
+    
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
@@ -214,6 +234,25 @@ public final class DefaultFolderNamesProvider {
      * @return The default folder fullnames as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final MailAccount mailAccount, final boolean isSpamEnabled) {
+        return getDefaultFolderFullnames(
+            extractFullname(mailAccount.getTrashFullname()),
+            extractFullname(mailAccount.getSentFullname()),
+            extractFullname(mailAccount.getDraftsFullname()),
+            extractFullname(mailAccount.getSpamFullname()),
+            extractFullname(mailAccount.getConfirmedSpamFullname()),
+            extractFullname(mailAccount.getConfirmedHamFullname()),
+            isSpamEnabled);
+    }
+
+    /**
+     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     * 
+     * @param mailAccount The mail account providing the fullnames
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder fullnames as an array of {@link String}
+     */
+    public String[] getDefaultFolderFullnames(final MailAccountDescription mailAccount, final boolean isSpamEnabled) {
         return getDefaultFolderFullnames(
             extractFullname(mailAccount.getTrashFullname()),
             extractFullname(mailAccount.getSentFullname()),
