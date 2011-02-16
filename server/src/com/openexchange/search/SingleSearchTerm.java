@@ -55,8 +55,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.search.internal.terms.EqualsTerm;
+import com.openexchange.search.internal.terms.GreaterOrEqualTerm;
 import com.openexchange.search.internal.terms.GreaterThanTerm;
+import com.openexchange.search.internal.terms.LessOrEqualTerm;
 import com.openexchange.search.internal.terms.LessThanTerm;
+import com.openexchange.search.internal.terms.NotEqualTerm;
 
 /**
  * {@link SingleSearchTerm} - A single search term; e.g. <i>equals</i>.
@@ -116,7 +119,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 //            private static final long serialVersionUID = 8960232001776390636L;
 
             public SingleSearchTerm newInstance() {
-                return new GreaterThanTerm();
+                return new NotEqualTerm();
             }
         }),
         /**
@@ -127,7 +130,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 //            private static final long serialVersionUID = 8960232001776390636L;
 
             public SingleSearchTerm newInstance() {
-                return new GreaterThanTerm();
+                return new GreaterOrEqualTerm();
             }
         }),
         /**
@@ -138,7 +141,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 //            private static final long serialVersionUID = 8960232001776390636L;
 
             public SingleSearchTerm newInstance() {
-                return new GreaterThanTerm();
+                return new LessOrEqualTerm();
             }
         });
 
