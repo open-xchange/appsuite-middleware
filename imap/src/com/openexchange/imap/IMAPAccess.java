@@ -497,21 +497,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             connected = true;
             /*
-             * Propagate client IP address in case of primary mail account access
-             */
-            if (imapConfProps.isPropagateClientIPAddress() && MailAccount.DEFAULT_ID == accountId) {
-                final String clientIP = session.getLocalIp();
-                if (!isEmpty(clientIP)) {
-                    IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), clientIP);
-                } else if (DEBUG) {
-                    LOG.debug(new StringBuilder(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
-                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n"));
-                }
-            } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
-                LOG.debug(new StringBuilder(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
-                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
-            }
-            /*
              * Add server's capabilities
              */
             config.initializeCapabilities(imapStore, session);
