@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -753,6 +753,17 @@ fi
 %doc doc/examples
 
 %changelog
+* Wed Feb 16 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18312: Introduced quotes for OXUpdater install parameters.
+* Tue Feb 15 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18165: Less strict parsing of address header
+* Mon Feb 14 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18299: Setting proper locale-sensitive folder names
+ - Bugfix #18329: Fixed ArrayIndexOutOfBoundsException in jTidy library
+ - Bugfix #18302: Replacing URL code point
+* Thu Feb 10 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18292: Fixed folder update
+ - Bugfix #18281: Error response from server if authentication of POP3 account fails
 * Tue Feb 08 2011 - thorben.betten@open-xchange.com
  - Bugfix #18291: Fixed NPE on call to an unregistered servlet path
 * Mon Feb 07 2011 - marcus.klein@open-xchange.com

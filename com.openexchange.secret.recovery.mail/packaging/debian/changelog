@@ -1,3 +1,9 @@
+open-xchange-secret-recovery-mail (6.19.0.0-5) unstable; urgency=low
+
+  * build for 6.19.0-rev5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 16 Feb 2011 13:26:53 +0000
+
 open-xchange-secret-recovery-mail (6.19.0.0-4) unstable; urgency=low
 
   * build for 6.19.0-rev4

@@ -1,4 +1,10 @@
-open-xchange-oauth-linkedin (6.19.0.0-0) unstable; urgency=low
+open-xchange-oauth-facebook (6.19.0.0-1) unstable; urgency=low
+
+  * build for 6.19.0-rev5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 16 Feb 2011 13:26:42 +0000
+
+open-xchange-oauth-facebook (6.19.0.0-0) unstable; urgency=low
 
   * initial version.
 
