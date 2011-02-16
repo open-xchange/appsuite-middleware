@@ -1,3 +1,16 @@
 <Products>
-${ITERATOR.iterate()}
+	<Product>
+		<Name>OXUpdater</Name> 
+		<Version>6.18.3</Version>
+		<UpgradeCode>{3BBB2D56-0B19-4C83-9266-307F49DF9DD6}</UpgradeCode>
+		<ReleaseDate>22.11.2010</ReleaseDate>
+		<URL>${OXUPDATER.url("OXUpdater.exe")}</URL>
+		<MD5>${OXUPDATER.md5()}</MD5>
+		<InfoUrl></InfoUrl>
+		<Icon></Icon>
+		<InstallParams></InstallParams> 
+		<Importance>200</Importance> 
+	</Product>
+
+	${ITERATOR.iterate()}
 </Products>
