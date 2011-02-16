@@ -124,8 +124,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     @Override
     protected Collection<String> getAllPropertyNames(Context context) {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
     protected String findFirst(List<Map<String, Object>> configData, String property) {
