@@ -69,15 +69,5 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
 		assertEquals("Should find the right contact", YOMI_LAST_NAME, results[0].getYomiLastName());
 
 	}
-	
-	/**
-	 * This is how the little alphabet sorting thing in a contact folder works
-	 */
-	public void testFindByLastNameInitial(){
-		String initial = YOMI_LAST_NAME.substring(0,1);
-		Contact[] results = manager.searchFirstletterAction(initial, folderID);
-		assertEquals(1, results.length);
-		assertEquals("Should find the right contact", YOMI_LAST_NAME, results[0].getYomiLastName());
-	}
 
 }
