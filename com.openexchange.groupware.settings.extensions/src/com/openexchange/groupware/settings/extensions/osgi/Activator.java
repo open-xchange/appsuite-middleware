@@ -117,7 +117,9 @@ public class Activator implements BundleActivator {
         
         
     }
-
+    
+    // Maybe that is an overuse of anonymous inner classes. Better get around to refactoring this at some point.
+    
     private void export(final ConfigViewFactory viewFactory, ComposedConfigProperty<String> property, final String propertyName) throws ConfigCascadeException {
         
         final String[] path = property.get(PREFERENCE_PATH).split("/");
@@ -166,10 +168,17 @@ public class Activator implements BundleActivator {
                     public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
                         if(null != setting.getSingleValue()) {
                             try {
-                                viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, setting.getSingleValue().toString());
+                                String value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
+                                String updateValue = setting.getSingleValue().toString();
+                                // Clients have a habit of dumping the config back at us, so we only save differing values.
+                                if(!updateValue.equals(value)) {
+                                    viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, updateValue);
+                                }
                             } catch (ConfigCascadeException e) {
                                 throw new SettingException(e);
                             }
+                        } else {
+                            //TODO: Remove user specific setting
                         }
                     }
                     
