@@ -164,14 +164,10 @@ public abstract class OXServlet extends WebDavServlet {
      */
     private static final String DIGEST_AUTH = "digest";
 
-    private final LoginPerformer loginPerformer;
+    private static final LoginPerformer loginPerformer = LoginPerformer.getInstance();
 
-    /**
-     * Initializes a new {@link OXServlet}.
-     */
     protected OXServlet() {
         super();
-        loginPerformer = LoginPerformer.getInstance();
     }
 
     /**
@@ -187,7 +183,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp)) {
+        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface())) {
             return;
         }
         try {
@@ -211,10 +207,11 @@ public abstract class OXServlet extends WebDavServlet {
      * 
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
+     * @param face the used interface.
      * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
      * @throws IOException If an I/O error occurs
      */
-    protected boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
         Session session;
         try {
             session = findSessionByCookie(req, resp);
@@ -229,7 +226,7 @@ public abstract class OXServlet extends WebDavServlet {
              */
             final LoginRequest loginRequest;
             try {
-                loginRequest = parseLogin(req);
+                loginRequest = parseLogin(req, face);
             } catch (final WebdavException e) {
                 LOG.debug(e.getMessage(), e);
                 addUnauthorizedHeader(req, resp);
@@ -312,7 +309,7 @@ public abstract class OXServlet extends WebDavServlet {
 //        resp.addHeader("WWW-Authenticate", builder.toString());
     }
 
-    private LoginRequest parseLogin(final HttpServletRequest req) throws WebdavException, IOException {
+    private static LoginRequest parseLogin(final HttpServletRequest req, Interface face) throws WebdavException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             if (LOG.isDebugEnabled()) {
@@ -325,7 +322,7 @@ public abstract class OXServlet extends WebDavServlet {
             if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
                 throw new WebdavException(WebdavException.Code.EMPTY_PASSWORD);
             }
-            return new LoginRequestImpl(creds.getLogin(), creds.getPassword(), getInterface(), req);
+            return new LoginRequestImpl(creds.getLogin(), creds.getPassword(), face, req);
         }
         if (checkForDigestAuthorization(auth)) {
             /*
@@ -354,7 +351,7 @@ public abstract class OXServlet extends WebDavServlet {
             /*
              * Return appropriate login request to generate a session
              */
-            return new LoginRequestImpl(userName, password, getInterface(), req);
+            return new LoginRequestImpl(userName, password, face, req);
         }
         /*
          * No known auth mechanism
@@ -376,11 +373,11 @@ public abstract class OXServlet extends WebDavServlet {
      * @return the initialized session or <code>null</code>.
      * @throws LoginException if an error occurs while creating the session.
      */
-    private Session addSession(final LoginRequest request) throws LoginException {
+    private static Session addSession(final LoginRequest request) throws LoginException {
         return loginPerformer.doLogin(request).getSession();
     }
 
-    private Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws ServiceException {
+    private static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws ServiceException {
         final Cookie[] cookies = req.getCookies();
         String sessionId = null;
         if (null != cookies) {
@@ -395,7 +392,7 @@ public abstract class OXServlet extends WebDavServlet {
             return null;
         }
         final Session session = ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
-        if (null == session) {
+        if (null == session && resp != null) {
             final Cookie cookie = new Cookie(COOKIE_SESSIONID, sessionId);
             cookie.setMaxAge(0);
             resp.addCookie(cookie);
@@ -403,11 +400,7 @@ public abstract class OXServlet extends WebDavServlet {
         return session;
     }
 
-    /**
-     * @param req Request.
-     * @return the session object.
-     */
-    protected Session getSession(final HttpServletRequest req) {
+    public static Session getSession(final HttpServletRequest req) {
         final Session session = (Session) req.getAttribute(SESSION);
         if (null == session) {
             LOG.error("Somebody gets a null session.");

@@ -215,6 +215,10 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    protected void superService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.service(req, resp);
+    }
+
     private void checkIP(final Session session, final String actual) throws SessiondException {
         checkIP(checkIP, ranges, session, actual);
     }

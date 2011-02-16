@@ -83,7 +83,7 @@ public abstract class PermissionServlet extends OXServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        if (!super.doAuth(req, resp)) {
+        if (!super.doAuth(req, resp, getInterface())) {
             return;
         }
         final Session session = getSession(req);
