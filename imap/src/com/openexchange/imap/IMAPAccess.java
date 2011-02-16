@@ -379,7 +379,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get store
                  */
-                imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), config.getLogin(), tmpPass);
+                imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), config.getLogin(), tmpPass, null);
             } catch (final MessagingException e) {
                 throw MIMEMailException.handleMessagingException(e, config, session);
             } finally {
@@ -454,10 +454,26 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapSession.setDebugOut(System.out);
             }
             /*
+             * Check if client IP address should be propagated
+             */
+            String clientIp = null;
+            if (imapConfProps.isPropagateClientIPAddress() && isPropagateAccount(imapConfProps)) {
+                final String ip = session.getLocalIp();
+                if (!isEmpty(ip)) {
+                    clientIp = ip;
+                } else if (DEBUG) {
+                    LOG.debug(new StringBuilder(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
+                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n"));
+                }
+            } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
+                LOG.debug(new StringBuilder(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
+                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
+            }
+            /*
              * Get connected store
              */
             try {
-                imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), login, tmpPass);
+                imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), login, tmpPass, clientIp);
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
@@ -514,9 +530,33 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
+    private boolean isPropagateAccount(final IIMAPProperties imapConfProps) throws MailException {
+        if (MailAccount.DEFAULT_ID == accountId) {
+            return true;
+        }
+
+        /*final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class);
+        if (null == storageService) {
+            return false;
+        }
+        try {
+            final int[] ids = storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
+            return Arrays.binarySearch(ids, accountId) >= 0;
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }*/
+        return false;
+    }
+
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
 
-    private static IMAPStore connectIMAPStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException {
+    private static IMAPStore connectIMAPStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final String clientIp) throws MessagingException {
+        /*
+         * Propagate client IP address
+         */
+        if (clientIp != null) {
+            imapSession.getProperties().put("mail.imap.propagate.clientipaddress", clientIp);
+        }
         /*
          * Get store...
          */
