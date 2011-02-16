@@ -61,6 +61,7 @@ import com.openexchange.search.Operand;
 import com.openexchange.search.Operation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 
 /**
  * Base class for converting a SearchTerm to a WHERE clause usable by SQL.
@@ -187,6 +188,24 @@ public abstract class BaseContactSearchtermConverter {
 		}
 		bob.append(" ) ");
 	}
+	
+	protected void traverseViaInorder(CompositeSearchTerm term) {
+		Operation operation = term.getOperation();
+		SearchTerm<?>[] operands = term.getOperands();
+		
+		bob.append(" ( ");
+		
+		if(operation instanceof CompositeOperation && ((CompositeOperation)operation).getMaxTerms() == 1)
+			bob.append(operation.getSqlRepresentation());
+
+		for(int i = 0; i < operands.length; i++){
+			traverseViaInOrder(operands[i]);
+			if((i+1) < operands.length)
+				bob.append(" ").append(operation.getSqlRepresentation()).append("    ");
+		}
+		bob.append(" ) ");
+		
+	}
 
 	/**
 	 * Called to check whether an argument given is about a folder. We 
@@ -220,19 +239,6 @@ public abstract class BaseContactSearchtermConverter {
 		bob.replace(index, index+1, "LIKE");
 		
 		return value;
-	}
-
-	protected void traverseViaInorder(CompositeSearchTerm term) {
-		Operation operation = term.getOperation();
-		SearchTerm<?>[] operands = term.getOperands();
-		bob.append(" ( ");
-		for(int i = 0; i < operands.length; i++){
-			traverseViaInOrder(operands[i]);
-			if((i+1) < operands.length)
-				bob.append(" ").append(operation.getSqlRepresentation()).append("    ");
-		}
-		bob.append(" ) ");
-	
 	}
 
 	/**
