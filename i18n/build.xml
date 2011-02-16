@@ -66,11 +66,6 @@
         <copy todir="${destdir}/${commonConfigDir}">
             <fileset dir="${tmp.dir}/${confDir}"/>
         </copy>
-        <!--<chmod perm="640">
-            <fileset dir="${destdir}/${commonConfigDir}">
-                <include name="**"/>
-            </fileset>
-        </chmod>-->
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
