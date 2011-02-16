@@ -104,6 +104,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -116,6 +117,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
@@ -575,7 +577,19 @@ public final class MailFolderStorage implements FolderStorage {
                     /*
                      * Denoted parent is not capable to hold default folders. Therefore output as it is.
                      */
-                    final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true));
+                    final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
+                    /*
+                     * Filter against possible POP3 storage folders
+                     */
+                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                        final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                        for (final Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
+                            final MailFolder mf = it.next();
+                            if (pop3StorageFolders.contains(mf.getFullname())) {
+                                it.remove();
+                            }
+                        }            
+                    }
                     Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
                     final String[] subfolderIds = new String[children.size()];
                     int i = 0;
@@ -738,7 +752,19 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect(true);
 
-            final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true));
+            final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
+            /*
+             * Filter against possible POP3 storage folders
+             */
+            if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                for (final Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
+                    final MailFolder mailFolder = it.next();
+                    if (pop3StorageFolders.contains(mailFolder.getFullname())) {
+                        it.remove();
+                    }
+                }            
+            }
             addWarnings(mailAccess, storageParameters);
             /*
              * Check if denoted parent can hold default folders like Trash, Sent, etc.

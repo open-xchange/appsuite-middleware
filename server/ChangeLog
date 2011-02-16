@@ -1,6 +1,7 @@
 * 2011-02-16 - thorben.betten@open-xchange.com
 
  - Bugfix #18280: Using wrapping MailMessage instance
+ - Bugfix #18296: Introduced mail property to hide POP3 storage folders
 
 * 2011-02-15 - thorben.betten@open-xchange.com
 

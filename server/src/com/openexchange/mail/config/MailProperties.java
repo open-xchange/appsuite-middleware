@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -143,6 +143,8 @@ public final class MailProperties implements IMailProperties {
 
     private boolean ignoreSubscription;
 
+    private boolean hidePOP3StorageFolders;
+
     private char defaultSeparator;
 
     private int maxNumOfConnections;
@@ -249,6 +251,7 @@ public final class MailProperties implements IMailProperties {
         allowNestedDefaultFolderOnAltNamespace = false;
         defaultMimeCharset = null;
         ignoreSubscription = false;
+        hidePOP3StorageFolders = false;
         defaultSeparator = '/';
         maxNumOfConnections = 0;
         quoteLineColors = null;
@@ -449,6 +452,12 @@ public final class MailProperties implements IMailProperties {
             final String ignoreSubsStr = configuration.getProperty("com.openexchange.mail.ignoreSubscription", "false").trim();
             ignoreSubscription = Boolean.parseBoolean(ignoreSubsStr);
             logBuilder.append("\tIgnore Folder Subscription: ").append(ignoreSubscription).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.hidePOP3StorageFolders", "false").trim();
+            hidePOP3StorageFolders = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tHide POP3 Storage Folders: ").append(hidePOP3StorageFolders).append('\n');
         }
 
         {
@@ -697,6 +706,10 @@ public final class MailProperties implements IMailProperties {
 
     public boolean isIgnoreSubscription() {
         return ignoreSubscription;
+    }
+
+    public boolean isHidePOP3StorageFolders() {
+        return hidePOP3StorageFolders;
     }
 
     public boolean isSupportSubscription() {

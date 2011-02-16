@@ -146,6 +146,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -633,9 +634,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String parentFullname = argument.getFullname();
-        final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
+        final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(parentFullname, all)));
         if (children.isEmpty()) {
             return SearchIteratorAdapter.createEmptyIterator();
+        }
+        /*
+         * Filter against possible POP3 storage folders
+         */
+        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+            final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+            for (final Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
+                final MailFolder mailFolder = it.next();
+                if (pop3StorageFolders.contains(mailFolder.getFullname())) {
+                    it.remove();
+                }
+            }            
         }
         /*
          * Check if denoted parent can hold default folders like Trash, Sent, etc.
