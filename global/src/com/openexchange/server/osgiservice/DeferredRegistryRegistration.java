@@ -85,5 +85,6 @@ public abstract class DeferredRegistryRegistration<R,P> extends ServiceTracker {
     @Override
     public void removedService(final ServiceReference reference, final Object service) {
         unregister((R) service, item);
+        context.ungetService(reference);
     }
 }
