@@ -118,7 +118,7 @@ public interface UserService {
     /**
      * Reads the data for a set of user from the underlying persistent data storage.
      * 
-     * @param uid User identifier.
+     * @param userIds User identifier.
      * @return the users objects.
      * @param context The context.
      * @throws UserException if an error occurs while reading from the persistent storage or the user doesn't exist.
