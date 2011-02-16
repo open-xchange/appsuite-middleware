@@ -161,9 +161,19 @@ public class ContactTestManager implements TestManager {
     }
 
     public static Contact generateContact() {
+        Contact contact = generateContact(666);
+        contact.removeParentFolderID();
+        return contact;
+    }
+    
+    public static Contact generateContact(int folderId){
+    	return generateContact(folderId, "surname");
+    }
+
+    public static Contact generateContact(int folderId, String lastname){
         Contact contact = new Contact();
         contact.setGivenName("givenname");
-        contact.setSurName("surname");
+        contact.setSurName(lastname);
         contact.setMiddleName("middlename");
         contact.setSuffix("suffix");
         contact.setEmail1("email1@ox.invalid");
@@ -173,9 +183,9 @@ public class ContactTestManager implements TestManager {
         contact.setPosition("position");
         contact.setTitle("title");
         contact.setCompany("company");
+    	contact.setParentFolderID(folderId);
         return contact;
     }
-
     /**
      * Creates a contact via HTTP-API and updates it with new id, timestamp and all other information that is updated after such requests.
      * Remembers this contact for cleanup later.
