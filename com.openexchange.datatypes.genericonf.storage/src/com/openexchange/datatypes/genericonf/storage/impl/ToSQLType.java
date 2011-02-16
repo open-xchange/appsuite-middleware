@@ -79,7 +79,10 @@ public class ToSQLType implements WidgetSwitcher {
     }
 
     public Object custom(Object... args) {
-        return args[0];
+        if(args[0] == null) {
+            return null;
+        }
+        return args[0].toString();
     }
 
 }
