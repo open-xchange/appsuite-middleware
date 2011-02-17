@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 21
+%define		ox_release 22
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -718,6 +718,14 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Feb 17 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18312: Introduced quotes for OXUpdater install parameters.
+* Thu Feb 17 2011 - thorben.betten@open-xchange.com
+ - Bugfix #17845: Ensure proper content type header on JSON response.
+ - Bugfix #18232: Fixed AJP ping.
+* Wed Feb 16 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18280: Using wrapping MailMessage instance
+ - Bugfix #18296: Introduced mail property to hide POP3 storage folders
 * Tue Feb 15 2011 - thorben.betten@open-xchange.com
  - Bugfix #18281: Error response from server if authentication of POP3 account fails
 * Thu Jan 20 2011 - martin.herfurth@open-xchange.com
@@ -742,7 +750,6 @@ fi
  - Bugfix #17876: Fixed illegal monitor state when waiting on Condition instance
  - Bugfix #17877: Dealing with possible InterruptedException during concurrent loading of folder permissions
 * Mon Dec 20 2010 - thorben.betten@open-xchange.com
- - Bugfix #17845: Ensure proper content type header on JSON response
  - Bugfix #17800: Proper check for User instance when fetching from cache
  - Bugfix #17833: Fixed JavaDoc
 * Thu Dec 16 2010 - thorben.betten@open-xchange.com
