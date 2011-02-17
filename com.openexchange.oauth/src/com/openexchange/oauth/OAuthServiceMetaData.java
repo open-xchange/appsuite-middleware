@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth;
 
+
 /**
  * {@link OAuthServiceMetaData} - Represents the OAuth service meta data.
  * 
@@ -89,8 +90,23 @@ public interface OAuthServiceMetaData {
     /**
      * Indicates if this meta data needs a request token to obtain authorization URL.
      * 
-     * @return <code>true</code> if this meta data needs a request token to obtain authorization URL; otherwise <code>false</code> to pass <code>null</code>
+     * @return <code>true</code> if this meta data needs a request token to obtain authorization URL; otherwise <code>false</code> to pass
+     *         <code>null</code>
      */
     boolean needsRequestToken();
+
+    /**
+     * Gets the optional scope; a comma-separated list of scope items.
+     * 
+     * @return The scope or <code>null</code>
+     */
+    String getScope();
+
+    /**
+     * Processes specified authorization URL.
+     * 
+     * @return The processed authorization URL
+     */
+    String processAuthorizationURL(String authUrl);
 
 }

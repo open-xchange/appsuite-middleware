@@ -88,9 +88,12 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
              */
             // http://wiki.oauth.net/w/page/12238555/Signed-Callback-URLs
             // http://developer.linkedin.com/message/4568
-            final String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
+            String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
             if (oauthToken == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.URLPARAM_OAUTH_TOKEN);
+                oauthToken = request.getParameter("code");
+                if (oauthToken == null) {
+                    throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.URLPARAM_OAUTH_TOKEN);
+                }
             }
             final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
             if (uuid == null) {

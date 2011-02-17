@@ -85,7 +85,8 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
     @Override
     public String getAPIKey() {
-        final ConfigurationService configurationService = FacebookOAuthServiceRegistry.getServiceLookup().getService(ConfigurationService.class);
+        final ConfigurationService configurationService =
+            FacebookOAuthServiceRegistry.getServiceLookup().getService(ConfigurationService.class);
         if (null == configurationService) {
             return KEY_API;
         }
@@ -94,7 +95,8 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
     @Override
     public String getAPISecret() {
-        final ConfigurationService configurationService = FacebookOAuthServiceRegistry.getServiceLookup().getService(ConfigurationService.class);
+        final ConfigurationService configurationService =
+            FacebookOAuthServiceRegistry.getServiceLookup().getService(ConfigurationService.class);
         if (null == configurationService) {
             return KEY_SECRET;
         }
@@ -103,6 +105,17 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
     public boolean needsRequestToken() {
         return false;
+    }
+
+    public String getScope() {
+        return "publish_stream,read_stream,status_update,friends_birthday,friends_work_history,friends_about_me,friends_hometown";
+    }
+
+    public String processAuthorizationURL(final String authUrl) {
+        final String removeMe = "response_type=token&";
+        final int pos = authUrl.indexOf(removeMe);
+        return pos < 0 ? authUrl : new StringBuilder(authUrl.length()).append(authUrl.substring(0, pos)).append(
+            authUrl.substring(pos + removeMe.length())).toString();
     }
 
 }

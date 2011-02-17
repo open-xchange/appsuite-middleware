@@ -50,6 +50,8 @@
 package com.openexchange.oauth.internal;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -208,11 +210,35 @@ public class OAuthServiceImpl implements OAuthService {
         } else {
             scribeToken = null; // Empty token
         }
-        final String authorizationURL = service.getAuthorizationUrl(scribeToken);
+        final StringBuilder authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+        /*
+         * Add optional scope
+         */
+        {
+            final String scope = metaData.getScope();
+            if (scope != null) {
+                authorizationURL.append("&scope=").append(urlEncode(scope));
+            }
+        }
+        /*
+         * Process authorization URL
+         */
+        final String authURL = metaData.processAuthorizationURL(authorizationURL.toString());
+        /*
+         * Return interaction
+         */
         return new OAuthInteractionImpl(
             scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
-            authorizationURL,
+            authURL,
             callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
+    }
+
+    private static String urlEncode(final String s) {
+        try {
+            return URLEncoder.encode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
     }
 
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
@@ -429,6 +455,10 @@ public class OAuthServiceImpl implements OAuthService {
         serviceBuilder.apiKey(metaData.getAPIKey()).apiSecret(metaData.getAPISecret());
         if (null != callbackUrl) {
             serviceBuilder.callback(callbackUrl);
+        }
+        final String scope = metaData.getScope();
+        if (null != scope) {
+            serviceBuilder.scope(scope);
         }
         return serviceBuilder.build();
     }
