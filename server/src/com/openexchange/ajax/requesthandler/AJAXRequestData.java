@@ -94,7 +94,7 @@ public class AJAXRequestData {
 
     private InputStreamProvider uploadStreamProvider;
 
-    private List<UploadFile> files = new ArrayList<UploadFile>(5);
+    private final List<UploadFile> files = new ArrayList<UploadFile>(5);
 
     private String hostname;
 
@@ -139,6 +139,15 @@ public class AJAXRequestData {
         } else {
             params.put(name, value);
         }
+    }
+
+    /**
+     * Gets this request's parameters as a {@link Map map}
+     * 
+     * @return The parameters as a {@link Map map}
+     */
+    public Map<String, String> getParameters() {
+        return new HashMap<String, String>(params);
     }
 
     /**
@@ -291,8 +300,8 @@ public class AJAXRequestData {
      * @param name The name of the form field that include the file
      * @return The file, or null if no file field of this name was found
      */
-    public UploadFile getFile(String name) {
-        for (UploadFile file : files) {
+    public UploadFile getFile(final String name) {
+        for (final UploadFile file : files) {
             if (file.getFieldName().equals(name)) {
                 return file;
             }
@@ -300,7 +309,7 @@ public class AJAXRequestData {
         return null;
     }
 
-    public void addFile(UploadFile file) {
+    public void addFile(final UploadFile file) {
         files.add(file);
     }
 
@@ -313,8 +322,8 @@ public class AJAXRequestData {
      * @param query The query string. If <code>null</code> no query is included
      * @return A string builder with the URL so far, ready for meddling.
      */
-    public StringBuilder constructURL(String protocol, String path, boolean withRoute, String query) {
-        StringBuilder url = new StringBuilder();
+    public StringBuilder constructURL(final String protocol, final String path, final boolean withRoute, final String query) {
+        final StringBuilder url = new StringBuilder();
         String prot = protocol;
         if (prot == null) {
             prot = isSecure() ? "https://" : "http://";
@@ -357,7 +366,7 @@ public class AJAXRequestData {
      * 
      * @param hostname The host name
      */
-    public void setHostname(String hostname) {
+    public void setHostname(final String hostname) {
         this.hostname = hostname;
     }
 
@@ -375,7 +384,7 @@ public class AJAXRequestData {
      * 
      * @param route The AJP route
      */
-    public void setRoute(String route) {
+    public void setRoute(final String route) {
         this.route = route;
     }
 
@@ -384,7 +393,7 @@ public class AJAXRequestData {
      * 
      * @param upload The upload event
      */
-    public void setUploadEvent(UploadEvent upload) {
+    public void setUploadEvent(final UploadEvent upload) {
         this.uploadEvent = upload;
     }
 
