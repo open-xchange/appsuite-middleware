@@ -273,7 +273,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
-    public BlockableBufferedOutputStream getOutputStream() throws IOException {
+    public OutputStream getOutputStream() throws IOException {
         if (outputStream == null) {
             throw new IOException("Output stream not available");
         }

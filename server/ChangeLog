@@ -1,6 +1,7 @@
 * 2011-02-17 - thorben.betten@open-xchange.com
 
  - Bugfix #17845: Ensure proper content type header on JSON response.
+ - Bugfix #18232: Fixed AJP ping.
 
 * 2011-02-17 - marcus.klein@open-xchange.com
 

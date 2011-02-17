@@ -64,7 +64,6 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
-import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.Task;
@@ -380,7 +379,7 @@ public class AJPv13TaskWatcher {
             try {
                 if (!ajpRequestHandler.isEndResponseSent()) {
                     final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
-                    final BlockableBufferedOutputStream out = ajpConnection.getOutputStream();
+                    final OutputStream out = ajpConnection.getOutputStream();
                     if (ajpRequestHandler.isHeadersSent()) {
                         /*
                          * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data
