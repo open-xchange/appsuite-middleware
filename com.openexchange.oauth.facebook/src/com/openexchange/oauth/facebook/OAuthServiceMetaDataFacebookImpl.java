@@ -49,8 +49,12 @@
 
 package com.openexchange.oauth.facebook;
 
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthException;
+import com.openexchange.oauth.OAuthToken;
 
 /**
  * {@link OAuthServiceMetaDataFacebookImpl}
@@ -116,6 +120,22 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         final int pos = authUrl.indexOf(removeMe);
         return pos < 0 ? authUrl : new StringBuilder(authUrl.length()).append(authUrl.substring(0, pos)).append(
             authUrl.substring(pos + removeMe.length())).toString();
+    }
+
+    @Override
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter) {
+        final String code = parameter.get("code");
+        arguments.put(OAuthConstants.ARGUMENT_PIN, code);
+    }
+
+    @Override
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
+        final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
+        
+        
+        
+        
+        return null;
     }
 
 }
