@@ -50,6 +50,8 @@
 package com.openexchange.test;
 
 
+import com.openexchange.ajax.contact.AdvancedSearchTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -112,6 +114,7 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class);
         tests.addTestSuite(com.openexchange.ajax.contact.AggregatingContactTest.class);
         tests.addTestSuite(com.openexchange.ajax.framework.ParamsTest.class);
+        tests.addTestSuite(com.openexchange.ajax.contact.AdvancedSearchTest.class);
         return tests;
     }
 }
