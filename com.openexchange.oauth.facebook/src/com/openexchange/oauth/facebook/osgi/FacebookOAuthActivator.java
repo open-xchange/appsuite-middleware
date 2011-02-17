@@ -49,7 +49,15 @@
 
 package com.openexchange.oauth.facebook.osgi;
 
+import java.util.ArrayList;
+import java.util.Stack;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookOAuthServiceRegistry;
 import com.openexchange.oauth.facebook.OAuthServiceMetaDataFacebookImpl;
@@ -63,6 +71,18 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public final class FacebookOAuthActivator extends HousekeepingActivator {
 
+    private static final Log LOG = LogFactory.getLog(Activator.class);
+
+    private BundleContext bundleContext;
+
+    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+
+    private ArrayList<ServiceRegistration> services;
+
+    private OAuthService oAuthService;
+    
+    private ConfigurationService configurationService;
+    
     /**
      * Initializes a new {@link FacebookOAuthActivator}.
      */
@@ -104,6 +124,17 @@ public final class FacebookOAuthActivator extends HousekeepingActivator {
             org.apache.commons.logging.LogFactory.getLog(FacebookOAuthActivator.class).error(e.getMessage(), e);
             throw e;
         }
+    }
+    
+    /**
+     * @return
+     */
+    public OAuthService getOauthService() {
+        return oAuthService;
+    }
+
+    public void setOauthService(OAuthService oAuthService) {        
+        this.oAuthService = oAuthService;
     }
 
 }

@@ -69,6 +69,7 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.osgi.Activator;
+import com.openexchange.oauth.facebook.osgi.FacebookOAuthActivator;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -79,11 +80,11 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class FacebookServiceImpl implements FacebookService {
 
-    private Activator activator;
+    private FacebookOAuthActivator activator;
 
     private static final Log LOG = LogFactory.getLog(FacebookServiceImpl.class);
 
-    public FacebookServiceImpl(Activator activator) {
+    public FacebookServiceImpl(FacebookOAuthActivator activator) {
         this.activator = activator;
     }
 
@@ -131,11 +132,11 @@ public class FacebookServiceImpl implements FacebookService {
 
     }
 
-    public Activator getActivator() {
+    public FacebookOAuthActivator getActivator() {
         return activator;
     }
 
-    public void setActivator(Activator activator) {
+    public void setActivator(FacebookOAuthActivator activator) {
         this.activator = activator;
     }
 
