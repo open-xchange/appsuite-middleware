@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth;
 
+import java.util.Map;
+
 
 /**
  * {@link OAuthServiceMetaData} - Represents the OAuth service meta data.
@@ -109,4 +111,21 @@ public interface OAuthServiceMetaData {
      */
     String processAuthorizationURL(String authUrl);
 
+    /**
+     * Processes specified arguments.
+     * 
+     * @param arguments The arguments
+     * @param parameter The parameters
+     */
+    void processArguments(Map<String, Object> arguments, Map<String, String> parameter);
+
+    /**
+     * Gets the optional OAuth token.
+     * 
+     * @param arguments The OAuth arguments
+     * @return The OAuth token or <code>null</code>
+     * @throws OAuthException If an error occurs returning the token
+     */
+    OAuthToken getOAuthToken(Map<String, Object> arguments) throws OAuthException;
+    
 }

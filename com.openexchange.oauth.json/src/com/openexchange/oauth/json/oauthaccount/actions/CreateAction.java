@@ -61,6 +61,8 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
@@ -84,16 +86,29 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
             /*
-             * Parse parameters
+             * The meta data identifier
+             */
+            final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
+            if (serviceId == null) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
+            }
+            /*
+             * Get service meta data
+             */
+            final OAuthService oAuthService = getOAuthService();
+            final OAuthServiceMetaData service;
+            {
+                final OAuthServiceMetaDataRegistry registry = oAuthService.getMetaDataRegistry();
+                service = registry.getService(serviceId);
+            }
+            /*
+             * Parse OAuth parameters
              */
             // http://wiki.oauth.net/w/page/12238555/Signed-Callback-URLs
             // http://developer.linkedin.com/message/4568
             String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
             if (oauthToken == null) {
-                oauthToken = request.getParameter("code");
-                if (oauthToken == null) {
-                    throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.URLPARAM_OAUTH_TOKEN);
-                }
+                oauthToken = request.getParameter("access_token");
             }
             final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
             if (uuid == null) {
@@ -111,16 +126,6 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
              * The OAuth verifier (PIN)
              */
             final String oauthVerfifier = request.getParameter(OAuthConstants.URLPARAM_OAUTH_VERIFIER);
-            if (oauthVerfifier == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.URLPARAM_OAUTH_VERIFIER);
-            }
-            /*
-             * The meta data identifier
-             */
-            final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
-            if (serviceId == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
-            }
             /*
              * Invoke
              */
@@ -131,7 +136,10 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             token.setSecret(oauthTokenSecret);
             token.setToken(oauthToken);
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
-            final OAuthService oAuthService = getOAuthService();
+            /*
+             * Process arguments
+             */
+            service.processArguments(arguments, request.getParameters());
             /*
              * By now it doesn't matter which interaction type is passed
              */

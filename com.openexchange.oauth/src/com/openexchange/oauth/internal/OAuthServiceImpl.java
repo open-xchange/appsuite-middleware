@@ -406,25 +406,32 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     protected void obtainTokenByOutOfBand(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
-        final String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
-        if (null == pin) {
-            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PIN);
+        final OAuthServiceMetaData metaData = account.getMetaData();
+        final OAuthToken oAuthToken = metaData.getOAuthToken(arguments);
+        if (null == oAuthToken) {
+            final String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
+            if (null == pin) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PIN);
+            }
+            final OAuthToken requestToken = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
+            if (null == requestToken) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
+            }
+            /*
+             * With the request token and the verifier (which is a number) we need now to get the access token
+             */
+            final Verifier verifier = new Verifier(pin);
+            final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null);
+            final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
+            /*
+             * Apply to account
+             */
+            account.setToken(accessToken.getToken());
+            account.setSecret(accessToken.getSecret());
+        } else {
+            account.setToken(oAuthToken.getToken());
+            account.setSecret(oAuthToken.getSecret());
         }
-        final OAuthToken requestToken = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
-        if (null == requestToken) {
-            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
-        }
-        /*
-         * With the request token and the verifier (which is a number) we need now to get the access token
-         */
-        final Verifier verifier = new Verifier(pin);
-        final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null);
-        final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
-        /*
-         * Apply to account
-         */
-        account.setToken(accessToken.getToken());
-        account.setSecret(accessToken.getSecret());
     }
 
     protected void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
