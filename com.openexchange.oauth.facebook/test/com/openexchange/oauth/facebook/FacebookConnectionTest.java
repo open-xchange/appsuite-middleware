@@ -63,7 +63,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.facebook.osgi.Activator;
+import com.openexchange.oauth.facebook.osgi.FacebookOAuthActivator;
 
 
 /**
@@ -76,7 +76,7 @@ public class FacebookConnectionTest  extends TestCase {
     private FacebookServiceImpl facebook;
     
     public void setUp(){
-        Activator activator = new Activator();
+        FacebookOAuthActivator activator = new FacebookOAuthActivator();
 //        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
 //        activator.setLinkedInMetadata(linkedInMetadata);
         facebook = new FacebookServiceImpl(activator);

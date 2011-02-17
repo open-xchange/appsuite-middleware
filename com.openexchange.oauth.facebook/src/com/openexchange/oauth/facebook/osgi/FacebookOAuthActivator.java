@@ -96,7 +96,7 @@ public final class FacebookOAuthActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected void startBundle() throws Exception {        
         try {
             /*
              * (Re-)Initialize service registry with available services
