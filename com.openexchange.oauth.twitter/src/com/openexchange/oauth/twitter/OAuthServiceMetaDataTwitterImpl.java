@@ -105,4 +105,8 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
         return true;
     }
 
+    public String getScope() {
+        return null;
+    }
+
 }

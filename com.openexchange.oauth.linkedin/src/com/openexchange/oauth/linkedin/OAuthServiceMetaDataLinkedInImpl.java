@@ -87,4 +87,8 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
         return true;
     }
 
+    public String getScope() {
+        return null;
+    }
+
 }
