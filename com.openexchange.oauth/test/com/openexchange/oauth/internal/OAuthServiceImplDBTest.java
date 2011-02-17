@@ -109,6 +109,10 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             public boolean needsRequestToken() {
                 return true;
             }
+
+            public String getScope() {
+                return null;
+            }
             
         });
         
