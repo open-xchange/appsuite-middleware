@@ -198,4 +198,47 @@ public class FacebookConnectionTest  extends TestCase {
             System.out.println("---");
         }
     }
+    
+    public void testNewWorkflow(){
+     // This is basically scribes example
+        String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
+        String apiSecret = "9876bb887fac4be7518055b487eda4d9";
+        OAuthService service = new ServiceBuilder()
+                                      .provider(FacebookApi.class)
+                                      .apiKey(apiKey)
+                                      .apiSecret(apiSecret)
+                                      .callback("http://localhost/~karstenwill/")
+                                      .build();
+        Scanner in = new Scanner(System.in);
+
+        System.out.println("=== " + NETWORK_NAME + "'s OAuth Workflow ===");
+        System.out.println();
+
+        // Obtain the Authorization URL
+        System.out.println("Fetching the Authorization URL...");
+        String authorizationUrl = "https://graph.facebook.com/oauth/authorize?client_id=842495cb6b4d939cf998fd9239b5fe6f&redirect_uri=http://localhost/~karstenwill/";
+        System.out.println("Got the Authorization URL!");
+        System.out.println("Now go and authorize Scribe here:");
+        System.out.println(authorizationUrl+"&scope=friends_birthday,friends_work_history,friends_about_me,friends_hometown");
+        System.out.println("And paste the code here");
+        System.out.print(">>");
+        String code = in.nextLine();
+        
+        System.out.println("Now enter this in your browser:");
+        
+        System.out.println("https://graph.facebook.com/oauth/access_token?client_id="+apiKey+"&redirect_uri=http://localhost/~karstenwill/&client_secret="+apiSecret+"&code=" + code);
+        System.out.println("And enter the access token here:");
+        System.out.print(">>");
+        Token accessToken = new Token(in.nextLine(), NO_SECRET_NEEDED);
+        // Now let's go and ask for a protected resource!
+        System.out.println("Now we're going to access a protected resource...");
+        OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
+        
+        service.signRequest(accessToken, request);
+        Response response = request.send();
+        System.out.println("Got it! Lets see what we found...");
+        System.out.println();
+        System.out.println(response.getCode());
+        System.out.println(response.getBody());
+    }
 }
