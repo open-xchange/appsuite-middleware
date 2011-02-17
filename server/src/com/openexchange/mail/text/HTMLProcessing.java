@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -157,26 +157,21 @@ public final class HTMLProcessing {
         String retval = null;
         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
         if (isHtml) {
-            if (DisplayMode.RAW.equals(mode)) {
-                retval = content;
-            } else {
-                retval = htmlService.dropScriptTagsInHeader(content);
-                retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
-                if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
-                    /*
-                     * Filter according to white-list
-                     */
-                    retval = htmlService.filterWhitelist(retval);
-                    
-                    if (!usm.isAllowHTMLImages()) {
-                        retval = htmlService.filterExternalImages(retval, modified);
-                    }
-                    /*
-                     * Filter inlined images
-                     */
-                    if (mailPath != null && session != null) {
-                        retval = filterInlineImages(retval, session, mailPath);
-                    }
+            retval = htmlService.getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset, false);
+            if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
+                /*
+                 * Filter according to white-list
+                 */
+                retval = htmlService.filterWhitelist(retval);
+                
+                if (!usm.isAllowHTMLImages()) {
+                    retval = htmlService.filterExternalImages(retval, modified);
+                }
+                /*
+                 * Filter inlined images
+                 */
+                if (mailPath != null && session != null) {
+                    retval = filterInlineImages(retval, session, mailPath);
                 }
             }
             // if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
@@ -243,7 +238,7 @@ public final class HTMLProcessing {
      *            <code>Link&nbsp;[www.somewhere.com]</code>
      * @return The plain text representation of specified HTML content
      */
-    public static String html2text(final String htmlContent, final boolean appendHref) {
+    public static String html2text(String htmlContent, boolean appendHref) {
         return ServerServiceRegistry.getInstance().getService(HTMLService.class).html2text(htmlContent, appendHref);
     }
 
