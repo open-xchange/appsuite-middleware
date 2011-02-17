@@ -49,9 +49,19 @@
 
 package com.openexchange.oauth.facebook;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthToken;
@@ -123,19 +133,63 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter) {
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) {
         final String code = parameter.get("code");
         arguments.put(OAuthConstants.ARGUMENT_PIN, code);
+        arguments.put(OAuthConstants.CALLBACK, state.get(OAuthConstants.CALLBACK));
     }
 
     @Override
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
         final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
-        
-        
-        
+        String callback = (String) arguments.get(OAuthConstants.CALLBACK);
+
+        BufferedReader reader = null;
+        try {
+            callback = URLEncoder.encode(callback, "UTF-8");
+            final URL url = new URL("https://graph.facebook.com/oauth/access_token?client_id="+getAPIKey()+"&redirect_uri="+callback+"&client_secret="+getAPISecret()+"&code=" + code);
+            final URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(2500);
+            connection.setReadTimeout(2500);
+            connection.connect();
+            
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+            
+            final StringBuilder response = new StringBuilder();
+            String line;
+            while((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            
+            return parseResponse(response.toString());
+            
+        } catch (final MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // IGNORE
+                }
+            }
+        }
         
         return null;
+    }
+    
+    private static final Pattern EXTRACTOR = Pattern.compile("access_token=(.*?)&?");
+
+    private OAuthToken parseResponse(final String string) {
+        final Matcher matcher = EXTRACTOR.matcher(string);
+        String token = null; 
+        if(matcher.matches()) {
+            token = matcher.group(1);
+        }
+        return new DefaultOAuthToken(token, "");
     }
 
 }

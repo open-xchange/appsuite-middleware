@@ -49,13 +49,13 @@
 
 package com.openexchange.messaging.generic;
 
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
+import com.openexchange.messaging.generic.internal.Modifier;
 import com.openexchange.session.Session;
 
 /**
@@ -65,6 +65,39 @@ import com.openexchange.session.Session;
  * @since Open-Xchange v6.16
  */
 public class DefaultMessagingAccountManager implements MessagingAccountManager {
+
+    private static final class DefaultModifier implements Modifier {
+
+        private final DefaultMessagingAccountManager manager;
+        
+        public DefaultModifier(final DefaultMessagingAccountManager manager) {
+            super();
+            this.manager = manager;
+        }
+
+        /**
+         * Modifies account intended for incoming actions.
+         * 
+         * @param account The account
+         * @return The modified account
+         * @throws MessagingException If modifying fails
+         */
+        public MessagingAccount modifyIncoming(final MessagingAccount account) throws MessagingException {
+            return manager.modifyIncoming(account);
+        }
+
+        /**
+         * Modifies account intended for outgoing actions.
+         * 
+         * @param account The account
+         * @return The modified account
+         * @throws MessagingException If modifying fails
+         */
+        public MessagingAccount modifyOutgoing(final MessagingAccount account) throws MessagingException {
+            return manager.modifyOutgoing(account);
+        }
+
+    }
 
     /**
      * The messaging account storage cache.
@@ -78,6 +111,8 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
 
     private final MessagingService service;
 
+    private final Modifier modifier;
+
     /**
      * Initializes a new {@link DefaultMessagingAccountManager}.
      * 
@@ -87,6 +122,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         super();
         serviceId = service.getId();
         this.service = service;
+        modifier = new DefaultModifier(this);
     }
 
     protected MessagingAccount modifyIncoming(final MessagingAccount account) throws MessagingException {
@@ -97,32 +133,24 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         return account;
     }
 
-    private final List<MessagingAccount> modifyOutgoing(final List<MessagingAccount> accounts) throws MessagingException {
-        final List<MessagingAccount> ret = new ArrayList<MessagingAccount>(accounts.size());
-        for (final MessagingAccount messagingAccount : accounts) {
-            ret.add(modifyOutgoing(messagingAccount));
-        }
-        return ret;
-    }
-
     public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
-        return modifyOutgoing(CACHE.getAccount(serviceId, id, session));
+        return CACHE.getAccount(serviceId, id, session, modifier);
     }
 
     public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
-        return modifyOutgoing(CACHE.getAccounts(serviceId, session));
+        return CACHE.getAccounts(serviceId, session, modifier);
     }
 
     public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        return CACHE.addAccount(serviceId, modifyIncoming(account), session);
+        return CACHE.addAccount(serviceId, account, session, modifier);
     }
 
     public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.deleteAccount(serviceId, modifyIncoming(account), session);
+        CACHE.deleteAccount(serviceId, account, session, modifier);
     }
 
     public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.updateAccount(serviceId, modifyIncoming(account), session);
+        CACHE.updateAccount(serviceId, account, session, modifier);
     }
 
     public String checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {

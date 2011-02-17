@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,69 +49,33 @@
 
 package com.openexchange.messaging.generic.internal;
 
-import java.util.List;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.session.Session;
+
 
 /**
- * {@link MessagingAccountStorage}
- * 
+ * {@link Modifier}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public interface MessagingAccountStorage {
+public interface Modifier {
 
     /**
-     * Gets the denoted account.
+     * Modifies account intended for incoming actions.
      * 
-     * @param serviceId The service identifier
-     * @param id The account ID
-     * @param session The session
-     * @return The account
-     * @throws MessagingException If returning account fails
-     */
-    public MessagingAccount getAccount(String serviceId, int id, Session session, Modifier modifier) throws MessagingException;
-
-    /**
-     * Gets all accounts associated with specified service and given user.
-     * 
-     * @param serviceId The service ID
-     * @param session The session
-     * @return All accounts associated with specified service and given user
-     * @throws MessagingException If accounts cannot be returned
-     */
-    public List<MessagingAccount> getAccounts(String serviceId, Session session, Modifier modifier) throws MessagingException;
-
-    /**
-     * Adds given account.
-     * 
-     * @param serviceId The service identifier
      * @param account The account
-     * @param session The session
-     * @return The identifier of the newly created account
-     * @throws MessagingException If insertion fails
+     * @return The modified account
+     * @throws MessagingException If modifying fails
      */
-    public int addAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
+    public MessagingAccount modifyIncoming(MessagingAccount account) throws MessagingException;
 
     /**
-     * Deletes denoted account.
+     * Modifies account intended for outgoing actions.
      * 
-     * @param serviceId The service identifier
      * @param account The account
-     * @param session The session
-     * @throws MessagingException If deletion fails
+     * @return The modified account
+     * @throws MessagingException If modifying fails
      */
-    public void deleteAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
-
-    /**
-     * Updates given account.
-     * 
-     * @param serviceId The service identifier
-     * @param account The account
-     * @param session The session
-     * @throws MessagingException If update fails
-     */
-    public void updateAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
+    public MessagingAccount modifyOutgoing(MessagingAccount account) throws MessagingException;
 
 }

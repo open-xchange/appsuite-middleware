@@ -117,7 +117,9 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             /*
              * Get request token secret from session parameters
              */
-            final String oauthTokenSecret = (String) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
+            final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
+            final String oauthTokenSecret = (String) state.get("secret");
+            
             session.setParameter(uuid, null);
             if (oauthTokenSecret == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SECRET.getName());
@@ -139,7 +141,7 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             /*
              * Process arguments
              */
-            service.processArguments(arguments, request.getParameters());
+            service.processArguments(arguments, request.getParameters(), state);
             /*
              * By now it doesn't matter which interaction type is passed
              */

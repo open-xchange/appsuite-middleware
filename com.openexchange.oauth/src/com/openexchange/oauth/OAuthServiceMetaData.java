@@ -116,8 +116,9 @@ public interface OAuthServiceMetaData {
      * 
      * @param arguments The arguments
      * @param parameter The parameters
+     * @param state The state
      */
-    void processArguments(Map<String, Object> arguments, Map<String, String> parameter);
+    void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state);
 
     /**
      * Gets the optional OAuth token.

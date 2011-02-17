@@ -122,7 +122,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_SELECT_CONFIDS_FOR_USER = "SELECT confId FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
-    public MessagingAccount getAccount(final String serviceId, final int id, final Session session) throws MessagingException {
+    public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws MessagingException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -181,7 +181,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 }
                 account.setConfiguration(configuration);
             }
-            return account;
+            return modifier.modifyOutgoing(account);
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final GenericConfigStorageException e) {
@@ -194,7 +194,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
-    public List<MessagingAccount> getAccounts(final String serviceId, final Session session) throws MessagingException {
+    public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws MessagingException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -232,7 +232,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     account.setConfiguration(configuration);
                     account.setId(rs.getInt(1));
                     account.setMessagingService(messagingService);
-                    accounts.add(account);
+                    accounts.add(modifier.modifyOutgoing(account));
                 } while (rs.next());
             } else {
                 accounts = Collections.emptyList();
@@ -297,7 +297,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_INSERT = "INSERT INTO messagingAccount (cid, user, account, confId, serviceId, displayName) VALUES (?, ?, ?, ?, ?, ?)";
 
-    public int addAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
+    public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -317,6 +317,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             /*
              * Save account configuration using generic conf
              */
+            modifier.modifyIncoming(account);
             final int genericConfId;
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
@@ -381,7 +382,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_DELETE = "DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
-    public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
+    public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -398,6 +399,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
         PreparedStatement stmt = null;
         try {
+            modifier.modifyIncoming(account);
             final int accountId = account.getId();
             /*
              * Delete account configuration using generic conf
@@ -436,7 +438,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_UPDATE = "UPDATE messagingAccount SET displayName = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
-    public void updateAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
+    public void updateAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -453,6 +455,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
         PreparedStatement stmt = null;
         try {
+            modifier.modifyIncoming(account);
             /*
              * Update account configuration using generic conf
              */
@@ -643,7 +646,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                         try {
                             // Try using the new secret. Maybe this account doesn't need the migration
                             cryptoService.decrypt(encrypted, newSecret);
-                        } catch (CryptoException x) {
+                        } catch (final CryptoException x) {
                             // Needs migration
                             final String transcripted = cryptoService.encrypt(cryptoService.decrypt(encrypted, oldSecret), newSecret);
                             update.put(field, transcripted);

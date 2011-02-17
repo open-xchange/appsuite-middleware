@@ -57,12 +57,12 @@ import java.util.Map;
 import com.openexchange.context.SimContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.id.SimIDGenerator;
+import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthInteractionType;
-import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.SimOAuthServiceMetaDataRegistry;
 import com.openexchange.tools.sql.SQLTestCase;
@@ -84,12 +84,14 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         super.setUp();
         registry = new SimOAuthServiceMetaDataRegistry();
         
-        registry.addService(new OAuthServiceMetaData() {
+        registry.addService(new AbstractOAuthServiceMetaData() {
 
+            @Override
             public String getAPIKey() {
                 return "apiKey";
             }
 
+            @Override
             public String getAPISecret() {
                 return "apiSecret";
             }
@@ -98,10 +100,12 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
                 return "http://www.myService.invalid/initiateHandshake?token="+token.getToken()+"&secret="+token.getSecret();
             }
 
+            @Override
             public String getDisplayName() {
                 return "The cool oauthService";
             }
 
+            @Override
             public String getId() {
                 return "com.openexchange.test";
             }
@@ -116,14 +120,6 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
             public String processAuthorizationURL(final String authUrl) {
                 return authUrl;
-            }
-
-            public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter) {
-                // No-op
-            }
-
-            public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
-                return null;
             }
             
         });

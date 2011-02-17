@@ -51,6 +51,8 @@ package com.openexchange.oauth.json.oauthaccount.actions;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -138,7 +140,11 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString());
         final OAuthToken requestToken = interaction.getRequestToken();
-        session.setParameter(uuid, requestToken.getSecret());
+        final Map<String, Object> oauthState = new HashMap<String, Object>();
+        oauthState.put("secret", requestToken.getSecret());
+        oauthState.put(OAuthConstants.CALLBACK, callbackUrlBuilder.toString());
+        
+        session.setParameter(uuid, oauthState);
         /*
          * Write as JSON
          */

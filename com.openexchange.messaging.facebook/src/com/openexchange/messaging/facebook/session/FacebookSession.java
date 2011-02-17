@@ -49,30 +49,13 @@
 
 package com.openexchange.messaging.facebook.session;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.HttpWebConnection;
 import com.gargoylesoftware.htmlunit.ScriptException;
-import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJaxbRestClient;
 import com.google.code.facebookapi.IFacebookRestClient;
@@ -85,6 +68,10 @@ import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingResource;
+import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthException;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.session.Session;
 
 /**
@@ -112,7 +99,7 @@ public final class FacebookSession {
         final int accountId = messagingAccount.getId();
         FacebookSession facebookSession = registry.getSession(session.getContextId(), session.getUserId(), accountId);
         if (null == facebookSession) {
-            final FacebookSession newInstance = new FacebookSession(messagingAccount);
+            final FacebookSession newInstance = new FacebookSession(messagingAccount, session.getUserId(), session.getContextId());
             facebookSession = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
             if (null == facebookSession) {
                 facebookSession = newInstance;
@@ -125,7 +112,7 @@ public final class FacebookSession {
              * Create a new session
              */
             registry.purgeUserSession(session.getContextId(), session.getUserId(), accountId);
-            final FacebookSession newInstance = new FacebookSession(messagingAccount);
+            final FacebookSession newInstance = new FacebookSession(messagingAccount, session.getUserId(), session.getContextId());
             facebookSession = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
             if (null == facebookSession) {
                 facebookSession = newInstance;
@@ -145,22 +132,6 @@ public final class FacebookSession {
     private volatile boolean connected;
 
     /**
-     * The user's facebook home page.
-     */
-    private volatile HtmlPage homePage;
-
-    /**
-     * The web client to access user's facebook home page.
-     */
-    private volatile WebClient webClient;
-
-    /**
-     * Whether to log user out of current session as well as Facebook. If the user has sessions with other connected apps, these sessions
-     * will be closed as well.
-     */
-    private final boolean performWebLogout;
-
-    /**
      * The facebook REST client.
      */
     private volatile IFacebookRestClient<Object> facebookRestClient;
@@ -176,14 +147,9 @@ public final class FacebookSession {
     private final String secretKey;
 
     /**
-     * The facebook login.
+     * The OAuth account.
      */
-    private final String login;
-
-    /**
-     * The facebook password.
-     */
-    private final String password;
+    private final OAuthAccount oauthAccount;
 
     /**
      * The facebook user identifier; <code>-1</code> if not connected
@@ -204,19 +170,24 @@ public final class FacebookSession {
      * Initializes a new {@link FacebookMessagingResource}.
      * 
      * @param messagingAccount The facebook messaging account providing credentials and settings
+     * @throws MessagingException
      */
-    private FacebookSession(final MessagingAccount messagingAccount) {
+    private FacebookSession(final MessagingAccount messagingAccount, final int user, final int contextId) throws FacebookMessagingException {
         super();
         mutex = new Object();
-        performWebLogout = true;
         apiKey = FacebookConfiguration.getInstance().getApiKey();
         secretKey = FacebookConfiguration.getInstance().getSecretKey();
         /*
          * Read-in configuration
          */
         final Map<String, Object> accountConfiguration = messagingAccount.getConfiguration();
-        login = accountConfiguration.get(FacebookConstants.FACEBOOK_LOGIN).toString();
-        password = accountConfiguration.get(FacebookConstants.FACEBOOK_PASSWORD).toString();
+        final int oauthAccountId = Integer.parseInt(accountConfiguration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT).toString());
+        final OAuthService oAuthService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(OAuthService.class);
+        try {
+            oauthAccount = oAuthService.getAccount(oauthAccountId, user, contextId);
+        } catch (final OAuthException e) {
+            throw new FacebookMessagingException(e);
+        }
         facebookUserId = -1L;
         // lastAccessed = System.currentTimeMillis();
     }
@@ -238,10 +209,10 @@ public final class FacebookSession {
          */
         this.apiKey = apiKey;
         this.secretKey = secretKey;
-        this.login = login;
-        this.password = password;
+        // this.login = login;
+        // this.password = password;
+        oauthAccount = null;
         facebookUserId = -1L;
-        performWebLogout = true;
         // lastAccessed = System.currentTimeMillis();
     }
 
@@ -311,7 +282,7 @@ public final class FacebookSession {
             lastAccessed = System.currentTimeMillis();
             if (DEBUG) {
                 LOG.debug(new StringBuilder("Performed dummy request to Facebook REST server to keep Facebook session (\"").append(
-                    facebookSession).append("\") alive for Facebook user ").append(login).toString());
+                    facebookSession).append("\") alive for Facebook user ").append(oauthAccount.getDisplayName()).toString());
             }
         } catch (final FacebookException e) {
             throw FacebookMessagingException.create(e);
@@ -321,10 +292,10 @@ public final class FacebookSession {
     @Override
     public String toString() {
         if (connected) {
-            return new StringBuilder(32).append("{ connected=true, login=").append(login).append(", facebookUserId=").append(facebookUserId).append(
-                ", facebookSession=").append(facebookSession).append('}').toString();
+            return new StringBuilder(32).append("{ connected=true, login=").append(oauthAccount.getDisplayName()).append(
+                ", facebookUserId=").append(facebookUserId).append(", facebookSession=").append(facebookSession).append('}').toString();
         }
-        return new StringBuilder(32).append("{ connected=false, login=").append(login).append('}').toString();
+        return new StringBuilder(32).append("{ connected=false, login=").append(oauthAccount.getDisplayName()).append('}').toString();
     }
 
     /**
@@ -359,7 +330,7 @@ public final class FacebookSession {
             if (connected) {
                 return;
             }
-            login(true, true);
+            login();
             connected = true;
         }
     }
@@ -387,7 +358,7 @@ public final class FacebookSession {
                 return true;
             }
             try {
-                login(false, true);
+                login();
                 logout();
                 return true;
             } catch (final FacebookMessagingException e) {
@@ -407,21 +378,12 @@ public final class FacebookSession {
     }
 
     /**
-     * Gets the login.
+     * Gets associated OAuth account.
      * 
-     * @return The login
+     * @return The OAuth account
      */
-    public String getLogin() {
-        return login;
-    }
-
-    /**
-     * Gets the password.
-     * 
-     * @return The password
-     */
-    public String getPassword() {
-        return password;
+    public OAuthAccount getOauthAccount() {
+        return oauthAccount;
     }
 
     /**
@@ -448,49 +410,12 @@ public final class FacebookSession {
      * ----------------------------------------------------------------------------------------
      */
 
-    private void login(final boolean checkPermissions, final boolean useThreadedRefreshHandler) throws FacebookMessagingException {
-        /*
-         * Emulate a known client, hopefully keeping our profile low
-         */
-        WebClient wc = new WebClient(BrowserVersion.INTERNET_EXPLORER_7);
-        webClient = wc;
-        /*
-         * JavaScript needs to be disabled for security reasons
-         */
-        wc.setJavaScriptEnabled(false);
-        wc.setRedirectEnabled(true);
-        if (useThreadedRefreshHandler) {
-            wc.setRefreshHandler(new ThreadedRefreshHandler());
-        }
+    private void login() throws FacebookMessagingException {
         /*
          * Create REST client
          */
-        loginViaWebPage(wc);
-        /*
-         * Check permissions
-         */
-        if (checkPermissions && checkPermissions(wc, true)) {
-            /*
-             * Logout REST client to clean its state
-             */
-            logout();
-            /*
-             * ... and login again to bring up new permissions
-             */
-            wc = new WebClient(BrowserVersion.FIREFOX_2);
-            webClient = wc;
-            /*
-             * Javascript needs to be disabled for security reasons
-             */
-            wc.setJavaScriptEnabled(false);
-            if (useThreadedRefreshHandler) {
-                wc.setRefreshHandler(new ThreadedRefreshHandler());
-            }
-            loginViaWebPage(wc);
-        }
+        loginViaWebPage();
     }
-
-    private static final int FORM_INDEX = 0;
 
     /**
      * Logins via web page and assigns facebook REST client, facebook user identifier, and session string.
@@ -499,9 +424,9 @@ public final class FacebookSession {
      * @return The obtained auth token
      * @throws FacebookMessagingException If login fails
      */
-    private String loginViaWebPage(final WebClient webClient) throws FacebookMessagingException {
+    private String loginViaWebPage() throws FacebookMessagingException {
         try {
-            final FacebookConfiguration configuration = FacebookConfiguration.getInstance();
+            //final FacebookConfiguration configuration = FacebookConfiguration.getInstance();
             /*
              * Create REST client
              */
@@ -510,70 +435,8 @@ public final class FacebookSession {
             /*
              * First, we need to get an auth-token to log in with
              */
-            final String token = client.auth_createToken();
-            /*
-             * Access login page and get the login form
-             */
-            HtmlForm loginForm = null;
-            final String nameOfUserField = configuration.getNameOfUserField();
-            {
-                final String actionOfLoginForm = configuration.getActionOfLoginForm();
-                final List<HtmlForm> forms =
-                    webClient.<HtmlPage> getPage(
-                        new StringBuilder(64).append(configuration.getLoginPageBaseURL()).append("?api_key=").append(apiKey).append("&v=").append(
-                            configuration.getApiVersion()).append("&auth_token=").append(token).toString()).getForms();
-                final int size = forms.size();
-                for (int i = 0; i < size; i++) {
-                    if (FORM_INDEX == i) {
-                        final HtmlForm form = forms.get(i);
-                        if (form.getActionAttribute().startsWith(actionOfLoginForm) && (form.getInputsByName(nameOfUserField) != null)) {
-                            loginForm = form;
-                        }
-                    }
-                }
-            }
-            /*
-             * Check if form was found
-             */
-            if (loginForm == null) {
-                throw FacebookMessagingExceptionCodes.LOGIN_FORM_NOT_FOUND.create(configuration.getLoginPageBaseURL());
-            }
-            loginForm.<HtmlTextInput> getInputByName(nameOfUserField).setValueAttribute(login);
-            loginForm.<HtmlPasswordInput> getInputByName(configuration.getNameOfPasswordField()).setValueAttribute(password);
-            HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-            
-            /*
-             * Check if user should allow application access
-             */
-            {
-                final Iterable<HtmlElement> elements = pageAfterLogin.getAllHtmlChildElements();
-                for (final Iterator<HtmlElement> iterator = elements.iterator(); iterator.hasNext();) {
-                    final HtmlElement htmlElement = iterator.next();
-                    if ("meta".equalsIgnoreCase(htmlElement.getNodeName())) {
-                        final String httpEquiv = htmlElement.getAttribute("http-equiv");
-                        if ("refresh".equals(httpEquiv)) {
-                            String content = htmlElement.getAttribute("content");
-                            if (null != content) {
-                                final String url = content.substring(content.indexOf("url=") + 4);
-                                pageAfterLogin = webClient.<HtmlPage> getPage(url);
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Look for button
-                 */
-                final List<HtmlElement> list = pageAfterLogin.getHtmlElementsByName("grant_clicked");
-                for (final HtmlElement el : list){
-                    try {
-                        el.click();
-                    } catch (final IOException e) {
-                        LOG.error(e);
-                    }
-                }
-            }
+            // final String token = client.auth_createToken();
+            final String token = oauthAccount.getToken();
             /*
              * Check for proper pager after login
              */
@@ -588,21 +451,18 @@ public final class FacebookSession {
                  */
                 if ("Invalid parameter".equals(e.getMessage())) {
                     if (!LOG.isTraceEnabled()) {
-                        throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
+                        throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(oauthAccount.getDisplayName());
                     }
-                    final FacebookMessagingException fme = FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
+                    final FacebookMessagingException fme =
+                        FacebookMessagingExceptionCodes.FAILED_LOGIN.create(oauthAccount.getDisplayName());
                     LOG.trace(
-                        new StringBuilder("Login to facebook failed for login=").append(login).append(", password=").append(password).toString(),
+                        new StringBuilder("Login to facebook failed for login=").append(oauthAccount.getDisplayName()).toString(),
                         fme);
                     throw fme;
                 }
                 throw e;
             }
             facebookUserId = client.users_getLoggedInUser();
-            /*
-             * Check if expected link after login is available
-             */
-            homePage = pageAfterLogin;
             /*-
              * 
             if (!checkLinkExistence(pageAfterLogin.getAnchors())) {
@@ -611,19 +471,15 @@ public final class FacebookSession {
              */
             if (DEBUG) {
                 final StringBuilder sb = new StringBuilder(64);
-                sb.append("Connect successfully performed for user ").append(login);
+                sb.append("Connect successfully performed for user ").append(oauthAccount.getDisplayName());
                 sb.append(" with session=").append(facebookSession).append(" and userId=").append(facebookUserId);
                 LOG.debug(sb.toString());
             }
             return token;
         } catch (final FailingHttpStatusCodeException e) {
             throw FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(e, e.getMessage());
-        } catch (final MalformedURLException e) {
-            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ElementNotFoundException e) {
             throw FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw FacebookMessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final FacebookException e) {
             throw FacebookMessagingException.create(e);
         }
@@ -651,7 +507,7 @@ public final class FacebookSession {
                     if (!autoClick) {
                         throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(
                             statusUpdate.getName(),
-                            login,
+                            oauthAccount.getDisplayName(),
                             getPromptURL(statusUpdate));
                     }
                     perms.add(statusUpdate);
@@ -663,7 +519,7 @@ public final class FacebookSession {
                     if (!autoClick) {
                         throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(
                             readStream.getName(),
-                            login,
+                            oauthAccount.getDisplayName(),
                             getPromptURL(readStream));
                     }
                     perms.add(readStream);
@@ -675,7 +531,7 @@ public final class FacebookSession {
                     if (!autoClick) {
                         throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(
                             publishStream.getName(),
-                            login,
+                            oauthAccount.getDisplayName(),
                             getPromptURL(publishStream));
                     }
                     perms.add(publishStream);
@@ -698,73 +554,18 @@ public final class FacebookSession {
             if (perms.isEmpty()) {
                 return false;
             }
-            HtmlPage page = webClient.<HtmlPage> getPage(getPromptURL(perms.toArray(new Permission[perms.size()])));
-            /*
-             * Temporary allow JavaScript
-             */
-            webClient.setJavaScriptEnabled(true);
-            try {
-                page = grantPermissions(page);
-            } finally {
-                webClient.setJavaScriptEnabled(false);
-            }
-            /*
-             * Check if expected link after granting permission is available
-             */
-            homePage = page;
-            /*-
-             * 
-            if (!checkLinkExistence(page.getAnchors())) {
-                throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
-            }
-             */
             return true;
         } catch (final ScriptException e) {
             if (!perms.isEmpty()) {
                 final Permission p = perms.iterator().next();
-                throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(e, p.getName(), login, getPromptURL(p));
+                throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(e, p.getName(), oauthAccount.getDisplayName(), getPromptURL(p));
             }
             throw FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(e, e.getMessage());
         } catch (final FacebookException e) {
             throw FacebookMessagingException.create(e);
         } catch (final FailingHttpStatusCodeException e) {
             throw FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(e, e.getMessage());
-        } catch (final MalformedURLException e) {
-            throw FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private HtmlPage grantPermissions(final HtmlPage page) throws FacebookMessagingException {
-        final List<HtmlAnchor> anchors = page.getAnchors();
-        for (final HtmlAnchor htmlAnchor : anchors) {
-            final String attribute = htmlAnchor.getAttribute("onclick");
-            if (null != attribute && attribute.startsWith("UIPermissions.onAllowPermission(")) {
-                try {
-                    return grantPermissions(htmlAnchor.<HtmlPage> click());
-                } catch (final IOException e) {
-                    throw FacebookMessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                }
-
-            }
-        }
-        return page;
-    }
-
-    private boolean no_checkLinkExistence(final List<HtmlAnchor> anchors) {
-        final int size = anchors.size();
-        final Iterator<HtmlAnchor> iterator = anchors.iterator();
-        for (int i = 0; i < size; i++) {
-            final String hrefAttribute = iterator.next().getHrefAttribute();
-            if (hrefAttribute.startsWith("http://www.facebook.com/logout.php?h=")) {
-                /*
-                 * Found logout link
-                 */
-                return true;
-            }
-        }
-        return false;
     }
 
     private String getPromptURL(final Permission... permissions) {
@@ -799,121 +600,14 @@ public final class FacebookSession {
                  * Clear cached user id
                  */
                 client.setCacheSession(client.getCacheSessionKey(), null, client.getCacheSessionExpires());
-                /*
-                 * Logout from web front-end to log user out of current session as well as Facebook
-                 */
-                if (performWebLogout) {
-                    final HtmlPage tmp = homePage;
-                    if (null != tmp) {
-                        final List<HtmlAnchor> anchors = tmp.getAnchors();
-                        for (final HtmlAnchor htmlAnchor : anchors) {
-                            final String hrefAttribute = htmlAnchor.getHrefAttribute();
-                            if (null != hrefAttribute && hrefAttribute.startsWith("http://www.facebook.com/logout.php?")) {
-                                try {
-                                    htmlAnchor.click();
-                                } catch (final IOException e) {
-                                    LOG.warn("Logout from facebook web front-end failed.", e);
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
             } catch (final FacebookException e) {
                 LOG.warn("Logout of facebook failed.", e);
             } finally {
                 facebookRestClient = null;
                 facebookSession = null;
                 facebookUserId = -1L;
-                homePage = null;
-                final WebClient tmp = webClient;
-                if (null != tmp) {
-                    closeWebClient(tmp);
-                    webClient = null;
-                }
             }
         }
-    }
-
-    /**
-     * Closes specified {@link WebClient web client} in a safe manner.
-     * 
-     * @param webClient The web client to close
-     */
-    private static void closeWebClient(final WebClient webClient) {
-        if (null != webClient) {
-            /*
-             * Close all windows
-             */
-            try {
-                webClient.closeAllWindows();
-            } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-            /*
-             * Close associated manager
-             */
-            closeAssociatedManager(webClient);
-        }
-    }
-
-    private static final Class<HttpWebConnection> CLASS_WEB_CON = HttpWebConnection.class;
-
-    private static final Class<MultiThreadedHttpConnectionManager> CLASS_MUL_HTTP_CON_MANAGER = MultiThreadedHttpConnectionManager.class;
-
-    private static final Class<HttpClient> CLASS_HTTP_CLIENT = HttpClient.class;
-
-    /**
-     * Closes the {@link MultiThreadedHttpConnectionManager manager} possibly associated with specified web client.
-     * 
-     * @param client The web client whose manager should be closed
-     */
-    private static void closeAssociatedManager(final WebClient client) {
-        try {
-            final WebConnection webConnection = client.getWebConnection();
-            if (webConnection == null) {
-                return;
-            }
-            if (!CLASS_WEB_CON.isInstance(webConnection)) {
-                LOG.error(MessageFormat.format(
-                    "Cannot close webclient: webConnection is not of class {0} but of class {1}",
-                    CLASS_WEB_CON.getName(),
-                    webConnection.getClass().getName()));
-                return;
-            }
-            final Object httpClient = FacebookConstants.HTTP_CLIENT_FIELD.get(webConnection);
-            if (!CLASS_HTTP_CLIENT.isInstance(httpClient)) {
-                final String appendix = null == httpClient ? "is null" : "of class " + httpClient.getClass().getName();
-                LOG.error(MessageFormat.format(
-                    "Cannot close webclient: httpClient_ is not of class {0} but {1}",
-                    CLASS_HTTP_CLIENT.getName(),
-                    appendix));
-                return;
-            }
-            final Object manager = FacebookConstants.CONNECTION_MANAGER_FIELD.get(httpClient);
-            /*
-             * Check manager instance
-             */
-            if (!CLASS_MUL_HTTP_CON_MANAGER.isInstance(manager)) {
-                final String appendix = null == manager ? "is null" : "of class " + manager.getClass().getName();
-                LOG.error(MessageFormat.format(
-                    "Cannot close webclient: httpConnectionManager is not of class {0} but {1}",
-                    CLASS_MUL_HTTP_CON_MANAGER.getName(),
-                    appendix));
-                return;
-            }
-            /*
-             * Then shut down
-             */
-            ((MultiThreadedHttpConnectionManager) manager).shutdown();
-        } catch (final IllegalArgumentException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return;
     }
 
 }

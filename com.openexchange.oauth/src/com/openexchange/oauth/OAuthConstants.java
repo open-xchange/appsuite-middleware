@@ -114,4 +114,6 @@ public final class OAuthConstants {
      */
     public static final String TYPE_ACCOUNT = "com.openexchange.oauth.account";
 
+    public static final String CALLBACK = "callbackURL";
+
 }

@@ -142,19 +142,19 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         cacheLock = new ReentrantLock(true);
     }
 
-    public int addAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
-        return delegatee.addAccount(serviceId, account, session);
+    public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+        return delegatee.addAccount(serviceId, account, session, modifier);
     }
 
-    public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
-        delegatee.deleteAccount(serviceId, account, session);
+    public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+        delegatee.deleteAccount(serviceId, account, session, modifier);
         invalidateMessagingAccount(serviceId, account.getId(), session.getUserId(), session.getContextId());
     }
 
-    public MessagingAccount getAccount(final String serviceId, final int id, final Session session) throws MessagingException {
+    public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws MessagingException {
         final CacheService cacheService = MessagingGenericServiceRegistry.getServiceRegistry().getService(CacheService.class);
         if (cacheService == null) {
-            return delegatee.getAccount(serviceId, id, session);
+            return delegatee.getAccount(serviceId, id, session, modifier);
         }
         final int user = session.getUserId();
         final int cid = session.getContextId();
@@ -167,7 +167,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
             }
 
             public MessagingAccount load() throws MessagingException {
-                return d.getAccount(serviceId, id, session);
+                return d.getAccount(serviceId, id, session, modifier);
             }
 
             public Lock getCacheLock() {
@@ -184,7 +184,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         }
     }
 
-    public List<MessagingAccount> getAccounts(final String serviceId, final Session session) throws MessagingException {
+    public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws MessagingException {
         final TIntArrayList ids = delegatee.getAccountIDs(serviceId, session);
         if (ids.isEmpty()) {
             return Collections.emptyList();
@@ -196,7 +196,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
             public boolean execute(final int id) {
                 try {
-                    accounts.add(getAccount(serviceId, id, session));
+                    accounts.add(getAccount(serviceId, id, session, modifier));
                     return true;
                 } catch (final MessagingException e) {
                     me = e;
@@ -212,8 +212,8 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         return accounts;
     }
 
-    public void updateAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
-        delegatee.updateAccount(serviceId, account, session);
+    public void updateAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+        delegatee.updateAccount(serviceId, account, session, modifier);
         invalidateMessagingAccount(serviceId, account.getId(), session.getUserId(), session.getContextId());
     }
 

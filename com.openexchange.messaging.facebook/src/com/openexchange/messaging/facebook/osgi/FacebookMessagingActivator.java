@@ -71,6 +71,7 @@ import com.openexchange.messaging.facebook.FacebookMessagingService;
 import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionFactory;
 import com.openexchange.messaging.facebook.session.FacebookEventHandler;
 import com.openexchange.messaging.facebook.session.FacebookSessionRenewalTask;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -104,7 +105,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, TimerService.class, HTMLService.class };
+            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, TimerService.class, HTMLService.class, OAuthService.class };
     }
 
     @Override

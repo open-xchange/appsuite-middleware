@@ -125,7 +125,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         this.apiSecret = apiSecret;
     }
 
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter) {
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, Map<String, Object> state) {
         // no-op
     }
 

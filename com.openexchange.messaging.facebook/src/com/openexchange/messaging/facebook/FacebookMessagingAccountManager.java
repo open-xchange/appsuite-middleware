@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,71 +47,52 @@
  *
  */
 
-package com.openexchange.messaging.generic.internal;
+package com.openexchange.messaging.facebook;
 
-import java.util.List;
+import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.session.Session;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+
 
 /**
- * {@link MessagingAccountStorage}
- * 
+ * {@link FacebookMessagingAccountManager}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public interface MessagingAccountStorage {
+public final class FacebookMessagingAccountManager extends DefaultMessagingAccountManager {
 
     /**
-     * Gets the denoted account.
-     * 
-     * @param serviceId The service identifier
-     * @param id The account ID
-     * @param session The session
-     * @return The account
-     * @throws MessagingException If returning account fails
+     * Initializes a new {@link FacebookMessagingAccountManager}.
+     * @param service
      */
-    public MessagingAccount getAccount(String serviceId, int id, Session session, Modifier modifier) throws MessagingException;
+    public FacebookMessagingAccountManager(final MessagingService service) {
+        super(service);
+    }
 
-    /**
-     * Gets all accounts associated with specified service and given user.
-     * 
-     * @param serviceId The service ID
-     * @param session The session
-     * @return All accounts associated with specified service and given user
-     * @throws MessagingException If accounts cannot be returned
-     */
-    public List<MessagingAccount> getAccounts(String serviceId, Session session, Modifier modifier) throws MessagingException;
+    @Override
+    protected MessagingAccount modifyIncoming(final MessagingAccount account) throws MessagingException {
+        final Map<String, Object> configuration = account.getConfiguration();
+        if (null != configuration) {
+            final Integer id = (Integer) configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
+            if (null != id) {
+                configuration.put(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT, id.toString());
+            }
+        }
+        return account;
+    }
 
-    /**
-     * Adds given account.
-     * 
-     * @param serviceId The service identifier
-     * @param account The account
-     * @param session The session
-     * @return The identifier of the newly created account
-     * @throws MessagingException If insertion fails
-     */
-    public int addAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
-
-    /**
-     * Deletes denoted account.
-     * 
-     * @param serviceId The service identifier
-     * @param account The account
-     * @param session The session
-     * @throws MessagingException If deletion fails
-     */
-    public void deleteAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
-
-    /**
-     * Updates given account.
-     * 
-     * @param serviceId The service identifier
-     * @param account The account
-     * @param session The session
-     * @throws MessagingException If update fails
-     */
-    public void updateAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
+    @Override
+    protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws MessagingException {
+        final Map<String, Object> configuration = account.getConfiguration();
+        if (null != configuration) {
+            final String id = (String) configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
+            if (null != id) {
+                configuration.put(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT, Integer.valueOf(id.trim()));
+            }
+        }
+        return account;
+    }
 
 }

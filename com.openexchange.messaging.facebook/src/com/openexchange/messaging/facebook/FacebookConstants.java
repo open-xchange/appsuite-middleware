@@ -72,16 +72,6 @@ public final class FacebookConstants {
     public static final String FACEBOOK_SECRET_KEY = "secretKey";
 
     /**
-     * The configuration property name for facebook login.
-     */
-    public static final String FACEBOOK_LOGIN = "login";
-
-    /**
-     * The configuration property name for facebook password.
-     */
-    public static final String FACEBOOK_PASSWORD = "password";
-
-    /**
      * The default API key.
      */
     public static final String KEY_API = "d36ebc9e274a89e3bd0c239cea4acb48";
@@ -115,6 +105,11 @@ public final class FacebookConstants {
      * The folder identifier for a user's wall posts.
      */
     public static final String FOLDER_WALL = "wall";
+
+    /**
+     * The constant for account.
+     */
+    public static final String FACEBOOK_OAUTH_ACCOUNT = "account";
 
     /**
      * Initializes facebook constants.
