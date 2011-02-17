@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestHandler;
@@ -378,30 +379,32 @@ public class AJPv13TaskWatcher {
                 final AJPv13RequestHandler ajpRequestHandler = ajpConnection.getAjpRequestHandler();
                 ajpConnection.blockOutputStream(true);
                 try {
-                    final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
-                    final OutputStream out = ajpConnection.getOutputStream();
-                    if (ajpRequestHandler.isHeadersSent()) {
-                        /*
-                         * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data
-                         * or an empty SEND_BODY package.
-                         */
-                        final byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
-                        if (remainingData.length > 0) {
+                    if (!ajpRequestHandler.isEndResponseSent()) {
+                        final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
+                        final OutputStream out = ajpConnection.getOutputStream();
+                        if (ajpRequestHandler.isHeadersSent()) {
                             /*
-                             * Flush available data cut into MAX_BODY_CHUNK_SIZE chunks
+                             * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data
+                             * or an empty SEND_BODY package.
                              */
-                            keepAliveSendAvailableData(remoteAddress, out, remainingData);
+                            final byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
+                            if (remainingData.length > 0) {
+                                /*
+                                 * Flush available data cut into MAX_BODY_CHUNK_SIZE chunks
+                                 */
+                                keepAliveSendAvailableData(remoteAddress, out, remainingData);
+                            } else {
+                                /*
+                                 * Empty SEND_BODY package.
+                                 */
+                                keepAliveSendEmptyBody(remoteAddress, out);
+                            }
                         } else {
                             /*
-                             * Empty SEND_BODY package.
+                             * Pending SEND_HEADERS package. Keep-Alive needs to be performed by requesting an empty data chunk.
                              */
-                            keepAliveSendEmptyBody(remoteAddress, out);
+                            keepAliveGetEmptyBody(ajpConnection, remoteAddress, out);
                         }
-                    } else {
-                        /*
-                         * Pending SEND_HEADERS package. Keep-Alive needs to be performed by requesting an empty data chunk.
-                         */
-                        keepAliveGetEmptyBody(ajpConnection, remoteAddress, out);
                     }
                 } finally {
                     ajpConnection.blockOutputStream(false);
