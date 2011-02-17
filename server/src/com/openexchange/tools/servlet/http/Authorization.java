@@ -49,9 +49,9 @@
 
 package com.openexchange.tools.servlet.http;
 
+import java.io.UnsupportedEncodingException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
-import com.openexchange.tools.encoding.Charsets;
 
 /**
  * {@link Authorization}
@@ -103,9 +103,9 @@ public final class Authorization {
         }
     }
 
-    public static Credentials decode(String auth) {
+    public static Credentials decode(String auth) throws UnsupportedEncodingException {
         final byte[] decoded = Base64.decode(auth.substring(6));
-        final String userpass = new String(decoded, Charsets.UTF_8).trim();
+        final String userpass = new String(decoded, "UTF-8").trim();
         final int delimiter = userpass.indexOf(':');
         String login = "";
         String pass = "";

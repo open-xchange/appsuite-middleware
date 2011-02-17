@@ -309,7 +309,7 @@ public abstract class OXServlet extends WebDavServlet {
 //        resp.addHeader("WWW-Authenticate", builder.toString());
     }
 
-    private static LoginRequest parseLogin(final HttpServletRequest req, Interface face) throws WebdavException {
+    private static LoginRequest parseLogin(final HttpServletRequest req, Interface face) throws WebdavException, IOException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             if (LOG.isDebugEnabled()) {
