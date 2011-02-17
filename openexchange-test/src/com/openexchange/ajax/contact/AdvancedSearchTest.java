@@ -192,14 +192,23 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 	public void testSearchOrderingWithKana() throws Exception{
 		manager.newAction(
 				ContactTestManager.generateContact(folderID, "\u30ef"),
+				ContactTestManager.generateContact(folderID, "\u30ea"),
 				ContactTestManager.generateContact(folderID, "\u30e9"),
+				ContactTestManager.generateContact(folderID, "\u30e5"),
 				ContactTestManager.generateContact(folderID, "\u30e4"),
+				ContactTestManager.generateContact(folderID, "\u30df"),
 				ContactTestManager.generateContact(folderID, "\u30de"),
+				ContactTestManager.generateContact(folderID, "\u30d0"),
 				ContactTestManager.generateContact(folderID, "\u30cf"),
+				ContactTestManager.generateContact(folderID, "\u30cb"),
 				ContactTestManager.generateContact(folderID, "\u30ca"),
+				ContactTestManager.generateContact(folderID, "\u30c0"),
 				ContactTestManager.generateContact(folderID, "\u30bf"),
+				ContactTestManager.generateContact(folderID, "\u30b6"),
 				ContactTestManager.generateContact(folderID, "\u30b5"),
+				ContactTestManager.generateContact(folderID, "\u30ac"),
 				ContactTestManager.generateContact(folderID, "\u30ab"),
+				ContactTestManager.generateContact(folderID, "\u30a3"),
 				ContactTestManager.generateContact(folderID, "\u30a2")
 		);
 		
@@ -224,11 +233,14 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 			
 			Object[][] resultTable = response.getArray();
 			assertNotNull(ident+"Should find at least a result", resultTable);
-			assertEquals(ident+"Should find one result", 1, resultTable.length);
+			assertEquals(ident+"Should find two results", 2, resultTable.length);
 			
 			int columnPos = response.getColumnPos(field.getNumber());
+			HashSet<String> names = new HashSet<String>();
+			names.add((String) resultTable[0][columnPos]);
+			names.add((String) resultTable[1][columnPos]);
+			assertTrue(ident+"Should be contained", names.contains(letters[currentPosition]));
 			
-			assertEquals(ident+"Result should appear in the right order", letters[currentPosition], resultTable[0][columnPos]);
 			currentPosition++;
 		}
 	}
