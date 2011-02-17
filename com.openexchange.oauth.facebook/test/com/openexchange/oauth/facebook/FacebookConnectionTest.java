@@ -181,14 +181,6 @@ public class FacebookConnectionTest  extends TestCase {
             e.printStackTrace();
         }
         
-//        OAuthRequest request4 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/100001996625043?fields=name,first_name,last_name,email,birthday,picture,hometown");
-//        service.signRequest(accessToken, request4);
-//        Response response4 = request4.send();
-//        System.out.println("Got it! Lets see what we found...");
-//        System.out.println();
-//        System.out.println(response4.getCode());
-//        System.out.println(response4.getBody());
-        
 
         System.out.println();
         System.out.println("Thats it man! Go and build something awesome with Scribe! :)");
