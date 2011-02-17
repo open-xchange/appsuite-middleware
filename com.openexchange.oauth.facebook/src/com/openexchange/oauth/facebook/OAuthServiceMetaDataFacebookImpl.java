@@ -108,7 +108,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     public String getScope() {
-        return "publish_stream,read_stream,status_update,friends_birthday,friends_work_history,friends_about_me,friends_hometown";
+        return "offline_access,publish_stream,read_stream,status_update,friends_birthday,friends_work_history,friends_about_me,friends_hometown";
     }
 
     public String processAuthorizationURL(final String authUrl) {
