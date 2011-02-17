@@ -64,6 +64,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.Task;
@@ -374,43 +375,38 @@ public class AJPv13TaskWatcher {
              * Send "keep-alive" package depending on current request handler's state.
              */
             final AJPv13ConnectionImpl ajpConnection = task.getAJPConnection();
-            ajpConnection.block();
+            final AJPv13RequestHandler ajpRequestHandler = ajpConnection.getAjpRequestHandler();
+            ajpConnection.blockOutputStream(true);
             try {
-                final AJPv13RequestHandler ajpRequestHandler = ajpConnection.getAjpRequestHandler();
-                ajpConnection.blockOutputStream(true);
-                try {
-                    if (!ajpRequestHandler.isEndResponseSent()) {
-                        final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
-                        final OutputStream out = ajpConnection.getOutputStream();
-                        if (ajpRequestHandler.isHeadersSent()) {
+                if (!ajpRequestHandler.isEndResponseSent()) {
+                    final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
+                    final BlockableBufferedOutputStream out = ajpConnection.getOutputStream();
+                    if (ajpRequestHandler.isHeadersSent()) {
+                        /*
+                         * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data
+                         * or an empty SEND_BODY package.
+                         */
+                        final byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
+                        if (remainingData.length > 0) {
                             /*
-                             * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data
-                             * or an empty SEND_BODY package.
+                             * Flush available data cut into MAX_BODY_CHUNK_SIZE chunks
                              */
-                            final byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
-                            if (remainingData.length > 0) {
-                                /*
-                                 * Flush available data cut into MAX_BODY_CHUNK_SIZE chunks
-                                 */
-                                keepAliveSendAvailableData(remoteAddress, out, remainingData);
-                            } else {
-                                /*
-                                 * Empty SEND_BODY package.
-                                 */
-                                keepAliveSendEmptyBody(remoteAddress, out);
-                            }
+                            keepAliveSendAvailableData(remoteAddress, out, remainingData);
                         } else {
                             /*
-                             * Pending SEND_HEADERS package. Keep-Alive needs to be performed by requesting an empty data chunk.
+                             * Empty SEND_BODY package.
                              */
-                            keepAliveGetEmptyBody(ajpConnection, remoteAddress, out);
+                            keepAliveSendEmptyBody(remoteAddress, out);
                         }
+                    } else {
+                        /*
+                         * Pending SEND_HEADERS package. Keep-Alive needs to be performed by requesting an empty data chunk.
+                         */
+                        keepAliveGetEmptyBody(ajpConnection, remoteAddress, out);
                     }
-                } finally {
-                    ajpConnection.blockOutputStream(false);
                 }
             } finally {
-                ajpConnection.unblock();
+                ajpConnection.blockOutputStream(false);
             }
         } // End of keepAlive()
 

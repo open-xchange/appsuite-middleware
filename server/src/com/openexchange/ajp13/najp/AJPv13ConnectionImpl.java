@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -144,10 +144,15 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
     /**
      * Checks if data has already been written.
      * 
-     * @return <code>true</code> if data has already been written; otherwise <code>false</code>
+     * @return <code>true</code> if data has already been written; otherwsie <code>false</code>
      */
     public boolean isDirty() {
-        return outputStream.isDirty();
+        blocker.acquire();
+        try {
+            return outputStream.isDirty();
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
@@ -169,7 +174,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
                 try {
                     outputStream.flush();
                 } catch (final IOException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
                 outputStream.clear();
             }
@@ -251,6 +256,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @throws IOException If input stream cannot be returned
      */
     public InputStream getInputStream() throws IOException {
+        if (inputStream == null) {
+            throw new IOException("Input stream not availalbe");
+        }
         blocker.acquire();
         try {
             return inputStream;
@@ -265,7 +273,10 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
-    public OutputStream getOutputStream() throws IOException {
+    public BlockableBufferedOutputStream getOutputStream() throws IOException {
+        if (outputStream == null) {
+            throw new IOException("Output stream not available");
+        }
         blocker.acquire();
         try {
             return outputStream;
