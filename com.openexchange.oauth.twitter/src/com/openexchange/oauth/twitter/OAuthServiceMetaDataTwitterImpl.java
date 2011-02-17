@@ -109,4 +109,8 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
         return null;
     }
 
+    public String processAuthorizationURL(final String authUrl) {
+        return authUrl;
+    }
+
 }

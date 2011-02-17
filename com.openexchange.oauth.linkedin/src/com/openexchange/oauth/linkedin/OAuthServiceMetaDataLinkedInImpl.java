@@ -91,4 +91,8 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
         return null;
     }
 
+    public String processAuthorizationURL(final String authUrl) {
+        return authUrl;
+    }
+
 }

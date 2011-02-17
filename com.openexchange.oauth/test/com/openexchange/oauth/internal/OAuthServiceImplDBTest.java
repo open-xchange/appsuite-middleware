@@ -113,6 +113,10 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             public String getScope() {
                 return null;
             }
+
+            public String processAuthorizationURL(final String authUrl) {
+                return authUrl;
+            }
             
         });
         
