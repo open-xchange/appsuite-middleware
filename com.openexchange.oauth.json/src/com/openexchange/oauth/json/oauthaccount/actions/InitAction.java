@@ -106,26 +106,22 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             /*
              * Compose call-back URL
              */
-            final String callbackUrl;
-            {
-                final StringBuilder callbackUrlBuilder = new StringBuilder(256);
-                callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
-                callbackUrlBuilder.append(request.getHostname());
-                callbackUrlBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
-                final String action = (account != null) ? "reauthorize&id=" + account.getId() : "create";
-                callbackUrlBuilder.append("?action=").append(action).append("&respondWithHTML=true&session=").append(session.getSessionID());
-                final String displayName = request.getParameter(AccountField.DISPLAY_NAME.getName());
-                if (displayName != null) {
-                    callbackUrlBuilder.append('&').append(AccountField.DISPLAY_NAME.getName()).append('=').append(urlEncode(displayName));
-                }
-                callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
-                callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
-                callbackUrl = callbackUrlBuilder.toString();
+            final StringBuilder callbackUrlBuilder = new StringBuilder(256);
+            callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
+            callbackUrlBuilder.append(request.getHostname());
+            callbackUrlBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
+            final String action = (account != null) ? "reauthorize&id=" + account.getId() : "create";
+            callbackUrlBuilder.append("?action=").append(action).append("&respondWithHTML=true&session=").append(session.getSessionID());
+            final String displayName = request.getParameter(AccountField.DISPLAY_NAME.getName());
+            if (displayName != null) {
+                callbackUrlBuilder.append('&').append(AccountField.DISPLAY_NAME.getName()).append('=').append(urlEncode(displayName));
             }
+            callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
+            callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
             /*
              * Invoke
              */
-            final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl);
+            final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString());
             final OAuthToken requestToken = interaction.getRequestToken();
             session.setParameter(uuid, requestToken.getSecret());
             /*
