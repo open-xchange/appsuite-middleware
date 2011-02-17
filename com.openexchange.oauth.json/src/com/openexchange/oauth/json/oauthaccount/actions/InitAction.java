@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -68,7 +67,6 @@ import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
-import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,14 +87,11 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
             final OAuthService oAuthService = getOAuthService();
-
-            final String accountId = request.getParameter("id");
-            OAuthAccount account = null;
-
-            if (accountId != null) {
-                account = oAuthService.getAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+            final OAuthAccount account;
+            {
+                final String accountId = request.getParameter("id");
+                account = accountId == null ? null : oAuthService.getAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
             }
-
             /*
              * Parse parameters
              */
@@ -116,7 +111,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
             callbackUrlBuilder.append(request.getHostname());
             callbackUrlBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
-            String action = (account != null) ? "reauthorize&id=" + account.getId() : "create";
+            final String action = (account != null) ? "reauthorize&id=" + account.getId() : "create";
             callbackUrlBuilder.append("?action=").append(action).append("&respondWithHTML=true&session=").append(session.getSessionID());
             final String displayName = request.getParameter(AccountField.DISPLAY_NAME.getName());
             if (displayName != null) {
