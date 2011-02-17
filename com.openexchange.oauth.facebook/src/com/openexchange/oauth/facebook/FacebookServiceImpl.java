@@ -68,7 +68,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.facebook.osgi.Activator;
 import com.openexchange.oauth.facebook.osgi.FacebookOAuthActivator;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;

@@ -71,7 +71,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public final class FacebookOAuthActivator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = LogFactory.getLog(FacebookOAuthActivator.class);
 
     private BundleContext bundleContext;
 
