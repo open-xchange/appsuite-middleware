@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth;
 
+import java.util.Map;
+
 /**
  * {@link AbstractOAuthServiceMetaData} - The default {@link OAuthServiceMetaData} implementation.
  * 
@@ -92,7 +94,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      * 
      * @param id The identifier to set
      */
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -101,7 +103,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      * 
      * @param displayName The display name to set
      */
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
@@ -110,7 +112,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      * 
      * @param apiKey The API Key to set
      */
-    public void setApiKey(String apiKey) {
+    public void setApiKey(final String apiKey) {
         this.apiKey = apiKey;
     }
 
@@ -119,8 +121,16 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      * 
      * @param apiSecret The API Secret to set
      */
-    public void setApiSecret(String apiSecret) {
+    public void setApiSecret(final String apiSecret) {
         this.apiSecret = apiSecret;
     }
 
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter) {
+        // no-op
+    }
+
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
+        return null;
+    }
+    
 }

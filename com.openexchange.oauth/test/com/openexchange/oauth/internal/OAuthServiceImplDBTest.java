@@ -117,6 +117,14 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             public String processAuthorizationURL(final String authUrl) {
                 return authUrl;
             }
+
+            public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter) {
+                // No-op
+            }
+
+            public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
+                return null;
+            }
             
         });
         
