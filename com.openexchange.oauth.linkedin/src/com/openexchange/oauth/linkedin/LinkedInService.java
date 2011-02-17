@@ -60,5 +60,7 @@ import com.openexchange.groupware.container.Contact;
 public interface LinkedInService {
 
     public abstract List<Contact> getContacts(int user, int contextId, int accountId);
+    
+    public abstract String getAccountDisplayName(int user, int contextId, int accountId);
 
 }

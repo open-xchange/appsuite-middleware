@@ -120,7 +120,13 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
         if (null != accountId){
             Integer accountIdInt = Integer.parseInt(accountId);
             if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
-            subscription.setDisplayName("LinkedIn"); //FIXME use account displayName
+            String displayName = activator.getLinkedInService().getAccountDisplayName(subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+            if (null != displayName && !"".equals(displayName)){
+                subscription.setDisplayName(displayName);
+            } else {
+                subscription.setDisplayName("LinkedIn");
+            }
+            
         }        
         super.modifyOutgoing(subscription);
     }

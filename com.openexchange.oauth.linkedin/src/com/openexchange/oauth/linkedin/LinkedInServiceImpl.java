@@ -238,4 +238,16 @@ public class LinkedInServiceImpl implements LinkedInService{
 
         return textVal;
     }
+
+    public String getAccountDisplayName(int user, int contextId, int accountId) {
+        String displayName="";
+        try {
+            com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            OAuthAccount account = oAuthService.getAccount(accountId, user, contextId);
+            displayName = account.getDisplayName();
+        } catch (OAuthException e) {
+            LOG.error(e);
+        }
+        return displayName;
+    }
 }
