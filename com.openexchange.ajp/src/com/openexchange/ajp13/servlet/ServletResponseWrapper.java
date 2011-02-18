@@ -61,9 +61,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
@@ -82,7 +82,24 @@ public class ServletResponseWrapper implements ServletResponse {
 
     public static final int OUTPUT_WRITER = 2;
 
-    private static final String DEFAULT_CHARSET = ServerConfig.getProperty(Property.DefaultEncoding);
+    private static volatile String defaultCharset;
+
+    private static String getDefaultCharset() {
+        String tmp = defaultCharset;
+        if (tmp == null) {
+            synchronized (ServletResponseWrapper.class) {
+                tmp = defaultCharset;
+                if (tmp == null) {
+                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return "UTF-8";
+                    }
+                    defaultCharset = tmp = service.getProperty("DefaultEncoding", "UTF-8");
+                }
+            }
+        }
+        return tmp;
+    }
 
     protected static final String CONTENT_TYPE = "Content-Type";
 
@@ -139,7 +156,7 @@ public class ServletResponseWrapper implements ServletResponse {
             /*
              * Corresponding to rfc
              */
-            setCharacterEncoding(DEFAULT_CHARSET);
+            setCharacterEncoding(getDefaultCharset());
         }
         headers.put(CONTENT_TYPE, new String[] { contentType });
     }
@@ -223,7 +240,7 @@ public class ServletResponseWrapper implements ServletResponse {
     }
 
     public String getCharacterEncoding() {
-        return characterEncoding == null ? (characterEncoding = DEFAULT_CHARSET) : characterEncoding;
+        return characterEncoding == null ? (characterEncoding = getDefaultCharset()) : characterEncoding;
     }
 
     public void resetBuffer() {
@@ -263,7 +280,7 @@ public class ServletResponseWrapper implements ServletResponse {
             /*
              * Method setContentType() has not been called prior to call getWriter()
              */
-            characterEncoding = DEFAULT_CHARSET;
+            characterEncoding = getDefaultCharset();
         }
         /*
          * Check Charset Encoding
