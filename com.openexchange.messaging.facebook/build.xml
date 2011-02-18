@@ -48,6 +48,7 @@
     <property name="iojar" value="commons-io-1.4.jar"/>
     <property name="mailjar" value="mail-1.4.3.jar"/>
 	<property name="trovejar" value="trove-2.1.0.jar" />
+	<property name="jsonjar" value="json.jar"/>
 
     <property name="activationjar" value="activation-1.1.1.jar"/>
     <property name="xercesjar" value="xerces.jar"/>
@@ -71,6 +72,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${iojar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}" />
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}" />
 
         <pathelement location="${bundlesdir}/${threadpooljar}"/>
     	<pathelement location="${bundlesdir}/${htmljar}"/>
