@@ -111,7 +111,7 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
     @Override
     public String toString() {
         final String delim = ", ";
-        return new StringBuilder(64).append("DefaultOAuthAccount ( id = ").append(this.id).append(delim).append("displayName = ").append(
+        return new StringBuilder(64).append("( id = ").append(this.id).append(delim).append("displayName = ").append(
             this.displayName).append(delim).append("metaData = ").append(this.metaData).append(delim).append(" )").toString();
     }
 
