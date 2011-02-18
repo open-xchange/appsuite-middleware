@@ -711,7 +711,7 @@ public final class MIMEMailPart extends MailPart {
         if (null == multipart) {
             try {
                 final int size = part.getSize();
-                 if (size > 0 && size <= MAX_INMEMORY_SIZE) {
+                if (size > 0 && size <= MAX_INMEMORY_SIZE) {
                     /*
                      * If size is less than or equal to 1MB, use the in-memory implementation
                      */
@@ -724,9 +724,8 @@ public final class MIMEMailPart extends MailPart {
                      */
                     final Object content = part.getContent();
                     if (content instanceof InputStream) {
-                        multipart =
-                            new JavaMailMultipartWrapper(new MimeMultipart(
-                                new InputStreamDataSource((InputStream) content).setType(getContentType().toString())));
+                        multipart = new JavaMailMultipartWrapper(new MimeMultipart(
+                            new InputStreamDataSource((InputStream) content).setType(getContentType().toString())));
                     } else {
                         multipart = new JavaMailMultipartWrapper((Multipart) content);
                     }
