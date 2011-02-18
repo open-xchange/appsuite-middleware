@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,54 +49,39 @@
 
 package com.openexchange.sql.grammar;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.openexchange.sql.builder.IStatementBuilder;
 
-public class UPDATE extends ModifyCommand {
-	protected WHERE where;
-	protected String tableName;
-	protected List<Assignment> assignments;
 
-	public UPDATE(String tableName) {
-		this.tableName = tableName;
-		assignments = new LinkedList<Assignment>();
-	}
-	
-	public UPDATE(Table table) {
-	    this(table.getName());
-	}
+/**
+ * {@link BitLSHIFT}
+ *
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ */
+public class BitLSHIFT extends BinaryBitFunction {
 
-	public void build(IStatementBuilder builder) {
-		builder.buildUPDATE(this);
-	}
-	
-	public UPDATE SET(Column column, Expression expression) {
-	    return SET(column.getName(), expression);
-	}
-	
-	public UPDATE SET(String column, Expression expression) {
-		assignments.add(new Assignment(column, expression));
-		return this;
-	}
-	
-	public UPDATE WHERE(Predicate predicate) {
-		where = new WHERE(predicate);
-		return this;
-	}
+    /**
+     * Initializes a new {@link BitLSHIFT}.
+     * @param left
+     * @param right
+     */
+    public BitLSHIFT(Expression left, Expression right) {
+        super(left, right);
+    }
 
-	public String getTableName() {
-		return tableName;
-	}
+    /* (non-Javadoc)
+     * @see com.openexchange.sql.grammar.Expression#getSqlKeyword()
+     */
+    @Override
+    public String getSqlKeyword() {
+        return "<<";
+    }
 
-	public List<Assignment> getAssignments() {
-		return assignments;
-	}
-
-	public WHERE getWhere() {
-		return where;
-	}
-
+    /* (non-Javadoc)
+     * @see com.openexchange.sql.grammar.Element#build(com.openexchange.sql.builder.IStatementBuilder)
+     */
+    @Override
+    public void build(IStatementBuilder builder) {
+        builder.buildBitLSHIFT(this);
+    }
 
 }

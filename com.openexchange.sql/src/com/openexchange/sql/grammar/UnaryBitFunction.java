@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,54 +49,21 @@
 
 package com.openexchange.sql.grammar;
 
-import java.util.LinkedList;
-import java.util.List;
+/**
+ * {@link UnaryBitFunction}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ */
+public abstract class UnaryBitFunction extends BitFunction {
 
-import com.openexchange.sql.builder.IStatementBuilder;
+    protected Expression expression;
 
-public class UPDATE extends ModifyCommand {
-	protected WHERE where;
-	protected String tableName;
-	protected List<Assignment> assignments;
+    public UnaryBitFunction(Expression expression) {
+        super();
+        this.expression = expression;
+    }
 
-	public UPDATE(String tableName) {
-		this.tableName = tableName;
-		assignments = new LinkedList<Assignment>();
-	}
-	
-	public UPDATE(Table table) {
-	    this(table.getName());
-	}
-
-	public void build(IStatementBuilder builder) {
-		builder.buildUPDATE(this);
-	}
-	
-	public UPDATE SET(Column column, Expression expression) {
-	    return SET(column.getName(), expression);
-	}
-	
-	public UPDATE SET(String column, Expression expression) {
-		assignments.add(new Assignment(column, expression));
-		return this;
-	}
-	
-	public UPDATE WHERE(Predicate predicate) {
-		where = new WHERE(predicate);
-		return this;
-	}
-
-	public String getTableName() {
-		return tableName;
-	}
-
-	public List<Assignment> getAssignments() {
-		return assignments;
-	}
-
-	public WHERE getWhere() {
-		return where;
-	}
-
-
+    public Expression getExpression() {
+        return expression;
+    }
 }

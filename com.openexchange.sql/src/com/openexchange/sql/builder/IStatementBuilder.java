@@ -174,4 +174,16 @@ public interface IStatementBuilder {
 	void buildWHERE(WHERE where);
 
     void buildList(LIST element);
+
+    void buildBitAND(BitAND bitAND);
+
+    void buildBitLSHIFT(BitLSHIFT bitLSHIFT);
+
+    void buildBitOR(BitOR bitOR);
+
+    void buildBitRSHIFT(BitRSHIFT bitRSHIFT);
+
+    void buildBitXOR(BitXOR bitXOR);
+
+    void buildINVERT(INVERT invert);
 }

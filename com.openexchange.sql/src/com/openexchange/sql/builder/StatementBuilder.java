@@ -67,8 +67,14 @@ import com.openexchange.sql.grammar.AVG;
 import com.openexchange.sql.grammar.Assignment;
 import com.openexchange.sql.grammar.BETWEEN;
 import com.openexchange.sql.grammar.BinaryArithmeticExpression;
+import com.openexchange.sql.grammar.BinaryBitFunction;
 import com.openexchange.sql.grammar.BinaryFunction;
 import com.openexchange.sql.grammar.BinaryPredicate;
+import com.openexchange.sql.grammar.BitAND;
+import com.openexchange.sql.grammar.BitLSHIFT;
+import com.openexchange.sql.grammar.BitOR;
+import com.openexchange.sql.grammar.BitRSHIFT;
+import com.openexchange.sql.grammar.BitXOR;
 import com.openexchange.sql.grammar.CONCAT;
 import com.openexchange.sql.grammar.COUNT;
 import com.openexchange.sql.grammar.Column;
@@ -91,6 +97,7 @@ import com.openexchange.sql.grammar.HAVING;
 import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.INTO;
+import com.openexchange.sql.grammar.INVERT;
 import com.openexchange.sql.grammar.ISNULL;
 import com.openexchange.sql.grammar.Join;
 import com.openexchange.sql.grammar.LENGTH;
@@ -124,6 +131,7 @@ import com.openexchange.sql.grammar.TernaryFunction;
 import com.openexchange.sql.grammar.TernaryPredicate;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.sql.grammar.UnaryArithmeticExpression;
+import com.openexchange.sql.grammar.UnaryBitFunction;
 import com.openexchange.sql.grammar.UnaryFunction;
 import com.openexchange.sql.grammar.UnaryMINUS;
 import com.openexchange.sql.grammar.UnaryPLUS;
@@ -582,6 +590,47 @@ public class StatementBuilder implements IStatementBuilder {
 		buildBinaryArithmeticExpression(element);
 	}
 
+    // Bit Functions
+
+    protected void buildUnaryBitFunction(UnaryBitFunction function) {
+        append(function.getSqlKeyword());
+        function.getExpression().build(this);
+    }
+
+    protected void buildBinaryBitFunction(BinaryBitFunction function) {
+        append("(");
+        function.getLeftExpression().build(this);
+        blank();
+        append(function.getSqlKeyword());
+        blank();
+        function.getRightExpression().build(this);
+        append(")");
+    }
+
+    public void buildBitAND(BitAND function) {
+        buildBinaryBitFunction(function);
+    }
+
+    public void buildBitLSHIFT(BitLSHIFT function) {
+        buildBinaryBitFunction(function);
+    }
+
+    public void buildBitOR(BitOR function) {
+        buildBinaryBitFunction(function);
+    }
+
+    public void buildBitRSHIFT(BitRSHIFT function) {
+        buildBinaryBitFunction(function);
+    }
+
+    public void buildBitXOR(BitXOR function) {
+        buildBinaryBitFunction(function);
+    }
+
+    public void buildINVERT(INVERT function) {
+        buildUnaryBitFunction(function);
+    }
+    
 	/*
 	 * Functions
 	 */
