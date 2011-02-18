@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -718,7 +718,14 @@ public final class MIMEMailPart extends MailPart {
                     /*
                      * If size is unknown or exceeds 1MB, use the stream-based implementation
                      */
-                    multipart = new JavaMailMultipartWrapper((Multipart) part.getContent());
+                    final Object content = part.getContent();
+                    if (content instanceof InputStream) {
+                        multipart =
+                            new JavaMailMultipartWrapper(new MimeMultipart(
+                                new InputStreamDataSource((InputStream) content).setType(getContentType().toString())));
+                    } else {
+                        multipart = new JavaMailMultipartWrapper((Multipart) content);
+                    }
                 }
             } catch (final MessagingException e) {
                 throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
