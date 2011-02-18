@@ -305,7 +305,7 @@ public class ContactWriter extends CommonWriter {
         addElement(ContactFields.FAX_BUSINESS, contactobject.getFaxBusiness(), e);
         addElement(ContactFields.FAX_HOME, contactobject.getFaxHome(), e);
         addElement(ContactFields.FAX_OTHER, contactobject.getFaxOther(), e);
-        addElement("fileas", contactobject.getFileAs(), e);
+        addElement(ContactFields.FILE_AS, contactobject.getFileAs(), e);
         addElement(ContactFields.NOTE, contactobject.getNote(), e);
         addElement(ContactFields.MORE_INFO, contactobject.getInfo(), e);
         addElement(ContactFields.INSTANT_MESSENGER, contactobject.getInstantMessenger1(), e);
