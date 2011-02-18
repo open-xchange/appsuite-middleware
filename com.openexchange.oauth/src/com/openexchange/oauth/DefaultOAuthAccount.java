@@ -108,4 +108,11 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
         this.metaData = metaData;
     }
 
+    @Override
+    public String toString() {
+        final String delim = ", ";
+        return new StringBuilder(64).append("DefaultOAuthAccount ( id = ").append(this.id).append(delim).append("displayName = ").append(
+            this.displayName).append(delim).append("metaData = ").append(this.metaData).append(delim).append(" )").toString();
+    }
+
 }
