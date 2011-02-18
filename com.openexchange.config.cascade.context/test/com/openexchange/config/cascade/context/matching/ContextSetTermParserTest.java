@@ -49,6 +49,8 @@
 
 package com.openexchange.config.cascade.context.matching;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import com.openexchange.groupware.contexts.SimContext;
 import junit.framework.TestCase;
 
@@ -62,137 +64,80 @@ public class ContextSetTermParserTest extends TestCase {
     private ContextSetTermParser parser = new ContextSetTermParser();
 
     public void testParseSingleTag() {
+        String term = "green";
+        assertMatches(term, "green", "fluffy", "vegetarian");
+        assertNoMatch(term, "blue", "fluffy", "vegetarian");
 
-        ContextSetTerm term = parser.parse("green");
-
-        SimContext context = new SimContext(23);
-        context.setAttribute("taxonomy/types", "green, fluffy, vegetarian");
-
-        SimContext other = new SimContext(24);
-        other.setAttribute("taxonomy/types", "blue, fluffy, breatharian");
-
-        assertTrue(term.matches(context));
-        assertFalse(term.matches(other));
-        
     }
 
     public void testAnd() {
-        ContextSetTerm term = parser.parse("fluffy & vegetarian");
+        String term = "fluffy & vegetarian";
 
-        SimContext context = new SimContext(23);
-        context.setAttribute("taxonomy/types", "green, fluffy, vegetarian");
+        assertMatches(term, "green", "fluffy", "vegetarian");
+        assertNoMatch(term, "blue", "scaly", "vegetarian");
 
-        SimContext other = new SimContext(24);
-        other.setAttribute("taxonomy/types", "blue, fluffy, breatharian");
-
-        assertTrue(term.matches(context));
-        assertFalse(term.matches(other));
     }
-    
+
     public void testThreeAnds() {
-        ContextSetTerm term = parser.parse("fluffy & vegetarian & green");
+        String term ="fluffy & vegetarian & green";
 
-        SimContext context = new SimContext(23);
-        context.setAttribute("taxonomy/types", "green, fluffy, vegetarian");
+        assertMatches(term, "green", "fluffy", "vegetarian");
+        assertNoMatch(term, "blue", "fluffy", "vegetarian");
 
-        SimContext other = new SimContext(24);
-        other.setAttribute("taxonomy/types", "blue, fluffy, vegetarian");
-
-        assertTrue(term.matches(context));
-        assertFalse(term.matches(other));
     }
 
     public void testOr() {
-        ContextSetTerm term = parser.parse("green | blue");
+        String term ="green | blue";
 
-        SimContext context = new SimContext(23);
-        context.setAttribute("taxonomy/types", "green, fluffy, vegetarian");
-
-        SimContext other = new SimContext(24);
-        other.setAttribute("taxonomy/types", "blue, fluffy, breatharian");
-
-        SimContext yetAnother = new SimContext(25);
-        yetAnother.setAttribute("taxonomy/types", "red, fluffy, breatharian");
-
-        assertTrue(term.matches(context));
-        assertTrue(term.matches(other));
-        assertFalse(term.matches(yetAnother));
+        assertMatches(term, "green", "fluffy", "vegetarian");
+        assertMatches(term, "blue", "fluffy", "breatharian");
+        assertNoMatch(term, "red", "fluffy", "breatharian");
 
     }
 
     public void testNot() {
-        ContextSetTerm term = parser.parse("!blue");
+        String term ="!blue";
 
-        SimContext context = new SimContext(23);
-        context.setAttribute("taxonomy/types", "green, fluffy, vegetarian");
-
-        SimContext other = new SimContext(24);
-        other.setAttribute("taxonomy/types", "blue, fluffy, breatharian");
-
-        assertTrue(term.matches(context));
-        assertFalse(term.matches(other));
+        assertMatches(term, "green", "fluffy", "vegetarian");
+        assertNoMatch(term, "blue", "fluffy", "breatharian");
 
     }
 
     public void testBrackets() {
-        ContextSetTerm term = parser.parse("(blue | green) & !breatharian");
+        String term ="(blue | green) & !breatharian";
 
-        SimContext context = new SimContext(23);
-        context.setAttribute("taxonomy/types", "green, fluffy, vegetarian");
-
-        SimContext other = new SimContext(24);
-        other.setAttribute("taxonomy/types", "blue, fluffy, breatharian");
-
-        SimContext yetAnother = new SimContext(25);
-        yetAnother.setAttribute("taxonomy/types", "blue, fluffy, omnivore");
-
-        assertTrue(term.matches(context));
-        assertFalse(term.matches(other));
-        assertTrue(term.matches(yetAnother));
-
+        assertMatches(term, "green", "fluffy", "vegetarian");
+        assertNoMatch(term, "blue", "fluffy", "breatharian");
+        assertMatches(term, "blue", "fluffy", "omnivore");
     }
 
     public void testBrackets2() {
-        ContextSetTerm term = parser.parse("blue | (green & !breatharian)");
+        String term ="blue | (green & !breatharian)";
 
-        SimContext context = new SimContext(23);
-        context.setAttribute("taxonomy/types", "green, fluffy, vegetarian");
-
-        SimContext other = new SimContext(24);
-        other.setAttribute("taxonomy/types", "blue, fluffy, breatharian");
-
-        SimContext yetAnother = new SimContext(25);
-        yetAnother.setAttribute("taxonomy/types", "green, fluffy, breatharian");
-
-        assertTrue(term.matches(context));
-        assertTrue(term.matches(other));
-        assertFalse(term.matches(yetAnother));
+        assertMatches(term, "green", "fluffy", "vegetarian");
+        assertMatches(term, "blue", "fluffy", "breatharian");
+        assertNoMatch(term, "green", "fluffy", "breatharian");
     }
-    
+
     public void testComplex() {
-        ContextSetTerm term = parser.parse("!(blue | green) & (breatharian | ( fluffy & vegetarian ))");
+        String term ="!(blue | green) & (breatharian | ( fluffy & vegetarian ))";
 
-        SimContext context = new SimContext(23);
-        context.setAttribute("taxonomy/types", "green, fluffy, vegetarian");
+        assertNoMatch(term, "green", "fluffy", "vegetarian");
+        assertMatches(term, "red", "fluffy", "breatharian");
+        assertNoMatch(term, "blue", "soft", "breatharian");
+        assertMatches(term, "red", "fluffy", "vegetarian");
+        assertNoMatch(term, "red", "soft", "vegetarian");
 
-        SimContext other = new SimContext(24);
-        other.setAttribute("taxonomy/types", "red, fluffy, breatharian");
-
-        SimContext yetAnother = new SimContext(25);
-        yetAnother.setAttribute("taxonomy/types", "blue, soft, breatharian");
-
-        SimContext andYetAnother = new SimContext(25);
-        andYetAnother.setAttribute("taxonomy/types", "red, fluffy, vegetarian");
-
-        SimContext andOneMore = new SimContext(25);
-        andOneMore.setAttribute("taxonomy/types", "red, soft, vegetarian");
-
-        assertFalse(term.matches(context)); // Because it's green
-        assertTrue(term.matches(other)); // Because it's neither blue nor green and breatharian
-        assertFalse(term.matches(yetAnother)); // Because it's blue
-        assertTrue(term.matches(andYetAnother)); // Because it's neither blue nor green and both fluffy and vegetarian
-        assertFalse(term.matches(andOneMore)); 
-        
     }
-    
+
+    public void assertMatches(String term, String... tags) {
+        ContextSetTerm t = parser.parse(term);
+        assertTrue(t.matches(new HashSet<String>(Arrays.asList(tags))));
+    }
+
+    public void assertNoMatch(String term, String... tags) {
+        ContextSetTerm t = parser.parse(term);
+        assertFalse(t.matches(new HashSet<String>(Arrays.asList(tags))));
+    }
+
 }

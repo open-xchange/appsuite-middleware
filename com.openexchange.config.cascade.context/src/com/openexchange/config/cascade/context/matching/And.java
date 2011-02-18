@@ -49,7 +49,7 @@
 
 package com.openexchange.config.cascade.context.matching;
 
-import com.openexchange.groupware.contexts.Context;
+import java.util.Set;
 
 /**
  * {@link And}
@@ -68,8 +68,8 @@ public class And extends ContextSetTerm {
     }
 
     @Override
-    public boolean matches(Context ctx) {
-        return firstOperand.matches(ctx) && otherOperand.matches(ctx);
+    public boolean matches(Set<String> terms) {
+        return firstOperand.matches(terms) && otherOperand.matches(terms);
     }
 
     @Override

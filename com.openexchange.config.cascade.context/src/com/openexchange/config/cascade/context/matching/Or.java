@@ -49,7 +49,7 @@
 
 package com.openexchange.config.cascade.context.matching;
 
-import com.openexchange.groupware.contexts.Context;
+import java.util.Set;
 
 
 /**
@@ -68,8 +68,8 @@ public class Or extends ContextSetTerm {
     }
 
     @Override
-    public boolean matches(Context ctx) {
-        return firstOperand.matches(ctx) || otherOperand.matches(ctx);
+    public boolean matches(Set<String> tags) {
+        return firstOperand.matches(tags) || otherOperand.matches(tags);
     }
     
     public String toString() {

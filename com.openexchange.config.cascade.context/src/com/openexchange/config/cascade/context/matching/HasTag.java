@@ -50,7 +50,6 @@
 package com.openexchange.config.cascade.context.matching;
 
 import java.util.Set;
-import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link HasTag}
@@ -66,8 +65,7 @@ public class HasTag extends ContextSetTerm {
     }
 
     @Override
-    public boolean matches(Context context) {
-        Set<String> tags = getSpecification(context);
+    public boolean matches(Set<String> tags) {
         return tags.contains(tag);
     }
 

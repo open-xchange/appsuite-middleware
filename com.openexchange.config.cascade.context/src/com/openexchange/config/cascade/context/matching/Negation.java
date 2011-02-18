@@ -49,7 +49,7 @@
 
 package com.openexchange.config.cascade.context.matching;
 
-import com.openexchange.groupware.contexts.Context;
+import java.util.Set;
 
 
 /**
@@ -66,8 +66,8 @@ public class Negation extends ContextSetTerm {
     }
 
     @Override
-    public boolean matches(Context ctx) {
-        return !term.matches(ctx);
+    public boolean matches(Set<String> tags) {
+        return !term.matches(tags);
     }
     
     public String toString() {

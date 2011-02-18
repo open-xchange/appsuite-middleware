@@ -49,11 +49,14 @@
 
 package com.openexchange.config.cascade.context;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
@@ -71,9 +74,12 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider {
 
+    private static final String TAXONOMY_TYPES = "taxonomy/types";
+
     public static final String SCOPE = "contextSet";
     
     private List<ContextSetConfig> contextSetConfigs;
+    private List<AdditionalPredicates> additionalPredicates;
 
     public ContextSetConfigProvider(ContextService contexts, ConfigurationService config) {
         super(contexts);
@@ -83,12 +89,36 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             prepare(yamlInFolder);
         } else {
             contextSetConfigs = Collections.emptyList();
+            additionalPredicates = Collections.emptyList();
         }
+    }
+    
+    protected Set<String> getSpecification(Context context) {
+        Set<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
+        if (typeValues == null || typeValues.isEmpty()) {
+            return Collections.emptySet();
+        }
+        
+        Set<String> tags = new HashSet<String>();
+        for (String string : typeValues) {
+            tags.addAll(Arrays.asList(string.split("\\s*,\\s*")));
+        }
+        
+        // Add additional predicates. Do so until no modification has been done
+        boolean goOn = true;
+        while(goOn) {
+            goOn = false;
+            for(AdditionalPredicates additional : additionalPredicates) {
+                goOn = goOn || additional.apply(tags);
+            }
+        }
+        
+        return tags;
     }
 
     @Override
     protected BasicProperty get(final String property, Context context) {
-        final List<Map<String, Object>> config = getConfigData(context);
+        final List<Map<String, Object>> config = getConfigData(getSpecification(context));
 
         final String value = findFirst(config, property);
         
@@ -137,10 +167,12 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         return null;
     }
     
-    protected List<Map<String, Object>> getConfigData(Context ctx) {
+
+    
+    protected List<Map<String, Object>> getConfigData(Set<String> tags) {
         List<Map<String, Object>> retval = new LinkedList<Map<String, Object>>();
         for (ContextSetConfig c : contextSetConfigs) {
-            if (c.matches(ctx)) {
+            if (c.matches(tags)) {
                 retval.add(c.getConfiguration());
             }
         }
@@ -150,6 +182,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     protected void prepare(Map<String, Object> yamlFiles) {
         ContextSetTermParser parser = new ContextSetTermParser();
         contextSetConfigs = new LinkedList<ContextSetConfig>();
+        additionalPredicates = new LinkedList<AdditionalPredicates>();
         for(Map.Entry<String, Object> file : yamlFiles.entrySet()) {
             String filename = file.getKey();
             Map<String, Map<String, Object>> content = (Map<String, Map<String, Object>>) file.getValue();
@@ -164,6 +197,12 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
                 try {
                     ContextSetTerm term = parser.parse(withTags);
                     contextSetConfigs.add(new ContextSetConfig(term, configuration));
+                    Object addTags = configuration.get("addTags");
+                    if(addTags != null) {
+                        String additional = addTags.toString();
+                        List<String> additionalList = Arrays.asList(additional.split("\\s*,\\s*"));
+                        additionalPredicates.add(new AdditionalPredicates(term, additionalList));
+                    }
                 } catch (IllegalArgumentException x) {
                     throw new IllegalArgumentException("Could not parse withTags expression '"+withTags+"' in configuration "+configName+" in file "+filename+": "+x.getMessage());
                 }
@@ -182,12 +221,31 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             this.configuration = configuration;
         }
        
-        public boolean matches(Context ctx) {
-            return term.matches(ctx);
+        public boolean matches(Set<String> tags) {
+            return term.matches(tags);
         }
         
         public Map<String, Object> getConfiguration() {
             return configuration;
+        }
+        
+    }
+    
+    private class AdditionalPredicates {
+        private ContextSetTerm term;
+        private List<String> additionalTags;
+        
+        public AdditionalPredicates(ContextSetTerm term, List<String> additionalTags) {
+            super();
+            this.term = term;
+            this.additionalTags = additionalTags;
+        }
+        
+        public boolean apply(Set<String> terms) {
+            if(term.matches(terms)) {
+                return terms.addAll(additionalTags);
+            }
+            return false;
         }
         
     }

@@ -63,22 +63,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public abstract class ContextSetTerm {
 
-    private static final String TAXONOMY_TYPES = "taxonomy/types";
-
-    public abstract boolean matches(Context ctx);
-
-    protected Set<String> getSpecification(Context context) {
-        Set<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
-        if (typeValues == null || typeValues.isEmpty()) {
-            return Collections.emptySet();
-        }
-        
-        Set<String> tags = new HashSet<String>();
-        for (String string : typeValues) {
-            tags.addAll(Arrays.asList(string.split("\\s*,\\s*")));
-        }
-        
-        return tags;
-    }
-
+  
+    public abstract boolean matches(Set<String> tags);
+    
 }
