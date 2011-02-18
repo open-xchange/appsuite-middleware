@@ -279,9 +279,11 @@ public final class MIMEMailPart extends MailPart {
                 return part.getInputStream();
             } catch (final IOException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
-                        e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
-                        ". Trying to read from part's raw input stream instead").toString(), e);
+                    LOG.debug(
+                        new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
+                            e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
+                            ". Trying to read from part's raw input stream instead").toString(),
+                        e);
                 }
                 try {
                     if (part instanceof MimeBodyPart) {
@@ -296,9 +298,11 @@ public final class MIMEMailPart extends MailPart {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             } catch (final MessagingException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
-                        e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
-                        ". Trying to read from part's raw input stream instead").toString(), e);
+                    LOG.debug(
+                        new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
+                            e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
+                            ". Trying to read from part's raw input stream instead").toString(),
+                        e);
                 }
                 try {
                     if (part instanceof MimeBodyPart) {
@@ -707,7 +711,7 @@ public final class MIMEMailPart extends MailPart {
         if (null == multipart) {
             try {
                 final int size = part.getSize();
-                if (size > 0 && size <= MAX_INMEMORY_SIZE) {
+                 if (size > 0 && size <= MAX_INMEMORY_SIZE) {
                     /*
                      * If size is less than or equal to 1MB, use the in-memory implementation
                      */
@@ -718,7 +722,14 @@ public final class MIMEMailPart extends MailPart {
                     /*
                      * If size is unknown or exceeds 1MB, use the stream-based implementation
                      */
-                    multipart = new JavaMailMultipartWrapper((Multipart) part.getContent());
+                    final Object content = part.getContent();
+                    if (content instanceof InputStream) {
+                        multipart =
+                            new JavaMailMultipartWrapper(new MimeMultipart(
+                                new InputStreamDataSource((InputStream) content).setType(getContentType().toString())));
+                    } else {
+                        multipart = new JavaMailMultipartWrapper((Multipart) content);
+                    }
                 }
             } catch (final MessagingException e) {
                 throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
