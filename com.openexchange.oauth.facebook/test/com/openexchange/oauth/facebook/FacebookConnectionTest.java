@@ -76,8 +76,9 @@ public class FacebookConnectionTest  extends TestCase {
     
     private FacebookServiceImpl facebook;
     
+    @Override
     public void setUp(){
-        FacebookOAuthActivator activator = new FacebookOAuthActivator();
+        final FacebookOAuthActivator activator = new FacebookOAuthActivator();
 //        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
 //        activator.setLinkedInMetadata(linkedInMetadata);
         facebook = new FacebookServiceImpl(activator);
@@ -91,56 +92,56 @@ public class FacebookConnectionTest  extends TestCase {
     
     public void testAccountCreation(){
         // This is basically scribes example
-        String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
-        String apiSecret = "9876bb887fac4be7518055b487eda4d9";
-        OAuthService service = new ServiceBuilder()
+        final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
+        final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
+        final OAuthService service = new ServiceBuilder()
                                       .provider(FacebookApi.class)
                                       .apiKey(apiKey)
                                       .apiSecret(apiSecret)
                                       .callback("http://localhost/~karstenwill/")
                                       .build();
-        Scanner in = new Scanner(System.in);
+        final Scanner in = new Scanner(System.in);
 
         System.out.println("=== " + NETWORK_NAME + "'s OAuth Workflow ===");
         System.out.println();
 
         // Obtain the Authorization URL
         System.out.println("Fetching the Authorization URL...");
-        String authorizationUrl = service.getAuthorizationUrl(EMPTY_TOKEN);
+        final String authorizationUrl = service.getAuthorizationUrl(EMPTY_TOKEN);
         System.out.println("Got the Authorization URL!");
         System.out.println("Now go and authorize Scribe here:");
         System.out.println(authorizationUrl+"&scope=friends_birthday,friends_work_history,friends_about_me,friends_hometown,offline_access");
         System.out.println("And paste the access token here");
         System.out.print(">>");
-        Token accessToken = new Token(in.nextLine(), NO_SECRET_NEEDED);
+        final Token accessToken = new Token(in.nextLine(), NO_SECRET_NEEDED);
         System.out.println();
 
         // Now let's go and ask for a protected resource!
         System.out.println("Now we're going to access a protected resource...");
-        OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
+        final OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
         service.signRequest(accessToken, request);
-        Response response = request.send();
+        final Response response = request.send();
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response.getCode());
         System.out.println(response.getBody());
         
         try {
-            JSONObject jsonObject = new JSONObject(response.getBody());
-            JSONArray array = jsonObject.getJSONArray("data");
+            final JSONObject jsonObject = new JSONObject(response.getBody());
+            final JSONArray array = jsonObject.getJSONArray("data");
             
             for (int i = 0; i < array.length() ; i++){
-                JSONObject object = array.getJSONObject(i);
+                final JSONObject object = array.getJSONObject(i);
                 System.out.println(object.get("id"));
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
-        OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
+        final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
         service.signRequest(accessToken, request2);
-        Response response2 = request2.send();
+        final Response response2 = request2.send();
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response2.getCode());
@@ -148,27 +149,27 @@ public class FacebookConnectionTest  extends TestCase {
         
         String myuid = "";
         try {
-            JSONObject object = new JSONObject(response2.getBody());
+            final JSONObject object = new JSONObject(response2.getBody());
             myuid = object.getString("id");
             System.out.println("My uid : " + myuid);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
         
-        OAuthRequest request3 = new OAuthRequest(Verb.GET, "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,hometown_location%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1="+myuid+"%29&format=JSON");
+        final OAuthRequest request3 = new OAuthRequest(Verb.GET, "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,hometown_location%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1="+myuid+"%29&format=JSON");
         service.signRequest(accessToken, request3);
-        Response response3 = request3.send();
+        final Response response3 = request3.send();
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response3.getCode());
         System.out.println(response3.getBody());
         
         try {
-            JSONArray allConnections = new JSONArray(response3.getBody());
+            final JSONArray allConnections = new JSONArray(response3.getBody());
             for (int i=0; i < allConnections.length(); i++){
-                JSONObject connection = allConnections.getJSONObject(i);
+                final JSONObject connection = allConnections.getJSONObject(i);
                 System.out.println("---");
                 System.out.println(connection.get("first_name"));
                 System.out.println(connection.get("last_name"));
@@ -177,7 +178,7 @@ public class FacebookConnectionTest  extends TestCase {
                 System.out.println(connection.get("pic_big"));
                 System.out.println(connection.get("hometown_location"));
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -188,8 +189,8 @@ public class FacebookConnectionTest  extends TestCase {
     }
 
     public void testUsageOfExistingAccount(){
-        List<Contact> contacts = facebook.getContacts(1,1,1);
-        for (Contact contact : contacts){
+        final List<Contact> contacts = facebook.getContacts(1,1,1);
+        for (final Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName());
             System.out.println(contact.getBirthday());
             System.out.println(contact.getPostalCodeHome());
@@ -202,41 +203,41 @@ public class FacebookConnectionTest  extends TestCase {
     
     public void testNewWorkflow(){
      // This is basically scribes example
-        String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
-        String apiSecret = "9876bb887fac4be7518055b487eda4d9";
-        OAuthService service = new ServiceBuilder()
+        final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
+        final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
+        final OAuthService service = new ServiceBuilder()
                                       .provider(FacebookApi.class)
                                       .apiKey(apiKey)
                                       .apiSecret(apiSecret)
                                       .callback("http://localhost/~karstenwill/?parameter=value")
                                       .build();
-        Scanner in = new Scanner(System.in);
+        final Scanner in = new Scanner(System.in);
 
         System.out.println("=== " + NETWORK_NAME + "'s OAuth Workflow ===");
         System.out.println();
 
         // Obtain the Authorization URL
         System.out.println("Fetching the Authorization URL...");
-        String authorizationUrl = "https://graph.facebook.com/oauth/authorize?client_id=842495cb6b4d939cf998fd9239b5fe6f&redirect_uri=http://localhost/~karstenwill/?parameter=value";        
+        final String authorizationUrl = "https://graph.facebook.com/oauth/authorize?client_id=842495cb6b4d939cf998fd9239b5fe6f&redirect_uri=http://localhost/~karstenwill/?parameter=value";        
         System.out.println("Got the Authorization URL!");
         System.out.println("Now go and authorize Scribe here:");
         System.out.println(authorizationUrl+"&scope=friends_birthday,friends_work_history,friends_about_me,friends_hometown,offline_access");
         System.out.println("And paste the code here");
         System.out.print(">>");
-        String code = in.nextLine();
+        final String code = in.nextLine();
         
         System.out.println("Now enter this in your browser:");
-        String string = "https://graph.facebook.com/oauth/access_token?client_id="+apiKey+"&redirect_uri="+URLEncoder.encode("http://localhost/~karstenwill/?parameter=value")+"&client_secret="+apiSecret+"&code="+code;
+        final String string = "https://graph.facebook.com/oauth/access_token?client_id="+apiKey+"&redirect_uri="+URLEncoder.encode("http://localhost/~karstenwill/?parameter=value")+"&client_secret="+apiSecret+"&code="+code;
         System.out.println(string);
         System.out.println("And enter the access token here:");
         System.out.print(">>");
-        Token accessToken = new Token(in.nextLine(), NO_SECRET_NEEDED);
+        final Token accessToken = new Token(in.nextLine(), NO_SECRET_NEEDED);
         // Now let's go and ask for a protected resource!
         System.out.println("Now we're going to access a protected resource...");
-        OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
+        final OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
         
         service.signRequest(accessToken, request);
-        Response response = request.send();
+        final Response response = request.send();
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response.getCode());
@@ -245,42 +246,42 @@ public class FacebookConnectionTest  extends TestCase {
     
     // for more detailed information please see http://developers.facebook.com/docs/reference/api/
     public void testGetWall(){
-        String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
-        String apiSecret = "9876bb887fac4be7518055b487eda4d9";
-        OAuthService service = new ServiceBuilder()
+        final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
+        final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
+        final OAuthService service = new ServiceBuilder()
                                       .provider(FacebookApi.class)
                                       .apiKey(apiKey)
                                       .apiSecret(apiSecret)
                                       .callback("http://localhost/~karstenwill/")
                                       .build();
-        MockOAuthService mock = new MockOAuthService();
+        final MockOAuthService mock = new MockOAuthService();
         // get the wall
-        Token accessToken = new Token(mock.getAccount(1, 1, 1).getToken(),"");
+        final Token accessToken = new Token(mock.getAccount(1, 1, 1).getToken(),"");
         
         //find out the uid of the user
-        OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
+        final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
         service.signRequest(accessToken, request2);
-        Response response2 = request2.send();
+        final Response response2 = request2.send();
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response2.getCode());
         System.out.println(response2.getBody());
         String myuid = "";
         try {
-            JSONObject object = new JSONObject(response2.getBody());
+            final JSONObject object = new JSONObject(response2.getBody());
             myuid = object.getString("id");
             System.out.println("My uid : " + myuid);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
         // Now let's go and ask for a protected resource!
         System.out.println("Now we're going to access the feed");
-        OAuthRequest request = new OAuthRequest(Verb.GET, "https://graph.facebook.com/"+myuid+"/feed");
+        final OAuthRequest request = new OAuthRequest(Verb.GET, "https://graph.facebook.com/"+myuid+"/feed");
         
         service.signRequest(accessToken, request);
-        Response response = request.send();
+        final Response response = request.send();
         System.out.println("This is what we get back");
         System.out.println(response.getBody());
     }
@@ -292,44 +293,84 @@ public class FacebookConnectionTest  extends TestCase {
 //        curl -F 'access_token=...' \
 //             -F 'message=Hello, Arjun. I like this new API.' \
 //             https://graph.facebook.com/arjun/feed
-        String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
-        String apiSecret = "9876bb887fac4be7518055b487eda4d9";
-        OAuthService service = new ServiceBuilder()
+        final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
+        final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
+        final OAuthService service = new ServiceBuilder()
                                       .provider(FacebookApi.class)
                                       .apiKey(apiKey)
                                       .apiSecret(apiSecret)
                                       .callback("http://localhost/~karstenwill/")
                                       .build();
-        MockOAuthService mock = new MockOAuthService();
+        final MockOAuthService mock = new MockOAuthService();
         // get the wall
-        Token accessToken = new Token(mock.getAccount(1, 1, 1).getToken(),"");
+        final Token accessToken = new Token(mock.getAccount(1, 1, 1).getToken(),"");
         
         //find out the uid of the user
-        OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
+        final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
         service.signRequest(accessToken, request2);
-        Response response2 = request2.send();
+        final Response response2 = request2.send();
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response2.getCode());
         System.out.println(response2.getBody());
         String myuid = "";
         try {
-            JSONObject object = new JSONObject(response2.getBody());
+            final JSONObject object = new JSONObject(response2.getBody());
             myuid = object.getString("id");
             System.out.println("My uid : " + myuid);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
         // Now let's go and ask for a protected resource!
         System.out.println("Now we're going to post something to the wall feed");
-        String message = "This is my new, dynamic test-post. Enjoy!";
-        OAuthRequest request = new OAuthRequest(Verb.POST, "https://graph.facebook.com/"+myuid+"/feed"+"?message="+URLEncoder.encode(message));
+        final String message = "This is my new, dynamic test-post. Enjoy!";
+        final OAuthRequest request = new OAuthRequest(Verb.POST, "https://graph.facebook.com/"+myuid+"/feed"+"?message="+URLEncoder.encode(message));
         
         service.signRequest(accessToken, request);
-        Response response = request.send();
+        final Response response = request.send();
         System.out.println("This is what we get back");
         System.out.println(response.getBody());
     }
+
+    public void testFQLQuery(){
+        final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
+        final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
+        final OAuthService service = new ServiceBuilder()
+                                      .provider(FacebookApi.class)
+                                      .apiKey(apiKey)
+                                      .apiSecret(apiSecret)
+                                      .build();
+        final MockOAuthService mock = new MockOAuthService();
+        // get the wall
+        final Token accessToken = new Token(mock.getAccount(1, 1, 1).getToken(),"");
+        
+        //find out the uid of the user
+        final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
+        service.signRequest(accessToken, request2);
+        final Response response2 = request2.send();
+        System.out.println("Got it! Lets see what we found...");
+        System.out.println();
+        System.out.println(response2.getCode());
+        System.out.println(response2.getBody());
+        String myuid = "";
+        try {
+            final JSONObject object = new JSONObject(response2.getBody());
+            myuid = object.getString("id");
+            System.out.println("My uid : " + myuid);
+        } catch (final JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        // Now let's go and ask for a protected resource!
+        System.out.println("Now we're going to execute a FQL query");
+        final OAuthRequest request = new OAuthRequest(Verb.GET, "https://api.facebook.com/method/fql.query?format=XML&query=" + URLEncoder.encode(("SELECT wall_count FROM user WHERE uid = " + myuid)));
+        service.signRequest(accessToken, request);
+        final Response response = request.send();
+        System.out.println("This is what we get back");
+        System.out.println(response.getBody());
+    }
+
 }
