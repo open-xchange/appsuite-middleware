@@ -50,41 +50,48 @@
 package com.openexchange.messaging.facebook;
 
 import static com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry.getServiceRegistry;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import org.w3c.dom.Element;
-import com.google.code.facebookapi.FacebookException;
-import com.google.code.facebookapi.IFacebookRestClient;
-import com.google.code.facebookapi.schema.FqlQueryResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import org.scribe.exceptions.OAuthException;
+import org.scribe.model.OAuthRequest;
+import org.scribe.model.Token;
+import org.scribe.model.Verb;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
-import com.openexchange.messaging.facebook.parser.user.FacebookFQLUserParser;
+import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
-
 /**
  * {@link AbstractFacebookAccess}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractFacebookAccess {
 
-    protected static Set<String> KNOWN_FOLDER_IDS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MessagingFolder.ROOT_FULLNAME, FacebookConstants.FOLDER_WALL)));
+    protected static Set<String> KNOWN_FOLDER_IDS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        MessagingFolder.ROOT_FULLNAME,
+        FacebookConstants.FOLDER_WALL)));
 
     protected final Session session;
 
     protected final MessagingAccount messagingAccount;
 
-    protected final IFacebookRestClient<Object> facebookRestClient;
+    protected final FacebookOAuthInfo facebookOAuthInfo;
 
     protected final int id;
 
@@ -92,48 +99,35 @@ public abstract class AbstractFacebookAccess {
 
     protected final int cid;
 
-    protected final long facebookUserId;
+    protected final String facebookUserId;
 
-    protected final String facebookSession;
+    protected final String facebookUserName;
 
-    protected volatile String facebookUserName;
+    protected final org.scribe.oauth.OAuthService facebookOAuthService;
+
+    protected final Token facebookAccessToken;
 
     protected volatile Locale userLocale;
 
     /**
      * Initializes a new {@link AbstractFacebookAccess}.
      */
-    protected AbstractFacebookAccess(final IFacebookRestClient<Object> facebookRestClient, final MessagingAccount messagingAccount, final Session session, final long facebookUserId, final String facebookSession) {
+    protected AbstractFacebookAccess(final FacebookOAuthInfo facebookOAuthInfo, final MessagingAccount messagingAccount, final Session session) {
         super();
         this.session = session;
         this.messagingAccount = messagingAccount;
-        this.facebookRestClient = facebookRestClient;
+        this.facebookOAuthInfo = facebookOAuthInfo;
         id = messagingAccount.getId();
         user = session.getUserId();
         cid = session.getContextId();
-        this.facebookUserId = facebookUserId;
-        this.facebookSession = facebookSession;
+        this.facebookUserId = facebookOAuthInfo.getFacebookUserId();
+        facebookUserName = facebookOAuthInfo.getFacebookUserName();
+        this.facebookOAuthService = facebookOAuthInfo.getFacebookOAuthService();
+        this.facebookAccessToken = facebookOAuthInfo.getFacebookAccessToken();
     }
 
-    public String getFacebookUserName() throws MessagingException {
-        String tmp = facebookUserName;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = facebookUserName;
-                if (null == tmp) {
-                    try {
-                        final FqlQueryResponse fqr =
-                            (FqlQueryResponse) facebookRestClient.fql_query(new StringBuilder("SELECT name FROM user WHERE uid = ").append(
-                                facebookUserId).toString());
-                        facebookUserName =
-                            tmp = FacebookFQLUserParser.parseUserDOMElement((Element) fqr.getResults().iterator().next()).getName();
-                    } catch (final FacebookException e) {
-                        throw FacebookMessagingException.create(e);
-                    }
-                }
-            }
-        }
-        return tmp;
+    public String getFacebookUserName() {
+        return facebookUserName;
     }
 
     protected Locale getUserLocale() throws MessagingException {
@@ -154,6 +148,98 @@ public abstract class AbstractFacebookAccess {
             }
         }
         return tmp;
+    }
+
+    /**
+     * URL-encodes specified string.
+     * 
+     * @param string The string
+     * @return The URL-encoded string
+     */
+    protected static String encode(final String string) {
+        try {
+            return URLEncoder.encode(string, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            return string;
+        }
+    }
+
+    private static final String FQL_JSON_START = "https://api.facebook.com/method/fql.query?format=JSON&query=";
+
+    /**
+     * Performs specified FQL query and returns its result as a JSON object.
+     * 
+     * @param fqlQuery The FQL query
+     * @return The queried JSON object
+     * @throws FacebookMessagingException If FQL query fails
+     */
+    protected JSONObject performFQLQuery(final String fqlQuery) throws FacebookMessagingException {
+        try {
+            final String encodedQuery = encode(fqlQuery);
+            final OAuthRequest request =
+                new OAuthRequest(
+                    Verb.GET,
+                    new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString());
+            facebookOAuthService.signRequest(facebookAccessToken, request);
+            final JSONObject result = new JSONObject(request.send().getBody());
+            if (result.has("error")) {
+                final JSONObject error = result.getJSONObject("error");
+                final String type = error.optString("type");
+                final String message = error.optString("message");
+                if ("OAuthException".equals(type)) {
+                    throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
+                }
+                throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == message ? "" : message);
+            }
+            return result;
+        } catch (final JSONException e) {
+            throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final OAuthException e) {
+            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Performs specified FQL query and returns its result as a JSON result.
+     * 
+     * @param fqlQuery The FQL query
+     * @return The queried JSON result
+     * @throws FacebookMessagingException If FQL query fails
+     */
+    protected <V extends JSONValue> V performFQLQuery(final Class<V> clazz, final String fqlQuery) throws FacebookMessagingException {
+        try {
+            final String encodedQuery = encode(fqlQuery);
+            final OAuthRequest request =
+                new OAuthRequest(
+                    Verb.GET,
+                    new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString());
+            facebookOAuthService.signRequest(facebookAccessToken, request);
+            if (JSONObject.class.equals(clazz)) {
+                final JSONObject result = new JSONObject(request.send().getBody());
+                if (result.has("error")) {
+                    final JSONObject error = result.getJSONObject("error");
+                    final String type = error.optString("type");
+                    final String message = error.optString("message");
+                    if ("OAuthException".equals(type)) {
+                        throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
+                    }
+                    throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == message ? "" : message);
+                }
+                return (V) result;
+            }
+            if (JSONArray.class.equals(clazz)) {
+                return (V) new JSONArray(request.send().getBody());
+            }
+            throw new IllegalArgumentException("Unsupported return type: " + clazz.getName());
+        } catch (final JSONException e) {
+            throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final OAuthException e) {
+            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

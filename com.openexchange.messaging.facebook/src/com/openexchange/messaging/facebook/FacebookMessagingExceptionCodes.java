@@ -114,7 +114,24 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
     /**
      * Unsupported query type: %1$s.
      */
-    UNSUPPORTED_QUERY_TYPE(FacebookMessagingExceptionMessages.UNSUPPORTED_QUERY_TYPE_MSG, Category.CODE_ERROR, 12);
+    UNSUPPORTED_QUERY_TYPE(FacebookMessagingExceptionMessages.UNSUPPORTED_QUERY_TYPE_MSG, Category.CODE_ERROR, 12),
+    /**
+     * An OAuth error occurred: %1$s.
+     */
+    OAUTH_ERROR(FacebookMessagingExceptionMessages.OAUTH_ERROR_MSG, Category.CODE_ERROR, 13),
+    /**
+     * A FQL error of type %1$s occurred: %2$s.
+     */
+    FQL_ERROR(FacebookMessagingExceptionMessages.FQL_ERROR_MSG, Category.CODE_ERROR, 14),
+    /**
+     * FQL response body cannot be parsed to a JSON value:<br>
+     * %1$s
+     */
+    INVALID_RESPONSE_BODY(FacebookMessagingExceptionMessages.INVALID_RESPONSE_BODY_MSG, Category.CODE_ERROR, 15),
+    /**
+     * XML parse error: %1$s.
+     */
+    XML_PARSE_ERROR(FacebookMessagingExceptionMessages.XML_PARSE_ERROR_MSG, Category.CODE_ERROR, 16);
     
 
     private final Category category;

@@ -56,108 +56,106 @@ import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegi
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link FacebookSessionRegistry}
+ * {@link FacebookOAuthInfoRegistry}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class FacebookSessionRegistry {
+public final class FacebookOAuthInfoRegistry {
 
-    private static final FacebookSessionRegistry INSTANCE = new FacebookSessionRegistry();
+    private static final FacebookOAuthInfoRegistry INSTANCE = new FacebookOAuthInfoRegistry();
 
     /**
      * Gets the registry instance.
      * 
      * @return The registry instance
      */
-    public static FacebookSessionRegistry getInstance() {
+    public static FacebookOAuthInfoRegistry getInstance() {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<SimpleKey, ConcurrentMap<Integer, FacebookSession>> map;
+    private final ConcurrentMap<SimpleKey, ConcurrentMap<Integer, FacebookOAuthInfo>> map;
 
     /**
-     * Initializes a new {@link FacebookSessionRegistry}.
+     * Initializes a new {@link FacebookOAuthInfoRegistry}.
      */
-    private FacebookSessionRegistry() {
+    private FacebookOAuthInfoRegistry() {
         super();
-        map = new ConcurrentHashMap<SimpleKey, ConcurrentMap<Integer, FacebookSession>>();
+        map = new ConcurrentHashMap<SimpleKey, ConcurrentMap<Integer, FacebookOAuthInfo>>();
     }
 
     /**
-     * Adds specified facebook session.
+     * Adds specified facebook OAuth information.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @param facebookSession The facebook session to add
+     * @param fbOAuthInfo The facebook OAuth information to add
      * @return The previous associated session, or <code>null</code> if there was no session.
      */
-    public FacebookSession addSession(final int contextId, final int userId, final int accountId, final FacebookSession facebookSession) {
+    public FacebookOAuthInfo addSession(final int contextId, final int userId, final int accountId, final FacebookOAuthInfo fbOAuthInfo) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
-        ConcurrentMap<Integer, FacebookSession> inner = map.get(key);
+        ConcurrentMap<Integer, FacebookOAuthInfo> inner = map.get(key);
         if (null == inner) {
-            final ConcurrentMap<Integer, FacebookSession> tmp = new ConcurrentHashMap<Integer, FacebookSession>();
+            final ConcurrentMap<Integer, FacebookOAuthInfo> tmp = new ConcurrentHashMap<Integer, FacebookOAuthInfo>();
             inner = map.putIfAbsent(key, tmp);
             if (null == inner) {
                 inner = tmp;
             }
         }
-        return inner.putIfAbsent(Integer.valueOf(accountId), facebookSession);
+        return inner.putIfAbsent(Integer.valueOf(accountId), fbOAuthInfo);
     }
 
     /**
-     * Check presence of the facebook session associated with given user-context-pair.
+     * Check presence of the facebook OAuth information associated with given user-context-pair.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if such a facebook session is present; otherwise <code>false</code>
+     * @return <code>true</code> if such a facebook OAuth information is present; otherwise <code>false</code>
      */
     public boolean containsSession(final int contextId, final int userId, final int accountId) {
-        final ConcurrentMap<Integer, FacebookSession> inner = map.get(SimpleKey.valueOf(contextId, userId));
+        final ConcurrentMap<Integer, FacebookOAuthInfo> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null != inner && inner.containsKey(Integer.valueOf(accountId));
     }
 
     /**
-     * Gets the facebook session associated with given user-context-pair.
+     * Gets the facebook OAuth information associated with given user-context-pair.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return The facebook session or <code>null</code>
+     * @return The facebook OAuth information or <code>null</code>
      */
-    public FacebookSession getSession(final int contextId, final int userId, final int accountId) {
-        final ConcurrentMap<Integer, FacebookSession> inner = map.get(SimpleKey.valueOf(contextId, userId));
+    public FacebookOAuthInfo getSession(final int contextId, final int userId, final int accountId) {
+        final ConcurrentMap<Integer, FacebookOAuthInfo> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null == inner ? null : inner.get(Integer.valueOf(accountId));
     }
 
     /**
-     * Removes specified session identifier associated with given user-context-pair and the facebook session as well, if no more
-     * user-associated session identifiers are present.
+     * Removes the OAuth information associated with given user-context-pair, if no more user-associated sessions are present.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @param accountId The account identifier
      * @return <code>true</code> if a facebook session for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeSessionIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
-            final ConcurrentMap<Integer, FacebookSession> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+            /*
+             * No sessions left for user
+             */
+            final ConcurrentMap<Integer, FacebookOAuthInfo> inner = map.remove(SimpleKey.valueOf(contextId, userId));
             if (null == inner || inner.isEmpty()) {
                 return false;
             }
-            for (final FacebookSession ses : inner.values()) {
-                ses.close();
-            }
-            return true;
+            return !inner.isEmpty();
         }
         return false;
     }
 
     /**
-     * Purges specified user's facebook session.
+     * Purges specified user's facebook OAuth information.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
@@ -166,15 +164,14 @@ public final class FacebookSessionRegistry {
      */
     public boolean purgeUserSession(final int contextId, final int userId, final int accountId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
-        final ConcurrentMap<Integer, FacebookSession> inner = map.get(key);
+        final ConcurrentMap<Integer, FacebookOAuthInfo> inner = map.get(key);
         if (null == inner) {
             return false;
         }
-        final FacebookSession ses = inner.remove(Integer.valueOf(accountId));
-        if (null == ses) {
+        final FacebookOAuthInfo oAuthInfo = inner.remove(Integer.valueOf(accountId));
+        if (null == oAuthInfo) {
             return false;
         }
-        ses.close();
         if (inner.isEmpty()) {
             map.remove(key);
         }
@@ -182,11 +179,11 @@ public final class FacebookSessionRegistry {
     }
 
     /**
-     * Gets a {@link Iterator iterator} over the facebook sessions in this registry.
+     * Gets a {@link Iterator iterator} over the facebook OAuth information instances in this registry.
      * 
-     * @return A {@link Iterator iterator} over the facebook sessions in this registry.
+     * @return A {@link Iterator iterator} over the facebook OAuth information instances in this registry.
      */
-    Iterator<ConcurrentMap<Integer, FacebookSession>> iterator() {
+    Iterator<ConcurrentMap<Integer, FacebookOAuthInfo>> iterator() {
         return map.values().iterator();
     }
 
@@ -199,6 +196,7 @@ public final class FacebookSessionRegistry {
         final int cid;
 
         final int user;
+
         private final int hash;
 
         private SimpleKey(final int cid, final int user) {

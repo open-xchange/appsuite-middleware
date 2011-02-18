@@ -101,6 +101,19 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     // Unsupported query type: %1$s.
     public static final String UNSUPPORTED_QUERY_TYPE_MSG = "Unsupported query type: %1$s.";
 
+    // An OAuth error occurred: %1$s.
+    public static final String OAUTH_ERROR_MSG = "An OAuth error occurred: %1$s.";
+
+    // A FQL error of type %1$s occurred: %2$s.
+    public static final String FQL_ERROR_MSG = "A FQL error of type %1$s occurred: %2$s.";
+
+    // FQL response body cannot be parsed to a JSON value:
+    // %1$s
+    public static final String INVALID_RESPONSE_BODY_MSG = "FQL response body cannot be parsed to a JSON value:\n%1$s";
+
+    // XML parse error: %1$s.
+    public static final String XML_PARSE_ERROR_MSG = "XML parse error: %1$s.";
+
     /**
      * Initializes a new {@link FacebookMessagingExceptionMessages}.
      */

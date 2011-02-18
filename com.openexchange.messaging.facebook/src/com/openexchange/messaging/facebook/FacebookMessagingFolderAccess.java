@@ -51,15 +51,11 @@ package com.openexchange.messaging.facebook;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.google.code.facebookapi.FacebookException;
-import com.google.code.facebookapi.IFacebookRestClient;
-import com.google.code.facebookapi.ProfileField;
-import com.google.code.facebookapi.schema.UsersGetInfoResponse;
+import org.json.JSONException;
 import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.DefaultMessagingPermission;
 import com.openexchange.messaging.MessagingAccount;
@@ -70,6 +66,7 @@ import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.Quota;
 import com.openexchange.messaging.Quota.Type;
+import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
 import com.openexchange.session.Session;
 
 /**
@@ -133,14 +130,12 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
     /**
      * Initializes a new {@link FacebookMessagingFolderAccess}.
      * 
-     * @param facebookRestClient The facebook REST client
-     * @param messagingAccount The facebook messaging account
-     * @param session The session
-     * @param facebookUserId The facebook user identifier
-     * @param facebookSession The facebook session identifier
+     * @param facebookOAuthInfo The Facebook OAuth information
+     * @param messagingAccount The Facebook messaging account
+     * @param session The associated session
      */
-    public FacebookMessagingFolderAccess(final IFacebookRestClient<Object> facebookRestClient, final MessagingAccount messagingAccount, final Session session, final long facebookUserId, final String facebookSession) {
-        super(facebookRestClient, messagingAccount, session, facebookUserId, facebookSession);
+    public FacebookMessagingFolderAccess(final FacebookOAuthInfo facebookOAuthInfo, final MessagingAccount messagingAccount, final Session session) {
+        super(facebookOAuthInfo, messagingAccount, session);
     }
 
     public void clearFolder(final String folderId) throws MessagingException {
@@ -260,8 +255,6 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         return Quota.getUnlimitedQuotas(types);
     }
 
-    private static final EnumSet<ProfileField> FIELDS_WALL_COUNT = EnumSet.of(ProfileField.WALL_COUNT);
-
     private static final Set<String> CAPS = Collections.emptySet();
 
     public MessagingFolder getRootFolder() throws MessagingException {
@@ -273,18 +266,16 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
             /*
              * The collection of users
              */
-            final UsersGetInfoResponse response =
-                (UsersGetInfoResponse) facebookRestClient.users_getInfo(
-                    Collections.singletonList(Long.valueOf(facebookUserId)),
-                    FIELDS_WALL_COUNT);
-            final DefaultMessagingFolder rootFolder =
-                generateFolder(MessagingFolder.ROOT_FULLNAME, null, "Facebook", response.getUser().get(0).getWallCount().intValue());
+            final int wallCount =
+                performFQLQuery(new StringBuilder("SELECT wall_count FROM user WHERE uid = ").append(facebookUserId).toString()).getInt(
+                    "wall_count");
+            final DefaultMessagingFolder rootFolder = generateFolder(MessagingFolder.ROOT_FULLNAME, null, "Facebook", wallCount);
             rootFolder.setHoldsFolders(true);
             rootFolder.setSubfolders(true);
             rootFolder.setSubscribedSubfolders(true);
             return rootFolder;
-        } catch (final FacebookException e) {
-            throw FacebookMessagingException.create(e);
+        } catch (final JSONException e) {
+            throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

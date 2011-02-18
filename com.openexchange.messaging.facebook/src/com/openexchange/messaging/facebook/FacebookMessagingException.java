@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.facebook;
 
-import com.google.code.facebookapi.FacebookException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
@@ -78,16 +77,6 @@ public class FacebookMessagingException extends MessagingException {
             return STR_COMPONENT;
         }
     };
-
-    /**
-     * Creates a facebook error using {@link #COMMUNICATION_ERROR}.
-     * 
-     * @param facebookException The facebook error
-     * @return A {@link FacebookMessagingException} instance
-     */
-    public static FacebookMessagingException create(final FacebookException facebookException) {
-        return FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(facebookException, facebookException.getMessage());
-    }
 
     /**
      * Initializes a new {@link FacebookMessagingException}.

@@ -52,7 +52,7 @@ package com.openexchange.messaging.facebook;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingResource;
-import com.openexchange.messaging.facebook.session.FacebookSession;
+import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
 import com.openexchange.session.Session;
 
 /**
@@ -76,7 +76,7 @@ public class FacebookMessagingResource implements MessagingResource {
     /**
      * The facebook session.
      */
-    protected FacebookSession facebookSession;
+    protected FacebookOAuthInfo facebookOAuthInfo;
 
     /**
      * The session.
@@ -93,41 +93,25 @@ public class FacebookMessagingResource implements MessagingResource {
         super();
         this.messagingAccount = messagingAccount;
         this.session = session;
-        facebookSession = FacebookSession.sessionFor(messagingAccount, session);
-    }
-
-    /**
-     * Initializes a new {@link FacebookMessagingResource} for test purpose.
-     * 
-     * @param login The facebook login
-     * @param password The facebook password
-     * @param apiKey The API key
-     * @param secretKey The secret key
-     */
-    public FacebookMessagingResource(final String login, final String password, final String apiKey, final String secretKey) {
-        super();
-        messagingAccount = null;
-        session = null;
-        facebookSession = new FacebookSession(login, password, apiKey, secretKey);
+        facebookOAuthInfo = FacebookOAuthInfo.sessionFor(messagingAccount, session);
     }
 
     public void close() {
         /*
          * Close is performed when last session gone by FacebookEventHandler
          */
-        // facebookSession.close();
     }
 
     public void connect() throws MessagingException {
-        facebookSession.connect();
+        // no-op
     }
 
     public boolean isConnected() {
-        return facebookSession.isConnected();
+        return true;
     }
 
     public boolean ping() throws MessagingException {
-        return facebookSession.ping();
+        return true;
     }
 
     public boolean cacheable() {

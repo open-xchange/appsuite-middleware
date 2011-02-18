@@ -50,9 +50,15 @@
 package com.openexchange.messaging.facebook;
 
 import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.checkContent;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Collection;
-import com.google.code.facebookapi.FacebookException;
-import com.google.code.facebookapi.IFacebookRestClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.scribe.exceptions.OAuthException;
+import org.scribe.model.OAuthRequest;
+import org.scribe.model.Response;
+import org.scribe.model.Verb;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -63,6 +69,7 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
+import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.messaging.generic.Utility;
 import com.openexchange.session.Session;
@@ -86,20 +93,8 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
         super(messagingAccount, session);
     }
 
-    /**
-     * Initializes a new {@link FacebookMessagingAccountTransport} for testing purpose.
-     * 
-     * @param login The facebook login
-     * @param password The facebook password
-     * @param apiKey The API key
-     * @param secretKey The secret key
-     */
-    public FacebookMessagingAccountTransport(final String login, final String password, final String apiKey, final String secretKey) {
-        super(login, password, apiKey, secretKey);
-    }
-
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
-        transport(message, recipients, facebookSession.getFacebookRestClient(), facebookSession.getFacebookUserId());
+        transport(message, recipients, facebookOAuthInfo, facebookOAuthInfo.getFacebookUserId());
     }
 
     /**
@@ -111,7 +106,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
      * @param facebookUserId The facebook user identifier
      * @throws MessagingException If transport fails
      */
-    public static void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients, final IFacebookRestClient<Object> facebookRestClient, final long facebookUserId) throws MessagingException {
+    public static void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients, final FacebookOAuthInfo facebookOAuthInfo, final String facebookUserId) throws MessagingException {
         try {
             /*
              * Recipient identifier
@@ -150,12 +145,25 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                      */
                     final MultipartContent mp = (MultipartContent) content;
                     final StringContent stringContent = checkContent(StringContent.class, mp.get(0));
-                    facebookRestClient.stream_publish(
-                        stringContent.getData(),
-                        null,
-                        null,
-                        Long.valueOf(targetId),
-                        Long.valueOf(facebookUserId));
+                    /*
+                     * Post it
+                     */
+                    final OAuthRequest request =
+                        new OAuthRequest(
+                            Verb.POST,
+                            "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(stringContent.getData()));
+                    facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
+                    final Response response = request.send();
+                    final JSONObject result = new JSONObject(response.getBody());
+                    if (result.has("error")) {
+                        final JSONObject error = result.getJSONObject("error");
+                        final String type = error.optString("type");
+                        final String msg = error.optString("message");
+                        if ("OAuthException".equals(type)) {
+                            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                        }
+                        throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
+                    }
                 }
             } else {
                 /*
@@ -163,23 +171,67 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                  */
                 final StringContent stringContent = checkContent(StringContent.class, message);
                 if (message.getContentType().startsWith("text/htm")) {
-                    facebookRestClient.stream_publish(
-                        Utility.textFormat(stringContent.getData()),
-                        null,
-                        null,
-                        Long.valueOf(targetId),
-                        Long.valueOf(facebookUserId));
+                    /*
+                     * Post it
+                     */
+                    final OAuthRequest request =
+                        new OAuthRequest(
+                            Verb.POST,
+                            "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(Utility.textFormat(stringContent.getData())));
+                    facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
+                    final Response response = request.send();
+                    final JSONObject result = new JSONObject(response.getBody());
+                    if (result.has("error")) {
+                        final JSONObject error = result.getJSONObject("error");
+                        final String type = error.optString("type");
+                        final String msg = error.optString("message");
+                        if ("OAuthException".equals(type)) {
+                            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                        }
+                        throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
+                    }
                 } else {
-                    facebookRestClient.stream_publish(
-                        stringContent.getData(),
-                        null,
-                        null,
-                        Long.valueOf(targetId),
-                        Long.valueOf(facebookUserId));
+                    /*
+                     * Post it
+                     */
+                    final OAuthRequest request =
+                        new OAuthRequest(
+                            Verb.POST,
+                            "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(stringContent.getData()));
+                    facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
+                    final Response response = request.send();
+                    final JSONObject result = new JSONObject(response.getBody());
+                    if (result.has("error")) {
+                        final JSONObject error = result.getJSONObject("error");
+                        final String type = error.optString("type");
+                        final String msg = error.optString("message");
+                        if ("OAuthException".equals(type)) {
+                            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                        }
+                        throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
+                    }
                 }
             }
-        } catch (final FacebookException e) {
-            throw FacebookMessagingException.create(e);
+        } catch (final JSONException e) {
+            throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final OAuthException e) {
+            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * URL-encodes specified string.
+     * 
+     * @param string The string
+     * @return The URL-encoded string
+     */
+    private static String encode(final String string) {
+        try {
+            return URLEncoder.encode(string, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            return string;
         }
     }
 

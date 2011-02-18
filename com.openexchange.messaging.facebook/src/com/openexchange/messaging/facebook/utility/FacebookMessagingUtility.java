@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.facebook.utility;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,9 +61,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.google.code.facebookapi.FacebookException;
-import com.google.code.facebookapi.IFacebookRestClient;
-import com.google.code.facebookapi.schema.FqlQueryResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.scribe.exceptions.OAuthException;
+import org.scribe.model.OAuthRequest;
+import org.scribe.model.Verb;
+import org.w3c.dom.Element;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -75,6 +81,7 @@ import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingMessageAccess;
+import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
 
@@ -118,11 +125,11 @@ public final class FacebookMessagingUtility {
 
         private static final String TO = MessagingHeader.KnownHeader.TO.toString();
 
-        private final long userId;
+        private final String userId;
 
         private final String userName;
 
-        public ToFiller(final long userId, final String userName) {
+        public ToFiller(final String userId, final String userName) {
             super();
             this.userId = userId;
             this.userName = userName;
@@ -132,7 +139,7 @@ public final class FacebookMessagingUtility {
             /*
              * Add "To"
              */
-            message.setHeader(MimeAddressMessagingHeader.valueOfPlain(TO, userName, String.valueOf(userId)));
+            message.setHeader(MimeAddressMessagingHeader.valueOfPlain(TO, userName, userId));
         }
     }
 
@@ -169,7 +176,7 @@ public final class FacebookMessagingUtility {
     private static final Map<MessagingField, QueryAdder> ADDERS_USER;
 
     private static final Map<MessagingField, QueryAdder> ADDERS_GROUP;
-    
+
     private static final Map<MessagingField, QueryAdder> ADDERS_PAGE;
 
     static {
@@ -395,7 +402,7 @@ public final class FacebookMessagingUtility {
             });
 
             ADDERS_GROUP = Collections.unmodifiableMap(m);
-            
+
             m = new EnumMap<MessagingField, QueryAdder>(MessagingField.class);
 
             m.put(MessagingField.FROM, new QueryAdder() {
@@ -561,18 +568,121 @@ public final class FacebookMessagingUtility {
     }
 
     /**
+     * URL-encodes specified string.
+     * 
+     * @param string The string
+     * @return The URL-encoded string
+     */
+    public static String encode(final String string) {
+        try {
+            return URLEncoder.encode(string, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            return string;
+        }
+    }
+
+    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
+        if (null == toCheck) {
+            return false;
+        }
+        final int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+        if (!ignoreHeadingWhitespaces) {
+            return startingChar == toCheck.charAt(0);
+        }
+        int i = 0;
+        if (Character.isWhitespace(toCheck.charAt(i))) {
+            do {
+                i++;
+            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+        }
+        if (i >= len) {
+            return false;
+        }
+        return startingChar == toCheck.charAt(i);
+    }
+
+    private static final String FQL_JSON_START = "https://api.facebook.com/method/fql.query?format=JSON&query=";
+
+    /**
+     * Performs specified FQL query and returns its result as a JSON object.
+     * 
+     * @param fqlQuery The FQL query
+     * @return The queried JSON object
+     * @throws FacebookMessagingException If FQL query fails
+     */
+    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthInfo facebookOAuthInfo) throws FacebookMessagingException {
+        try {
+            final String encodedQuery = encode(fqlQuery);
+            final OAuthRequest request =
+                new OAuthRequest(
+                    Verb.GET,
+                    new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString());
+            facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
+            final String body = request.send().getBody();
+            if (startsWith('{', body, true)) {
+                /*
+                 * Expect the body to be a JSON object
+                 */
+                final JSONObject result = new JSONObject(body);
+                if (result.has("error")) {
+                    final JSONObject error = result.getJSONObject("error");
+                    final String type = error.optString("type");
+                    final String message = error.optString("message");
+                    if ("OAuthException".equals(type)) {
+                        throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
+                    }
+                    throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
+                        null == type ? "<unknown>" : type,
+                        null == message ? "" : message);
+                }
+                return Collections.singletonList(result);
+            } else if (startsWith('[', body, true)) {
+                /*
+                 * Expect the body to be a JSON array
+                 */
+                final JSONArray result = new JSONArray(body);
+                final int length = result.length();
+                final List<JSONObject> list = new ArrayList<JSONObject>(length);
+                for (int i = 0; i < length; i++) {
+                    list.add(result.getJSONObject(i));
+                }
+                return list;
+            }
+            throw FacebookMessagingExceptionCodes.INVALID_RESPONSE_BODY.create(body);
+        } catch (final JSONException e) {
+            throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final OAuthException e) {
+            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static final String FQL_XML_START = "https://api.facebook.com/method/fql.query?format=XML&query=";
+
+    /**
      * Fires given FQL query using specified facebook REST client.
      * 
-     * @param query The FQL query to fire
-     * @param facebookRestClient The facebook REST client
+     * @param fqlQuery The FQL query to fire
+     * @param facebookOAuthInfo The facebook OAuth information
      * @return The FQL query's results
      * @throws FacebookMessagingException If query cannot be fired
      */
-    public static List<Object> fireFQLQuery(final CharSequence query, final IFacebookRestClient<Object> facebookRestClient) throws FacebookMessagingException {
+    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthInfo facebookOAuthInfo) throws FacebookMessagingException {
         try {
-            return ((FqlQueryResponse) facebookRestClient.fql_query(query)).getResults();
-        } catch (final FacebookException e) {
-            throw FacebookMessagingException.create(e);
+            final String encodedQuery = encode(fqlQuery.toString());
+            final OAuthRequest request =
+                new OAuthRequest(Verb.GET, new StringBuilder(FQL_XML_START.length() + encodedQuery.length()).append(FQL_XML_START).append(
+                    encodedQuery).toString());
+            facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
+            return FacebookDOMParser.parseXMLResponse(request.send().getBody());
+        } catch (final OAuthException e) {
+            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -669,7 +779,7 @@ public final class FacebookMessagingUtility {
      * @throws FacebookMessagingException If composing query fails
      */
     public static FQLQuery composeFQLStreamQueryFor(final Collection<MessagingField> fields, final String postId) throws FacebookMessagingException {
-        return composeFQLStreamQueryFor0(null, fields, null, null, new String[] { postId }, -1L);
+        return composeFQLStreamQueryFor0(null, fields, null, null, new String[] { postId }, null);
     }
 
     /**
@@ -682,7 +792,7 @@ public final class FacebookMessagingUtility {
      * @throws FacebookMessagingException If composing query fails
      */
     public static FQLQuery composeFQLStreamQueryFor(final Collection<MessagingField> fields, final String[] postIds) throws FacebookMessagingException {
-        return composeFQLStreamQueryFor0(null, fields, null, null, postIds, -1L);
+        return composeFQLStreamQueryFor0(null, fields, null, null, postIds, null);
     }
 
     /**
@@ -694,7 +804,7 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final Collection<MessagingField> fields, final long facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final Collection<MessagingField> fields, final String facebookUserId) throws FacebookMessagingException {
         return composeFQLStreamQueryFor0(queryType, fields, null, null, null, facebookUserId);
     }
 
@@ -709,7 +819,7 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String facebookUserId) throws FacebookMessagingException {
         return composeFQLStreamQueryFor0(queryType, fields, sortField, order, null, facebookUserId);
     }
 
@@ -718,7 +828,7 @@ public final class FacebookMessagingUtility {
      */
     private static final int DEFAULT_LIMIT = 1000;
 
-    private static FQLQuery composeFQLStreamQueryFor0(final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+    private static FQLQuery composeFQLStreamQueryFor0(final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final String facebookUserId) throws FacebookMessagingException {
         final StringBuilder query = startFQLStreamQuery(queryType, fields, facebookUserId);
         if (null == query) {
             /*
@@ -741,11 +851,11 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String facebookUserId) throws FacebookMessagingException {
         return composeFQLStreamQueryBefore(timeStamp, queryType, fields, sortField, order, null, facebookUserId);
     }
 
-    private static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+    private static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final String facebookUserId) throws FacebookMessagingException {
         final StringBuilder query = startFQLStreamQuery(queryType, fields, facebookUserId);
         if (null == query) {
             /*
@@ -760,7 +870,7 @@ public final class FacebookMessagingUtility {
         return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query, (null != queryType));
     }
 
-    private static StringBuilder startFQLStreamQuery(final FQLQueryType queryType, final Collection<MessagingField> fields, final long facebookUserId) throws FacebookMessagingException {
+    private static StringBuilder startFQLStreamQuery(final FQLQueryType queryType, final Collection<MessagingField> fields, final String facebookUserId) throws FacebookMessagingException {
         /*
          * Resolve fields to known FQL fields
          */
