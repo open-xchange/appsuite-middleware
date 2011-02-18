@@ -136,7 +136,7 @@ final class CharsetValidator {
         private IgnoreCaseString(final String s) {
             super();
             this.s = s;
-            hashcode = s.toLowerCase(Locale.ENGLISH).hashCode();
+            hashcode = null == s ? 0 : s.toLowerCase(Locale.ENGLISH).hashCode();
         }
 
         @Override
