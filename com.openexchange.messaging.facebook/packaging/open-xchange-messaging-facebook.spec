@@ -4,7 +4,7 @@
 Name:           open-xchange-messaging-facebook
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-html >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Messaging Facebook Bundle
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-html >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@
 #
 
 %description
