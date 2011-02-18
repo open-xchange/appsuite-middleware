@@ -54,7 +54,7 @@ import com.openexchange.messaging.MessagingException;
 
 
 /**
- * {@link Modifier}
+ * {@link Modifier} - Modifies incoming/outgoing {@link MessagingAccount} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

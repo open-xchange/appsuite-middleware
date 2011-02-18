@@ -69,30 +69,16 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
     private static final class DefaultModifier implements Modifier {
 
         private final DefaultMessagingAccountManager manager;
-        
+
         public DefaultModifier(final DefaultMessagingAccountManager manager) {
             super();
             this.manager = manager;
         }
 
-        /**
-         * Modifies account intended for incoming actions.
-         * 
-         * @param account The account
-         * @return The modified account
-         * @throws MessagingException If modifying fails
-         */
         public MessagingAccount modifyIncoming(final MessagingAccount account) throws MessagingException {
             return manager.modifyIncoming(account);
         }
 
-        /**
-         * Modifies account intended for outgoing actions.
-         * 
-         * @param account The account
-         * @return The modified account
-         * @throws MessagingException If modifying fails
-         */
         public MessagingAccount modifyOutgoing(final MessagingAccount account) throws MessagingException {
             return manager.modifyOutgoing(account);
         }
