@@ -117,6 +117,7 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
             /*
              * Get request token secret from session parameters
              */
+            @SuppressWarnings("unchecked")
             final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
             final String oauthTokenSecret = (String) state.get("secret");
             session.setParameter(uuid, null);
