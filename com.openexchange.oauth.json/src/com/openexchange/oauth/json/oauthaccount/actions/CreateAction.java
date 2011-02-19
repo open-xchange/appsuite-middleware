@@ -119,7 +119,6 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
              */
             final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
             final String oauthTokenSecret = (String) state.get("secret");
-            
             session.setParameter(uuid, null);
             if (oauthTokenSecret == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SECRET.getName());
