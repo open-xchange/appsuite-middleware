@@ -199,38 +199,44 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OAuthException {
-        final OAuthServiceMetaData metaData = registry.getService(serviceMetaData);
-        /*
-         * Get appropriate Scribe service implementation
-         */
-        final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
-        final Token scribeToken;
-        if (metaData.needsRequestToken()) {
-            scribeToken = service.getRequestToken();
-        } else {
-            scribeToken = null; // Empty token
-        }
-        final StringBuilder authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
-        /*
-         * Add optional scope
-         */
-        {
-            final String scope = metaData.getScope();
-            if (scope != null) {
-                authorizationURL.append("&scope=").append(urlEncode(scope));
+        try {
+            final OAuthServiceMetaData metaData = registry.getService(serviceMetaData);
+            /*
+             * Get appropriate Scribe service implementation
+             */
+            final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
+            final Token scribeToken;
+            if (metaData.needsRequestToken()) {
+                scribeToken = service.getRequestToken();
+            } else {
+                scribeToken = null; // Empty token
             }
+            final StringBuilder authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+            /*
+             * Add optional scope
+             */
+            {
+                final String scope = metaData.getScope();
+                if (scope != null) {
+                    authorizationURL.append("&scope=").append(urlEncode(scope));
+                }
+            }
+            /*
+             * Process authorization URL
+             */
+            final String authURL = metaData.processAuthorizationURL(authorizationURL.toString());
+            /*
+             * Return interaction
+             */
+            return new OAuthInteractionImpl(
+                scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
+                authURL,
+                callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
+        } catch (final org.scribe.exceptions.OAuthException e) {
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        /*
-         * Process authorization URL
-         */
-        final String authURL = metaData.processAuthorizationURL(authorizationURL.toString());
-        /*
-         * Return interaction
-         */
-        return new OAuthInteractionImpl(
-            scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
-            authURL,
-            callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
     }
 
     private static String urlEncode(final String s) {
@@ -406,31 +412,37 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     protected void obtainTokenByOutOfBand(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
-        final OAuthServiceMetaData metaData = account.getMetaData();
-        final OAuthToken oAuthToken = metaData.getOAuthToken(arguments);
-        if (null == oAuthToken) {
-            final String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
-            if (null == pin) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PIN);
+        try {
+            final OAuthServiceMetaData metaData = account.getMetaData();
+            final OAuthToken oAuthToken = metaData.getOAuthToken(arguments);
+            if (null == oAuthToken) {
+                final String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
+                if (null == pin) {
+                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PIN);
+                }
+                final OAuthToken requestToken = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
+                if (null == requestToken) {
+                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
+                }
+                /*
+                 * With the request token and the verifier (which is a number) we need now to get the access token
+                 */
+                final Verifier verifier = new Verifier(pin);
+                final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null);
+                final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
+                /*
+                 * Apply to account
+                 */
+                account.setToken(accessToken.getToken());
+                account.setSecret(accessToken.getSecret());
+            } else {
+                account.setToken(oAuthToken.getToken());
+                account.setSecret(oAuthToken.getSecret());
             }
-            final OAuthToken requestToken = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
-            if (null == requestToken) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
-            }
-            /*
-             * With the request token and the verifier (which is a number) we need now to get the access token
-             */
-            final Verifier verifier = new Verifier(pin);
-            final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null);
-            final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
-            /*
-             * Apply to account
-             */
-            account.setToken(accessToken.getToken());
-            account.setSecret(accessToken.getSecret());
-        } else {
-            account.setToken(oAuthToken.getToken());
-            account.setSecret(oAuthToken.getSecret());
+        } catch (final org.scribe.exceptions.OAuthException e) {
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

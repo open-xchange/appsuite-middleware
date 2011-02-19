@@ -129,7 +129,10 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     public static final String MISSING_ARGUMENT_MSG = "Missing argument: %1$s";
 
     // OAuth Token has expired. Please authorize this account and try again.
-    public static final String TOKEN_EXPIRED = "OAuth Token has expired. Please authorize this account and try again.";
+    public static final String TOKEN_EXPIRED_MSG = "OAuth Token has expired. Please authorize this account and try again.";
+
+    // An OAuth error occurred: %1$s
+    public static final String OAUTH_ERROR_MSG = "An OAuth error occurred: %1$s";
 
     /**
      * Initializes a new {@link OAuthExceptionMessages}.

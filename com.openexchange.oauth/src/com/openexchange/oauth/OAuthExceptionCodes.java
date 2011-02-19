@@ -93,11 +93,14 @@ public enum OAuthExceptionCodes implements OXErrorMessage {
      * Missing argument: %1$s
      */
     MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, Category.CODE_ERROR, 8),
-    
     /**
      * Token has expired
      */
-    TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED, Category.TRY_AGAIN, 9);
+    TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED_MSG, Category.TRY_AGAIN, 9),
+    /**
+     * An OAuth error occurred: %1$s
+     */
+    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, Category.CODE_ERROR, 10),
 
     ;
 
