@@ -106,7 +106,8 @@ public final class OAuthConstants {
      */
 
     /**
-     * The session parameter providing the UUID associated with token secret.
+     * The session parameter providing the UUID associated with OAuth state. Actually a <code>java.uitl.Map&lt;String, Object&gt;</code>
+     * providing request token's secret, call-back URL, whatever.
      */
     public static final String SESSION_PARAM_UUID = "uuid";
 
