@@ -82,6 +82,11 @@ public final class OAuthConstants {
      */
     public static final String ARGUMENT_REQUEST_TOKEN = "requestToken";
 
+    /**
+     * The argument name for call-back URL. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_CALLBACK = "callbackURL";
+
     /*-
      * ------------------- URL parameters -------------------
      */
@@ -113,7 +118,5 @@ public final class OAuthConstants {
      * The type constant used for generated IDs.
      */
     public static final String TYPE_ACCOUNT = "com.openexchange.oauth.account";
-
-    public static final String CALLBACK = "callbackURL";
 
 }

@@ -137,13 +137,13 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) {
         final String code = parameter.get("code");
         arguments.put(OAuthConstants.ARGUMENT_PIN, code);
-        arguments.put(OAuthConstants.CALLBACK, state.get(OAuthConstants.CALLBACK));
+        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, state.get(OAuthConstants.ARGUMENT_CALLBACK));
     }
 
     @Override
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
         final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
-        String callback = (String) arguments.get(OAuthConstants.CALLBACK);
+        String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
 
         BufferedReader reader = null;
         try {

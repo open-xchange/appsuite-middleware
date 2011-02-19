@@ -142,7 +142,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         final OAuthToken requestToken = interaction.getRequestToken();
         final Map<String, Object> oauthState = new HashMap<String, Object>();
         oauthState.put("secret", requestToken.getSecret());
-        oauthState.put(OAuthConstants.CALLBACK, callbackUrlBuilder.toString());
+        oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrlBuilder.toString());
         
         session.setParameter(uuid, oauthState);
         /*
