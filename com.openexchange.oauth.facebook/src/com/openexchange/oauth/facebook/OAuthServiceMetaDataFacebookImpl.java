@@ -64,6 +64,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthException;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthToken;
 
 /**
@@ -164,10 +165,9 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             return parseResponse(response.toString());
             
         } catch (final MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            e.printStackTrace();
+            throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if(reader != null) {
                 try {
@@ -177,8 +177,6 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
                 }
             }
         }
-        
-        return null;
     }
     
     private static final Pattern EXTRACTOR = Pattern.compile("access_token=(.*?)&?");
