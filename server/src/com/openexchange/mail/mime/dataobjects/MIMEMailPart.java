@@ -51,6 +51,7 @@ package com.openexchange.mail.mime.dataobjects;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -723,11 +724,24 @@ public final class MIMEMailPart extends MailPart {
                      * If size is unknown or exceeds 1MB, use the stream-based implementation
                      */
                     final Object content = part.getContent();
-                    if (content instanceof InputStream) {
-                        multipart = new JavaMailMultipartWrapper(new MimeMultipart(
-                            new InputStreamDataSource((InputStream) content).setType(getContentType().toString())));
-                    } else {
+                    if (content instanceof Multipart) {
                         multipart = new JavaMailMultipartWrapper((Multipart) content);
+                    } else {
+                        /*-
+                         * Content object is not a Multipart. Then data is kept in memory regardless of MultipartWrapper implementation.
+                         * 
+                         * Since MIMEMultipartMailPart was introduced to provide a faster multipart/* parsing, use the MIMEMultipartWrapper
+                         * implementation to take benefit of improved parsing.
+                         */
+                        if (content instanceof InputStream) {
+                            /*
+                             * Close in case of InputStream
+                             */
+                            closeQuitely((InputStream) content);
+                        }
+                        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size);
+                        part.writeTo(out);
+                        multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
                     }
                 }
             } catch (final MessagingException e) {
@@ -795,4 +809,12 @@ public final class MIMEMailPart extends MailPart {
         }
 
     } // End of JavaMailMultipartWrapper
+
+    private static void closeQuitely(final Closeable closeable) {
+        try {
+            closeable.close();
+        } catch (final IOException e) {
+            LOG.trace(e.getMessage(), e);
+        }
+    }
 }
