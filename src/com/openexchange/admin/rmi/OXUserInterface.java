@@ -388,7 +388,34 @@ public interface OXUserInterface extends Remote {
      */
     public void changeModuleAccess(final Context ctx, final User user, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
-    
+    /**
+     * 
+     * @param ctx Context object
+     * @param filter The call affects only users with exactly this access combination. -1 for no filter.
+     * @param addAccess Access rights to be added
+     * @param removeAccess Access rights to be removed
+     * @throws InvalidCredentialsException 
+     * @throws StorageException 
+     * @throws InvalidDataException 
+     * @throws DatabaseUpdateException 
+     * @throws NoSuchContextException 
+     */
+    public void changeModuleAccessGlobal(int filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException;
+
+    /**
+     * 
+     * @param ctx Context object
+     * @param filter The call affects only users with exactly this access combination. null for no filter.
+     * @param addAccess Access rights to be added
+     * @param removeAccess Access rights to be removed
+     * @throws InvalidCredentialsException 
+     * @throws StorageException
+     * @throws InvalidDataException 
+     * @throws DatabaseUpdateException 
+     * @throws NoSuchContextException 
+     */
+    public void changeModuleAccessGlobal(String filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
+
     /**
      * Retrieve user objects for a range of users by username or id.
      * 
