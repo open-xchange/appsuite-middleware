@@ -50,6 +50,8 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.sql.grammar.Constant.ASTERISK;
+import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,6 +60,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -68,6 +72,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -75,10 +80,23 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.sql.builder.StatementBuilder;
+import com.openexchange.sql.grammar.BitAND;
+import com.openexchange.sql.grammar.BitLSHIFT;
+import com.openexchange.sql.grammar.BitOR;
+import com.openexchange.sql.grammar.Column;
+import com.openexchange.sql.grammar.Constant;
+import com.openexchange.sql.grammar.EQUALS;
+import com.openexchange.sql.grammar.INVERT;
+import com.openexchange.sql.grammar.Table;
+import com.openexchange.sql.grammar.UPDATE;
 
 /**
  * @author d7
@@ -2230,6 +2248,72 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         if (aliases != null) {
             for (final String addr : aliases) {
                 GenericChecks.checkValidMailAddress(addr);
+            }
+        }
+    }
+
+    @Override
+    public void changeAccessCombination(int filter, int addAccess, int removeAccess) throws StorageException {
+        
+        //Collecting ONE Context id for each schema
+        Set<Integer> contextIdsForSchema = new HashSet<Integer>();
+        try {
+            List<Integer> allCids = ContextStorage.getInstance().getAllContextIds();
+            Set<Integer> handledContextIds = new HashSet<Integer>();
+            for (int cid : allCids) {
+                if (!handledContextIds.contains(cid)) {
+                    int[] contextsInSameSchema = com.openexchange.databaseold.Database.getContextsInSameSchema(cid);
+                    for (int contextInSameSchama : contextsInSameSchema) {
+                        handledContextIds.add(contextInSameSchama);
+                    }
+                    contextIdsForSchema.add(cid);
+                }
+            }
+        } catch (DBPoolingException e) {
+            log.error("DBPool Error", e);
+            throw new StorageException(e);
+        } catch (ContextException e) {
+            log.error("Context Storage Error", e);
+            throw new StorageException(e);
+        }
+        
+        //Execute once for each schema
+        for (int cid : contextIdsForSchema) {
+            changeAccessCombination(cid, filter, addAccess, removeAccess);
+        }
+    }
+
+    private void changeAccessCombination(int cid, int filter, int addAccess, int removeAccess) throws StorageException {
+        Connection con = null;
+        Table table = new Table("user_configuration");
+        Column column = new Column("permissions");
+        
+        try {
+            con = cache.getConnectionForContextNoTimeout(cid);
+            UPDATE update = new UPDATE(table).SET(column, new BitAND(new BitOR(column, PLACEHOLDER), new INVERT(PLACEHOLDER)));
+            
+            List<Object> values = new ArrayList<Object>();
+            values.add(addAccess);
+            values.add(removeAccess);
+            
+            if (filter != -1) {
+                update.WHERE(new EQUALS(column, PLACEHOLDER));
+                values.add(filter);
+            } else {
+                throw new SQLException();
+            }
+            new StatementBuilder().executeStatement(con, update, values);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                cache.pushConnectionForContextNoTimeout(cid, con);
+            } catch (final PoolException e) {
+                log.error("Error pushing context connection to pool.", e);
             }
         }
     }
