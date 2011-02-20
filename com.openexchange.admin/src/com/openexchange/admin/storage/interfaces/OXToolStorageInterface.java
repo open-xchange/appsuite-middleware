@@ -446,5 +446,15 @@ public abstract class OXToolStorageInterface {
     public abstract void validateUserName(String name) throws InvalidDataException;
 
     public abstract void checkValidEmailsInUserObject(User user) throws InvalidDataException;
+    
+    /**
+     * Changes access rights for all users in the Database.
+     * 
+     * @param filter Only users with this access combination are affected. Set to -1 for no filter.
+     * @param addAccess
+     * @param removeAccess
+     * @throws StorageException
+     */
+    public abstract void changeAccessCombination(int filter, int addAccess, int removeAccess) throws StorageException;
 
 }
