@@ -49,11 +49,8 @@
 
 package com.openexchange.messaging.twitter;
 
-import static com.openexchange.messaging.twitter.FormStrings.FORM_LABEL_LOGIN;
-import static com.openexchange.messaging.twitter.FormStrings.FORM_LABEL_PASSWORD;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -66,7 +63,6 @@ import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
 import com.openexchange.session.Session;
 
 /**
@@ -103,27 +99,24 @@ public final class TwitterMessagingService implements MessagingService {
 
     private final DynamicFormDescription formDescription;
 
-    private final Set<String> secretProperties;
-
     /**
      * Initializes a new {@link TwitterMessagingService}.
      */
     public TwitterMessagingService() {
         super();
-        accountManager = new DefaultMessagingAccountManager(this);
+        accountManager = new TwitterMessagingAccountManager(this);
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
-        tmpDescription.add(FormElement.input(TwitterConstants.TWITTER_LOGIN, FORM_LABEL_LOGIN, true, ""));
-        tmpDescription.add(FormElement.password(TwitterConstants.TWITTER_PASSWORD, FORM_LABEL_PASSWORD, true, ""));
+        /*
+         * API & secret key
+         */
+        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
+        oauthAccount.setOption("type", "com.openexchange.oauth.twitter");
+        tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
-        secretProperties =
-            Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-                TwitterConstants.TWITTER_PASSWORD,
-                TwitterConstants.TWITTER_TOKEN,
-                TwitterConstants.TWITTER_TOKEN_SECRET)));
     }
 
     public Set<String> getSecretProperties() {
-        return secretProperties;
+        return Collections.emptySet();
     }
 
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {

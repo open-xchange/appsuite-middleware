@@ -62,6 +62,7 @@ import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.twitter.TwitterMessagingService;
 import com.openexchange.messaging.twitter.session.TwitterEventHandler;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -89,8 +90,7 @@ public final class TwitterMessagingActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return new Class<?>[] {TwitterService.class, SessiondService.class, HTMLService.class};
+        return new Class<?>[] { TwitterService.class, SessiondService.class, HTMLService.class, OAuthService.class };
     }
 
     @Override

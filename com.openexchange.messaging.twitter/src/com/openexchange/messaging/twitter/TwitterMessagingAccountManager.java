@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,68 +49,50 @@
 
 package com.openexchange.messaging.twitter;
 
+import java.util.Map;
+import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+
+
 /**
- * {@link TwitterConstants} - Provides useful constants for twitter.
- * 
+ * {@link TwitterMessagingAccountManager}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterConstants {
+public final class TwitterMessagingAccountManager extends DefaultMessagingAccountManager {
 
     /**
-     * The max. length of a tweet: 140 characters.
+     * Initializes a new {@link TwitterMessagingAccountManager}.
+     * @param service
      */
-    public static final int MAX_TWEET_LENGTH = 140;
+    public TwitterMessagingAccountManager(final MessagingService service) {
+        super(service);
+    }
 
-    /**
-     * The type denoting a common twitter tweet.
-     */
-    public static final String TYPE_TWEET = "tweet";
+    @Override
+    protected MessagingAccount modifyIncoming(final MessagingAccount account) throws MessagingException {
+        final Map<String, Object> configuration = account.getConfiguration();
+        if (null != configuration) {
+            final Integer id = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
+            if (null != id) {
+                configuration.put(TwitterConstants.TWITTER_OAUTH_ACCOUNT, id.toString());
+            }
+        }
+        return account;
+    }
 
-    /**
-     * The type denoting twitter retweet.
-     */
-    public static final String TYPE_RETWEET = "retweet";
-
-    /**
-     * The type denoting twitter retweet new.
-     */
-    public static final String TYPE_RETWEET_NEW = "retweetNew";
-
-    /**
-     * The type denoting twitter direct message.
-     */
-    public static final String TYPE_DIRECT_MESSAGE = "directMessage";
-
-    /**
-     * The Status-Id header.
-     */
-    public static final String HEADER_STATUS_ID = "X-Twitter-Status-Id";
-
-    /**
-     * The twitter time line length.
-     */
-    public static final int TIMELINE_LENGTH = 20;
-
-    /**
-     * The constant for account.
-     */
-    public static final String TWITTER_OAUTH_ACCOUNT = "account";
-
-    /**
-     * The configuration property name for twitter token.
-     */
-    public static final String TWITTER_TOKEN = "twitterToken";
-
-    /**
-     * The configuration property name for twitter token secret.
-     */
-    public static final String TWITTER_TOKEN_SECRET = "twitterTokenSecret";
-
-    /**
-     * Initializes a new {@link TwitterConstants}.
-     */
-    private TwitterConstants() {
-        super();
+    @Override
+    protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws MessagingException {
+        final Map<String, Object> configuration = account.getConfiguration();
+        if (null != configuration) {
+            final String id = (String) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
+            if (null != id) {
+                configuration.put(TwitterConstants.TWITTER_OAUTH_ACCOUNT, Integer.valueOf(id.trim()));
+            }
+        }
+        return account;
     }
 
 }

@@ -36,6 +36,7 @@
     <property name="genconfdatajar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="twitterjar" value="com.openexchange.twitter.jar"/>
 	<property name="htmljar" value="com.openexchange.html.jar"/>
+	<property name="oauthjar" value="com.openexchange.oauth.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -49,6 +50,7 @@
         <pathelement location="${bundlesdir}/${genconfdatajar}"/>
         <pathelement location="${bundlesdir}/${twitterjar}"/>
     	<pathelement location="${bundlesdir}/${htmljar}"/>
+    	<pathelement location="${bundlesdir}/${oauthjar}"/>
     </path>
 
     <!-- Compile -->
