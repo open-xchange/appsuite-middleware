@@ -144,7 +144,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
          */
         final Map<String, Object> oauthState = new HashMap<String, Object>();
-        oauthState.put("secret", requestToken.getSecret());
+        oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrlBuilder.toString());
         session.setParameter(uuid, oauthState);
         /*

@@ -87,6 +87,11 @@ public final class OAuthConstants {
      */
     public static final String ARGUMENT_CALLBACK = "callbackURL";
 
+    /**
+     * The argument name for secret string. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_SECRET = "secret";
+
     /*-
      * ------------------- URL parameters -------------------
      */

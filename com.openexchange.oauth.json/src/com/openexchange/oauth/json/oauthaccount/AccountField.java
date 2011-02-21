@@ -77,7 +77,7 @@ public enum AccountField {
     /**
      * The secret
      */
-    SECRET("secret"),
+    SECRET(OAuthConstants.ARGUMENT_SECRET),
     /**
      * The authorization URL
      */
