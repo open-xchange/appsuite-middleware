@@ -725,6 +725,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Feb 18 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18376: Dealing with an InputStream content
 * Thu Feb 17 2011 - marcus.klein@open-xchange.com
  - Bugfix #18312: Introduced quotes for OXUpdater install parameters.
 * Thu Feb 17 2011 - thorben.betten@open-xchange.com
