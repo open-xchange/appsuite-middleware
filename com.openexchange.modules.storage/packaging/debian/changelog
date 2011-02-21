@@ -1,0 +1,5 @@
+open-xchange-modules-storage (6.19.0.0-0) unstable; urgency=low
+
+  * initial version.
+
+ -- Francisco Laguna <francisco.laguna@open-xchange.com>  Mon, 21 Feb 2010 12:50:00 +0200
