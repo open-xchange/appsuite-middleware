@@ -239,6 +239,12 @@ public class PushRequest {
 
         final int length = parseLength(s, pos++);
 
+        if (currentLength >= b.length) {
+            /*
+             * Strange datagram package
+             */
+            throw new PushUDPException(PushUDPException.Code.MISSING_PAYLOAD);
+        }
         final byte[] bData = new byte[length];
         System.arraycopy(b, currentLength, bData, 0, length);
         return PATTERN_SPLIT.split(new String(bData), 0);

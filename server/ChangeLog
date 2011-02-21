@@ -1,3 +1,7 @@
+* 2011-02-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #18052: Checking presence of datagram package's payload
+
 * 2011-02-21 - marcus.klein@open-xchange.com
 
  - Bugfix #18399: Added session identifier to warning message for further debugging the cause of the warning.

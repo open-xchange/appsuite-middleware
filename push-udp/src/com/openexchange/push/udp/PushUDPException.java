@@ -160,7 +160,11 @@ public class PushUDPException extends AbstractOXException {
         /**
          * Unknown request type: %1$s.
          */
-        INVALID_TYPE("Unknown request type: %1$s.", 13, AbstractOXException.Category.CODE_ERROR);
+        INVALID_TYPE("Unknown request type: %1$s.", 13, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Missing payload in datagram package.
+         */
+        MISSING_PAYLOAD("Missing payload in datagram package.", 14, AbstractOXException.Category.CODE_ERROR);
 
         /**
          * Message of the exception.
