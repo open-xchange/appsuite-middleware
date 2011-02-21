@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
@@ -70,7 +71,12 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map,
      * int, int)
      */
-    public OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) {
+    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -79,7 +85,7 @@ public class MockOAuthService implements OAuthService {
      * (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#deleteAccount(int, int, int)
      */
-    public void deleteAccount(int accountId, int user, int contextId) {
+    public void deleteAccount(final int accountId, final int user, final int contextId) {
         // TODO Auto-generated method stub
 
     }
@@ -88,8 +94,8 @@ public class MockOAuthService implements OAuthService {
      * (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccount(int, int, int)
      */
-    public OAuthAccount getAccount(int accountId, int user, int contextId) {
-        DefaultOAuthAccount account = new DefaultOAuthAccount();
+    public OAuthAccount getAccount(final int accountId, final int user, final int contextId) {
+        final DefaultOAuthAccount account = new DefaultOAuthAccount();
         account.setSecret("");
         account.setToken("138416139502963%7C2.Ey8MZjuewTVbS4HdzFnvvA__.3600.1297886400-1470746124%7Cb8ITW7P_oUB-YVW7aEy-pEKq5_Q");
         return account;
@@ -99,7 +105,7 @@ public class MockOAuthService implements OAuthService {
      * (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccounts(int, int)
      */
-    public List<OAuthAccount> getAccounts(int user, int contextId) {
+    public List<OAuthAccount> getAccounts(final int user, final int contextId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -108,7 +114,7 @@ public class MockOAuthService implements OAuthService {
      * (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, int, int)
      */
-    public List<OAuthAccount> getAccounts(String serviceMetaData, int user, int contextId) {
+    public List<OAuthAccount> getAccounts(final String serviceMetaData, final int user, final int contextId) {
         return null;
     }
 
@@ -125,7 +131,7 @@ public class MockOAuthService implements OAuthService {
      * (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
      */
-    public OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl) {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -134,7 +140,7 @@ public class MockOAuthService implements OAuthService {
      * (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
      */
-    public void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) {
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) {
         // TODO Auto-generated method stub
 
     }

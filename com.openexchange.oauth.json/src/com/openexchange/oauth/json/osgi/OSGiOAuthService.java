@@ -81,6 +81,10 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         }
     }
 
+    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+        return getService0().createAccount(serviceMetaData, arguments, user, contextId);
+    }
+
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
         return getService0().createAccount(serviceMetaData, type, arguments, user, contextId);
     }
