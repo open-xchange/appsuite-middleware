@@ -487,7 +487,7 @@ final class SessionData {
                 if (sessionList.getFirst().containsSessionId(sessionId)) {
                     LOG.warn("Somebody else moved session to most actual container.");
                 } else {
-                    LOG.warn("Was not able to move the session into the most actual container.");
+                    LOG.warn("Was not able to move the session " + sessionId + " into the most actual container.");
                 }
             }
         } catch (SessiondException e) {
