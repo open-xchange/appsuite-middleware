@@ -75,7 +75,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
     }
 
     @Override
-    public BasicProperty get(final String property, final Context ctx) {
+    public BasicProperty get(final String property, final Context ctx, int user) {
 
         return new BasicProperty() {
 

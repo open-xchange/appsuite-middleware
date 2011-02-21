@@ -97,6 +97,10 @@ public class ConfigCascade implements ConfigViewFactory {
         this.searchPath = searchPath;
         this.path = null;
     }
+    
+    public String[] getSearchPath() {
+        return searchPath;
+    }
 
     protected List<ConfigProviderService> getConfigProviders() {
         if (path != null) {

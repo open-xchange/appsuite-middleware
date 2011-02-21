@@ -58,4 +58,5 @@ package com.openexchange.config.cascade;
 public interface ConfigViewFactory {
     public ConfigView getView(int user, int context) throws ConfigCascadeException;
     public ConfigView getView() throws ConfigCascadeException;
+    public String[] getSearchPath() throws ConfigCascadeException;
 }

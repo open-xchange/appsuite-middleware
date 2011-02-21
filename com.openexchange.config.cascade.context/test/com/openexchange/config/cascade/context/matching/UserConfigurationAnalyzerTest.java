@@ -47,54 +47,37 @@
  *
  */
 
-package com.openexchange.config.cascade.context;
+package com.openexchange.config.cascade.context.matching;
 
-import java.util.Collection;
-import java.util.Collections;
-import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
-import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import java.util.Arrays;
+import java.util.Set;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import junit.framework.TestCase;
+
 
 /**
- * {@link AbstractContextBasedConfigProvider}
- * 
+ * {@link UserConfigurationAnalyzerTest}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractContextBasedConfigProvider implements ConfigProviderService {
-
-    protected ContextService contexts;
-
-    public AbstractContextBasedConfigProvider(ContextService contexts) {
-        this.contexts = contexts;
+public class UserConfigurationAnalyzerTest extends TestCase {
+    public void testSample() {
+        UserConfiguration config = new UserConfiguration(0, 0, new int[0], null);
+        config.setActiveSync(true);
+        config.setEditPassword(true);
+        config.setInfostore(true);
+        config.setWebDAVXML(true);
+        
+        UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
+        
+        Set<String> tags = analyzer.getTags(config);
+        
+        for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
+            assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));
+        }
+        
+        assertTrue(tags.toString()+" were not expected", tags.isEmpty());
+        
+        
     }
-
-    public BasicProperty get(String property, int context, int user) throws ConfigCascadeException {
-        if (context == NO_CONTEXT) {
-            return NO_PROPERTY;
-        }
-        try {
-            return get(property, contexts.getContext(context), user);
-        } catch (ContextException e) {
-            throw new ConfigCascadeException(e);
-        }
-    }
-
-    public Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException {
-        if (context == NO_CONTEXT) {
-            return Collections.emptyList();
-        }
-        try {
-            return getAllPropertyNames(contexts.getContext(context));
-        } catch (ContextException e) {
-            throw new ConfigCascadeException(e);
-        }
-    }
-
-    protected abstract Collection<String> getAllPropertyNames(Context context);
-
-    protected abstract BasicProperty get(String property, Context context, int user) throws ConfigCascadeException;
-
 }

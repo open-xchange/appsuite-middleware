@@ -52,14 +52,17 @@ package com.openexchange.config.cascade.context.osgi;
 import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.context.ContextConfigProvider;
 import com.openexchange.config.cascade.context.ContextSetConfigProvider;
 import com.openexchange.context.ContextService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.server.osgiservice.Whiteboard;
+import com.openexchange.userconf.UserConfigurationService;
 
 public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
-    private static final Class<?>[] NEEDED = new Class[]{ ContextService.class, ConfigurationService.class};
+    private static final Class<?>[] NEEDED = new Class[]{ ContextService.class, ConfigurationService.class, UserConfigurationService.class};
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -70,7 +73,8 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         ContextService contexts = getService(ContextService.class);
         ConfigurationService configuration = getService(ConfigurationService.class);
-
+        UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        
         {
             ContextConfigProvider provider = new ContextConfigProvider(contexts);
         
@@ -81,7 +85,11 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
         }
         
         {
-            ContextSetConfigProvider provider = new ContextSetConfigProvider(contexts, configuration);
+            Whiteboard whiteboard = new Whiteboard(context);
+            
+            ConfigViewFactory configViews = whiteboard.getService(ConfigViewFactory.class);
+            
+            ContextSetConfigProvider provider = new ContextSetConfigProvider(contexts, configuration, userConfigs, configViews);
         
             Hashtable<String, Object> properties = new Hashtable<String,Object>();
             properties.put("scope", "contextSets");

@@ -47,54 +47,82 @@
  *
  */
 
-package com.openexchange.config.cascade.context;
+package com.openexchange.config.cascade.context.matching;
 
-import java.util.Collection;
-import java.util.Collections;
-import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
-import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+
 
 /**
- * {@link AbstractContextBasedConfigProvider}
- * 
+ * {@link UserConfigurationAnalyzer}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractContextBasedConfigProvider implements ConfigProviderService {
-
-    protected ContextService contexts;
-
-    public AbstractContextBasedConfigProvider(ContextService contexts) {
-        this.contexts = contexts;
-    }
-
-    public BasicProperty get(String property, int context, int user) throws ConfigCascadeException {
-        if (context == NO_CONTEXT) {
-            return NO_PROPERTY;
-        }
-        try {
-            return get(property, contexts.getContext(context), user);
-        } catch (ContextException e) {
-            throw new ConfigCascadeException(e);
+public class UserConfigurationAnalyzer {
+    
+    // Time for a little reflection magic
+    private static final Map<String, Method> getMethods = new HashMap<String, Method>();
+    
+    static {
+        Method[] methods = UserConfiguration.class.getMethods();
+        for (Method method : methods) {
+            if (isCandidate(method)) {
+                getMethods.put(getName(method), method);
+            }
         }
     }
-
-    public Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException {
-        if (context == NO_CONTEXT) {
-            return Collections.emptyList();
+    
+    
+    public Set<String> getTags(UserConfiguration configuration) {
+        Set<String> retval = new HashSet<String>();
+        for(Map.Entry<String, Method> entry : getMethods.entrySet()) {
+            String name = entry.getKey();
+            Method m = entry.getValue();
+            
+            try {
+                Boolean active = (Boolean) m.invoke(configuration);
+                if(active) {
+                    retval.add(name);
+                }
+            } catch (IllegalArgumentException e) {
+                // Ignore
+            } catch (IllegalAccessException e) {
+                // Ignore
+            } catch (InvocationTargetException e) {
+                // Ignore
+            }
+            
+            
         }
-        try {
-            return getAllPropertyNames(contexts.getContext(context));
-        } catch (ContextException e) {
-            throw new ConfigCascadeException(e);
-        }
+        return retval;
     }
 
-    protected abstract Collection<String> getAllPropertyNames(Context context);
 
-    protected abstract BasicProperty get(String property, Context context, int user) throws ConfigCascadeException;
+    private static String getName(Method method) {
+        String name = method.getName();
+        StringBuilder nameBuilder = new StringBuilder("uc");
+        boolean collect = false;
+        for(char c : name.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                collect = true;
+            }
+            if(collect) {
+                nameBuilder.append(c);
+            }
+        }
+        return nameBuilder.toString();
+    }
 
+
+    private static boolean isCandidate(Method method) {
+        Class<?> cls = method.getReturnType();
+        boolean returnsBoolean = boolean.class.isAssignableFrom(cls) || Boolean.class.isAssignableFrom(cls);
+        boolean hasNoParameters = method.getParameterTypes().length==0;
+        return returnsBoolean && hasNoParameters;
+    }
 }

@@ -61,10 +61,16 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.context.matching.ContextSetTerm;
 import com.openexchange.config.cascade.context.matching.ContextSetTermParser;
+import com.openexchange.config.cascade.context.matching.UserConfigurationAnalyzer;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
@@ -76,12 +82,19 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     private static final String TAXONOMY_TYPES = "taxonomy/types";
 
-    public static final String SCOPE = "contextSet";
+    public static final String SCOPE = "contextSets";
+
+    private static final String TYPE_PROPERTY = "com.openexchange.config.cascade.types";
     
     private List<ContextSetConfig> contextSetConfigs;
     private List<AdditionalPredicates> additionalPredicates;
 
-    public ContextSetConfigProvider(ContextService contexts, ConfigurationService config) {
+    private UserConfigurationService userConfigs;
+    private UserConfigurationAnalyzer userConfigAnalyzer = new UserConfigurationAnalyzer();
+
+    private ConfigViewFactory configViews;
+
+    public ContextSetConfigProvider(ContextService contexts, ConfigurationService config, UserConfigurationService userConfigs, ConfigViewFactory configViews) {
         super(contexts);
         
         Map<String, Object> yamlInFolder = config.getYamlInFolder("contextSets");
@@ -91,17 +104,35 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             contextSetConfigs = Collections.emptyList();
             additionalPredicates = Collections.emptyList();
         }
+        
+        this.userConfigs = userConfigs;
+        this.configViews = configViews;
     }
     
-    protected Set<String> getSpecification(Context context) {
+    protected Set<String> getSpecification(Context context, UserConfiguration userConfig) throws ConfigCascadeException {
         Set<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
-        if (typeValues == null || typeValues.isEmpty()) {
-            return Collections.emptySet();
+        if(typeValues == null) {
+            typeValues = Collections.emptySet();
         }
         
         Set<String> tags = new HashSet<String>();
         for (String string : typeValues) {
             tags.addAll(Arrays.asList(string.split("\\s*,\\s*")));
+        }
+        
+        tags.addAll(userConfigAnalyzer.getTags(userConfig));
+        
+        int user = userConfig.getUserId();
+        
+        // Now let's try modifications by cascade, first those below the contextSet level
+        ConfigView view = configViews.getView(user, context.getContextId());
+        
+        String[] searchPath = configViews.getSearchPath();
+        for (String scope : searchPath) {
+            String types = view.property(TYPE_PROPERTY, String.class).precedence(scope).get();
+            if(types != null) {
+                tags.addAll(Arrays.asList(types.split("\\s*,\\s*")));
+            }
         }
         
         // Add additional predicates. Do so until no modification has been done
@@ -117,8 +148,8 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     @Override
-    protected BasicProperty get(final String property, Context context) {
-        final List<Map<String, Object>> config = getConfigData(getSpecification(context));
+    protected BasicProperty get(final String property, Context context, int user) throws ConfigCascadeException {
+        final List<Map<String, Object>> config = getConfigData(getSpecification(context, getUserConfiguration(context, user)));
 
         final String value = findFirst(config, property);
         
@@ -151,6 +182,14 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         };
     }
 
+
+    private UserConfiguration getUserConfiguration(Context ctx, int user) throws ConfigCascadeException {
+        try {
+            return userConfigs.getUserConfiguration(user, ctx);
+        } catch (UserConfigurationException e) {
+            throw new ConfigCascadeException(e);
+        }
+    }
 
     @Override
     protected Collection<String> getAllPropertyNames(Context context) {
