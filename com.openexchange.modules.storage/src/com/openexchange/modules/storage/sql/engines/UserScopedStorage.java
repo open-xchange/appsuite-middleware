@@ -79,11 +79,7 @@ public class UserScopedStorage<T extends Model<T>> extends BasicStorage<T>{
     @Override
     protected List<Object> getExtraValues() {
         List<Object> values = super.getExtraValues();
-        if(userId > 0) {
-            values.add(userId);
-        } else {
-            values.add(null);
-        }
+        values.add(userId);
         return values;
     }
 
