@@ -100,6 +100,18 @@ public interface OAuthService {
     OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl) throws OAuthException;
 
     /**
+     * Creates a new OAuth account completely from specified arguments.
+     * 
+     * @param serviceMetaData The identifier of service meta data
+     * @param arguments The arguments providing {@link OAuthConstants#ARGUMENT_TOKEN}, {@link OAuthConstants#ARGUMENT_SECRET}, and optional {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @return The newly created account
+     * @throws OAuthException If creation fails
+     */
+    OAuthAccount createAccount(String serviceMetaData, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
+
+    /**
      * Create a new OAuth account from specified arguments.
      * <p>
      * The arguments should provide:
