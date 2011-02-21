@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
 import com.openexchange.oauth.OAuthAccount;
@@ -124,7 +123,7 @@ public abstract class AbstractTwitterMessagingAccess {
                         final String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
                         final String tokenSecret = (String) configuration.get(TwitterConstants.TWITTER_TOKEN_SECRET);
                         if ((null == token || null == tokenSecret)) {
-                            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create("Please delete & re-create your twitter account.");
+                            throw TwitterMessagingExceptionCodes.INVALID_ACCOUNT.create(new Object[0]);
                         }
                         final Map<String, Object> arguments = new HashMap<String, Object>(3);
                         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, account.getDisplayName());
