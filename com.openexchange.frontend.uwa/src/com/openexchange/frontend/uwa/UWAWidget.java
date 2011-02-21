@@ -49,6 +49,7 @@
 
 package com.openexchange.frontend.uwa;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -62,7 +63,7 @@ import static com.openexchange.java.Autoboxing.*;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UWAWidget extends AbstractModel<UWAWidget> {
+public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
     private String adj;
     

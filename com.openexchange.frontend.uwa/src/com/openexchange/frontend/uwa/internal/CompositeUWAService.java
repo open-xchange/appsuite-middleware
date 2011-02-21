@@ -103,7 +103,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws ConfigCascadeException {
         userScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
-        contextScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, -1, ctxId);
+        contextScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
         positions = new PositionSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
 
         ConfigView view = configViews.getView(userId, ctxId);

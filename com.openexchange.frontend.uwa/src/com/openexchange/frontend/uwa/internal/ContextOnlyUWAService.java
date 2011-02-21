@@ -49,46 +49,87 @@
 
 package com.openexchange.frontend.uwa.internal;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigCascadeException;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import java.sql.SQLException;
+import java.util.List;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidgetException;
+import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
 import com.openexchange.frontend.uwa.UWAWidgetService;
-import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.modules.model.Attribute;
 
 
 /**
- * {@link UWAWidgetServiceFactoryImpl}
+ * {@link ContextOnlyUWAService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UWAWidgetServiceFactoryImpl implements UWAWidgetServiceFactory {
+public class ContextOnlyUWAService implements UWAWidgetService {
 
     private DatabaseService dbService;
-    private ConfigViewFactory configViews;
-    private ConfigurationService config;
     private IDGeneratorService idGenerator;
+    private UserWidgetSQLStorage contextWidgets;
+    private int ctxId;
 
-    public UWAWidgetServiceFactoryImpl(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator) {
-        super();
+    public ContextOnlyUWAService(DatabaseService dbService, IDGeneratorService idGenerator, int ctxId) {
         this.dbService = dbService;
-        this.configViews = configViews;
-        this.config = config;
         this.idGenerator = idGenerator;
+        this.contextWidgets = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
+        this.ctxId = ctxId;
     }
-
-    public UWAWidgetService getService(int userId, int ctxId) throws UWAWidgetException {
+    
+    public List<UWAWidget> all() throws UWAWidgetException {
         try {
-            return new CompositeUWAService(dbService, configViews, config, idGenerator, userId, ctxId);
-        } catch (ConfigCascadeException e) {
+            return contextWidgets.load();
+        } catch (SQLException x) {
+            throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+        } catch (AbstractOXException e) {
             throw new UWAWidgetException(e);
         }
     }
 
-    public UWAWidgetService getService(int ctxId) throws UWAWidgetException {
-        return new ContextOnlyUWAService(dbService, idGenerator, ctxId);
+    public void create(UWAWidget widget) throws UWAWidgetException {
+        try {
+            int dbId = idGenerator.getId("uwaWidget", ctxId);
+            widget.setId(String.valueOf(dbId));
+            contextWidgets.create(widget);
+        } catch (SQLException x) {
+            throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+        } catch (AbstractOXException e) {
+            throw new UWAWidgetException(e);
+        }
+    }
+
+    public void delete(String id) throws UWAWidgetException {
+        try {
+            contextWidgets.delete(id);
+        } catch (SQLException x) {
+            throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+        } catch (AbstractOXException e) {
+            throw new UWAWidgetException(e);
+        }
+    }
+
+    public UWAWidget get(String id) throws UWAWidgetException {
+        try {
+            return contextWidgets.load(id);
+        } catch (SQLException x) {
+            throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+        } catch (AbstractOXException e) {
+            throw new UWAWidgetException(e);
+        }
+    }
+
+    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+        try {
+            contextWidgets.update(widget, modified);
+        } catch (SQLException x) {
+            throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
+        } catch (AbstractOXException e) {
+            throw new UWAWidgetException(e);
+        }
     }
 
 }
