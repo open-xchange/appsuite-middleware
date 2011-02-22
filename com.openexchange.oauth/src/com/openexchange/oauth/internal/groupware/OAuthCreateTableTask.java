@@ -74,6 +74,13 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OAuthCreateTableTask.class);
 
+    /**
+     * Initializes a new {@link OAuthCreateTableTask}.
+     */
+    public OAuthCreateTableTask() {
+        super();
+    }
+
     public String[] getDependencies() {
         return new String[] {};
     }
