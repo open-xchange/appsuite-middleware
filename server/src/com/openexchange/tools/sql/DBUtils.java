@@ -57,7 +57,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -289,6 +291,59 @@ public final class DBUtils {
         int retval = -1;
         if (result.next()) {
             retval = result.getInt("COLUMN_SIZE");
+        }
+        return retval;
+    }
+    
+    /**
+     * Filters a given list of tablenames. Returns only those that also exist
+     * @param con The connection to the database in which to check for the tables
+     * @param tablesToCheck The list of table names to check for.
+     * @return A set with all the tables that exist of those to be checked for
+     * @throws SQLException If something goes wrong
+     */
+    public static Set<String> existingTables(Connection con, String... tablesToCheck) throws SQLException {
+        Set<String> tables = new HashSet<String>();
+        for (String table : tablesToCheck) {
+            if(tableExists(con, table)) {
+                tables.add(table);
+            }
+        }
+        return tables;
+    }
+
+    /**
+     * Finds out whether all tables listed exist in the given database
+     * @param con The connection to the database in which to check for the tables
+     * @param tablesToCheck The list of table names to check for.
+     * @return A set with all the tables that exist of those to be checked for
+     * @throws SQLException If something goes wrong
+     */
+    public static boolean tablesExist(Connection con, String... tablesToCheck) throws SQLException {
+        for (String table : tablesToCheck) {
+            if(!tableExists(con, table)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Finds out whether a table listed exist in the given database
+     * @param con The connection to the database in which to check for the tables
+     * @param table The table name to check for.
+     * @return A set with all the tables that exist of those to be checked for
+     * @throws SQLException If something goes wrong
+     */
+    public static boolean tableExists(Connection con, String table) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
+            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+        } finally {
+            closeSQLStuff(rs);
         }
         return retval;
     }

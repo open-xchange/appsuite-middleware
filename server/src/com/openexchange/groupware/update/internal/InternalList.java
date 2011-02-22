@@ -358,5 +358,11 @@ public final class InternalList {
         
         // Creates new Contact fields (First Name, Last Name, Company) for Kana based search in japanese environments.
         new com.openexchange.groupware.update.tasks.ContactFieldsForJapaneseKanaSearch(),
+        
+        // Remove facebook subscriptions to force use of new oauth
+        new com.openexchange.groupware.update.tasks.SubscriptionRemoverTask("com.openexchange.subscribe.crawler.facebook"),
+
+        // Remove linkedin subscriptions to force use of new oauth
+        new com.openexchange.groupware.update.tasks.SubscriptionRemoverTask("com.openexchange.subscribe.linkedin")
     };
 }
