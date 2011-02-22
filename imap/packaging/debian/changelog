@@ -1,3 +1,9 @@
+open-xchange-imap (6.18.1.0-13) unstable; urgency=low
+
+  * build for PTF 2011011410000111
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 22 Feb 2011 12:52:58 +0000
+
 open-xchange-imap (6.18.1.0-12) unstable; urgency=low
 
   * second build for public ptf 2010-12-07
