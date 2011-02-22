@@ -34,6 +34,12 @@
 	
     <property name="jsonjar" value="json.jar"/>
 
+    <!-- Third party libs -->
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
+        	
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -43,6 +49,8 @@
         <pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
         <pathelement location="${bundlesdir}/${oauthjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+    	
+    	<fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
