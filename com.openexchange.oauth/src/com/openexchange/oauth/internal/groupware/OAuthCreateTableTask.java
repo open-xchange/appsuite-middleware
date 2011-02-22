@@ -116,7 +116,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
         }
         final Connection writeCon;
         try {
-            writeCon = dbService.getWritable(contextId);
+            writeCon = dbService.getForUpdateTask(contextId);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -133,7 +133,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
             }
         } finally {
             closeSQLStuff(null, stmt);
-            dbService.backWritable(contextId, writeCon);
+            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
