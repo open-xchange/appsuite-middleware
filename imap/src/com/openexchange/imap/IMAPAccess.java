@@ -520,7 +520,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return true;
         }
 
-        /*final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class);
+        /*-
+         * final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class);
         if (null == storageService) {
             return false;
         }
