@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.facebook.utility;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -64,6 +63,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link FacebookDOMParser} - Parser for Facebook XML results from a FQL query.
@@ -124,7 +124,7 @@ public final class FacebookDOMParser {
              * Parse to DOM document
              */
             final DOMParser parser = new DOMParser();
-            parser.parse(new InputSource(new ByteArrayInputStream(xmlReponse.getBytes("UTF-8"))));
+            parser.parse(new InputSource(new UnsynchronizedByteArrayInputStream(xmlReponse.getBytes("UTF-8"))));
             final Document dom = parser.getDocument();
             /*
              * Get document's root element
