@@ -77,6 +77,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FacebookDropObsoleteAccountsTask.class);
+
     /**
      * Initializes a new {@link FacebookDropObsoleteAccountsTask}.
      */
@@ -122,9 +124,8 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
             dbService.backForUpdateTask(contextId, writeCon);
         }
 
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(FacebookDropObsoleteAccountsTask.class);
-        if (log.isInfoEnabled()) {
-            log.info("UpdateTask '" + FacebookDropObsoleteAccountsTask.class.getSimpleName() + "' successfully performed!");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("UpdateTask '" + FacebookDropObsoleteAccountsTask.class.getSimpleName() + "' successfully performed!");
         }
     }
 

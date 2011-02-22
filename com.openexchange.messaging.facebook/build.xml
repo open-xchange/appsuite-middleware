@@ -43,6 +43,7 @@
 	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
 	<property name="htmljar" value="com.openexchange.html.jar"/>
 	<property name="oauthjar" value="com.openexchange.oauth.jar"/>
+	<property name="serverjar" value="com.openexchange.server.jar"/>
 
     <property name="httpclientjar" value="commons-httpclient-3.1.jar"/>
     <property name="codecjar" value="commons-codec-1.4.jar"/>
@@ -78,6 +79,7 @@
         <pathelement location="${bundlesdir}/${threadpooljar}"/>
     	<pathelement location="${bundlesdir}/${htmljar}"/>
     	<pathelement location="${bundlesdir}/${oauthjar}"/>
+    	<pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
