@@ -1349,7 +1349,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
             if (cdao.getRecurrenceType() > 0) {
                 calculateEndDateForNewType(cdao, edao);
-            } else if (cdao.getRecurrenceType() == 0) {
+            } else if (cdao.getRecurrenceType() == 0 && !cdao.containsEndDate()) {
                 calculateEndDateForNoType(cdao, edao);
             }
             
