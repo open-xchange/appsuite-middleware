@@ -48,6 +48,7 @@
     <property name="monitoringbundle"     value="com.openexchange.monitoring.jar"/>
     <property name="managementbundle"     value="com.openexchange.management.jar"/>
     <property name="sessiondbundle"       value="com.openexchange.sessiond.jar"/>
+    <property name="sqljar"               value="com.openexchange.sql.jar" />
     <property name="servletbundle"        value="javax.servlet_2.4.0.v200706111738.jar"/>
 
     <!-- non-osgi jars -->
@@ -84,6 +85,7 @@
         <pathelement location="${bundlesdir}/${cachingBundle}/${cachebundle}"/>
         <pathelement location="${bundlesdir}/${configbundle}"/>
         <pathelement location="${bundlesdir}/${serverbundle}"/>
+        <pathelement location="${bundlesdir}/${sqljar}"/>
         <pathelement location="lib/${csv}"/>
     </path>
 
