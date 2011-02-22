@@ -5,7 +5,7 @@
 Name:           open-xchange-admin
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-server >= @OXVERSION@
+BuildRequires:  ant open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
