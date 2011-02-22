@@ -52,6 +52,7 @@ package com.openexchange.messaging.twitter;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
@@ -118,18 +119,31 @@ public abstract class AbstractTwitterMessagingAccess {
                     /*
                      * Check presence of TwitterConstants.TWITTER_OAUTH_ACCOUNT
                      */
-                    final Integer oAuthAccountId = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
+                    Integer oAuthAccountId = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
                     if (null == oAuthAccountId) {
-                        final String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
-                        final String tokenSecret = (String) configuration.get(TwitterConstants.TWITTER_TOKEN_SECRET);
-                        if ((null == token || null == tokenSecret)) {
-                            throw TwitterMessagingExceptionCodes.INVALID_ACCOUNT.create(new Object[0]);
+                        synchronized (getSessionLock(session)) {
+                            oAuthAccountId = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
+                            if (null == oAuthAccountId) {
+                                final String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
+                                final String tokenSecret = (String) configuration.get(TwitterConstants.TWITTER_TOKEN_SECRET);
+                                if ((null == token || null == tokenSecret)) {
+                                    throw TwitterMessagingExceptionCodes.INVALID_ACCOUNT.create(new Object[0]);
+                                }
+                                final Map<String, Object> arguments = new HashMap<String, Object>(3);
+                                arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, account.getDisplayName());
+                                arguments.put(OAuthConstants.ARGUMENT_TOKEN, token);
+                                arguments.put(OAuthConstants.ARGUMENT_SECRET, tokenSecret);
+                                oAuthAccount = oAuthService.createAccount("com.openexchange.oauth.twitter", arguments, userId, contextId);
+                                /*
+                                 * Write to configuration
+                                 */
+                                configuration.put(TwitterConstants.TWITTER_OAUTH_ACCOUNT, Integer.valueOf(oAuthAccount.getId()));
+                                final MessagingAccountManager accountManager = account.getMessagingService().getAccountManager();
+                                accountManager.updateAccount(account, session);
+                            } else {
+                                oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), userId, contextId);
+                            }
                         }
-                        final Map<String, Object> arguments = new HashMap<String, Object>(3);
-                        arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, account.getDisplayName());
-                        arguments.put(OAuthConstants.ARGUMENT_TOKEN, token);
-                        arguments.put(OAuthConstants.ARGUMENT_SECRET, tokenSecret);
-                        oAuthAccount = oAuthService.createAccount("com.openexchange.oauth.twitter", arguments, userId, contextId);
                     } else {
                         oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), userId, contextId);
                     }
@@ -152,6 +166,11 @@ public abstract class AbstractTwitterMessagingAccess {
             }
         }
         twitterAccess = tmp;
+    }
+
+    private static Object getSessionLock(final Session session) {
+        final Object lock = session.getParameter(Session.PARAM_LOCK);
+        return lock == null ? session : lock;
     }
 
     private boolean testOAuthTwitterAccess(final TwitterAccess newTwitterAccess) {
