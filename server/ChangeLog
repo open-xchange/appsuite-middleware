@@ -6,6 +6,7 @@
 
  - Bugfix #17845: Ensure proper content type header on JSON response.
  - Bugfix #18232: Fixed AJP ping.
+ - Bugfix #18211: Client IP in NOOP command
 
 * 2011-02-17 - marcus.klein@open-xchange.com
 
