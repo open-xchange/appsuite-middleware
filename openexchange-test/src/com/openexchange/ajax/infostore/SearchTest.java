@@ -2,6 +2,7 @@ package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -254,6 +255,24 @@ public class SearchTest extends InfostoreAJAXTest {
 
         }
     }
+    
+    // Bug 18124
+    
+    public void testBackslashFound() throws MalformedURLException, IOException, SAXException, JSONException {
+        String title = "Test\\WithBackslash";
+        final int id = createNew(getWebConversation(),getHostName(), sessionId, m(
+            "title" , title,
+            "description", "this is document the backslasher",
+            "folder_id" , ""+folderId
+        ));
+        
+        clean.add(id);
+        
+        Response res = search(getWebConversation(), getHostName(), sessionId, title, new int[]{Metadata.TITLE, Metadata.ID}, folderId);
+        
+        assertTitles(res, title);
+        
+    }   
 
 
     public static void assertTitle(final int index, final JSONArray results, final String title) throws JSONException {
