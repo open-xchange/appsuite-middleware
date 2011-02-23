@@ -123,7 +123,9 @@ public class Activator implements BundleActivator {
     private void export(final ConfigViewFactory viewFactory, ComposedConfigProperty<String> property, final String propertyName) throws ConfigCascadeException {
         
         final String[] path = property.get(PREFERENCE_PATH).split("/");
-        final boolean writable = (property.get("final") == null || property.get("final").equals("user")) && (property.get("protected") == null || ! property.get("protected", boolean.class));
+        String finalScope = property.get("final");
+        String isProtected = property.get("protected");
+        final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class));
         
         
         PreferencesItemService prefItem = new PreferencesItemService() {
