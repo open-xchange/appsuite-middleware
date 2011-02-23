@@ -1,3 +1,9 @@
+open-xchange-oauth-facebook (6.19.0.0-2) unstable; urgency=low
+
+  * build for 6.19.0-rev6
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 23 Feb 2011 13:19:05 +0000
+
 open-xchange-oauth-facebook (6.19.0.0-1) unstable; urgency=low
 
   * build for 6.19.0-rev5

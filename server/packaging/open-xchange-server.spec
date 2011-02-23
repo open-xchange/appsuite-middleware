@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -760,8 +760,29 @@ fi
 %doc doc/examples
 
 %changelog
-* Wed Feb 16 2011 - steffen.templin@open-xchange.com
+* Wed Feb 23 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18396: Proper IMAP folder cache invalidation
+* Wed Feb 23 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18204: The modification of a tasks recurrence information from 'after x times' to 'on date' is working correctly now.
+* Tue Feb 22 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #18336: Fixed wrong end date for when removing sequence.
+* Mon Feb 21 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18399: Added session identifier to warning message for further debugging the cause of the warning.
+* Mon Feb 21 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18052: Checking presence of datagram package's payload
+* Fri Feb 18 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18374: Using ConfigurationService to detect default charset
+ - Bugfix #18376: Dealing with an InputStream content
+* Thu Feb 17 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18375: Corrected upgrade code for OXUpdater
+* Thu Feb 17 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18379: Fixed MANIFEST.MF of JavaMail library
+* Wed Feb 16 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18280: Using wrapping MailMessage instance
+ - Bugfix #18296: Introduced mail property to hide POP3 storage folders
+* Wed Feb 16 2011 - marcus.klein@open-xchange.com
  - Bugfix #18312: Introduced quotes for OXUpdater install parameters.
+ - Bugfix #18154: OXUpdater is now able to update itself.
 * Tue Feb 15 2011 - thorben.betten@open-xchange.com
  - Bugfix #18165: Less strict parsing of address header
 * Mon Feb 14 2011 - thorben.betten@open-xchange.com

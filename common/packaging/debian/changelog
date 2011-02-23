@@ -1,3 +1,9 @@
+open-xchange-common (6.19.0.0-7) unstable; urgency=low
+
+  * build for 6.19.0-rev6
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 23 Feb 2011 13:16:49 +0000
+
 open-xchange-common (6.19.0.0-6) unstable; urgency=low
 
   * second build for 6.19.0-rev5
