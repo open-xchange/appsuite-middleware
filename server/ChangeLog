@@ -1,3 +1,7 @@
+* 2011-02-23 - steffen.templin@open-xchange.com
+
+ - Bugfix #18204: The modification of a tasks recurrence information from 'after x times' to 'on date' is working correctly now.
+ 
 * 2011-02-23 - thorben.betten@open-xchange.com
 
  - Bugfix #18396: Proper IMAP folder cache invalidation

@@ -609,6 +609,13 @@ public final class TaskLogic {
                 fields.add(Integer.valueOf(mapper.getId()));
             }
         }
+        
+        // If the end of recurrence information is changed from 'after x occurrences' to 'at *date*'
+        // the field recurrence_count has explicitly to be unset.
+        if (oldTask.containsOccurrence() && !task.containsOccurrence()) {
+            fields.add(Task.RECURRENCE_COUNT);
+        }
+        
         final int[] retval = new int[fields.size()];
         for (int i = 0; i < fields.size(); i++) {
             retval[i] = fields.get(i).intValue();
