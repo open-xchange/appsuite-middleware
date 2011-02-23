@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="com.openexchange.modules.storage" default="install" basedir=".">
+<project name="com.openexchange.modules.model" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
