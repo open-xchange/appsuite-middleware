@@ -9,4 +9,4 @@ Standards-Version: 3.6.1
 Package: open-xchange-modules-model
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre
-Description: OAuth Service 
+Description: Base classes for attribute based programming
