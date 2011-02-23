@@ -30,4 +30,5 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.xml.sax
 Bundle-ClassPath: lib/rome-1.0.jar,
  lib/rome-fetcher-1.0.jar,
+ extraClassPath/,
  .

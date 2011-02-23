@@ -8,7 +8,8 @@
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="lib.dir" value="lib"/>
-
+	<property name="extraClassPath" value="extraClassPath" />
+	
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
@@ -79,6 +80,7 @@
         <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
             <fileset refid="3rdpartyjars"/>
+        	<fileset dir="${extraClassPath}" />
         </jar>
     </target>
 
