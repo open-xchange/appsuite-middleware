@@ -35,7 +35,7 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="sqljar" value="com.openexchange.sql.jar"/>
-    <property name="mmodeljar" value="com.openexchange.modules.model"/>
+    <property name="mmodeljar" value="com.openexchange.modules.model.jar"/>
 	
 	<!-- Third party libs -->
 	<fileset dir="${basedir}" id="3rdpartyjars">

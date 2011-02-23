@@ -37,7 +37,7 @@
 
     <property name="jsonjar" value="json.jar"/>
     <property name="commonjar" value="common.jar"/>
-    <property name="mmodeljar" value="com.openexchange.modules.model"/>
+    <property name="mmodeljar" value="com.openexchange.modules.model.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
