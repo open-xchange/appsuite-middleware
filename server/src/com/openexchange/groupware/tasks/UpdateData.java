@@ -64,8 +64,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
@@ -89,11 +87,6 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 class UpdateData {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(UpdateData.class);
 
     /**
      * Context.
