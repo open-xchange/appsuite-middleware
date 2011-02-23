@@ -58,9 +58,6 @@
     <target name="install" depends="installJar,installConfig"/>
 
     <target name="installConfig">
-        <copy todir="${destdir}/${prefix}/${serverconfdir}" overwrite="true">
-            <fileset dir="conf" excludes="**/*.in"/>
-        </copy>
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
