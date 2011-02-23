@@ -44,6 +44,7 @@
 	<property name="htmljar" value="com.openexchange.html.jar"/>
 	<property name="oauthjar" value="com.openexchange.oauth.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
+        <property name="xercesBundle" value="com.openexchange.xerces.sun"/>
 
     <property name="httpclientjar" value="commons-httpclient-3.1.jar"/>
     <property name="codecjar" value="commons-codec-1.4.jar"/>
