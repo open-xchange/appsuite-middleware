@@ -78,6 +78,10 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
 
     private static final String VALUE = "value";
 
+    private static final String PROTECTED = "protected";
+
+    private static final String TRUE = "true";
+
     private ConfigurationService configService;
     
     private ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
@@ -123,6 +127,8 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
         for(Object propName : propertiesInFolder.keySet()) {
             get((String) propName, -1, -1).set(PREFRENCE_PATH, (String) propName);
+            get((String) propName, -1, -1).set(PROTECTED, (String) TRUE);
+            
         }
         
     }
