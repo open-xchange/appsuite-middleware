@@ -41,14 +41,14 @@ BuildRequires:  open-xchange-xerces-sun
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        LinkedIn via OAuth for Open-Xchange Server 6
+Summary:        Facebook Subscription Source for Open-Xchange Server 6
 Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-facebook >= @OXVERSION@
 
 %if 0%{?sles_version} >= 10
@@ -61,7 +61,7 @@ Conflicts:  open-xchange-xerces-ibm
 #
 
 %description
-Subscribe Microformat feeds
+Facebook Subscription Source for Open-Xchange Server 6
   
 Authors:
 --------
