@@ -52,7 +52,6 @@ package com.openexchange.push.udp;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.UnknownHostException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -82,19 +81,12 @@ public class PushDiscoverySender implements Runnable {
 
     private ScheduledTimerTask task;
 
-    public PushDiscoverySender(final PushConfig pushConfigInterface) {
+    public PushDiscoverySender(final PushConfiguration pushConfigInterface) {
         super();
 
         InetAddress hostname = pushConfigInterface.getHostName();
-        if (hostname == null) {
-            try {
-                hostname = InetAddress.getLocalHost();
-            } catch (final UnknownHostException exc) {
-                LOG.warn("unable to resolv local address", exc);
-            }
-        }
 
-        discoveryData = String.valueOf(PushRequest.REMOTE_HOST_REGISTER) + '\1' + (hostname == null ? "localhost" : hostname.getHostName())
+        discoveryData = String.valueOf(PushRequest.REMOTE_HOST_REGISTER) + '\1' + hostname.getCanonicalHostName()
             + '\1' + String.valueOf(pushConfigInterface.getRegisterPort());
         packetData = String.valueOf(PushRequest.MAGIC) + '\1' + String.valueOf(discoveryData.length()) + '\1' + discoveryData;
         packetBytes = Charsets.getBytes(packetData, Charsets.US_ASCII);

@@ -1,3 +1,7 @@
+* 2011-02-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #18309: Using proper host names for UDP push remote host register package.
+
 * 2011-02-23 - francisco.laguna@open-xchange.com
 
  - Bugfix #18124: Escape backslashes for searches.

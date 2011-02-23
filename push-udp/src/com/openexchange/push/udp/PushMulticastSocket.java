@@ -77,7 +77,7 @@ public class PushMulticastSocket implements Runnable {
 
     private final InetAddress multicastAddress;
 
-    public PushMulticastSocket(final PushConfig config) {
+    public PushMulticastSocket(final PushConfiguration config) {
         multicastPort = config.getMultiCastPort();
         multicastAddress = config.getMultiCastAddress();
 

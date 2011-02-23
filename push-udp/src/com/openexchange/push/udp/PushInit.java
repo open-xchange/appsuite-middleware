@@ -80,10 +80,10 @@ public class PushInit implements Initialization {
 
     private PushSocket input;
 
-    private PushConfig config;
+    private PushConfiguration config;
 
     
-    public PushConfig getConfig() {
+    public PushConfiguration getConfig() {
         return config;
     }
 
@@ -111,7 +111,7 @@ public class PushInit implements Initialization {
 
         final ConfigurationService conf = PushServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (conf != null) {
-            config = new PushConfigInterfaceImpl(conf);
+            config = new PushConfigurationImpl(conf);
         }
 
         if (LOG.isInfoEnabled()) {

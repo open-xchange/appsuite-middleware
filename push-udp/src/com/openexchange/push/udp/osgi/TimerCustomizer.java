@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.push.udp.PushConfig;
+import com.openexchange.push.udp.PushConfiguration;
 import com.openexchange.push.udp.PushDiscoverySender;
 import com.openexchange.push.udp.PushInit;
 import com.openexchange.timer.TimerService;
@@ -82,7 +82,7 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer {
 
     public Object addingService(final ServiceReference reference) {
         final TimerService timer = (TimerService) context.getService(reference);
-        final PushConfig config = PushInit.getInstance().getConfig();
+        final PushConfiguration config = PushInit.getInstance().getConfig();
         if (config.isMultiCastEnabled()) {
             LOG.info("Starting push multicast discovery sender.");
             sender = new PushDiscoverySender(config);

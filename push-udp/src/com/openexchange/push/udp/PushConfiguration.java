@@ -9,7 +9,7 @@
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
  *    trademarks of the Open-Xchange, Inc. group of companies.
- *    The use of the Logos is not covered by the GNU General Public License.
+ *    The use of the Logos is not covered by the GNU General License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
  *    Non-commercial, ShareAlike, and the interpretation of the term
@@ -33,15 +33,15 @@
  *
  *
  *     This program is free software; you can redistribute it and/or modify it
- *     under the terms of the GNU General Public License, Version 2 as published
+ *     under the terms of the GNU General License, Version 2 as published
  *     by the Free Software Foundation.
  *
  *     This program is distributed in the hope that it will be useful, but
  *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General License
  *     for more details.
  *
- *     You should have received a copy of the GNU General Public License along
+ *     You should have received a copy of the GNU General License along
  *     with this program; if not, write to the Free Software Foundation, Inc., 59
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
@@ -54,64 +54,64 @@ import java.util.Set;
 
 /**
  * PushConfigInterface
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
+public interface PushConfiguration {
 
-public interface PushConfig {
+    boolean isPushEnabled();
 
-    public boolean isPushEnabled();
+    void setPushEnabled(boolean isPushEnabled);
 
-    public void setPushEnabled(boolean isPushEnabled);
+    boolean isMultiCastEnabled();
 
-    public boolean isMultiCastEnabled();
+    void setMultiCastEnabled(boolean multicastEnabled);
 
-    public void setMultiCastEnabled(boolean multicastEnabled);
+    int getMultiCastPort();
 
-    public int getMultiCastPort();
+    InetAddress getMultiCastAddress();
 
-    public InetAddress getMultiCastAddress();
+    void setMultiCastAddress(InetAddress inetAddress);
 
-    public void setMultiCastAddress(InetAddress inetAddress);
+    Set<RemoteHostObject> getRemoteHost();
 
-    public Set<RemoteHostObject> getRemoteHost();
+    void setRemoteHost(Set<RemoteHostObject> remoteHost);
 
-    public void setRemoteHost(Set<RemoteHostObject> remoteHost);
+    int getRegisterTimeout();
 
-    public int getRegisterTimeout();
+    void setRegisterTimeout(int registerTimeout);
 
-    public void setRegisterTimeout(int registerTimeout);
+    int getOutputQueueDelay();
 
-    public int getOutputQueueDelay();
+    void setOutputQueueDelay(int outputQueueDelay);
 
-    public void setOutputQueueDelay(int outputQueueDelay);
+    int getRegisterPort();
 
-    public int getRegisterPort();
+    void setRegisterPort(int registerPort);
 
-    public void setRegisterPort(int registerPort);
+    boolean isRegisterDistributionEnabled();
 
-    public boolean isRegisterDistributionEnabled();
+    void setRegisterDistributionEnabled(boolean isRegisterDistributionEnabled);
 
-    public void setRegisterDistributionEnabled(boolean isRegisterDistributionEnabled);
+    boolean isEventDistributionEnabled();
 
-    public boolean isEventDistributionEnabled();
+    void setEventDistributionEnabled(boolean isEventDistributionEnabled);
 
-    public void setEventDistributionEnabled(boolean isEventDistributionEnabled);
+    InetAddress getSenderAddress();
 
-    public InetAddress getSenderAddress();
+    void setSenderAddress(InetAddress senderAddress);
 
-    public void setSenderAddress(InetAddress senderAddress);
+    int getRemoteHostTimeOut();
 
-    public int getRemoteHostTimeOut();
+    void setRemoteHostTimeOut(int remoteHostTimeOut);
 
-    public void setRemoteHostTimeOut(int remoteHostTimeOut);
+    int getRemoteHostRefresh();
 
-    public int getRemoteHostRefresh();
+    void setRemoteHostRefresh(int remoteHostRefresh);
 
-    public void setRemoteHostRefresh(int remoteHostRefresh);
-
-    public void setHostName(InetAddress hostname);
-
-    public InetAddress getHostName();
-
+    /**
+     * @return either the {@link InetAddress} for the configured host name or the local {@link InetAddress} if configuration property is
+     * empty.
+     */
+    InetAddress getHostName();
 }

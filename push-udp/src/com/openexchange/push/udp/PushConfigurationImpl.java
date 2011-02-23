@@ -64,7 +64,7 @@ import com.openexchange.config.ConfigurationService;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
-public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements PushConfig {
+public class PushConfigurationImpl extends AbstractConfigWrapper implements PushConfiguration {
 
     private boolean isPushEnabled = false;
 
@@ -96,15 +96,15 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 
     private boolean isInit = false;
 
-    private static final Log LOG = LogFactory.getLog(PushConfigInterfaceImpl.class);
+    private static final Log LOG = LogFactory.getLog(PushConfigurationImpl.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    public PushConfigInterfaceImpl(final ConfigurationService conf) {
+    public PushConfigurationImpl(final ConfigurationService conf) {
         this(conf, false);
     }
 
-    public PushConfigInterfaceImpl(final ConfigurationService conf, final boolean ignoreIsInit) {
+    public PushConfigurationImpl(final ConfigurationService conf, final boolean ignoreIsInit) {
         if (!ignoreIsInit && isInit) {
             return;
         }
@@ -213,16 +213,18 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
             LOG.debug("PushHandler property: com.openexchange.push.udp.multicastPort=" + multicastPort);
         }
 
-        String hostnameString = null;
-        hostnameString = parseProperty(conf, "com.openexchange.push.udp.hostname", hostnameString);
+        String hostnameString = parseProperty(conf, "com.openexchange.push.udp.hostname", (String) null);
         if (DEBUG) {
             LOG.debug("PushHandler property: com.openexchange.push.udp.hostname=" + hostnameString);
         }
-
         try {
-            hostname = InetAddress.getByName(hostnameString);
-        } catch (final UnknownHostException exc) {
-            LOG.error("problem with parsing hostname: " + hostnameString, exc);
+            if (null != hostnameString) {
+                hostname = InetAddress.getByName(hostnameString);
+            } else {
+                hostname = InetAddress.getLocalHost();
+            }
+        } catch (UnknownHostException e) {
+            LOG.error("Unable to determine internet address for hostname: " + hostnameString, e);
         }
 
         isInit = true;
@@ -326,10 +328,6 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 
     public void setRemoteHostRefresh(final int remoteHostRefresh) {
         this.remoteHostRefresh = remoteHostRefresh;
-    }
-
-    public void setHostName(final InetAddress hostname) {
-        this.hostname = hostname;
     }
 
     public InetAddress getHostName() {

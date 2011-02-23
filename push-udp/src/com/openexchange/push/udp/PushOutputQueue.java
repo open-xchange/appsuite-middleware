@@ -89,7 +89,7 @@ public class PushOutputQueue implements Runnable {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static PushConfig pushConfigInterface;
+    private static PushConfiguration pushConfigInterface;
 
     private static DelayQueue<PushDelayedObject> queue = new DelayQueue<PushDelayedObject>();
 
@@ -384,7 +384,7 @@ public class PushOutputQueue implements Runnable {
 
     private boolean isRunning = false;
 
-    public PushOutputQueue(final PushConfig pushConfigInterface) {
+    public PushOutputQueue(final PushConfiguration pushConfigInterface) {
         PushOutputQueue.pushConfigInterface = pushConfigInterface;
 
         remoteHost = pushConfigInterface.getRemoteHost();

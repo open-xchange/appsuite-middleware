@@ -72,7 +72,7 @@ public class PushSocket implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(PushSocket.class);
 
-    public PushSocket(final PushConfig config) {
+    public PushSocket(final PushConfiguration config) {
         final int serverRegisterPort = config.getRegisterPort();
         final InetAddress senderAddress = config.getSenderAddress();
 
