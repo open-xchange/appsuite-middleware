@@ -4,7 +4,7 @@
 Name:           open-xchange-subscribe-facebook
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-facebook >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-facebook >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -49,7 +49,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Facebook Subscription Source for Open-Xchange Server 6
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-facebook >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-facebook >= @OXVERSION@
 
 %if 0%{?sles_version} >= 10
 Requires:   open-xchange-xerces-ibm
