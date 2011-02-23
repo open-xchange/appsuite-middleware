@@ -229,16 +229,30 @@ public final class FolderCache {
          */
         MailFolder mailFolder = folderMap.get(fullName);
         if (null == mailFolder) {
-            final MailFolder newFld = loadFolder(fullName, folderStorage, imapFolder);
-            mailFolder = folderMap.putIfAbsent(fullName, newFld);
-            if (null == mailFolder) {
-                mailFolder = newFld;
+            try {
+                final MailFolder newFld = loadFolder(fullName, folderStorage, imapFolder);
+                if (isNotCacheable(fullName, session, accountId, folderStorage.getImapStore())) {
+                    /*
+                     * Don't cache
+                     */
+                    return newFld;
+                }
+                mailFolder = folderMap.putIfAbsent(fullName, newFld);
+                if (null == mailFolder) {
+                    mailFolder = newFld;
+                }
+            } catch (final MessagingException e) {
+                throw MIMEMailException.handleMessagingException(e, folderStorage.getImapConfig(), session);
             }
         }
         /*
          * Return
          */
         return (MailFolder) mailFolder.clone();
+    }
+
+    private static boolean isNotCacheable(final String fullName, final Session session, final int accountId, final IMAPStore imapStore) throws MessagingException {
+        return NamespaceFoldersCache.startsWithAnyOfSharedNamespaces(fullName, imapStore, true, session, accountId) || NamespaceFoldersCache.startsWithAnyOfUserNamespaces(fullName, imapStore, true, session, accountId);
     }
 
     private static final MailFolder loadFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {

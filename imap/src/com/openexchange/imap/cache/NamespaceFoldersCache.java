@@ -162,7 +162,7 @@ public final class NamespaceFoldersCache {
     /**
      * Checks if user namespaces contain the specified fullname
      * 
-     * @param fullname The fullname to check
+     * @param fullname The full name to check
      * @param imapStore The IMAP store
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
      * @param session The session providing the session-bound cache
@@ -172,6 +172,26 @@ public final class NamespaceFoldersCache {
      */
     public static boolean containedInUserNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
         return Arrays.binarySearch(getUserNamespaces(imapStore, load, session, accountId), fullname) >= 0;
+    }
+
+    /**
+     * Checks if provided full name starts with any of user namespaces.
+     * 
+     * @param fullname The full name to check
+     * @param imapStore The IMAP store
+     * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return <code>true</code> if provided full name starts with any of user namespaces; otherwise <code>false</code>
+     * @throws MessagingException If <code>NAMESPACE</code> command fails
+     */
+    public static boolean startsWithAnyOfUserNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+        for (final String userNamespace : getUserNamespaces(imapStore, load, session, accountId)) {
+            if (fullname.startsWith(userNamespace)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -206,9 +226,9 @@ public final class NamespaceFoldersCache {
     }
 
     /**
-     * Checks if shared namespaces contain the specified fullname
+     * Checks if shared namespaces contain the specified fullname.
      * 
-     * @param fullname The fullname to check
+     * @param fullname The full name to check
      * @param imapStore The IMAP store
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
      * @param session The session providing the session-bound cache
@@ -218,6 +238,26 @@ public final class NamespaceFoldersCache {
      */
     public static boolean containedInSharedNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
         return Arrays.binarySearch(getSharedNamespaces(imapStore, load, session, accountId), fullname) >= 0;
+    }
+
+    /**
+     * Checks if provided full name starts with any of shared namespaces.
+     * 
+     * @param fullname The full name to check
+     * @param imapStore The IMAP store
+     * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     * @return <code>true</code> if provided full name starts with any of shared namespaces; otherwise <code>false</code>
+     * @throws MessagingException If <code>NAMESPACE</code> command fails
+     */
+    public static boolean startsWithAnyOfSharedNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+        for (final String sharedNamespace : getSharedNamespaces(imapStore, load, session, accountId)) {
+            if (fullname.startsWith(sharedNamespace)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static final class NamespaceFoldersCacheEntry implements SessionMailCacheEntry<String[]> {
