@@ -61,7 +61,7 @@ public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
     /*
      * CREATE TABLE oauthAccounts (cid INT4 unsigned NOT NULL, user INT4 unsigned NOT NULL, id INT4 unsigned NOT NULL, displayName
      * VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, accessToken VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci
-     * NOT NULL, accessSecret VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, serviceId VARCHAR(32) CHARACTER SET utf8
+     * NOT NULL, accessSecret VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, serviceId VARCHAR(128) CHARACTER SET utf8
      * COLLATE utf8_unicode_ci NOT NULL, PRIMARY KEY (cid, id) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
      */
 
