@@ -10,6 +10,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.oauth,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
+ com.openexchange.tools.versit.converter,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.auth,
  org.apache.commons.httpclient.cookie,
@@ -18,11 +19,11 @@ Import-Package: com.openexchange.config,
  org.apache.commons.httpclient.params,
  org.apache.commons.httpclient.protocol,
  org.apache.commons.httpclient.util,
- com.openexchange.tools.versit.converter,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker
-Bundle-Activator: com.openexchange.oauth.facebook.osgi.FacebookOAuthActivator
+Bundle-Activator: com.openexchange.oauth.facebook.osgi.Activator
 Bundle-ClassPath: .,
  lib/scribe-1.1.0.jar
+Export-Package: com.openexchange.oauth.facebook

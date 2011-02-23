@@ -64,7 +64,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.facebook.osgi.FacebookOAuthActivator;
+import com.openexchange.oauth.facebook.osgi.Activator;
 
 
 /**
@@ -78,11 +78,10 @@ public class FacebookConnectionTest  extends TestCase {
     
     @Override
     public void setUp(){
-        final FacebookOAuthActivator activator = new FacebookOAuthActivator();
+        final Activator activator = new Activator();
 //        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
 //        activator.setLinkedInMetadata(linkedInMetadata);
-        facebook = new FacebookServiceImpl(activator);
-        activator.setOauthService(new MockOAuthService());
+        facebook = new FacebookServiceImpl(new MockOAuthService(), new OAuthServiceMetaDataFacebookImpl(null));        
     }
     
     private static final String NETWORK_NAME = "Facebook";

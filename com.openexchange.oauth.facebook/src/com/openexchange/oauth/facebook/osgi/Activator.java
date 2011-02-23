@@ -49,92 +49,44 @@
 
 package com.openexchange.oauth.facebook.osgi;
 
-import java.util.ArrayList;
-import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.facebook.FacebookOAuthServiceRegistry;
-import com.openexchange.oauth.facebook.OAuthServiceMetaDataFacebookImpl;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 
 /**
- * {@link FacebookOAuthActivator}
+ * {@link Activator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public final class FacebookOAuthActivator extends HousekeepingActivator {
+public final class Activator implements BundleActivator{
 
-    private static final Log LOG = LogFactory.getLog(FacebookOAuthActivator.class);
+    private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private BundleContext bundleContext;
+    private ServiceTracker tracker;
 
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-
-    private ArrayList<ServiceRegistration> services;
-
-    private OAuthService oAuthService;
-    
-    private ConfigurationService configurationService;
-    
-    /**
-     * Initializes a new {@link FacebookOAuthActivator}.
-     */
-    public FacebookOAuthActivator() {
+    public Activator() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    public void start(final BundleContext context) throws Exception {
+        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + OAuthService.class.getName() + "))");
+        tracker = new ServiceTracker(context, filter, new FacebookRegisterer(context));
+        tracker.open();
     }
 
-    @Override
-    protected void startBundle() throws Exception {        
-        try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            FacebookOAuthServiceRegistry.setServiceLookup(this);
-            /*
-             * Register service
-             */
-            registerService(OAuthServiceMetaData.class, new OAuthServiceMetaDataFacebookImpl());
-        } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(FacebookOAuthActivator.class).error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            super.stopBundle();
-            /*
-             * Clear service registry
-             */
-            FacebookOAuthServiceRegistry.setServiceLookup(null);
-        } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(FacebookOAuthActivator.class).error(e.getMessage(), e);
-            throw e;
-        }
-    }
-    
     /**
-     * @return
+     * {@inheritDoc}
      */
-    public OAuthService getOauthService() {
-        return oAuthService;
-    }
-
-    public void setOauthService(OAuthService oAuthService) {        
-        this.oAuthService = oAuthService;
+    public void stop(final BundleContext context) throws Exception {
+        tracker.close();
     }
 
 }

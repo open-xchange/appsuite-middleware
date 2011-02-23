@@ -67,8 +67,6 @@ import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthException;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.facebook.osgi.FacebookOAuthActivator;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -79,23 +77,24 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class FacebookServiceImpl implements FacebookService {
 
-    private FacebookOAuthActivator activator;
-
     private static final Log LOG = LogFactory.getLog(FacebookServiceImpl.class);
+    
+    private com.openexchange.oauth.OAuthService oAuthService;
+    private OAuthServiceMetaDataFacebookImpl facebookMetaData;
 
-    public FacebookServiceImpl(FacebookOAuthActivator activator) {
-        this.activator = activator;
+    public FacebookServiceImpl(com.openexchange.oauth.OAuthService oAuthService, OAuthServiceMetaDataFacebookImpl facebookMetaData) {
+        this.oAuthService = oAuthService;
+        this.facebookMetaData = facebookMetaData;
     }
 
     public List<Contact> getContacts(int user, int contextId, int accountId) {
-        OAuthServiceMetaData facebookMetaData = new OAuthServiceMetaDataFacebookImpl();
+        
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey()).apiSecret(
             facebookMetaData.getAPISecret()).build();
 
         OAuthAccount account = null;
-
-        com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+        
         try {
             account = oAuthService.getAccount(accountId, user, contextId);
         } catch (OAuthException e) {
@@ -121,7 +120,7 @@ public class FacebookServiceImpl implements FacebookService {
                 Verb.GET,
                 "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,hometown_location%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1=" + myuid + "%29&format=JSON");
             service.signRequest(accessToken, connectionsRequest);
-            Response connectionsResponse = connectionsRequest.send();            
+            Response connectionsResponse = connectionsRequest.send();
 
             // parse the returned JSON into neat little contacts
             contacts = parseIntoContacts(connectionsResponse.getBody());
@@ -129,14 +128,6 @@ public class FacebookServiceImpl implements FacebookService {
 
         return contacts;
 
-    }
-
-    public FacebookOAuthActivator getActivator() {
-        return activator;
-    }
-
-    public void setActivator(FacebookOAuthActivator activator) {
-        this.activator = activator;
     }
 
     public List<Contact> parseIntoContacts(String jsonString) {
@@ -167,15 +158,15 @@ public class FacebookServiceImpl implements FacebookService {
                 // System.out.println(connection.get("email"));
 
                 if (JSONObject.NULL != connection.get("birthday_date") && !"".equals((String) connection.get("birthday_date")) && !"nil".equals((String) connection.get("birthday_date"))) {
-                    String dateString = (String) connection.get("birthday_date");                    
-                    Integer month = Integer.parseInt(dateString.substring(0, 2)) -1;                    
-                    Integer day = Integer.parseInt(dateString.substring(3, 5));                    
+                    String dateString = (String) connection.get("birthday_date");
+                    Integer month = Integer.parseInt(dateString.substring(0, 2)) - 1;
+                    Integer day = Integer.parseInt(dateString.substring(3, 5));
                     Integer year = 0;
                     // year is available
                     if (dateString.length() == 10) {
-                        year = Integer.parseInt(dateString.substring(6, 10)) - 1900;                        
+                        year = Integer.parseInt(dateString.substring(6, 10)) - 1900;
                     }
-                    
+
                     contact.setBirthday(new Date(year, month, day));
                 }
                 // System.out.println();
@@ -199,6 +190,17 @@ public class FacebookServiceImpl implements FacebookService {
         }
 
         return contacts;
+    }
+
+    public String getAccountDisplayName(int user, int contextId, int accountId) {
+        String displayName = "";
+        try {            
+            OAuthAccount account = oAuthService.getAccount(accountId, user, contextId);
+            displayName = account.getDisplayName();
+        } catch (OAuthException e) {
+            LOG.error(e);
+        }
+        return displayName;
     }
 
 }

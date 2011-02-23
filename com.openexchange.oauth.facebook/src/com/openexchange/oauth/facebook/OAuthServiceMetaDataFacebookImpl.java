@@ -83,9 +83,16 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
      * The default secret key.
      */
     private static final String KEY_SECRET = "903e8006dbad9204bb74c26eb3ca2310";
+    
+    private ConfigurationService configurationService;
 
-    public OAuthServiceMetaDataFacebookImpl() {
+    /**
+     * Initializes a new {@link OAuthServiceMetaDataFacebookImpl}.
+     * @param configurationService
+     */
+    public OAuthServiceMetaDataFacebookImpl(ConfigurationService configurationService) {
         super();
+        this.configurationService=configurationService;        
     }
 
     @Override
@@ -99,9 +106,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public String getAPIKey() {
-        final ConfigurationService configurationService =
-            FacebookOAuthServiceRegistry.getServiceLookup().getService(ConfigurationService.class);
+    public String getAPIKey() {        
         if (null == configurationService) {
             return KEY_API;
         }
@@ -109,9 +114,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public String getAPISecret() {
-        final ConfigurationService configurationService =
-            FacebookOAuthServiceRegistry.getServiceLookup().getService(ConfigurationService.class);
+    public String getAPISecret() {        
         if (null == configurationService) {
             return KEY_SECRET;
         }
