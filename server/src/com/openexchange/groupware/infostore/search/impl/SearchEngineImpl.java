@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore.search.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -91,21 +92,18 @@ import com.openexchange.tools.sql.SearchStrings;
 
 /**
  * SearchEngineImpl
+ * 
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
 public class SearchEngineImpl extends DBService implements InfostoreSearchEngine {
 
     static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
+
     private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 
     private static final String[] SEARCH_FIELDS = new String[] {
-        "infostore_document.title",
-        "infostore_document.url",
-        "infostore_document.description",
-        "infostore_document.categories",
-        "infostore_document.filename",
-        "infostore_document.file_version_comment"
-    };
+        "infostore_document.title", "infostore_document.url", "infostore_document.description", "infostore_document.categories",
+        "infostore_document.filename", "infostore_document.file_version_comment" };
 
     public SearchEngineImpl() {
         super(null);
@@ -119,7 +117,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     @Override
     public void setProvider(final DBProvider provider) {
         super.setProvider(provider);
-        if(security!=null) {
+        if (security != null) {
             security.setProvider(provider);
         }
     }
@@ -128,6 +126,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
+        
+        boolean addQuery = false;
         try {
             final int userId = user.getId();
             if (folderId == NOT_SET || folderId == NO_FOLDER) {
@@ -149,7 +149,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig);
                 if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
                     own.add(Integer.valueOf(folderId));
-                } else if (perm.canReadAllObjects()){
+                } else if (perm.canReadAllObjects()) {
                     all.add(Integer.valueOf(folderId));
                 } else {
                     return SearchIteratorAdapter.createEmptyIterator();
@@ -161,40 +161,47 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             throw new OXException(e);
         }
 
-        if(all.isEmpty() && own.isEmpty()) {
+        if (all.isEmpty() && own.isEmpty()) {
             return SearchIteratorAdapter.createEmptyIterator();
         }
 
         final StringBuilder SQL_QUERY = new StringBuilder();
         SQL_QUERY.append(getResultFieldsSelect(cols));
-        SQL_QUERY.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ")
-        .append(ctx.getContextId());
+        SQL_QUERY.append(
+            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
+            ctx.getContextId());
         boolean needOr = false;
 
-        if(!all.isEmpty()) {
+        if (!all.isEmpty()) {
             SQL_QUERY.append(" AND ((infostore.folder_id IN (").append(join(all)).append("))");
             needOr = true;
         }
 
-        if(!own.isEmpty()) {
-            if(needOr) {
+        if (!own.isEmpty()) {
+            if (needOr) {
                 SQL_QUERY.append(" OR ");
             } else {
                 SQL_QUERY.append(" AND (");
             }
-            SQL_QUERY.append("(infostore.created_by = ").append(user.getId()).append(" AND infostore.folder_id in (").append(join(own)).append(")))");
-         } else {
-             SQL_QUERY.append(')');
-         }
-        if(!query.equals("") && !query.equals("*") ) {
+            SQL_QUERY.append("(infostore.created_by = ").append(user.getId()).append(" AND infostore.folder_id in (").append(join(own)).append(
+                ")))");
+        } else {
+            SQL_QUERY.append(')');
+        }
+        if (!query.equals("") && !query.equals("*")) {
             checkPatternLength(query);
             final boolean containsWildcard = query.contains("*");
+            addQuery = true;
             
-            query = query.replaceAll("\\\\","\\\\\\\\\\\\\\\\"); // Turn \ into \\\\
-            query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
+            query = query.replaceAll("\\\\", "\\\\\\\\");
+            query = query.replaceAll("%", "\\%"); 
             query = query.replace('*', '%');
             query = query.replace('?', '_');
-            query = query.replaceAll("'", "\\\\'");// Escape \ twice, due to regexp parser in replaceAll
+            query = query.replaceAll("'", "\\'");
+
+            if (!containsWildcard) {
+                query = "%" + query + "%";
+            }
 
             final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
             for (final String currentField : SEARCH_FIELDS) {
@@ -202,17 +209,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                     SQL_QUERY_OBJECTS.append(" OR ");
                 }
 
-                if (containsWildcard) {
-                    SQL_QUERY_OBJECTS.append(currentField);
-                    SQL_QUERY_OBJECTS.append(" LIKE ('");
-                    SQL_QUERY_OBJECTS.append(query);
-                    SQL_QUERY_OBJECTS.append("')");
-                } else {
-                    SQL_QUERY_OBJECTS.append(currentField);
-                    SQL_QUERY_OBJECTS.append(" LIKE ('%");
-                    SQL_QUERY_OBJECTS.append(query);
-                    SQL_QUERY_OBJECTS.append("%')");
-                }
+                SQL_QUERY_OBJECTS.append(currentField);
+                SQL_QUERY_OBJECTS.append(" LIKE (?)");
             }
             if (SQL_QUERY_OBJECTS.length() > 0) {
                 SQL_QUERY.append(" AND (");
@@ -241,7 +239,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 SQL_QUERY.append(" LIMIT ");
                 SQL_QUERY.append(start);
                 SQL_QUERY.append(", ");
-                SQL_QUERY.append(((end+1)-start));
+                SQL_QUERY.append(((end + 1) - start));
             }
         } else {
             if (start != NOT_SET) {
@@ -251,7 +249,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
             if (end != NOT_SET) {
                 SQL_QUERY.append(" LIMIT ");
-                SQL_QUERY.append(end+1);
+                SQL_QUERY.append(end + 1);
             }
         }
 
@@ -261,10 +259,15 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
-        Statement stmt = null;
+        PreparedStatement stmt = null;
         try {
-            stmt = con.createStatement();
-            return new InfostoreSearchIterator(stmt.executeQuery(SQL_QUERY.toString()), this, cols, ctx, con, stmt);
+            stmt = con.prepareStatement(SQL_QUERY.toString());
+            if(addQuery) {
+                for(int i = 0; i < SEARCH_FIELDS.length; i++) {
+                    stmt.setString(i+1, query);
+                }
+            }
+            return new InfostoreSearchIterator(stmt.executeQuery(), this, cols, ctx, con, stmt);
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
@@ -291,11 +294,11 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
     private String join(final List<Integer> all) {
         final StringBuffer joined = new StringBuffer();
-        for(final Integer i : all) {
+        for (final Integer i : all) {
             joined.append(i.toString());
             joined.append(',');
         }
-        joined.setLength(joined.length()-1);
+        joined.setLength(joined.length() - 1);
         return joined.toString();
     }
 
@@ -310,32 +313,75 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     private String[] switchMetadata2DBColumns(final Metadata[] columns) {
         final List<String> retval = new ArrayList<String>();
         for (final Metadata current : columns) {
-            Metadata2DBSwitch : switch(current.getId()) {
-            default : break Metadata2DBSwitch;
-            case Metadata.LAST_MODIFIED : retval.add("infostore.last_modified"); break Metadata2DBSwitch;
-            case Metadata.LAST_MODIFIED_UTC : retval.add("infostore.last_modified"); break Metadata2DBSwitch;
-            case Metadata.CREATION_DATE : retval.add("infostore.creating_date"); break Metadata2DBSwitch;
-            case Metadata.MODIFIED_BY : retval.add("infostore.changed_by"); break Metadata2DBSwitch;
-            case Metadata.FOLDER_ID : retval.add("infostore.folder_id"); break Metadata2DBSwitch;
-            case Metadata.TITLE : retval.add("infostore_document.title"); break Metadata2DBSwitch;
-            case Metadata.VERSION : retval.add("infostore.version"); break Metadata2DBSwitch;
-            case Metadata.CONTENT : retval.add("infostore_document.description"); break Metadata2DBSwitch;
-            case Metadata.FILENAME : retval.add("infostore_document.filename"); break Metadata2DBSwitch;
-            case Metadata.SEQUENCE_NUMBER : retval.add("infostore.id"); break Metadata2DBSwitch;
-            case Metadata.ID : retval.add("infostore.id"); break Metadata2DBSwitch;
-            case Metadata.FILE_SIZE : retval.add("infostore_document.file_size"); break Metadata2DBSwitch;
-            case Metadata.FILE_MIMETYPE : retval.add("infostore_document.file_mimetype"); break Metadata2DBSwitch;
-            case Metadata.DESCRIPTION : retval.add("infostore_document.description"); break Metadata2DBSwitch;
-            case Metadata.LOCKED_UNTIL : retval.add("infostore.locked_until"); break Metadata2DBSwitch;
-            case Metadata.URL : retval.add("infostore_document.url"); break Metadata2DBSwitch;
-            case Metadata.CREATED_BY : retval.add("infostore.created_by"); break Metadata2DBSwitch;
-            case Metadata.CATEGORIES : retval.add("infostore_document.categories"); break Metadata2DBSwitch;
-            case Metadata.FILE_MD5SUM : retval.add("infostore_document.file_md5sum"); break Metadata2DBSwitch;
-            case Metadata.VERSION_COMMENT : retval.add("infostore_document.file_version_comment"); break Metadata2DBSwitch;
-            case Metadata.COLOR_LABEL : retval.add("infostore.color_label"); break Metadata2DBSwitch;
+            Metadata2DBSwitch: switch (current.getId()) {
+            default:
+                break Metadata2DBSwitch;
+            case Metadata.LAST_MODIFIED:
+                retval.add("infostore.last_modified");
+                break Metadata2DBSwitch;
+            case Metadata.LAST_MODIFIED_UTC:
+                retval.add("infostore.last_modified");
+                break Metadata2DBSwitch;
+            case Metadata.CREATION_DATE:
+                retval.add("infostore.creating_date");
+                break Metadata2DBSwitch;
+            case Metadata.MODIFIED_BY:
+                retval.add("infostore.changed_by");
+                break Metadata2DBSwitch;
+            case Metadata.FOLDER_ID:
+                retval.add("infostore.folder_id");
+                break Metadata2DBSwitch;
+            case Metadata.TITLE:
+                retval.add("infostore_document.title");
+                break Metadata2DBSwitch;
+            case Metadata.VERSION:
+                retval.add("infostore.version");
+                break Metadata2DBSwitch;
+            case Metadata.CONTENT:
+                retval.add("infostore_document.description");
+                break Metadata2DBSwitch;
+            case Metadata.FILENAME:
+                retval.add("infostore_document.filename");
+                break Metadata2DBSwitch;
+            case Metadata.SEQUENCE_NUMBER:
+                retval.add("infostore.id");
+                break Metadata2DBSwitch;
+            case Metadata.ID:
+                retval.add("infostore.id");
+                break Metadata2DBSwitch;
+            case Metadata.FILE_SIZE:
+                retval.add("infostore_document.file_size");
+                break Metadata2DBSwitch;
+            case Metadata.FILE_MIMETYPE:
+                retval.add("infostore_document.file_mimetype");
+                break Metadata2DBSwitch;
+            case Metadata.DESCRIPTION:
+                retval.add("infostore_document.description");
+                break Metadata2DBSwitch;
+            case Metadata.LOCKED_UNTIL:
+                retval.add("infostore.locked_until");
+                break Metadata2DBSwitch;
+            case Metadata.URL:
+                retval.add("infostore_document.url");
+                break Metadata2DBSwitch;
+            case Metadata.CREATED_BY:
+                retval.add("infostore.created_by");
+                break Metadata2DBSwitch;
+            case Metadata.CATEGORIES:
+                retval.add("infostore_document.categories");
+                break Metadata2DBSwitch;
+            case Metadata.FILE_MD5SUM:
+                retval.add("infostore_document.file_md5sum");
+                break Metadata2DBSwitch;
+            case Metadata.VERSION_COMMENT:
+                retval.add("infostore_document.file_version_comment");
+                break Metadata2DBSwitch;
+            case Metadata.COLOR_LABEL:
+                retval.add("infostore.color_label");
+                break Metadata2DBSwitch;
             }
         }
-        return(retval.toArray(new String[0]));
+        return (retval.toArray(new String[0]));
     }
 
     private String getResultFieldsSelect(final Metadata[] RESULT_FIELDS) {
@@ -344,7 +390,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         final StringBuilder selectFields = new StringBuilder();
         boolean id = false;
         for (String currentField : DB_RESULT_FIELDS) {
-            if(currentField.equals("infostore.id")){
+            if (currentField.equals("infostore.id")) {
                 currentField = "infostore.id";
                 id = true;
             }
@@ -366,16 +412,23 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
         private DocumentMetadata next;
-        private ResultSet rs ;
+
+        private ResultSet rs;
+
         private final Metadata[] columns;
+
         private final SearchEngineImpl s;
+
         private final Context ctx;
+
         private Connection readCon;
+
         private Statement stmt;
+
         private final List<AbstractOXException> warnings;
 
         public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws SearchIteratorException {
-            this.warnings =  new ArrayList<AbstractOXException>(2);
+            this.warnings = new ArrayList<AbstractOXException>(2);
             this.rs = rs;
             this.s = s;
             this.columns = columns;
@@ -389,7 +442,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                     close();
                 }
             } catch (final Exception e) {
-                throw new SearchIteratorException(Code.SQL_ERROR,e,EnumComponent.INFOSTORE);
+                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.INFOSTORE);
             }
         }
 
@@ -418,7 +471,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 }
                 return retval;
             } catch (final Exception exc) {
-                throw new SearchIteratorException(Code.SQL_ERROR,exc,EnumComponent.INFOSTORE);
+                throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.INFOSTORE);
             }
         }
 
@@ -430,16 +483,16 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 }
                 rs = null;
             } catch (final SQLException e) {
-                LOG.debug("",e);
+                LOG.debug("", e);
             }
 
             try {
-                if( stmt != null ) {
+                if (stmt != null) {
                     stmt.close();
                 }
                 stmt = null;
             } catch (final SQLException e) {
-                LOG.debug("",e);
+                LOG.debug("", e);
             }
 
             if (null != readCon) {
@@ -470,34 +523,75 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
         private DocumentMetadataImpl fillDocumentMetadata(final DocumentMetadataImpl retval, final Metadata[] columns, final ResultSet result) throws SQLException {
             for (int i = 0; i < columns.length; i++) {
-                FillDocumentMetadata : switch(columns[i].getId()) {
-                default : break FillDocumentMetadata;
-                case Metadata.LAST_MODIFIED : retval.setLastModified(new Date(result.getLong(i+1))); break FillDocumentMetadata;
-                case Metadata.LAST_MODIFIED_UTC : retval.setLastModified(new Date(result.getLong(i+1))); break FillDocumentMetadata;
-                case Metadata.CREATION_DATE : retval.setCreationDate(new Date(result.getLong(i+1))); break FillDocumentMetadata;
-                case Metadata.MODIFIED_BY : retval.setModifiedBy(result.getInt(i+1)); break FillDocumentMetadata;
-                case Metadata.FOLDER_ID : retval.setFolderId(result.getInt(i+1)); break FillDocumentMetadata;
-                case Metadata.TITLE : retval.setTitle(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.VERSION : retval.setVersion(result.getInt(i+1)); break FillDocumentMetadata;
-                case Metadata.CONTENT : retval.setDescription(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.FILENAME : retval.setFileName(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.SEQUENCE_NUMBER : retval.setId(result.getInt(i+1)); break FillDocumentMetadata;
-                case Metadata.ID : retval.setId(result.getInt(i+1)); break FillDocumentMetadata;
-                case Metadata.FILE_SIZE : retval.setFileSize(result.getInt(i+1)); break FillDocumentMetadata;
-                case Metadata.FILE_MIMETYPE : retval.setFileMIMEType(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.DESCRIPTION : retval.setDescription(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.LOCKED_UNTIL :
-                    retval.setLockedUntil(new Date(result.getLong(i+1)));
+                FillDocumentMetadata: switch (columns[i].getId()) {
+                default:
+                    break FillDocumentMetadata;
+                case Metadata.LAST_MODIFIED:
+                    retval.setLastModified(new Date(result.getLong(i + 1)));
+                    break FillDocumentMetadata;
+                case Metadata.LAST_MODIFIED_UTC:
+                    retval.setLastModified(new Date(result.getLong(i + 1)));
+                    break FillDocumentMetadata;
+                case Metadata.CREATION_DATE:
+                    retval.setCreationDate(new Date(result.getLong(i + 1)));
+                    break FillDocumentMetadata;
+                case Metadata.MODIFIED_BY:
+                    retval.setModifiedBy(result.getInt(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.FOLDER_ID:
+                    retval.setFolderId(result.getInt(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.TITLE:
+                    retval.setTitle(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.VERSION:
+                    retval.setVersion(result.getInt(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.CONTENT:
+                    retval.setDescription(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.FILENAME:
+                    retval.setFileName(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.SEQUENCE_NUMBER:
+                    retval.setId(result.getInt(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.ID:
+                    retval.setId(result.getInt(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.FILE_SIZE:
+                    retval.setFileSize(result.getInt(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.FILE_MIMETYPE:
+                    retval.setFileMIMEType(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.DESCRIPTION:
+                    retval.setDescription(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.LOCKED_UNTIL:
+                    retval.setLockedUntil(new Date(result.getLong(i + 1)));
                     if (result.wasNull()) {
                         retval.setLockedUntil(null);
                     }
                     break FillDocumentMetadata;
-                case Metadata.URL : retval.setURL(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.CREATED_BY : retval.setCreatedBy(result.getInt(i+1)); break FillDocumentMetadata;
-                case Metadata.CATEGORIES : retval.setCategories(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.FILE_MD5SUM : retval.setFileMD5Sum(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.VERSION_COMMENT : retval.setVersionComment(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.COLOR_LABEL : retval.setColorLabel(result.getInt(i+1)); break FillDocumentMetadata;
+                case Metadata.URL:
+                    retval.setURL(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.CREATED_BY:
+                    retval.setCreatedBy(result.getInt(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.CATEGORIES:
+                    retval.setCategories(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.FILE_MD5SUM:
+                    retval.setFileMD5Sum(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.VERSION_COMMENT:
+                    retval.setVersionComment(result.getString(i + 1));
+                    break FillDocumentMetadata;
+                case Metadata.COLOR_LABEL:
+                    retval.setColorLabel(result.getInt(i + 1));
+                    break FillDocumentMetadata;
                 }
             }
             retval.setIsCurrentVersion(true);
