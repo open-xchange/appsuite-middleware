@@ -316,8 +316,7 @@ public abstract class FolderStorage {
      * @return the folder mapping for the user or <code>null</code> if it can't
      * be found.
      */
-    static Folder extractFolderOfUser(final Set<Folder> folders,
-        final int userId) {
+    static Folder extractFolderOfUser(final Set<Folder> folders, final int userId) {
         Folder retval = null;
         for (final Folder folder : folders) {
             if (folder.getUser() == userId) {
