@@ -189,7 +189,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         if(!query.equals("") && !query.equals("*") ) {
             checkPatternLength(query);
             final boolean containsWildcard = query.contains("*");
-
+            
+            query = query.replaceAll("\\\\","\\\\\\\\\\\\\\\\"); // Turn \ into \\\\
             query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
             query = query.replace('*', '%');
             query = query.replace('?', '_');
