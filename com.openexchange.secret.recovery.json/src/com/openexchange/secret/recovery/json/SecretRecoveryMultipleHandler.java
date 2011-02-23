@@ -51,6 +51,8 @@ package com.openexchange.secret.recovery.json;
 
 import java.util.Collection;
 import java.util.Date;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException;
@@ -69,6 +71,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SecretRecoveryMultipleHandler implements MultipleHandler {
 
+    private static final Log LOG = LogFactory.getLog(SecretRecoveryMultipleHandler.class);
+    
     private static final String CHECK = "check";
     private static final String MIGRATE = "migrate";
 
@@ -109,6 +113,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         final JSONObject object = new JSONObject();
         object.put("secretWorks", diagnosis == null);
         if(diagnosis != null) {
+            LOG.info("Secrets in session "+session.getSessionID()+" seem to need migration: "+diagnosis);
             object.put("diagnosis", diagnosis);
         }
         return object;
