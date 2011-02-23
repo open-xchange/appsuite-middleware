@@ -93,7 +93,7 @@ public class Activator implements BundleActivator {
         // react dynamically to the appearance/disappearance of ConfigurationService
         trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationServiceRegisterer(context, this)));
         
-     // react dynamically to the appearance/disappearance of OauthService
+        // react dynamically to the appearance/disappearance of OauthService
         trackers.push(new ServiceTracker(context, OAuthService.class.getName(), new OAuthServiceRegisterer(context, this)));
 
         for (final ServiceTracker tracker : trackers) {
