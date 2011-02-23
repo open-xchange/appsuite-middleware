@@ -33,7 +33,7 @@
     <property name="commonjar" value="common.jar"/>
     <property name="configreadjar" value="com.openexchange.configread.jar"/>
     <property name="oauthjar" value="com.openexchange.oauth.jar" />
-    <property name="oauthlinkedinjar" value="com.openexchange.oauth.facebook.jar" />
+    <property name="oauthfacebookjar" value="com.openexchange.oauth.facebook.jar" />
 
 
     <!-- Classpath -->
