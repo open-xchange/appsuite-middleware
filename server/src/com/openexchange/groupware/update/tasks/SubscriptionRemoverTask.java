@@ -60,6 +60,7 @@ import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -76,7 +77,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     private String subscriptionSourceId;
     
-    private static final String DELETE = "DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = 'com.openexchange.removeMe' AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;";
+    private static final String DELETE = "DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;";
     
     
     public SubscriptionRemoverTask(String subscriptionSourceId) {
@@ -84,7 +85,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
     }
     
     public TaskAttributes getAttributes() {
-        return new Attributes();
+        return new Attributes(UpdateConcurrency.BACKGROUND);
     }
 
     public String[] getDependencies() {
@@ -108,7 +109,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
         
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         try {
-            con = ds.getWritable(contextId);
+            con = ds.getForUpdateTask(contextId);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -136,7 +137,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
                 }
             }
             if(con != null) {
-                ds.backWritable(contextId, con);                
+                ds.backForUpdateTask(contextId, con);
             }
         }
     }
