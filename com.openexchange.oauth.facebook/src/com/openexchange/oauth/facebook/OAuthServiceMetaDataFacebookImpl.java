@@ -110,7 +110,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         if (null == configurationService) {
             return KEY_API;
         }
-        return configurationService.getProperty("com.openexchange.messaging.facebook.apiKey", KEY_API);
+        return configurationService.getProperty("com.openexchange.facebook.apiKey", KEY_API);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         if (null == configurationService) {
             return KEY_SECRET;
         }
-        return configurationService.getProperty("com.openexchange.messaging.facebook.secretKey", KEY_SECRET);
+        return configurationService.getProperty("com.openexchange.facebook.secretKey", KEY_SECRET);
     }
 
     public boolean needsRequestToken() {
