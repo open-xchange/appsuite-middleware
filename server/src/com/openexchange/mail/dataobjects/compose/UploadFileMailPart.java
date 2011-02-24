@@ -63,6 +63,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -95,8 +96,9 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
     protected UploadFileMailPart(final UploadFile uploadFile) throws MailException {
         super();
         this.uploadFile = uploadFile.getTmpFile();
-        setContentType(prepareContentType(uploadFile.getContentType()));
-        setFileName(uploadFile.getPreparedFileName());
+        final String preparedFileName = uploadFile.getPreparedFileName();
+        setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
+        setFileName(preparedFileName);
         setSize(uploadFile.getSize());
         final ContentDisposition cd = new ContentDisposition();
         cd.setDisposition(Part.ATTACHMENT);
@@ -104,13 +106,22 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         setContentDisposition(cd);
     }
 
-    private static String prepareContentType(final String contentType) {
+    private static String prepareContentType(final String contentType, final String preparedFileName) {
         if (null == contentType || contentType.length() == 0) {
             return MIMETypes.MIME_APPL_OCTET;
         }
-        final int mlen = contentType.length() - 1;
-        if (0 == contentType.indexOf('"') && mlen == contentType.lastIndexOf('"')) {
-            return contentType.substring(1, mlen);
+        final String retval;
+        {
+            final int mlen = contentType.length() - 1;
+            if (0 == contentType.indexOf('"') && mlen == contentType.lastIndexOf('"')) {
+                retval = contentType.substring(1, mlen);
+            } else {
+                retval = contentType;
+            }
+        }
+        if ("multipart/form-data".equalsIgnoreCase(retval)) {
+            return MIMEType2ExtMap.getContentType(preparedFileName);
+            
         }
         return contentType;
     }
