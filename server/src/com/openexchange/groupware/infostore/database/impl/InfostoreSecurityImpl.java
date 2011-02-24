@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.groupware.container.FolderObject;
@@ -73,7 +72,6 @@ import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tx.TransactionException;
 
 public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
 
@@ -151,12 +149,12 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     public void checkFolderId(final long folderId, final Context ctx) throws OXException {
-        final FolderCacheManager cache = FolderCacheManager.getInstance();
         final FolderObject fo;
         Connection readCon = null;
         try {
             readCon = getReadConnection(ctx);
-            fo = cache.getFolderObject((int)folderId, false, ctx, readCon);
+            final OXFolderAccess access = new OXFolderAccess(readCon, ctx);
+            fo = access.getFolderObject((int)folderId);
         } catch (DBPoolingException e) {
             throw new OXException(e);
         } finally {
