@@ -482,7 +482,20 @@ public class MIMEMailException extends MailException {
                 if (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
                     return new MIMEMailException(Code.MESSAGE_TOO_LARGE, exc, new Object[0]);
                 }
-                return new MIMEMailException(Code.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
+                final Exception nextException = exc.getNextException();
+                if (nextException instanceof com.sun.mail.smtp.SMTPSendFailedException) {
+                    final SMTPSendFailedException smtpExc = (SMTPSendFailedException) nextException;
+                    final Address[] invalidAddresses = smtpExc.getInvalidAddresses();
+                    if (null == invalidAddresses || invalidAddresses.length == 0) {
+                        return new MIMEMailException(Code.SEND_FAILED_MSG, exc, exc.getMessage());
+                    }
+                }
+                final Address[] addrs = exc.getInvalidAddresses();
+                if (null == addrs || addrs.length == 0) {
+                    // No invalid addresses available
+                    return new MIMEMailException(Code.SEND_FAILED_MSG, exc, exc.getMessage());
+                }
+                return new MIMEMailException(Code.SEND_FAILED, exc, Arrays.toString(addrs));
             } else if (e instanceof javax.mail.StoreClosedException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(

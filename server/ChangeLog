@@ -1,6 +1,7 @@
 * 2011-02-24 - thorben.betten@open-xchange.com
 
  - Bugfix #18423: Checking for possible wrong content type for uploaded file
+ - Bugfix #18387: Fall-back error message if exception does not provide invalid addresses
 
 * 2011-02-23 - steffen.templin@open-xchange.com
 
