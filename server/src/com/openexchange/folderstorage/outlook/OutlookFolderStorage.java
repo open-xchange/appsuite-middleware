@@ -1367,7 +1367,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         try {
             final List<SortableId> sortedIDs = f.get();
-            return sortedIDs.toArray(new SortableId[sortedIDs.size()]);
+            return sortedIDs.isEmpty() ? new SortableId[0] : sortedIDs.toArray(new SortableId[sortedIDs.size()]);
         } catch (final InterruptedException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
