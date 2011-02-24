@@ -360,9 +360,9 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.ContactFieldsForJapaneseKanaSearch(),
         
         // Remove facebook subscriptions to force use of new oauth
-        new com.openexchange.groupware.update.tasks.SubscriptionRemoverTask("com.openexchange.subscribe.crawler.facebook"),
+        new com.openexchange.groupware.update.tasks.FacebookCrawlerSubscriptionRemoverTask(),
 
         // Remove linkedin subscriptions to force use of new oauth
-        new com.openexchange.groupware.update.tasks.SubscriptionRemoverTask("com.openexchange.subscribe.linkedin")
+        new com.openexchange.groupware.update.tasks.LinkedInCrawlerSubscriptionsRemoverTask()
     };
 }
