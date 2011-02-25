@@ -114,7 +114,7 @@ public class UserTest extends AbstractTest {
         final Class clazz = ret.getClass();
         for(final Method m : clazz.getMethods() ) {
             final String name = m.getName();
-            if( !name.equals("getClass") && (name.startsWith("is") || name.startsWith("get")) ) {
+            if( !name.equals("getClass") && !name.equals("getPermissionBits") && (name.startsWith("is") || name.startsWith("get")) ) {
                 System.out.println(name);
                 boolean res = (Boolean)m.invoke(ret, null);
                 if( name.endsWith("Webmail") || name.endsWith("Contacts") || name.endsWith("GlobalAddressBookDisabled")) {
