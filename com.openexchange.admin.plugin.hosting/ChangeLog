@@ -1,3 +1,7 @@
+* 2011-02-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #9614: Added host and port parameter to mysqladmin command for a remote database.
+
 * 2011-01-07 - marcus.klein@open-xchange.com
 
  - Bugfix #17840: Added missing columns to getmoduleaccessforcontext CLT.
@@ -275,11 +279,6 @@
   - Bugfix ID#9949 L3: Filestore directory layout not physically deleted when context
     is removed, only contained files
   - Bugfix ID#9948 No rollback when deleting a context
-
-* 2007-09-26 - choeger@open-xchange.com
-
-  - Bugfix ID#9614 initconfigdb "mysqladmin: connect to server at 'localhost'
-  failed" when database not local
 
 * 2007-09-25 - dennis.sieben@open-xchange.com
 

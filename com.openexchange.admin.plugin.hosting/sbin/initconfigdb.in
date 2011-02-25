@@ -219,7 +219,7 @@ GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'%' IDENTIFIED BY '$CONFIGDB_PAS
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'localhost' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 create database \`${CONFIGDB_DBNAME}\`;
 EOF
-    mysqladmin $(eval echo $ROOTAUTH) flush-privileges || die
+    mysqladmin -h $CONFIGDB_HOST -P $CONFIGDB_PORT $(eval echo $ROOTAUTH) flush-privileges || die
 else
     cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} || die
 drop database if exists \`${CONFIGDB_DBNAME}\`;
