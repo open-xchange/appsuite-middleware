@@ -59,7 +59,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
 public class ContextAttributeCreateTable extends AbstractCreateTableImpl {
 
     private static final String[] TABLE = new String[]{"contextAttribute"};
-    private static final String[] CREATE_TABLE = new String[] { "CREATE TABLE `contextAttribute` (`cid` int(10) unsigned NOT NULL, `name` varchar(128) collate utf8_unicode_ci NOT NULL, `value` varchar(128) collate utf8_unicode_ci NOT NULL, KEY `cid` (`cid`,`name`,`value`), KEY `cid_2` (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+    private static final String[] CREATE_TABLE = new String[] { "CREATE TABLE `contextAttribute` (`cid` INT4 unsigned NOT NULL, `name` varchar(128) collate utf8_unicode_ci NOT NULL, `value` varchar(128) collate utf8_unicode_ci NOT NULL, KEY `cid` (`cid`,`name`,`value`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
 
     @Override
     protected String[] getCreateStatements() {
