@@ -85,7 +85,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
     }
 
     public String[] getDependencies() {
-        return new String[] {};
+        return new String[] { "com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableTask", "com.openexchange.groupware.update.tasks.CreateGenconfTablesTask" };
     }
 
     public void perform(final PerformParameters params) throws AbstractOXException {
