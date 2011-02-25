@@ -61,8 +61,6 @@ import com.openexchange.frontend.uwa.internal.groupware.CreatePositionsTable;
 import com.openexchange.frontend.uwa.internal.groupware.CreatePositionsTableTask;
 import com.openexchange.frontend.uwa.internal.groupware.CreateWidgetTable;
 import com.openexchange.frontend.uwa.internal.groupware.CreateWidgetTableTask;
-import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
-import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
