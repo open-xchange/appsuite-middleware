@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -144,6 +144,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Feb 25 2011 - marcus.klein@open-xchange.com
+ - Bugfix #9614: Added host and port parameter to mysqladmin command for a remote database.
 * Fri Jan 07 2011 - marcus.klein@open-xchange.com
  - Bugfix #17840: Added missing columns to getmoduleaccessforcontext CLT.
 * Wed Dec 01 2010 - choeger@open-xchange.com
@@ -294,9 +296,6 @@ mv doc javadoc
   - Bugfix ID#9949 L3: Filestore directory layout not physically deleted when context
     is removed, only contained files
   - Bugfix ID#9948 No rollback when deleting a context
-* Wed Sep 26 2007 - choeger@open-xchange.com
-  - Bugfix ID#9614 initconfigdb "mysqladmin: connect to server at 'localhost'
-  failed" when database not local
 * Tue Sep 25 2007 - dennis.sieben@open-xchange.com
   - Bugfix ID#9569 showruntimestats shows "statistictools" as default usage
 * Mon Sep 10 2007 - choeger@open-xchange.com
