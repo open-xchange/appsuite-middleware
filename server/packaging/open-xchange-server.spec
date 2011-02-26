@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -760,10 +760,19 @@ fi
 %doc doc/examples
 
 %changelog
+* Thu Feb 24 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18423: Checking for possible wrong content type for uploaded file
+ - Bugfix #18387: Fall-back error message if exception does not provide invalid addresses
 * Wed Feb 23 2011 - thorben.betten@open-xchange.com
  - Bugfix #18396: Proper IMAP folder cache invalidation
 * Wed Feb 23 2011 - steffen.templin@open-xchange.com
  - Bugfix #18204: The modification of a tasks recurrence information from 'after x times' to 'on date' is working correctly now.
+* Wed Feb 23 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #18124: Escape backslashes for searches.
+* Wed Feb 23 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18309: Using proper host names for UDP push remote host register package.
+* Wed Feb 23 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18219: Unable to access publications created by PIM users.
 * Tue Feb 22 2011 - martin.herfurth@open-xchange.com
  - Bugfix #18336: Fixed wrong end date for when removing sequence.
 * Mon Feb 21 2011 - marcus.klein@open-xchange.com

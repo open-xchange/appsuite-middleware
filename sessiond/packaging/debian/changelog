@@ -1,3 +1,9 @@
+open-xchange-sessiond (6.19.0.0-7) unstable; urgency=low
+
+  * build for 6.19.0-rev7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Sat, 26 Feb 2011 09:46:45 +0000
+
 open-xchange-sessiond (6.19.0.0-6) unstable; urgency=low
 
   * build for 6.19.0-rev6
