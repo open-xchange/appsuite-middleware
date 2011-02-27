@@ -57,12 +57,14 @@ import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import javax.mail.internet.AddressException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -325,7 +327,15 @@ public abstract class MailConfig {
             return mailAccount.getLogin();
         }
         if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-            return mailAccount.getPrimaryAddress();
+            try {
+                return QuotedInternetAddress.toACE(mailAccount.getPrimaryAddress());
+            } catch (final AddressException e) {
+                final String primaryAddress = mailAccount.getPrimaryAddress();
+                org.apache.commons.logging.LogFactory.getLog(MailConfig.class).warn(
+                    "Login source primary email address \"" + primaryAddress + "\" could not be converted to ASCII. Using unicode representation.",
+                    e);
+                return primaryAddress;
+            }
         }
         return userLoginInfo;
     }
@@ -401,8 +411,8 @@ public abstract class MailConfig {
                 default:
                     throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
                 }
-                Set<Integer> userIds = new HashSet<Integer>();
-                for (MailAccount candidate : accounts) {
+                final Set<Integer> userIds = new HashSet<Integer>();
+                for (final MailAccount candidate : accounts) {
                     final InetSocketAddress shouldMatch;
                     switch (MailProperties.getInstance().getMailServerSource()) {
                     case USER:
@@ -537,8 +547,8 @@ public abstract class MailConfig {
             } else {
                 // Decrypt mail account's password using session password
                 try {
-                    SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
-                    String secret = secretService.getSecret(session);
+                    final SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
+                    final String secret = secretService.getSecret(session);
                     mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, secret);
                 } catch (final GeneralSecurityException e) {
                     throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(
