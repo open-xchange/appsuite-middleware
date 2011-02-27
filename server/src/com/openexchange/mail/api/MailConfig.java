@@ -316,6 +316,7 @@ public abstract class MailConfig {
      * Gets the mail login with respect to configured login source.
      * 
      * @param mailAccount The mail account used to determine the login
+     * @param userLoginInfo The login information of the user
      * @return The mail login of specified user
      */
     public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) {
