@@ -1,6 +1,7 @@
 * 2011-02-26 - thorben.betten@open-xchange.com
 
  - Bugfix #18453: Converting unicode representation of primary email address to ASCII for com.openexchange.mail.loginSource=mail
+ - Bugfix #18429: Using proper default folder indexes
 
 * 2011-02-24 - thorben.betten@open-xchange.com
 

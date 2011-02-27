@@ -82,6 +82,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -1346,17 +1347,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
                 /*
-                 * Default folder names
+                 * Default folder names: trash, sent, drafts, spam, confirmed_spam, confirmed_ham
                  */
                 final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(id, user, cid);
                 {
                     final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
-                    setOptionalString(stmt, pos++, defaultFolderNames[0]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[1]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[2]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[3]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[4]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[5]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_TRASH]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_SENT]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_DRAFTS]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_SPAM]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_CONFIRMED_SPAM]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_CONFIRMED_HAM]);
                 }
                 /*
                  * Spam handler
@@ -1374,12 +1375,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 {
                     final String[] defaultFolderFullnames =
                         defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, true);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[0]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[1]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[2]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[3]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[4]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[5]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_TRASH]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_SENT]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_DRAFTS]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_SPAM]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_CONFIRMED_SPAM]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_CONFIRMED_HAM]);
                 }
                 /*
                  * Personal
