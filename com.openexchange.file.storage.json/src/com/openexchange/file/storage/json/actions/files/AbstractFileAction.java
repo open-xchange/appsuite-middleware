@@ -67,7 +67,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tx.TransactionException;
 
 /**
  * {@link AbstractFileAction}
@@ -197,6 +196,11 @@ public abstract class AbstractFileAction implements AJAXActionService {
             throw new AjaxException(AjaxException.Code.UnexpectedError, t.getMessage());
         } finally {
             after(req);
+            
+            // Delete tmp files
+            if (request.hasUploads()) {
+                request.getUploadEvent().cleanUp();
+            }
         }
     }
 
