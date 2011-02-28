@@ -126,9 +126,8 @@ public final class SearchTest extends AbstractMailTest {
         /*
          * Perform search request
          */
-        final JSONObject searchExpression =
-            new JSONObject(
-                "{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"from\"},\"" + getSendAddress() + "\"]}");
+        final JSONArray searchExpression =
+            new JSONArray("['=', {'field':'from'}, '" + getSendAddress() + "']");
         final JSONObject searchObject = new JSONObject().put("filter", searchExpression);
 
         final SearchResponse searchR =
@@ -170,13 +169,12 @@ public final class SearchTest extends AbstractMailTest {
         /*
          * Perform search request
          */
-        final JSONObject searchExpression1 =
-            new JSONObject(
-                "{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"from\"},\"" + getSendAddress() + "\"]}");
-        final JSONObject searchExpression2 =
-            new JSONObject("{\"operation\":\"gt\",\"operands\":[{\"type\":\"column\",\"value\":\"size\"},\"16\"]}");
-        final JSONObject searchExpression =
-            new JSONObject().put("operation", "or").put("operands", new JSONArray().put(searchExpression1).put(searchExpression2));
+        final JSONArray searchExpression1 =
+            new JSONArray("['=', {'field':'from'}, '" + getSendAddress() + "']");
+        final JSONArray searchExpression2 =
+            new JSONArray("['>', {'field':'size'}, '16']");
+        final JSONArray searchExpression =
+        	new JSONArray("['or', "+searchExpression1+","+searchExpression2+"]");
 
         final JSONObject searchObject = new JSONObject().put("filter", searchExpression);
 
@@ -215,8 +213,9 @@ public final class SearchTest extends AbstractMailTest {
          * Perform search request
          */
         final long recDate = System.currentTimeMillis() - 86400000L; // minus 1 day
-        final JSONObject searchExpression = new JSONObject("{\"operation\":\"and\",\"operands\":[{\"operation\":\"gt\",\"operands\":[{\"type\":\"column\",\"value\":\"received_date\"},\""+recDate+"\"]},{\"operation\":\"not\",\"operands\":[{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"flags\"},\"32\"]}]}]}}");
-
+        final JSONArray searchExpression = new JSONArray(
+        	//"{\"operation\":\"and\",\"operands\":[{\"operation\":\"gt\",\"operands\":[{\"type\":\"column\",\"value\":\"received_date\"},\""+recDate+"\"]},{\"operation\":\"not\",\"operands\":[{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"flags\"},\"32\"]}]}]}}");
+        		"['and', ['>',{'field':'received_date'}, '"+recDate+"'], ['not', ['=', {'field':'flags'},'32']]]");
         final JSONObject searchObject = new JSONObject().put("filter", searchExpression);
 
         final SearchResponse searchR =
