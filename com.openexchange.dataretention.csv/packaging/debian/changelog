@@ -1,3 +1,9 @@
+open-xchange-dataretention-csv (6.18.2.0-22) unstable; urgency=low
+
+  * build for public ptf 2011-03-02
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 28 Feb 2011 10:21:53 +0000
+
 open-xchange-dataretention-csv (6.18.2.0-21) unstable; urgency=low
 
   * second build for public ptf 2011-02-15

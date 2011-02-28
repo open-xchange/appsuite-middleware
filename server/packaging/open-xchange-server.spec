@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 22
+%define		ox_release 23
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -725,6 +725,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Sat Feb 26 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18429: Using proper default folder indexes
 * Fri Feb 18 2011 - thorben.betten@open-xchange.com
  - Bugfix #18376: Dealing with an InputStream content
 * Thu Feb 17 2011 - marcus.klein@open-xchange.com
@@ -732,6 +734,7 @@ fi
 * Thu Feb 17 2011 - thorben.betten@open-xchange.com
  - Bugfix #17845: Ensure proper content type header on JSON response.
  - Bugfix #18232: Fixed AJP ping.
+ - Bugfix #18211: Client IP in NOOP command
 * Wed Feb 16 2011 - thorben.betten@open-xchange.com
  - Bugfix #18280: Using wrapping MailMessage instance
  - Bugfix #18296: Introduced mail property to hide POP3 storage folders
