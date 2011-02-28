@@ -95,7 +95,6 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
         + "accessSecret VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, id),"
-        + "INDEX (cid, user),"
         + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
