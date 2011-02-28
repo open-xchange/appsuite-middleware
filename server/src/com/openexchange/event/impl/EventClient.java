@@ -357,7 +357,7 @@ public class EventClient {
         final int folderId = newTask.getParentFolderID();
         if (folderId > 0) {
             final FolderObject folder = getFolder(folderId, ctx);
-            declined(oldTask, newTask, folder);
+            tentative(oldTask, newTask, folder);
         }
     }
 

@@ -114,6 +114,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
     public EmailableParticipant(final int cid, final int type, final int id, final int[] groups, final String email,
             final String displayName, final Locale locale, final TimeZone timeZone, final int reliability,
             final int folderId, final int confirm, final String confirmMessage, final boolean ignoreNotification) {
+        super();
         this.cid = cid;
         this.type = type;
         this.email = email;

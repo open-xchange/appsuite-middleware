@@ -55,6 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
@@ -73,29 +74,22 @@ import com.openexchange.session.Session;
 public final class ConfirmTask {
 
     private static final TaskStorage storage = TaskStorage.getInstance();
-
+    private static final FolderStorage foldStor = FolderStorage.getInstance();
     private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
-    private static final int[] CHANGED_ATTRIBUTES = new int[] {
-        Task.LAST_MODIFIED, Task.MODIFIED_BY
-    };
+    private static final int[] CHANGED_ATTRIBUTES = new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY };
 
     private final Context ctx;
-
     private final int taskId;
-
     private final int userId;
-
     private final int confirm;
-
     private final String message;
 
     private Task origTask;
-
+    private Set<TaskParticipant> participants;
+    private Set<Folder> folders;
     private Task changedTask;
-
     private InternalParticipant origParticipant;
-
     private InternalParticipant changedParticipant;
 
     /**
@@ -143,10 +137,8 @@ public final class ConfirmTask {
         }
         try {
             con.setAutoCommit(false);
-            partStor.updateInternal(ctx, con, taskId, changedParticipant,
-                StorageType.ACTIVE);
-            UpdateData.updateTask(ctx, con, changedTask, getOrigTask()
-                .getLastModified(), CHANGED_ATTRIBUTES, null, null, null, null);
+            partStor.updateInternal(ctx, con, taskId, changedParticipant, StorageType.ACTIVE);
+            UpdateData.updateTask(ctx, con, changedTask, getOrigTask().getLastModified(), CHANGED_ATTRIBUTES, null, null, null, null);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -157,18 +149,19 @@ public final class ConfirmTask {
         }
     }
 
+    
     void sentEvent(final Session session) throws TaskException {
         try {
             final EventClient eventClient = new EventClient(session);
             switch (changedParticipant.getConfirm()) {
             case CalendarObject.ACCEPT:
-                eventClient.accept(getOrigTask(), changedTask);
+                eventClient.accept(getOrigTask(), getFilledChangedTask());
                 break;
             case CalendarObject.DECLINE:
-                eventClient.declined(getOrigTask(), changedTask);
+                eventClient.declined(getOrigTask(), getFilledChangedTask());
                 break;
             case CalendarObject.TENTATIVE:
-                eventClient.tentative(getOrigTask(), changedTask);
+                eventClient.tentative(getOrigTask(), getFilledChangedTask());
                 break;
             }
         } catch (final EventException e) {
@@ -207,11 +200,44 @@ public final class ConfirmTask {
      */
     private InternalParticipant getOrigParticipant() throws TaskException {
         if (null == origParticipant) {
-            origParticipant = partStor.selectInternal(ctx, taskId, userId, StorageType.ACTIVE);
+            origParticipant = ParticipantStorage.getParticipant(ParticipantStorage.extractInternal(getParticipants()), userId);
             if (null == origParticipant) {
                 throw new TaskException(Code.PARTICIPANT_NOT_FOUND, I(userId), I(taskId));
             }
         }
         return origParticipant;
+    }
+
+    private Set<TaskParticipant> getParticipants() throws TaskException {
+        if (null == participants) {
+            participants = partStor.selectParticipants(ctx, taskId, StorageType.ACTIVE);
+        }
+        return participants;
+    }
+
+    private Set<Folder> getFolders() throws TaskException {
+        if (null == folders) {
+            folders =  foldStor.selectFolder(ctx, taskId, StorageType.ACTIVE);
+        }
+        return folders;
+    }
+
+    private boolean filledTask = false;
+
+    private Task getFilledChangedTask() throws TaskException {
+        if (!filledTask) {
+            changedTask.setCreatedBy(getOrigTask().getCreatedBy());
+            changedTask.setParticipants(TaskLogic.createParticipants(getParticipants()));
+            changedTask.setUsers(TaskLogic.createUserParticipants(getParticipants()));
+            Folder folder = FolderStorage.extractFolderOfUser(getFolders(), userId);
+            if (null == folder) {
+                if (getFolders().isEmpty()) {
+                    throw new TaskException(TaskException.Code.MISSING_FOLDER, I(taskId));
+                }
+                folder = getFolders().iterator().next();
+            }
+            changedTask.setParentFolderID(folder.getIdentifier());
+        }
+        return changedTask;
     }
 }

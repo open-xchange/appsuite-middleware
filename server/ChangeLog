@@ -1,3 +1,7 @@
+* 2011-02-28 - marcus.klein@open-xchange.com
+
+ - Bugfix #17892: Task creator now gets notification mails about changed participants states.
+
 * 2011-02-26 - thorben.betten@open-xchange.com
 
  - Bugfix #18453: Converting unicode representation of primary email address to ASCII for com.openexchange.mail.loginSource=mail

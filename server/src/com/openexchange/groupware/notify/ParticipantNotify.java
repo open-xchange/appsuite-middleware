@@ -428,6 +428,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.DELETED), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
     }
 
+    /**
+     * TODO new object should have all necessary data when coming through the event system.
+     */
     private void sendNotification(final CalendarObject oldObj, final CalendarObject newObj, final Session session, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader, final boolean isUpdate) {
 
         if (onlyIrrelevantFieldsChanged(oldObj, newObj, state)) {
@@ -1157,6 +1160,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 all,
                 newObj.getOrganizer());
         }
+        // Add task owner to receivers list to make him receive mails about changed participants states.
+        if (newObj instanceof Task) {
+            addTaskOwner(newObj, receivers, all, session);
+        }
         /*
          * Generate a render map
          */
@@ -1832,6 +1839,31 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         }
 
+    }
+
+    private void addTaskOwner(CalendarObject task, Map<Locale, List<EmailableParticipant>> receivers, Map<String, EmailableParticipant> all, ServerSession session) {
+        Context ctx = session.getContext();
+        int creatorId = task.getCreatedBy();
+        try {
+            User user = resolveUsers(ctx, creatorId)[0];
+            EmailableParticipant emailable =  new EmailableParticipant(
+                ctx.getContextId(),
+                Participant.USER,
+                creatorId,
+                user.getGroups(),
+                user.getMail(),
+                user.getDisplayName(),
+                user.getLocale(),
+                getCalendarTools().getTimeZone(user.getTimeZone()),
+                10,
+                -1,
+                CalendarObject.NONE,
+                null,
+                false);
+            addReceiver(emailable, receivers, all);
+        } catch (final LdapException e) {
+            LL.log(e);
+        }
     }
 
     private void addReceiver(final EmailableParticipant participant, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all) {
