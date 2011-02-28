@@ -5,6 +5,7 @@
 * 2011-02-28 - marcus.klein@open-xchange.com
 
  - Bugfix #17892: Task creator now gets notification mails about changed participants states.
+ - Bugfix #18263: Added links for documentation of mobile sync configuration on Android devices.
 
 * 2011-02-26 - thorben.betten@open-xchange.com
 
