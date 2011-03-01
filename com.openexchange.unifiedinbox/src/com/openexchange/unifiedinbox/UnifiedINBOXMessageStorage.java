@@ -329,10 +329,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             try {
                 mailAccess.connect();
                 close = true;
-                final MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullname(), uid.getId(), markSeen);
+                MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullname(), uid.getId(), markSeen);
                 if (null == mail) {
                     return null;
                 }
+                mail = new UnifiedMailMessage(mail);
                 mail.setMailId(mailId);
                 mail.setFolder(fullname);
                 mail.loadContent();
