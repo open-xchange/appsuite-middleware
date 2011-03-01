@@ -72,9 +72,12 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer 
     }
 
     public Object addingService(ServiceReference reference) {
-        OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) context.getService(reference);        
-        activator.setOAuthServiceMetadata(oAuthServiceMetaData);
-        activator.registerServices();
+        OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) context.getService(reference);
+        // TODO Please use a service property or the service description to let the ServiceTracker filter the only wanted service.
+        if ("com.openexchange.socialplugin.linkedin".equals(oAuthServiceMetaData.getId())) {
+            activator.setOAuthServiceMetadata(oAuthServiceMetaData);
+            activator.registerServices();
+        }
         return oAuthServiceMetaData;
     }
 
@@ -83,8 +86,11 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer 
     }
 
     public void removedService(ServiceReference reference, Object arg1) {
-        activator.setOAuthServiceMetadata(null);
-        activator.unregisterServices();
+        OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) arg1;
+        if ("com.openexchange.socialplugin.linkedin".equals(oAuthServiceMetaData.getId())) {
+            activator.setOAuthServiceMetadata(null);
+            activator.unregisterServices();
+        }
         context.ungetService(reference);
     }
 
