@@ -1,3 +1,7 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
 * 2009-11-18 - thorben.betten@open-xchange.com
 
  - Bugfix #14891: Using proper login to check IMAP authentication

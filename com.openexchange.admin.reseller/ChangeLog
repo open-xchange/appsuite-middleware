@@ -1,3 +1,7 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
 * 2009-11-02 - marcus.klein@open-xchange.com
 
  - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.

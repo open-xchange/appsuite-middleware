@@ -96,7 +96,7 @@
 
     <target name="compile" depends="prop_check_output,prop_check" if="runok">
         <mkdir dir="classes"/>
-        <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
+        <javac srcdir="src" destdir="classes" debug="true" debuglevel="lines,vars,source" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath>
                 <path refid="project.classpath"/>
             </classpath>
@@ -214,7 +214,7 @@
 
     <target name="compile-tests" depends="compile" if="runok">
         <mkdir dir="classes"/>
-        <javac failonerror="true" srcdir="test" debug="true" destdir="classes">
+        <javac srcdir="test" destdir="classes" debug="true" debuglevel="lines,vars,source" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <include name="**/**"/>
             <classpath>
                 <path refid="project.classpath"/>

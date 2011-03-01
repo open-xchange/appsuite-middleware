@@ -1,3 +1,7 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
 * 2009-07-27 - marcus.klein@open-xchange.com
 
  - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.

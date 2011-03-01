@@ -1,3 +1,7 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
 * 2011-02-28 - steffen.templin@open-xchange.com
 
  - Bugfix #18442: Temporary files now are deleted after creating an infostore item with file upload.
