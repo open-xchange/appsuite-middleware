@@ -74,6 +74,9 @@ public class LinkedInConnectionTest extends TestCase {
     
     private LinkedInServiceImpl linkedIn;
     
+    private String apiKey = "PLEASE_INSERT_VALID_KEY_HERE";
+    private String apiSecret = "PLEASE_INSERT_VALID_SECRET_HERE";
+    
     public void setUp(){
         Activator activator = new Activator();
 //        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
@@ -88,7 +91,7 @@ public class LinkedInConnectionTest extends TestCase {
     
     public void testAccountCreation(){
         // This is basically scribes example
-        OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey("Ra7yTqolxUk_6UVpIAIsbv6kwLpIZCdNeUYxAA1n2Lnf05Dkr7D41dw-ivK-z4vA").apiSecret("vEPBnxJvXvqf9NsBby0kZ1hcgQCM7JBO7iCjlw4KIDhw_7lwPIln7zIvtP3dbL-i").build();        
+        OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();        
         
         System.out.println("=== LinkedIn's OAuth Workflow ===");
         System.out.println();
