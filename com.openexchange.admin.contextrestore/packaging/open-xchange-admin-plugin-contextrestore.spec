@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -96,6 +96,8 @@ mv doc javadoc
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
 %changelog
+* Tue Mar 01 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Mon Jul 27 2009 - marcus.klein@open-xchange.com
  - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Wed Jun 24 2009 - marcus.klein@open-xchange.com

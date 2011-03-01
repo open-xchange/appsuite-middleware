@@ -40,7 +40,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -99,6 +99,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/groupware/imapauth.properties
 
 %changelog
+* Tue Mar 01 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Wed Nov 18 2009 - thorben.betten@open-xchange.com
  - Bugfix #14891: Using proper login to check IMAP authentication
 * Mon Oct 05 2009 - dennis.sieben@open-xchange.com

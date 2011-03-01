@@ -40,7 +40,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -125,6 +125,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/ldapauth.properties
 
 %changelog
+* Tue Mar 01 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Fri Sep 03 2010 - choeger@open-xchange.com
  - Added new functions adsBind and referral
 * Tue Feb 02 2010 - dennis.sieben@open-xchange.com

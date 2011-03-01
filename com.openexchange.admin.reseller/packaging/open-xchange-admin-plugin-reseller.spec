@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -119,5 +119,7 @@ mv doc javadoc
 /opt/open-xchange/bundles/com.openexchange.axis2/services/*
 
 %changelog
+* Tue Mar 01 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Mon Nov 02 2009 - marcus.klein@open-xchange.com
  - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.

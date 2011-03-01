@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -760,6 +760,17 @@ fi
 %doc doc/examples
 
 %changelog
+* Tue Mar 01 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+ - Bugfix #18463: Added necessary imports for OAuth LinkedIn bundle.
+* Mon Feb 28 2011 - marcus.klein@open-xchange.com
+ - Bugfix #17892: Task creator now gets notification mails about changed participants states.
+ - Bugfix #18263: Added links for documentation of mobile sync configuration on Android devices.
+* Mon Feb 28 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18442: Temporary files now are deleted after creating an infostore item with file upload.
+* Sat Feb 26 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18453: Converting unicode representation of primary email address to ASCII for com.openexchange.mail.loginSource=mail
+ - Bugfix #18429: Using proper default folder indexes
 * Thu Feb 24 2011 - thorben.betten@open-xchange.com
  - Bugfix #18423: Checking for possible wrong content type for uploaded file
  - Bugfix #18387: Fall-back error message if exception does not provide invalid addresses

@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -85,6 +85,8 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install doc
 %config(noreplace) /opt/open-xchange/etc/groupware/axis2.properties
 %doc docs
 %changelog
+* Tue Mar 01 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Tue Sep 28 2010 - choeger@open-xchange.com
  - Bugfix #17048: Provisioning via SOAP broken
 * Mon Jul 27 2009 - marcus.klein@open-xchange.com
