@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -101,6 +101,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
 %doc docs
 %changelog
+* Tue Mar 01 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Wed Dec 15 2010 - dennis.sieben@open-xchange.com
  - Bugfix #17824: [L3] Operation with two or more SOAP Client leads to race condition errors
    - Added config option to define lock wait time
