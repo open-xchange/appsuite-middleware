@@ -1,3 +1,8 @@
+* 2011-03-01 - choeger@open-xchange.com
+
+ - Bugfix #18493: [L3] Open-xchange init scripts don't display results on
+   RHEL6 system with special package
+
 * 2011-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.

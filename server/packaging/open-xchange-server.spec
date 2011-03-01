@@ -85,6 +85,8 @@ Requires: mysql-client >= 5.0.0
 %endif
 %if 0%{?rhel_version}
 Requires: mysql >= 5.0.0
+# for the correct operation of the init scripts
+Requires:  redhat-lsb
 %endif
 %if 0%{?centos_version}
 BuildRequires:  java-1.6.0-openjdk-devel
