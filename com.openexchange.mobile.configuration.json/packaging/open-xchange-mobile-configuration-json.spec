@@ -83,7 +83,7 @@ fi
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 %dir /opt/open-xchange/etc/groupware
 %dir /opt/open-xchange/bundles
-%config(noreplace) /opt/open-xchange/etc/groupware/settings/open-xchange-mobile-configuration-gui.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/settings/*
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/*
