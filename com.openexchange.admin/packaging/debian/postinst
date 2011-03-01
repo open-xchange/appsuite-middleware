@@ -76,7 +76,7 @@ postFix() {
       done
   fi
 
-  # SoftwareChange_Request-282, SoftwareChange_Request-533
+  # SoftwareChange_Request-282, SoftwareChange_Request-533, SoftwareChange_Request-645
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
   ox_system_type
