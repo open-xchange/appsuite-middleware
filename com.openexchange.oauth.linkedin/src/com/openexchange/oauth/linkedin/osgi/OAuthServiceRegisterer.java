@@ -53,8 +53,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
 
 
 /**
