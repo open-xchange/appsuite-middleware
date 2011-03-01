@@ -1,3 +1,7 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
 * 2010-12-15 - dennis.sieben@open-xchange.com
 
  - Bugfix #17824: [L3] Operation with two or more SOAP Client leads to race condition errors
