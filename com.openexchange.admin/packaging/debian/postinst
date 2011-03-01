@@ -283,65 +283,6 @@ EOF
     echo 'JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"' >> $pfile
   }
 
-  if [ $version -le 660 ]; then
-      # -----------------------------------------------------------------------
-      # force setting of last minute option
-      local pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
-      if ox_exists_property writeOnly $pfile; then
-	  local wonly=$(ox_read_property writeOnly $pfile)
-	  if [ "$wonly" != "true" ]; then
-	      ox_set_property writeOnly true $pfile
-	  fi
-      else
-	  ox_set_property writeOnly true $pfile
-      fi
-  fi
-
-  # we're updating from pre sp4
-  if [ $version -lt 650 ]; then
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
-      ox_exists_property OSGIBUNDLE $pfile || {
-	  ox_set_property OSGIBUNDLE /opt/open-xchange/bundles/org.eclipse.osgi_3.6.1.R36x_v20100806.jar $pfile
-      }
-      ox_exists_property BUNDLELIBPATH $pfile || {
-	  ox_set_property BUNDLELIBPATH /opt/open-xchange/bundles/com.openexchange.common/lib $pfile
-      }
-
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/admindaemon/system.properties
-      ox_exists_property com.openexchange.caching.configfile $pfile || {
-	  ox_set_property com.openexchange.caching.configfile etc/admindaemon/cache.ccf $pfile
-      }
-      ox_exists_property serviceUsageInspection $pfile || {
-	  ox_set_property serviceUsageInspection false $pfile
-      }
-      ox_exists_property serviceUsageTimeout $pfile || {
-	  ox_set_property serviceUsageTimeout 10000 $pfile
-      }
-      ox_exists_property MimeTypeFile $pfile || {
-	  ox_set_property MimeTypeFile etc/groupware/mime.types $pfile
-      }
-      ox_exists_property MailCacheConfig $pfile || {
-	  ox_set_property MailCacheConfig etc/groupware/mailcache.ccf $pfile
-      }
-      ox_exists_property TidyMessages $pfile || {
-	  ox_set_property TidyMessages etc/groupware/TidyMessages.properties $pfile
-      }
-      ox_exists_property TidyConfiguration $pfile || {
-	  ox_set_property TidyConfiguration etc/groupware/TidyConfiguration.properties $pfile
-      }
-      ox_exists_property Whitelist $pfile || {
-	  ox_set_property Whitelist etc/groupware/whitelist.properties $pfile
-      }
-      
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/admindaemon/AdminDaemon.properties
-      ox_exists_property ACCESS_COMBINATIONS_FILE $pfile || {
-	  ox_set_property ACCESS_COMBINATIONS_FILE '$PWD/etc/admindaemon/ModuleAccessDefinitions.properties' $pfile
-      }
-  fi
-
 }
 
 setConfigFilePermissions() {
