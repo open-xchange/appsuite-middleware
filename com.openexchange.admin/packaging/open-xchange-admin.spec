@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -403,6 +403,9 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Mar 01 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+ - Bugfix #18479: OLOX2 should not be enabled for PIM mobility users.
 * Thu Jan 27 2011 - marcus.klein@open-xchange.com
  - Added Italian translations for standard mail folder names.
 * Thu Jan 20 2011 - marcus.klein@open-xchange.com
