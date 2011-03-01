@@ -213,8 +213,10 @@ if [ -n "$CREATEADMIN" ]; then
     if [ -n "$MYSQL_ROOT_PASSWD" ]; then
 	ROOTAUTH="-u $MYSQL_ROOT_USER -p${MYSQL_ROOT_PASSWD}"
     fi
-    cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT $(eval echo $ROOTAUTH) || die
+    cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT $(eval echo $ROOTAUTH) || die "unable to drop database (wrong or missing password for user root?)"
 drop database if exists \`${CONFIGDB_DBNAME}\`;
+EOF
+    cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT $(eval echo $ROOTAUTH) || die "unable to GRANT privileges"
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'%' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'localhost' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 create database \`${CONFIGDB_DBNAME}\`;
