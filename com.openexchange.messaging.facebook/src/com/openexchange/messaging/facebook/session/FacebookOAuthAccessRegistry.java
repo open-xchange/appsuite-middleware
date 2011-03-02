@@ -56,41 +56,41 @@ import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegi
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link FacebookOAuthInfoRegistry}
+ * {@link FacebookOAuthAccessRegistry}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class FacebookOAuthInfoRegistry {
+public final class FacebookOAuthAccessRegistry {
 
-    private static final FacebookOAuthInfoRegistry INSTANCE = new FacebookOAuthInfoRegistry();
+    private static final FacebookOAuthAccessRegistry INSTANCE = new FacebookOAuthAccessRegistry();
 
     /**
      * Gets the registry instance.
      * 
      * @return The registry instance
      */
-    public static FacebookOAuthInfoRegistry getInstance() {
+    public static FacebookOAuthAccessRegistry getInstance() {
         return INSTANCE;
     }
 
     private final ConcurrentMap<SimpleKey, ConcurrentMap<Integer, FacebookOAuthAccess>> map;
 
     /**
-     * Initializes a new {@link FacebookOAuthInfoRegistry}.
+     * Initializes a new {@link FacebookOAuthAccessRegistry}.
      */
-    private FacebookOAuthInfoRegistry() {
+    private FacebookOAuthAccessRegistry() {
         super();
         map = new ConcurrentHashMap<SimpleKey, ConcurrentMap<Integer, FacebookOAuthAccess>>();
     }
 
     /**
-     * Adds specified facebook OAuth information.
+     * Adds specified facebook OAuth access.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @param fbOAuthInfo The facebook OAuth information to add
+     * @param fbOAuthInfo The facebook OAuth access to add
      * @return The previous associated session, or <code>null</code> if there was no session.
      */
     public FacebookOAuthAccess addSession(final int contextId, final int userId, final int accountId, final FacebookOAuthAccess fbOAuthInfo) {
@@ -107,12 +107,12 @@ public final class FacebookOAuthInfoRegistry {
     }
 
     /**
-     * Check presence of the facebook OAuth information associated with given user-context-pair.
+     * Check presence of the facebook OAuth access associated with given user-context-pair.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if such a facebook OAuth information is present; otherwise <code>false</code>
+     * @return <code>true</code> if such a facebook OAuth access is present; otherwise <code>false</code>
      */
     public boolean containsSession(final int contextId, final int userId, final int accountId) {
         final ConcurrentMap<Integer, FacebookOAuthAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -120,12 +120,12 @@ public final class FacebookOAuthInfoRegistry {
     }
 
     /**
-     * Gets the facebook OAuth information associated with given user-context-pair.
+     * Gets the facebook OAuth access associated with given user-context-pair.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return The facebook OAuth information or <code>null</code>
+     * @return The facebook OAuth access or <code>null</code>
      */
     public FacebookOAuthAccess getSession(final int contextId, final int userId, final int accountId) {
         final ConcurrentMap<Integer, FacebookOAuthAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -133,7 +133,7 @@ public final class FacebookOAuthInfoRegistry {
     }
 
     /**
-     * Removes the OAuth information associated with given user-context-pair, if no more user-associated sessions are present.
+     * Removes the OAuth access associated with given user-context-pair, if no more user-associated sessions are present.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
@@ -155,12 +155,12 @@ public final class FacebookOAuthInfoRegistry {
     }
 
     /**
-     * Purges specified user's facebook OAuth information.
+     * Purges specified user's facebook OAuth access.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if a facebook session for given user-context-pair was found and purged; otherwise <code>false</code>
+     * @return <code>true</code> if a facebook OAuth access for given user-context-pair was found and purged; otherwise <code>false</code>
      */
     public boolean purgeUserSession(final int contextId, final int userId, final int accountId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
@@ -179,9 +179,9 @@ public final class FacebookOAuthInfoRegistry {
     }
 
     /**
-     * Gets a {@link Iterator iterator} over the facebook OAuth information instances in this registry.
+     * Gets a {@link Iterator iterator} over the facebook OAuth access instances in this registry.
      * 
-     * @return A {@link Iterator iterator} over the facebook OAuth information instances in this registry.
+     * @return A {@link Iterator iterator} over the facebook OAuth access instances in this registry.
      */
     Iterator<ConcurrentMap<Integer, FacebookOAuthAccess>> iterator() {
         return map.values().iterator();
