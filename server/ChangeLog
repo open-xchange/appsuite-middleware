@@ -2,6 +2,7 @@
 
  - Bugfix #17891: Fixed possible IndexOutOfBounsdException when checking quotes in personal part of an email address
  - Bugfix #18296: Introduced property to hide POP3 storage folders
+ - Bugfix #18280: Using wrapping MailMessage instance to support string-based message identifiers
 
 * 2011-02-10 - thorben.betten@open-xchange.com
 

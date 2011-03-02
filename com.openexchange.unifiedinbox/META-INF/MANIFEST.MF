@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Unified Inbox
 Bundle-SymbolicName: com.openexchange.unifiedinbox
-Bundle-Version: 6.11.0.0
+Bundle-Version: 6.18.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.caching,
  com.openexchange.config,
@@ -26,7 +26,13 @@ Import-Package: com.openexchange.caching,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.spamhandler,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
  com.openexchange.user,
+ gnu.trove,
+ javax.activation,
+ javax.mail,
+ javax.mail.internet,
  org.apache.commons.logging;version="1.0.4",
  org.osgi.framework;version="1.3.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
