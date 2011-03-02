@@ -87,6 +87,7 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections;
@@ -170,6 +171,7 @@ public class CSVContactImporter extends AbstractImporter {
         final Iterator<List<String>> iter = csv.iterator();
         // get header fields
         final List<String> fields = iter.next();
+        purgeBOM(fields);
         if (!checkFields(fields)) {
             throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
         }
@@ -188,7 +190,14 @@ public class CSVContactImporter extends AbstractImporter {
         return results;
     }
 
-    protected CSVParser getCSVParser() {
+	private void purgeBOM(List<String> fields) {
+		if(fields == null || fields.size() == 0)
+			return;
+		String first = fields.get(0);
+		fields.set(0, Strings.trimBOM(first));
+	}
+
+	protected CSVParser getCSVParser() {
         return new CSVParser();
     }
 
