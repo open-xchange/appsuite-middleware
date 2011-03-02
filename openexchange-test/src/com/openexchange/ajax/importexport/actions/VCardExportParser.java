@@ -49,30 +49,41 @@
 
 package com.openexchange.ajax.importexport.actions;
 
-import java.io.InputStream;
+import org.json.JSONException;
 
-/**
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public final class VCardImportRequest extends AbstractImportRequest<VCardImportResponse> {
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-    private final boolean failOnError;
+public class VCardExportParser extends AbstractAJAXParser<VCardExportResponse>{
+
+	   /**
+     * @param failOnError
+     */
+	VCardExportParser(final boolean failOnError) {
+        super(failOnError);
+    }
 
     /**
-     * Default constructor.
+     * {@inheritDoc}
      */
-    public VCardImportRequest(final int folderId, final InputStream vcard) {
-        this(folderId, vcard, true);
+    @Override
+    protected Response getResponse(final String body) throws JSONException {
+        throw new UnsupportedOperationException();
     }
 
-    public VCardImportRequest(final int folderId, final InputStream vcard,
-        final boolean failOnError) {
-        super(Action.VCard, folderId, vcard);
-        this.failOnError = failOnError;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public VCardExportResponse parse(final String body) throws JSONException {
+        final VCardExportResponse retval = new VCardExportResponse();
+        retval.setVCard(body);
+        return retval;
     }
 
-    public VCardImportParser getParser() {
-        return new VCardImportParser(failOnError);
+    @Override
+    protected VCardExportResponse createResponse(final Response response) throws JSONException {
+        throw new UnsupportedOperationException();
     }
+
 }

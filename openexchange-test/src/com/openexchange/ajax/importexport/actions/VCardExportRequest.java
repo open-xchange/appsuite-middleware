@@ -49,30 +49,20 @@
 
 package com.openexchange.ajax.importexport.actions;
 
-import java.io.InputStream;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
-/**
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public final class VCardImportRequest extends AbstractImportRequest<VCardImportResponse> {
+public class VCardExportRequest extends AbstractExportRequest<VCardExportResponse> {
 
-    private final boolean failOnError;
+	private boolean failOnError;
 
-    /**
-     * Default constructor.
-     */
-    public VCardImportRequest(final int folderId, final InputStream vcard) {
-        this(folderId, vcard, true);
-    }
+	public VCardExportRequest(int folderId, boolean failOnError) {
+		super(Action.VCard, folderId);
+		this.failOnError = failOnError;
+	}
 
-    public VCardImportRequest(final int folderId, final InputStream vcard,
-        final boolean failOnError) {
-        super(Action.VCard, folderId, vcard);
-        this.failOnError = failOnError;
-    }
 
-    public VCardImportParser getParser() {
-        return new VCardImportParser(failOnError);
+    public AbstractAJAXParser<VCardExportResponse> getParser() {
+        return new VCardExportParser(failOnError); 
     }
 }

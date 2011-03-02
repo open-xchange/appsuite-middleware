@@ -49,30 +49,75 @@
 
 package com.openexchange.ajax.importexport.actions;
 
-import java.io.InputStream;
+import java.util.Date;
 
-/**
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public final class VCardImportRequest extends AbstractImportRequest<VCardImportResponse> {
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 
-    private final boolean failOnError;
+
+public class VCardExportResponse extends AbstractAJAXResponse {
+
+    private String vCard;
 
     /**
-     * Default constructor.
+     * @param response
      */
-    public VCardImportRequest(final int folderId, final InputStream vcard) {
-        this(folderId, vcard, true);
+    public VCardExportResponse() {
+        super(null);
     }
 
-    public VCardImportRequest(final int folderId, final InputStream vcard,
-        final boolean failOnError) {
-        super(Action.VCard, folderId, vcard);
-        this.failOnError = failOnError;
+    /**
+     * @param iCal the iCal to set
+     */
+    public void setVCard(final String vCard) {
+        this.vCard = vCard;
     }
 
-    public VCardImportParser getParser() {
-        return new VCardImportParser(failOnError);
+    /**
+     * @return the iCal
+     */
+    public String getVCard() {
+        return vCard;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getData() {
+        return getVCard();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AbstractOXException getException() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ProblematicAttribute[] getProblematics() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Date getTimestamp() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasError() {
+        throw new UnsupportedOperationException();
     }
 }
