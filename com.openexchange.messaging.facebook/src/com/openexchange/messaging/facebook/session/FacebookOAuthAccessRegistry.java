@@ -133,7 +133,7 @@ public final class FacebookOAuthAccessRegistry {
     }
 
     /**
-     * Removes the OAuth access associated with given user-context-pair, if no more user-associated sessions are present.
+     * Removes the OAuth access associated with given user-context-pair, if no more user-associated accesses are present.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
