@@ -49,32 +49,76 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import org.json.JSONArray;
+
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.importexport.actions.CSVImportRequest;
+import com.openexchange.groupware.importexport.ContactTestData;
 
 /**
- * This suite is meant to be used with a running OX.
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * This bug is concerned with data sent as UTF8 stream with a Byte Order Mark (BOM).
+ * UTF8 does not need one (it would be pointless actually, since the main improvements 
+ * of UTF8 are dynamic length and backwards-compatibility to US-ASCII). It is actually 
+ * recommended not to use one, but of course, some Windows programs insist on using
+ * one anyway. This test tries out several BOMs to prove that the import works even
+ * in those weird situations.
+ * 
+ * @author tobiasp
+ *
  */
-public final class ImportExportServerSuite {
+public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTest(ICalTestSuite.suite());
-
-		//VCARD
-		tests.addTestSuite(VCardImportBugTests.class);
-		tests.addTestSuite(VCardExportTest.class);
-		tests.addTestSuite(Bug9475Test.class);
-		tests.addTestSuite(VCardImportLosingAddressInfoTest.class);
-
-		//CSV
-		tests.addTestSuite(CSVImportExportServletTest.class);
-		tests.addTestSuite(Bug18482Test_ByteOrderMarkOnUtf8.class);
-
-		// Overall bug tests.
-		tests.addTestSuite(Bug9209Test.class);
-
-		return tests;
+	String csv = ContactTestData.IMPORT_MULTIPLE;
+	
+	public Bug18482Test_ByteOrderMarkOnUtf8(String name) {
+		super(name);
 	}
+
+	public void testNone() throws Exception{
+		testWithBOM();
+	}
+	
+	public void testUTF8() throws Exception{
+		testWithBOM(0xEF,0xBB,0xBF);
+	}
+	
+	public void testUTF16LE() throws Exception{
+		testWithBOM(0xFF,0xFE);
+	}
+	
+	public void testUTF16BE() throws Exception{
+		testWithBOM(0xFE, 0xFF);
+	}
+	
+	public void testUTF32LE() throws Exception{
+		testWithBOM(0xFF,0xFE, 0x00, 0x00);
+	}
+	
+	public void testUTF32BE() throws Exception{
+		testWithBOM(0x00, 0x00, 0xFE, 0xFF);
+	}
+	
+	private void testWithBOM(int... bom) throws Exception{
+		byte[] bytes = csv.getBytes("UTF-8");
+		byte[] streambase = new byte[bom.length + bytes.length];
+		for(int i = 0; i < bom.length; i++)
+			streambase[i] = (byte) bom[i];
+		for(int i = bom.length; i < streambase.length; i++)
+			streambase[i] = bytes[i - bom.length];
+		
+		InputStream stream = new ByteArrayInputStream( streambase );
+		CSVImportRequest importRequest = new CSVImportRequest(folderID, stream);
+		AbstractAJAXResponse response = manager.getClient().execute(importRequest);
+		
+		assertFalse(response.hasError());
+		assertFalse(response.hasConflicts());
+		
+		JSONArray data = (JSONArray) response.getData();
+		assertEquals(2, data.length());
+	}
+
 }
