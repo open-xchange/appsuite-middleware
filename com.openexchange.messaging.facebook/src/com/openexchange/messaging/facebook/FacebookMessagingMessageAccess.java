@@ -558,6 +558,9 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         {
             final List<Element> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookOAuthInfo);
             final int size = results.size();
+            if (size <= 0) {
+                return Collections.<MessagingMessage> emptyList();
+            }
             final Iterator<Element> iterator = results.iterator();
             messages = new ArrayList<MessagingMessage>(size);
             if (entityFieldSet.isEmpty()) {

@@ -134,17 +134,15 @@ public final class FacebookDOMParser {
             if ("true".equalsIgnoreCase(attribute)) {
                 final NodeList childNodes = rootElement.getChildNodes();
                 final int length = childNodes.getLength();
-                final List<Element> list;
-                if (length > 0) {
-                    list = new ArrayList<Element>(length);
-                    for (int i = 0; i < length; i++) {
-                        final Node node = childNodes.item(i);
-                        if (ELEMENT_NODE == node.getNodeType()) {
-                            list.add((Element) node);
-                        }
+                if (length <= 0) {
+                    return Collections.emptyList();
+                }
+                final List<Element> list = new ArrayList<Element>(length);
+                for (int i = 0; i < length; i++) {
+                    final Node node = childNodes.item(i);
+                    if (ELEMENT_NODE == node.getNodeType()) {
+                        list.add((Element) node);
                     }
-                } else {
-                    list = Collections.emptyList();
                 }
                 return list;
             }

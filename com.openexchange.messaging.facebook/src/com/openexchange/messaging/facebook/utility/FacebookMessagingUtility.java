@@ -606,6 +606,8 @@ public final class FacebookMessagingUtility {
 
     private static final String FQL_JSON_START = "https://api.facebook.com/method/fql.query?format=JSON&query=";
 
+    private static final int FQL_JSON_START_LEN = FQL_JSON_START.length();
+
     /**
      * Performs specified FQL query and returns its result as a JSON object.
      * 
@@ -619,7 +621,7 @@ public final class FacebookMessagingUtility {
             final OAuthRequest request =
                 new OAuthRequest(
                     Verb.GET,
-                    new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString());
+                    new StringBuilder(FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString());
             facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
             final String body = request.send().getBody();
             if (startsWith('{', body, true)) {
@@ -663,6 +665,8 @@ public final class FacebookMessagingUtility {
 
     private static final String FQL_XML_START = "https://api.facebook.com/method/fql.query?format=XML&query=";
 
+    private static final int FQL_XML_START_LEN = FQL_XML_START.length();
+
     /**
      * Fires given FQL query using specified facebook REST client.
      * 
@@ -675,7 +679,7 @@ public final class FacebookMessagingUtility {
         try {
             final String encodedQuery = encode(fqlQuery.toString());
             final OAuthRequest request =
-                new OAuthRequest(Verb.GET, new StringBuilder(FQL_XML_START.length() + encodedQuery.length()).append(FQL_XML_START).append(
+                new OAuthRequest(Verb.GET, new StringBuilder(FQL_XML_START_LEN + encodedQuery.length()).append(FQL_XML_START).append(
                     encodedQuery).toString());
             facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
             return FacebookDOMParser.parseXMLResponse(request.send().getBody());
