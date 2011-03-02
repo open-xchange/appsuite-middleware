@@ -319,7 +319,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG,
         ContactException.NO_PERMISSION_MSG, "An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d" })
     public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
-        int[] extendedCols = cols;
+        int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
         cs.setFolder(folderId);
 

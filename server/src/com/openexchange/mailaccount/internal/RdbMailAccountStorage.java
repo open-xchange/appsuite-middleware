@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +73,11 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.utils.DefaultFolderNamesProvider;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -85,14 +90,17 @@ import com.openexchange.mailaccount.servlet.fields.GetSwitch;
 import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.servlet.fields.SetSwitch;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbMailAccountStorage} - The relational database implementation of mail account storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class RdbMailAccountStorage implements MailAccountStorageService {
+public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RdbMailAccountStorage.class);
 
@@ -138,6 +146,78 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final String UPDATE_PERSONAL1 = "UPDATE user_mail_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String UPDATE_PERSONAL2 = "UPDATE user_transport_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?";
+
+    private static final String SELECT_PASSWORD1 = "SELECT id, password FROM user_mail_account WHERE cid = ? AND user = ?";
+
+    private static final String SELECT_PASSWORD2 = "SELECT id, password FROM user_transport_account WHERE cid = ? AND user = ?";
+
+    private static final String UPDATE_PASSWORD1 = "UPDATE user_mail_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
+
+    private static final String UPDATE_PASSWORD2 = "UPDATE user_transport_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
+
+    private static final String PARAM_POP3_STORAGE_FOLDERS = "com.openexchange.mailaccount.pop3Folders";
+
+    private static void dropPOP3StorageFolders(final int userId, final int contextId) {
+        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null != service) {
+            for (final Session session : service.getSessions(userId, contextId)) {
+                synchronized (session) {
+                    session.setParameter(PARAM_POP3_STORAGE_FOLDERS, null);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Gets the POP3 storage folders for specified session.
+     * 
+     * @param session The session
+     * @return The POP3 storage folder full names
+     * @throws MailException If an error occurs
+     */
+    @SuppressWarnings("unchecked")
+    public static Set<String> getPOP3StorageFolders(final Session session) throws MailException {
+        Set<String> set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
+        if (null == set) {
+            synchronized (session) {
+                set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
+                if (null == set) {
+                    set = getPOP3StorageFolders0(session);
+                    session.setParameter(PARAM_POP3_STORAGE_FOLDERS, set);
+                }
+            }
+        }
+        return set;
+    }
+
+    private static Set<String> getPOP3StorageFolders0(final Session session) throws MailException {
+        final int contextId = session.getContextId();
+        final Connection con;
+        try {
+            con = Database.get(contextId, false);
+        } catch (final DBPoolingException e) {
+            throw new MailException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND name = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, session.getUserId());
+            stmt.setString(3, "pop3.path");
+            rs = stmt.executeQuery();
+            final Set<String> set = new HashSet<String>(4);
+            while (rs.next()) {
+                set.add(rs.getString(1));
+            }
+            return set;
+        } catch (final SQLException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            Database.back(contextId, false, con);
+        }
+    }
 
     private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid) throws MailAccountException {
         Connection con = null;
@@ -315,9 +395,15 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             con.setAutoCommit(false);
             deleteMailAccount(id, user, cid, deletePrimary, con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final MailAccountException e) {
+            rollback(con);
+            throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.back(cid, true, con);
@@ -348,6 +434,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(3, user);
             stmt.executeUpdate();
             registry.triggerOnAfterDeletion(id, user, cid, con);
+            dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -602,6 +689,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final MailAccountException e) {
+            rollback(con);
+            throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.back(cid, true, con);
@@ -611,20 +704,30 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     /**
      * Contains attributes which denote an account's default folders.
      */
-    private static final EnumSet<Attribute> DEFAULT =
-        EnumSet.of(
-            Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
-            Attribute.CONFIRMED_HAM_LITERAL,
-            Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
-            Attribute.CONFIRMED_SPAM_LITERAL,
-            Attribute.DRAFTS_FULLNAME_LITERAL,
-            Attribute.DRAFTS_LITERAL,
-            Attribute.SENT_FULLNAME_LITERAL,
-            Attribute.SENT_LITERAL,
-            Attribute.SPAM_FULLNAME_LITERAL,
-            Attribute.SPAM_LITERAL,
-            Attribute.TRASH_FULLNAME_LITERAL,
-            Attribute.TRASH_LITERAL);
+    private static final EnumSet<Attribute> DEFAULT = EnumSet.of(
+        Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_HAM_LITERAL,
+        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_SPAM_LITERAL,
+        Attribute.DRAFTS_FULLNAME_LITERAL,
+        Attribute.DRAFTS_LITERAL,
+        Attribute.SENT_FULLNAME_LITERAL,
+        Attribute.SENT_LITERAL,
+        Attribute.SPAM_FULLNAME_LITERAL,
+        Attribute.SPAM_LITERAL,
+        Attribute.TRASH_FULLNAME_LITERAL,
+        Attribute.TRASH_LITERAL);
+
+    /**
+     * Contains attributes which denote the fullnames of an account's default folders.
+     */
+    private static final EnumSet<Attribute> DEFAULT_FULL_NAMES = EnumSet.of(
+        Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+        Attribute.DRAFTS_FULLNAME_LITERAL,
+        Attribute.SENT_FULLNAME_LITERAL,
+        Attribute.SPAM_FULLNAME_LITERAL,
+        Attribute.TRASH_FULLNAME_LITERAL);
 
     /**
      * Contains attributes which are allowed to be edited for primary mail account.
@@ -633,6 +736,18 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         EnumSet.of(Attribute.UNIFIED_INBOX_ENABLED_LITERAL, Attribute.PERSONAL_LITERAL);
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
+        final boolean rename;
+        if (attributes.contains(Attribute.NAME_LITERAL)) {
+            // Check name
+            final String name = mailAccount.getName();
+            if (!isValid(name)) {
+                throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_NAME, name);
+            }
+            // Check for rename operation
+            rename = !name.equals(getMailAccount(mailAccount.getId(), user, cid, con).getName());
+        } else {
+            rename = false;
+        }
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
             final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
             final boolean containsPersonal = attributes.contains(Attribute.PERSONAL_LITERAL);
@@ -745,14 +860,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                         attribute.doSwitch(sqlBuilder);
                     }
 
-                    if (LOG.isDebugEnabled()) {
-                        final String query = sqlBuilder.getUpdateQuery();
-                        stmt = con.prepareStatement(query);
-                        LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
-                            orderedAttributes).append(" :\n").append(query));
-                    } else {
-                        stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
-                    }
+                    stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
 
                     final GetSwitch getter = new GetSwitch(mailAccount);
                     int pos = 1;
@@ -781,10 +889,15 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                                 stmt.setString(pos++, personal);
                             }
                         } else if (DEFAULT.contains(attribute)) {
-                            if (null == value) {
-                                stmt.setObject(pos++, "");
+                            if (DEFAULT_FULL_NAMES.contains(attribute)) {
+                                final String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
+                                stmt.setString(pos++, fullName);
                             } else {
-                                stmt.setObject(pos++, value);
+                                if (null == value) {
+                                    stmt.setObject(pos++, "");
+                                } else {
+                                    stmt.setObject(pos++, value);
+                                }
                             }
                         } else {
                             stmt.setObject(pos++, value);
@@ -794,6 +907,13 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setLong(pos++, cid);
                     stmt.setLong(pos++, mailAccount.getId());
                     stmt.setLong(pos++, user);
+
+                    if (LOG.isDebugEnabled()) {
+                        final String query = stmt.toString();
+                        LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
+                            orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
+                    }
+
                     stmt.executeUpdate();
                     closeSQLStuff(stmt);
 
@@ -862,6 +982,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
+                }
+                /*
+                 * Drop POP3 storage folders if a rename was performed
+                 */
+                if (rename) {
+                    dropPOP3StorageFolders(user, cid);
                 }
             } catch (final SQLException e) {
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
@@ -1006,6 +1132,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
         }
+        // Check name
+        final String name = mailAccount.getName();
+        if (!isValid(name)) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_NAME, name);
+        }
         Connection con = null;
         try {
             con = Database.get(cid, true);
@@ -1029,7 +1160,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
                 int pos = 1;
-                stmt.setString(pos++, mailAccount.getName());
+                stmt.setString(pos++, name);
                 stmt.setString(pos++, mailAccount.generateMailServerURL());
                 stmt.setString(pos++, mailAccount.getLogin());
                 setOptionalString(stmt, pos++, encryptedPassword);
@@ -1075,7 +1206,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.close();
                 stmt = con.prepareStatement(UPDATE_TRANSPORT_ACCOUNT);
                 int pos = 1;
-                stmt.setString(pos++, mailAccount.getName());
+                stmt.setString(pos++, name);
                 stmt.setString(pos++, transportURL);
                 stmt.setString(pos++, mailAccount.getLogin());
                 setOptionalString(stmt, pos++, encryptedTransportPassword);
@@ -1122,6 +1253,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final MailAccountException e) {
+            rollback(con);
+            throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             autocommit(con);
@@ -1200,12 +1337,22 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
-                setOptionalString(stmt, pos++, mailAccount.getTrash());
-                setOptionalString(stmt, pos++, mailAccount.getSent());
-                setOptionalString(stmt, pos++, mailAccount.getDrafts());
-                setOptionalString(stmt, pos++, mailAccount.getSpam());
-                setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
-                setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
+                /*
+                 * Default folder names: trash, sent, drafts, spam, confirmed_spam, confirmed_ham
+                 */
+                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(id, user, cid);
+                {
+                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_TRASH]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_SENT]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_DRAFTS]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_SPAM]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_CONFIRMED_SPAM]);
+                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_CONFIRMED_HAM]);
+                }
+                /*
+                 * Spam handler
+                 */
                 final String sh = mailAccount.getSpamHandler();
                 if (null == sh) {
                     stmt.setNull(pos++, TYPE_VARCHAR);
@@ -1213,12 +1360,22 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setString(pos++, sh);
                 }
                 stmt.setInt(pos++, mailAccount.isUnifiedINBOXEnabled() ? 1 : 0);
-                setOptionalString(stmt, pos++, mailAccount.getTrashFullname());
-                setOptionalString(stmt, pos++, mailAccount.getSentFullname());
-                setOptionalString(stmt, pos++, mailAccount.getDraftsFullname());
-                setOptionalString(stmt, pos++, mailAccount.getSpamFullname());
-                setOptionalString(stmt, pos++, mailAccount.getConfirmedSpamFullname());
-                setOptionalString(stmt, pos++, mailAccount.getConfirmedHamFullname());
+                /*
+                 * Default folder full names
+                 */
+                {
+                    final String[] defaultFolderFullnames =
+                        defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, true);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_TRASH]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_SENT]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_DRAFTS]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_SPAM]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_CONFIRMED_SPAM]);
+                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_CONFIRMED_HAM]);
+                }
+                /*
+                 * Personal
+                 */
                 final String personal = mailAccount.getPersonal();
                 if (isEmpty(personal)) {
                     stmt.setNull(pos++, TYPE_VARCHAR);
@@ -1283,8 +1440,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), con);
                 }
             }
+            dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final MailException e) {
+            throw new MailAccountException(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -1319,6 +1479,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final MailAccountException e) {
             rollback(con);
             throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.back(cid, true, con);
