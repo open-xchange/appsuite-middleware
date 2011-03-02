@@ -186,6 +186,41 @@ public class ContactTestManager implements TestManager {
     	contact.setParentFolderID(folderId);
         return contact;
     }
+
+    /**
+     * Creates a contact with all possible string, int and date fields 
+     * set to the value of their column number. Sorry, if you want to 
+     * check the date fields, you have to do a bit of parsing.
+     * 
+     * Warning: objectID is being set, too. You might want to change 
+     * that for all but the most basic tests.
+     */
+    public static Contact generateFullContact(int folderID){
+    	Contact contact = new Contact();
+    	int i = 100;
+    	for(int field: Contact.ALL_COLUMNS){
+    		try {
+    			contact.set(field, new Integer(field));
+    		} catch(ClassCastException e1) {
+    			try {
+        			contact.set(field, String.valueOf(field));
+        		} catch(ClassCastException e2) {
+        			try {
+            			contact.set(field, new Date(field));
+            		} catch(ClassCastException e3) {
+            			//don't
+            		}
+        		}
+    		}
+    	}
+    	contact.setEmail1("email1@hostinvalid");
+    	contact.setEmail2("email2@hostinvalid");
+    	contact.setEmail3("email3@hostinvalid");
+    	
+    	contact.removeObjectID();
+    	contact.setParentFolderID(folderID);
+    	return contact;
+    }
     /**
      * Creates a contact via HTTP-API and updates it with new id, timestamp and all other information that is updated after such requests.
      * Remembers this contact for cleanup later.
