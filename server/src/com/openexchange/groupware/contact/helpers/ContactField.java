@@ -187,7 +187,7 @@ public enum ContactField{
     IMAGE1_CONTENT_TYPE (601 , "intfield04" , "IMAGE1_CONTENT_TYPE" , ""  , ""),
     INTERNAL_USERID (524 , "userid" , "INTERNAL_USERID" , ""  , ""),
     COLOR_LABEL (102 , "intfield05" , "COLOR_LABEL" , ""  , CommonFields.COLORLABEL),
-    FILE_AS (599 , "field90" , "FILE_AS" , ""  , ""),
+    FILE_AS (599 , "field90" , "FILE_AS" , ""  , ContactFields.FILE_AS),
     DEFAULT_ADDRESS (605 , "intfield06" , "DEFAULT_ADDRESS" , "Default address"  , ContactFields.DEFAULT_ADDRESS),
     MARK_AS_DISTRIBUTIONLIST (602 , "intfield07" , "MARK_AS_DISTRIBUTIONLIST" , ""  , ContactFields.MARK_AS_DISTRIBUTIONLIST),
     NUMBER_OF_ATTACHMENTS (104 , "intfield08" , "NUMBER_OF_ATTACHMENTS" , ""  , "");
