@@ -226,7 +226,12 @@ public final class ConfirmTask {
 
     private Task getFilledChangedTask() throws TaskException {
         if (!filledTask) {
-            changedTask.setCreatedBy(getOrigTask().getCreatedBy());
+            Task oldTask = getOrigTask();
+            for (Mapper mapper : Mapping.MAPPERS) {
+                if (!mapper.isSet(changedTask) && mapper.isSet(getOrigTask())) {
+                    mapper.set(changedTask, mapper.get(getOrigTask()));
+                }
+            }
             changedTask.setParticipants(TaskLogic.createParticipants(getParticipants()));
             changedTask.setUsers(TaskLogic.createUserParticipants(getParticipants()));
             Folder folder = FolderStorage.extractFolderOfUser(getFolders(), userId);
