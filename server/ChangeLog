@@ -1,3 +1,7 @@
+* 2011-03-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #18292: Fixed folder update.
+
 * 2011-03-01 - thorben.betten@open-xchange.com
 
  - Bugfix #18423: Checking for possible wrong content type for uploaded file
