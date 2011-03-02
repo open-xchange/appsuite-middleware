@@ -162,7 +162,7 @@ public final class FacebookOAuthAccessRegistry {
      * @param accountId The account identifier
      * @return <code>true</code> if a facebook OAuth access for given user-context-pair was found and purged; otherwise <code>false</code>
      */
-    public boolean purgeUserSession(final int contextId, final int userId, final int accountId) {
+    public boolean purgeUserAccess(final int contextId, final int userId, final int accountId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         final ConcurrentMap<Integer, FacebookOAuthAccess> inner = map.get(key);
         if (null == inner) {

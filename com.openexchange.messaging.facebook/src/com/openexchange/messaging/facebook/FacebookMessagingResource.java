@@ -52,7 +52,7 @@ package com.openexchange.messaging.facebook;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingResource;
-import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
+import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -76,7 +76,7 @@ public class FacebookMessagingResource implements MessagingResource {
     /**
      * The facebook session.
      */
-    protected FacebookOAuthInfo facebookOAuthInfo;
+    protected FacebookOAuthAccess facebookOAuthInfo;
 
     /**
      * The session.
@@ -93,7 +93,7 @@ public class FacebookMessagingResource implements MessagingResource {
         super();
         this.messagingAccount = messagingAccount;
         this.session = session;
-        facebookOAuthInfo = FacebookOAuthInfo.sessionFor(messagingAccount, session);
+        facebookOAuthInfo = FacebookOAuthAccess.accessFor(messagingAccount, session);
     }
 
     public void close() {

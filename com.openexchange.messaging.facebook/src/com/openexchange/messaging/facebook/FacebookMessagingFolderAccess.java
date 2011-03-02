@@ -66,7 +66,7 @@ import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.Quota;
 import com.openexchange.messaging.Quota.Type;
-import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
+import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -130,12 +130,12 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
     /**
      * Initializes a new {@link FacebookMessagingFolderAccess}.
      * 
-     * @param facebookOAuthInfo The Facebook OAuth information
+     * @param facebookOAuthAccess The Facebook OAuth access
      * @param messagingAccount The Facebook messaging account
      * @param session The associated session
      */
-    public FacebookMessagingFolderAccess(final FacebookOAuthInfo facebookOAuthInfo, final MessagingAccount messagingAccount, final Session session) {
-        super(facebookOAuthInfo, messagingAccount, session);
+    public FacebookMessagingFolderAccess(final FacebookOAuthAccess facebookOAuthAccess, final MessagingAccount messagingAccount, final Session session) {
+        super(facebookOAuthAccess, messagingAccount, session);
     }
 
     public void clearFolder(final String folderId) throws MessagingException {

@@ -87,7 +87,7 @@ public final class FacebookOAuthAccess {
      * @throws FacebookMessagingException If a Facebook session could not be created
      */
     public static FacebookOAuthAccess accessFor(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
-        final FacebookOAuthInfoRegistry registry = FacebookOAuthInfoRegistry.getInstance();
+        final FacebookOAuthAccessRegistry registry = FacebookOAuthAccessRegistry.getInstance();
         final int accountId = messagingAccount.getId();
         FacebookOAuthAccess facebookSession = registry.getSession(session.getContextId(), session.getUserId(), accountId);
         if (null == facebookSession) {

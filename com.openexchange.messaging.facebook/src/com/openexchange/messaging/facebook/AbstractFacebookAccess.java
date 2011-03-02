@@ -62,16 +62,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.scribe.exceptions.OAuthException;
-import org.scribe.model.OAuthRequest;
 import org.scribe.model.Token;
-import org.scribe.model.Verb;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
-import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
+import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
@@ -91,7 +89,7 @@ public abstract class AbstractFacebookAccess {
 
     protected final MessagingAccount messagingAccount;
 
-    protected final FacebookOAuthInfo facebookOAuthInfo;
+    protected final FacebookOAuthAccess facebookOAuthAccess;
 
     protected final int id;
 
@@ -112,18 +110,18 @@ public abstract class AbstractFacebookAccess {
     /**
      * Initializes a new {@link AbstractFacebookAccess}.
      */
-    protected AbstractFacebookAccess(final FacebookOAuthInfo facebookOAuthInfo, final MessagingAccount messagingAccount, final Session session) {
+    protected AbstractFacebookAccess(final FacebookOAuthAccess facebookOAuthAccess, final MessagingAccount messagingAccount, final Session session) {
         super();
         this.session = session;
         this.messagingAccount = messagingAccount;
-        this.facebookOAuthInfo = facebookOAuthInfo;
+        this.facebookOAuthAccess = facebookOAuthAccess;
         id = messagingAccount.getId();
         user = session.getUserId();
         cid = session.getContextId();
-        this.facebookUserId = facebookOAuthInfo.getFacebookUserId();
-        facebookUserName = facebookOAuthInfo.getFacebookUserName();
-        this.facebookOAuthService = facebookOAuthInfo.getFacebookOAuthService();
-        this.facebookAccessToken = facebookOAuthInfo.getFacebookAccessToken();
+        this.facebookUserId = facebookOAuthAccess.getFacebookUserId();
+        facebookUserName = facebookOAuthAccess.getFacebookUserName();
+        this.facebookOAuthService = facebookOAuthAccess.getFacebookOAuthService();
+        this.facebookAccessToken = facebookOAuthAccess.getFacebookAccessToken();
     }
 
     public String getFacebookUserName() {
@@ -176,12 +174,10 @@ public abstract class AbstractFacebookAccess {
     protected JSONObject performFQLQuery(final String fqlQuery) throws FacebookMessagingException {
         try {
             final String encodedQuery = encode(fqlQuery);
-            final OAuthRequest request =
-                new OAuthRequest(
-                    Verb.GET,
-                    new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString());
-            facebookOAuthService.signRequest(facebookAccessToken, request);
-            final JSONObject result = new JSONObject(request.send().getBody());
+            final JSONObject result =
+                new JSONObject(
+                    facebookOAuthAccess.executeGETRequest(new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(
+                        FQL_JSON_START).append(encodedQuery).toString()));
             if (result.has("error")) {
                 final JSONObject error = result.getJSONObject("error");
                 final String type = error.optString("type");
@@ -211,13 +207,11 @@ public abstract class AbstractFacebookAccess {
     protected <V extends JSONValue> V performFQLQuery(final Class<V> clazz, final String fqlQuery) throws FacebookMessagingException {
         try {
             final String encodedQuery = encode(fqlQuery);
-            final OAuthRequest request =
-                new OAuthRequest(
-                    Verb.GET,
-                    new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString());
-            facebookOAuthService.signRequest(facebookAccessToken, request);
             if (JSONObject.class.equals(clazz)) {
-                final JSONObject result = new JSONObject(request.send().getBody());
+                final JSONObject result =
+                    new JSONObject(
+                        facebookOAuthAccess.executeGETRequest(new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(
+                            FQL_JSON_START).append(encodedQuery).toString()));
                 if (result.has("error")) {
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
@@ -225,12 +219,15 @@ public abstract class AbstractFacebookAccess {
                     if ("OAuthException".equals(type)) {
                         throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                     }
-                    throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == message ? "" : message);
+                    throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
+                        null == type ? "<unknown>" : type,
+                        null == message ? "" : message);
                 }
                 return (V) result;
             }
             if (JSONArray.class.equals(clazz)) {
-                return (V) new JSONArray(request.send().getBody());
+                return (V) new JSONArray(facebookOAuthAccess.executeGETRequest(new StringBuilder(
+                    FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString()));
             }
             throw new IllegalArgumentException("Unsupported return type: " + clazz.getName());
         } catch (final JSONException e) {

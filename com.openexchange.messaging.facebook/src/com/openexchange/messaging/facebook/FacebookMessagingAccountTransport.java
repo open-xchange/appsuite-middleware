@@ -69,7 +69,7 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
-import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
+import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.messaging.generic.Utility;
 import com.openexchange.session.Session;
@@ -106,7 +106,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
      * @param facebookUserId The facebook user identifier
      * @throws MessagingException If transport fails
      */
-    public static void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients, final FacebookOAuthInfo facebookOAuthInfo, final String facebookUserId) throws MessagingException {
+    public static void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients, final FacebookOAuthAccess facebookOAuthAccess, final String facebookUserId) throws MessagingException {
         try {
             /*
              * Recipient identifier
@@ -152,7 +152,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                         new OAuthRequest(
                             Verb.POST,
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(stringContent.getData()));
-                    facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
+                    facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
                     final Response response = request.send();
                     final JSONObject result = new JSONObject(response.getBody());
                     if (result.has("error")) {
@@ -178,7 +178,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                         new OAuthRequest(
                             Verb.POST,
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(Utility.textFormat(stringContent.getData())));
-                    facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
+                    facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
                     final Response response = request.send();
                     final JSONObject result = new JSONObject(response.getBody());
                     if (result.has("error")) {
@@ -198,7 +198,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                         new OAuthRequest(
                             Verb.POST,
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(stringContent.getData()));
-                    facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
+                    facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
                     final Response response = request.send();
                     final JSONObject result = new JSONObject(response.getBody());
                     if (result.has("error")) {

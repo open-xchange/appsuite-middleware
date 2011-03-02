@@ -65,8 +65,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.exceptions.OAuthException;
-import org.scribe.model.OAuthRequest;
-import org.scribe.model.Verb;
 import org.w3c.dom.Element;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
@@ -81,7 +79,7 @@ import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingMessageAccess;
-import com.openexchange.messaging.facebook.session.FacebookOAuthInfo;
+import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
 
@@ -615,15 +613,12 @@ public final class FacebookMessagingUtility {
      * @return The queried JSON object
      * @throws FacebookMessagingException If FQL query fails
      */
-    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthInfo facebookOAuthInfo) throws FacebookMessagingException {
+    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws FacebookMessagingException {
         try {
             final String encodedQuery = encode(fqlQuery);
-            final OAuthRequest request =
-                new OAuthRequest(
-                    Verb.GET,
-                    new StringBuilder(FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString());
-            facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
-            final String body = request.send().getBody();
+            final String body =
+                facebookOAuthInfo.executeGETRequest(new StringBuilder(FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(
+                    encodedQuery).toString());
             if (startsWith('{', body, true)) {
                 /*
                  * Expect the body to be a JSON object
@@ -675,16 +670,11 @@ public final class FacebookMessagingUtility {
      * @return The FQL query's results
      * @throws FacebookMessagingException If query cannot be fired
      */
-    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthInfo facebookOAuthInfo) throws FacebookMessagingException {
+    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws FacebookMessagingException {
         try {
             final String encodedQuery = encode(fqlQuery.toString());
-            final OAuthRequest request =
-                new OAuthRequest(Verb.GET, new StringBuilder(FQL_XML_START_LEN + encodedQuery.length()).append(FQL_XML_START).append(
-                    encodedQuery).toString());
-            facebookOAuthInfo.getFacebookOAuthService().signRequest(facebookOAuthInfo.getFacebookAccessToken(), request);
-            return FacebookDOMParser.parseXMLResponse(request.send().getBody());
-        } catch (final OAuthException e) {
-            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+            return FacebookDOMParser.parseXMLResponse(facebookOAuthInfo.executeGETRequest(new StringBuilder(
+                FQL_XML_START_LEN + encodedQuery.length()).append(FQL_XML_START).append(encodedQuery).toString()));
         } catch (final Exception e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
