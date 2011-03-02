@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import java.util.Collection;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.exception.SessiondException;
@@ -62,18 +63,13 @@ import com.openexchange.sessiond.exception.SessiondException;
 public interface SessiondService {
 
     /**
-     * Creates a new session object in the sessiond storage with the given session parameters
+     * Creates a new session object in the sessiond storage with the given session parameters.
+     * @param parameterObject TODO
      * 
-     * @param userId - The User ID
-     * @param loginName - The login name of the user (e.g. <code>test</code> extracted from login <code>test@foo</code>)
-     * @param password - The password of the user
-     * @param context - The context of the user
-     * @param clientHost - The hostname of the incoming client
-     * @param login The full login name (e.g <code>test@foo</code>)
      * @return The session ID of the newly created session as a <code>String</code>
      * @throws SessiondException
      */
-    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login) throws SessiondException;
+    public String addSession(AddSessionParameter parameterObject) throws SessiondException;
 
     /**
      * Replaces the currently stored password in session identified through given session ID with specified <code>newPassword</code>.
@@ -85,7 +81,7 @@ public interface SessiondService {
     public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException;
 
     /**
-     * Refreshes the timestamp of the session with the given session ID
+     * Refreshes the timestamp of the session with the given session ID.
      * 
      * @param sessionId - The Session ID
      * @return <code>true</code> if the session timestamp was updated or <code>false</code> if the session ID was invalid or expired
@@ -93,7 +89,7 @@ public interface SessiondService {
     public boolean refreshSession(final String sessionId);
 
     /**
-     * Removes the session with the given session ID
+     * Removes the session with the given session ID.
      * 
      * @param sessionId - The Session ID
      * @return <code>true</code> if the session was removed or <code>false</code> if the session ID doesn't exist
@@ -101,7 +97,7 @@ public interface SessiondService {
     public boolean removeSession(final String sessionId);
 
     /**
-     * Removes all sessions belonging to given user in specified context
+     * Removes all sessions belonging to given user in specified context.
      * 
      * @param userId The user ID
      * @param ctx The context
@@ -110,7 +106,27 @@ public interface SessiondService {
     public int removeUserSessions(final int userId, final Context ctx);
 
     /**
-     * Get the session object related to the given session ID
+     * Gets the number of active sessions belonging to given user in specified context.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of active sessions belonging to given user in specified context
+     */
+    public int getUserSessions(final int userId, final int contextId);
+
+    /**
+     * Gets the <b>local-only</b> sessions associated with specified user in given context.
+     * <p>
+     * <b>Note</b>: Remote sessions are not considered by this method.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The <b>local-only</b> sessions associated with specified user in given context
+     */
+    public Collection<Session> getSessions(int userId, int contextId);
+
+    /**
+     * Get the session object related to the given session identifier.
      * 
      * @param sessionId - The Session ID
      * @return Return the session object or null if no session exists for the given ID or if the session is expired
@@ -118,7 +134,7 @@ public interface SessiondService {
     public Session getSession(final String sessionId);
 
     /**
-     * Get the session object related to the given random token
+     * Get the session object related to the given random token.
      * 
      * @param randomToken - The random token of the session
      * @param localIp - The new local IP to apply to session
@@ -127,18 +143,7 @@ public interface SessiondService {
     public Session getSessionByRandomToken(final String randomToken, final String localIp);
 
     /**
-     * Gets (and removes) the session bound to given secret cookie identifier in cache.
-     * <p>
-     * Session is going to be added to local session containers on a cache hit.
-     * 
-     * @param secret The secret cookie identifier (which is sent as <i>"session=..."</i> in every request)
-     * @param localIP The host's local IP address
-     * @return The cached session or <code>null</code> on cache miss.
-     */
-    public Session getCachedSession(final String secret, final String localIP);
-
-    /**
-     * The number of active sessions
+     * The number of active sessions.
      * 
      * @return Return the number of active sessions
      */

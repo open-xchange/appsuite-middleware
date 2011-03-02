@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import java.util.Collection;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.exception.SessiondException;
@@ -131,6 +132,11 @@ public class AbstractSimSessiondService implements SessiondService{
     public int removeUserSessions(int userId, Context ctx) {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    public Collection<Session> getSessions(int userId, int contextId) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

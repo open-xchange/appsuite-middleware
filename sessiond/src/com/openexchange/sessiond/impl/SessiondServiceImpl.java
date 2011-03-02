@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,8 +49,17 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
 
@@ -62,17 +71,14 @@ import com.openexchange.sessiond.exception.SessiondException;
  */
 public class SessiondServiceImpl implements SessiondService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessiondServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(SessiondServiceImpl.class);
 
-    /**
-     * Initializes a new {@link SessiondServiceImpl}
-     */
     public SessiondServiceImpl() {
         super();
     }
 
-    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login) throws SessiondException {
-        return SessionHandler.addSession(userId, loginName, password, context, clientHost, login);
+    public String addSession(AddSessionParameter param) throws SessiondException {
+        return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash());
     }
 
     public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {
@@ -91,20 +97,48 @@ public class SessiondServiceImpl implements SessiondService {
         return SessionHandler.removeUserSessions(userId, ctx.getContextId(), true).length;
     }
 
-    public Session getSession(final String sessionId) {
-        final SessionControl sessionControl = SessionHandler.getSession(sessionId);
-        if (sessionControl != null) {
-            return sessionControl.getSession();
-        }
-        return null;
+    public int getUserSessions(final int userId, final int contextId) {
+        return SessionHandler.getUserSessions(userId, contextId).length;
     }
 
-    public Session getCachedSession(final String secret, final String localIP) {
-        final SessionControl sessionControl = SessionHandler.getCachedSession(secret, localIP);
-        if (sessionControl != null) {
-            return sessionControl.getSession();
+    public Collection<Session> getSessions(final int userId, final int contextId) {
+        final SessionControl[] sessionControls = SessionHandler.getUserSessions(userId, contextId);
+        if (null == sessionControls || 0 == sessionControls.length) {
+            return Collections.emptyList();
         }
-        return null;
+        final int length = sessionControls.length;
+        final List<Session> list = new ArrayList<Session>(length);
+        for (int i = 0; i < length; i++) {
+            list.add(sessionControls[i].getSession());
+        }
+        return list;
+    }
+
+    private final Lock migrateLock = new ReentrantLock();
+
+    public Session getSession(String sessionId) {
+        SessionControl sessionControl = SessionHandler.getSession(sessionId);
+        if (null == sessionControl) {
+            // No local session found. Maybe it should be migrated.
+            // Look for a cached session must be serialized. Multiple threads can reach simultaneously this code part. The first one
+            // migrates the session and the second one will not find a session in the cache.
+            migrateLock.lock();
+            try {
+                // First look again locally. Maybe another thread already migrated the session while this one waits on the lock.
+                sessionControl = SessionHandler.getSession(sessionId);
+                if (null == sessionControl) {
+                    // Migrate session.
+                    sessionControl = SessionHandler.getCachedSession(sessionId);
+                }
+            } finally {
+                migrateLock.unlock();
+            }
+        }
+        if (null == sessionControl) {
+            LOG.info("Session not found. ID: " + sessionId);
+            return null;
+        }
+        return sessionControl.getSession();
     }
 
     public Session getSessionByRandomToken(final String randomToken, final String localIp) {
