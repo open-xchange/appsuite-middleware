@@ -72,7 +72,7 @@ com.openexchange.contacts.ldap.context111.LDAPglobal.mappingfile=mapping.openlda
 com.openexchange.contacts.ldap.context111.LDAPglobal.foldername=LDAPglobal
 
 # Specify the searchfilter for the global ldap folder here
-com.openexchange.contacts.ldap.context111.LDAPglobal.searchfilter=(objectclass=person)
+com.openexchange.contacts.ldap.context111.LDAPglobal.searchfilter=(objectclass=posixaccount)
 
 # Specify what types of contacts should be displayed. Maybe "users", "distributionlists", or "both"
 com.openexchange.contacts.ldap.context111.LDAPglobal.contactTypes=both
