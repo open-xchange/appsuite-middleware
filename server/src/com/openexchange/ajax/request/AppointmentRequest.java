@@ -100,22 +100,22 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.OXJSONException.Code;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link AppointmentRequest} - Processes appointment requests.
@@ -691,6 +691,7 @@ public class AppointmentRequest extends CalendarRequest {
             }
         }
     }
+   
 
     public JSONArray actionAll(final JSONObject jsonObj) throws JSONException,AbstractOXException {
         timestamp = new Date(0);
@@ -752,6 +753,43 @@ public class AppointmentRequest extends CalendarRequest {
                 final Appointment appointment = it.next();
                 final AppointmentWriter writer = new AppointmentWriter(timeZone);
                 boolean written = false;
+                
+                // Workaround to fill appointments with alarm times 
+                // TODO: Move me down into the right layer if there is time for some refactoring.
+                if (com.openexchange.tools.arrays.Arrays.contains(columns, Appointment.ALARM)) {
+                    if (!appointment.containsAlarm() && appointment.containsUserParticipants()) {
+                        final OXFolderAccess ofa = new OXFolderAccess(ctx);
+                        
+                        try {
+                            final int folderType = ofa.getFolderType(folderId, user.getId());
+                            final int owner = ofa.getFolderOwner(folderId);
+                            
+                            switch (folderType) {
+                            case FolderObject.PRIVATE:
+                                for (UserParticipant u : appointment.getUsers()) {
+                                    if (u.getIdentifier() == user.getId() && u.getAlarmMinutes() > -1) {
+                                        appointment.setAlarm(u.getAlarmMinutes());
+                                        break;
+                                    }
+                                }
+                                break;
+
+                            case FolderObject.SHARED:
+                                for (UserParticipant u : appointment.getUsers()) {
+                                    if (u.getIdentifier() == owner && u.getAlarmMinutes() > -1) {
+                                        appointment.setAlarm(u.getAlarmMinutes());
+                                        break;
+                                    }
+                                }               
+                                break;
+                            }
+                        } catch (OXException e) {
+                            LOG.error("An error occurred during filling an appointment with alarm information.", e);
+                        }                        
+                    }                  
+                }
+                // End of workaround
+                
                 if (appointment.getRecurrenceType() != CalendarObject.NONE && appointment.getRecurrencePosition() == 0) {
                     if (bRecurrenceMaster) {
                         RecurringResultsInterface recuResults = null;
