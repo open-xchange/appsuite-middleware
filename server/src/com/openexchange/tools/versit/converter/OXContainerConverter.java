@@ -135,6 +135,8 @@ public class OXContainerConverter {
 
     private static final String PARAM_HOME = "home";
 
+    private static final String PARAM_OTHER = "dom";
+
     private static final String P_TYPE = "TYPE";
 
     private static final String P_DESCRIPTION = "DESCRIPTION";
@@ -598,6 +600,7 @@ public class OXContainerConverter {
         final int CAR = 3;
         final int ISDN = 4;
         final int PAGER = 5;
+        final int OTHER = 6;
 
         final int VOICE = 0;
         final int FAX = 1;
@@ -622,14 +625,15 @@ public class OXContainerConverter {
             property = object.getProperty(i);
             // ADR
             if ("ADR".equals(property.name)) {
-                boolean isHome = false, isWork = true;
+                boolean isHome = false, isWork = false, isOther = true;
                 final Parameter type = property.getParameter(P_TYPE);
                 if (type != null) {
-                    isWork = false;
+                    isOther = false;
                     for (int j = 0; j < type.getValueCount(); j++) {
                         final String value = type.getValue(j).getText();
-                        isHome |= PARAM_HOME.equalsIgnoreCase(value);
-                        isWork |= PARAM_WORK.equalsIgnoreCase(value);
+                        isHome  |= PARAM_HOME.equalsIgnoreCase(value);
+                        isWork  |= PARAM_WORK.equalsIgnoreCase(value);
+                        isOther |= PARAM_OTHER.equalsIgnoreCase(value);
                     }
                 }
                 final ArrayList<?> A = (ArrayList<?>) property.getValue();
@@ -651,6 +655,13 @@ public class OXContainerConverter {
                     ListValue(contactContainer, Contact.POSTAL_CODE_HOME, A.get(5), "\n");
                     ListValue(contactContainer, Contact.COUNTRY_HOME, A.get(6), "\n");
                 }
+                if (isOther) {
+                    ListValue(contactContainer, Contact.STREET_OTHER, A.get(2), "\n");
+                    ListValue(contactContainer, Contact.CITY_OTHER, A.get(3), "\n");
+                    ListValue(contactContainer, Contact.STATE_OTHER, A.get(4), "\n");
+                    ListValue(contactContainer, Contact.POSTAL_CODE_OTHER, A.get(5), "\n");
+                    ListValue(contactContainer, Contact.COUNTRY_OTHER, A.get(6), "\n");
+                }
             }
             // LABEL is ignored
             // TEL
@@ -667,6 +678,8 @@ public class OXContainerConverter {
                                 idx = WORK;
                             } else if (value.equalsIgnoreCase(PARAM_HOME)) {
                                 idx = HOME;
+                            } else if (value.equalsIgnoreCase(PARAM_OTHER)) {
+                                idx = OTHER;
                             } else if (value.equalsIgnoreCase("car")) {
                                 idx = CAR;
                             } else if (value.equalsIgnoreCase("isdn")) {
@@ -1445,6 +1458,16 @@ public class OXContainerConverter {
             Contact.STATE_HOME,
             Contact.POSTAL_CODE_HOME,
             Contact.COUNTRY_HOME);
+        // ADR OTHER (as "dom" since there is no equivalent)
+    	addADR(
+            object,
+            contact,
+            new String[] { PARAM_OTHER },
+            Contact.STREET_OTHER,
+            Contact.CITY_OTHER,
+            Contact.STATE_OTHER,
+            Contact.POSTAL_CODE_OTHER,
+            Contact.COUNTRY_OTHER);
         // LABEL is ignored
         // TEL
         addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness1());
@@ -1456,10 +1479,9 @@ public class OXContainerConverter {
         addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, "fax" }, contact.getFaxHome());
         addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone1());
         addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone2());
-        // addProperty(object, "TEL", "TYPE", null, contact
-        // .get(OXContact.PHONE_OTHER));
-        // addProperty(object, "TEL", "TYPE", new String[] { "fax" }, contact
-        // .get(OXContact.FAX_OTHER));
+        
+        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, PARAM_VOICE }, contact.getTelephoneOther());
+        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, "fax" }, contact.getFaxOther());
         addProperty(object, P_TEL, P_TYPE, new String[] { "isdn" }, contact.getTelephoneISDN());
         addProperty(object, P_TEL, P_TYPE, new String[] { "pager" }, contact.getTelephonePager());
         // EMAIL
