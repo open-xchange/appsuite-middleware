@@ -725,6 +725,18 @@ public final class FacebookMessagingUtility {
             return orderBy;
         }
 
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder(256).append("( charSequence=");
+            if (null == charSequence) {
+                sb.append("<not-available>");
+            } else {
+                sb.append('"').append(charSequence).append('"');
+            }
+            sb.append(", orderBy=").append(orderBy).append(" )");
+            return sb.toString();
+        }
+
     }
 
     /**
