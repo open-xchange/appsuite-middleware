@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 23
+%define		ox_release 24
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -725,6 +725,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Mar 02 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18292: Fixed folder update.
+* Tue Mar 01 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18423: Checking for possible wrong content type for uploaded file
 * Sat Feb 26 2011 - thorben.betten@open-xchange.com
  - Bugfix #18429: Using proper default folder indexes
 * Fri Feb 18 2011 - thorben.betten@open-xchange.com

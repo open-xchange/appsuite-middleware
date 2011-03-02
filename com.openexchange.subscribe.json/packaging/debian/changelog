@@ -1,3 +1,9 @@
+open-xchange-subscribe-json (6.18.2.0-23) unstable; urgency=low
+
+  * second build for public ptf 2011-03-02
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 02 Mar 2011 15:08:05 +0000
+
 open-xchange-subscribe-json (6.18.2.0-22) unstable; urgency=low
 
   * build for public ptf 2011-03-02
