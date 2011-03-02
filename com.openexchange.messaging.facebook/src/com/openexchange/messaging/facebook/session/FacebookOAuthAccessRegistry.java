@@ -137,7 +137,7 @@ public final class FacebookOAuthAccessRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @return <code>true</code> if a facebook session for given user-context-pair was found and removed; otherwise <code>false</code>
+     * @return <code>true</code> if a facebook OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeSessionIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
