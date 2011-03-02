@@ -1,3 +1,8 @@
+* 2011-03-02 - tobias.prinz@open-xchange.com
+
+ - Bugfix #18094: "other" address information is now exported to VCards (using type=dom) - and imported this way,too.
+ - Bugfix #18482: Importing CSV works even with UTF8-encoded files that insist on using a Byte Order Mark.
+
 * 2011-03-02 - marcus.klein@open-xchange.com
 
  - Bugfix #18487: Adding all necessary information to a task when triggering the event for accepting, declining etc.
