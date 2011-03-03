@@ -5,9 +5,6 @@
     <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
 
-    <!-- Bundle dependencies -->
-    <property name="commonBundle" value="com.openexchange.common"/>
-
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="lib.dir" value="lib"/>
@@ -25,6 +22,7 @@
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
     <property name="cachingBundle" value="com.openexchange.caching"/>
 
     <!-- JAR names for classpath -->
@@ -48,10 +46,10 @@
     <property name="trovejar" value="trove-2.1.0.jar"/>
 
     <!-- Third party libs -->
-        <fileset dir="${basedir}" id="3rdpartyjars">
-            <include name="${lib.dir}/*.jar"/>
-            <exclude name="CVS"/>
-        </fileset>
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
 
     <!-- Classpath -->
     <path id="project.classpath">
