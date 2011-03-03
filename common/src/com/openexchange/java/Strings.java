@@ -98,20 +98,30 @@ public class Strings {
         }
         return join(list, connector);
     }
+
+    public static String join(final byte[] arr, final String connector) {
+        final List<Byte> list = new LinkedList<Byte>();
+        for (final Byte i : arr) {
+            list.add(i);
+        }
+        return join(list, connector);
+    }
     
     /**
-     * Removes byte order marks from UTF8 strings
+     * Removes byte order marks from UTF8 strings.
+     * @return new instance of trimmed string - or reference to old one if unchanged 
      */
     public static String trimBOM(String str) {
 		final byte[][] byteOrderMarks = new byte[][]{
 				new byte[]{(byte)0x00, (byte)0x00, (byte)0xFE,(byte)0xFF},
 				new byte[]{(byte)0xFF, (byte)0xFE, (byte)0x00,(byte)0x0},
 				new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF},
-				new byte[]{(byte)0xFE,(byte)0xFF},
-				new byte[]{(byte)0xFE,(byte)0xFF}
+				new byte[]{(byte)0xFE, (byte)0xFF},
+				new byte[]{(byte)0xFE, (byte)0xFF}
 			};				
 		
 		byte[] bytes = str.getBytes();
+		System.out.println("BOM@JENKINS: " + Strings.join(bytes," "));
 		for(byte[] bom: byteOrderMarks){
 			if(bom.length > bytes.length)
 				continue;
