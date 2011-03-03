@@ -456,10 +456,9 @@ public abstract class SessionServlet extends AJAXServlet {
         if (cookies == null) {
             return;
         }
-        final String jsessionidCookie = "JSESSIONID";
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
-            if (jsessionidCookie.equals(name)) {
+            if (Tools.JSESSIONID_COOKIE.equals(name)) {
                 final Cookie respCookie = new Cookie(name, cookie.getValue());
                 respCookie.setPath("/");
                 respCookie.setMaxAge(0); // delete

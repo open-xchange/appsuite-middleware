@@ -220,7 +220,7 @@ public final class Tools {
     /**
      * The name of the JSESSIONID cookie
      */
-    private static final String JSESSIONID_COOKIE = "JSESSIONID";
+    public static final String JSESSIONID_COOKIE = "JSESSIONID";
 
     private static final CookieNameMatcher OX_COOKIE_MATCHER = new CookieNameMatcher() {
 

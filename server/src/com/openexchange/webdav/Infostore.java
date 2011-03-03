@@ -183,7 +183,7 @@ public class Infostore extends OXServlet {
     private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {
 
         public boolean matches(final String cookieName) {
-            return (COOKIE_SESSIONID.equals(cookieName) || "JSESSIONID".equals(cookieName));
+            return (COOKIE_SESSIONID.equals(cookieName) || Tools.JSESSIONID_COOKIE.equals(cookieName));
         }
     };
 
