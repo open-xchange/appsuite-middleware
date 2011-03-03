@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.extensions.osgi;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.BundleActivator;
@@ -168,13 +169,24 @@ public class Activator implements BundleActivator {
                     }
 
                     public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
-                        if(null != setting.getSingleValue()) {
+                        Object value = setting.getSingleValue();
+                        if(value == null) {
+                            Object[] multiValue = setting.getMultiValue();
+                            if(multiValue != null) {
+                                
+                                JSONArray arr = new JSONArray();
+                                for (Object o : multiValue) {
+                                    arr.put(o);
+                                }
+                                value = arr.toString();
+                            }
+                        }
+                        if(value != null) {
                             try {
-                                String value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
-                                String updateValue = setting.getSingleValue().toString();
+                                String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
                                 // Clients have a habit of dumping the config back at us, so we only save differing values.
-                                if(!updateValue.equals(value)) {
-                                    viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, updateValue);
+                                if(!value.equals(oldValue)) {
+                                    viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
                                 }
                             } catch (ConfigCascadeException e) {
                                 throw new SettingException(e);
@@ -182,6 +194,7 @@ public class Activator implements BundleActivator {
                         } else {
                             //TODO: Remove user specific setting
                         }
+                        
                     }
                     
                 };
