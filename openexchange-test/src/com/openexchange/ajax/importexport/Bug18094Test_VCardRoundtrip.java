@@ -116,6 +116,7 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 			add(ContactField.FOLDER_ID);
 			add(ContactField.OBJECT_ID);
 			add(ContactField.LAST_MODIFIED);
+			add(ContactField.MODIFIED_BY);
 			add(ContactField.CREATION_DATE);
 			add(ContactField.CREATED_BY);
 		}};
@@ -140,10 +141,10 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 			public int compare(ContactField o1, ContactField o2) {
 				return o1.toString().compareTo(o2.toString());
 			}});
-		String fields = Strings.join(mismatches,"\n");
-		
+		String fields = Strings.join(mismatches," ");
+		System.out.println(fields);
 		//this is a really fragile test, but it is meant to be: Every time you add a new field, check whether it should be exportable or not
-		assertEquals("Too many fields not surviving the roundtrip: \n"+fields, 55, mismatches.size());
+		assertEquals("Too many fields not surviving the roundtrip: \n"+fields, 54, mismatches.size());
 	}
 
 }
