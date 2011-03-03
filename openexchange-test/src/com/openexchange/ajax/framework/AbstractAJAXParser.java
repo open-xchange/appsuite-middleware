@@ -49,16 +49,13 @@
 
 package com.openexchange.ajax.framework;
 
-import javax.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
 import junit.framework.Assert;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
-
-import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.ResponseParser;
 
@@ -91,12 +88,9 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
         return response;
     }
 
-    public void checkResponse(WebResponse resp) {
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
-    }
-    
-    public void checkResponse(HttpResponse resp) {
+    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+        return EntityUtils.toString(resp.getEntity());
     }
 
     public T parse(String body) throws JSONException {

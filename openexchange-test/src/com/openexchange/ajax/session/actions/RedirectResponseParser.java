@@ -49,11 +49,19 @@
 
 package com.openexchange.ajax.session.actions;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import com.meterware.httpunit.WebResponse;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.message.BasicHeaderElementIterator;
+import org.apache.http.util.EntityUtils;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * 
@@ -68,20 +76,29 @@ public class RedirectResponseParser extends AbstractAJAXParser<RedirectResponse>
     }
 
     @Override
-    public void checkResponse(WebResponse resp) {
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, resp.getResponseCode());
-        location = resp.getHeaderField("Location");
+    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, resp.getStatusLine().getStatusCode());
+        Header[] headers = resp.getHeaders("Location");
+        assertEquals("There should be exactly one Location header.", 1, headers.length);
+        location = headers[0].getValue();
         assertNotNull("Location for redirect is missing.", location);
         boolean oxCookieFound = false;
-        for (final String newCookie : resp.getNewCookieNames()) {
-            if (newCookie.startsWith(Login.SECRET_PREFIX)) {
+        boolean jsessionIdCookieFound = false;
+        HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
+        while (iter.hasNext()) {
+            HeaderElement element = iter.nextElement();
+            if (element.getName().startsWith(Login.SECRET_PREFIX)) {
                 oxCookieFound = true;
-                break;
+                continue;
+            }
+            if (Tools.JSESSIONID_COOKIE.equals(element.getName())) {
+                jsessionIdCookieFound = true;
+                continue;
             }
         }
         assertTrue("Session cookie is missing.", oxCookieFound);
-        String jsessionId = resp.getNewCookieValue("JSESSIONID");
-        assertNotNull("JSESSIONID cookie is missing.", jsessionId);
+        assertTrue("JSESSIONID cookie is missing.", jsessionIdCookieFound);
+        return EntityUtils.toString(resp.getEntity());
     }
 
     @Override

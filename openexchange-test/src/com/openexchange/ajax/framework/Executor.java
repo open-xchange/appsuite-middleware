@@ -80,7 +80,6 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -179,18 +178,17 @@ public class Executor extends Assert {
 			System.out.println("InterruptedException while sleeping between test requests. Does that help?");
 			e.printStackTrace();
 		} //emulating HttpUnit to avoid the Apache bug that mixes package up
-		
+
         AbstractAJAXParser<? extends T> parser = request.getParser();
-        parser.checkResponse(response);
-        String responseBody = EntityUtils.toString(response.getEntity());
-        
+        String responseBody = parser.checkResponse(response);
+
         long startParse = System.currentTimeMillis();
         T retval = parser.parse(responseBody);
         long parseDuration = System.currentTimeMillis() - startParse;
 
         retval.setRequestDuration(requestDuration);
         retval.setParseDuration(parseDuration);
-        
+
         return retval;
     }
 

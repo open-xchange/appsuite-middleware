@@ -59,10 +59,11 @@ public class RedirectRequest extends AbstractRequest<RedirectResponse> {
 
     private final String jvmRoute;
 
-    public RedirectRequest(String jvmRoute, String random) {
+    public RedirectRequest(String jvmRoute, String random, String client) {
         super(new Parameter[] {
             new FieldParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_REDIRECT),
-            new FieldParameter("random", random)
+            new FieldParameter("random", random),
+            new FieldParameter("client", client)
         });
         this.jvmRoute = jvmRoute;
     }

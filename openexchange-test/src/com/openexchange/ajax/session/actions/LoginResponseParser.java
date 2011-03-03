@@ -52,13 +52,18 @@ package com.openexchange.ajax.session.actions;
 import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.message.BasicHeaderElementIterator;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * 
@@ -75,44 +80,38 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
     }
 
     @Override
-    public void checkResponse(final WebResponse resp) {
-        super.checkResponse(resp);
+    public String checkResponse(final HttpResponse resp) throws ParseException, IOException {
+        String body = super.checkResponse(resp);
         // Check for error messages
         try {
-            super.getResponse(resp.getText());
+            super.getResponse(body);
         } catch (final JSONException e) {
-            try {
-                LOG.error("Invalid login body: \"" + resp.getText() + "\"");
-            } catch (final IOException e1) {
-                fail(e.getMessage());
-            }
-            fail(e.getMessage());
-        } catch (final IOException e) {
+            LOG.error("Invalid login body: \"" + body + "\"");
             fail(e.getMessage());
         }
         if (isFailOnError()) {
             boolean oxCookieFound = false;
-            final String[] newCookieNames = resp.getNewCookieNames();
-            {
-                final String message = "Missing cookies in HTTP response.\n"
-                    + "Probably cookies could not be parsed with respect to RFC2109/RFC2965 specification.\n"
-                    + "Is the \"com.openexchange.cookie.httpOnly\" property (server.properties) set to \"true\"?";
-                assertNotNull(message, newCookieNames);
-                assertTrue(message, newCookieNames.length > 0);
-            }
-            for (final String newCookie : newCookieNames) {
-                if (newCookie.startsWith(Login.SECRET_PREFIX)) {
+            boolean jsessionIdCookieFound = false;
+            HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
+            while (iter.hasNext()) {
+                HeaderElement element = iter.nextElement();
+                if (element.getName().startsWith(Login.SECRET_PREFIX)) {
                     oxCookieFound = true;
-                    break;
+                    continue;
+                }
+                if (Tools.JSESSIONID_COOKIE.equals(element.getName())) {
+                    jsessionIdCookieFound = true;
+                    final String jsessionId = element.getValue();
+                    final int dotPos = jsessionId.lastIndexOf('.');
+                    assertTrue("jvmRoute is missing.", dotPos > 0);
+                    jvmRoute = jsessionId.substring(dotPos + 1);
+                    continue;
                 }
             }
             assertTrue("Secret cookie is missing.", oxCookieFound);
-            final String jsessionId = resp.getNewCookieValue("JSESSIONID");
-            assertNotNull("JSESSIONID cookie is missing.", jsessionId);
-            final int dotPos = jsessionId.lastIndexOf('.');
-            assertTrue("jvmRoute is missing.", dotPos > 0);
-            jvmRoute = jsessionId.substring(dotPos + 1);
+            assertTrue("JSESSIONID cookie is missing.", jsessionIdCookieFound);
         }
+        return body;
     }
 
     @Override

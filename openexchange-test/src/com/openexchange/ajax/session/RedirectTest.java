@@ -50,8 +50,8 @@
 package com.openexchange.ajax.session;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import org.apache.http.cookie.Cookie;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -61,6 +61,7 @@ import com.openexchange.ajax.session.actions.RedirectRequest;
 import com.openexchange.ajax.session.actions.RedirectResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * 
@@ -69,7 +70,6 @@ import com.openexchange.configuration.AJAXConfig;
 public class RedirectTest extends AbstractAJAXSession {
 
     private String login;
-
     private String password;
 
     public RedirectTest(final String name) {
@@ -100,25 +100,26 @@ public class RedirectTest extends AbstractAJAXSession {
                 password,
                 LoginTools.generateAuthId(),
                 RedirectTest.class.getName(),
-                "6.17.0"));
+                "6.19.0"));
             // Activate Autologin
             myClient.execute(new StoreRequest(lResponse.getSessionId(), false));
-            
-            String[] cookies = session.getConversation().getCookieNames();
-            List<String> cookieList = new ArrayList<String>(Arrays.asList(cookies));
-            cookieList.remove("JSESSIONID");
-    
+
+            List<String> cookieList = new ArrayList<String>();
+            for (Cookie cookie : session.getHttpClient().getCookieStore().getCookies()) {
+                if (!Tools.JSESSIONID_COOKIE.equals(cookie.getName())) {
+                    cookieList.add(cookie.getName());
+                }
+            }
+
             // Remove cookies and that stuff.
-            session.getConversation().clearContents();
-            session.getConversation().getClientProperties().setAutoRedirect(false);
+            session.getHttpClient().getCookieStore().clear();
             // Test redirect
-            final RedirectResponse rResponse = myClient.execute(new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom()));
+            final RedirectResponse rResponse = myClient.execute(new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom(), RedirectTest.class.getName() + '2'));
             assertNotNull("Redirect location is missing.", rResponse.getLocation());
-            session.getConversation().getClientProperties().setAutoRedirect(true);
             
-            String[] redirectCookies = session.getConversation().getCookieNames();
-            for (String c : redirectCookies) {
-                assertFalse("Cookie " + c + " was not removed after redirect.", cookieList.contains(c));
+            for (Cookie cookie : session.getHttpClient().getCookieStore().getCookies()) {
+                String name = cookie.getName();
+                assertFalse("Cookie " + name + " was not removed after redirect.", cookieList.contains(name));
             }
             // To get logout with tearDown() working.
             session.setId(lResponse.getSessionId());
