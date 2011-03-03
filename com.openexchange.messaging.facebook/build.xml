@@ -19,7 +19,8 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
     <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
@@ -29,7 +30,7 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
-	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
+    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="commonslangjar" value="org.apache.commons.lang_2.4.0.v20081016-1030.jar"/>
 
@@ -44,7 +45,7 @@
 	<property name="htmljar" value="com.openexchange.html.jar"/>
 	<property name="oauthjar" value="com.openexchange.oauth.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
-        <property name="xercesBundle" value="com.openexchange.xerces.sun"/>
+    <property name="xercesBundle" value="com.openexchange.xerces.sun"/>
 
     <property name="httpclientjar" value="commons-httpclient-3.1.jar"/>
     <property name="codecjar" value="commons-codec-1.4.jar"/>
@@ -109,8 +110,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
             <fileset refid="3rdpartyjars"/>
         </jar>
@@ -127,9 +127,10 @@
         <copy todir="${confInstallCopyDir}" overwrite="true">
             <fileset dir="${conf.dir}"/>
         </copy>
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
@@ -154,10 +155,8 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${composite.name}.tar.gz"
-            basedir="${dist-package}"
-            includes="${composite.name}/"
-             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip"/>
+        <!-- dpkg-source does not like anything else -->
         <delete dir="${dist-package}"/>
     </target>
 
