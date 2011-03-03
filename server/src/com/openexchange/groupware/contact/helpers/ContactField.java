@@ -190,10 +190,10 @@ public enum ContactField{
     FILE_AS (599 , "field90" , "FILE_AS" , ""  , ContactFields.FILE_AS),
     DEFAULT_ADDRESS (605 , "intfield06" , "DEFAULT_ADDRESS" , "Default address"  , ContactFields.DEFAULT_ADDRESS),
     MARK_AS_DISTRIBUTIONLIST (602 , "intfield07" , "MARK_AS_DISTRIBUTIONLIST" , ""  , ContactFields.MARK_AS_DISTRIBUTIONLIST),
-    NUMBER_OF_ATTACHMENTS (104 , "intfield08" , "NUMBER_OF_ATTACHMENTS" , ""  , "");
-
-
-
+    NUMBER_OF_ATTACHMENTS (104 , "intfield08" , "NUMBER_OF_ATTACHMENTS" , ""  , ""),
+    YOMI_FIRST_NAME(610, "yomiFirstName", "YOMI_FIRST_NAME", "yomiFirstName", ContactFields.YOMI_FIRST_NAME),
+    YOMI_LAST_NAME(611, "yomiLastName", "YOMI_LAST_NAME", "yomiLastName", ContactFields.YOMI_LAST_NAME),
+    YOMI_COMPANY(612, "yomiCompany", "YOMI_COMPANY", "yomiCompany", ContactFields.YOMI_COMPANY);
 
 	private int columnNumber;
 	private String dbName, readableName, fieldName, ajaxName;
