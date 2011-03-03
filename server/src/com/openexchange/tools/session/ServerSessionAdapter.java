@@ -232,6 +232,10 @@ public class ServerSessionAdapter implements ServerSession {
         return session.getClient();
     }
 
+    public void setClient(String client) {
+        session.setClient(client);
+    }
+
     public User getUser() {
         if (serverSession != null) {
             return serverSession.getUser();

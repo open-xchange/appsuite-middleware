@@ -152,4 +152,8 @@ public class PublicationSession implements Session {
     public String getClient() {
         return null;
     }
+
+    public void setClient(String client) {
+        // Nothing to do.
+    }
 }

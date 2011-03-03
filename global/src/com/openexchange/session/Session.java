@@ -215,4 +215,9 @@ public interface Session {
      */
     String getClient();
 
+    /**
+     * Should only be used to update the client on a redirect request.
+     * @param client new client identifier.
+     */
+    void setClient(String client);
 }

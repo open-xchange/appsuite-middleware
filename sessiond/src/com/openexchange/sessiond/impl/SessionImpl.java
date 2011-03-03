@@ -96,7 +96,7 @@ public final class SessionImpl implements Session {
 
     private String hash;
 
-    private final String client;
+    private String client;
 
     private final Map<String, Object> parameters;
     
@@ -286,5 +286,9 @@ public final class SessionImpl implements Session {
 
     public String getClient() {
         return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
     }
 }

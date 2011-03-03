@@ -274,4 +274,8 @@ public class SessionObject implements Session {
     public String getClient() {
         return client;
     }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
 }

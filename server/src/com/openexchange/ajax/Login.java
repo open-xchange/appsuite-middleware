@@ -302,8 +302,10 @@ public class Login extends AJAXServlet {
             String client = req.getParameter(LoginFields.CLIENT_PARAM);
             if (null == client) {
                 client = session.getClient();
+            } else {
+                session.setClient(client);
             }
-            final String hash = HashCalculator.getHash(req, session.getClient());
+            final String hash = HashCalculator.getHash(req, client);
             writeSecretCookie(resp, session, hash, req.isSecure());
 
             if (ACTION_REDIRECT.equals(action)) {

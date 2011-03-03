@@ -186,4 +186,8 @@ public class SimServerSession implements ServerSession {
         // TODO Auto-generated method stub
         return null;
     }
+
+    public void setClient(String client) {
+        // TODO Auto-generated method stub
+    }
 }

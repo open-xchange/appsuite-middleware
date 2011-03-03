@@ -264,6 +264,10 @@ public class LdapGlobalFolderCreator {
                 return null;
             }
 
+            public void setClient(String client) {
+                // Nothing to do.
+            }
+
             public void setLocalIp(String ip) {
                 // TODO Auto-generated method stub
                 
