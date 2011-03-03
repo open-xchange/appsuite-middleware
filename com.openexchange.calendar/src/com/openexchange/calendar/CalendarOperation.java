@@ -1028,6 +1028,18 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         return p;
     }
+    
+    private static boolean userIsParticipant(final int uid, final CalendarDataObject cdao) {
+        boolean retval = false;
+        for (UserParticipant u : cdao.getUsers()) {
+            if (u.getIdentifier() == uid) { 
+                retval = true;
+                break;
+            }
+        }
+            
+        return retval;     
+    }
 
     /**
      * Gets the new and modified user participants
@@ -1074,6 +1086,20 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                 if (cdao.containsAlarm() && recColl.existsReminder(cdao.getContext(), cdao.getObjectID(), uid)) {
                                     np[a].setIsModified(true);
                                     np[a].setAlarmMinutes(cdao.getAlarm());
+                                } else if (sharedFolderOwner != 0 && uid != sharedFolderOwner && sharedFolderOwner == np[a].getIdentifier() && !userIsParticipant(uid, cdao)) {
+                                    // 1. The folder is shared and the actual participant is the folder owner.
+                                    // 2. The user that tries to change the appointment is not the folder owner and is not participant in this appointment.
+                                    // 3. So we assume that the user wants to change the alarm for the folder owner.
+                                    if (np[a].containsAlarm() && cdao.containsAlarm() && np[a].getAlarmMinutes() != cdao.getAlarm()) {
+                                        np[a].setAlarmMinutes(cdao.getAlarm());
+                                        np[a].setIsModified(true);
+                                    } else if (cdao.containsAlarm() && !recColl.existsReminder(cdao.getContext(), cdao.getObjectID(), np[a].getIdentifier())) {
+                                        np[a].setAlarmMinutes(cdao.getAlarm());
+                                        np[a].setIsModified(true);
+                                    } else if (cdao.getAlarm() == -1 && recColl.existsReminder(cdao.getContext(), cdao.getObjectID(), np[a].getIdentifier())) {
+                                        np[a].setAlarmMinutes(-1);
+                                        np[a].setIsModified(true);
+                                    }
                                 } else if (!np[a].containsAlarm() && recColl.existsReminder(cdao.getContext(), cdao.getObjectID(), uid)) {
                                     np[a].setIsModified(true);
                                     np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
