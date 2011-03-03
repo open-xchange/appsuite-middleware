@@ -1,4 +1,5 @@
 # OSGi AdminDaemon Configuration File
+osgi.noShutdown=true
 osgi.bundles.defaultStartLevel=4
 osgi.framework=file\:@oxosgibundle@
 osgi.configuration.cascaded=false
