@@ -79,7 +79,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
     public LinkedInSubscribeService(Activator activator){
         this.activator = activator;
 
-        source.setDisplayName("LinkedIn via OAUTH");
+        source.setDisplayName("LinkedIn");
         source.setFolderModule(FolderObject.CONTACT);
         source.setId("com.openexchange.subscribe.socialplugin.linkedin");
         source.setSubscribeService(this);

@@ -81,7 +81,7 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
         this.facebookMetaData = facebookMetaData;
         this.facebookService = facebookService;
 
-        source.setDisplayName("Facebook via OAUTH");
+        source.setDisplayName("Facebook");
         source.setFolderModule(FolderObject.CONTACT);
         source.setId("com.openexchange.subscribe.socialplugin.facebook");
         source.setSubscribeService(this);
