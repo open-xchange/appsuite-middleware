@@ -52,13 +52,18 @@ package com.openexchange.groupware.notify;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.notify.ParticipantNotifyTest.Message;
 import com.openexchange.groupware.tasks.Task;
 
-
+/**
+ * Ensures that every added/removed/remained participant and the task owner are informed about the changed task.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class Bug9950Test extends ParticipantNotifyTest {
 
-    // Bug 9950
+    public Bug9950Test() {
+        super();
+    }
 
     public void testShouldNotifyOldAndNewParticipants() throws Exception{
         NotificationPool.getInstance().clear();
@@ -70,8 +75,6 @@ public class Bug9950Test extends ParticipantNotifyTest {
 
         notify.taskModified(oldTask, newTask, session);
 
-
-
         final List<Message> messages = notify.getMessages();
 
         final List<String> mailAddresses = new LinkedList<String>();
@@ -82,7 +85,6 @@ public class Bug9950Test extends ParticipantNotifyTest {
             mailAddresses.add(pooledNotification.getParticipant().email);
         }
 
-
-        assertNames( mailAddresses, "user1@test.invalid", "user3@test.invalid", "user7@test.invalid", "user9@test.invalid" );
+        assertNames( mailAddresses, "user1@test.invalid", "user3@test.invalid", "user7@test.invalid", "user9@test.invalid", "primary@test" );
     }
 }

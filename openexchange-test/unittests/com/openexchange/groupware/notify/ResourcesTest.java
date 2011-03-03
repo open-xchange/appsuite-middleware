@@ -52,15 +52,23 @@ package com.openexchange.groupware.notify;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
-
+/**
+ * Ensures that the participant and the resource administrator are informed about new tasks booking resources.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class ResourcesTest extends ParticipantNotifyTest {
+
+    public ResourcesTest() {
+        super();
+    }
 
     public void testResources() throws Exception {
         final Participant[] participants = getParticipants(U(2),G(),S(),R(1));
-        
+
         final Task t = getTask(participants);
-        
+
         notify.taskCreated(t,session);
-        assertAddresses(notify.getMessages(), "user1@test.invalid","resource_admin1@test.invalid");
+        assertAddresses(notify.getMessages(), "user1@test.invalid","resource_admin1@test.invalid", "primary@test");
     }
 }
