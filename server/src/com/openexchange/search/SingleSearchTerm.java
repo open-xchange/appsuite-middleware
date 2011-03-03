@@ -54,9 +54,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.openexchange.search.internal.terms.EqualsTerm;
 import com.openexchange.search.internal.terms.GreaterOrEqualTerm;
 import com.openexchange.search.internal.terms.GreaterThanTerm;
+import com.openexchange.search.internal.terms.IsNullTerm;
 import com.openexchange.search.internal.terms.LessOrEqualTerm;
 import com.openexchange.search.internal.terms.LessThanTerm;
 import com.openexchange.search.internal.terms.NotEqualTerm;
@@ -81,10 +83,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Equals comparison
          */
-        EQUALS("=", 2, "=", new InstanceCreator() {
-
-            private static final long serialVersionUID = -7337346107116884060L;
-
+        EQUALS("=", 2, "=", OperationPosition.BETWEEN, new InstanceCreator() {
             public SingleSearchTerm newInstance() {
                 return new EqualsTerm();
             }
@@ -92,10 +91,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Less-than comparison
          */
-        LESS_THAN("<", 2, "<", new InstanceCreator() {
-
-            private static final long serialVersionUID = 3045641432242061311L;
-
+        LESS_THAN("<", 2, "<", OperationPosition.BETWEEN, new InstanceCreator() {
             public SingleSearchTerm newInstance() {
                 return new LessThanTerm();
             }
@@ -103,10 +99,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Greater-than comparison
          */
-        GREATER_THAN(">", 2, ">", new InstanceCreator() {
-
-            private static final long serialVersionUID = 8960232001776390636L;
-
+        GREATER_THAN(">", 2, ">", OperationPosition.BETWEEN, new InstanceCreator() {
             public SingleSearchTerm newInstance() {
                 return new GreaterThanTerm();
             }
@@ -114,10 +107,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Not-equal comparison
          */
-        NOT_EQUALS("<>", 2, "<>", new InstanceCreator() {
-
-//            private static final long serialVersionUID = 8960232001776390636L;
-
+        NOT_EQUALS("<>", 2, "<>", OperationPosition.BETWEEN, new InstanceCreator() {
             public SingleSearchTerm newInstance() {
                 return new NotEqualTerm();
             }
@@ -125,10 +115,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Greater-than or equal comparison
          */
-        GREATER_OR_EQUAL(">=", 2, ">=", new InstanceCreator() {
-
-//            private static final long serialVersionUID = 8960232001776390636L;
-
+        GREATER_OR_EQUAL(">=", 2, ">=", OperationPosition.BETWEEN, new InstanceCreator() {
             public SingleSearchTerm newInstance() {
                 return new GreaterOrEqualTerm();
             }
@@ -136,14 +123,20 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Less-than or equal comparison
          */
-        LESS_OR_EQUAL("<=", 2, "<=", new InstanceCreator() {
-
-//            private static final long serialVersionUID = 8960232001776390636L;
-
+        LESS_OR_EQUAL("<=", 2, "<=", OperationPosition.BETWEEN, new InstanceCreator() {
             public SingleSearchTerm newInstance() {
                 return new LessOrEqualTerm();
             }
-        });
+        }),
+        /**
+         * is null check
+         */
+        ISNULL("isNull", 1, "IS NULL", OperationPosition.AFTER, new InstanceCreator() {
+          public SingleSearchTerm newInstance() {
+              return new IsNullTerm();
+          }
+      })
+        ;
 
         private final String str;
 
@@ -153,12 +146,15 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
         private final int maxOperands;
 
+		private OperationPosition pos;
 
-        private SingleOperation(final String str, final int maxOperands, final String sql, final InstanceCreator creator) {
+
+        private SingleOperation(final String str, final int maxOperands, final String sql, final OperationPosition pos, final InstanceCreator creator) {
             this.str = str;
             this.maxOperands = maxOperands;
             this.creator = creator;
             this.sql = sql;
+            this.pos = pos;
         }
 
         public String getOperation() {
@@ -185,6 +181,10 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          */
         public int getMaxOperands() {
             return maxOperands;
+        }
+        
+        public OperationPosition getPosition() {
+        	return pos;
         }
 
         private static final transient Map<String, SingleOperation> map;

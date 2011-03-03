@@ -62,6 +62,8 @@ import com.openexchange.search.Operation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm.OperationPosition;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * Base class for converting a SearchTerm to a WHERE clause usable by SQL.
@@ -163,6 +165,9 @@ public abstract class BaseContactSearchtermConverter {
 		for(int i = 0; i < operands.length; i++){
 			Operand<?> o = operands[i];
 			
+			if(operation.getPosition() == OperationPosition.BEFORE)
+				bob.append(operation.getSqlRepresentation());
+
 			if(o.getType() == Operand.Type.COLUMN){
 				String value = (String) o.getValue();
 				handleFolder(o);
@@ -180,10 +185,12 @@ public abstract class BaseContactSearchtermConverter {
 				bob.append("?");
 			}
 			
-			if((i+1) == operands.length)
-				continue; //don't put an operator after the last operand
+			if(operation.getPosition() == OperationPosition.AFTER)
+				bob.append(" ").append(operation.getSqlRepresentation());
 			
-			bob.append(" ").append(operation.getSqlRepresentation()).append(" ");
+			if(operation.getPosition() == OperationPosition.BETWEEN)
+				if((i+1) < operands.length) //don't place an operator after the last operand here
+					bob.append(" ").append(operation.getSqlRepresentation()).append(" ");
 			
 		}
 		bob.append(" ) ");
@@ -195,13 +202,17 @@ public abstract class BaseContactSearchtermConverter {
 		
 		bob.append(" ( ");
 		
-		if(operation instanceof CompositeOperation && ((CompositeOperation)operation).getMaxTerms() == 1)
+		if(operation.getPosition() == OperationPosition.BEFORE)
 			bob.append(operation.getSqlRepresentation());
 
 		for(int i = 0; i < operands.length; i++){
 			traverseViaInOrder(operands[i]);
-			if((i+1) < operands.length)
-				bob.append(" ").append(operation.getSqlRepresentation()).append("    ");
+			
+			if(operation.getPosition() == OperationPosition.AFTER)
+				bob.append(" ").append(operation.getSqlRepresentation());
+			if(operation.getPosition() == OperationPosition.BETWEEN)
+				if((i+1) < operands.length) //don't place an operator after the last operand
+					bob.append(" ").append(operation.getSqlRepresentation()).append("    ");
 		}
 		bob.append(" ) ");
 		

@@ -5,6 +5,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
@@ -157,5 +158,35 @@ public class ContactSearchtermSqlConverterTest extends TestCase {
 		assertTrue(folders.contains("1"));
 		assertTrue(folders.contains("2"));
 		assertTrue(folders.contains("strings-can-be-folder-names-too"));
+	}
+	
+	public void testIsNullOperator(){
+		 ContactField field = ContactField.YOMI_LAST_NAME;
+		SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.ISNULL);
+		term.addOperand(new ColumnOperand(field.getAjaxName()));
+		
+		ContactSearchtermSqlConverter converter = new ContactSearchtermSqlConverter();
+		converter.parse(term);
+		
+		String expected = "( co.yomiLastName IS NULL )";
+		String actualString = converter.getPreparedWhereString();
+		assertEquals(expected, actualString);
+	}
+
+	public void testNotOperator(){
+		SingleSearchTerm equalsTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+		equalsTerm.addOperand(new ColumnOperand("yomiLastName"));
+		equalsTerm.addOperand(new ConstantOperand<String>("value1"));
+		
+		
+		CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
+		notTerm.addSearchTerm(equalsTerm);
+		
+		ContactSearchtermSqlConverter converter = new ContactSearchtermSqlConverter();
+		converter.parse(notTerm);
+		
+		String expected = "( ! ( co.yomiLastName = ? ) )";
+		String actualString = converter.getPreparedWhereString();
+		assertEquals(expected, actualString);
 	}
 }

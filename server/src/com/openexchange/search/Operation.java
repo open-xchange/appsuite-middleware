@@ -49,6 +49,8 @@
 
 package com.openexchange.search;
 
+import com.openexchange.search.SearchTerm.OperationPosition;
+
 /**
  * {@link Operation} - A search term operation.
  * 
@@ -75,4 +77,9 @@ public interface Operation {
      * @return <code>true</code> if specified string equals this operation's string representation; otherwise <code>false</code>.
      */
     public boolean equalsOperation(String other);
+    
+    /**
+     * tells you where the operator is positioned in relation to the operand(s)
+     */
+    public OperationPosition getPosition();
 }

@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.openexchange.search.internal.terms.AndTerm;
 import com.openexchange.search.internal.terms.NotTerm;
 import com.openexchange.search.internal.terms.OrTerm;
@@ -81,7 +82,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         /**
          * The <i><code>AND</code></i> composite type.
          */
-        AND("and", PRETTY_BIG_NUMBER, "AND", new InstanceCreator() {
+        AND("and", PRETTY_BIG_NUMBER, "AND", OperationPosition.BETWEEN, new InstanceCreator() {
 
             private static final long serialVersionUID = -2839503961447478423L;
 
@@ -92,7 +93,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         /**
          * The <i><code>OR</code></i> composite type.
          */
-        OR("or", PRETTY_BIG_NUMBER, "OR", new InstanceCreator() {
+        OR("or", PRETTY_BIG_NUMBER, "OR", OperationPosition.BETWEEN, new InstanceCreator() {
 
             private static final long serialVersionUID = 8612089760772780923L;
 
@@ -103,7 +104,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         /**
          * The <i><code>NOT</code></i> composite type.
          */
-        NOT("not", 1, "!", new InstanceCreator() {
+        NOT("not", 1, "!", OperationPosition.BEFORE, new InstanceCreator() {
 
             private static final long serialVersionUID = 5131782739497011902L;
 
@@ -120,12 +121,15 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
         private final int maxTerms;
 
+		private OperationPosition pos;
 
-        private CompositeOperation(final String str, final int maxTerms, final String sql, final InstanceCreator creator) {
+
+        private CompositeOperation(final String str, final int maxTerms, final String sql, final OperationPosition pos, final InstanceCreator creator) {
             this.str = str;
             this.creator = creator;
             this.maxTerms = maxTerms;
             this.sql = sql;
+            this.pos = pos;
         }
 
         public String getOperation() {
@@ -152,6 +156,10 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
          */
         public int getMaxTerms() {
             return maxTerms;
+        }
+        
+        public OperationPosition getPosition() {
+        	return pos;
         }
 
         private static final transient Map<String, CompositeOperation> map;
