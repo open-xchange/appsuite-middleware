@@ -2032,7 +2032,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             cdao.setGlobalFolderID(pfid);
                         }
                         cdao.setPrivateFolderID(pfid);
-                    } else {
+                    } else if (cdao.getActionFolder() < 1){
                         cdao.setActionFolder(pfid);
                     }
                 }
