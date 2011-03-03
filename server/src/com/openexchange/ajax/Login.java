@@ -80,7 +80,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigTools;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -139,11 +138,16 @@ public class Login extends AJAXServlet {
     private static final Log LOG = LogFactory.getLog(Login.class);
     
     private String uiWebPath;
+    private boolean sessiondAutoLogin;
     private CookieHashSource hashSource;
-    private String autoLogin;
+    private String httpAuthAutoLogin;
     private String defaultClient;
     private String clientVersion;
     private String errorPageTemplate;
+    private int cookieExpiry;
+    private boolean cookieForceHTTPS;
+    private boolean ipCheck;
+    private List<IPRange> ranges;
 
     public Login() {
         super();
@@ -153,8 +157,9 @@ public class Login extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
+        sessiondAutoLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName()));
         hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
-        autoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
+        httpAuthAutoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
         defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
         clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
         String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
@@ -168,6 +173,22 @@ public class Login extends AJAXServlet {
             } catch (FileNotFoundException e) {
                 LOG.error("Could not find an error page template at " + templateFileLocation + ", using default.");
                 errorPageTemplate = ERROR_PAGE_TEMPLATE;
+            }
+        }
+        cookieExpiry = (int) (ConfigTools.parseTimespan(config.getInitParameter(ServerConfig.Property.COOKIE_TTL.getPropertyName())) / 1000);
+        cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName()));
+        ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
+        if (tmp == null) {
+            ranges = Collections.emptyList();
+        } else {
+            ranges = new ArrayList<IPRange>();
+            final String[] lines = tmp.split("\n");
+            for (String line : lines) {
+                line = line.replaceAll("\\s", "");
+                if (!line.equals("") && !line.startsWith("#")) {
+                    ranges.add(IPRange.parseRange(line));
+                }
             }
         }
     }
@@ -308,7 +329,7 @@ public class Login extends AJAXServlet {
             final Response response = new Response();
             Session session = null;
             try {
-                if (!isAutologinEnabled()) {
+                if (!sessiondAutoLogin) {
                     throw new AjaxException(AjaxException.Code.DisabledAction, "autologin");
                 }
 
@@ -329,51 +350,15 @@ public class Login extends AJAXServlet {
                         final String sessionId = cookie.getValue();
                         if (sessiondService.refreshSession(sessionId)) {
                             session = sessiondService.getSession(sessionId);
-                            /*
-                             * IP check if enabled; otherwise update session's IP address if different to request's IP address
-                             */
-                            {
-                                final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                                if (configurationService == null) {
-                                    LOG.fatal("No configuration service available, can neither read IP check configuration nor whitelist");
-                                    /*
-                                     * Update IP address if necessary
-                                     */
-                                    updateIPAddress(req.getRemoteAddr(), session);
-                                } else {
-                                    /*
-                                     * Test if IP check is enabled
-                                     */
-                                    if (configurationService.getBoolProperty("com.openexchange.IPCheck", true)) { //IP-Check
-                                        final List<IPRange> ranges;
-                                        {
-                                            final String text = configurationService.getText("noipcheck.cnf");
-                                            if (text == null) {
-                                                ranges = Collections.emptyList();
-                                            } else {
-                                                ranges = new ArrayList<IPRange>(5);
-                                                final String[] lines = text.split("\n");
-                                                for (String line : lines) {
-                                                    line = line.replaceAll("\\s", "");
-                                                    if (!line.equals("") && !line.startsWith("#")) {
-                                                        ranges.add(IPRange.parseRange(line));
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        final String newIP = req.getRemoteAddr();
-                                        SessionServlet.checkIP(true, ranges, session, newIP);
-                                        /*
-                                         * IP check passed: update IP address if necessary
-                                         */
-                                        updateIPAddress(newIP, session);
-                                    } else {
-                                        /*
-                                         * Update IP address if necessary
-                                         */
-                                        updateIPAddress(req.getRemoteAddr(), session);
-                                    }
-                                }
+                            // IP check if enabled; otherwise update session's IP address if different to request's IP address
+                            if (!ipCheck) {
+                                // Update IP address if necessary
+                                updateIPAddress(req.getRemoteAddr(), session);
+                            } else {
+                                final String newIP = req.getRemoteAddr();
+                                SessionServlet.checkIP(true, ranges, session, newIP);
+                                // IP check passed: update IP address if necessary
+                                updateIPAddress(newIP, session);
                             }
                             try {
                                 final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
@@ -528,7 +513,7 @@ public class Login extends AJAXServlet {
      * Writes or rewrites a cookie
      */
     private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, CookieType type) throws AbstractOXException, JSONException, IOException {
-        if (!isAutologinEnabled() && CookieType.SESSION == type) {
+        if (!sessiondAutoLogin && CookieType.SESSION == type) {
             throw new AjaxException(AjaxException.Code.DisabledAction, "store");
         }
         final SessiondService sessiond = ServerServiceRegistry.getInstance().getService(SessiondService.class);
@@ -569,11 +554,6 @@ public class Login extends AJAXServlet {
     	doCookieReWrite(req, resp, CookieType.SECRET);
     }
 
-    private boolean isAutologinEnabled() {
-        final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        return configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false);
-    }
-
     private void logAndSendException(final HttpServletResponse resp, final AbstractOXException e) throws IOException {
         LOG.debug(e.getMessage(), e);
         Tools.disableCaching(resp);
@@ -595,29 +575,25 @@ public class Login extends AJAXServlet {
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
      */
-    protected static void writeSecretCookie(final HttpServletResponse resp, final Session session, String hash, final boolean secure) {
+    protected void writeSecretCookie(final HttpServletResponse resp, final Session session, String hash, final boolean secure) {
         final Cookie cookie = new Cookie(SECRET_PREFIX + hash, session.getSecret());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
     }
 
-    protected static void writeSessionCookie(final HttpServletResponse resp, final Session session, String hash, final boolean secure) {
+    protected void writeSessionCookie(final HttpServletResponse resp, final Session session, String hash, final boolean secure) {
         final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
     }
 
-    private static void configureCookie(final Cookie cookie, final boolean secure) {
+    private void configureCookie(final Cookie cookie, final boolean secure) {
         cookie.setPath("/");
-        final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        final boolean autologin = configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false);
-        if (!autologin) {
+        if (!sessiondAutoLogin) {
             return;
         }
-        final String spanDef = configurationService.getProperty("com.openexchange.cookie.ttl", "1W");
-        cookie.setMaxAge((int) (ConfigTools.parseTimespan(spanDef) / 1000));
-        final boolean forceHTTPS = configurationService.getBoolProperty("com.openexchange.sessiond.cookie.forceHTTPS", false);
-        if (forceHTTPS || secure) {
+        cookie.setMaxAge(cookieExpiry);
+        if (cookieForceHTTPS || secure) {
             cookie.setSecure(true);
         }
     }
@@ -842,7 +818,7 @@ public class Login extends AJAXServlet {
         final Session session = result.getSession();
         Tools.disableCaching(resp);
         writeSecretCookie(resp, session, session.getHash(), req.isSecure());
-        resp.sendRedirect(generateRedirectURL(null, autoLogin, session.getSessionID()));
+        resp.sendRedirect(generateRedirectURL(null, httpAuthAutoLogin, session.getSessionID()));
     }
 
     private String generateRedirectURL(String uiWebPathParam, String autoLoginParam, String sessionId) {

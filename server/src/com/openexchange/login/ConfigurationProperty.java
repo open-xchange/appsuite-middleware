@@ -82,7 +82,13 @@ public enum ConfigurationProperty {
      * Authorization Header login. All other login related requests provide normal JSON responses in error cases. The built-in error page
      * shows the error message for 5 seconds and then redirects to the referrer page. 
      */
-    ERROR_PAGE_TEMPLATE("com.openexchange.ajax.login.errorPageTemplate", null);
+    ERROR_PAGE_TEMPLATE("com.openexchange.ajax.login.errorPageTemplate", null),
+
+    /**
+     * Whether autologin is allowed or not.
+     */
+    SESSIOND_AUTOLOGIN("com.openexchange.sessiond.autologin", Boolean.FALSE.toString()),
+    NO_IP_CHECK_RANGE("com.openexchange.noIPCheckRange", null);
 
     private final String propertyName;
 
