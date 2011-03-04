@@ -240,7 +240,7 @@ public class Login extends AJAXServlet {
                     final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
 
                     if (secret == null || !session.getSecret().equals(secret)) {
-                        sendError(resp);
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
 
@@ -306,6 +306,7 @@ public class Login extends AJAXServlet {
                 session.setClient(client);
             }
             final String hash = HashCalculator.getHash(req, client);
+            session.setHash(hash);
             writeSecretCookie(resp, session, hash, req.isSecure());
 
             if (ACTION_REDIRECT.equals(action)) {
