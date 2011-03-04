@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
+ * {@link HttpAuthResponse}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class SessionTestSuite {
+public class HttpAuthResponse extends AbstractAJAXResponse {
 
-    /**
-     * Prevent instantiation.
-     */
-    private SessionTestSuite() {
-        super();
+    private final String location;
+
+    public HttpAuthResponse(String location) {
+        super(null);
+        this.location = location;
     }
 
-    /**
-     * Generates the session tests suite.
-     * @return the session tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(LoginTest.class);
-        tests.addTestSuite(StoreTest.class);
-        tests.addTestSuite(RedirectTest.class);
-        tests.addTestSuite(Bug12437Test.class);
-        tests.addTestSuite(DuplicateAuthIdTest.class);
-        tests.addTestSuite(RedeemTest.class);
-        tests.addTestSuite(HttpAuthTest.class);
-        return tests;
+    public String getLocation() {
+        return location;
     }
 }

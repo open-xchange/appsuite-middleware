@@ -49,38 +49,41 @@
 
 package com.openexchange.ajax.session;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
-import org.apache.http.cookie.Cookie;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.session.actions.LoginRequest;
-import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.ajax.session.actions.RedirectRequest;
-import com.openexchange.ajax.session.actions.RedirectResponse;
-import com.openexchange.ajax.session.actions.StoreRequest;
+import com.openexchange.ajax.session.actions.HttpAuthRequest;
+import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * 
+ * Tests the HTTP authorization header on the login servlet.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class RedirectTest extends AbstractAJAXSession {
+public class HttpAuthTest extends AbstractAJAXSession {
 
+    private String protocol;
+    private String hostname;
     private String login;
     private String password;
 
-    public RedirectTest(final String name) {
+    public HttpAuthTest(final String name) {
         super(name);
     }
 
     @Override
     protected void setUp() throws Exception {
         AJAXConfig.init();
+        protocol = AJAXConfig.getProperty(Property.PROTOCOL);
+        hostname = AJAXConfig.getProperty(Property.HOSTNAME);
         login = AJAXConfig.getProperty(Property.LOGIN);
         password = AJAXConfig.getProperty(Property.PASSWORD);
     }
@@ -92,40 +95,25 @@ public class RedirectTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    public void testAuthorizationRequired() throws Throwable {
+        HttpClient client2 = AJAXSession.newHttpClient();
+        HttpUriRequest request = new HttpGet(protocol + "://" + hostname + HttpAuthRequest.HTTP_AUTH_URL);
+        HttpResponse response = client2.execute(request);
+        assertEquals("HTTP auth URL does not respond with a required authorization.", HttpServletResponse.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
+    }
+
     public void testRedirect() throws Throwable {
         final AJAXSession session = new AJAXSession();
         final AJAXClient myClient = new AJAXClient(session);
         try {
-            // Create session.
-            LoginResponse lResponse = myClient.execute(new LoginRequest(
-                login,
-                password,
-                LoginTools.generateAuthId(),
-                RedirectTest.class.getName(),
-                "6.19.0"));
-            // Activate Autologin
-            myClient.execute(new StoreRequest(lResponse.getSessionId(), false));
-
-            List<String> cookieList = new ArrayList<String>();
-            for (Cookie cookie : session.getHttpClient().getCookieStore().getCookies()) {
-                if (!Tools.JSESSIONID_COOKIE.equals(cookie.getName())) {
-                    cookieList.add(cookie.getName());
-                }
-            }
-
-            // Remove cookies and that stuff.
-            session.getHttpClient().getCookieStore().clear();
             session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-            // Test redirect
-            final RedirectResponse rResponse = myClient.execute(new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom(), RedirectTest.class.getName() + '2'));
-            assertNotNull("Redirect location is missing.", rResponse.getLocation());
-            
-            for (Cookie cookie : session.getHttpClient().getCookieStore().getCookies()) {
-                String name = cookie.getName();
-                assertFalse("Cookie " + name + " was not removed after redirect.", cookieList.contains(name));
-            }
-            // To get logout with tearDown() working.
-            session.setId(lResponse.getSessionId());
+            // Create session.
+            HttpAuthResponse response = myClient.execute(new HttpAuthRequest(login, password));
+            String location = response.getLocation();
+            assertNotNull("Location is missing in response.", location);
+            int sessionStart = location.indexOf("session=");
+            String sessionId = location.substring(sessionStart + 8, location.indexOf('&', sessionStart + 8));
+            session.setId(sessionId);
         } finally {
             myClient.logout();
         }

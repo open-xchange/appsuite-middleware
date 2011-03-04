@@ -62,7 +62,7 @@ public abstract class AbstractRequest<T extends AbstractAJAXResponse> implements
     /**
      * URL of the login AJAX servlet.
      */
-    private static final String LOGIN_URL = "/ajax/login";
+    protected static final String LOGIN_URL = "/ajax/login";
 
     private final Parameter[] parameters;
 

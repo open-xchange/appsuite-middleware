@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.tools.encoding.Base64;
+
 
 /**
+ * {@link HttpAuthRequest}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class SessionTestSuite {
+public class HttpAuthRequest extends AbstractRequest<HttpAuthResponse> {
 
-    /**
-     * Prevent instantiation.
-     */
-    private SessionTestSuite() {
-        super();
+    public static final String HTTP_AUTH_URL = LOGIN_URL + "/httpAuth";
+
+    final String login;
+    final String password;
+
+    public HttpAuthRequest(String login, String password) {
+        super(new Parameter[0]);
+        this.login = login;
+        this.password = password;
     }
 
-    /**
-     * Generates the session tests suite.
-     * @return the session tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(LoginTest.class);
-        tests.addTestSuite(StoreTest.class);
-        tests.addTestSuite(RedirectTest.class);
-        tests.addTestSuite(Bug12437Test.class);
-        tests.addTestSuite(DuplicateAuthIdTest.class);
-        tests.addTestSuite(RedeemTest.class);
-        tests.addTestSuite(HttpAuthTest.class);
-        return tests;
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public String getServletPath() {
+        return HTTP_AUTH_URL;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return new Header[] {
+            new Header() {
+                public String getName() {
+                    return "Authorization";
+                }
+                public String getValue() {
+                    return "Basic " + Base64.encode(login + ':' + password);
+                }
+            }
+        };
+    }
+
+    public HttpAuthParser getParser() {
+        return new HttpAuthParser();
     }
 }

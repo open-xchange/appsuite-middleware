@@ -49,65 +49,19 @@
 
 package com.openexchange.ajax.session.actions;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.message.BasicHeaderElementIterator;
-import org.apache.http.util.EntityUtils;
-import com.openexchange.ajax.Login;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class RedirectResponseParser extends AbstractAJAXParser<RedirectResponse> {
-
-    private String location;
+public class RedirectResponseParser extends AbstractRedirectParser<RedirectResponse> {
     
     RedirectResponseParser() {
-        super(true);
+        super();
     }
 
     @Override
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, resp.getStatusLine().getStatusCode());
-        Header[] headers = resp.getHeaders("Location");
-        assertEquals("There should be exactly one Location header.", 1, headers.length);
-        location = headers[0].getValue();
-        assertNotNull("Location for redirect is missing.", location);
-        boolean oxCookieFound = false;
-        boolean jsessionIdCookieFound = false;
-        HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
-        while (iter.hasNext()) {
-            HeaderElement element = iter.nextElement();
-            if (element.getName().startsWith(Login.SECRET_PREFIX)) {
-                oxCookieFound = true;
-                continue;
-            }
-            if (Tools.JSESSIONID_COOKIE.equals(element.getName())) {
-                jsessionIdCookieFound = true;
-                continue;
-            }
-        }
-        assertTrue("Session cookie is missing.", oxCookieFound);
-        assertTrue("JSESSIONID cookie is missing.", jsessionIdCookieFound);
-        return EntityUtils.toString(resp.getEntity());
-    }
-
-    @Override
-    public RedirectResponse parse(String body) {
-        return createResponse(null);
-    }
-
-    @Override
-    protected RedirectResponse createResponse(Response response) {
+    protected RedirectResponse createResponse(String location) {
         return new RedirectResponse(location);
     }
 }
