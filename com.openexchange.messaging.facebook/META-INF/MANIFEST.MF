@@ -99,4 +99,4 @@ Bundle-ClassPath: lib/commons-collections-3.2.1.jar,
  lib/serializer-2.7.1.jar,
  lib/xalan-2.7.1.jar,
  .
-Bundle-Activator: com.openexchange.messaging.facebook.osgi.FacebookMessagingActivator
+Bundle-Activator: com.openexchange.messaging.facebook.osgi.Activator

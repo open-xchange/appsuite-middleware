@@ -176,12 +176,6 @@ public final class FacebookMessagingActivator extends DeferredActivator {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrations.add(context.registerService(EventHandler.class.getName(), new FacebookEventHandler(), serviceProperties));
-            registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-
-                public Collection<UpdateTask> getUpdateTasks() {
-                    return Arrays.asList(((UpdateTask) new FacebookDropObsoleteAccountsTask()));
-                }
-            }, null));
             try {
                 // new StartUpTest().test();
             } catch (final Exception e) {
