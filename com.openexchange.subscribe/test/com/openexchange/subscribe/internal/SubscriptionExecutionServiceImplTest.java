@@ -99,6 +99,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         subscribeService.setSubscription( subscription );
         subscribeService.setContent(Arrays.asList("entry1", "entry2", "entry3"));
         source.setSubscribeService( subscribeService );
+        subscribeService.setSubscriptionSource(source);
         SubscriptionSource source2 = new SubscriptionSource();
         source2.setId(SOURCE_NAME2);
         source2.setSubscribeService(new SimSubscribeService() );
