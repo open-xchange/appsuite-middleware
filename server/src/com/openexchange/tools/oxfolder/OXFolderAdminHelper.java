@@ -208,13 +208,19 @@ public final class OXFolderAdminHelper {
             ResultSet rs = null;
             try {
                 stmt =
-                    writeCon.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                    writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, id);
                 stmt.setInt(pos++, admin);
                 rs = stmt.executeQuery();
                 final boolean update = rs.next();
+                final int system;
+                if(update) {
+                    system = rs.getInt(2);
+                } else {
+                    system = -1;
+                }
                 DBUtils.closeSQLStuff(rs, stmt);
                 rs = null;
                 /*
@@ -222,7 +228,7 @@ public final class OXFolderAdminHelper {
                  */
                 if (update) {
                     stmt =
-                        writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                        writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = ?");
                     pos = 1;
                     stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS); // fp
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
@@ -232,6 +238,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, id);
                     stmt.setInt(pos++, admin);
+                    stmt.setInt(pos++, system);
                     stmt.executeUpdate();
                 } else {
                     stmt =
@@ -454,13 +461,15 @@ public final class OXFolderAdminHelper {
         ResultSet rs = null;
         try {
             stmt =
-                writeCon.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, globalAddressBookId);
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
             final boolean update = rs.next();
+            final int system = (update) ? rs.getInt(2) : -1;
+            
             DBUtils.closeSQLStuff(rs, stmt);
             rs = null;
             /*
@@ -468,7 +477,7 @@ public final class OXFolderAdminHelper {
              */
             if (update) {
                 stmt =
-                    writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                    writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = ?");
                 pos = 1;
                 if (disable) {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
@@ -486,6 +495,7 @@ public final class OXFolderAdminHelper {
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, globalAddressBookId);
                 stmt.setInt(pos++, userId);
+                stmt.setInt(pos++, system);
                 stmt.executeUpdate();
             } else {
                 stmt =
@@ -1625,6 +1635,8 @@ public final class OXFolderAdminHelper {
             OCLPermission.NO_PERMISSIONS);
     }
 
+    // NOTE: This is an update without the full primary key in the where clause, so it may lock too many rows. 
+    // Since this is never called, I suppose we might as well remove the method
     private void updateGABWritePermission(final int contextId, final boolean enable, final Connection con) throws OXException {
         PreparedStatement ps = null;
         try {
