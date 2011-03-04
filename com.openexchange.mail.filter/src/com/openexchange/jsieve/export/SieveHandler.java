@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.jsieve;
+package com.openexchange.jsieve.export;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -65,8 +65,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
+import com.openexchange.jsieve.Capabilities;
+import com.openexchange.jsieve.SocketFetcher;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 
@@ -86,17 +88,17 @@ public class SieveHandler {
     /**
      * The constant for CRLF (carriage-return line-feed).
      */
-    private final static String CRLF = "\r\n";
+    protected final static String CRLF = "\r\n";
 
     /**
      * The SIEVE OK.
      */
-    private final static String SIEVE_OK = "OK";
+    protected final static String SIEVE_OK = "OK";
 
     /**
      * The SIEVE NO.
      */
-    private final static String SIEVE_NO = "NO";
+    protected final static String SIEVE_NO = "NO";
 
     /**
      * The SIEVE AUTHENTICATE.
@@ -125,15 +127,15 @@ public class SieveHandler {
 
     private static final int UNDEFINED = -1;
 
-    private static final int OK = 0;
+    protected static final int OK = 0;
 
-    private static final int NO = 1;
+    protected static final int NO = 1;
 
     /*-
      * Member section
      */
 
-    private boolean AUTH = false;
+    protected boolean AUTH = false;
 
     private final String sieve_user;
 
@@ -143,17 +145,17 @@ public class SieveHandler {
 
     private final String sieve_auth_passwd;
 
-    private final String sieve_host;
+    protected final String sieve_host;
 
-    private final int sieve_host_port;
+    protected final int sieve_host_port;
 
     private Capabilities capa = null;
 
     private Socket s_sieve = null;
 
-    private BufferedReader bis_sieve = null;
+    protected BufferedReader bis_sieve = null;
 
-    private BufferedOutputStream bos_sieve = null;
+    protected BufferedOutputStream bos_sieve = null;
 
     private long mStart;
 
@@ -880,7 +882,7 @@ public class SieveHandler {
      *         {@link #OK}), otherwise {@link #UNDEFINED}. The second position holds the number of octets of a following literal or
      *         {@link #UNDEFINED} if no literal is present.
      */
-    private static int[] parseFirstLine(final String firstLine) {
+    protected static int[] parseFirstLine(final String firstLine) {
         if (null == firstLine) {
             return null;
         }
