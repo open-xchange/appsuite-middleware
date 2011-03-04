@@ -481,9 +481,8 @@ public class Login extends AJAXServlet {
             try {
                 doAuthHeaderLogin(req, resp);
             } catch (LoginException e) {
-                String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
-                resp.setContentType(CONTENTTYPE_HTML);
-                resp.getWriter().write(errorPage);
+                resp.setHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             }
         } else {
             resp.setHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
