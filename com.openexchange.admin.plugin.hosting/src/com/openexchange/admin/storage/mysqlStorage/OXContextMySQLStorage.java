@@ -311,6 +311,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rollback(con);
             throw new StorageException(e);
         } finally {
+            closeSQLStuff(dynamicAttrDel);
             autocommit(con);
         }
         LOG.debug("Data delete for context " + ctx.getId() + " completed!");
