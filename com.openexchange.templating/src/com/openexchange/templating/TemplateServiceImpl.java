@@ -215,7 +215,7 @@ public class TemplateServiceImpl implements TemplateService {
         this.infostore = helper;
     }
 
-    public List<String> getBasicTemplateNames() throws TemplateException {
+    public List<String> getBasicTemplateNames() {
         String templatePath = config.getProperty(PATH_PROPERTY);
         File templateDir = new File(templatePath);
         if (!templateDir.isDirectory() || !templateDir.exists()) {
