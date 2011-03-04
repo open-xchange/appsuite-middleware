@@ -53,10 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.httpclient.Cookie;
-
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.simple.AbstractSimpleClientTest;
-import com.openexchange.ajax.simple.SimpleOXClient;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.test.json.JSONAssertion;
 
