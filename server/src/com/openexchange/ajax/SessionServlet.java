@@ -131,9 +131,8 @@ public abstract class SessionServlet extends AJAXServlet {
                 LOG.fatal("No configuration service available, can not read whitelist");
             } else {
                 final String text = configurationService.getText(SESSION_WHITELIST_FILE);
-                if (text == null) {
-                    LOG.info("No exceptions from IP Check have been defined.");
-                } else {
+                if (text != null) {
+                    LOG.info("Exceptions from IP Check have been defined.");
                     final String[] lines = text.split("\n");
                     for (String line : lines) {
                         line = line.replaceAll("\\s", "");
