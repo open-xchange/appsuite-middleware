@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
-import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link MailAccountGetRequest}
@@ -72,12 +72,16 @@ public class MailAccountGetRequest implements AJAXRequest<MailAccountGetResponse
         this.failOnError = failOnError;
     }
 
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return AJAXRequest.Method.GET;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {

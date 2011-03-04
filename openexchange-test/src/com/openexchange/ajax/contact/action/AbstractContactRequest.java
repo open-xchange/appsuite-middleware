@@ -56,6 +56,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.Contact;
 
@@ -90,5 +91,9 @@ public abstract class AbstractContactRequest<T extends AbstractAJAXResponse> imp
         final ContactWriter contactWriter = new ContactWriter(TimeZone.getTimeZone("UTC"));
 		contactWriter.writeContact(contactObj, jsonObj, null);
         return jsonObj;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 }

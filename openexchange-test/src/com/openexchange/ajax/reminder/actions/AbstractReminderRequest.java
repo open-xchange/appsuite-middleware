@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.groupware.reminder.ReminderObject;
 
@@ -79,6 +80,10 @@ public abstract class AbstractReminderRequest<T extends AbstractAJAXResponse> im
      */
     public String getServletPath() {
         return REMINDER_URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     protected JSONObject convert(final ReminderObject reminderObj) throws JSONException {

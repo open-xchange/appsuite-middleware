@@ -50,10 +50,9 @@
 package com.openexchange.ajax.mailaccount.actions;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link MailAccountListRequest}
@@ -91,12 +90,16 @@ public class MailAccountListRequest implements AJAXRequest<MailAccountListRespon
         this(true, ids, cols);
     }
     
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return idArray;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {

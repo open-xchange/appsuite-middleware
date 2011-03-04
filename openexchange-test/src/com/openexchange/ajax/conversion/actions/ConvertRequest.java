@@ -51,12 +51,10 @@ package com.openexchange.ajax.conversion.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link ConvertRequest}
@@ -70,9 +68,6 @@ public final class ConvertRequest implements AJAXRequest {
 
 	private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link ConvertRequest}
-	 */
 	public ConvertRequest(final JSONObject jsonBody, final boolean failOnError) {
 		super();
 		this.jsonBody = jsonBody;
@@ -83,40 +78,24 @@ public final class ConvertRequest implements AJAXRequest {
 		return "/ajax/conversion";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
+	public Object getBody() {
 		return jsonBody;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
 	public Method getMethod() {
 		return Method.PUT;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
 	public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "convert"));
 		return params.toArray(new Parameter[params.size()]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
 	public ConvertParser getParser() {
 		return new ConvertParser(failOnError);
 	}

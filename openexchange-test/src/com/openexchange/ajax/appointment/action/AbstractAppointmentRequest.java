@@ -56,6 +56,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.Appointment;
 
@@ -70,18 +71,16 @@ public abstract class AbstractAppointmentRequest<T extends AbstractAJAXResponse>
      */
     static final String URL = "/ajax/calendar";
 
-    /**
-     * Default constructor.
-     */
     protected AbstractAppointmentRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     protected JSONObject convert(final Appointment appointmentObj, final TimeZone timeZone)

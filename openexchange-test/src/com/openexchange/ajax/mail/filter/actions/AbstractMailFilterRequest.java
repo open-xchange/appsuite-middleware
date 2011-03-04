@@ -54,6 +54,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.mail.filter.Rule;
 import com.openexchange.ajax.mail.filter.writer.MailFilterWriter;
 
@@ -68,18 +69,16 @@ public abstract class AbstractMailFilterRequest<T extends AbstractAJAXResponse> 
      */
     public static final String URL = "/ajax/mailfilter";
 
-    /**
-     * Default constructor.
-     */
     protected AbstractMailFilterRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     protected JSONObject convert(final Rule rule)

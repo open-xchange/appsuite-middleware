@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
@@ -105,6 +106,10 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
 
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {

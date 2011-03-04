@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.groupware.tasks.Task;
 
@@ -74,18 +75,16 @@ public abstract class AbstractTaskRequest<T extends AbstractAJAXResponse> implem
 
     public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID, Task.FOLDER_ID };
 
-    /**
-     * Default constructor.
-     */
     protected AbstractTaskRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return TASKS_URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     protected JSONObject convert(Task task, TimeZone timeZone) throws JSONException {

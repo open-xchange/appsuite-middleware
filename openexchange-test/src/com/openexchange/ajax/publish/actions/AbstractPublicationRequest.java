@@ -51,6 +51,7 @@ package com.openexchange.ajax.publish.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractPublicationRequest}
@@ -63,6 +64,10 @@ public abstract class AbstractPublicationRequest<T extends AbstractAJAXResponse>
 
     public String getServletPath() {
         return "/ajax/publications";
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public void setFailOnError(boolean failOnError) {

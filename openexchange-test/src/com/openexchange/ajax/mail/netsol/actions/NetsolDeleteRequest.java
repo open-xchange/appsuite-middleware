@@ -58,6 +58,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.mail.actions.AbstractMailRequest;
 import com.openexchange.ajax.mail.netsol.FolderAndID;
 
@@ -85,11 +86,6 @@ public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteReques
         this.hardDelete = hardDelete;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
         for (int i = 0; i < mailPaths.length; i++) {
@@ -101,39 +97,23 @@ public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteReques
         return array;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public Parameter[] getParameters() {
         return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
                 new Parameter("harddelete", hardDelete ? "1" : "0") };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     public DeleteParser getParser() {
         return new DeleteParser(true);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
-     */
     public String getServletPath() {
         return AbstractMailRequest.MAIL_URL;
     }

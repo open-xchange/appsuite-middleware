@@ -50,6 +50,7 @@
 package com.openexchange.ajax.passwordchange.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractPasswordChangeResourceRequest}
@@ -64,18 +65,15 @@ public abstract class AbstractPasswordChangeResourceRequest implements AJAXReque
      */
     public static final String RESOURCE_URL = "/ajax/passwordchange";
 
-    /**
-     * Default constructor.
-     */
     protected AbstractPasswordChangeResourceRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return RESOURCE_URL;
     }
 
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.voipnow.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractVoipNowRequest}
@@ -64,18 +65,16 @@ public abstract class AbstractVoipNowRequest<T extends AbstractAJAXResponse> imp
      */
     static final String URL = "/ajax/com.4psa.voipnow";
 
-    /**
-     * Default constructor.
-     */
     protected AbstractVoipNowRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
 }

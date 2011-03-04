@@ -50,10 +50,9 @@
 package com.openexchange.ajax.mailaccount.actions;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link MailAccountDeleteRequest}
@@ -77,12 +76,16 @@ public class MailAccountDeleteRequest implements AJAXRequest<MailAccountDeleteRe
         this(true, ids);
     }
     
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return ids;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return AJAXRequest.Method.PUT;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {

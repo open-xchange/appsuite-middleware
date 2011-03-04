@@ -52,6 +52,7 @@ package com.openexchange.ajax.importexport.actions;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
 /**
@@ -69,32 +70,24 @@ public abstract class AbstractExportRequest<T extends AbstractAJAXResponse> impl
 
     private final int folderId;
 
-    /**
-     * Default constructor.
-     */
     public AbstractExportRequest(final Action action, final int folderId) {
         super();
         this.action = action;
         this.folderId = folderId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
@@ -102,9 +95,6 @@ public abstract class AbstractExportRequest<T extends AbstractAJAXResponse> impl
         };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return EXPORT_URL;
     }

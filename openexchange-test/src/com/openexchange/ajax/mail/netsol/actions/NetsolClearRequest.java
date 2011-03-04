@@ -50,13 +50,12 @@
 package com.openexchange.ajax.mail.netsol.actions;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.mail.actions.AbstractMailRequest;
 
 /**
@@ -74,39 +73,28 @@ public final class NetsolClearRequest implements AJAXRequest {
 		this.folderId = folderId;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
+	public Object getBody() {
 		final JSONArray array = new JSONArray();
 		array.put(folderId);
 		return array;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
 	public Method getMethod() {
 		return Method.PUT;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
 	public Parameter[] getParameters() {
 		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR) };
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
 	public AbstractAJAXParser<NetsolClearResponse> getParser() {
 		return new ClearParser(true);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
-	 */
 	public String getServletPath() {
 		return AbstractMailRequest.MAIL_URL;
 	}
@@ -118,7 +106,7 @@ public final class NetsolClearRequest implements AJAXRequest {
 		}
 
 		@Override
-		protected NetsolClearResponse createResponse(final Response response) throws JSONException {
+		protected NetsolClearResponse createResponse(final Response response) {
 			return new NetsolClearResponse(response);
 		}
 

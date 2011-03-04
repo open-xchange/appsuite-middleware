@@ -50,6 +50,7 @@
 package com.openexchange.ajax.spellcheck.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractSpellCheckRequest}
@@ -64,18 +65,16 @@ public abstract class AbstractSpellCheckRequest implements AJAXRequest {
      */
     public static final String SPELL_CHECK_URL = "/ajax/spellcheck";
 
-	/**
-	 * Initializes a new {@link AbstractSpellCheckRequest}
-	 */
 	protected AbstractSpellCheckRequest() {
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
-	 */
 	public String getServletPath() {
 		return SPELL_CHECK_URL;
 	}
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.config.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * 
@@ -63,14 +64,15 @@ abstract class AbstractConfigRequest<T extends AbstractAJAXResponse> implements 
      */
     private static final String CONFIG_URL = "/ajax/config";
 
-    /**
-     * Default constructor.
-     */
     protected AbstractConfigRequest() {
         super();
     }
 
     public String getServletPath() {
         return CONFIG_URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 }

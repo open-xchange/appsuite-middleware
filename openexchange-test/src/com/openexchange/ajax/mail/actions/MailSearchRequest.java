@@ -52,9 +52,9 @@ package com.openexchange.ajax.mail.actions;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link MailSearchRequest}
@@ -103,7 +103,7 @@ public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
         setBody(body);
     }
 
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return body;
     }
     
@@ -114,6 +114,10 @@ public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
 
     public Method getMethod() {
         return Method.PUT;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {

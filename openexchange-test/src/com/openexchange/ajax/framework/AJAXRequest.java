@@ -61,6 +61,8 @@ import org.json.JSONException;
  */
 public interface AJAXRequest<T extends AbstractAJAXResponse> {
 
+    static final Header[] NO_HEADER = new Header[0];
+
     enum Method {
         GET,
         POST,
@@ -215,4 +217,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
     AbstractAJAXParser<? extends T> getParser();
 
     Object getBody() throws IOException, JSONException;
+
+    Header[] getHeaders();
+
 }

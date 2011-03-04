@@ -50,11 +50,11 @@
 package com.openexchange.ajax.mail.actions;
 
 import java.io.InputStream;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link SendRequest}
@@ -99,23 +99,18 @@ public class SendRequest implements AJAXRequest<SendResponse> {
         this.upload = upload;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.UPLOAD;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public Parameter[] getParameters() {
         final Parameter[] retval = new Parameter[upload == null ? 2 : 3];
         retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
@@ -126,9 +121,6 @@ public class SendRequest implements AJAXRequest<SendResponse> {
         return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return MAIL_URL;
     }
@@ -144,7 +136,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
         }
 
         @Override
-        protected SendResponse createResponse(final Response response) throws JSONException {
+        protected SendResponse createResponse(final Response response) {
             return new SendResponse(response);
         }
 

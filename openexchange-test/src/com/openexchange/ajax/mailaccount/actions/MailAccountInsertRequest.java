@@ -54,10 +54,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
-
 
 /**
  * {@link MailAccountInsertRequest}
@@ -87,6 +87,10 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
 
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return AJAXRequest.Method.PUT;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {

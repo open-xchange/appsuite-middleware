@@ -51,6 +51,7 @@ package com.openexchange.ajax.user.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractUserRequest}
@@ -64,18 +65,16 @@ public abstract class AbstractUserRequest<T extends AbstractAJAXResponse> implem
      */
     static final String URL = "/ajax/user";
 
-    /**
-     * Default constructor.
-     */
     protected AbstractUserRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
 }

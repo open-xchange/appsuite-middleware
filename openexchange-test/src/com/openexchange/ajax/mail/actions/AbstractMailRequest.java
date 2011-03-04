@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractMailRequest}
@@ -65,18 +66,16 @@ public abstract class AbstractMailRequest<T extends AbstractAJAXResponse> implem
      */
     public static final String MAIL_URL = "/ajax/mail";
 
-    /**
-     * Default constructor.
-     */
     protected AbstractMailRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return MAIL_URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.resource.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractResourceRequest}
@@ -65,18 +66,15 @@ public abstract class AbstractResourceRequest<T extends AbstractAJAXResponse> im
      */
     public static final String RESOURCE_URL = "/ajax/resource";
 
-    /**
-     * Default constructor.
-     */
     protected AbstractResourceRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return RESOURCE_URL;
     }
 
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 }

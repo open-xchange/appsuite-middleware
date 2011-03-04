@@ -72,23 +72,18 @@ public class MultipleRequest<T extends AbstractAJAXResponse> implements AJAXRequ
         return new MultipleRequest<T>(requests);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public Parameter[] getParameters() {
         return new Parameter[0];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return "/ajax/multiple";
     }
@@ -112,9 +107,6 @@ public class MultipleRequest<T extends AbstractAJAXResponse> implements AJAXRequ
         return array.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public MultipleParser<T> getParser() {
         return new MultipleParser<T>(requests);
     }

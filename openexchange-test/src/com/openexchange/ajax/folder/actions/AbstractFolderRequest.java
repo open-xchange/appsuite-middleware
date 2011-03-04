@@ -59,6 +59,7 @@ import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.OCLPermission;
@@ -78,6 +79,10 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
 
     public String getServletPath() {
         return api.getUrl();
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     protected JSONObject convert(final FolderObject folder) throws JSONException {

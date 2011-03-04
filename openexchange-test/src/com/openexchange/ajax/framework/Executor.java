@@ -164,7 +164,10 @@ public class Executor extends Assert {
         default:
             throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
         }
-        
+        for (Header header : request.getHeaders()) {
+            httpRequest.addHeader(header.getName(), header.getValue());
+        }
+
         DefaultHttpClient httpClient = session.getHttpClient();
 
         long startRequest = System.currentTimeMillis();

@@ -148,6 +148,10 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         };
     }
 
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public CommonListParser getParser() {
         return new CommonListParser(failOnError, columns);
     }

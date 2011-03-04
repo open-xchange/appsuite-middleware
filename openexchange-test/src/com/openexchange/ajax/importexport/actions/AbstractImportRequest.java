@@ -54,6 +54,7 @@ import java.io.InputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.groupware.importexport.Format;
 
 /**
@@ -73,9 +74,6 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
 
     private final InputStream upload;
 
-    /**
-     * Default constructor.
-     */
     public AbstractImportRequest(final Action action, final int folderId,
         final InputStream upload) {
         super();
@@ -84,23 +82,18 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
         this.upload = upload;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.UPLOAD;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
@@ -130,9 +123,6 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return IMPORT_URL;
     }

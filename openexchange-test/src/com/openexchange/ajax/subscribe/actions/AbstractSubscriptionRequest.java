@@ -51,17 +51,22 @@ package com.openexchange.ajax.subscribe.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-
+import com.openexchange.ajax.framework.Header;
 
 /**
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractSubscriptionRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T>{
+
     private boolean failOnError;
     
     public String getServletPath() {
         return "/ajax/subscriptions";
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public void setFailOnError(boolean failOnError) {

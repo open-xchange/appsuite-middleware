@@ -51,6 +51,7 @@ package com.openexchange.ajax.attach.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractAttachmentRequest}
@@ -67,5 +68,9 @@ public abstract class AbstractAttachmentRequest<T extends AbstractAJAXResponse> 
 
     public String getServletPath() {
         return ATTACHMENT_URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 }

@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
@@ -81,6 +82,10 @@ public abstract class AbstractInfostoreRequest<T extends AbstractInfostoreRespon
 
     public String getServletPath() {
         return INFOSTORE_URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public String writeJSON(DocumentMetadata data) throws JSONException {

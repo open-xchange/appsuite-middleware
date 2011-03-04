@@ -54,6 +54,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.groupware.container.LinkObject;
 
 /**
@@ -67,18 +68,16 @@ public abstract class AbstractLinkRequest<T extends AbstractAJAXResponse> implem
      */
     private static final String LINK_URL = "/ajax/link";
 
-    /**
-     * Default constructor.
-     */
     public AbstractLinkRequest() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return LINK_URL;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
     public static JSONObject convert(final LinkObject link) throws JSONException {

@@ -99,6 +99,10 @@ public abstract class AbstractUpdatesRequest<T extends AbstractColumnsResponse> 
         return Method.GET;
     }
 
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES));

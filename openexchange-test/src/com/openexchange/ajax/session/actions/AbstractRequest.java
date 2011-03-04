@@ -51,6 +51,7 @@ package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
  * 
@@ -65,38 +66,27 @@ public abstract class AbstractRequest<T extends AbstractAJAXResponse> implements
 
     private final Parameter[] parameters;
 
-    /**
-     * Default constructor.
-     */
     protected AbstractRequest(final Parameter[] parameters) {
         super();
         this.parameters = parameters;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return LOGIN_URL;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.POST;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public Parameter[] getParameters() {
         return parameters.clone();
     }

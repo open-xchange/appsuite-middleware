@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,17 @@
  *
  */
 
-package com.openexchange.ajax.group.actions;
-
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
+package com.openexchange.ajax.framework;
 
 /**
+ * Possible HTTP header for a request.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-abstract class AbstractGroupRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public interface Header {
 
-    /**
-     * URL for group servlet.
-     */
-    public static final String GROUP_URL = "/ajax/group";
-    
-    protected AbstractGroupRequest() {
-        super();
-    }
+    String getName();
 
-    public final String getServletPath() {
-        return GROUP_URL;
-    }
+    String getValue();
 
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
 }

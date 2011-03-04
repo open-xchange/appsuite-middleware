@@ -100,6 +100,10 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         return servletPath;
     }
 
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
     public Object getBody() {
         return null;
     }
