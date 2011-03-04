@@ -79,6 +79,7 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.connect.POP3StoreConnector;
 import com.openexchange.pop3.connect.POP3StoreConnector.POP3StoreResult;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -550,7 +551,18 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     }
                 }
             } finally {
-                inbox.close(doExpunge);
+                try {
+                    if (inbox.isOpen()) {
+                        inbox.close(doExpunge);
+                    }
+                } catch (final Exception e) {
+                    final POP3Config pop3Config = pop3Access.getPOP3Config();
+                    if (doExpunge) {
+                        LOG.warn("POP3 mailbox " + pop3Config.getServer() + " could not be expunged for login " + pop3Config.getLogin(), e);
+                    } else {
+                        LOG.debug("POP3 mailbox " + pop3Config.getServer() + " could not be closed for login " + pop3Config.getLogin(), e);
+                    }
+                }
                 if (doExpunge) {
                     // Trashed UIDLs not needed anymore
                     getTrashContainer().clear();
