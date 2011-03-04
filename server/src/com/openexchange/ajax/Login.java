@@ -196,10 +196,18 @@ public class Login extends AJAXServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final String action = req.getParameter(PARAMETER_ACTION);
-        if (action == null) {
+        final String subPath = getServletSpecificURI(req);
+        if (null != subPath && subPath.length() > 0 && subPath.startsWith("/httpAuth")) {
+            doHttpAuth(req, resp);
+        } else if (null != action) {
+            doJSONAuth(req, resp, action);
+        } else {
             logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION));
             return;
         }
+    }
+
+    private void doJSONAuth(HttpServletRequest req, HttpServletResponse resp, String action) throws IOException {
         if (ACTION_LOGIN.equals(action)) {
             // Look-up necessary credentials
             try {
@@ -463,7 +471,13 @@ public class Login extends AJAXServlet {
                 resp.setContentType(CONTENTTYPE_HTML);
                 resp.getWriter().write(errorPage);
             }
-        } else if (req.getHeader(Header.AUTH_HEADER) != null) {
+        } else {
+            logAndSendException(resp, new AjaxException(AjaxException.Code.UnknownAction, action));
+        }
+    }
+
+    private void doHttpAuth(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (req.getHeader(Header.AUTH_HEADER) != null) {
             try {
                 doAuthHeaderLogin(req, resp);
             } catch (LoginException e) {
@@ -472,7 +486,8 @@ public class Login extends AJAXServlet {
                 resp.getWriter().write(errorPage);
             }
         } else {
-            logAndSendException(resp, new AjaxException(AjaxException.Code.UnknownAction, action));
+            resp.setHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
         }
     }
 
