@@ -151,6 +151,8 @@ public final class MailFolderImpl extends AbstractFolder {
 
     private static final int BIT_USER_FLAG = (1 << 29);
 
+    private static final int BIT_RENAME_FLAG = (1 << 30);
+
     /**
      * Initializes a new {@link MailFolderImpl} from given mail folder.
      * <p>
@@ -298,6 +300,10 @@ public final class MailFolderImpl extends AbstractFolder {
                 mp.isFolderAdmin());
         if (mailFolder.isSupportsUserFlags()) {
             permissionBits |= BIT_USER_FLAG;
+        }
+        final int canRename = mp.canRename();
+        if (canRename > 0) {
+            permissionBits |= BIT_RENAME_FLAG;
         }
         bits = permissionBits;
         if (mailFolder.containsShared() && mailFolder.isShared()) {

@@ -76,6 +76,18 @@ public abstract class MailPermission extends OCLPermission {
         super();
     }
 
+    /**
+     * Checks if permission allows to rename the folder.
+     * <p>
+     * Returns <code>-1</code> if there's no special rename permission. Then rename is granted if {@link #isFolderAdmin()} returns
+     * <code>true</code>. Otherwise <code>1</code> is returned if rename is granted; <code>0</code> means no rename permission.
+     * 
+     * @return
+     */
+    public int canRename() {
+        return -1;
+    }
+
     private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
 
     /**

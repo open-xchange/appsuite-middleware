@@ -74,11 +74,14 @@ public final class ACLPermission extends MailPermission {
 
     private transient ACL acl;
 
+    private int canRename;
+
     /**
      * Initializes a new {@link ACLPermission}.
      */
     public ACLPermission() {
         super();
+        canRename = -1;
     }
 
     @Override
@@ -158,6 +161,20 @@ public final class ACLPermission extends MailPermission {
         acl = null;
     }
 
+    @Override
+    public int canRename() {
+        return canRename;
+    }
+    
+    /**
+     * Sets the rename flag.
+     * 
+     * @param canRename The rename flag
+     */
+    public void setCanRename(final int canRename) {
+        this.canRename = canRename;
+    }
+
     /*-
      * Full rights: "acdilprsw"
      */
@@ -208,6 +225,7 @@ public final class ACLPermission extends MailPermission {
      */
     public void parseRights(final Rights rights, final IMAPConfig imapConfig) throws IMAPException {
         rights2Permission(rights, this, imapConfig);
+        canRename = imapConfig.getACLExtension().canCreate(rights) ? 1 : 0;
     }
 
     /**
