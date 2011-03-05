@@ -1,6 +1,7 @@
 * 2011-03-05 - thorben.betten@open-xchange.com
 
  - Bugfix #18036: Introduced special bit to check for rename permission
+ - Bugfix #18285: Preserve plain text signature delimiter
 
 * 2011-03-04 - thorben.betten@open-xchange.com
 

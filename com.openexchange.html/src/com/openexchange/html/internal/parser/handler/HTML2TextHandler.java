@@ -407,6 +407,11 @@ public final class HTML2TextHandler implements HTMLHandler {
      */
     private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{2,}))+");
 
+    /**
+     * The special signature delimiter.
+     */
+    private static final Pattern PAT_SIGNATURE_DELIM = Pattern.compile(" *-- (?:&#160;)?$");
+
     private static final Set<String> FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("b", "i", "em", "strong")));
 
     private static final String STR_EMPTY = "";
@@ -474,6 +479,15 @@ public final class HTML2TextHandler implements HTMLHandler {
                      * Turn remaining indentions to space characters
                      */
                     preparedText = PAT_INDENT.matcher(preparedText).replaceAll(STR_BLANK);
+                    /*
+                     * Check for special signature delimiter
+                     */
+                    if (PAT_SIGNATURE_DELIM.matcher(preparedText).matches()) {
+                        preparedText = "-- ";
+                    }
+                    /*
+                     * Finally append to text builder
+                     */
                     textBuilder.append(htmlService.replaceHTMLEntities(preparedText));
                 }
             }
