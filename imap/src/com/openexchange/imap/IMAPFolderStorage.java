@@ -88,6 +88,7 @@ import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.UserGroupID;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
@@ -98,6 +99,9 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
@@ -932,6 +936,177 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     @Override
+    public String renameFolder(final String fullname, final String newName) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            final String name;
+            if (accountId == MailAccount.DEFAULT_ID) {
+                name = MailFolder.DEFAULT_FOLDER_NAME;
+            } else {
+                final MailAccountStorageService mass = IMAPServiceRegistry.getService(MailAccountStorageService.class);
+                if (null == mass) {
+                    name = MailFolder.DEFAULT_FOLDER_NAME;
+                } else {
+                    try {
+                        name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
+                    } catch (final MailAccountException e) {
+                        throw new MailException(e);
+                    }
+                }
+                
+            }
+            throw IMAPException.create(IMAPException.Code.NO_RENAME_ACCESS, imapConfig, session, name);
+        }
+        try {
+            IMAPFolder renameMe = (IMAPFolder) imapStore.getFolder(fullname);
+            if (!renameMe.exists()) {
+                renameMe = checkForNamespaceFolder(fullname);
+                if (null == renameMe) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
+                }
+            }
+            FolderCache.removeCachedFolders(session, accountId);
+            /*
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+             */
+            synchronized (renameMe) {
+                if (imapConfig.isSupportsACLs() && isSelectable(renameMe)) {
+                    try {
+                        if (!imapConfig.getACLExtension().canCreate(RightsCache.getCachedRights(renameMe, true, session, accountId))) {
+                            throw IMAPException.create(IMAPException.Code.NO_RENAME_ACCESS, imapConfig, session, fullname);
+                        }
+                    } catch (final MessagingException e) {
+                        /*
+                         * MYRIGHTS command failed for given mailbox
+                         */
+                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullname);
+                    }
+                }
+                if (getChecker().isDefaultFolder(renameMe.getFullName())) {
+                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, renameMe.getFullName());
+                }
+                /*
+                 * Notify message storage about outstanding rename
+                 */
+                imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
+                final char separator = renameMe.getSeparator();
+                if (isEmpty(newName)) {
+                    throw new MailException(MailException.Code.INVALID_FOLDER_NAME_EMPTY);
+                } else if (newName.indexOf(separator) != -1) {
+                    throw new MailException(MailException.Code.INVALID_FOLDER_NAME, String.valueOf(separator));
+                }
+                /*-
+                 * Perform rename operation
+                 * 
+                 * Rename can only be invoked on a closed folder
+                 */
+                if (renameMe.isOpen()) {
+                    renameMe.close(false);
+                }
+                final boolean mboxEnabled;
+                final IMAPFolder renameFolder;
+                {
+                    final IMAPFolder par = (IMAPFolder) renameMe.getParent();
+                    final String parentFullName = par.getFullName();
+                    final StringBuilder tmp = new StringBuilder();
+                    if (parentFullName.length() > 0) {
+                        tmp.append(parentFullName).append(separator);
+                    }
+                    tmp.append(newName);
+                    renameFolder = (IMAPFolder) imapStore.getFolder(tmp.toString());
+                    /*
+                     * Check for MBox
+                     */
+                    mboxEnabled =
+                        MBoxEnabledCache.isMBoxEnabled(
+                            imapConfig.getImapServerSocketAddress(),
+                            par,
+                            new StringBuilder(par.getFullName()).append(separator).toString());
+                }
+                if (renameFolder.exists()) {
+                    throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
+                }
+                if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
+                    throw IMAPException.create(
+                        IMAPException.Code.INVALID_FOLDER_NAME,
+                        imapConfig,
+                        session,
+                        Character.valueOf(separator));
+                }
+                /*
+                 * Remember subscription status
+                 */
+                Map<String, Boolean> subscriptionStatus;
+                final String newFullName = renameFolder.getFullName();
+                final String oldFullName = renameMe.getFullName();
+                try {
+                    subscriptionStatus = getSubscriptionStatus(renameMe, oldFullName, newFullName);
+                } catch (final MessagingException e) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(new StringBuilder(128).append("Subscription status of folder \"").append(renameMe.getFullName()).append(
+                            "\" and its subfolders could not be stored prior to rename operation"));
+                    }
+                    subscriptionStatus = null;
+                }
+                removeSessionData(renameMe);
+                /*
+                 * Rename
+                 */
+                boolean success = false;
+                try {
+                    if (renameMe.isOpen()) {
+                        renameMe.close(false);
+                    } else {
+                        // Enforce close
+                        IMAPCommandsCollection.forceCloseCommand(renameMe);
+                    }
+                    final long start = System.currentTimeMillis();
+                    IMAPCommandsCollection.renameFolder(renameMe, renameFolder);
+                    success = true;
+                    // success = moveMe.renameTo(renameFolder);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                } catch (final MessagingException e) {
+                    /*
+                     * Rename failed
+                     */
+                    throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, e, renameMe.getFullName(), newFullName);
+                }
+                /*
+                 * Success?
+                 */
+                if (!success) {
+                    throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, renameMe.getFullName(), newFullName);
+                }
+                renameMe = (IMAPFolder) imapStore.getFolder(oldFullName);
+                if (renameMe.exists()) {
+                    deleteFolder(renameMe);
+                }
+                renameMe = (IMAPFolder) imapStore.getFolder(newFullName);
+                /*
+                 * Apply remembered subscription status
+                 */
+                if (subscriptionStatus == null) {
+                    /*
+                     * At least subscribe to renamed folder
+                     */
+                    renameMe.setSubscribed(true);
+                } else {
+                    applySubscriptionStatus(renameMe, subscriptionStatus);
+                }
+                /*
+                 * Return new full name
+                 */
+                return renameMe.getFullName();
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final IMAPException e) {
+            throw e;
+        } catch (final MailException e) {
+            throw e;
+        }
+    }
+
+    @Override
     public String moveFolder(final String fullname, final String newFullname) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(fullname) || DEFAULT_FOLDER_ID.equals(newFullname)) {
             throw IMAPException.create(IMAPException.Code.NO_ROOT_MOVE, imapConfig, session, new Object[0]);
@@ -1224,8 +1399,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IMAPException e) {
             throw e;
-        } catch (final AbstractOXException e) {
-            throw new IMAPException(e);
+        } catch (final MailException e) {
+            throw e;
         }
     }
 
