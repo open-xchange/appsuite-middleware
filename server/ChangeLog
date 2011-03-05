@@ -2,6 +2,7 @@
 
  - Bugfix #18036: Introduced special bit to check for rename permission
  - Bugfix #18285: Preserve plain text signature delimiter
+ - Bugfix #18448: Allowing to remove SMTP login/password field for external mail account
 
 * 2011-03-04 - thorben.betten@open-xchange.com
 

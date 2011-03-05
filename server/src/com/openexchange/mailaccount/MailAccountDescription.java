@@ -655,29 +655,19 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the optional transport login.
-     * <p>
-     * <b>NOTE</b>:&nbsp;{@link #getLogin()} is returned if no separate transport login is available.
      * 
      * @return The optional transport login
      */
     public String getTransportLogin() {
-        if (null == transportLogin) {
-            return getLogin();
-        }
         return transportLogin;
     }
 
     /**
      * Gets the optional transport password.
-     * <p>
-     * <b>NOTE</b>:&nbsp;{@link #getPassword()} is returned if no separate transport password is available.
      * 
      * @return The optional transport password
      */
     public String getTransportPassword() {
-        if (null == transportPassword) {
-            return getPassword();
-        }
         return transportPassword;
     }
 
