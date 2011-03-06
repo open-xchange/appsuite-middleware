@@ -62,7 +62,7 @@ public interface OAuthAccountDeleteListener {
     /**
      * Handles the event <i>before</i> the denoted OAuth account is deleted.
      * 
-     * @param id The mail account ID
+     * @param id The OAuth account ID
      * @param eventProps Optional properties for delete event
      * @param user The user ID
      * @param cid The context ID
@@ -74,7 +74,7 @@ public interface OAuthAccountDeleteListener {
     /**
      * Handles the event <i>after</i> the denoted OAuth account is deleted.
      * 
-     * @param id The mail account ID
+     * @param id The OAuth account ID
      * @param eventProps Optional properties for delete event
      * @param user The user ID
      * @param cid The context ID
