@@ -368,13 +368,14 @@ public class OAuthServiceImpl implements OAuthService {
         PreparedStatement stmt = null;
         try {
             final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
-            deleteListenerRegistry.triggerOnBeforeDeletion(accountId, Collections.<String, Object> emptyMap(), user, contextId, con);
+            final Map<String, Object> properties = Collections.<String, Object> emptyMap();
+            deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, user, contextId, con);
             stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
             stmt.executeUpdate();
-            deleteListenerRegistry.triggerOnAfterDeletion(accountId, Collections.<String, Object> emptyMap(), user, contextId, con);
+            deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, user, contextId, con);
             /*
              * Post folder event
              */

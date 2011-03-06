@@ -125,8 +125,8 @@ public final class DeleteListenerRegistry {
      * Triggers the {@link OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion()} event for registered listeners.
      */
     public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OAuthException {
-        for (final OAuthAccountDeleteListener mailAccountDeleteListener : registry.values()) {
-            mailAccountDeleteListener.onBeforeOAuthAccountDeletion(id, properties, user, cid, con);
+        for (final OAuthAccountDeleteListener listener : registry.values()) {
+            listener.onBeforeOAuthAccountDeletion(id, properties, user, cid, con);
         }
     }
 
@@ -134,8 +134,8 @@ public final class DeleteListenerRegistry {
      * Triggers the {@link OAuthAccountDeleteListener#onAfterOAuthAccountDeletion()} event for registered listeners.
      */
     public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OAuthException {
-        for (final OAuthAccountDeleteListener mailAccountDeleteListener : registry.values()) {
-            mailAccountDeleteListener.onAfterOAuthAccountDeletion(id, properties, user, cid, con);
+        for (final OAuthAccountDeleteListener listener : registry.values()) {
+            listener.onAfterOAuthAccountDeletion(id, properties, user, cid, con);
         }
     }
 
