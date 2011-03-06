@@ -47,13 +47,13 @@
  *
  */
 
-package com.openexchange.messaging.facebook;
+package com.openexchange.messaging.twitter;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,19 +61,20 @@ import java.util.Map;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link FacebookOAuthAccountDeleteListener}
+ * {@link TwitterOAuthAccountDeleteListener}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TwitterOAuthAccountDeleteListener.class);
 
     /**
-     * Initializes a new {@link FacebookOAuthAccountDeleteListener}.
+     * Initializes a new {@link TwitterOAuthAccountDeleteListener}.
      */
-    public FacebookOAuthAccountDeleteListener() {
+    public TwitterOAuthAccountDeleteListener() {
         super();
     }
 
@@ -82,7 +83,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
     }
 
     public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OAuthException {
-        final List<int[]> dataList = listFacebookMessagingAccounts(user, cid, con);
+        final List<int[]> dataList = listTwitterMessagingAccounts(user, cid, con);
         for (final int[] data : dataList) {
             if (checkData(id, data, con)) {
                 dropAccountByData(data, con);
@@ -90,14 +91,14 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         }
     }
 
-    private static List<int[]> listFacebookMessagingAccounts(final int userId, final int contextId, final Connection writeCon) throws OAuthException {
+    private static List<int[]> listTwitterMessagingAccounts(final int userId, final int contextId, final Connection writeCon) throws OAuthException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = writeCon.prepareStatement("SELECT account, confId, user, cid FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setString(2, FacebookMessagingService.getServiceId());
+            stmt.setString(3, TwitterMessagingService.getServiceId());
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptyList();
@@ -115,7 +116,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -126,7 +127,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
             stmt = writeCon.prepareStatement("SELECT value FROM genconf_attributes_strings WHERE cid = ? AND id = ? AND name = ?");
             stmt.setInt(1, data[3]);
             stmt.setInt(2, data[1]);
-            stmt.setString(3, FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
+            stmt.setString(3, TwitterConstants.TWITTER_OAUTH_ACCOUNT);
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return false;
@@ -135,7 +136,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -156,7 +157,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
             stmt = writeCon.prepareStatement("DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?");
             stmt.setInt(1, data[3]);
             stmt.setInt(2, data[2]);
-            stmt.setString(3, FacebookMessagingService.getServiceId());
+            stmt.setString(3, TwitterMessagingService.getServiceId());
             stmt.setInt(4, data[0]);
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -168,6 +169,47 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
 
     private static OAuthException createSQLError(final SQLException e) {
         return OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+    }
+
+    /**
+     * Closes the ResultSet.
+     * 
+     * @param result <code>null</code> or a ResultSet to close.
+     */
+    private static void closeSQLStuff(final ResultSet result) {
+        if (result != null) {
+            try {
+                result.close();
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Closes the {@link Statement}.
+     * 
+     * @param stmt <code>null</code> or a {@link Statement} to close.
+     */
+    private static void closeSQLStuff(final Statement stmt) {
+        if (null != stmt) {
+            try {
+                stmt.close();
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Closes the ResultSet and the Statement.
+     * 
+     * @param result <code>null</code> or a ResultSet to close.
+     * @param stmt <code>null</code> or a Statement to close.
+     */
+    private static void closeSQLStuff(final ResultSet result, final Statement stmt) {
+        closeSQLStuff(result);
+        closeSQLStuff(stmt);
     }
 
 }
