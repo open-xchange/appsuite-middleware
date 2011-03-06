@@ -1,6 +1,6 @@
 * 2011-03-06 - thorben.betten@open-xchange.com
 
- - Bugfix #18498: Introduced listener for OAuth account deletion
+ - Bugfix #18498: Introduced listener framework for OAuth account deletion
 
 * 2011-03-05 - thorben.betten@open-xchange.com
 
