@@ -51,8 +51,6 @@ package com.openexchange.messaging.facebook.osgi;
 
 import static com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -64,8 +62,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.MessagingService;
@@ -73,9 +69,10 @@ import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingService;
+import com.openexchange.messaging.facebook.FacebookOAuthAccountDeleteListener;
 import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionFactory;
-import com.openexchange.messaging.facebook.groupware.FacebookDropObsoleteAccountsTask;
 import com.openexchange.messaging.facebook.session.FacebookEventHandler;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -176,6 +173,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrations.add(context.registerService(EventHandler.class.getName(), new FacebookEventHandler(), serviceProperties));
+            registrations.add(context.registerService(OAuthAccountDeleteListener.class.getName(), new FacebookOAuthAccountDeleteListener(), null));
             try {
                 // new StartUpTest().test();
             } catch (final Exception e) {

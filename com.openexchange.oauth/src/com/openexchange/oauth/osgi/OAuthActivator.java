@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
@@ -76,6 +77,7 @@ import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask;
 import com.openexchange.oauth.internal.groupware.OAuthDeleteListener;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link OAuthActivator}
@@ -101,7 +103,7 @@ public final class OAuthActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class };
     }
 
     @Override

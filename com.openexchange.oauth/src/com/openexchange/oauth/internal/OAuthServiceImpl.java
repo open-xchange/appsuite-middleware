@@ -59,12 +59,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
@@ -78,6 +83,8 @@ import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.folderstorage.FolderEventConstants;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -93,6 +100,9 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.services.ServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.Command;
 import com.openexchange.sql.grammar.INSERT;
@@ -365,6 +375,10 @@ public class OAuthServiceImpl implements OAuthService {
             stmt.setInt(3, accountId);
             stmt.executeUpdate();
             deleteListenerRegistry.triggerOnAfterDeletion(accountId, Collections.<String, Object> emptyMap(), user, contextId, con);
+            /*
+             * Post folder event
+             */
+            postFolderEvent(user, contextId);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
             rollback(con);
@@ -380,6 +394,42 @@ public class OAuthServiceImpl implements OAuthService {
             autocommit(con);
             provider.releaseReadConnection(context, con);
         }
+    }
+
+    private static void postFolderEvent(final int userId, final int contextId) {
+        final Session session = getUserSession(userId, contextId);
+        if (null == session) {
+            /*
+             * No session available
+             */
+            return;
+        }
+        final EventAdmin eventAdmin = ServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null == eventAdmin) {
+            /*
+             * Missing event admin service
+             */
+            return;
+        }
+        final Dictionary<String, Object> props = new Hashtable<String, Object>(4);
+        props.put(FolderEventConstants.PROPERTY_SESSION, session);
+        props.put(FolderEventConstants.PROPERTY_FOLDER, FolderStorage.PRIVATE_ID);
+        props.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
+        props.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(userId));
+        final Event event = new Event(FolderEventConstants.TOPIC, props);
+        /*
+         * Finally deliver it
+         */
+        eventAdmin.sendEvent(event);
+    }
+
+    private static Session getUserSession(final int userId, final int contextId) {
+        final SessiondService service = ServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null == service) {
+            return null;
+        }
+        final Collection<Session> sessions = service.getSessions(userId, contextId);
+        return sessions.isEmpty() ? null : sessions.iterator().next();
     }
 
     public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
