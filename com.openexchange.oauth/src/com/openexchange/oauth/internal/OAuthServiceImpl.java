@@ -49,7 +49,9 @@
 
 package com.openexchange.oauth.internal;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
@@ -348,17 +350,34 @@ public class OAuthServiceImpl implements OAuthService {
     public void deleteAccount(final int accountId, final int user, final int contextId) throws OAuthException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
+        try {
+            con.setAutoCommit(false); // BEGIN
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        }
         PreparedStatement stmt = null;
         try {
+            final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
+            deleteListenerRegistry.triggerOnBeforeDeletion(accountId, Collections.<String, Object> emptyMap(), user, contextId, con);
             stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
             stmt.executeUpdate();
+            deleteListenerRegistry.triggerOnAfterDeletion(accountId, Collections.<String, Object> emptyMap(), user, contextId, con);
+            con.commit(); // COMMIT
         } catch (final SQLException e) {
+            rollback(con);
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OAuthException e) {
+            rollback(con);
+            throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+            autocommit(con);
             provider.releaseReadConnection(context, con);
         }
     }

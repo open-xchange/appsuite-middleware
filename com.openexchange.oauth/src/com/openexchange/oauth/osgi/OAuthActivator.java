@@ -64,10 +64,12 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.exception.OAuthExceptionFactory;
+import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.internal.groupware.CreateOAuthAccountTable;
 import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask;
@@ -141,6 +143,7 @@ public final class OAuthActivator extends DeferredActivator {
                     }
                 }
             }
+            DeleteListenerRegistry.initInstance();
             /*
              * Register component
              */
@@ -158,7 +161,7 @@ public final class OAuthActivator extends DeferredActivator {
              * Start other trackers
              */
             trackers = new ArrayList<ServiceTracker>(4);
-            // trackers.add();
+            trackers.add(new ServiceTracker(context, OAuthAccountDeleteListener.class.getName(), new DeleteListenerServiceTracker(context)));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
@@ -216,6 +219,7 @@ public final class OAuthActivator extends DeferredActivator {
                 delegateServices.clear();
                 delegateServices = null;
             }
+            DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
             /*
              * Unregister component
