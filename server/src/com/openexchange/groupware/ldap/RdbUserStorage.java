@@ -443,11 +443,13 @@ public class RdbUserStorage extends UserStorage {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
+            con.setAutoCommit(false);
         } catch (DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+        } catch (SQLException e) {
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
         }
         try {
-            con.setAutoCommit(false);
             // Update time zone and language
             if (null != timeZone && null != preferredLanguage) {
                 PreparedStatement stmt = null;
@@ -491,6 +493,9 @@ public class RdbUserStorage extends UserStorage {
         } catch (SQLException e) {
             rollback(con);
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+        } catch (Exception e) {
+            rollback(con);
+            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, e, e.getMessage());
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(context, con);
