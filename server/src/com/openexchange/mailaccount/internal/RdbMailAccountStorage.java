@@ -1418,7 +1418,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(pos++, user);
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, transportURL);
-                stmt.setString(pos++, mailAccount.getTransportLogin());
+                if (null == mailAccount.getTransportLogin()) {
+                    stmt.setString(pos++, "");
+                } else {
+                    stmt.setString(pos++, mailAccount.getTransportLogin());
+                }
                 if (mailAccount.isDefaultFlag()) {
                     stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
