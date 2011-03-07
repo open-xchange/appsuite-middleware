@@ -61,7 +61,7 @@ import com.openexchange.tools.encoding.Base64;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class OXHCardParserTest extends TestCase {
-    
+
     public static final String gifBase64 = "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
         +"AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
         +"AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAANAA0DASIA"
@@ -80,8 +80,8 @@ public class OXHCardParserTest extends TestCase {
         +"/qV5qIW5dZbkmCxivY9OsInmle3sbOCHzWRUSP8AknIfCPxAz3xElxD4gY7iHC5Tl887qYCrhuIc"
         +"O44p4uKwGFpYeGX53iFh6NTBww+KjTxOSU1h3h61P2kK2ITXzGCwObSx7q4+VaOHhPEThL21OSnz"
         +"SlCjGDp4mTpp0pRnyywqjH2bTkpOJ//Z";
-    
-    public static final String HCARD_CONTENT =             
+
+    public static final String HCARD_CONTENT =
             "<span class=\"fn n\">\n" +
                 "<span class=\"given-name\">Terry</span>\n" +
                 "<span class=\"additional-name\">Tiberius</span>\n" +
@@ -119,11 +119,11 @@ public class OXHCardParserTest extends TestCase {
             "<div class=\""+OXMFVisitor.OXMF_PREFIX+"userfield02\">Another userfield.</div>\n" +
             "<p style=\"font-size:smaller;\">This <a href=\"http://microformats.org/wiki/hcard\">hCard</a> created with the <a href=\"http://microformats.org/code/hcard/creator\">hCard creator</a>.</p>\n";
 
-    public static final String HCARD_SNIPPET = 
+    public static final String HCARD_SNIPPET =
         "<div id=\"Terry-Tiberius-Tester\" class=\"vcard\">\n" +
         HCARD_CONTENT +
         "</div>";
-    
+
     public static final Expectations EXPECTED_CONTENTS = new Expectations(){{
         put(Contact.GIVEN_NAME, "Terry");
         put(Contact.SUR_NAME, "Tester");
@@ -133,18 +133,18 @@ public class OXHCardParserTest extends TestCase {
         put(Contact.EMAIL2, "tester2@open-xchange.com"); //this is home
         put(Contact.EMAIL1, "tester3@open-xchange.com"); //this is work
         put(Contact.POSITION, "Test subject");
-        
+
         put(Contact.FAX_HOME, "+666 34 54 74 95");
-        put(Contact.FAX_BUSINESS, "+666 34 54 74 96"); //because the first fax number stored was "home", the non-defined will be "work", the default one 
-        put(Contact.TELEPHONE_BUSINESS1, "+666 34 54 74 97"); 
+        put(Contact.FAX_BUSINESS, "+666 34 54 74 96"); //because the first fax number stored was "home", the non-defined will be "work", the default one
+        put(Contact.TELEPHONE_BUSINESS1, "+666 34 54 74 97");
         put(Contact.TELEPHONE_OTHER, "+666 34 54 74 94");
-        
+
         put(Contact.STREET_BUSINESS, "Workingstreet 67");
         put(Contact.CITY_BUSINESS, "Workingcity");
         put(Contact.STATE_BUSINESS, "Workingstate");
         put(Contact.POSTAL_CODE_BUSINESS, "6677");
         put(Contact.COUNTRY_BUSINESS, "Elbownia");
-        
+
         put(Contact.STREET_HOME, "Somestreet 69");
         put(Contact.CITY_HOME, "Somecity");
         put(Contact.STATE_HOME, "Somestate");
@@ -159,7 +159,7 @@ public class OXHCardParserTest extends TestCase {
     }};
 
     private OXHCardParser parser;
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -178,17 +178,17 @@ public class OXHCardParserTest extends TestCase {
         final String html = "<html><body>" + HCARD_SNIPPET + "</body></html>";
         List<Contact> results = parser.parse(html);
         assertEquals("Should extract exactly one element", 1, results.size());
-        EXPECTED_CONTENTS.verify(results.get(0));        
+        EXPECTED_CONTENTS.verify(results.get(0));
     }
-    
+
     public void testShouldReadHtmlWithoutClosingElements() {
         final String html = "<html><head><body>" + HCARD_SNIPPET + "</html>";
         List<Contact> results = parser.parse(html);
         assertEquals("Should extract exactly one element", 1, results.size());
         EXPECTED_CONTENTS.verify(results.get(0));
-    
+
     }
-    
+
     public void testShouldReadHtmlWithoutQuotedAttributeValues() {
         final String html = "<html><head><title>OX hCard Parsing Test</title></head><body>" + HCARD_SNIPPET + "</body></html>".replace("\"", "");
         List<Contact> results = parser.parse(html);
@@ -197,61 +197,61 @@ public class OXHCardParserTest extends TestCase {
     }
 
     public void testShouldCreateTwoElementsEvenIfGivenTwoWithTheSameID(){
-        final String html = "<html><head><title>OX hCard Parsing Test</title></head><body>" 
-            + HCARD_SNIPPET 
-            + HCARD_SNIPPET 
+        final String html = "<html><head><title>OX hCard Parsing Test</title></head><body>"
+            + HCARD_SNIPPET
+            + HCARD_SNIPPET
             +"</body></html>";
         List<Contact> results = parser.parse(html);
         assertEquals("Should extract exactly one element", 2, results.size());
         EXPECTED_CONTENTS.verify(results.get(0));
     }
-    
+
     public void testShouldCreateTwoElementsIfGivenTwoSeparateElements() {
         final String html = "<html><head><title>OX hCard Parsing Test</title></head><body>"
             + "<div id=\"hcard-One-Tester\" class=\"vcard\">\n"
-            + HCARD_CONTENT 
+            + HCARD_CONTENT
             +"</div>"
             + "<div id=\"hcard-Two-Tester\" class=\"vcard\">\n"
-            + HCARD_SNIPPET 
+            + HCARD_SNIPPET
             +"</div>"
             +"</body></html>";        List<Contact> results = parser.parse(html);
         assertEquals("Should extract exactly two elements", 2, results.size());
         EXPECTED_CONTENTS.verify(results.get(0));
     }
-    
+
     public void testShouldDealWithMoreThanOneValuePerAttribute(){
         String html = "<div class=\"vcard\"><span class=\"fn n\">\n" +
         "<span class=\"given-name bullshit value\">Terry</span>\n" +
         "<span class=\"bullshit-value additional-name\">Tiberius</span>\n" +
         "<span class=\"family-name familyname\">Tester</span>\n" +
         "</span>\n</div>";
-     
+
         Expectations expectations = new Expectations(){{
             put(Contact.GIVEN_NAME, "Terry");
             put(Contact.SUR_NAME, "Tester");
             put(Contact.MIDDLE_NAME, "Tiberius");
         }};
-        
+
         expectations.verify(parser.parse(html).get(0));
     }
-    
+
     public void testShouldDealWithMoreThanOneValueForAdditionalNames(){
-        String html = 
+        String html =
             "<div class=\"vcard\">" +
-        		"<span class=\"fn n\">\n" +
-        		    "<span class=\"additional-name\">Tiberius</span>\n" +
-        		    "<span class=\"additional-name\">Thaddeus</span>\n" +
-        		    "<span class=\"additional-name\">Theseus</span>\n" +
-        		"</span>\n" +
-        	"</div>";
-     
+                "<span class=\"fn n\">\n" +
+                    "<span class=\"additional-name\">Tiberius</span>\n" +
+                    "<span class=\"additional-name\">Thaddeus</span>\n" +
+                    "<span class=\"additional-name\">Theseus</span>\n" +
+                "</span>\n" +
+            "</div>";
+
         Expectations expectations = new Expectations(){{
             put(Contact.MIDDLE_NAME, "Tiberius Thaddeus Theseus");
         }};
-        
+
         expectations.verify(parser.parse(html).get(0));
     }
-    
+
     public void testShouldDealWithPhotoUrl(){
         String html =  "<div class=\"vcard\"><span class=\"fn n\">\n" +
         "<span class=\"given-name bullshit value\">Terry</span>\n" +
@@ -260,12 +260,12 @@ public class OXHCardParserTest extends TestCase {
         "</span>\n" +
         "<img class=\"photo\" src=\"http://www.google.de/intl/de_de/images/logo.gif\"/>\n" + //FIXME Use local logo, make google happy
         "</div>";
-        
-             
+
+
         Contact contact = parser.parse(html).get(0);
         assertTrue("Should contain an image but does not", contact.containsImage1());
     }
-    
+
     public void testShouldDealWithPhotoUrlToMissingImage(){
         String html =  "<div class=\"vcard\"><span class=\"fn n\">\n" +
         "<span class=\"given-name bullshit value\">William</span>\n" +
@@ -274,11 +274,11 @@ public class OXHCardParserTest extends TestCase {
         "</span>\n" +
         "<img class=\"photo\" src=\"http://example.com/william_shatner.jpg\"/>\n" +
         "</div>";
-        
+
         Contact contact = parser.parse(html).get(0);
         assertFalse("Should not contain an image", contact.containsImage1());
     }
-    
+
     public void testShouldDealWithInlinedPhoto(){
         String html = "<table class=\"vcard\">" +
             "<div class=\"fn n\">\n" +
@@ -293,31 +293,31 @@ public class OXHCardParserTest extends TestCase {
         assertEquals("Should remember this is a .gif", "image/gif", contact.getImageContentType());
         assertEquals("Should have same contents", gifBase64, actual);
     }
-    
+
     public void testShouldDealWithTableLayouts(){
-        String html = 
+        String html =
             "<table class=\"vcard\">" +
-        		"<div class=\"fn n\">\n" +
-        		    "<td>Given name</td><td><span class=\"given-name bullshit value\">Terry</span></td>\n" +
-        		    "<td>Additional name</td><td><span class=\"bullshit-value additional-name\">Tiberius</span></td>\n" +
-        		    "<td>Family name</td><td><span class=\"family-name familyname\">Tester</span></td>\n" +
-        		"</div>\n" +
-        	"</table>";
-     
+                "<div class=\"fn n\">\n" +
+                    "<td>Given name</td><td><span class=\"given-name bullshit value\">Terry</span></td>\n" +
+                    "<td>Additional name</td><td><span class=\"bullshit-value additional-name\">Tiberius</span></td>\n" +
+                    "<td>Family name</td><td><span class=\"family-name familyname\">Tester</span></td>\n" +
+                "</div>\n" +
+            "</table>";
+
         Expectations expectations = new Expectations(){{
             put(Contact.GIVEN_NAME, "Terry");
             put(Contact.SUR_NAME, "Tester");
             put(Contact.MIDDLE_NAME, "Tiberius");
         }};
-        
+
         expectations.verify(parser.parse(html).get(0));
     }
-    
+
     public void testShouldFindOXMFData(){
         String html = "<div class=\"vcard\" id=\"a\""+HCARD_CONTENT+"</div>"
         + "<div class=\"vcard\" id=\"b\""+HCARD_CONTENT+"</div>"
         + "<div class=\"vcard\" id=\"c\""+HCARD_CONTENT+"</div>";
-        
+
         List<Contact> contacts = parser.parse(html);
         int expectedNumber = 3;
         assertEquals("Should find "+ expectedNumber +" contacts", expectedNumber, contacts.size());
@@ -335,9 +335,9 @@ public class OXHCardParserTest extends TestCase {
             assertEquals("Should get the value entered on first field", "Another userfield.", value);
         }
     }
-    
+
     public void testShouldMergeDataProperlyIfUsingOXMFElementValue(){
-        String html = 
+        String html =
             "<div class=\"vcard\" id=\"a\">" +
                 "<span class=\"fn n\">\n" +
                     "<span class=\"given-name\">Terry</span>\n" +
@@ -354,7 +354,7 @@ public class OXHCardParserTest extends TestCase {
                     "spouse2" +
                 "</span>" +
             "</div>";
-        
+
         List<Contact> contacts = parser.parse(html);
         int expectedNumber = 2;
         assertEquals("Should find "+ expectedNumber +" contacts", expectedNumber, contacts.size());
@@ -364,9 +364,9 @@ public class OXHCardParserTest extends TestCase {
             assertEquals("Should have included OX-specific information (spouseName) in contact", "spouse"+(++i), contact.getSpouseName());
         }
     }
-    
+
     public void testShouldMergeDataProperlyIfUsingSeparateValueElement(){
-        String html = 
+        String html =
             "<div class=\"vcard\" id=\"a\">" +
                 "<span class=\"fn n\">\n" +
                     "<span class=\"given-name\">Terry</span>\n" +
@@ -380,10 +380,10 @@ public class OXHCardParserTest extends TestCase {
                     "<span class=\"given-name\">Toni</span>\n" +
                 "</span>\n" +
                 "<span class=\""+OXMFVisitor.OXMF_PREFIX+"spouseName\">" +
-                	"<span class=\"value\">spouse2</span>" +
+                    "<span class=\"value\">spouse2</span>" +
                 "</span>" +
             "</div>";
-        
+
         List<Contact> contacts = parser.parse(html);
         int expectedNumber = 2;
         assertEquals("Should find "+ expectedNumber +" contacts", expectedNumber, contacts.size());
@@ -393,10 +393,10 @@ public class OXHCardParserTest extends TestCase {
             assertEquals("Should have included OX-specific information (spouseName) in contact", "spouse"+(++i), contact.getSpouseName());
         }
     }
-    
-    
+
+
     public void testShouldPrioritizeSeparateValueOverElementValue(){
-        String html = 
+        String html =
             "<div class=\"vcard\" id=\"a\">" +
                 "<span class=\"fn n\">\n" +
                     "<span class=\"given-name\">Terry</span>\n" +
@@ -415,7 +415,7 @@ public class OXHCardParserTest extends TestCase {
                     "<span class=\"value\">spouse2</span>" +
                 "</span>" +
             "</div>";
-        
+
         List<Contact> contacts = parser.parse(html);
         int expectedNumber = 2;
         assertEquals("Should find "+ expectedNumber +" contacts", expectedNumber, contacts.size());
@@ -425,16 +425,16 @@ public class OXHCardParserTest extends TestCase {
             assertEquals("Should have included OX-specific information (spouseName) in contact", "spouse"+(++i), contact.getSpouseName());
         }
     }
-    
+
     public void testShouldNotMakeNullFieldsEmptyStringFields(){
         List<Contact> contacts = parser.parse(HCARD_SNIPPET);
         Contact actual = contacts.get(0);
-        
+
         assertNull("Street (other) was not in the hcard, should be null", actual.getStreetOther());
     }
-    
+
     public void testShouldStripTrailingWhitespaces(){
-        String html = 
+        String html =
             "<div class=\"vcard\" id=\"a\">" +
                 "<span class=\"fn n\">\n" +
                     "<span class=\"given-name\"> Terry </span>\n" +
@@ -444,5 +444,5 @@ public class OXHCardParserTest extends TestCase {
         Contact actual = contacts.get(0);
         assertEquals("Should contain the given name without any whitespaces around it", "Terry", actual.getGivenName());
     }
-    
+
 }
