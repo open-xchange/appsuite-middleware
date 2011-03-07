@@ -68,7 +68,7 @@ public class MoveWriterImpl implements ActionWriter {
 		final Move moveAction = (Move)abstractAction;
 		
 		jsonObj.put("id", name);
-		jsonObj.put("folder", moveAction.getFolder());
+		jsonObj.put("into", moveAction.getFolder());
 		
 		return jsonObj;
 	}
