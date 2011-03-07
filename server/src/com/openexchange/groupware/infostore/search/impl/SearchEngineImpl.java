@@ -194,10 +194,10 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             addQuery = true;
             
             query = query.replaceAll("\\\\", "\\\\\\\\");
-            query = query.replaceAll("%", "\\%"); 
+            query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
             query = query.replace('*', '%');
             query = query.replace('?', '_');
-            query = query.replaceAll("'", "\\'");
+            query = query.replaceAll("'", "\\\\'"); // Escape \ twice, due to regexp parser in replaceAll
 
             if (!containsWildcard) {
                 query = "%" + query + "%";
