@@ -58,6 +58,7 @@ import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
@@ -70,7 +71,11 @@ import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.MoveActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RedirectActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RejectActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.VacationActionFields;
+import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
+import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 final class ActionCommandMapper implements Mapper<Rule> {
 
@@ -93,7 +98,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
         return array;
     }
 
-    public boolean isNull(final Rule obj) {                
+    public boolean isNull(final Rule obj) {
         return (null == obj.getIfCommand());
     }
 
@@ -146,16 +151,18 @@ final class ActionCommandMapper implements Mapper<Rule> {
             }
             final String text = object.getString(VacationActionFields.TEXT.getFieldname());
             if (null == text) {
-                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Parameter " + VacationActionFields.TEXT.getFieldname() + " is missing for " + 
-                        ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
+                throw new OXJSONException(
+                    OXJSONException.Code.JSON_READ_ERROR,
+                    "Parameter " + VacationActionFields.TEXT.getFieldname() + " is missing for " + ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
             }
             arrayList.add(stringToList(text.replaceAll("(\r)?\n", "\r\n")));
             return new ActionCommand(ActionCommand.Commands.VACATION, arrayList);
         } else if (ActionCommand.Commands.ADDFLAG.getJsonname().equals(id)) {
             final JSONArray array = object.getJSONArray(AddFlagsActionFields.FLAGS);
             if (null == array) {
-                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Parameter " + AddFlagsActionFields.FLAGS + " is missing for " + 
-                        ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
+                throw new OXJSONException(
+                    OXJSONException.Code.JSON_READ_ERROR,
+                    "Parameter " + AddFlagsActionFields.FLAGS + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
             }
             final ArrayList<Object> arrayList = new ArrayList<Object>();
             arrayList.add(Rule2JSON2Rule.JSONArrayToStringList(array));
@@ -168,8 +175,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
     private ActionCommand createOneParameterActionCommand(final JSONObject object, final String parameter, final ActionCommand.Commands command) throws JSONException, SieveException, OXJSONException {
         final String stringparam = getString(object, parameter, command.getCommandname());
         if (null == stringparam) {
-            throw new JSONException("The parameter " + parameter + " is missing for action command " + 
-                    command.getCommandname() + ".");
+            throw new JSONException("The parameter " + parameter + " is missing for action command " + command.getCommandname() + ".");
         }
         if (ActionCommand.Commands.REDIRECT.equals(command)) {
             // Check for valid email address here:
@@ -185,10 +191,21 @@ final class ActionCommandMapper implements Mapper<Rule> {
     private ActionCommand createFileintoActionCommand(final JSONObject object, final String parameter, final ActionCommand.Commands command) throws JSONException, SieveException, OXJSONException {
         final String stringparam = getString(object, parameter, command.getCommandname());
         if (null == stringparam) {
-            throw new JSONException("The parameter " + parameter + " is missing for action command " + 
-                    command.getCommandname() + ".");
+            throw new JSONException("The parameter " + parameter + " is missing for action command " + command.getCommandname() + ".");
         }
-        return new ActionCommand(command, createArrayArray(MailFolderUtility.prepareMailFolderParam(stringparam).getFullname()));
+
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
+        final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
+
+        final String folderName;
+        if (useUTF7Encoding) {
+            folderName = BASE64MailboxEncoder.encode(MailFolderUtility.prepareMailFolderParam(stringparam).getFullname());
+        } else {
+            folderName = MailFolderUtility.prepareMailFolderParam(stringparam).getFullname();
+        }
+
+        return new ActionCommand(command, createArrayArray(folderName));
     }
 
     private ArrayList<Object> createArrayArray(final String string) {
@@ -206,8 +223,8 @@ final class ActionCommandMapper implements Mapper<Rule> {
     }
 
     /**
-     * This method is used to create a JSON object from a TestCommand. It is done this way because a separate
-     * converter class would have to do the check for the right TestCommand for each id.
+     * This method is used to create a JSON object from a TestCommand. It is done this way because a separate converter class would have to
+     * do the check for the right TestCommand for each id.
      * 
      * @param tmp the JSONObject into which the values are written
      * @param actionCommand the TestCommand itself
@@ -247,10 +264,10 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 if (null != subject) {
                     tmp.put(VacationActionFields.SUBJECT.getFieldname(), subject.get(0));
                 }
-                tmp.put(VacationActionFields.TEXT.getFieldname(), ((List<String>)arguments.get(arguments.size() - 1)).get(0));
+                tmp.put(VacationActionFields.TEXT.getFieldname(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
             } else if (ActionCommand.Commands.ADDFLAG.equals(actionCommand.getCommand())) {
                 tmp.put(GeneralFields.ID, ActionCommand.Commands.ADDFLAG.getJsonname());
-                tmp.put(AddFlagsActionFields.FLAGS, (List<String>)arguments.get(0));
+                tmp.put(AddFlagsActionFields.FLAGS, (List<String>) arguments.get(0));
             }
         }
     }
@@ -258,20 +275,35 @@ final class ActionCommandMapper implements Mapper<Rule> {
     @SuppressWarnings("unchecked")
     private void createOneParameterJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
         tmp.put(GeneralFields.ID, command.getJsonname());
-        tmp.put(field, ((List<String>)arguments.get(0)).get(0));
+        tmp.put(field, ((List<String>) arguments.get(0)).get(0));
     }
 
     @SuppressWarnings("unchecked")
     private void createFileintoJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
         tmp.put(GeneralFields.ID, command.getJsonname());
-        tmp.put(field, MailFolderUtility.prepareFullname(0, ((List<String>)arguments.get(0)).get(0)));
+
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
+        final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
+
+        final String folderName;
+        if (useUTF7Encoding) {
+            folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(0)).get(0));
+        } else {
+            folderName = ((List<String>) arguments.get(0)).get(0);
+        }
+
+        tmp.put(field, MailFolderUtility.prepareFullname(0, folderName));
     }
 
     private String getString(final JSONObject jobj, final String value, final String component) throws OXJSONException {
         try {
             return jobj.getString(value);
         } catch (final JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, "Error while reading ActionCommand " + component + ": " + e.getMessage());
+            throw new OXJSONException(
+                OXJSONException.Code.JSON_READ_ERROR,
+                e,
+                "Error while reading ActionCommand " + component + ": " + e.getMessage());
         }
     }
 }

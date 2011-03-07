@@ -73,7 +73,8 @@ public class MailFilterProperties {
         VACATION_DOMAINS("VACATION_DOMAINS", ""),
         SIEVE_CONNECTION_TIMEOUT("com.openexchange.mail.filter.connectionTimeout", "30000"),
         SIEVE_PASSWORDSRC("com.openexchange.mail.filter.passwordSource", PasswordSource.SESSION.name),
-        SIEVE_MASTERPASSWORD("com.openexchange.mail.filter.masterPassword", "");
+        SIEVE_MASTERPASSWORD("com.openexchange.mail.filter.masterPassword", ""),
+        USE_UTF7_FOLDER_ENCODING("com.openexchange.mail.filter.useUTF7FolderEncoding", "false");
         
         public final String property;
         
