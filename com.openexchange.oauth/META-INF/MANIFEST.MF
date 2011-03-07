@@ -40,4 +40,4 @@ Import-Package: com.openexchange.config,
 Export-Package: com.openexchange.oauth
 Bundle-ClassPath: lib/scribe-1.1.0.jar,
  .
-Bundle-Activator: com.openexchange.oauth.osgi.OAuthActivator
+Bundle-Activator: com.openexchange.oauth.osgi.Activator

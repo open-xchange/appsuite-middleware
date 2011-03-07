@@ -50,20 +50,14 @@
 package com.openexchange.oauth.osgi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthException;
@@ -72,9 +66,6 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.exception.OAuthExceptionFactory;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
-import com.openexchange.oauth.internal.groupware.CreateOAuthAccountTable;
-import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask;
-import com.openexchange.oauth.internal.groupware.OAuthDeleteListener;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.sessiond.SessiondService;
@@ -184,14 +175,6 @@ public final class OAuthActivator extends DeferredActivator {
                 registry,
                 delegateServices.get(ContextService.class)), null));
             registrations.add(context.registerService(OAuthServiceMetaDataRegistry.class.getName(), registry, null));
-            registrations.add(context.registerService(CreateTableService.class.getName(), new CreateOAuthAccountTable(), null));
-            registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-
-                public Collection<UpdateTask> getUpdateTasks() {
-                    return Arrays.asList(((UpdateTask) new OAuthCreateTableTask()));
-                }
-            }, null));
-            registrations.add(context.registerService(DeleteListener.class.getName(), new OAuthDeleteListener(), null));
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
