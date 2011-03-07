@@ -1,6 +1,10 @@
-* 2011-03-02 - steffen.templin@open-xchange.com
+* 2011-03-07 - thorben.betten@open-xchange.com
 
- - Bugfix #18490: Encode Foldernames in UTF-7
+ - Bugfix #18512: Drop possible cached locale-sensitive folder data on changed language
+
+* 2011-03-07 - steffen.templin@open-xchange.com
+
+ - Bugfix #18490: Encode folder names in UTF-7
  
 * 2011-03-06 - thorben.betten@open-xchange.com
 

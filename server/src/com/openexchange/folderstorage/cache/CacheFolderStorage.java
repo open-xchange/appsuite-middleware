@@ -53,6 +53,7 @@ import gnu.trove.TIntArrayList;
 import gnu.trove.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -95,7 +96,9 @@ import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -1280,6 +1283,38 @@ public final class CacheFolderStorage implements FolderStorage {
         return map;
     }
 
-    
+    /**
+     * Drops entries associated with specified user in given context.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void dropUserEntries(final int userId, final int contextId) {
+        SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null != service) {
+            for (Session session : service.getSessions(userId, contextId)) {
+                final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+                if (null == lock) {
+                    synchronized (session) {
+                        FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+                        if (null != map) {
+                            map.clear();
+                        }
+                    }
+                } else {
+                    lock.lock();
+                    try {
+                        FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+                        if (null != map) {
+                            map.clear();
+                        }
+                    } finally {
+                        lock.unlock();
+                    }
+                }
+            }
+            
+        }
+    }
 
 }

@@ -76,6 +76,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
@@ -462,6 +463,10 @@ public class RdbUserStorage extends UserStorage {
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
                     stmt.execute();
+                    /*
+                     * Drop possible cached locale-sensitive folder data
+                     */
+                    CacheFolderStorage.dropUserEntries(userId, contextId);
                 } finally {
                     closeSQLStuff(stmt);
                 }
