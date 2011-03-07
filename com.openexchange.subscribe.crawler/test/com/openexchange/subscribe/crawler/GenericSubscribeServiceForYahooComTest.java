@@ -75,7 +75,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         crawler.setDisplayName("yahoo.com");
         crawler.setId("com.openexchange.subscribe.crawler.yahoocom");
         crawler.setCrawlerApiVersion(616);
-        crawler.setPriority(6);
+        crawler.setPriority(8);
         List<Step> steps = new LinkedList<Step>();
         
         String crapBefore = "[^0-9\\+\\(\\)]*";
@@ -88,10 +88,10 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
             "https://login.yahoo.com/config/login?",
             "login",
             "passwd",
-            "(http\\:\\/\\/address\\.yahoo\\.com\\/)",
+            "(.*contact_list.*)",
             1,
             ""));
-        steps.add(new PageByUrlStep("We are not automatically redirected so we have to click a link", "http://address.yahoo.com/"));
+        steps.add(new PageByUrlStep("We are not automatically redirected so we have to call this manually", "http://address.yahoo.com/"));
         steps.add(new PageByLinkRegexStep("Click on Classic Contacts", ".*contact_list.*"));
         steps.add(new AnchorsByLinkRegexStep("Get the links to all contact detail pages", "", ".*detailed_contact.*", true));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
@@ -124,7 +124,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep("Get each contacts details", sequence, "", ""));
 
         Workflow workflow = new Workflow(steps);
-        workflow.setUseThreadedRefreshHandler(true);
+        //workflow.setUseThreadedRefreshHandler(true);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
