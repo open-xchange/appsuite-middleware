@@ -823,14 +823,15 @@ public class OXContainerConverter {
         } catch (final IOException e) {
             throw new ConverterException("IO problem while reading \"" + url.toString() + "\"", e);
         }
-        if (bytes != null) {
-            contact.setImage1(bytes);
-            if (mimeType == null) {
-                mimeType = ImageTypeDetector.getMimeType(bytes);
-                if ("application/octet-stream".equals(mimeType)) {
-                    mimeType = getMimeType(url.toString());
-                }
+        if (mimeType == null) {
+            mimeType = ImageTypeDetector.getMimeType(bytes);
+            if ("application/octet-stream".equals(mimeType)) {
+                mimeType = getMimeType(url.toString());
             }
+        }
+        if (bytes != null && isValidImage(bytes)) {
+            // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
+            contact.setImage1(bytes);
             contact.setImageContentType(mimeType);
         }
     }
@@ -1022,7 +1023,7 @@ public class OXContainerConverter {
                 month = cal.get(Calendar.MONTH);
             }
             calContainerObj.setMonth(month);
-            // no break
+            //$FALL-THROUGH$
         case RecurrenceValue.MONTHLY:
             if (recur.ByMonthDay.length > 0) {
                 if (recur.ByDay.size() != 0) {
