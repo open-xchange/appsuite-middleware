@@ -104,17 +104,17 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
 
     protected void setSizeOption(final AdminParser parser, final String defaultvalue) {
         if (null != defaultvalue) {
-            this.filestoreSizeOption = setShortLongOptWithDefault(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore", defaultvalue, true, NeededQuadState.notneeded);
+            this.filestoreSizeOption = setShortLongOptWithDefault(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore in MB", defaultvalue, true, NeededQuadState.notneeded);
         } else {
-            this.filestoreSizeOption = setShortLongOpt(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore", true, NeededQuadState.notneeded);
+            this.filestoreSizeOption = setShortLongOpt(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore in MB", true, NeededQuadState.notneeded);
         }
     }
 
     protected void setMaxCtxOption(final AdminParser parser, final String defaultvalue) {
         if (null != defaultvalue) {
-            this.filestoreMaxContextsOption = setShortLongOptWithDefault(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", defaultvalue, true, NeededQuadState.notneeded);
+            this.filestoreMaxContextsOption = setShortLongOptWithDefault(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "The maximum number of contexts", defaultvalue, true, NeededQuadState.notneeded);
         } else {
-            this.filestoreMaxContextsOption = setShortLongOpt(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", true, NeededQuadState.notneeded);
+            this.filestoreMaxContextsOption = setShortLongOpt(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "The maximum number of contexts", true, NeededQuadState.notneeded);
         }
     }
 
