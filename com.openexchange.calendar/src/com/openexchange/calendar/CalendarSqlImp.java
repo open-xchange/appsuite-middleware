@@ -120,7 +120,7 @@ public interface CalendarSqlImp {
 
     Participants getUserParticipants(CalendarDataObject cdao, Connection readcon, int uid) throws SQLException, OXException;
 
-    void getUserParticipantsSQLIn(List<CalendarDataObject> list, Connection readcon, int cid, int uid, String sqlin) throws SQLException, OXException;
+    void getUserParticipantsSQLIn(CalendarFolderObject visibleFolders, List<CalendarDataObject> list, Connection readcon, int cid, int uid, String sqlin) throws SQLException, OXException;
 
     void getParticipantsSQLIn(List<CalendarDataObject> list, Connection readcon, int cid, String sqlin) throws SQLException;
 

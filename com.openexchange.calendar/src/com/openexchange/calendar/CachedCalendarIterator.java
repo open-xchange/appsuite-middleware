@@ -73,6 +73,7 @@ import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -107,9 +108,12 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
     public static int MAX_PRE_FETCH = 20;
     private int pre_fetch;
 
-    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws AbstractOXException {
+    private CalendarFolderObject visibleFolders;
+
+    public CachedCalendarIterator(CalendarFolderObject visibleFolders, final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws AbstractOXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	list = new ArrayList<CalendarDataObject>(16);
+    	this.visibleFolders = visibleFolders;
         this.non_cached_iterator = non_cached_iterator;
         this.c = c;
         this.uid = uid;
@@ -119,6 +123,10 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         if (cache) {
             fillCachedResultSet();
         }
+    }
+
+    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws AbstractOXException {
+        this(null, non_cached_iterator, c, uid);
     }
 
     public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws AbstractOXException {
@@ -239,7 +247,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			    final String sqlin = StringCollection.getSqlInString(arr);
 			    if  (cdao.fillUserParticipants() || cdao.fillFolderID()) {
 			        try {
-			            new CalendarMySQL().getUserParticipantsSQLIn(list, readcon, c.getContextId(), uid, sqlin);
+			            new CalendarMySQL().getUserParticipantsSQLIn(visibleFolders, list, readcon, c.getContextId(), uid, sqlin);
 			        } catch (final SQLException ex) {
 			            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, I(202));
 			        }

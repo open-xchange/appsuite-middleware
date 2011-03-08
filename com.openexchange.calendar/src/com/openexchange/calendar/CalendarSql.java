@@ -1053,7 +1053,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             // Don't close connection, it's used within the SearchIterator
             closeCon = false;
             
-            return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
+            return new AppointmentIteratorAdapter(new CachedCalendarIterator(cfo, co, ctx, session.getUserId()));
         } catch (SQLException e) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
         } catch (AbstractOXException e) {

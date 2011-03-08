@@ -1958,7 +1958,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return participants;
     }
 
-    public final void getUserParticipantsSQLIn(final List<CalendarDataObject> list, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
+    public final void getUserParticipantsSQLIn(CalendarFolderObject visibleFolders, final List<CalendarDataObject> list, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
         final Statement stmt = readcon.createStatement();
         ResultSet rs = null;
         try {
@@ -2033,7 +2033,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         cdao.setPrivateFolderID(pfid);
                     } else {
-                        cdao.setActionFolder(pfid);
+                        if (visibleFolders == null || visibleFolders.getSharedFolderList().contains(pfid)) {
+                            cdao.setActionFolder(pfid);
+                        }
                     }
                 }
 
