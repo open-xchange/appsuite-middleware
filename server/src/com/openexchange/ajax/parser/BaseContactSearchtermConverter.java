@@ -86,12 +86,22 @@ public abstract class BaseContactSearchtermConverter {
 	private List<String> folders;
 		
 	private boolean nextIsFolder;
+
+	private String charset;
 	
 	public BaseContactSearchtermConverter() {
 		super();
 		initialize();
 	}
 
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+	
+	public String getCharset() {
+		return charset;
+	}
+	
 	/**
 	 * Takes a search term (basically an Abstract Syntax Tree, AST,
 	 * which is usually created from JSON sent by the GUI) and forms 
@@ -173,7 +183,9 @@ public abstract class BaseContactSearchtermConverter {
 				handleFolder(o);
 				
 				String field = translateFromJSONtoDB( value);
-				bob.append(getPrefix()).append(".").append(field);
+				field = handlePrefix(field);
+				field = handleCharset(field);
+				bob.append(field);
 			}
 			
 			if(o.getType() == Operand.Type.CONSTANT){
@@ -195,7 +207,7 @@ public abstract class BaseContactSearchtermConverter {
 		}
 		bob.append(" ) ");
 	}
-	
+
 	protected void traverseViaInorder(CompositeSearchTerm term) {
 		Operation operation = term.getOperation();
 		SearchTerm<?>[] operands = term.getOperands();
@@ -252,6 +264,25 @@ public abstract class BaseContactSearchtermConverter {
 		return value;
 	}
 
+	/**
+	 * Writes a CONVERT statement around the field in case there was a charset given
+	 */
+	protected String handleCharset(String field) {
+		if(charset == null)
+			return field;
+		return new StringBuilder("CONVERT(").append(field).append(" USING ").append(getCharset()).append(")").toString(); 
+	}
+
+	/**
+	 * Adds a prefix to the field - if set.
+	 */
+	protected String handlePrefix(String field) {
+		if(getPrefix() == null)
+			return field;
+		return new StringBuilder(getPrefix()).append(".").append(field).toString();
+	}
+	
+	
 	/**
 	 * Translates a value given by the GUI to one in the database
 	 * @param fieldvalue As usable by the database (usually something hardly descriptive like 'field01' or 'intfield07')

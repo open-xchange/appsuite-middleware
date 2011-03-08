@@ -72,5 +72,4 @@ public class ContactSearchtermSqlConverter extends BaseContactSearchtermConverte
 	protected String getPrefix() {
 		return "co";
 	}
-
 }
