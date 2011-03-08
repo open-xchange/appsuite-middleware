@@ -127,6 +127,8 @@ public class CachingContextStorage extends ContextStorage {
             }
             public ContextExtended load() throws AbstractOXException {
                 final ContextExtended retval = getPersistantImpl().loadContext(contextId);
+                // TODO We should introduce a logic layer above this context storage layer. That layer should then trigger the update tasks.
+                // Nearly all accesses to the ContextStorage need then to be replaced with an access to the ContextService.
                 final Updater updater = Updater.getInstance();
                 try {
                     UpdateStatus status = updater.getStatus(retval);
