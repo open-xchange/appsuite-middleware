@@ -1031,57 +1031,6 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
-    public void testInsertUpdateFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
-        int fuid = -1;
-        int[] failedIds = null;
-        boolean updated = false;
-        try {
-            final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-            fuid = insertFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                userId,
-                false,
-                FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                "ChangeMyPermissions" + System.currentTimeMillis(),
-                "calendar",
-                FolderObject.PRIVATE,
-                -1,
-                true);
-            assertFalse(fuid == -1);
-            final Calendar cal = GregorianCalendar.getInstance();
-            getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
-            updated = updateFolder(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                getLogin(),
-                getSeconduser(),
-                fuid,
-                cal.getTimeInMillis(),
-                true);
-            assertTrue(updated);
-            getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
-            failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
-            assertFalse((failedIds != null && failedIds.length > 0));
-            fuid = -1;
-        } finally {
-            try {
-                if (fuid != -1) {
-                    final Calendar cal = GregorianCalendar.getInstance();
-                    /*
-                     * Call getFolder to receive a valid timestamp for deletion
-                     */
-                    getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, false);
-                    deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), false);
-                }
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void testSharedFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
         int fuid01 = -1;
         int fuid02 = -1;

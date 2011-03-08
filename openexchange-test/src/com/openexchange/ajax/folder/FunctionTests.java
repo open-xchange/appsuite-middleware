@@ -54,13 +54,21 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * {@link FunctionTests}
@@ -70,6 +78,7 @@ import com.openexchange.tools.servlet.AjaxException;
 public class FunctionTests extends AbstractAJAXSession {
 
     private AJAXClient client;
+    private AJAXClient client2;
 
     public FunctionTests(String name) {
         super(name);
@@ -79,6 +88,13 @@ public class FunctionTests extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client = getClient();
+        client2 = new AJAXClient(User.User2);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        client2.logout();
+        super.tearDown();
     }
 
     public void testUnknownAction() throws IOException, JSONException, AjaxException {
@@ -104,4 +120,32 @@ public class FunctionTests extends AbstractAJAXSession {
             params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, getColumns()));
         }
     }
+
+    public void testInsertUpdateFolder() throws AjaxException, IOException, JSONException, OXException, OXJSONException {
+        FolderObject toDelete = null;
+        int userId1 = client.getValues().getUserId();
+        int userId2 = client2.getValues().getUserId();
+        try {
+            FolderObject folder = Create.createPrivateFolder("ChangeMyPermissions" + System.currentTimeMillis(), FolderObject.CALENDAR, userId1);
+            folder.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+            InsertResponse insertR = client.execute(new InsertRequest(API.OX_OLD, folder));
+            GetResponse getR = client.execute(new GetRequest(API.OX_OLD, insertR.getId()));
+            toDelete = getR.getFolder();
+            toDelete.setLastModified(getR.getTimestamp());
+            FolderObject inserted = getR.getFolder();
+            FolderObject update = new FolderObject();
+            update.setParentFolderID(inserted.getParentFolderID());
+            update.setObjectID(inserted.getObjectID());
+            update.setLastModified(insertR.getTimestamp());
+            update.addPermission(Create.ocl(userId1, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
+            update.addPermission(Create.ocl(userId2, false, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
+            client.execute(new UpdateRequest(API.OX_OLD, update));
+            getR = client.execute(new GetRequest(API.OX_OLD, insertR.getId()));
+            toDelete = getR.getFolder();
+            toDelete.setLastModified(getR.getTimestamp());
+        } finally {
+            client.execute(new DeleteRequest(API.OX_OLD, toDelete));
+        }
+    }
+
 }
