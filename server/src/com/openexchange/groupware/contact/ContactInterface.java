@@ -131,17 +131,6 @@ public interface ContactInterface {
     SearchIterator<Contact> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
 
     /**
-     * List all contacts where the contact matters the given search term
-     * @param term Search term 
-     * @param orderBy The field by which the result should be ordered
-     * @param orderDir "asc" or "desc"
-     * @param cols fields that will be added to the data object
-     * @return A SearchIterator
-     * @throws OXException
-     */
-    SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy, String orderDir, int[] cols) throws OXException;
-    
-    /**
      * Loads one contact by the given ID
      * 
      * @param objectId The Object ID
