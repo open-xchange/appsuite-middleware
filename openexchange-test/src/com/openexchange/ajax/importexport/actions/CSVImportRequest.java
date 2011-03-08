@@ -55,7 +55,7 @@ import java.io.InputStream;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CSVImportRequest extends AbstractImportRequest {
+public final class CSVImportRequest extends AbstractImportRequest<CSVImportResponse> {
 
     private final boolean failOnError;
 
