@@ -88,6 +88,7 @@ public final class FolderTestSuite {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         // First the function tests.
+        tests.addTestSuite(FunctionTests.class);
 
         // Now several single function tests.
         tests.addTestSuite(GetMailInboxTest.class);

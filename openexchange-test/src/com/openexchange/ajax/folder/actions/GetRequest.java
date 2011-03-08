@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public final class GetRequest extends AbstractFolderRequest<GetResponse> {
+public class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     class GetParser extends AbstractAJAXParser<GetResponse> {
 
@@ -132,5 +132,13 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     public GetParser getParser() {
         return new GetParser(failOnError);
+    }
+
+    protected String getFolderIdentifier() {
+        return folderIdentifier;
+    }
+
+    protected int[] getColumns() {
+        return columns;
     }
 }

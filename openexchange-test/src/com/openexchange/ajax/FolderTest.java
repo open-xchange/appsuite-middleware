@@ -723,16 +723,6 @@ public class FolderTest extends AbstractAJAXTest {
 
     }
 
-    public void testUnknownAction() throws IOException, SAXException, JSONException, AjaxException {
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FOLDER_URL);
-        req.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
-        req.setParameter(AJAXServlet.PARAMETER_ACTION, "unknown");
-        final WebResponse resp = getWebConversation().getResponse(req);
-        final JSONObject respObj = new JSONObject(resp.getText());
-        assertTrue(respObj.has("error") && respObj.getString("error").indexOf(
-            "Action \"unknown\" NOT supported via GET on /ajax/folders") != -1);
-    }
-
     public void testGetUserId() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException {
         getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
     }
