@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 23
+%define		ox_release 24
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Mar 02 2011 - thorben.betten@open-xchange.co
+ - Bugfix #17891: Fixed possible IndexOutOfBounsdException when checking quotes in personal part of an email address
+ - Bugfix #18296: Introduced property to hide POP3 storage folders
+ - Bugfix #18280: Using wrapping MailMessage instance to support string-based message identifiers
 * Thu Feb 10 2011 - thorben.betten@open-xchange.com
  - Bugfix #18212: Retry with read-write connection if read-only connection fails to read newly created mail account
 * Fri Jan 14 2011 - francisco.laguna@open-xchange.com
