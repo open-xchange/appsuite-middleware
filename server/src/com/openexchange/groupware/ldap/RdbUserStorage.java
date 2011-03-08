@@ -76,7 +76,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
@@ -92,11 +91,6 @@ import com.openexchange.tools.StringCollection;
 public class RdbUserStorage extends UserStorage {
 
     private static final Log LOG = LogFactory.getLog(RdbUserStorage.class);
-
-    private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
-        "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId FROM user WHERE user.cid=?";
-
-    private static final String SELECT_USER = SELECT_ALL_USER + " AND id IN (";
 
     private static final String SELECT_ATTRS = "SELECT id,name,value FROM user_attribute WHERE cid=? AND id IN (";
 
@@ -432,7 +426,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public void updateUser(final User user, final Context context) throws LdapException {
+    public void updateUserInternal(final User user, final Context context) throws LdapException {
         int contextId = context.getContextId();
         int userId = user.getId();
         String timeZone = user.getTimeZone();
@@ -463,10 +457,6 @@ public class RdbUserStorage extends UserStorage {
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
                     stmt.execute();
-                    /*
-                     * Drop possible cached locale-sensitive folder data
-                     */
-                    CacheFolderStorage.dropUserEntries(userId, contextId);
                 } finally {
                     closeSQLStuff(stmt);
                 }

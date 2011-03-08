@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -226,7 +227,15 @@ public abstract class UserStorage {
      * @param context The context.
      * @throws LdapException  if an error occurs.
      */
-    public abstract void updateUser(User user, Context context) throws LdapException;
+    public final void updateUser(User user, Context context) throws LdapException{
+        updateUserInternal(user, context);
+        /*
+         * Drop possible cached locale-sensitive folder data
+         */
+        CacheFolderStorage.dropUserEntries(user.getId(), context.getContextId());
+    }
+
+    protected abstract void updateUserInternal(User user, Context context) throws LdapException;
 
     /**
      * Gets specified user attribute.

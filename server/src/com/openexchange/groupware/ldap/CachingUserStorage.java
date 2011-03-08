@@ -246,7 +246,7 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public void updateUser(final User user, final Context context) throws LdapException {
+    public void updateUserInternal(final User user, final Context context) throws LdapException {
         delegate.updateUser(user, context);
         try {
             invalidateUser(context, user.getId());
