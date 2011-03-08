@@ -97,12 +97,11 @@ public class FileStorageThreadTest extends TestCase {
         }
         for (int i = 0; i < fmr.length; i++) {
             if (fmr[i].getThrowable() != null) {
-                System.out.println("================= FEHLER: " + fmr[i].getThrowable().getMessage());
+                fail(fmr[i].getThrowable().getMessage());
             }
-            assertNull(fmr[i].getThrowable());
         }
         final FileStorage fm = new LocalFileStorage(tempFile.toURI());
-        assertTrue(fm.stateFileIsCorrect());
+        assertTrue("State file is not correct.", fm.stateFileIsCorrect());
     	rmdir(new File("file:" + tempFile.toString()));
     	super.tearDown();
     }
