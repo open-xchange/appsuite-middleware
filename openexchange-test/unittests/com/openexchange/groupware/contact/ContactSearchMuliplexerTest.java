@@ -269,6 +269,13 @@ public class ContactSearchMuliplexerTest extends TestCase {
 				// TODO Auto-generated method stub
 				return null;
 			}
+
+			public <T> SearchIterator<Contact> getContactsByExtendedSearch(
+					SearchTerm<T> searchterm, int orderBy, String orderDir,
+					String collation, int[] cols) throws OXException {
+				// TODO Auto-generated method stub
+				return null;
+			}
             
         };
     }

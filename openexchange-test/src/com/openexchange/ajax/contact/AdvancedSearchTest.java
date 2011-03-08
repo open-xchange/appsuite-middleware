@@ -1,6 +1,7 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -267,7 +268,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		int currentPosition = 0;
 		for(JSONObject filter: filters){
 			String ident = "Step #"+currentPosition + " from "+sinograph.get(currentPosition)+" to "+sinograph.get(currentPosition+1)+": ";
-			AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc");
+			AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
 			CommonSearchResponse response = getClient().execute(request);
 			assertFalse(ident+"Should work", response.hasError());
 			
@@ -282,6 +283,35 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 			currentPosition++;
 		}
 	}
+	
+	public void testOrderByWithCollation() throws Exception{
+		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		LinkedList<String> randomized = new LinkedList<String>(sinograph);
+		Collections.shuffle(randomized);
+		for(String graphem: randomized){
+			manager.newAction(ContactTestManager.generateContact(folderID, graphem));
+		}
+		
+		ContactField field = ContactField.SUR_NAME;
+		JSONObject filter = new JSONObject("{'filter' : [ '=' , '1', '1' ]})");
+		
+		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
+		CommonSearchResponse response = getClient().execute(request);
+		assertFalse("Should work", response.hasError());
+			
+		Object[][] resultTable = response.getArray();
+		assertNotNull("Should find at least a result", resultTable);
+		int columnPos = response.getColumnPos(field.getNumber());
+		for(int i = 0; i < resultTable.length; i++){
+			String actualName = (String) resultTable[0][columnPos];
+			assertEquals("Graphen #"+i+" is wrong", sinograph.get(i), actualName);
+		}
+	}
+
+	/*
+	wrong collation
+	sql inject
+	*/
 
 	
 }

@@ -16,6 +16,7 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 	private int orderBy;
 	private String orderDir;
 	private int[] columns;
+	private String collation;
 
 	public void setFilter(JSONObject filter) {
 		this.filter = filter;
@@ -30,6 +31,10 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 
 	public void setColumns(int[] columns) {
 		this.columns = columns;
+	}
+	
+	public void setCollation(String collation){
+		this.collation = collation;
 	}
 	
 	
@@ -53,6 +58,8 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 			params.add(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
 		if (orderDir != null)
 			params.add(AJAXServlet.PARAMETER_ORDER, orderDir);
+		if (collation != null)
+			params.add(AJAXServlet.PARAMETER_COLLATION, collation);
 
 		return params.toArray();
 	}
@@ -71,5 +78,10 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 		setColumns(columns);
 		setOrderBy(orderBy);
 		setOrderDir(orderDir);
+	}
+	
+	public AdvancedSearchRequest(JSONObject filter, int[] columns, int orderBy, String orderDir, String collation){
+		this(filter,columns,orderBy,orderDir);
+		setCollation(collation);
 	}
 }
