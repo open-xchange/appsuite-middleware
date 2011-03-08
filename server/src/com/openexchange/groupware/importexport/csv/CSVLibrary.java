@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -155,6 +156,8 @@ public final class CSVLibrary {
     }
 
     public static String transformInputStreamToString(final InputStream is, final String encoding) throws ImportExportException{
+    	boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
+    	
         final InputStreamReader isr;
         try {
             isr = new InputStreamReader(is, encoding);
@@ -163,11 +166,18 @@ public final class CSVLibrary {
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         }
         final StringBuilder bob = new StringBuilder();
+        boolean firstPartSpecialTreatment = isUTF8;
         try {
             char[] buf = new char[512];
             int length = -1;
             while ((length = isr.read(buf)) != -1) {
-                bob.append(buf, 0, length);
+            	if(firstPartSpecialTreatment){
+            		firstPartSpecialTreatment = false;
+            		int offset = lengthOfBOM(buf);
+            		bob.append(buf, offset, length);
+            	} else {
+            		bob.append(buf, 0, length);
+            	}
             }
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
@@ -180,4 +190,15 @@ public final class CSVLibrary {
         }
         return bob.toString();
     }
+
+	private static int lengthOfBOM(char[] buf) {
+		int length = buf.length;
+		if(length > 3 && Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0)
+			return 4;
+		if(length > 1 && Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0)
+			return 2;
+		if(length > 0 && Character.getNumericValue(buf[0]) < 0)
+			return 1;
+		return 0;
+	}
 }

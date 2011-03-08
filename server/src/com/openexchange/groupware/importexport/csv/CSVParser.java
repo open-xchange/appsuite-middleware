@@ -232,6 +232,8 @@ public class CSVParser {
     protected String wellform(String str) {
         // changing all possible formats (Mac, DOS) to Unix
         str = str.replace("\r\n", "\n").replace("\r", "\n");
+        //removing excess whitespaces
+        str = str.trim();
         // adding ending to create well-formed file
         if (!str.endsWith("\n")) {
             str = str + "\n";

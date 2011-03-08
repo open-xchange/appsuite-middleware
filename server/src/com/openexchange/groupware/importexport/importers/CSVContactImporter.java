@@ -171,7 +171,6 @@ public class CSVContactImporter extends AbstractImporter {
         final Iterator<List<String>> iter = csv.iterator();
         // get header fields
         final List<String> fields = iter.next();
-        purgeBOM(fields);
         if (!checkFields(fields)) {
             throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
         }
