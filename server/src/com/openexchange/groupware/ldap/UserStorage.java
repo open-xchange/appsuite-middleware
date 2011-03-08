@@ -229,9 +229,9 @@ public abstract class UserStorage {
      */
     public final void updateUser(User user, Context context) throws LdapException{
         updateUserInternal(user, context);
-        /*
-         * Drop possible cached locale-sensitive folder data
-         */
+        // Drop possible cached locale-sensitive folder data.
+        // TODO We need some logic layer above the storage layer for users. Every component then needs to be refactored to use the
+        // UserService instead of the UserStorage.
         CacheFolderStorage.dropUserEntries(user.getId(), context.getContextId());
     }
 
