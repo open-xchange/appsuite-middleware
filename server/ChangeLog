@@ -1,3 +1,8 @@
+* 2011-03-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #18532: Correctly initializing the prepared statement for removing Facebook messaging account when Facebook OAuth account is
+   removed.
+
 * 2011-03-07 - thorben.betten@open-xchange.com
 
  - Bugfix #18512: Drop possible cached locale-sensitive folder data on changed language

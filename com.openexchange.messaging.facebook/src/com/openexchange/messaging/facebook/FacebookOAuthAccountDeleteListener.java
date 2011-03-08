@@ -77,7 +77,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         super();
     }
 
-    public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OAuthException {
+    public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
         // Nope
     }
 
@@ -97,7 +97,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
             stmt = writeCon.prepareStatement("SELECT account, confId, user, cid FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setString(2, FacebookMessagingService.getServiceId());
+            stmt.setString(3, FacebookMessagingService.getServiceId());
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptyList();
@@ -169,5 +169,4 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
     private static OAuthException createSQLError(final SQLException e) {
         return OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
     }
-
 }
