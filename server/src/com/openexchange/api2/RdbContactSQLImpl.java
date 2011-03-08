@@ -1061,12 +1061,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
     }
-    
-	public SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy, String orderDir, int[] cols) throws OXException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+ 
     public SearchIterator<Contact> getObjectsById(final int[][] object_id, final int[] cols) throws ContactException, OXException {
         final int[] myCols = checkColumns(cols);
         try {
