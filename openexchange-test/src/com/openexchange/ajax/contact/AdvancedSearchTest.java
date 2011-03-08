@@ -1,8 +1,10 @@
 package com.openexchange.ajax.contact;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.json.JSONObject;
@@ -244,6 +246,42 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 			currentPosition++;
 		}
 	}
-	
+
+	public void testSearchOrderingWithHanzi() throws Exception{
+		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		for(String graphem: sinograph){
+			manager.newAction(ContactTestManager.generateContact(folderID, graphem));
+		}
+		
+		
+		ContactField field = ContactField.SUR_NAME;
+		LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
+		for(int i = 0; i < sinograph.size() - 1; i++)
+			filters.add( new JSONObject(
+				"{'filter' : [ 'and', " +
+					"['>=' , {'field' : '"+field.getAjaxName()+"'} , '"+sinograph.get(i)+"'], " +
+					"['<' , {'field' : '"+field.getAjaxName()+"'}, '"+sinograph.get(i+1)+"'], " +
+					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
+				"]})"));
+		
+		int currentPosition = 0;
+		for(JSONObject filter: filters){
+			String ident = "Step #"+currentPosition + " from "+sinograph.get(currentPosition)+" to "+sinograph.get(currentPosition+1)+": ";
+			AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc");
+			CommonSearchResponse response = getClient().execute(request);
+			assertFalse(ident+"Should work", response.hasError());
+			
+			Object[][] resultTable = response.getArray();
+			assertNotNull(ident+"Should find at least a result", resultTable);
+			assertEquals(ident+"Should find one result", 1, resultTable.length);
+			
+			int columnPos = response.getColumnPos(field.getNumber());
+			String actualName = (String) resultTable[0][columnPos];
+			assertEquals(ident+"Should be contained", sinograph.get(currentPosition), actualName);
+			
+			currentPosition++;
+		}
+	}
+
 	
 }
