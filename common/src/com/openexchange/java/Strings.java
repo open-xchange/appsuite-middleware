@@ -121,7 +121,6 @@ public class Strings {
 			};				
 		
 		byte[] bytes = str.getBytes();
-		System.out.println("BOM@JENKINS: " + Strings.join(bytes," "));
 		for(byte[] bom: byteOrderMarks){
 			if(bom.length > bytes.length)
 				continue;
