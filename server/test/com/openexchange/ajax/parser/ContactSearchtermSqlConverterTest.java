@@ -189,4 +189,20 @@ public class ContactSearchtermSqlConverterTest extends TestCase {
 		String actualString = converter.getPreparedWhereString();
 		assertEquals(expected, actualString);
 	}
+	
+
+	public void testUsingCharset(){
+		SingleSearchTerm equalsTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+		equalsTerm.addOperand(new ColumnOperand("yomiLastName"));
+		equalsTerm.addOperand(new ConstantOperand<String>("value1"));
+		
+		
+		ContactSearchtermSqlConverter converter = new ContactSearchtermSqlConverter();
+		converter.setCharset("gb2312");
+		converter.parse(equalsTerm);
+		
+		String expected = "( CONVERT(co.yomiLastName USING gb2312) = ? )";
+		String actualString = converter.getPreparedWhereString();
+		assertEquals(expected, actualString);
+	}
 }

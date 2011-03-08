@@ -380,9 +380,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return new ArrayIterator<Contact>(contacts);
     }
     
-    public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final String orderMechanism, final int[] cols) throws ContactException, OXException {
+    public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXException {
         final ContactSql cs = new ContactMySql(session, ctx);
         ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
+        conv.setCharset(collation);
         conv.parse(searchterm);
         
         //generate parts of query

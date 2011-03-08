@@ -685,17 +685,18 @@ public class ContactRequest {
     	int[] columnsToLoad = removeVirtual(columns);
         int[] internalColumns = checkLastModified(columnsToLoad);
 
-        String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
-        TimeZone timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
-        int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
-
+        final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+        final TimeZone timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final String collation = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_COLLATION);
+        
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
         JSONArray filterContent = jData.getJSONArray("filter");
         SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
         
         ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchTerm, orderBy, orderDir, internalColumns);
+        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchTerm, orderBy, orderDir, collation, internalColumns);
         
         final JSONArray jsonResponseArray = new JSONArray();
         try {
@@ -703,6 +704,7 @@ public class ContactRequest {
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
+
                 contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
@@ -716,7 +718,8 @@ public class ContactRequest {
                 it.close();
             }
         }
-        return jsonResponseArray;    }
+        return jsonResponseArray;    
+    }
     
     public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");

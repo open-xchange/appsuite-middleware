@@ -121,8 +121,7 @@ public class ContactSearchMultiplexer {
         return new ContactMergerator(new DefaultContactComparator(orderBy, orderDir), searchIterators);
     }
     
-//	public SearchIterator<Contact> extendedSearch(ServerSession session, SearchTerm<?> searchTerm, int orderBy, String orderDir,int[] internalColumns) {
-    public SearchIterator<Contact> extendedSearch(ServerSession session, SearchTerm<?> searchTerm, int orderBy, String orderDir, int[] cols) throws AbstractOXException {
+    public SearchIterator<Contact> extendedSearch(ServerSession session, SearchTerm<?> searchTerm, int orderBy, String orderDir, String collation, int[] cols) throws AbstractOXException {
     	ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
     	conv.parse(searchTerm);
     	List<String> folders = conv.getFolders();
@@ -134,7 +133,7 @@ public class ContactSearchMultiplexer {
             	Integer folderId = Integer.parseInt(folderStr);
                 if(discoveryService.hasSpecificContactInterface(folderId, contextId)) {
                     ContactInterface contactInterface = discoveryService.newContactInterface(folderId, session);
-                    SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, cols);
+                    SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, collation, cols);
                     searchIterators.add(iterator);
                 } else {
                     foldersForDefaultSearch.add(folderId);
@@ -142,18 +141,18 @@ public class ContactSearchMultiplexer {
             }
             if(!foldersForDefaultSearch.isEmpty()) {
                 ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
-                SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, cols);
+                SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, collation, cols);
                 searchIterators.add(contactsByExtendedSearch);
             }
         } else {
             List<ContactInterfaceProviderRegistration> registrations = discoveryService.getRegistrations(contextId);
             for (ContactInterfaceProviderRegistration registration : registrations) {
                 ContactInterface contactInterface = registration.newContactInterface(session);
-                SearchIterator<Contact> searchIterator = contactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, cols);
+                SearchIterator<Contact> searchIterator = contactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, collation, cols);
                 searchIterators.add(searchIterator);
             }
             ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
-            SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, cols);
+            SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, collation, cols);
             searchIterators.add(contactsByExtendedSearch);
         
         }

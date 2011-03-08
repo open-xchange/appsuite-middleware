@@ -118,7 +118,7 @@ public interface ContactInterface {
      */
     public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException;
 
-    public <T>SearchIterator<Contact> getContactsByExtendedSearch(SearchTerm<T> searchterm, int orderBy, String orderDir, int[] cols) throws OXException;
+    public <T>SearchIterator<Contact> getContactsByExtendedSearch(SearchTerm<T> searchterm, int orderBy, String orderDir, String collation, int[] cols) throws OXException;
     /**
      * Lists all contacts where the firstname, lastname or the displayname match the given searchpattern
      * 

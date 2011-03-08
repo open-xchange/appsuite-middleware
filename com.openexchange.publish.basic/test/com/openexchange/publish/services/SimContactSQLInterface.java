@@ -299,7 +299,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
 	}
 
 	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
-			SearchTerm<T> searchterm, int orderBy, String orderDir, int[] cols)
+			SearchTerm<T> searchterm, int orderBy, String orderDir, String collation, int[] cols)
 			throws OXException {
 		// TODO Auto-generated method stub
 		return null;
