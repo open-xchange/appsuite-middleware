@@ -25,6 +25,13 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-657
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
+  if ! ox_exists_property com.openexchange.mail.filter.useUTF7FolderEncoding $pfile; then
+      ox_set_property com.openexchange.mail.filter.useUTF7FolderEncoding false $pfile
+  fi
+
   # SoftwareChange_Request-392
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/mailfilter.properties

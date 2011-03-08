@@ -79,6 +79,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-657
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
+   if ! ox_exists_property com.openexchange.mail.filter.useUTF7FolderEncoding $pfile; then
+      ox_set_property com.openexchange.mail.filter.useUTF7FolderEncoding false $pfile
+   fi
+
    # SoftwareChange_Request-392
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
