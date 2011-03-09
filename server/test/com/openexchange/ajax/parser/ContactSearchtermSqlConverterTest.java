@@ -4,9 +4,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.ContactFields;
-import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.search.CompositeSearchTerm;
@@ -201,7 +198,7 @@ public class ContactSearchtermSqlConverterTest extends TestCase {
 		converter.setCharset("gb2312");
 		converter.parse(equalsTerm);
 		
-		String expected = "( CONVERT(co.yomiLastName USING gb2312) = ? )";
+		String expected = "( CONVERT(co.yomiLastName USING gb2312) = CONVERT(? USING gb2312) )";
 		String actualString = converter.getPreparedWhereString();
 		assertEquals(expected, actualString);
 	}

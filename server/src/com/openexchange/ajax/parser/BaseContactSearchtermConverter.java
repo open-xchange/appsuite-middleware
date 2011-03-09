@@ -192,9 +192,8 @@ public abstract class BaseContactSearchtermConverter {
 				String value = (String) o.getValue();
 				handleFolder(o);
 				value = handlePatternMatching(value);
-
 				injectors.add(new StringSQLInjector(value));
-				bob.append("?");
+				bob.append(handleCharset("?"));
 			}
 			
 			if(operation.getPosition() == OperationPosition.AFTER)

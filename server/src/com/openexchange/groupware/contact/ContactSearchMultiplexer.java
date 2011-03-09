@@ -52,14 +52,18 @@ package com.openexchange.groupware.contact;
 import static com.openexchange.java.Autoboxing.I;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contact.helpers.CollationContactComparator;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.l10n.I18nMap;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -159,6 +163,17 @@ public class ContactSearchMultiplexer {
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
         }
-        return new ContactMergerator(new DefaultContactComparator(orderBy, orderDir), searchIterators);
+        Comparator<Contact> comparator = getContactComparator(orderBy, orderDir, collation);
+        return new ContactMergerator(comparator, searchIterators);
     }
+
+	private Comparator<Contact> getContactComparator(int orderBy, String orderDir, String collation) {
+		if(collation == null)
+			return new DefaultContactComparator(orderBy, orderDir);
+		
+		I18nMap myI18nMap = I18nMap.get(collation);
+		ContactField myField = ContactField.getByValue(orderBy);
+		
+		return new CollationContactComparator(myField, orderDir, myI18nMap.getJavaLocale());
+	}
 }
