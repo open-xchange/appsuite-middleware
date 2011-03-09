@@ -57,8 +57,8 @@ import java.util.Locale;
  *
  */
 public enum I18nMap {
-	PRC(Locale.PRC, "cp2312", "cp2312_chinese_ci"),
-	CHINA(Locale.CHINESE, "cp2312", "cp2312_chinese_ci"),
+	PRC(Locale.PRC, "gb2312", "gb2312_chinese_ci"),
+	CHINA(Locale.CHINESE, "gb2312", "gb2312_chinese_ci"),
 	DEFAULT(Locale.getDefault(), "utf8", "utf8_general_ci");
 	
 	private String collation;
