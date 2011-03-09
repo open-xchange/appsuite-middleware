@@ -1,3 +1,9 @@
+open-xchange-meta-centos (6.19.0.0-7) unstable; urgency=low
+
+  * build for 6.19.0-rev9
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 09 Mar 2011 14:51:45 +0000
+
 open-xchange-meta-centos (6.19.0.0-6) unstable; urgency=low
 
   * build for 6.19.0-rev8

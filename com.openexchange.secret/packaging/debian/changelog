@@ -1,3 +1,9 @@
+open-xchange-secret (6.19.0.0-9) unstable; urgency=low
+
+  * build for 6.19.0-rev9
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 09 Mar 2011 14:48:53 +0000
+
 open-xchange-secret (6.19.0.0-8) unstable; urgency=low
 
   * build for 6.19.0-rev8

@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -769,9 +769,42 @@ fi
 %doc doc/examples
 
 %changelog
+* Wed Mar 09 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #18525: Make sure to select only one row in IDGenerator.
+* Tue Mar 08 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18532: Correctly initializing the prepared statement for removing Facebook messaging account when Facebook OAuth account is
+   removed.
+* Mon Mar 07 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18490: Encode folder names in UTF-7
+* Mon Mar 07 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18512: Drop possible cached locale-sensitive folder data on changed language
+* Sun Mar 06 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18498: Introduced listener framework for OAuth account deletion
+* Sat Mar 05 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18036: Introduced special bit to check for rename permission
+ - Bugfix #18285: Preserve plain text signature delimiter
+ - Bugfix #18448: Allowing to remove SMTP login/password field for external mail account
+* Fri Mar 04 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #17638: Use entire primary key on updates to oxfolder_permissions in long running transactions, so as not to lock too many rows.
+* Fri Mar 04 2011 - marcus.klein@open-xchange.com
+ - TA5815 of US 5768: Moved the HTTP authorization header based login to another URL and added correct HTTP unauthorized response.
+* Fri Mar 04 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18502: Checking POP3 INBOX folder's open status before closing it
+* Thu Mar 03 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18499: Passing all configuration options for the login servlet through the ServletConfig.
+* Wed Mar 02 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18487: Adding all necessary information to a task when triggering the event for accepting, declining etc.
+* Wed Mar 02 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #18094: "other" address information is now exported to VCards (using type=dom) - and imported this way,too.
+ - Bugfix #18482: Importing CSV works even with UTF8-encoded files that insist on using a Byte Order Mark.
+* Wed Mar 02 2011 - steffen.templin@open-xchange.com
+ - Bugfix #17327: Alarm time of appointments is not delivered with all request.
 * Tue Mar 01 2011 - marcus.klein@open-xchange.com
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
  - Bugfix #18463: Added necessary imports for OAuth LinkedIn bundle.
+* Tue Mar 01 2011 - choeger@open-xchange.com
+ - Bugfix #18493: [L3] Open-xchange init scripts don't display results on
+   RHEL6 system with special package
 * Mon Feb 28 2011 - marcus.klein@open-xchange.com
  - Bugfix #17892: Task creator now gets notification mails about changed participants states.
  - Bugfix #18263: Added links for documentation of mobile sync configuration on Android devices.
@@ -795,6 +828,8 @@ fi
  - Bugfix #18219: Unable to access publications created by PIM users.
 * Tue Feb 22 2011 - martin.herfurth@open-xchange.com
  - Bugfix #18336: Fixed wrong end date for when removing sequence.
+* Tue Feb 22 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #18455: Error messages in List-view.
 * Mon Feb 21 2011 - marcus.klein@open-xchange.com
  - Bugfix #18399: Added session identifier to warning message for further debugging the cause of the warning.
 * Mon Feb 21 2011 - thorben.betten@open-xchange.com
