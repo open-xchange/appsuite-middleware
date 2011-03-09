@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
@@ -94,7 +95,7 @@ public final class OAuthActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class };
+        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, CryptoService.class };
     }
 
     @Override
