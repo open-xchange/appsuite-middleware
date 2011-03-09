@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,7 +67,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tx.TransactionException;
 
 /**
  * {@link AbstractFileAction}
@@ -197,6 +196,11 @@ public abstract class AbstractFileAction implements AJAXActionService {
             throw new AjaxException(AjaxException.Code.UnexpectedError, t.getMessage());
         } finally {
             after(req);
+            
+            // Delete tmp files
+            if (request.hasUploads()) {
+                request.getUploadEvent().cleanUp();
+            }
         }
     }
 
