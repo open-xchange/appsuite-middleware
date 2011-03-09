@@ -100,7 +100,7 @@ public class DataParser {
 
     private static final Log LOG = LogFactory.getLog(DataParser.class);
 
-    protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws Exception {
+    protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws XmlPullParserException, IOException {
         if (isTag(parser, DataFields.OBJECT_ID, XmlServlet.NAMESPACE)) {
             dataobject.setObjectID(getValueAsInt(parser));
         } else if (isTag(parser, DataFields.LAST_MODIFIED, XmlServlet.NAMESPACE)) {
@@ -128,7 +128,7 @@ public class DataParser {
         }
     }
 
-    protected boolean hasCorrectNamespace(final XmlPullParser parser) throws Exception {
+    protected boolean hasCorrectNamespace(final XmlPullParser parser) throws XmlPullParserException {
         if (parser.getEventType() == XmlPullParser.START_TAG && parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
             // if (parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
             return true;
