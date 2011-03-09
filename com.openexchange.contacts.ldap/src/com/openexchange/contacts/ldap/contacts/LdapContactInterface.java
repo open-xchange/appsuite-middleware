@@ -786,10 +786,9 @@ public class LdapContactInterface implements ContactInterface {
         throw new UnsupportedOperationException();
 	}
 
-
-	public SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy,
-			String orderDir, int[] cols) throws OXException {
-		// TODO Auto-generated method stub
-		return null;
+	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
+			SearchTerm<T> searchterm, int orderBy, String orderDir,
+			String collation, int[] cols) throws OXException {
+        throw new UnsupportedOperationException();
 	}
 }
