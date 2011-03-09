@@ -103,7 +103,7 @@ public interface OAuthService {
      * Creates a new OAuth account completely from specified arguments.
      * 
      * @param serviceMetaData The identifier of service meta data
-     * @param arguments The arguments providing {@link OAuthConstants#ARGUMENT_TOKEN}, {@link OAuthConstants#ARGUMENT_SECRET}, and optional {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}
+     * @param arguments The arguments providing {@link OAuthConstants#ARGUMENT_TOKEN}, {@link OAuthConstants#ARGUMENT_SECRET}, {@link OAuthConstants#ARGUMENT_PASSWORD}, and optional {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}
      * @param user The user identifier
      * @param contextId The context identifier
      * @return The newly created account
