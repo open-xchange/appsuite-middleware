@@ -144,6 +144,7 @@ public class OrderByTest extends TestCase {
                 searchObject,
                 Contact.USERFIELD20,
                 "ASC",
+                null,
                 columns);
 
             final List<String> surnames = new ArrayList<String>();

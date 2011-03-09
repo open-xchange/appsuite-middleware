@@ -110,7 +110,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
         contactSearchObject.addFolder(1337);
         
         
-        final SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, "ASC", new int[]{Contact.OBJECT_ID});
+        final SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, "ASC", null, new int[]{Contact.OBJECT_ID});
         
         assertNotNull(contacts);
         // Folder 2 is not searched, so 21,22 and 23 will be missing
@@ -122,7 +122,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
         final ContactSearchObject contactSearchObject = new ContactSearchObject();
         
         
-        final SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, "ASC", new int[]{Contact.OBJECT_ID});
+        final SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, "ASC", null, new int[]{Contact.OBJECT_ID});
         
         assertNotNull(contacts);
         assertIDs(contacts, 1,2,3,11,12,13,21,22,23,31,32,33);
@@ -167,11 +167,11 @@ public class ContactSearchMuliplexerTest extends TestCase {
                 // Nothing to do.
             }
 
-            public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+            public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final String collation, final int[] cols) throws OXException {
                 return new SearchIteratorAdapter<Contact>(contacts.iterator());
             }
 
-            public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+            public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, String collation, final int[] cols) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
@@ -273,8 +273,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
 			public <T> SearchIterator<Contact> getContactsByExtendedSearch(
 					SearchTerm<T> searchterm, int orderBy, String orderDir,
 					String collation, int[] cols) throws OXException {
-				// TODO Auto-generated method stub
-				return null;
+                return new SearchIteratorAdapter<Contact>(contacts.iterator());
 			}
             
         };

@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.contact;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -118,6 +123,23 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         assertTrue("Should contain field #4", actual.contains(4));
         assertTrue("Should contain field #5", actual.contains(5));
         assertTrue("Should contain field #20", actual.contains(20));
+    }
+    
+    
+    public void testGetAllContactsOrderedByCollation() {
+		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		
+		for(String graphem: sinograph){
+			manager.newAction( manager.generateContact(folderID, graphem) );
+		}
+
+		int fieldNum = ContactField.SUR_NAME.getNumber();
+        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.DESCENDING, "gb2312" );
+
+        for(int i = 0, len = sinograph.size(); i < len; i++){
+        	String expected = sinograph.get(len-i-1);
+        	assertEquals("Element #"+i, expected, allContacts[i].getSurName());
+        }
     }
 
     public void testUpdateContactAndGetUpdates() {

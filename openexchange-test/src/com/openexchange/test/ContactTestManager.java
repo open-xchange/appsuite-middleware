@@ -51,6 +51,7 @@ package com.openexchange.test;
 
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,11 +59,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
+
 import junit.framework.TestCase;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
+
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
@@ -84,9 +88,9 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
@@ -322,6 +326,28 @@ public class ContactTestManager implements TestManager {
         }
     }
 
+    public Contact[] allAction(int folderId, int[] columns, int orderBy, Order order, String collation) {
+        Vector<Contact> allContacts = new Vector<Contact>();
+        AllRequest request = new AllRequest(folderId, columns, orderBy, order, collation);
+        try {
+            CommonAllResponse response = getClient().execute(request);
+            int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
+            int folderIdPos = response.getColumnPos(Contact.FOLDER_ID);
+            lastResponse = response;
+            for (Object[] temp : response) {
+                int tempObjectId = ((Integer) temp[objectIdPos]).intValue();
+                int tempFolderId = ((Integer) temp[folderIdPos]).intValue();
+                Contact tempContact = getAction(tempFolderId, tempObjectId);
+                allContacts.add(tempContact);
+            }
+        } catch (Exception e) {
+            doExceptionHandling(e, "AllRequest for folder " + folderId);
+        }
+        Contact[] contactArray = new Contact[allContacts.size()];
+        allContacts.copyInto(contactArray);
+        return contactArray;
+    }
+    
     public Contact[] allAction(int folderId, int[] columns) {
         Vector<Contact> allContacts = new Vector<Contact>();
         AllRequest request = new AllRequest(folderId, columns);
@@ -342,7 +368,6 @@ public class ContactTestManager implements TestManager {
         Contact[] contactArray = new Contact[allContacts.size()];
         allContacts.copyInto(contactArray);
         return contactArray;
-
     }
 
     /**
@@ -379,8 +404,13 @@ public class ContactTestManager implements TestManager {
     }
 
     public Contact[] searchAction(String pattern, int folderId, int... columns) {
+    	return searchAction(pattern, folderId, -1, null, null, Contact.ALL_COLUMNS);
+    }
+    public Contact[] searchAction(String pattern, int folderId, int orderBy, Order order, String collation, int... columns) {
         Vector<Contact> allContacts = new Vector<Contact>();
-        SearchRequest request = new SearchRequest(pattern, folderId, columns, true);
+        String orderDir = order == null ? "ASC" : order.equals(Order.ASCENDING) ? "ASC" : "DESC";
+        
+        SearchRequest request = new SearchRequest(pattern, false, folderId, columns, orderBy, orderDir, collation, failOnError);
         try {
             SearchResponse response = getClient().execute(request);
             lastResponse = response;
@@ -420,8 +450,12 @@ public class ContactTestManager implements TestManager {
     }
     
     public Contact[] searchAction(ContactSearchObject search, int[] columns) {
+    	return searchAction(search, columns, -1, null, null);
+    }
+    
+    public Contact[] searchAction(ContactSearchObject search, int[] columns, int orderBy, Order order, String collation) {
         Vector<Contact> allContacts = new Vector<Contact>();
-        SearchRequest request = new SearchRequest(search, columns, getFailOnError());
+        SearchRequest request = new SearchRequest(search, columns, orderBy, order, collation, getFailOnError());
         try {
             SearchResponse response = getClient().execute(request);
             lastResponse = response;

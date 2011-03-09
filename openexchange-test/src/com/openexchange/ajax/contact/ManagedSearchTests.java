@@ -47,79 +47,74 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
+package com.openexchange.ajax.contact;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.tools.arrays.Arrays;
 
 /**
- * Contains the data for an contact all request.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @author <a href="mailto:ben.pahne@open-xchange.org">Ben Pahne</a>
+ * 
+ * @author tobiasp
+ *
  */
-public class AllRequest extends CommonAllRequest {
+public class ManagedSearchTests extends AbstractManagedContactTest {
 
-    public static final int[] GUI_COLUMNS = new int[] {
-        Contact.OBJECT_ID,
-        Contact.FOLDER_ID
-    };
+	public List<String> sinographs = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
 
-    public static final int GUI_SORT = Contact.SUR_NAME;
-
-    public static final Order GUI_ORDER = Order.ASCENDING;
-
-	private String collation;
-    
-    /**
-     * Default constructor.
-     */
-    public AllRequest(final int folderId, final int[] columns) {
-        super(AbstractContactRequest.URL, folderId, addGUIColumns(columns),
-            0, null, true);
-    }
-    
-    public AllRequest(final int folderId, final int[] columns, int orderBy, Order order, String collation) {
-        super(AbstractContactRequest.URL, folderId, addGUIColumns(columns), orderBy, order, true);
-        this.collation = collation;
-    }
-
-	@Override
-	public Parameter[] getParameters() {
-		Parameter[] params = super.getParameters();
-		return Arrays.add(params, new Parameter(AJAXServlet.PARAMETER_COLLATION, collation));
+	public ManagedSearchTests(String name) {
+		super(name);
+	}
+	
+	public void testGuiLikeSearch(){
+		List<ContactSearchObject> searches = new LinkedList<ContactSearchObject>();
+		
+		for(String name: sinographs){
+			//create
+			Contact tmp = generateContact();
+			tmp.setSurName(name);
+			manager.newAction(tmp);
+			
+			//prepare search
+			ContactSearchObject search = new ContactSearchObject();
+			search.setFolder(folderID);
+			search.setGivenName(name);
+			search.setSurname(name);
+			search.setDisplayName(name);
+			search.setEmail1(name);
+			search.setEmail2(name);
+			search.setEmail3(name);
+			search.setCatgories(name);
+			search.setYomiFirstname(name);
+			search.setYomiLastName(name);
+			search.setOrSearch(true);
+			searches.add(search);
+		}
+		for(int i = 0; i < sinographs.size(); i++){
+			Contact[] results= manager.searchAction(searches.get(i));
+		
+			assertEquals("#"+i+" Should find one contact", 1, results.length);
+			assertEquals("#"+i+" Should find the right contact", sinographs.get(i), results[0].getSurName());
+		}
 	}
 
-	private static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
-        }
-        // Move GUI_COLUMNS to end unless already in there.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            if (!list.contains(column)) {
-                list.add(column);
-            }
-        }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
-    }
+	public void testSearchPattern(){
+		for(String name: sinographs){
+			Contact tmp = generateContact();
+			tmp.setSurName(name);
+			manager.newAction(tmp);
+		}
+		Contact[] contacts= manager.searchAction("*", folderID, ContactField.SUR_NAME.getNumber(), Order.ASCENDING, "gb2312", Contact.ALL_COLUMNS);
+		
+		for(int i = 0; i < sinographs.size(); i++){
+			String name = contacts[i].getSurName();
+			assertEquals("#"+i+" Should have the right order", sinographs.get(i), name);
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
-    }
 }

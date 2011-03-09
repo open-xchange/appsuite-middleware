@@ -76,17 +76,21 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
     public SearchRequest(final String pattern, final int inFolder, final int[] columns, final boolean failOnError) {
         this(pattern, inFolder, columns, -1, null, failOnError);
     }
-
     public SearchRequest(final String pattern, final boolean firstLetterOnly, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError)  {
+    	this(pattern, firstLetterOnly, inFolder, columns, orderBy, orderDir, null, failOnError);
+    }
+    
+    public SearchRequest(final String pattern, final boolean firstLetterOnly, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final String collation, final boolean failOnError)  {
         searchParser = new SearchParser(failOnError, columns);
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
         param(AJAXServlet.PARAMETER_COLUMNS, join(columns));
-        if (orderBy != -1) {
+        if (orderBy != -1)
             param(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
+        if (orderDir != null)
             param(AJAXServlet.PARAMETER_ORDER, orderDir);
-        }
-        
+        if (collation != null)
+        	param(AJAXServlet.PARAMETER_COLLATION, collation);        
         try {
         	if(firstLetterOnly){
         		body.put("startletter", true);
@@ -118,6 +122,9 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
     }
 
     public SearchRequest(ContactSearchObject cso, int[] columns, int orderBy, Order order, boolean failOnError) {
+    	this(cso, columns, orderBy, order, null, failOnError);
+    }
+    public SearchRequest(ContactSearchObject cso, int[] columns, int orderBy, Order order, String collation, boolean failOnError) {
         searchParser = new SearchParser(failOnError, columns);
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -127,6 +134,9 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
         }
         if (null != order) {
             param(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order));
+        }
+        if (null != collation) {
+        	param(AJAXServlet.PARAMETER_COLLATION, collation);
         }
         try {
         	body.put(ContactFields.LAST_NAME, cso.getSurname());

@@ -222,7 +222,7 @@ public class ContactCollectorTest extends TestCase {
 
         final int[] columns = new int[] {
             Contact.FOLDER_ID, Contact.LAST_MODIFIED, Contact.OBJECT_ID, Contact.USERFIELD20 };
-        final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
+        final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, null, columns);
 
         final List<Contact> contacts = new ArrayList<Contact>();
         while (iterator.hasNext()) {

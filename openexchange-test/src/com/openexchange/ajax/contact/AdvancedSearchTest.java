@@ -13,6 +13,7 @@ import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.test.ContactTestManager;
 
 public class AdvancedSearchTest extends AbstractManagedContactTest{
@@ -285,6 +286,8 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 	}
 	
 	public void testOrderByWithCollation() throws Exception{
+		ContactField field = ContactField.SUR_NAME;
+
 		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
 		LinkedList<String> randomized = new LinkedList<String>(sinograph);
 		Collections.shuffle(randomized);
@@ -292,8 +295,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 			manager.newAction(ContactTestManager.generateContact(folderID, graphem));
 		}
 		
-		ContactField field = ContactField.SUR_NAME;
-		JSONObject filter = new JSONObject("{'filter' : [ '=' , '1', '1' ]})");
+		JSONObject filter = new JSONObject("{'filter' : [ '>=' , {'field':'"+field.getAjaxName()+"'}, '阿' ]})");
 		
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
 		CommonSearchResponse response = getClient().execute(request);
@@ -302,10 +304,44 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		Object[][] resultTable = response.getArray();
 		assertNotNull("Should find at least a result", resultTable);
 		int columnPos = response.getColumnPos(field.getNumber());
-		for(int i = 0; i < resultTable.length; i++){
+		
+		LinkedList<String> actuals = new LinkedList<String>();
+		for(int i = 1; i < resultTable.length; i++){
 			String actualName = (String) resultTable[0][columnPos];
-			assertEquals("Graphen #"+i+" is wrong", sinograph.get(i), actualName);
+			actuals.add(actualName);
 		}
+		
+		System.out.println(Strings.join(sinograph, ","));
+		System.out.println(Strings.join(actuals, ","));
+	
+		for(int i = 0; i < actuals.size(); i++)
+			assertEquals("Graphen #"+i+" is wrong", sinograph.get(i), actuals.get(i));
+	}
+	
+	public void testNameThatAppearedTwice() throws Exception{
+		String name = "砂糖";
+		manager.newAction(ContactTestManager.generateContact(folderID, name));
+
+		ContactField field = ContactField.SUR_NAME;
+		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+
+		LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
+		for(int i = 0; i < sinograph.size() - 1; i++)
+			filters.add( new JSONObject(
+				"{'filter' : [ 'and', " +
+					"['>=' , {'field' : '"+field.getAjaxName()+"'} , '"+sinograph.get(i)+"'], " +
+					"['<' , {'field' : '"+field.getAjaxName()+"'}, '"+sinograph.get(i+1)+"'], " +
+					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
+				"]})"));
+		
+		int occurences = 0;
+		for(JSONObject filter: filters){
+			AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
+			CommonSearchResponse response = getClient().execute(request);
+			Object[][] resultTable = response.getArray();
+			occurences += resultTable.length;
+		}		
+		assertEquals("Should only appear once", 1, occurences);
 	}
 
 	/*
