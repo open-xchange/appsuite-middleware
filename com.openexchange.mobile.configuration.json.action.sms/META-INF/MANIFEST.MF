@@ -51,7 +51,8 @@ Import-Package: com.openexchange.ajax,
  org.w3c.dom,
  org.xml.sax,
  org.xml.sax.ext,
- org.xml.sax.helpers
+ org.xml.sax.helpers,
+ com.openexchange.mobile.configuration.json.action
 Require-Bundle: com.openexchange.server,
  com.openexchange.common,
  com.openexchange.mobile.configuration.json
