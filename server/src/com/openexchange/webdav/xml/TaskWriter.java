@@ -167,6 +167,7 @@ public class TaskWriter extends CalendarWriter {
         } catch (final OXObjectNotFoundException exc) {
             writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
         } catch (final Exception ex) {
+            LOG.error(ex.getMessage(), ex);
             writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
         }
     }
@@ -256,10 +257,10 @@ public class TaskWriter extends CalendarWriter {
                 addElement(END_DATE, taskObj.getEndDate(), e_prop);
             }
             if (taskObj.containsActualCosts()) {
-                addElement(ACTUAL_COSTS, taskObj.getActualCosts(), e_prop);
+                addElement(ACTUAL_COSTS, taskObj.getActualCosts().floatValue(), e_prop);
             }
             if (taskObj.containsActualDuration()) {
-                addElement(ACTUAL_DURATION, taskObj.getActualDuration(), e_prop);
+                addElement(ACTUAL_DURATION, taskObj.getActualDuration().floatValue(), e_prop);
             }
             addElement(BILLING_INFORMATION, taskObj.getBillingInformation(), e_prop);
             addElement(COMPANIES, taskObj.getCompanies(), e_prop);
@@ -277,10 +278,10 @@ public class TaskWriter extends CalendarWriter {
                 addElement(STATUS, taskObj.getStatus(), e_prop);
             }
             if (taskObj.containsTargetCosts()) {
-                addElement(TARGET_COSTS, taskObj.getTargetCosts(), e_prop);
+                addElement(TARGET_COSTS, taskObj.getTargetCosts().floatValue(), e_prop);
             }
             if (taskObj.containsTargetDuration()) {
-                addElement(TARGET_DURATION, taskObj.getTargetDuration(), e_prop);
+                addElement(TARGET_DURATION, taskObj.getTargetDuration().floatValue(), e_prop);
             }
             if (taskObj.containsTripMeter()) {
                 addElement(TRIP_METER, taskObj.getTripMeter(), e_prop);

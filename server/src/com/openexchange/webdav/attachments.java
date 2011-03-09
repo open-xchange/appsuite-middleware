@@ -338,12 +338,12 @@ public final class attachments extends OXServlet {
                 i = is.read(b);
             }
         } catch (final OXConflictException exc) {
-            doError(resp, HttpServletResponse.SC_CONFLICT, exc.toString());
             LOG.error("doGet", exc);
+            doError(resp, HttpServletResponse.SC_CONFLICT, exc.toString());
             rollbackTransaction();
         } catch (final Exception exc) {
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
             LOG.error("doGet", exc);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
             rollbackTransaction();
         } finally {
             finishTransaction();

@@ -121,6 +121,7 @@ public class FolderWriter extends FolderChildWriter {
         } catch (final OXObjectNotFoundException exc) {
             writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
         } catch (final Exception ex) {
+            LOG.error(ex.getMessage(), ex);
             writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
         }
     }

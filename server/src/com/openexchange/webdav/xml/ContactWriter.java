@@ -64,7 +64,6 @@ import org.jdom.Namespace;
 import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -145,6 +144,7 @@ public class ContactWriter extends CommonWriter {
         } catch (final OXObjectNotFoundException exc) {
             writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
         } catch (final Exception ex) {
+            LOG.error(ex.getMessage(), ex);
             writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
         }
     }
