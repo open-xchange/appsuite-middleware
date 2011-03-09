@@ -260,7 +260,7 @@ public class TaskWriter extends CalendarWriter {
                 addElement(ACTUAL_COSTS, taskObj.getActualCosts().floatValue(), e_prop);
             }
             if (taskObj.containsActualDuration()) {
-                addElement(ACTUAL_DURATION, taskObj.getActualDuration().floatValue(), e_prop);
+                addElement(ACTUAL_DURATION, taskObj.getActualDuration(), e_prop);
             }
             addElement(BILLING_INFORMATION, taskObj.getBillingInformation(), e_prop);
             addElement(COMPANIES, taskObj.getCompanies(), e_prop);
@@ -281,7 +281,7 @@ public class TaskWriter extends CalendarWriter {
                 addElement(TARGET_COSTS, taskObj.getTargetCosts().floatValue(), e_prop);
             }
             if (taskObj.containsTargetDuration()) {
-                addElement(TARGET_DURATION, taskObj.getTargetDuration().floatValue(), e_prop);
+                addElement(TARGET_DURATION, taskObj.getTargetDuration(), e_prop);
             }
             if (taskObj.containsTripMeter()) {
                 addElement(TRIP_METER, taskObj.getTripMeter(), e_prop);
