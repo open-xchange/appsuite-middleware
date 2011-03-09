@@ -196,7 +196,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     public void testGetAccount() throws Exception {
         final OAuthAccount authAccount = createTestAccount();
         
-        final OAuthAccount account = oauth.getAccount(authAccount.getId(), 23, 1);
+        final OAuthAccount account = oauth.getAccount(authAccount.getId(), "password", 23, 1);
         
         assertNotNull(account);
         assertEqualAttributes(authAccount, account);
@@ -209,7 +209,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,42,3,'account1user2', '1234', '4321', 'com.openexchange.test');");
         
         
-        final List<OAuthAccount> accounts = oauth.getAccounts(23, 1);
+        final List<OAuthAccount> accounts = oauth.getAccounts("password", 23, 1);
         
         assertEquals(2, accounts.size());
         
@@ -296,7 +296,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     
     public void testUnknownIdOnGet() {
         try {
-            oauth.getAccount(12, 1, 23);
+            oauth.getAccount(12, "password", 1, 23);
             fail("Should have died");
         } catch (final OAuthException x) {
             // Hooray!

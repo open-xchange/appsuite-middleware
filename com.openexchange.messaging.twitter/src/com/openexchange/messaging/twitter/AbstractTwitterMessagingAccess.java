@@ -142,11 +142,11 @@ public abstract class AbstractTwitterMessagingAccess {
                                 final MessagingAccountManager accountManager = account.getMessagingService().getAccountManager();
                                 accountManager.updateAccount(account, session);
                             } else {
-                                oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), userId, contextId);
+                                oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), session.getPassword(), userId, contextId);
                             }
                         }
                     } else {
-                        oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), userId, contextId);
+                        oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), session.getPassword(), userId, contextId);
                     }
                 }
                 newTwitterAccess = twitterService.getOAuthTwitterAccess(oAuthAccount.getToken(), oAuthAccount.getSecret());

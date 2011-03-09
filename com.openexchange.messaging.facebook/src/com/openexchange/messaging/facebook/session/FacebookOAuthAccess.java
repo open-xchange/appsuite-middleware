@@ -91,7 +91,7 @@ public final class FacebookOAuthAccess {
         final int accountId = messagingAccount.getId();
         FacebookOAuthAccess facebookSession = registry.getSession(session.getContextId(), session.getUserId(), accountId);
         if (null == facebookSession) {
-            final FacebookOAuthAccess newInstance = new FacebookOAuthAccess(messagingAccount, session.getUserId(), session.getContextId());
+            final FacebookOAuthAccess newInstance = new FacebookOAuthAccess(messagingAccount, session.getPassword(), session.getUserId(), session.getContextId());
             facebookSession = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
             if (null == facebookSession) {
                 facebookSession = newInstance;
@@ -136,7 +136,7 @@ public final class FacebookOAuthAccess {
      * @param messagingAccount The facebook messaging account providing credentials and settings
      * @throws MessagingException
      */
-    private FacebookOAuthAccess(final MessagingAccount messagingAccount, final int user, final int contextId) throws FacebookMessagingException {
+    private FacebookOAuthAccess(final MessagingAccount messagingAccount, final String password, final int user, final int contextId) throws FacebookMessagingException {
         super();
         /*
          * Get OAuth account identifier from messaging account's configuration
@@ -144,7 +144,7 @@ public final class FacebookOAuthAccess {
         final int oauthAccountId = ((Integer) messagingAccount.getConfiguration().get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT)).intValue();
         final OAuthService oAuthService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(OAuthService.class);
         try {
-            oauthAccount = oAuthService.getAccount(oauthAccountId, user, contextId);
+            oauthAccount = oAuthService.getAccount(oauthAccountId, password, user, contextId);
             facebookAccessToken = new Token(oauthAccount.getToken(), oauthAccount.getSecret());
             /*
              * Generate FB service
