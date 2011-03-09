@@ -458,7 +458,7 @@ public final class IDGenerator {
                 stmt = con.prepareStatement("UPDATE " + table + " SET id=id+1");
                 stmt.execute();
                 stmt.close();
-                stmt = con.prepareStatement("SELECT id FROM " + table);
+                stmt = con.prepareStatement("SELECT id FROM " + table+ " ORDER BY id DESC LIMIT 1");
                 result = stmt.executeQuery();
                 if (result.next()) {
                     newId = result.getInt(1);
