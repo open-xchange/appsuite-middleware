@@ -36,6 +36,7 @@
 	<property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="sqljar" value="com.openexchange.sql.jar"/>
 	<property name="configjar" value="com.openexchange.configread.jar"/>
+	<property name="cryptojar" value="com.openexchange.crypto.jar"/>
 	
 	<!-- Third party libs -->
 	<fileset dir="${basedir}" id="3rdpartyjars">
@@ -52,6 +53,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${sqljar}"/>
+    	<pathelement location="${bundlesdir}/${cryptojar}"/>
         <pathelement location="${bundlesdir}/${configreadBundle}/${configjar}"/>
     	<fileset refid="3rdpartyjars"/>
     </path>
