@@ -81,6 +81,8 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoException;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.folderstorage.FolderEventConstants;
@@ -101,6 +103,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.services.ServiceRegistry;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sql.builder.StatementBuilder;
@@ -143,7 +146,7 @@ public class OAuthServiceImpl implements OAuthService {
         return registry;
     }
 
-    public List<OAuthAccount> getAccounts(final int user, final int contextId) throws OAuthException {
+    public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) throws OAuthException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -162,8 +165,8 @@ public class OAuthServiceImpl implements OAuthService {
                 final DefaultOAuthAccount account = new DefaultOAuthAccount();
                 account.setId(rs.getInt(1));
                 account.setDisplayName(rs.getString(2));
-                account.setToken(rs.getString(3));
-                account.setSecret(rs.getString(4));
+                account.setToken(decrypt(rs.getString(3), password));
+                account.setSecret(decrypt(rs.getString(4), password));
                 account.setMetaData(registry.getService(rs.getString(5)));
                 accounts.add(account);
             } while (rs.next());
@@ -176,7 +179,7 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-    public List<OAuthAccount> getAccounts(final String serviceMetaData, final int user, final int contextId) throws OAuthException {
+    public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) throws OAuthException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -196,8 +199,8 @@ public class OAuthServiceImpl implements OAuthService {
                 final DefaultOAuthAccount account = new DefaultOAuthAccount();
                 account.setId(rs.getInt(1));
                 account.setDisplayName(rs.getString(2));
-                account.setToken(rs.getString(3));
-                account.setSecret(rs.getString(4));
+                account.setToken(decrypt(rs.getString(3), password));
+                account.setSecret(decrypt(rs.getString(4), password));
                 account.setMetaData(registry.getService(serviceMetaData));
                 accounts.add(account);
             } while (rs.next());
@@ -282,6 +285,16 @@ public class OAuthServiceImpl implements OAuthService {
             account.setToken((String) arguments.get(OAuthConstants.ARGUMENT_TOKEN));
             account.setSecret((String) arguments.get(OAuthConstants.ARGUMENT_SECRET));
             /*
+             * Crypt tokens
+             */
+            final String password = (String) arguments.get(OAuthConstants.ARGUMENT_PASSWORD);
+            if (null == password) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PASSWORD);
+            }
+            final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
+            account.setToken(encrypt(account.getToken(), password, cryptoService));
+            account.setSecret(encrypt(account.getSecret(), password, cryptoService));
+            /*
              * Create INSERT command
              */
             final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
@@ -322,6 +335,16 @@ public class OAuthServiceImpl implements OAuthService {
              * Obtain & apply the access token
              */
             obtainToken(type, arguments, account);
+            /*
+             * Crypt tokens
+             */
+            final String password = (String) arguments.get(OAuthConstants.ARGUMENT_PASSWORD);
+            if (null == password) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PASSWORD);
+            }
+            final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
+            account.setToken(encrypt(account.getToken(), password, cryptoService));
+            account.setSecret(encrypt(account.getSecret(), password, cryptoService));
             /*
              * Create INSERT command
              */
@@ -475,7 +498,7 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-    public OAuthAccount getAccount(final int accountId, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) throws OAuthException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -496,8 +519,8 @@ public class OAuthServiceImpl implements OAuthService {
             final DefaultOAuthAccount account = new DefaultOAuthAccount();
             account.setId(accountId);
             account.setDisplayName(rs.getString(1));
-            account.setToken(rs.getString(2));
-            account.setSecret(rs.getString(3));
+            account.setToken(decrypt(rs.getString(2), password));
+            account.setSecret(decrypt(rs.getString(3), password));
             account.setMetaData(registry.getService(rs.getString(4)));
             return account;
         } catch (final SQLException e) {
@@ -617,7 +640,7 @@ public class OAuthServiceImpl implements OAuthService {
         int set(int pos, PreparedStatement stmt) throws SQLException;
     }
 
-    private static List<Setter> setterFrom(final Map<String, Object> arguments) {
+    private static List<Setter> setterFrom(final Map<String, Object> arguments) throws OAuthException {
         final List<Setter> ret = new ArrayList<Setter>(4);
         /*
          * Check for display name
@@ -641,25 +664,72 @@ public class OAuthServiceImpl implements OAuthService {
          */
         final OAuthToken token = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
         if (null != token) {
-            final String sToken = token.getToken();
-            final String secret = token.getSecret();
-            ret.add(new Setter() {
-
-                public int set(final int pos, final PreparedStatement stmt) throws SQLException {
-                    stmt.setString(pos, sToken);
-                    stmt.setString(pos + 1, secret);
-                    return pos + 2;
+            try {
+                /*
+                 * Crypt tokens
+                 */
+                final String password = (String) arguments.get(OAuthConstants.ARGUMENT_PASSWORD);
+                if (null == password) {
+                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PASSWORD);
                 }
+                final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
+                final String sToken = encrypt(token.getToken(), password, cryptoService);
+                final String secret = encrypt(token.getSecret(), password, cryptoService);
+                ret.add(new Setter() {
 
-                public void appendTo(final StringBuilder stmtBuilder) {
-                    stmtBuilder.append("accessToken = ?, accessSecret = ?");
-                }
-            });
+                    public int set(final int pos, final PreparedStatement stmt) throws SQLException {
+                        stmt.setString(pos, sToken);
+                        stmt.setString(pos + 1, secret);
+                        return pos + 2;
+                    }
+
+                    public void appendTo(final StringBuilder stmtBuilder) {
+                        stmtBuilder.append("accessToken = ?, accessSecret = ?");
+                    }
+                });
+            } catch (final ServiceException e) {
+                throw new OAuthException(e);
+            } catch (final CryptoException e) {
+                throw new OAuthException(e);
+            }
         }
         /*
          * Other arguments?
          */
         return ret;
+    }
+
+    private static String encrypt(final String toEncrypt, final String password, final CryptoService cryptoService) throws CryptoException {
+        if (isEmpty(toEncrypt)) {
+            return toEncrypt;
+        }
+        return cryptoService.encrypt(toEncrypt, password);
+    }
+
+    private static String decrypt(final String toDecrypt, final String password) throws OAuthException {
+        if (isEmpty(toDecrypt)) {
+            return toDecrypt;
+        }
+        try {
+            final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
+            return cryptoService.decrypt(toDecrypt, password);
+        } catch (final ServiceException e) {
+            throw new OAuthException(e);
+        } catch (final CryptoException e) {
+            throw new OAuthException(e);
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
     }
 
 }

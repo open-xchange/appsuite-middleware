@@ -71,23 +71,25 @@ public interface OAuthService {
     /**
      * Gets all accounts belonging to specified user.
      * 
+     * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OAuthException If accounts cannot be returned
      * @return The accounts
      */
-    List<OAuthAccount> getAccounts(int user, int contextId) throws OAuthException;
+    List<OAuthAccount> getAccounts(String password, int user, int contextId) throws OAuthException;
 
     /**
      * Gets all accounts belonging to specified user with given service identifier.
      * 
      * @param serviceMetaData The identifier of service meta data
+     * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OAuthException If accounts cannot be returned
      * @return The accounts
      */
-    List<OAuthAccount> getAccounts(String serviceMetaData, int user, int contextId) throws OAuthException;
+    List<OAuthAccount> getAccounts(String serviceMetaData, String password, int user, int contextId) throws OAuthException;
 
     /**
      * Initializes a new OAuth account.
@@ -164,11 +166,12 @@ public interface OAuthService {
      * Gets the specified account.
      * 
      * @param accountId The account identifier
+     * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OAuthException If account cannot be returned
      * @return The account
      */
-    OAuthAccount getAccount(int accountId, int user, int contextId) throws OAuthException;
+    OAuthAccount getAccount(int accountId, String password, int user, int contextId) throws OAuthException;
 
 }
