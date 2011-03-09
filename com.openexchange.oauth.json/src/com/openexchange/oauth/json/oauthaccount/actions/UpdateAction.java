@@ -114,6 +114,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
             }
 
             if (!arguments.isEmpty()) {
+                arguments.put(OAuthConstants.ARGUMENT_PASSWORD, session.getPassword());
                 oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId());
             }
 

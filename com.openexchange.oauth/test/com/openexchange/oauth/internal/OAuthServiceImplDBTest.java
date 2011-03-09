@@ -254,6 +254,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         
         final Map<String, Object> update = new HashMap<String,Object>();
         update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
+        update.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
         oauth.updateAccount(1, update, 23, 1);
         
         assertResult("SELECT 1 FROM oauthAccounts WHERE cid = 1 AND user = 23 AND displayName = 'updatedDisplayName' AND id = 1");
@@ -273,6 +274,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
+        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
             public String getSecret() {
@@ -305,6 +307,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             final Map<String, Object> update = new HashMap<String,Object>();
             update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
+            update.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
             oauth.updateAccount(12, update, 23, 1);
             fail("Should have died");
         } catch (final OAuthException x) {

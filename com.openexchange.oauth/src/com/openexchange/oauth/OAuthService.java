@@ -148,6 +148,8 @@ public interface OAuthService {
      * The arguments may provide:
      * <ul>
      * <li>display name; {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}</li>
+     * <li>request token; {@link OAuthConstants#ARGUMENT_REQUEST_TOKEN}</li>
+     * <li>user password is <b>mandatory</b> if request token shall be updated; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
      * </ul>
      * 
      * @param accountId The account identifier
