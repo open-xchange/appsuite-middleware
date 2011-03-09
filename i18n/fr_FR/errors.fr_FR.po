@@ -1,13 +1,15 @@
 # translation of errors.fr_FR.po to deutsch
 # Antje Faber <antje.faber@open-xchange.com>, 2010.
 # Joëlle Cornavin <jcornavin@laposte.net>, 2010.
+# Sandrine, 2011.
+# Joëlle Cornavin <jcornavin_AT_laposte_DOT_net>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors.fr_FR\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-12-11 04:54+0100\n"
-"Last-Translator: Joëlle Cornavin <jcornavin@laposte.net>\n"
-"Language-Team: French <kde-francophone@kde.org>\n"
+"PO-Revision-Date: 2011-03-07 16:56+0100\n"
+"Last-Translator: Joëlle Cornavin <jcornavin_AT_laposte_DOT_net>\n"
+"Language-Team: French <>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -273,8 +275,8 @@ msgstr ""
 msgid "Can not generate uid."
 msgstr "Impossible de générer un nouvel uid."
 
-msgid "Can not insert appointment with this uid. Uid already exists."
-msgstr "Impossible d'insérer un rendez-vous avec cet UID. L'UID existe déjà."
+msgid "Can not insert appointment with uid %1$s. Uid already exists."
+msgstr "Impossible d'insérer un rendez-vous avec l'UID %1$s. Cet UID existe déjà."
 
 msgid "Can not resolve resource: %1$s"
 msgstr "Impossible de déterminer la ressource : %1$s"
@@ -580,6 +582,20 @@ msgstr "Erreur de communication avec spamd : « %s »"
 
 msgid "Error during use of a subsystem"
 msgstr "Erreur lors de l'utilisation d'un sous-système"
+
+msgid ""
+"Error processing %1$s mail server response for login %2$s (user=%3$s, "
+"context=%4$s). The administrator has been informed."
+msgstr ""
+"Erreur dans le traitement de la réponse du serveur de courriel %1$s pour "
+"l'identifiant de connexion %2$s (utilisateur=%3$s, contexte=%4$s). "
+"L'administrateur a été informé."
+
+msgid ""
+"Error processing mail server response. The administrator has been informed."
+msgstr ""
+"Erreur dans le traitement de la réponse du serveur de courriel. "
+"L'administrateur a été informé."
 
 msgid "Error while getting spamd provider from service: \"%s\""
 msgstr "Erreur d'obtention du fournisseur de spamd à partir du service : « %s »"
@@ -1122,6 +1138,9 @@ msgstr "Erreur JSON : %s"
 msgid "Length is not a number: %1$s."
 msgstr "La longueur n'est pas un nombre : %1$s."
 
+msgid "Loading one or more users failed."
+msgstr "Le chargement d'un ou plusieurs utilisateurs a échoué."
+
 msgid "Magic bytes are not a number: %1$s."
 msgstr "Les octets magiques ne sont pas un nombre : %1$s."
 
@@ -1319,6 +1338,9 @@ msgid "Missing payload data in client's body chunk package"
 msgstr ""
 "Données de charge utile manquantes dans le paquetage segment principal du "
 "client"
+
+msgid "Missing payload in datagram package."
+msgstr "Données de charge utiles manquantes dans le paquetage du datagramme."
 
 msgid "Missing property %1$s in imap.properties."
 msgstr "Propriété %1$s manquante dans imap.properties."
@@ -2323,6 +2345,10 @@ msgstr ""
 "L'utilisateur %1$s n'a pas le droit de partager le dossier  %2$s dans le "
 "contexte %3$s à cause de la configuration utilisateur"
 
+msgid "User %1$s must not rename folder %2$s in context %3$s"
+msgstr ""
+"L'utilisateur %1$s ne doit pas renommer le dossier %2$s dans le contexte %3$s"
+
 msgid "User ID is not a number: %1$s."
 msgstr "L'identifiant utilisateur n'est pas un nombre : %1$s."
 
@@ -2487,6 +2513,18 @@ msgstr ""
 
 msgid "clientLastModified IS NULL. Abort action!"
 msgstr "clientLastModified IS NULL. Action abandonnée !"
+
+#. Could not coerce value %1$s into class %2$s
+msgid "Could not coerce value %1$s into class %2$s"
+msgstr "Impossible de forcer la valeur %1$s dans la classe %2$s"
+
+#. Can not define metadata %1$s in scope %2$s
+msgid "Can not define metadata %1$s in scope %2$s"
+msgstr "Ne peut trouver la métadonnée %1$s dans le périmètre %2$d."
+
+#. Can not set property %1$s in scope %2$s
+msgid "Can not set property %1$s in scope %2$s"
+msgstr "Ne peut définir la propriété %1$s dans le périmètre %2$s"
 
 msgid "The given type of %1$s is not supported"
 msgstr "Le type indiqué de %1$s n'est pas pris en charge"
@@ -2785,6 +2823,19 @@ msgstr "Aucun gestionnaire de comptes n'a pu être trouvé pour le service : %1
 msgid "Invalid URL \"%1$s\". Error: %2$s."
 msgstr "URL « %1$s » invalide. Erreur : %2$s."
 
+msgid "The database returned an error: %1$s"
+msgstr "La base de données a renvoyé une erreur : %1$s"
+
+msgid "The uwa widget with the id %1$s could not be found"
+msgstr "Le widget UWA d'identifiant %1$s n'a pas pu être trouvé"
+
+msgid ""
+"The widget with the id %1$s is protected and only positional information can "
+"be updated"
+msgstr ""
+"Le widget d'identifiant %1$s est protégé et seules les informations de "
+"position peuvent être mises à jour"
+
 #. Could not find data provider for id: %1$s
 msgid "Could not find data provider for id: %1$s"
 msgstr "Impossible de trouver le fournisseur de données pour l'identifiant : %1$s"
@@ -2845,6 +2896,27 @@ msgstr ""
 msgid "Unsupported query type: %1$s."
 msgstr "Type de requête non pris en charge : %1$s."
 
+#. An OAuth error occurred: %1$s.
+msgid "An OAuth error occurred: %1$s."
+msgstr "Une erreur OAuth s'est produite : %1$s"
+
+#. A FQL error of type %1$s occurred: %2$s.
+msgid "A FQL error of type %1$s occurred: %2$s."
+msgstr "Une erreur FQL de type %1$s s'est produite : %2$s."
+
+#. FQL response body cannot be parsed to a JSON value:
+#. %1$s
+msgid ""
+"FQL response body cannot be parsed to a JSON value:\n"
+"%1$s"
+msgstr ""
+"Il est impossible de convertir le corps de la réponse FQL en valeur JSON :\n"
+"%1$s"
+
+#. XML parse error: %1$s.
+msgid "XML parse error: %1$s."
+msgstr "Erreur d'analyse XML : %1$s."
+
 #. Missing configuration parameter: %1$s.
 msgid "Missing configuration parameter: %1$s."
 msgstr "Paramètre de configuration manquant : %1$s."
@@ -2854,6 +2926,14 @@ msgid "Wrong configuration parameter type. Should be %1$s, but is %2$s."
 msgstr ""
 "Type de paramètre de configuration incorrect. Ce devrait être %1$s, mais on "
 "a %2$s."
+
+#. Invalid Twitter messaging account. Please delete & re-create your Twitter messaging account.
+msgid ""
+"Invalid Twitter messaging account. Please delete & re-create your Twitter "
+"messaging account."
+msgstr ""
+"Compte de messagerie Twitter invalide. Veuillez supprimer & re-créer votre "
+"compte de messagerie Twitter."
 
 #. Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
 msgid ""
@@ -2891,36 +2971,6 @@ msgstr ""
 msgid "Message %1$s not found in folder %2$s."
 msgstr "Le message %1$s n'a pas été trouvé dans le dossier %2$s."
 
-#. Duplicate proxy registration: %1$s
-msgid "Duplicate proxy registration: %1$s"
-msgstr "Enregistrement du serveur mandataire en double : %1$s"
-
-#. Malformed URL: %1$s
-msgid "Malformed URL: %1$s"
-msgstr "URL mal formé : %1$s"
-
-#. HTTP request to VoipNow server %1$s failed. Status line: %2$s
-msgid "HTTP request to VoipNow server %1$s failed. Status line: %2$s"
-msgstr ""
-"La requête HTTP vers le serveur VoipNow %1$s a échoué. Ligne d'état : %2$s"
-
-#. Malformed URI: %1$s
-msgid "Malformed URI: %1$s"
-msgstr "URI mal formé : %1$s"
-
-#. Invalid session identifier: %1$s
-msgid "Invalid session identifier: %1$s"
-msgstr "Identifiant de session invalide : %1$s"
-
-#. Missing property: %1$s
-msgid "Missing property: %1$s"
-msgstr "Propriété manquante : %1$s"
-
-#. Invalid property value in property \"%1$s\": %2$s
-#. Invalid property value in property "%1$s": %2$s
-msgid "Invalid property value in property \"%1$s\": %2$s"
-msgstr "Valeur de propriété invalide dans la propriété « %1$s » : %2$s"
-
 #. Response is not of type: %1$s
 msgid "Response is not of type: %1$s"
 msgstr "La réponse n'est pas du type : %1$s."
@@ -2937,6 +2987,7 @@ msgstr "Non trouvé : %1$s"
 msgid "The source and destination URIs are equal: %1$s."
 msgstr "Les URI source et destination sont équivalents : %1$s."
 
+#. Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.
 msgid ""
 "Conflict. The resource cannot be created until one or more parental "
 "directories have been created: %1$s."
@@ -2970,6 +3021,7 @@ msgstr "URL invalide : %1$s"
 msgid "Unsupported protocol for SmartDrive server access: %1$s"
 msgstr "Protocole pour l'accès au serveur SmartDrive non pris en charge : %1$s"
 
+#. SmartDrive user "%1$s" is not authenticated for stateful access to SmarTDrive server "%2$s".
 msgid ""
 "SmartDrive user \"%1$s\" is not authenticated for stateful access to "
 "SmarTDrive server \"%2$s\"."
@@ -2984,6 +3036,63 @@ msgstr "Cette ressource n'est pas un fichier"
 #. This resource is not a directory
 msgid "This resource is not a directory"
 msgstr "Cette ressource n'est pas un répertoire"
+
+#. Unknown OAuth service meta data: %1$s
+msgid "Unknown OAuth service meta data: %1$s"
+msgstr "Métadonnée de service OAuth inconnue : %1$s"
+
+#. Account not found with identifier %1$s for user %2$s in context %3$s.
+msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
+msgstr ""
+"Impossible de trouver un compte avec l'identifiant %1$s pour l'utilisateur %2"
+"$s dans le contexte %3$s."
+
+#. Unsupported OAuth service: %1$s
+msgid "Unsupported OAuth service: %1$s"
+msgstr "Service OAuth non pris en charge : %1$s"
+
+#. Missing argument: %1$s
+msgid "Missing argument: %1$s"
+msgstr "Argument manquant : %1$s"
+
+#. OAuth Token has expired. Please authorize this account and try again.
+msgid "OAuth Token has expired. Please authorize this account and try again."
+msgstr ""
+"Le jeton OAuth a expiré. Veuillez autoriser ce compte et essayer à nouveau."
+
+#. An OAuth error occurred: %1$s
+msgid "An OAuth error occurred: %1$s"
+msgstr "Une erreur OAuth s'est produite : %1$s"
+
+#. Duplicate proxy registration: %1$s
+msgid "Duplicate proxy registration: %1$s"
+msgstr "Enregistrement du serveur mandataire en double : %1$s"
+
+#. Malformed URL: %1$s
+msgid "Malformed URL: %1$s"
+msgstr "URL mal formé : %1$s"
+
+#. HTTP request to VoipNow server %1$s failed. Status line: %2$s
+msgid "HTTP request to VoipNow server %1$s failed. Status line: %2$s"
+msgstr ""
+"La requête HTTP vers le serveur VoipNow %1$s a échoué. Ligne d'état : %2$s"
+
+#. Malformed URI: %1$s
+msgid "Malformed URI: %1$s"
+msgstr "URI mal formé : %1$s"
+
+#. Invalid session identifier: %1$s
+msgid "Invalid session identifier: %1$s"
+msgstr "Identifiant de session invalide : %1$s"
+
+#. Missing property: %1$s
+msgid "Missing property: %1$s"
+msgstr "Propriété manquante : %1$s"
+
+#. Invalid property value in property \"%1$s\": %2$s
+#. Invalid property value in property "%1$s": %2$s
+msgid "Invalid property value in property \"%1$s\": %2$s"
+msgstr "Valeur de propriété invalide dans la propriété « %1$s » : %2$s"
 
 #. A parsing error occurred: %1$s.
 msgid "A parsing error occurred: %1$s."
@@ -3196,7 +3305,7 @@ msgstr ""
 
 #. Indicates an unresolvable user
 #. %1$s is replaced with the login name of the user.
-#. %1$s is replaced with the unique context identifier.
+#. %2$s is replaced with the unique context identifier.
 msgid "User %1$s could not be found in context %2$s."
 msgstr "L'utilisateur %1$s n'a pas pu être trouvé dans le contexte %2$s."
 
@@ -3208,6 +3317,17 @@ msgstr "L'utilisateur n'est pas activé."
 #. E.g. 'Client "OLOX20" is not activated.'
 msgid "Client \"%1$s\" is not activated."
 msgstr "Le client « %1$s » n'est pas activé."
+
+#. This message is thrown when the login request with a HTTP authorization header contains a authorization method that is not supported.
+#. %1$s is replaved with the not supported HTTP authorization header method.
+msgid "Method \"%1$s\" in HTTP header authorization is not supported."
+msgstr ""
+"La méthode \"%1$s\" dans l'en-tête HTTP d'autorisation n'est pas prise en "
+"charge."
+
+#. ID generation failed
+msgid "ID generation failed"
+msgstr "La génération de l'identifiant a échoué"
 
 msgid "Sessiond Exception"
 msgstr "Exception sessiond"
@@ -3329,7 +3449,7 @@ msgstr ""
 "Veuillez vous assurer que le fichier peut être lu par le logiciel de travail "
 "de collaboratif."
 
-msgid "User is disabled"
+msgid "User is deactivated"
 msgstr "L'utilisateur est désactivé"
 
 msgid "Password expired"
@@ -3590,6 +3710,10 @@ msgstr ""
 #. No mail folder allowed below a public folder.
 msgid "No mail folder allowed below a public folder."
 msgstr "Aucun dossier de courrier n'est autorisé sous un dossier public."
+
+#. No such tree with identifier "%1$s".
+msgid "No such tree with identifier \"%1$s\"."
+msgstr "Pas d'arborescence possédant l'identifiant \"%1$s\"."
 
 msgid "Invalid SQL Query: %s"
 msgstr "Requête SQL invalide : %s"
@@ -4314,6 +4438,16 @@ msgstr ""
 msgid "Invalid mail account name: %1$s"
 msgstr "Nom de compte de messagerie invalide : %1$s"
 
+#. Duplicate mail account for user %1$s in context %2$s.
+msgid "Duplicate mail account for user %1$s in context %2$s."
+msgstr ""
+"Comptes de courrier en double pour l'utilisateur %1$s dans le contexte %2$s."
+
+#. Duplicate transport account for user %1$s in context %2$s.
+msgid "Duplicate transport account for user %1$s in context %2$s."
+msgstr ""
+"Comptes de transport en double pour l'utilisateur %1$s dans le contexte %2$s."
+
 #. Search failed: %1$s.
 msgid "Search failed: %1$s."
 msgstr "La recherche a échoué : %1$s."
@@ -4337,6 +4471,9 @@ msgstr "Champ « %1$s » manquant dans l'objet JSON."
 #. Unknown operation: %1$s.
 msgid "Unknown operation: %1$s."
 msgstr "Opération inconnue : %1$s."
+
+#~ msgid "User is disabled"
+#~ msgstr "L'utilisateur est désactivé"
 
 #~ msgid "'Depth' must be >= 1 but is %1$d."
 #~ msgstr "'Depth' doit être >= à 1 mais vaut %1$d."
