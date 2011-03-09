@@ -188,7 +188,7 @@ public class FacebookConnectionTest  extends TestCase {
     }
 
     public void testUsageOfExistingAccount(){
-        final List<Contact> contacts = facebook.getContacts("password",1,1,1);
+        final List<Contact> contacts = facebook.getContacts(1,1,1);
         for (final Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName());
             System.out.println(contact.getBirthday());

@@ -1,7 +1,3 @@
-* 2011-03-09 - thorben.betten@open-xchange.com
-
- - Bugfix #18562: Using PBE to encrypt/decrypt token and secret when writing to/reading from database.
-
 * 2011-03-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #18525: Make sure to select only one row in IDGenerator.

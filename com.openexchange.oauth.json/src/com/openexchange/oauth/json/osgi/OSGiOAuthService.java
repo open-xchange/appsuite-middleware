@@ -93,16 +93,16 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         getService0().deleteAccount(accountId, user, contextId);
     }
 
-    public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) throws OAuthException {
-        return getService0().getAccount(accountId, password, user, contextId);
+    public OAuthAccount getAccount(final int accountId, final int user, final int contextId) throws OAuthException {
+        return getService0().getAccount(accountId, user, contextId);
     }
 
-    public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) throws OAuthException {
-        return getService0().getAccounts(password, user, contextId);
+    public List<OAuthAccount> getAccounts(final int user, final int contextId) throws OAuthException {
+        return getService0().getAccounts(user, contextId);
     }
 
-    public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) throws OAuthException {
-        return getService0().getAccounts(serviceMetaData, password, user, contextId);
+    public List<OAuthAccount> getAccounts(final String serviceMetaData, final int user, final int contextId) throws OAuthException {
+        return getService0().getAccounts(serviceMetaData, user, contextId);
     }
 
     public OAuthServiceMetaDataRegistry getMetaDataRegistry() {

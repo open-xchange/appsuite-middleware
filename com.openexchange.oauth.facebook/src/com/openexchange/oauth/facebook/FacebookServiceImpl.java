@@ -87,7 +87,7 @@ public class FacebookServiceImpl implements FacebookService {
         this.facebookMetaData = facebookMetaData;
     }
 
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
+    public List<Contact> getContacts(int user, int contextId, int accountId) {
         
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey()).apiSecret(
@@ -96,7 +96,7 @@ public class FacebookServiceImpl implements FacebookService {
         OAuthAccount account = null;
         
         try {
-            account = oAuthService.getAccount(accountId, password, user, contextId);
+            account = oAuthService.getAccount(accountId, user, contextId);
         } catch (OAuthException e) {
             LOG.error(e);
         }
@@ -192,10 +192,10 @@ public class FacebookServiceImpl implements FacebookService {
         return contacts;
     }
 
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
+    public String getAccountDisplayName(int user, int contextId, int accountId) {
         String displayName = "";
         try {            
-            OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
+            OAuthAccount account = oAuthService.getAccount(accountId, user, contextId);
             displayName = account.getDisplayName();
         } catch (OAuthException e) {
             LOG.error(e);

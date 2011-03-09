@@ -123,7 +123,7 @@ public class LinkedInConnectionTest extends TestCase {
     }
     
     public void testUsageOfExistingAccount(){
-        List<Contact> contacts = linkedIn.getContacts("password",1,1,1);
+        List<Contact> contacts = linkedIn.getContacts(1,1,1);
         for (Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName());
         }
