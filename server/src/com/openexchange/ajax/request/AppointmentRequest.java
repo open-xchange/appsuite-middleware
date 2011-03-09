@@ -761,8 +761,8 @@ public class AppointmentRequest extends CalendarRequest {
                         final OXFolderAccess ofa = new OXFolderAccess(ctx);
                         
                         try {
-                            final int folderType = ofa.getFolderType(folderId, user.getId());
-                            final int owner = ofa.getFolderOwner(folderId);
+                            final int folderType = ofa.getFolderType(appointment.getParentFolderID(), user.getId());
+                            final int owner = ofa.getFolderOwner(appointment.getParentFolderID());
                             
                             switch (folderType) {
                             case FolderObject.PRIVATE:
