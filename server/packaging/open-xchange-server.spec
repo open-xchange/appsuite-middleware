@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 24
+%define		ox_release 25
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -725,6 +725,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Mar 09 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18442: UPLOAD_DIRECTORY filling up with unused files.
 * Wed Mar 02 2011 - thorben.betten@open-xchange.com
  - Bugfix #18292: Fixed folder update.
 * Tue Mar 01 2011 - thorben.betten@open-xchange.com

@@ -1,3 +1,9 @@
+open-xchange-secret-recovery-json (6.18.2.0-24) unstable; urgency=low
+
+  * build for public ptf 2011-03-11
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 09 Mar 2011 09:34:29 +0000
+
 open-xchange-secret-recovery-json (6.18.2.0-23) unstable; urgency=low
 
   * second build for public ptf 2011-03-02
