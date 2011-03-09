@@ -255,7 +255,7 @@ public class FacebookConnectionTest  extends TestCase {
                                       .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
-        final Token accessToken = new Token(mock.getAccount(1, "password", 1, 1).getToken(),"");
+        final Token accessToken = new Token(mock.getAccount(1, 1, 1).getToken(),"");
         
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
@@ -302,7 +302,7 @@ public class FacebookConnectionTest  extends TestCase {
                                       .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
-        final Token accessToken = new Token(mock.getAccount(1, "password", 1, 1).getToken(),"");
+        final Token accessToken = new Token(mock.getAccount(1, 1, 1).getToken(),"");
         
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
@@ -343,7 +343,7 @@ public class FacebookConnectionTest  extends TestCase {
                                       .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
-        final Token accessToken = new Token(mock.getAccount(1, "password", 1, 1).getToken(),"");
+        final Token accessToken = new Token(mock.getAccount(1, 1, 1).getToken(),"");
         
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
