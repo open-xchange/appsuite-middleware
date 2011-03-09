@@ -1,3 +1,9 @@
+open-xchange-sessiond (6.18.0.0-14) unstable; urgency=low
+
+  * build for PTF 2011020810000264
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 09 Mar 2011 08:01:58 +0000
+
 open-xchange-sessiond (6.18.0.0-13) unstable; urgency=low
 
   * second build for public ptf 2010-11-26
