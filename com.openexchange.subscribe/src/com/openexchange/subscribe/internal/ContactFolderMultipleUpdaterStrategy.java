@@ -213,6 +213,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
             numberOfContacts,
             Contact.OBJECT_ID,
             "ASC",
+            null,
             COMPARISON_COLUMNS);
         List<Contact> retval = new ArrayList<Contact>();
         while (contactsInFolder.hasNext()) {

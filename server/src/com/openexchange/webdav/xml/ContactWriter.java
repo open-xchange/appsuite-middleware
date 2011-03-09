@@ -187,7 +187,7 @@ public class ContactWriter extends CommonWriter {
             try {
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
-                it = contactInterface.getContactsInFolder(folder_id, 0, 50000, 0, null, deleteFields);
+                it = contactInterface.getContactsInFolder(folder_id, 0, 50000, 0, null, null,  deleteFields);
                 writeList(it, xo, os);
             } finally {
                 if (it != null) {

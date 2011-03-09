@@ -85,7 +85,7 @@ public class ContactHandler {
         RdbContactSQLImpl storage = new RdbContactSQLImpl(session);
         
         for(Contact updatedContact: updatedContacts){
-            SearchIterator<Contact> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, Contact.ALL_COLUMNS);
+            SearchIterator<Contact> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, null, Contact.ALL_COLUMNS);
             boolean foundMatch = false;
             while( existingContacts.hasNext() && ! foundMatch ){
                 Contact existingContact = null;

@@ -56,6 +56,7 @@ import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import gnu.trove.TIntHashSet;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -68,11 +69,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.print.attribute.IntegerSyntax;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,16 +89,16 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
+import com.openexchange.groupware.contact.ContactConfig.Property;
+import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.helpers.CollationContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -117,9 +115,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.l10n.I18nMap;
 import com.openexchange.preferences.ServerUserSetting;
@@ -130,7 +128,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -300,7 +297,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws ContactException, OXConflictException, OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXConflictException, OXException {
         int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
         cs.setFolder(folderId);
@@ -368,6 +365,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
                 tmp.add(contact);
             }
+            sortByCollation(tmp, order_field, orderMechanism, collation);
             contacts = tmp.toArray(new Contact[tmp.size()]);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
@@ -487,7 +485,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return sb.toString();
 	}
 
-	public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final String orderMechanism, final int[] cols) throws ContactException, OXException {
+	public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXException {
         int[] extendedCols = cols;
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
@@ -643,6 +641,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             java.util.Collections.sort(contacts, new UseCountComparator(specialSort));
         } else if (specialSort) {
             java.util.Collections.sort(contacts, new ContactComparator());
+        } else if ( collation != null) {
+            sortByCollation(contacts, order_field, orderMechanism, collation);
         }
         return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }

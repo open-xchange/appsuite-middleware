@@ -168,6 +168,7 @@ public final class AllAction extends AbstractUserAction {
                             rhl,
                             orderBy,
                             orderDirection,
+                            null,
                             checkedCols);
                     try {
                         final List<Contact> contactList = new ArrayList<Contact>(128);

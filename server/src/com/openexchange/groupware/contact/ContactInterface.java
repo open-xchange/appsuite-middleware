@@ -106,7 +106,7 @@ public interface ContactInterface {
      * @return A SearchIterator contains Task objects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<Contact> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException;
+    public SearchIterator<Contact> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, String collation, int[] cols) throws OXException;
 
     /**
      * Lists all contacts that match the given search
@@ -116,7 +116,7 @@ public interface ContactInterface {
      * @return A SearchIterator contains ContactObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException;
+    public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, String collation, int[] cols) throws OXException;
 
     public <T>SearchIterator<Contact> getContactsByExtendedSearch(SearchTerm<T> searchterm, int orderBy, String orderDir, String collation, int[] cols) throws OXException;
     /**

@@ -121,6 +121,7 @@ public final class SearchAction extends AbstractUserAction {
             final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
             final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
             final String orderDirection = request.getParameter(AJAXServlet.PARAMETER_ORDER);
+            final String collation = request.getParameter(AJAXServlet.PARAMETER_COLLATION);
             final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             /*
              * Get remaining parameters
@@ -175,13 +176,13 @@ public final class SearchAction extends AbstractUserAction {
                 final ContactSearchMultiplexer multiplexer =
                     new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
                 final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
-                it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDirection, checkedCols);
+                it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDirection, collation, checkedCols);
             } else {
                 // Get contact iterator with dummy search fields
                 final ContactSearchMultiplexer multiplexer =
                     new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
                 final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
-                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), "asc", checkedCols);
+                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), "asc", collation, checkedCols);
             }
             /*
              * Collect contacts from iterator

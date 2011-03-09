@@ -227,7 +227,7 @@ public class Memorizer implements Runnable {
             searchObject.setEmailAutoComplete(true);
             searchObject.setDynamicSearchField(new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, });
             searchObject.setDynamicSearchFieldValue(new String[] { contact.getEmail1(), contact.getEmail1(), contact.getEmail1() });
-            final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, COLUMNS);
+            final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, null, COLUMNS);
             try {
                 if (iterator.hasNext()) {
                     foundContact = iterator.next();

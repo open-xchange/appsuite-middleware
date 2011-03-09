@@ -244,7 +244,7 @@ public class LdapContactInterface implements ContactInterface {
         throw new LdapException(Code.DELETE_NOT_POSSIBLE);
     }
 
-    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final String collation, final int[] cols) throws OXException {
         final Order valueOf = getOrder(orderDir);
         final Set<Integer> columns = getColumnSet(cols);
         final int folderId;
@@ -303,7 +303,7 @@ public class LdapContactInterface implements ContactInterface {
 
 
     // The all request...
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final String collation, final int[] cols) throws OXException {
         final Order valueOf = getOrder(orderDir);
         
         final Set<Integer> columns = getColumnSet(cols);
@@ -778,13 +778,6 @@ public class LdapContactInterface implements ContactInterface {
     public void separateTwoContacts(Contact master, Contact slave) throws OXException {
         throw new UnsupportedOperationException();
     }
-
-
-	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
-			SearchTerm<T> searchterm, int orderBy, String orderDir, int[] cols)
-			throws OXException {
-        throw new UnsupportedOperationException();
-	}
 
 	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
 			SearchTerm<T> searchterm, int orderBy, String orderDir,

@@ -90,7 +90,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
             final int folderId = Integer.parseInt(publication.getEntityId());
             final ContactInterface contacts = factory.create(folderId, new PublicationSession(publication));
             final int numberOfContacts = contacts.getNumberOfContacts(folderId);
-            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, "ASC", Contact.ALL_COLUMNS);
+            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, "ASC", null, Contact.ALL_COLUMNS);
             while(contactsInFolder.hasNext()) {
                 Contact next = contactsInFolder.next();
                 if(!next.getMarkAsDistribtuionlist()) {

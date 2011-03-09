@@ -207,7 +207,7 @@ public class CSVContactExporter implements Exporter {
             final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
                 folderId,
                 sessObj);
-            conIter = contactInterface.getContactsInFolder(folderId, 0, contactInterface.getNumberOfContacts(folderId), 0, "ASC", cols);
+            conIter = contactInterface.getContactsInFolder(folderId, 0, contactInterface.getNumberOfContacts(folderId), 0, "ASC", null, cols);
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
