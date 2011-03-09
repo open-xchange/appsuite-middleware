@@ -133,6 +133,7 @@ public abstract class AbstractTwitterMessagingAccess {
                                 arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, account.getDisplayName());
                                 arguments.put(OAuthConstants.ARGUMENT_TOKEN, token);
                                 arguments.put(OAuthConstants.ARGUMENT_SECRET, tokenSecret);
+                                arguments.put(OAuthConstants.ARGUMENT_PASSWORD, session.getPassword());
                                 oAuthAccount = oAuthService.createAccount("com.openexchange.oauth.twitter", arguments, userId, contextId);
                                 /*
                                  * Write to configuration

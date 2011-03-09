@@ -156,6 +156,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
+        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
             public String getSecret() {
@@ -174,6 +175,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     public void testDefaultDisplayName() throws OAuthException {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
+        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
             public String getSecret() {
@@ -271,6 +273,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
+        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
             public String getSecret() {
