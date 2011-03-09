@@ -291,9 +291,8 @@ public class OAuthServiceImpl implements OAuthService {
             if (null == password) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PASSWORD);
             }
-            final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
-            account.setToken(encrypt(account.getToken(), password, cryptoService));
-            account.setSecret(encrypt(account.getSecret(), password, cryptoService));
+            account.setToken(encrypt(account.getToken(), password));
+            account.setSecret(encrypt(account.getSecret(), password));
             /*
              * Create INSERT command
              */
@@ -342,9 +341,8 @@ public class OAuthServiceImpl implements OAuthService {
             if (null == password) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PASSWORD);
             }
-            final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
-            account.setToken(encrypt(account.getToken(), password, cryptoService));
-            account.setSecret(encrypt(account.getSecret(), password, cryptoService));
+            account.setToken(encrypt(account.getToken(), password));
+            account.setSecret(encrypt(account.getSecret(), password));
             /*
              * Create INSERT command
              */
@@ -664,34 +662,27 @@ public class OAuthServiceImpl implements OAuthService {
          */
         final OAuthToken token = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
         if (null != token) {
-            try {
-                /*
-                 * Crypt tokens
-                 */
-                final String password = (String) arguments.get(OAuthConstants.ARGUMENT_PASSWORD);
-                if (null == password) {
-                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PASSWORD);
-                }
-                final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
-                final String sToken = encrypt(token.getToken(), password, cryptoService);
-                final String secret = encrypt(token.getSecret(), password, cryptoService);
-                ret.add(new Setter() {
-
-                    public int set(final int pos, final PreparedStatement stmt) throws SQLException {
-                        stmt.setString(pos, sToken);
-                        stmt.setString(pos + 1, secret);
-                        return pos + 2;
-                    }
-
-                    public void appendTo(final StringBuilder stmtBuilder) {
-                        stmtBuilder.append("accessToken = ?, accessSecret = ?");
-                    }
-                });
-            } catch (final ServiceException e) {
-                throw new OAuthException(e);
-            } catch (final CryptoException e) {
-                throw new OAuthException(e);
+            /*
+             * Crypt tokens
+             */
+            final String password = (String) arguments.get(OAuthConstants.ARGUMENT_PASSWORD);
+            if (null == password) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PASSWORD);
             }
+            final String sToken = encrypt(token.getToken(), password);
+            final String secret = encrypt(token.getSecret(), password);
+            ret.add(new Setter() {
+
+                public int set(final int pos, final PreparedStatement stmt) throws SQLException {
+                    stmt.setString(pos, sToken);
+                    stmt.setString(pos + 1, secret);
+                    return pos + 2;
+                }
+
+                public void appendTo(final StringBuilder stmtBuilder) {
+                    stmtBuilder.append("accessToken = ?, accessSecret = ?");
+                }
+            });
         }
         /*
          * Other arguments?
@@ -699,11 +690,18 @@ public class OAuthServiceImpl implements OAuthService {
         return ret;
     }
 
-    private static String encrypt(final String toEncrypt, final String password, final CryptoService cryptoService) throws CryptoException {
+    private static String encrypt(final String toEncrypt, final String password) throws OAuthException {
         if (isEmpty(toEncrypt)) {
             return toEncrypt;
         }
-        return cryptoService.encrypt(toEncrypt, password);
+        try {
+            final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
+            return cryptoService.encrypt(toEncrypt, password);
+        } catch (final ServiceException e) {
+            throw new OAuthException(e);
+        } catch (final CryptoException e) {
+            throw new OAuthException(e);
+        }
     }
 
     private static String decrypt(final String toDecrypt, final String password) throws OAuthException {
