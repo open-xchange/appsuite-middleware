@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -67,13 +67,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
-%post
-
-if [ ${1:-0} -eq 2 ]; then
-   # only when updating
-   . /opt/open-xchange/etc/oxfunctions.sh
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -85,8 +78,9 @@ fi
 %config(noreplace) /opt/open-xchange/etc/groupware/mobile_configuration_action_sms.properties
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) /opt/open-xchange/etc/groupware/*
 
 %changelog
+* Sat Jun 26 2010 - manuel.kraft@open-xchange.com
+  - adding SMS implementation and fixed libs in build file
 * Fri Jun 25 2010 - benjamin.otterbach@open-xchange.com
   - Initial import
