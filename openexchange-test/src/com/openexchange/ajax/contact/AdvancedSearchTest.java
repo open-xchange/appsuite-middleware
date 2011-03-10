@@ -250,7 +250,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 	}
 
 	public void testSearchOrderingWithHanzi() throws Exception{
-		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 		for(String graphem: sinograph){
 			manager.newAction(ContactTestManager.generateContact(folderID, graphem));
 		}
@@ -288,14 +288,14 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 	public void testOrderByWithCollation() throws Exception{
 		ContactField field = ContactField.SUR_NAME;
 
-		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 		LinkedList<String> randomized = new LinkedList<String>(sinograph);
 		Collections.shuffle(randomized);
 		for(String graphem: randomized){
 			manager.newAction(ContactTestManager.generateContact(folderID, graphem));
 		}
 		
-		JSONObject filter = new JSONObject("{'filter' : [ '>=' , {'field':'"+field.getAjaxName()+"'}, '阿' ]})");
+		JSONObject filter = new JSONObject("{'filter' : [ '>=' , {'field':'"+field.getAjaxName()+"'}, '\u963f' ]})");
 		
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
 		CommonSearchResponse response = getClient().execute(request);
@@ -319,11 +319,11 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 	}
 	
 	public void testNameThatAppearedTwice() throws Exception{
-		String name = "砂糖";
+		String name = "\u7802\u7cd6";
 		manager.newAction(ContactTestManager.generateContact(folderID, name));
 
 		ContactField field = ContactField.SUR_NAME;
-		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 
 		LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
 		for(int i = 0; i < sinograph.size() - 1; i++)
@@ -344,9 +344,9 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		assertEquals("Should only appear once", 1, occurences);
 	}
 
-	/*
-	wrong collation
-	sql inject
+	/* TODO:
+	 * wrong collation
+	 * sql inject
 	*/
 
 	
