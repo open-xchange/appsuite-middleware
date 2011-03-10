@@ -57,7 +57,9 @@ import java.util.Locale;
  *
  */
 public enum I18nMap {
-	PRC(Locale.PRC, "gb2312", "gb2312_chinese_ci"),
+	PRC_1(Locale.PRC, "gb2312", "gb2312_chinese_ci"),
+	PRC_2(Locale.PRC, "gbk", "gbk_chinese_ci"),
+	PRC_3(Locale.TAIWAN, "big5", "big5_chinese_ci"),
 	CHINA(Locale.CHINESE, "gb2312", "gb2312_chinese_ci"),
 	DEFAULT(Locale.getDefault(), "utf8", "utf8_general_ci");
 	
