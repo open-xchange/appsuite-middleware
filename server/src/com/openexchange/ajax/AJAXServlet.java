@@ -355,7 +355,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_FILTER = "filter";
     
-    public static final String PARAMETER_COLLATION = "collate";
+    public static final String PARAMETER_COLLATION = "collation";
     
     /**
      * The content type if the response body contains javascript data. Set it with
