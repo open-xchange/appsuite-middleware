@@ -63,6 +63,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.oauth.internal.groupware.CreateOAuthAccountTable;
 import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask;
 import com.openexchange.oauth.internal.groupware.OAuthDeleteListener;
+import com.openexchange.secret.recovery.SecretConsistencyCheck;
 
 /**
  * Registers the update task.
@@ -87,6 +88,7 @@ public class LowLevelServicesActivator implements BundleActivator {
             }
         }, null));
         registrations.add(context.registerService(DeleteListener.class.getName(), new OAuthDeleteListener(), null));
+        
     }
 
     public void stop(BundleContext context) throws Exception {

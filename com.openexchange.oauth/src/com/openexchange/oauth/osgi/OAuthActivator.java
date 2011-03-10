@@ -68,6 +68,8 @@ import com.openexchange.oauth.exception.OAuthExceptionFactory;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.services.ServiceRegistry;
+import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.sessiond.SessiondService;
 
@@ -170,12 +172,16 @@ public final class OAuthActivator extends DeferredActivator {
             delegateServices.put(IDGeneratorService.class, new OSGiIDGeneratorService().start(context));
             delegateServices.startAll(context);
 
-            registrations.add(context.registerService(OAuthService.class.getName(), new OAuthServiceImpl(
+            OAuthServiceImpl oauthService = new OAuthServiceImpl(
                 delegateServices.get(DBProvider.class),
                 delegateServices.get(IDGeneratorService.class),
                 registry,
-                delegateServices.get(ContextService.class)), null));
+                delegateServices.get(ContextService.class));
+            registrations.add(context.registerService(OAuthService.class.getName(), oauthService, null));
             registrations.add(context.registerService(OAuthServiceMetaDataRegistry.class.getName(), registry, null));
+            registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), oauthService, null));
+            registrations.add(context.registerService(SecretMigrator.class.getName(), oauthService, null));
+            
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
