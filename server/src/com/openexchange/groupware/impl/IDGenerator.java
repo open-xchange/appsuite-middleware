@@ -458,7 +458,11 @@ public final class IDGenerator {
                 stmt = con.prepareStatement("UPDATE " + table + " SET id=id+1");
                 stmt.execute();
                 stmt.close();
-                stmt = con.prepareStatement("SELECT id FROM " + table+ " ORDER BY id DESC LIMIT 1");
+                // A single developer machine was not able to generate unique identifier. The result of the SELECT contained multiple rows.
+                // All investigations did not show any possiblity to fix this. Only the last highest identifier was correct. Without sorting
+                // the first returned identifier was always a little slower than the last highest and correct one. We need to ask MySQL
+                // consultants for this scary issue.
+                stmt = con.prepareStatement("SELECT id FROM " + table); // + " ORDER BY id DESC LIMIT 1");
                 result = stmt.executeQuery();
                 if (result.next()) {
                     newId = result.getInt(1);
