@@ -60,6 +60,13 @@ import com.openexchange.session.Session;
  */
 public class SessionSecretService implements SecretService {
 
+    /**
+     * Initializes a new {@link SessionSecretService}.
+     */
+    public SessionSecretService() {
+        super();
+    }
+
     public String getSecret(final Session session) {
         return session.getPassword();
     }
