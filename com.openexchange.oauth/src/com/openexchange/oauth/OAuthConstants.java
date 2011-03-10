@@ -97,6 +97,11 @@ public final class OAuthConstants {
      */
     public static final String ARGUMENT_SECRET = "secret";
 
+    /**
+     * The argument name for password string. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_PASSWORD = "password";
+
     /*-
      * ------------------- URL parameters -------------------
      */

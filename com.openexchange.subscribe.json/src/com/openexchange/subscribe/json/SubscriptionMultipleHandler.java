@@ -384,7 +384,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final Subscription subscription = new SubscriptionJSONParser(getDiscovery(session)).parse(object);
         subscription.setContext(session.getContext());
         subscription.setUserId(session.getUserId());
-        subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
+        subscription.setSecret(secret);
         return subscription;
     }
 

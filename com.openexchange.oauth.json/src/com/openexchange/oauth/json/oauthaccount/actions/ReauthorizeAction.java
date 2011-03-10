@@ -118,6 +118,7 @@ public class ReauthorizeAction extends AbstractOAuthAJAXActionService {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, request.getParameter(AccountField.DISPLAY_NAME.getName()));
         arguments.put(OAuthConstants.ARGUMENT_PIN, oauthVerfifier);
+        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, secret( session ));
         final DefaultOAuthToken token = new DefaultOAuthToken();
         token.setSecret(oauthTokenSecret);
         token.setToken(oauthToken);

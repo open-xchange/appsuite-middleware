@@ -37,6 +37,7 @@
     <property name="twitterjar" value="com.openexchange.twitter.jar"/>
 	<property name="htmljar" value="com.openexchange.html.jar"/>
 	<property name="oauthjar" value="com.openexchange.oauth.jar"/>
+	<property name="secretjar" value="com.openexchange.secret.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -51,6 +52,7 @@
         <pathelement location="${bundlesdir}/${twitterjar}"/>
     	<pathelement location="${bundlesdir}/${htmljar}"/>
     	<pathelement location="${bundlesdir}/${oauthjar}"/>
+    	<pathelement location="${bundlesdir}/${secretjar}"/>
     </path>
 
     <!-- Compile -->

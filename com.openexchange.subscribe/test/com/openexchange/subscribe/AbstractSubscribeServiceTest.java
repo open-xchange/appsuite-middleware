@@ -66,11 +66,10 @@ public class AbstractSubscribeServiceTest extends TestCase {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("p1","password1");
         map.put("p2","password2");
-        map.put("com.openexchange.crypto.secret", "secret");
         map.put("something else", "something else");
         
         AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
-        AbstractSubscribeService.encrypt(map, "p1", "p2");
+        AbstractSubscribeService.encrypt("secret", map, "p1", "p2");
         
         assertEquals("encrypted", map.get("p1"));
         assertEquals("encrypted", map.get("p2"));
@@ -85,7 +84,7 @@ public class AbstractSubscribeServiceTest extends TestCase {
         map.put("com.openexchange.crypto.secret", "secret");
         
         AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
-        AbstractSubscribeService.decrypt(map, "p1", "p2");
+        AbstractSubscribeService.decrypt("secret", map, "p1", "p2");
         
         assertEquals("decrypted", map.get("p1"));
         assertEquals("decrypted", map.get("p2"));

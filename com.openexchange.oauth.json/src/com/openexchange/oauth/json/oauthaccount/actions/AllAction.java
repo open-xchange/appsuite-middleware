@@ -88,9 +88,9 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
             final OAuthService oAuthService = getOAuthService();
             final List<OAuthAccount> accounts;
             if (null == serviceId) {
-                accounts = oAuthService.getAccounts(session.getUserId(), session.getContextId());
+                accounts = oAuthService.getAccounts(session.getPassword(), session.getUserId(), session.getContextId());
             } else {
-                accounts = oAuthService.getAccounts(serviceId, session.getUserId(), session.getContextId());
+                accounts = oAuthService.getAccounts(serviceId, secret( session ), session.getUserId(), session.getContextId());
             }
             /*
              * Write accounts as a JSON array

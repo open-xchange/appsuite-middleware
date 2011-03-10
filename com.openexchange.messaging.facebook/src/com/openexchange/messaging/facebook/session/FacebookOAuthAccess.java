@@ -68,6 +68,7 @@ import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegi
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 
 /**
@@ -88,10 +89,11 @@ public final class FacebookOAuthAccess {
      */
     public static FacebookOAuthAccess accessFor(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
         final FacebookOAuthAccessRegistry registry = FacebookOAuthAccessRegistry.getInstance();
+        String secret = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SecretService.class).getSecret(session);
         final int accountId = messagingAccount.getId();
         FacebookOAuthAccess facebookSession = registry.getSession(session.getContextId(), session.getUserId(), accountId);
         if (null == facebookSession) {
-            final FacebookOAuthAccess newInstance = new FacebookOAuthAccess(messagingAccount, session.getUserId(), session.getContextId());
+            final FacebookOAuthAccess newInstance = new FacebookOAuthAccess(messagingAccount, secret, session.getUserId(), session.getContextId());
             facebookSession = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
             if (null == facebookSession) {
                 facebookSession = newInstance;
@@ -136,7 +138,7 @@ public final class FacebookOAuthAccess {
      * @param messagingAccount The facebook messaging account providing credentials and settings
      * @throws MessagingException
      */
-    private FacebookOAuthAccess(final MessagingAccount messagingAccount, final int user, final int contextId) throws FacebookMessagingException {
+    private FacebookOAuthAccess(final MessagingAccount messagingAccount, final String password, final int user, final int contextId) throws FacebookMessagingException {
         super();
         /*
          * Get OAuth account identifier from messaging account's configuration
@@ -144,7 +146,7 @@ public final class FacebookOAuthAccess {
         final int oauthAccountId = ((Integer) messagingAccount.getConfiguration().get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT)).intValue();
         final OAuthService oAuthService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(OAuthService.class);
         try {
-            oauthAccount = oAuthService.getAccount(oauthAccountId, user, contextId);
+            oauthAccount = oAuthService.getAccount(oauthAccountId, password, user, contextId);
             facebookAccessToken = new Token(oauthAccount.getToken(), oauthAccount.getSecret());
             /*
              * Generate FB service

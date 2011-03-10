@@ -97,6 +97,7 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
 
     public Collection<?> getContent(Subscription subscription) throws SubscriptionException {
         return facebookService.getContacts(
+            subscription.getSecret(),
             subscription.getUserId(),
             subscription.getContext().getContextId(),
             (Integer) subscription.getConfiguration().get("account"));
@@ -127,6 +128,7 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
             if (null != accountIdInt)
                 subscription.getConfiguration().put("account", accountIdInt);
             String displayName = facebookService.getAccountDisplayName(
+                subscription.getSecret(),
                 subscription.getUserId(),
                 subscription.getContext().getContextId(),
                 (Integer) subscription.getConfiguration().get("account"));

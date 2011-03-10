@@ -99,7 +99,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     /* (non-Javadoc)
      * @see com.openexchange.oauth.linkedin.LinkedInService#getContacts(int, int, int)
      */
-    public List<Contact> getContacts(int user, int contextId, int accountId) {
+    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
         OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl();
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey()).apiSecret(
@@ -108,7 +108,7 @@ public class LinkedInServiceImpl implements LinkedInService{
         OAuthAccount account = null;
         try {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            account = oAuthService.getAccount(accountId, user, contextId);
+            account = oAuthService.getAccount(accountId, password, user, contextId);
         } catch (OAuthException e) {
             LOG.error(e);
         }
@@ -239,11 +239,11 @@ public class LinkedInServiceImpl implements LinkedInService{
         return textVal;
     }
 
-    public String getAccountDisplayName(int user, int contextId, int accountId) {
+    public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName="";
         try {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            OAuthAccount account = oAuthService.getAccount(accountId, user, contextId);
+            OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
             displayName = account.getDisplayName();
         } catch (OAuthException e) {
             LOG.error(e);

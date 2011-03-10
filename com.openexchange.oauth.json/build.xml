@@ -37,6 +37,7 @@
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
 	<property name="oauthjar" value="com.openexchange.oauth.jar" />
+	<property name="secretjar" value="com.openexchange.secret.jar" />
 
     <property name="jsonjar" value="json.jar"/>
     <property name="commonjar" value="common.jar"/>
@@ -51,6 +52,7 @@
     	<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
     	<pathelement location="${bundlesdir}/${oauthjar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
+	    <pathelement location="${bundlesdir}/${secretjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>

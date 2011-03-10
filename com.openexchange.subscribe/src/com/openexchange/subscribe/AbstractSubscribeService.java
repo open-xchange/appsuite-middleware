@@ -111,9 +111,8 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             }
         }
         for (Subscription subscription : subscriptions) {
-            subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
+            subscription.setSecret(secret);
             modifyOutgoing(subscription);
-            subscription.getConfiguration().remove("com.openexchange.crypto.secret");
         }
 
         return subscriptions;
@@ -122,20 +121,15 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public Subscription loadSubscription(Context ctx, int subscriptionId, String secret) throws AbstractOXException {
         Subscription subscription = STORAGE.getSubscription(ctx, subscriptionId);
-        subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
+        subscription.setSecret(secret);
         modifyOutgoing(subscription);
-        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
         return subscription;
     }
 
     public void subscribe(Subscription subscription) throws AbstractOXException {
-        String secret = (String) subscription.getConfiguration().get("com.openexchange.crypto.secret");
         modifyIncoming(subscription);
-        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
         STORAGE.rememberSubscription(subscription);
-        subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
         modifyOutgoing(subscription);
-        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
     }
 
     public void unsubscribe(Subscription subscription) throws AbstractOXException {
@@ -143,13 +137,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     public void update(Subscription subscription) throws AbstractOXException {
-        String secret = (String) subscription.getConfiguration().get("com.openexchange.crypto.secret");
         modifyIncoming(subscription);
-        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
         STORAGE.updateSubscription(subscription);
-        subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
         modifyOutgoing(subscription);
-        subscription.getConfiguration().remove("com.openexchange.crypto.secret");
     }
 
     public void modifyIncoming(Subscription subscription) throws SubscriptionException {
@@ -171,11 +161,10 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         return false;
     }
 
-    public static void encrypt(Map<String, Object> map, String... keys) throws SubscriptionException {
+    public static void encrypt(String secret, Map<String, Object> map, String... keys) throws SubscriptionException {
         if (CRYPTO == null) {
             return;
         }
-        String secret = (String) map.get("com.openexchange.crypto.secret");
         if (secret == null) {
             return;
         }
@@ -191,14 +180,12 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 map.put(key, encrypted);
             }
         }
-        map.remove("com.openexchange.crypto.secret");
     }
 
-    public static void decrypt(Map<String, Object> map, String... keys) throws SubscriptionException {
+    public static void decrypt(String secret, Map<String, Object> map, String... keys) throws SubscriptionException {
         if (CRYPTO == null) {
             return;
         }
-        String secret = (String) map.get("com.openexchange.crypto.secret");
         if (secret == null) {
             return;
         }
@@ -215,7 +202,6 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 map.put(key, decrypted);
             }
         }
-        map.remove("com.openexchange.crypto.secret");
     }
 
     public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException {

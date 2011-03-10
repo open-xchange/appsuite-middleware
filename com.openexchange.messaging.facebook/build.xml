@@ -45,8 +45,9 @@
 	<property name="htmljar" value="com.openexchange.html.jar"/>
 	<property name="oauthjar" value="com.openexchange.oauth.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
-    <property name="xercesBundle" value="com.openexchange.xerces.sun"/>
-
+	<property name="secretjar" value="com.openexchange.secret.jar"/>
+	<property name="xercesBundle" value="com.openexchange.xerces.sun"/>
+  
     <property name="httpclientjar" value="commons-httpclient-3.1.jar"/>
     <property name="codecjar" value="commons-codec-1.4.jar"/>
     <property name="iojar" value="commons-io-1.4.jar"/>
@@ -89,6 +90,7 @@
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${messaginggenjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${secretjar}"/>
 
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${xercesBundle}/lib/${xercesjar}"/>

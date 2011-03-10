@@ -87,7 +87,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccount(int, int, int)
      */
-    public OAuthAccount getAccount(final int accountId, final int user, final int contextId) {
+    public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) {
         final DefaultOAuthAccount account = new DefaultOAuthAccount();
         account.setSecret("b558fc34-ecb0-45f2-a1ca-0f3c8ea1eb1a");
         account.setToken("23a0c108-2ea5-49e9-a23d-fb7d6d404462");
@@ -97,7 +97,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccounts(int, int)
      */
-    public List<OAuthAccount> getAccounts(final int user, final int contextId) {
+    public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -105,7 +105,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, int, int)
      */
-    public List<OAuthAccount> getAccounts(final String serviceMetaData, final int user, final int contextId) {
+    public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) {
         final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
         final DefaultOAuthAccount account = new DefaultOAuthAccount();
         account.setSecret("b558fc34-ecb0-45f2-a1ca-0f3c8ea1eb1a");

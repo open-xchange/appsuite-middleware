@@ -94,7 +94,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
     }
 
     public Collection<?> getContent(Subscription subscription) throws SubscriptionException {
-        return activator.getLinkedInService().getContacts(subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+        return activator.getLinkedInService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -120,7 +120,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
         if (null != accountId){
             Integer accountIdInt = Integer.parseInt(accountId);
             if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
-            String displayName = activator.getLinkedInService().getAccountDisplayName(subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+            String displayName = activator.getLinkedInService().getAccountDisplayName(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
             if (null != displayName && !"".equals(displayName)){
                 subscription.setDisplayName(displayName);
             } else {

@@ -76,6 +76,8 @@ public class Subscription {
     private String displayName;
     
     private Boolean enabled;
+    
+    private String secret;
 
     
     public String getFolderId() {
@@ -187,7 +189,15 @@ public class Subscription {
     public boolean containsEnabled() {
         return enabled != null;
     }
-
+    
+    public String getSecret() {
+        return secret;
+    }
+    
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+    
 
 
 

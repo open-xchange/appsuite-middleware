@@ -51,6 +51,8 @@ package com.openexchange.oauth.json;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.secret.SecretService;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractOAuthAJAXActionService}
@@ -60,6 +62,7 @@ import com.openexchange.oauth.OAuthService;
 public abstract class AbstractOAuthAJAXActionService implements AJAXActionService {
 
     private static volatile OAuthService oAuthService;
+    private static volatile SecretService secretService;
 
     /**
      * Sets the OAuth service
@@ -77,6 +80,14 @@ public abstract class AbstractOAuthAJAXActionService implements AJAXActionServic
      */
     public static OAuthService getOAuthService() {
         return oAuthService;
+    }
+    
+    public static void setSecretService(SecretService secretService) {
+        AbstractOAuthAJAXActionService.secretService = secretService;
+    }
+    
+    public static String secret(Session session) {
+        return secretService.getSecret(session);
     }
 
     /**

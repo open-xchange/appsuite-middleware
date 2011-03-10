@@ -71,23 +71,25 @@ public interface OAuthService {
     /**
      * Gets all accounts belonging to specified user.
      * 
+     * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OAuthException If accounts cannot be returned
      * @return The accounts
      */
-    List<OAuthAccount> getAccounts(int user, int contextId) throws OAuthException;
+    List<OAuthAccount> getAccounts(String password, int user, int contextId) throws OAuthException;
 
     /**
      * Gets all accounts belonging to specified user with given service identifier.
      * 
      * @param serviceMetaData The identifier of service meta data
+     * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OAuthException If accounts cannot be returned
      * @return The accounts
      */
-    List<OAuthAccount> getAccounts(String serviceMetaData, int user, int contextId) throws OAuthException;
+    List<OAuthAccount> getAccounts(String serviceMetaData, String password, int user, int contextId) throws OAuthException;
 
     /**
      * Initializes a new OAuth account.
@@ -103,7 +105,7 @@ public interface OAuthService {
      * Creates a new OAuth account completely from specified arguments.
      * 
      * @param serviceMetaData The identifier of service meta data
-     * @param arguments The arguments providing {@link OAuthConstants#ARGUMENT_TOKEN}, {@link OAuthConstants#ARGUMENT_SECRET}, and optional {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}
+     * @param arguments The arguments providing {@link OAuthConstants#ARGUMENT_TOKEN}, {@link OAuthConstants#ARGUMENT_SECRET}, {@link OAuthConstants#ARGUMENT_PASSWORD}, and optional {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}
      * @param user The user identifier
      * @param contextId The context identifier
      * @return The newly created account
@@ -119,6 +121,7 @@ public interface OAuthService {
      * <li>display name; {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}</li>
      * <li>pin; {@link OAuthConstants#ARGUMENT_PIN}</li>
      * <li>request token; {@link OAuthConstants#ARGUMENT_REQUEST_TOKEN}</li>
+     * <li>user password; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
      * </ul>
      * 
      * @param serviceMetaData The identifier of service meta data
@@ -147,6 +150,8 @@ public interface OAuthService {
      * The arguments may provide:
      * <ul>
      * <li>display name; {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}</li>
+     * <li>request token; {@link OAuthConstants#ARGUMENT_REQUEST_TOKEN}</li>
+     * <li>user password is <b>mandatory</b> if request token shall be updated; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
      * </ul>
      * 
      * @param accountId The account identifier
@@ -161,11 +166,12 @@ public interface OAuthService {
      * Gets the specified account.
      * 
      * @param accountId The account identifier
+     * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OAuthException If account cannot be returned
      * @return The account
      */
-    OAuthAccount getAccount(int accountId, int user, int contextId) throws OAuthException;
+    OAuthAccount getAccount(int accountId, String password, int user, int contextId) throws OAuthException;
 
 }

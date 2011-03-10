@@ -60,6 +60,7 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
@@ -83,6 +84,8 @@ public abstract class AbstractTwitterMessagingAccess {
 
     protected final Session session;
 
+    protected final String secret;
+    
     protected boolean connected;
 
     /**
@@ -96,6 +99,8 @@ public abstract class AbstractTwitterMessagingAccess {
         this.account = account;
         try {
             twitterService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
+            secret = TwitterMessagingServiceRegistry.getServiceRegistry().getService(SecretService.class, true).getSecret(session);
+
         } catch (final ServiceException e) {
             throw new MessagingException(e);
         }
@@ -133,6 +138,7 @@ public abstract class AbstractTwitterMessagingAccess {
                                 arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, account.getDisplayName());
                                 arguments.put(OAuthConstants.ARGUMENT_TOKEN, token);
                                 arguments.put(OAuthConstants.ARGUMENT_SECRET, tokenSecret);
+                                arguments.put(OAuthConstants.ARGUMENT_PASSWORD, secret);
                                 oAuthAccount = oAuthService.createAccount("com.openexchange.oauth.twitter", arguments, userId, contextId);
                                 /*
                                  * Write to configuration
@@ -141,11 +147,11 @@ public abstract class AbstractTwitterMessagingAccess {
                                 final MessagingAccountManager accountManager = account.getMessagingService().getAccountManager();
                                 accountManager.updateAccount(account, session);
                             } else {
-                                oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), userId, contextId);
+                                oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), secret, userId, contextId);
                             }
                         }
                     } else {
-                        oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), userId, contextId);
+                        oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), secret, userId, contextId);
                     }
                 }
                 newTwitterAccess = twitterService.getOAuthTwitterAccess(oAuthAccount.getToken(), oAuthAccount.getSecret());

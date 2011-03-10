@@ -91,6 +91,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
             final OAuthService oAuthService = getOAuthService();
             final OAuthAccount account = oAuthService.getAccount(
                 Tools.getUnsignedInteger(accountId),
+                secret( session ),
                 session.getUserId(),
                 session.getContextId());
             /*

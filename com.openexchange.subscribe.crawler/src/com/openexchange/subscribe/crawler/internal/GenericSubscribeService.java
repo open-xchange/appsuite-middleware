@@ -149,14 +149,14 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     public void modifyIncoming(final Subscription subscription) throws SubscriptionException {
         super.modifyIncoming(subscription);
         final Map<String, Object> configuration = subscription.getConfiguration();
-        encrypt(configuration, PASSWORD);
+        encrypt(subscription.getSecret(), configuration, PASSWORD);
     }
 
     @Override
     public void modifyOutgoing(final Subscription subscription) throws SubscriptionException {
         super.modifyOutgoing(subscription);
         final Map<String, Object> configuration = subscription.getConfiguration();
-        decrypt(configuration, PASSWORD);
+        decrypt(subscription.getSecret(), configuration, PASSWORD);
         subscription.setDisplayName((String) subscription.getConfiguration().get(LOGIN));
     }
 
