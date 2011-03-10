@@ -501,8 +501,16 @@ public final class MailAccountRequest {
         final MailTransport mailTransport = transportProvider.createNewMailTransport(session);
         final TransportConfig transportConfig = mailTransport.getTransportConfig();
         // Set login and password
-        transportConfig.setLogin(accountDescription.getTransportLogin());
-        transportConfig.setPassword(accountDescription.getTransportPassword());
+        String login = accountDescription.getTransportLogin();
+        if (null == login) {
+            login = accountDescription.getLogin();
+        }
+        transportConfig.setLogin(login);
+        String password = accountDescription.getTransportPassword();
+        if (null == password) {
+            password = accountDescription.getPassword();
+        }
+        transportConfig.setPassword(password);
         // Set server and port
         final String server;
         {

@@ -1,3 +1,7 @@
+* 2011-03-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #18552: Fallback to mail login/password if transport ones are missing
+
 * 2011-03-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #18525: Make sure to select only one row in IDGenerator.

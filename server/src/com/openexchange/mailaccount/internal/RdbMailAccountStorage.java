@@ -1219,7 +1219,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 int pos = 1;
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, transportURL);
-                stmt.setString(pos++, mailAccount.getLogin());
+                setOptionalString(stmt, pos++, mailAccount.getTransportLogin());
                 setOptionalString(stmt, pos++, encryptedTransportPassword);
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
                 final String personal = mailAccount.getPersonal();
@@ -1691,7 +1691,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 addr = null;
             }
             final int port = mailAccount.getTransportPort();
-            final String login = mailAccount.getTransportLogin();
+            String login = mailAccount.getTransportLogin();
+            if (null == login) {
+                login = mailAccount.getLogin();
+            }
             do {
                 final int id = (int) result.getLong(1);
                 final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
