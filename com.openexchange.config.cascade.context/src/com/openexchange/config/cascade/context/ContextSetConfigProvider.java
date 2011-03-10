@@ -129,9 +129,11 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         
         String[] searchPath = configViews.getSearchPath();
         for (String scope : searchPath) {
-            String types = view.property(TYPE_PROPERTY, String.class).precedence(scope).get();
-            if(types != null) {
-                tags.addAll(Arrays.asList(types.split("\\s*,\\s*")));
+            if(!scope.equals(SCOPE)) {
+                String types = view.property(TYPE_PROPERTY, String.class).precedence(scope).get();
+                if(types != null) {
+                    tags.addAll(Arrays.asList(types.split("\\s*,\\s*")));
+                }
             }
         }
         

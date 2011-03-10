@@ -126,8 +126,11 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     private void initSettings(ConfigurationService config) {
         Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
         for(Object propName : propertiesInFolder.keySet()) {
-            get((String) propName, -1, -1).set(PREFRENCE_PATH, (String) propName);
-            get((String) propName, -1, -1).set(PROTECTED, (String) TRUE);
+            ServerProperty serverProperty = get((String) propName, -1, -1);
+            serverProperty.set(PREFRENCE_PATH, (String) propName);
+            if(serverProperty.get(PROTECTED) == null) {
+                serverProperty.set(PROTECTED, (String) TRUE);
+            }
             
         }
         
