@@ -300,20 +300,17 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
 		CommonSearchResponse response = getClient().execute(request);
 		assertFalse("Should work", response.hasError());
-			
+		
 		Object[][] resultTable = response.getArray();
 		assertNotNull("Should find at least a result", resultTable);
 		int columnPos = response.getColumnPos(field.getNumber());
 		
 		LinkedList<String> actuals = new LinkedList<String>();
-		for(int i = 1; i < resultTable.length; i++){
-			String actualName = (String) resultTable[0][columnPos];
+		for(int i = 0; i < resultTable.length; i++){
+			String actualName = (String) resultTable[i][columnPos];
 			actuals.add(actualName);
 		}
-		
-		System.out.println(Strings.join(sinograph, ","));
-		System.out.println(Strings.join(actuals, ","));
-	
+
 		for(int i = 0; i < actuals.size(); i++)
 			assertEquals("Graphen #"+i+" is wrong", sinograph.get(i), actuals.get(i));
 	}
