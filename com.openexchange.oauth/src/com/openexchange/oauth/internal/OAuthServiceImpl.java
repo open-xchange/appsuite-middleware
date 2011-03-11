@@ -94,6 +94,7 @@ import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthEventConstants;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
@@ -401,7 +402,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             /*
              * Post folder event
              */
-            postFolderEvent(user, contextId);
+            postOAuthDeleteEvent(accountId, user, contextId);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
             rollback(con);
@@ -419,7 +420,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    private static void postFolderEvent(final int userId, final int contextId) {
+    private static void postOAuthDeleteEvent(final int accountId, final int userId, final int contextId) {
         final Session session = getUserSession(userId, contextId);
         if (null == session) {
             /*
@@ -435,11 +436,11 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             return;
         }
         final Dictionary<String, Object> props = new Hashtable<String, Object>(4);
-        props.put(FolderEventConstants.PROPERTY_SESSION, session);
-        props.put(FolderEventConstants.PROPERTY_FOLDER, FolderStorage.PRIVATE_ID);
-        props.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
-        props.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(userId));
-        final Event event = new Event(FolderEventConstants.TOPIC, props);
+        props.put(OAuthEventConstants.PROPERTY_SESSION, session);
+        props.put(OAuthEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
+        props.put(OAuthEventConstants.PROPERTY_USER, Integer.valueOf(userId));
+        props.put(OAuthEventConstants.PROPERTY_ID, Integer.valueOf(accountId));
+        final Event event = new Event(OAuthEventConstants.TOPIC_DELETE, props);
         /*
          * Finally deliver it
          */
