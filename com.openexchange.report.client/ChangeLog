@@ -1,3 +1,8 @@
+* 2011-03-10 - benjamin.otterbach@open-xchange.com
+
+ - Bugfix #18588: Report client requests wrong values for OLOX2 reporting
+   - Changed request value from regex to wildcard
+
 * 2010-12-21 - benjamin.otterbach@open-xchange.com
 
   - Changes for bugfix #17859
