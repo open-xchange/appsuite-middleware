@@ -50,47 +50,39 @@
 package com.openexchange.tools.net;
 
 /**
- * {@link URLDefaults}
+ * {@link URIDefaults}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface URLDefaults {
+public enum URIDefaults {
+    NULL(null, -1, null, -1),
+    IMAP("imap", 143, "imaps", 993);
 
-    String getProtocol();
+    private final String protocol;
+    private final int port;
+    private final String protocolSSL;
+    private final int portSSL;
 
-    String getSSLProtocol();
+    private URIDefaults(String protocol, int port, String protocolSSL, int portSSL) {
+        this.protocol = protocol;
+        this.port = port;
+        this.protocolSSL = protocolSSL;
+        this.portSSL = portSSL;
+    }
 
-    int getPort();
+    public String getProtocol() {
+        return protocol;
+    }
 
-    int getSSLPort();
+    public int getPort() {
+        return port;
+    }
 
-    static URLDefaults NULL = new URLDefaults() {
-        public String getProtocol() {
-            return null;
-        }
-        public String getSSLProtocol() {
-            return null;
-        }
-        public int getPort() {
-            return -1;
-        }
-        public int getSSLPort() {
-            return -1;
-        }
-    };
+    public String getSSLProtocol() {
+        return protocolSSL;
+    }
 
-    static URLDefaults IMAP = new URLDefaults() {
-        public String getProtocol() {
-            return "imap";
-        }
-        public String getSSLProtocol() {
-            return "imaps";
-        }
-        public int getPort() {
-            return 143;
-        }
-        public int getSSLPort() {
-            return 993;
-        }
-    };
+    public int getSSLPort() {
+        return portSSL;
+    }
 }

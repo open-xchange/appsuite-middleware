@@ -61,6 +61,8 @@ import java.util.regex.Pattern;
  */
 public class URIParser {
 
+    // The magic is the not being there of the dot character that would allow the match to IPv4 addresses. Place here \. in the pattern to
+    // break it.
     private static final Pattern IPV6_PATTERN = Pattern.compile("^(?:(?:([a-zA-Z][0-9a-zA-Z]*)://\\[)|\\[)?([0-9a-zA-Z:]*?)(?:\\]|(?:\\]:(.*)))?$");
 
     private static final Pattern IPV4_PATTERN = Pattern.compile("^(?:([a-zA-Z][0-9a-zA-Z]*)://)?(.*?)(?::(.*))?$");
@@ -70,10 +72,10 @@ public class URIParser {
     }
 
     public static final URI parse(String s) throws URISyntaxException {
-        return parse(s, URLDefaults.NULL);
+        return parse(s, URIDefaults.NULL);
     }
 
-    public static final URI parse(String s, URLDefaults defaults) throws URISyntaxException {
+    public static final URI parse(String s, URIDefaults defaults) throws URISyntaxException {
         Matcher matcher6 = IPV6_PATTERN.matcher(s);
         Matcher matcher4 = IPV4_PATTERN.matcher(s);
         final Matcher matcher;
@@ -102,7 +104,7 @@ public class URIParser {
         return retval;
     }
 
-    private static final int applyDefault(int port, String scheme, URLDefaults defaults) {
+    private static final int applyDefault(int port, String scheme, URIDefaults defaults) {
         if (-1 == port) {
             if (null != defaults.getSSLProtocol() && defaults.getSSLProtocol().equals(scheme)) {
                 return defaults.getSSLPort();
@@ -112,7 +114,7 @@ public class URIParser {
         return port;
     }
 
-    private static final String applyDefault(String scheme, int port, URLDefaults defaults) {
+    private static final String applyDefault(String scheme, int port, URIDefaults defaults) {
         if (null == scheme) {
             if (defaults.getSSLPort() == port) {
                 return defaults.getSSLProtocol();

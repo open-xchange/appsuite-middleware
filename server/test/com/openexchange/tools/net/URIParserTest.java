@@ -50,7 +50,7 @@
 package com.openexchange.tools.net;
 
 import static com.openexchange.junit.Warn.warnEquals;
-import static com.openexchange.tools.net.URLDefaults.IMAP;
+import static com.openexchange.tools.net.URIDefaults.IMAP;
 import static org.junit.Assert.assertEquals;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -280,14 +280,16 @@ public class URIParserTest {
     }
 
     private static final void test(String s, String scheme, String host, int port) throws URISyntaxException {
-        test(s, scheme, host, port, URLDefaults.NULL);
+        test(s, scheme, host, port, URIDefaults.NULL);
     }
 
-    private static final void test(String s, String scheme, String host, int port, URLDefaults defaults) throws URISyntaxException {
+    private static final void test(String s, String scheme, String host, int port, URIDefaults defaults) throws URISyntaxException {
         URI uri = URIParser.parse(s, defaults);
         assertEquals("Protocol not correctly detected: \"" + s + "\".", scheme, uri.getScheme());
         assertEquals("Host not correctly detected: \"" + s + "\".", host, uri.getHost());
         assertEquals("Port not correctly detected: \"" + s + "\".", port, uri.getPort());
+        String expected = new URI(scheme, null, host, port, null, null, null).toString();
+        assertEquals("toString does not work: \"" + s + "\".", expected, uri.toString());
         if (WARN) {
             try {
                 uri = new URI(s);
@@ -297,11 +299,13 @@ public class URIParserTest {
             warnEquals("Protocol not correctly detected: \"" + s + "\".", scheme, uri.getScheme());
             warnEquals("Host not correctly detected: \"" + s + "\".", host, uri.getHost());
             warnEquals("Port not correctly detected.", port, uri.getPort());
+            warnEquals("toString does not work: \"" + s + "\".", expected, uri.toString());
         } else {
             uri = new URI(s);
             assertEquals("Protocol not correctly detected: \"" + s + "\".", scheme, uri.getScheme());
             assertEquals("Host not correctly detected: \"" + s + "\".", host, uri.getHost());
             assertEquals("Port not correctly detected: \"" + s + "\".", port, uri.getPort());
+            assertEquals("toString does not work: \"" + s + "\".", expected, uri.toString());
         }
     }
 }
