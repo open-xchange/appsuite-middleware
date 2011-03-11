@@ -367,6 +367,13 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         toCreate.setParentFullname(getRealFullname(toCreate.getParentFullname()));
         toCreate.setSubscribed(false);
         final String realFullname = delegatee.createFolder(toCreate);
+        /*
+         * Be sure newly created folder is unsubscribed
+         */
+        final MailFolderDescription tmp = new MailFolderDescription();
+        tmp.setFullname(realFullname);
+        tmp.setSubscribed(false);
+        delegatee.updateFolder(realFullname, tmp);
         return stripPathFromFullname(path, realFullname);
     }
 

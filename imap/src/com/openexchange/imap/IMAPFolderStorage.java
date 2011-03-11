@@ -1501,7 +1501,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                 }
-                if (!MailProperties.getInstance().isIgnoreSubscription() && toUpdate.containsSubscribed()) {
+                if (/*!MailProperties.getInstance().isIgnoreSubscription() && */toUpdate.containsSubscribed()) {
                     /*
                      * Check read permission
                      */
