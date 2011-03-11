@@ -126,6 +126,9 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
     @Override
     protected void stopBundle() throws Exception {
         final HttpService httpService = getService(HttpService.class);
+        if(httpService == null) {
+            return; // No need to unregister, if the service is gone already.
+        }
         httpService.unregister("ajax/recovery/secret");
         if(registration != null) {
             registration.unregister();
