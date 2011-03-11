@@ -1,6 +1,7 @@
 * 2011-03-11 - francisco.laguna@open-xchange.com
 
  - Bugfix #18576: Fix some shutdown exceptions.
+ - Bugfix #18562: Some cleanup to tie in oauth accounts into our regular secret/crypto/secretMigration mechanisms.
 
 * 2011-03-11 - thorben.betten@open-xchange.com
 
