@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,30 @@
  *
  */
 
-package com.openexchange;
+package com.openexchange.junit;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
-import com.openexchange.ajax.parser.TaskLastModifiedTest;
-import com.openexchange.tools.collections.OXCollectionsTest;
-import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
-import com.openexchange.tools.net.URIParserTest;
+import org.junit.Assert;
 
 /**
- * {@link UnitTests}
+ * {@link Warn}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UnitTests {
+public class Warn extends Assert {
 
-    private UnitTests() {
+    private Warn() {
         super();
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(TaskLastModifiedTest.class);
-        tests.addTestSuite(SearchIteratorDelegatorTest.class);
-        tests.addTestSuite(OXCollectionsTest.class);
-        tests.addTestSuite(ContactSearchtermSqlConverterTest.class);
-        tests.addTest(new JUnit4TestAdapter(URIParserTest.class));
-        return tests;
+    public static void warnEquals(String message, Object expected, Object actual) {
+        try {
+            assertEquals(message, expected, actual);
+        } catch (AssertionError e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void warnEquals(String message, long expected, long actual) {
+        warnEquals(message, Long.valueOf(expected), Long.valueOf(actual));
     }
 }
