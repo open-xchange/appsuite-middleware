@@ -109,7 +109,9 @@ public class Activator implements BundleActivator {
     }
 
     public void unregisterServices() {
-        for (final ServiceRegistration serviceRegistration : services) {
+        ArrayList<ServiceRegistration> registrations = new ArrayList<ServiceRegistration>(services);
+        services.clear();
+        for (final ServiceRegistration serviceRegistration : registrations) {
             serviceRegistration.unregister();
         }
     }
