@@ -127,11 +127,14 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
             Integer accountIdInt = Integer.parseInt(accountId);
             if (null != accountIdInt)
                 subscription.getConfiguration().put("account", accountIdInt);
-            String displayName = facebookService.getAccountDisplayName(
+            String displayName = null;
+            if (subscription.getSecret() != null) {
+                displayName = facebookService.getAccountDisplayName(
                 subscription.getSecret(),
                 subscription.getUserId(),
                 subscription.getContext().getContextId(),
                 (Integer) subscription.getConfiguration().get("account"));
+            }
             if (null != displayName && !"".equals(displayName)) {
                 subscription.setDisplayName(displayName);
             } else {

@@ -62,6 +62,8 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
@@ -79,6 +81,8 @@ public class Activator extends DeferredActivator {
     private List<ServiceTracker> trackers;
 
     private OSGiOAuthService oAuthService;
+
+    private WhiteboardSecretService secretService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -146,6 +150,8 @@ public class Activator extends DeferredActivator {
             oAuthService = new OSGiOAuthService().start(context);
             // registry.addService(OAuthService.class, oAuthService);
             AbstractOAuthAJAXActionService.setOAuthService(oAuthService);
+            secretService = new WhiteboardSecretService(context);
+            AbstractOAuthAJAXActionService.setSecretService(secretService);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -155,6 +161,9 @@ public class Activator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            if(secretService != null) {
+                secretService.close();
+            }
             if (null != trackers) {
                 /*
                  * Close trackers

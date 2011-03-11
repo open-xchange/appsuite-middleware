@@ -84,15 +84,23 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
-    private static final Class<?>[] NEEDED_SERVICES = new Class[]{MessagingServiceRegistry.class, HttpService.class, CacheService.class};
-    
+
+    private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class };
+
     private final List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
+
     private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
+
     private HttpService httpService;
+
     private MessagingServiceRegistry registry;
+
     private MessagingMessageParser parser;
+
     private MessagingMessageWriter writer;
+
     private CacheService cacheService;
+
     private boolean cacheConfigured;
 
     @Override
@@ -111,18 +119,18 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if(clazz == MessagingServiceRegistry.class) {
+        if (clazz == MessagingServiceRegistry.class) {
             hide();
         }
     }
 
     private void hide() {
-        if(null != httpService) {
+        if (null != httpService) {
             httpService.unregister("/ajax/messaging/account");
             httpService.unregister("/ajax/messaging/message");
             httpService.unregister("/ajax/messaging/service");
         }
-        
+
         for (final ServiceRegistration registration : registrations) {
             registration.unregister();
         }
@@ -146,67 +154,49 @@ public class Activator extends DeferredActivator {
             }
 
             register();
-        } catch (final Exception x) {
+        } catch (final Throwable x) {
             LOG.error(x.getMessage(), x);
-            throw x;
         }
     }
 
     private void register() throws CacheException {
-
-        registry = getService(MessagingServiceRegistry.class);
-        httpService = getService(HttpService.class);
-        cacheService = getService(CacheService.class);
-        
-        if (!allAvailable()) {
-            return;
-        }
-        
-        
-        AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
-        MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
-        ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
-
         try {
+
+            registry = getService(MessagingServiceRegistry.class);
+            httpService = getService(HttpService.class);
+            cacheService = getService(CacheService.class);
+
+            if (!allAvailable()) {
+                return;
+            }
+
+            AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
+            MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
+            ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
+
             httpService.registerServlet("/ajax/messaging/account", new AccountServlet(), null, null);
             httpService.registerServlet("/ajax/messaging/message", new MessagesServlet(), null, null);
             httpService.registerServlet("/ajax/messaging/service", new ServicesServlet(), null, null);
-        } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final NamespaceException e) {
+
+            registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
+            registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
+            registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
+            registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(), null));
+            registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
-
-        
-        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
-        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
-        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
-        registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(), null));
-        registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
     }
 
     /**
      * @return
-     * @throws CacheException 
+     * @throws CacheException
      */
     private Cache getCache() throws CacheException {
         final String regionName = "com.openexchange.messaging.json.messageCache";
-        if(!cacheConfigured) {
+        if (!cacheConfigured) {
             cacheConfigured = true;
-            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" + 
-                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + 
-                    "jcs.region."+regionName+".cacheattributes.MaxObjects=10000000\n" + 
-                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + 
-                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" + 
-                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + 
-                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" + 
-                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + 
-                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" + 
-                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=300\n" + 
-                    "jcs.region."+regionName+".elementattributes.IdleTime=180\n" + 
-                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" + 
-                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" + 
-                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            final byte[] ccf = ("jcs.region." + regionName + "=LTCP\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=10000000\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=300\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=180\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
             cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
         }
         return cacheService.getCache(regionName);

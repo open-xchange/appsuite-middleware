@@ -74,6 +74,8 @@ import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionF
 import com.openexchange.messaging.facebook.session.FacebookEventHandler;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -93,6 +95,8 @@ public final class FacebookMessagingActivator extends DeferredActivator {
 
     private ComponentRegistration componentRegistration;
 
+    private WhiteboardSecretService secretService;
+
     /**
      * Initializes a new {@link FacebookMessagingActivator}.
      */
@@ -103,7 +107,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, HTMLService.class, OAuthService.class, DatabaseService.class };
+            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, HTMLService.class, OAuthService.class, DatabaseService.class, SecretService.class};
     }
 
     @Override
@@ -141,7 +145,12 @@ public final class FacebookMessagingActivator extends DeferredActivator {
                         registry.addService(classe, service);
                     }
                 }
+                
+                secretService = new WhiteboardSecretService(context);
+                registry.addService(SecretService.class, secretService);
             }
+            
+            
             /*
              * Some init stuff
              */
@@ -189,6 +198,9 @@ public final class FacebookMessagingActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            if(secretService != null) {
+                secretService.close();
+            }
             /*
              * Unregister component
              */

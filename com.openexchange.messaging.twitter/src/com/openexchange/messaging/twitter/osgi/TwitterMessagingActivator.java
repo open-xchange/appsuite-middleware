@@ -68,6 +68,8 @@ import com.openexchange.messaging.twitter.exception.TwitterMessagingExceptionFac
 import com.openexchange.messaging.twitter.session.TwitterEventHandler;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -88,6 +90,8 @@ public final class TwitterMessagingActivator extends DeferredActivator {
 
     private ComponentRegistration componentRegistration;
 
+    private WhiteboardSecretService secretService;
+
     /**
      * Initializes a new {@link TwitterMessagingActivator}.
      */
@@ -97,7 +101,7 @@ public final class TwitterMessagingActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TwitterService.class, SessiondService.class, HTMLService.class, OAuthService.class };
+        return new Class<?>[] { TwitterService.class, SessiondService.class, HTMLService.class, OAuthService.class, SecretService.class };
     }
 
     @Override
@@ -134,6 +138,8 @@ public final class TwitterMessagingActivator extends DeferredActivator {
                         registry.addService(classe, service);
                     }
                 }
+                secretService = new WhiteboardSecretService(context);
+                registry.addService(SecretService.class, secretService);
             }
             /*
              * Register component
@@ -171,6 +177,9 @@ public final class TwitterMessagingActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            if(secretService != null) {
+                secretService.close();
+            }
             if (null != componentRegistration) {
                 componentRegistration.unregister();
                 componentRegistration = null;

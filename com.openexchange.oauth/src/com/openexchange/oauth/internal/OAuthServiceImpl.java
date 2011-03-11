@@ -764,8 +764,9 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
 
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws OAuthException {
         final Context context = session.getContext();
-        final Connection con = getConnection(true, context);
+        final Connection con = getConnection(false, context);
         PreparedStatement stmt = null;
+        PreparedStatement update = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
@@ -773,37 +774,45 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             stmt.setInt(2, session.getUserId());
             rs = stmt.executeQuery();
             while(rs.next()) {
-                int id = rs.getInt(1);
-                String accessToken = rs.getString(2);
-                String accessSecret = rs.getString(3);
                 try {
-                    decrypt(accessToken, newSecret);
-                } catch (OAuthException x) {
-                    String newToken = encrypt(decrypt(accessToken, oldSecret), newSecret);
-                    stmt.close();
-                    stmt = con.prepareStatement("UPDATE oauthAccounts SET accessToken=? WHERE cid=? AND id=?");
-                    stmt.setString(1, newToken);
-                    stmt.setInt(2, context.getContextId());
-                    stmt.setInt(3, id);
-                    stmt.executeUpdate();
-                }
-                try {
-                    decrypt(accessSecret, newSecret);
-                } catch (OAuthException x) {
-                    String newToken = encrypt(decrypt(accessSecret, oldSecret), newSecret);
-                    stmt.close();
-                    stmt = con.prepareStatement("UPDATE oauthAccounts SET accessSecret=? WHERE cid=? AND id=?");
-                    stmt.setString(1, newToken);
-                    stmt.setInt(2, context.getContextId());
-                    stmt.setInt(3, id);
-                    stmt.executeUpdate();
+                    int id = rs.getInt(1);
+                    String accessToken = rs.getString(2);
+                    String accessSecret = rs.getString(3);
+                    try {
+                        decrypt(accessToken, newSecret);
+                    } catch (OAuthException x) {
+                        String newToken = encrypt(decrypt(accessToken, oldSecret), newSecret);
+                        update = con.prepareStatement("UPDATE oauthAccounts SET accessToken=? WHERE cid=? AND id=?");
+                        update.setString(1, newToken);
+                        update.setInt(2, context.getContextId());
+                        update.setInt(3, id);
+                        update.executeUpdate();
+                    }
+                    try {
+                        decrypt(accessSecret, newSecret);
+                    } catch (OAuthException x) {
+                        String newToken = encrypt(decrypt(accessSecret, oldSecret), newSecret);
+                        if(update != null) {
+                            update.close();
+                        }
+                        update = con.prepareStatement("UPDATE oauthAccounts SET accessSecret=? WHERE cid=? AND id=?");
+                        update.setString(1, newToken);
+                        update.setInt(2, context.getContextId());
+                        update.setInt(3, id);
+                        update.executeUpdate();
+                    }
+                } finally {
+                    if(update != null) {
+                        update.close();
+                    }
                 }
             }
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            provider.releaseReadConnection(context, con);
+            closeSQLStuff(null, update);
+            provider.releaseWriteConnection(context, con);
         }
     }
 
