@@ -50,6 +50,7 @@
 package com.openexchange.charset;
 
 import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.Iterator;
 
@@ -66,6 +67,8 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
 
     /**
      * Initializes a new {@link <code>CollectionCharsetProvider</code>}
+     * 
+     * @throws UnsupportedCharsetException If "CP50220" charset cannot be found
      */
     public JapaneseReplacementCharsetProvider(final CharsetProvider standardProvider) {
         super();
