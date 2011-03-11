@@ -66,6 +66,8 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link JDBC3PreparedStatementWrapper}
@@ -75,6 +77,8 @@ import java.util.Calendar;
 public abstract class JDBC3PreparedStatementWrapper extends JDBC3StatementWrapper implements PreparedStatement {
 
     private final PreparedStatement delegate;
+    
+    private static final Log LOG = LogFactory.getLog(JDBC3PreparedStatementWrapper.class);
 
     /**
      * Initializes a new {@link JDBC3PreparedStatementWrapper}.
@@ -96,14 +100,23 @@ public abstract class JDBC3PreparedStatementWrapper extends JDBC3StatementWrappe
     }
 
     public boolean execute() throws SQLException {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(Thread.currentThread()+" executes: "+delegate.toString());
+        }
         return delegate.execute();
     }
 
     public ResultSet executeQuery() throws SQLException {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(Thread.currentThread()+" executes: "+delegate.toString());
+        }
         return new JDBC4ResultSetWrapper(delegate.executeQuery(), this);
     }
 
     public int executeUpdate() throws SQLException {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(Thread.currentThread()+" executes: "+delegate.toString());
+        }
         return delegate.executeUpdate();
     }
 
