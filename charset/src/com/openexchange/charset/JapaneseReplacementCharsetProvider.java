@@ -66,7 +66,7 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
     private final Charset cp50220;
 
     /**
-     * Initializes a new {@link <code>CollectionCharsetProvider</code>}
+     * Initializes a new {@link JapaneseReplacementCharsetProvider}.
      * 
      * @throws UnsupportedCharsetException If "CP50220" charset cannot be found
      */
@@ -74,6 +74,11 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
         super();
         this.standardProvider = standardProvider;
         cp50220 = Charset.forName("CP50220");
+        /*-
+         * Retry with: "x-windows-50220", "MS50220"
+         * 
+         * http://www.docjar.com/html/api/sun/nio/cs/ext/MS50220.java.html
+         */
     }
 
     @Override

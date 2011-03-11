@@ -7,6 +7,7 @@
 * 2011-03-11 - thorben.betten@open-xchange.com
 
  - Bugfix #18585: Be sure newly created POP3 folder is unsubscribed in backing mail account
+ - Bugfix #18599: Handling UnsupportedCharsetException on bundle start-up
 
 * 2011-03-11 - marcus.klein@open-xchange.com
 

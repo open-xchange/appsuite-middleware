@@ -50,6 +50,7 @@
 package com.openexchange.charset;
 
 import java.lang.reflect.Field;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
 
 /**
@@ -87,7 +88,18 @@ public final class ModifyCharsetStandardProvider {
         /*
          * Initialize new standard charset provider
          */
-        final JapaneseReplacementCharsetProvider jpCharsetProvider = new JapaneseReplacementCharsetProvider(backupCharsetProvider);
+        final JapaneseReplacementCharsetProvider jpCharsetProvider;
+        try {
+            jpCharsetProvider = new JapaneseReplacementCharsetProvider(backupCharsetProvider);
+        } catch (final UnsupportedCharsetException e) {
+            /*
+             * Leave unchanged since fall-back charset "CP50220" is not support by JVM
+             */
+            org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class).warn(
+                new StringBuilder("Charset \"CP50220\" is not support by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
+                    System.getProperty("java.vm.version")).append("\". Japanese encoding \"ISO-2022-JP\" not supported ! ! !").toString());
+            return null;
+        }
         /*
          * Reinitialize field
          */
