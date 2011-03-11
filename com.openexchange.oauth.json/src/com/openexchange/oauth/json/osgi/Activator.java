@@ -151,6 +151,7 @@ public class Activator extends DeferredActivator {
             // registry.addService(OAuthService.class, oAuthService);
             AbstractOAuthAJAXActionService.setOAuthService(oAuthService);
             secretService = new WhiteboardSecretService(context);
+            secretService.open();
             AbstractOAuthAJAXActionService.setSecretService(secretService);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

@@ -139,6 +139,7 @@ public final class TwitterMessagingActivator extends DeferredActivator {
                     }
                 }
                 secretService = new WhiteboardSecretService(context);
+                secretService.open();
                 registry.addService(SecretService.class, secretService);
             }
             /*
