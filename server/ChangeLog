@@ -1,3 +1,7 @@
+* 2011-03-11 - marcus.klein@open-xchange.com
+
+ - Bugfix #18596: Not starting system bundle fragment to export xerces for IBM Java.
+
 * 2011-03-10 - thorben.betten@open-xchange.com
 
  - Bugfix #18552: Fallback to mail login/password if transport ones are missing
@@ -18,7 +22,7 @@
 * 2011-03-07 - steffen.templin@open-xchange.com
 
  - Bugfix #18490: Encode folder names in UTF-7
- 
+
 * 2011-03-06 - thorben.betten@open-xchange.com
 
  - Bugfix #18498: Introduced listener framework for OAuth account deletion
@@ -94,7 +98,7 @@
 * 2011-02-23 - steffen.templin@open-xchange.com
 
  - Bugfix #18219: Unable to access publications created by PIM users.
- 
+
 * 2011-02-23 - marcus.klein@open-xchange.com
 
  - Bugfix #18309: Using proper host names for UDP push remote host register package.
@@ -102,11 +106,11 @@
 * 2011-02-23 - francisco.laguna@open-xchange.com
 
  - Bugfix #18124: Escape backslashes for searches.
- 
+
 * 2011-02-23 - steffen.templin@open-xchange.com
 
  - Bugfix #18204: The modification of a tasks recurrence information from 'after x times' to 'on date' is working correctly now.
- 
+
 * 2011-02-23 - thorben.betten@open-xchange.com
 
  - Bugfix #18396: Proper IMAP folder cache invalidation
@@ -197,15 +201,15 @@
 * 2011-01-20 - martin.herfurth@open-xchange.com
 
  - Bugfix #17902: Closed SQL Connection was used.
- 
+
 * 2011-01-18 - martin.herfurth@open-xchange.com
 
  - Bugfix #17535: Update of Yearly Series does no longer destroy the appointment.
- 
+
 * 2011-01-18 - choeger@open-xchange.com
 
  - Bugfix #18044: wrong file ownerships after initial installation
- 
+
 * 2011-01-17 - thorben.betten@open-xchange.com
 
  - Bugfix #18035: Allowing surrounding quotes when parsing Content-Type header
@@ -226,7 +230,7 @@
 * 2011-01-12 - marcus.klein@open-xchange.com
 
  - TA5701 of US 5504: Made session handling more restrictive. Hash used in cookies will now be recalculated for every request.
- 
+
 * 2011-01-12 - martin.herfurth@open-xchange.com
 
  - Bugfix #17883: Reminder in shared folders.
@@ -263,12 +267,12 @@
 
 * 2011-01-07 - tobias.prinz@open-xchange.com
 
- - Bugfix #17392: ICal exports now contain the timezone of the appointment on dates, so they are not "floating" (RFC5545) any more. 
- 
+ - Bugfix #17392: ICal exports now contain the timezone of the appointment on dates, so they are not "floating" (RFC5545) any more.
+
 * 2011-01-03 - tobias.prinz@open-xchange.com
 
  - Bugfix #17937: If an import cannot be done because the UUID is in use, you now get to know which UUID is the problem
- 
+
 * 2010-12-27 - thorben.betten@open-xchange.com
 
  - Bugfix #17882: Retry fetching POP3 server's capabilities if cached check indicates failure
@@ -479,7 +483,7 @@
 * 2010-11-12 - martin.herfurth@open-xchange.com
 
  - Bugfix #17519: NullPointerException during sync fixed..
- 
+
 * 2010-11-11 - karsten.will@open-xchange.com
 
  - Bugfix #17441: GMX.com URL changed again
@@ -487,7 +491,7 @@
 * 2010-11-11 - choeger@open-xchange.com
 
  - Bugfix #13480: DNS is not rediscovered for E-Mail servers
- 
+
 * 2010-11-11 - francisco.laguna@open-xchange.com
 
  - Bugfix #17449: Made code a bit more robust against null values.
@@ -501,11 +505,11 @@
 * 2010-11-10 - steffen.templin@open-xchange.com
 
  - Bugfix #17227: Wrong end date in confirmation mails.
- 
+
 * 2010-11-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #17459: Delegate to correct method when saving a new infoitem.
- 
+
 * 2010-11-10 - thorben.betten@open-xchange.com
 
  - Bugfix #17223: Replacing "ISO-2022-JP" charset with "CP50220" on charset encoding
@@ -532,7 +536,7 @@
 
 * 2010-11-04 - tobias.prinz@open-xchange.com
 
- - Bugfix #16895: Ignoring the non-RFC element EMAIL in an iCal file ATTENDEE property 
+ - Bugfix #16895: Ignoring the non-RFC element EMAIL in an iCal file ATTENDEE property
 
 * 2010-11-04 - marcus.klein@open-xchange.com
 
@@ -548,7 +552,7 @@
 
 * 2010-11-02 - tobias.prinz@open-xchange.com
 
- - Bugfix #17203 on server side: Added action=refreshSecret to Login servlet which allows to extend the expiry date for a secret cookie. 
+ - Bugfix #17203 on server side: Added action=refreshSecret to Login servlet which allows to extend the expiry date for a secret cookie.
 
 * 2010-10-29 - thorben.betten@open-xchange.com
 
@@ -564,7 +568,7 @@
 * 2010-10-26 - tobias.prinz@open-xchange.com
 
  - Userstory 5247: Publications can now be configured to run on different (sub-)domains, HTML white-listing can be disabled.
- 
+
 * 2010-10-25 - thorben.betten@open-xchange.com
 
  - Bugfix #17330: Proper folder fullname when renaming a folder on root level
@@ -581,7 +585,7 @@
 * 2010-10-20 - steffen.templin@open-xchange.com
 
  - Bugfix #17261: Duplicate folder exception is thrown for synchronizing contact folder 'Vorgeschlagene Kontakte' with Outlook 2010.
- 
+
 * 2010-10-20 - steffen.templin@open-xchange.com
 
  - Bugfix #17072: Contact field 'Profession' not exported to VCards.
@@ -610,7 +614,7 @@
 
 * 2010-10-12 - choeger@open-xchange.com
 
- - Bugfix #17237 - Incorrect file permissions for configuration files in 
+ - Bugfix #17237 - Incorrect file permissions for configuration files in
    packages -twitter and -mailfilter
 
 * 2010-10-08 - steffen.templin@open-xchange.com
@@ -684,7 +688,7 @@
 * 2010-09-22 - steffen.templin@open-xchange.com
 
  - Bugfix #16720: Making an existing appointment recurring causes disappearance in Outlook.
- 
+
 * 2010-09-22 - thorben.betten@open-xchange.com
 
  - Bugfix #16870: Showing inline images if content-type set to "application/octet-stream"
@@ -712,11 +716,11 @@
 
 * 2010-09-13 - marcus.klein@open-xchange.com
 
- - Bugfix #16796: Fixed creating a task without start and end date through first generation Outlook OXtender. 
+ - Bugfix #16796: Fixed creating a task without start and end date through first generation Outlook OXtender.
 
 * 2010-09-13 - tobias.prinz@open-xchange.com
 
- - User story #5212: Both resources and groups now allow to be queried for updates, just like other elements. See HTTP API for details. 
+ - User story #5212: Both resources and groups now allow to be queried for updates, just like other elements. See HTTP API for details.
 
 * 2010-09-10 - marcus.klein@open-xchange.com
 
@@ -777,7 +781,7 @@
 * 2010-08-30 - martin.herfurth@open-xchange.com
 
  - Bugfix #16548: Reccurrence type 0 for normal appointments.
- 
+
 * 2010-08-26 - marcus.klein@open-xchange.com
 
  - Bugfix #16455: Implemented a more sophisticated search for a participant when using freebusy interface. Resources are now preferred if a
@@ -850,7 +854,7 @@
 
  - Bugfix #16669: Proper quoting of regex replacement
 
-* 2010-08-11 - steffen.templin@open-xchange.com 
+* 2010-08-11 - steffen.templin@open-xchange.com
 
  - Bugfix #16643: Wrong series information in notification mails
 
@@ -878,7 +882,7 @@
  - Bugfix #15138: Made a log message, complaining, that the server can't reach an external subscription service definition, more meaningful.
  - Bugfix #16351: Complain louder about missing property in templating service.
  - Bugfix #15302: Make subscription parser more resilient.
- 
+
 * 2010-07-29 - thorben.betten@open-xchange.com
 
  - Bugfix #16557: And additional > after a link as produced by the Mulberry mail client is not included in the link
@@ -903,7 +907,7 @@
 
  - Bugfix #16249: Event for changed Attachments.
  - Bugfix #16540: Event for changed Alarm.
- 
+
 * 2010-07-27 - marcus.klein@open-xchange.com
 
  - Bugfix #16577: Fixed ClassCastException in FolderCache due to newly introduced conditional loading of folder objects.
@@ -911,7 +915,7 @@
 
 * 2010-07-26 - marcus.klein@open-xchange.com
 
- - Bugfix #16558: Fixed a NullPointerException in FolderCacheManager when putting loaded folders through an FolderObjectIterator into the 
+ - Bugfix #16558: Fixed a NullPointerException in FolderCacheManager when putting loaded folders through an FolderObjectIterator into the
    cache.
  - Bugfix #16561: Fixed a cleared prefetch structure in FolderObjectIterator when it should not be cleared because it is needed afterwards.
 
@@ -934,13 +938,13 @@
 * 2010-07-21 - francisco.laguna@open-xchange.com
 
  - Bugfix #16507: Ignore timezones when writing notification mails about appointments lasting the whole day. Artificially move the end date
-   of an appointment to the previous day, if it is a whole day appointment. 
- 
+   of an appointment to the previous day, if it is a whole day appointment.
+
 * 2010-07-21 - tobias.prinz@open-xchange.com
 
  - US1601 - serverside: ALL and LIST requests for appointments now have a new parameter called "showPrivate" (default: false). If it is set
    to true, private appointments in shared folders are also returned, but only as anonymized appointments (lacking all information except
-   start and end date).  
+   start and end date).
 
 * 2010-07-21 - steffen.templin@open-xchange.com
 
@@ -950,14 +954,14 @@
 * 2010-07-21 - choeger@open-xchange.com
 
  - Bugfix #16529: Errors when updating OX Packages on RHEL5
- 
+
 * 2010-07-20 - marcus.klein@open-xchange.com
 
  - Bugfix #16379: Not using context specific locks anymore filling a map until all memory is eaten up.
 
 * 2010-07-20 - tobias.prinz@open-xchange.com
 
- - Bugfix #15669: A display name now can be part of another display, it just is not allowed to be the same. 
+ - Bugfix #15669: A display name now can be part of another display, it just is not allowed to be the same.
 
 * 2010-07-20 - martin.herfurth@open-xchange.com
 
@@ -992,7 +996,7 @@
 
  - Bugfix #16107: Changing a series that stretches more than one week/month/year from "full time" to normal does not break the view in the
    second week/month/year
- 
+
 * 2010-07-14 - marcus.klein@open-xchange.com
 
  - Bugfix #16484: A loaded contact object now always contains the private flag.
@@ -1017,14 +1021,14 @@
  - Bugfix #16467: Processing embedded images nested in "background=" attribute
 
 * 2010-07-09 - francisco.laguna@open-xchange.com
- 
+
  - Bugfix #16447: Have Publication and Subscription User Delete listeners take part in Admins transaction.
  - Bugfix #16099: Moving first task of a series to day where first occurrence of series should be as described in the series pattern.
- 
+
 * 2010-07-09 - steffen.templin@open-xchange.com
- 
+
  - Bugfix #15776: Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now.
- 
+
 * 2010-07-08 - marcus.klein@open-xchange.com
 
  - Bugfix #16199: Adding correct content-type to attachments servlet GET requests.
@@ -1033,7 +1037,7 @@
 
 * 2010-07-07 - tobias.prinz@open-xchange.com
 
- - Bugfix #16367: MS Exchange 2007 tends to send broken iCal CN data. We ignore that now. 
+ - Bugfix #16367: MS Exchange 2007 tends to send broken iCal CN data. We ignore that now.
 
 * 2010-07-07 - marcus.klein@open-xchange.com
 
@@ -1064,7 +1068,7 @@
 * 2010-06-30 - tobias.prinz@open-xchange.com
 
  - Bugfix #16287: Error message made easier to understand.
- 
+
 * 2010-06-29 - tobias.prinz@open-xchange.com
 
  - Bugfix #15662: As per RFC 2445, checking free/busy on an appointment marked as "FREE" returns "FREE" and not nothing at all.
@@ -1118,7 +1122,7 @@
 * 2010-06-22 - steffen.templin@open-xchange.com
 
  - Bugfix #15291: Adding groups with participants who already exists is working correctly now.
- 
+
 * 2010-06-22 - martin.herfurth@open-xchange.com
 
  - Bugfix #16297: Fixed attachment tracking in calendar.
@@ -1480,7 +1484,7 @@
 * 2010-03-24 - tobias.prinz@open-xchange.com
 
  - RFC 2447: IMIP behaviour: Party crashers (people not invited, e.g. responding from another e-mail address) can now be accepted as
-   participants by the organizer of the event  
+   participants by the organizer of the event
 
 * 2010-03-24 - thorben.betten@open-xchange.com
 
@@ -1540,7 +1544,7 @@
 * 2010-03-03 - tobias.prinz@open-xchange.com
 
  - Related to bug #15231: Outlook imports for different languages can now be easily extended by creating .properties files with mapping for
-   them. 
+   them.
 
 * 2010-03-03 - thorben.betten@open-xchange.com
 
@@ -1567,12 +1571,12 @@
 * 2010-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #15429: Giving proper exception message if a contact in a public folder should marked private.
- - Bugfix #15501: Enabling the contact collector for all user. 
+ - Bugfix #15501: Enabling the contact collector for all user.
 
 * 2010-03-01 - martin.herfurth@open-xchange.com
 
  - Bugfix #15509: Null Pointer in Conversion Servlet.
- 
+
 * 2010-03-01 - thorben.betten@open-xchange.com
 
  - Bugfix #15504: Ignoring possible FQL query result size mismatch
@@ -1611,12 +1615,12 @@
 * 2010-02-24 - matthias.biggeleben@open-xchange.com
 
  - Bugfix #15038: [L3] print week-view within firefox: 2.nd page no vertical lines.
- 
+
 * 2010-02-24 - tobias.prinz@open-xchange.com
 
  - Bugfix #13557: Error message when importing broken VCards gives line and column information now.
  - Bugfix #15231 (partial): Can now import most data from Dutch Outlook CSV files
- 
+
 * 2010-02-24 - thorben.betten@open-xchange.com
 
  - Bugfix #15448: Fixed wrong array type in complex search term
@@ -1676,11 +1680,11 @@
 
  - Bugfix 14919 - Reflect automatic participant status changes in cdao for events
  - Bugfix #15083: No link to OX for external participants on confirmation change
- 
+
 * 2010-02-16 - tobias.prinz@open-xchange.com
 
  - Bugfix #15241 - VCards by Apple Addressbook with inline images are imported now
- 
+
 * 2010-02-15 - thorben.betten@open-xchange.com
 
  - Bugfix #15365: Added admin daemon to build files
@@ -1726,7 +1730,7 @@
 * 2010-01-27 - tobias.prinz@open-xchange.com
 
  - Bugfix #15274: Values read from OXMF are now stripped of trailing whitespaces
- 
+
 * 2010-01-27 - thorben.betten@open-xchange.com
 
  - Bugfix #15258: Added day of week to appointment notification's start/end date replacement
@@ -1749,7 +1753,7 @@
 
 * 2010-01-14 - marcus.klein@open-xchange.com
 
- - Bugfix #15202: Added old UpdateTask 
+ - Bugfix #15202: Added old UpdateTask
 
 * 2010-01-13 - martin.herfurth@open-xchange.com
 
@@ -1762,7 +1766,7 @@
 * 2010-01-11 - martin.herfurth@open-xchange.com
 
  - Bugfix #14922: Confirm status in public folders.
- 
+
 * 2010-01-11 - thorben.betten@open-xchange.com
 
  - Bugfix #15061: Adding a warning to response object if an account's authentication fails
@@ -1828,7 +1832,7 @@
 * 2009-12-14 - marcus.klein@open-xchange.com
 
  - Bugfix #15070: Corrected category for concurrent modifications exceptions on contacts.
- 
+
 * 2009-12-09 - thorben.betten@open-xchange.com
 
 - Bugfix #15022: Fallback on non-parseable content type header
@@ -2112,7 +2116,7 @@
  - Bugfix #14350: Removed special handling of empty cells in parser, these are now treated as null. That made it possible to remove
    workaround for bug 7248, too.
  - Bugfix #14349: VCard 3.0 allows for a list of nicknames. That led to the brackets around the nickname.
- 
+
 * 2009-09-01 - marcus.klein@open-xchange.com
 
  - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
@@ -2157,7 +2161,7 @@
 
 * 2009-08-24 - francisco.laguna@open-xchange.com
 
- - Bugfix #14343: Format dates in CSV export so the import understands them. 
+ - Bugfix #14343: Format dates in CSV export so the import understands them.
  - Bugfix #14343: Don't set caching headers in file downloads for IE. Set content-disposition header for nice file names.
 
 * 2009-08-24 - thorben.betten@open-xchange.com
@@ -2184,7 +2188,7 @@
 
 * 2009-08-17 - martin.herfurth@open-xchange.com
 
- - Bugfix #14250: Fake delete for outlook. 
+ - Bugfix #14250: Fake delete for outlook.
 
 * 2009-08-18 - thorben.betten@open-xchange.com
 
@@ -2193,7 +2197,7 @@
 
 * 2009-08-17 - martin.herfurth@open-xchange.com
 
- - Bugfix #13782: Added marker attribute for internal email addresses 
+ - Bugfix #13782: Added marker attribute for internal email addresses
 
 * 2009-08-14 - martin.herfurth@open-xchange.com
 
@@ -2271,7 +2275,7 @@
 * 2009-07-19 - choeger@open-xchange.com
 
  - Bugfix #14193: Update from SP5 to 6.10 RC5 fails with error on Debian
- 
+
 * 2009-07-17 - marcus.klein@open-xchange.com
 
  - Bugfix #14115: Added renaming of oxreport.in to oxreport and setting its executable permission. Added missing library to classpath.
@@ -2305,7 +2309,7 @@
  - Bugfix #14107: Clients may specify the ID of the task to confirm in either the request body or the parameters. If both are sent, body
    wins.
  - Bugfix #14134: Infostore and Object Attachments disregard user specific file upload quotas.
- 
+
 * 2009-07-09 - martin.herfurth@open-xchange.com
 
  - Bugfix #11210: Conflicts for appointment series.
@@ -2393,7 +2397,7 @@
 * 2009-06-26 - marcus.klein@open-xchange.com
 
  - Bugfix #13380: Changed the default scaling size for contact images to 90x90 pixels.
- - Bugfix #13951: Writing understandable exception to RMI client if database is updated.  
+ - Bugfix #13951: Writing understandable exception to RMI client if database is updated.
 
 * 2009-06-26 - choeger@open-xchange.com
 
@@ -2493,13 +2497,13 @@
 * 2009-06-16 - choeger@open-xchange.com
 
  - Bugfix #12859: [L3] Changing umask for Infostore documents
- - Bugfix #13477: [L3] "Error: Invalid email address" when clearing email2 or email3 with "" 
+ - Bugfix #13477: [L3] "Error: Invalid email address" when clearing email2 or email3 with ""
 
 * 2009-06-16 - francisco.laguna@open-xchange.com
 
  - Bugfix #13869: Don't overwrite contact attributes with empty strings in XING subscriptions
  - Bugfix #13866: Use streams instead of Strings when handling websites.
- 
+
 * 2009-06-16 - thorben.betten@open-xchange.com
 
  - Bugfix #12821: Inline images made visible when composing reply/forward mail
@@ -2519,7 +2523,7 @@
 * 2009-06-15 - marcus.klein@open-xchange.com
 
  - Bugfix #13845: Adding information to iCal files to enable invitations for Notes. Adding iCal version information, too.
- 
+
 * 2009-06-13 - thorben.betten@open-xchange.com
 
  - Bugfix #13830: Fixed occurring NPEs on framework closure
@@ -2650,7 +2654,7 @@
 * 2009-04-13 - francisco.laguna@open-xchange.com
 
  - Bugfix #13482: Survive empty LOCK request bodies in webdav infostore.
- - Bugfix #13477: Move from batching infostore deletes on user delete to deleting individual documents. 
+ - Bugfix #13477: Move from batching infostore deletes on user delete to deleting individual documents.
 
 * 2009-04-06 - francisco.laguna@open-xchange.com
 
@@ -2706,7 +2710,7 @@
 
 * 2009-03-11 - francisco.laguna@open-xchange.com
 
- - Bugfix #13333: Added null check. 
+ - Bugfix #13333: Added null check.
 
 * 2009-03-11 - thorben.betten@open-xchange.com
 
@@ -2734,7 +2738,7 @@
 * 2009-03-05 - marcus.klein@open-xchange.com
 
  - Bugfix #12241: Removed context load waiting if context is not found. Added check if filestore still exists.
- 
+
 * 2009-03-04 - choeger@open-xchange.com
 
  - Bugfix #13316: postinstall script breaks update under certain circumstances
@@ -2794,7 +2798,7 @@
 
  - Bugfix #12517: [L3] Foldercache does not synchronize properly
     set jcs.region.OXFolderCache.elementattributes.IsLateral=false on update
-    
+
 * 2009-02-23 - thorben.betten@open-xchange.com
 
  - Bugfix #9872: Added "MACINTOSH" as an alias charset for "MacRoman"
@@ -2840,12 +2844,12 @@
  - Bugfix #13120: Added string constants for ordinals
 
 * 2009-02-10 - francisco.laguna@open-xchange.com
- 
- - Node #3267: Omit version attribute in iCal file so that outlook 2003 likes to import them. 
+
+ - Node #3267: Omit version attribute in iCal file so that outlook 2003 likes to import them.
    See: http://calendarswamp.blogspot.com/2005/08/outlook-2003-for-ical-import-use.html
 
 * 2009-02-10 - thorben.betten@open-xchange.com
- 
+
  - Bugfix #13154: Moved quota-check to message parser to ensure all attachments are checked prior to sending a mail
 
 * 2009-02-10 - marcus.klein@open-xchange.com
@@ -2859,7 +2863,7 @@
 * 2009-02-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #9771: Write cell phone into cell column even if it's marked as a "home" phone
- 
+
 * 2009-02-08 - thorben.betten@open-xchange.com
 
  - Bugfix #13138: Using a charset which supports non-ascii characters when generating a forward message
@@ -2933,7 +2937,7 @@
 * 2009-01-23 - francisco.laguna@open-xchange.com
 
  - Bugfix #13046: Decode plus signs correctly
- 
+
 * 2009-01-22 - francisco.laguna@open-xchange.com
 
  - Node 3087: Added Test to verify search behaviour for first and last name search.
@@ -2947,7 +2951,7 @@
 
 * 2009-01-21 - francisco.laguna@open-xchange.com
 
- - Bugfix #12985: Suppress notifications if only alarm setting is changed. 
+ - Bugfix #12985: Suppress notifications if only alarm setting is changed.
 
 * 2009-01-20 - thorben.betten@open-xchange.com
 
@@ -2974,7 +2978,7 @@
 
  - Bugfix #11333: Fix SQL error when generating search string.
  - Bugfix #12790: Update version number first when removing current version.
- 
+
 * 2009-01-16 - marcus.klein@open-xchange.com
 
  - Bugfix #12885: Improved message for the delivery receipt email.
@@ -2986,7 +2990,7 @@
  - Bugfix #12929: Don't use current time millis for generating timestamps
    in responses. Use the timestamp of the newest object in the response set
    instead.
- 
+
 * 2009-01-15 - thorben.betten@open-xchange.com
 
  - Bugfix #12944: Fixed changing recurring pattern for infinite recurring
@@ -3038,7 +3042,7 @@
 
 * 2009-01-09 - marcus.klein@open-xchange.com
 
- - Bugfix #7460: Server response now contains the timestamp of the confirmed appointment. 
+ - Bugfix #7460: Server response now contains the timestamp of the confirmed appointment.
 
 * 2009-01-09 - francisco.laguna@open-xchange.com
 
@@ -3083,7 +3087,7 @@
 
  - Bugfix #11124: Set "until" to null when switching from limited to
    unlimited series via webdav interface (which doesn't do incremental
-   updates). 
+   updates).
 
 * 2008-12-28 - thorben.betten@open-xchange.com
 
@@ -3224,7 +3228,7 @@
 
  - Bugfix #11613: Allow empty files to be saved in infostore.
  - Bugfix #11399: Delete of locked infoitems will cause an error and not only a
-   delete / edit conflict. 
+   delete / edit conflict.
 
 * 2008-12-05 - francisco.laguna@open-xchange.com
 
@@ -3278,7 +3282,7 @@
 
 * 2008-11-27 - francisco.laguna@open-xchange.com
 
- - Bugfix #12618: Nicer names for infostore folders in webdav. 
+ - Bugfix #12618: Nicer names for infostore folders in webdav.
 
 * 2008-11-26 - thorben.betten@open-xchange.com
 
@@ -3812,7 +3816,7 @@
 * 2008-09-01 - dennis.sieben@open-xchange.com
 
  - Bugfix #12086: Changed endWith checks in SieveHandler to startWith
- 
+
 * 2008-09-01 - thorben.betten@open-xchange.com
 
  - Bugfix #11302: Resolving an IMAP login to an user ID may return multiple
@@ -3884,7 +3888,7 @@
  - Bugfix #11946: The property file and the properties are now checked right
    at the beginning
  - Bugfix #11989: Fixed grammar file
- 
+
 * 2008-08-18 - francisco.laguna@open-xchange.com
 
  - Bugfix #11797: Check all fields for length constraints, even supposedly unlimited ones.
@@ -3940,7 +3944,7 @@
    URL.
  - Bugfix #10859: Prevent endless loops in recurring calculation. Removed all
    Thread.getStackTrace() in non-debug code. Reimplemented reloading of user
-   objects to prevent too much thread blocking. 
+   objects to prevent too much thread blocking.
 
 * 2008-08-13 - francisco.laguna@open-xchange.com
 
@@ -3963,7 +3967,7 @@
 
    The longer version: When saving a recurring appointment without setting the start and end dates those will be set
    to the first ocurrences start and end date, that in turn triggering an autoaccept in the name of the user. This
-   doesn't work when updating only the delete exceptions, because no folder type is set. 
+   doesn't work when updating only the delete exceptions, because no folder type is set.
 
 * 2008-08-11 - francisco.laguna@open-xchange.com
 
@@ -4084,7 +4088,7 @@
 * 2007-07-17 - marcus.klein@open-xchange.com
 
  - Bugfix #11337: Fixed reminder update SQL statement. Removing broken reminder.
- 
+
 * 2008-07-17 - dennis.sieben@open-xchange.com
 
  - Bugfix #11672: NullPointerException in MailfilterAction.java
@@ -4102,7 +4106,7 @@
    mail/transport provider by URL string.
  - Bugfix #11671: Invoking "unsafe" user retrieval on user storage for
    being notified about a non-existing user.
- - Bugfix #11669: Check for null reference prior to composing a new 
+ - Bugfix #11669: Check for null reference prior to composing a new
    subject for a forward mail
  - Bugfix #11670: Checking unknown user configuration before checking mail
    access permission
@@ -4128,7 +4132,7 @@
 
  - Bugfix #11642 RHEL5 Packages don't depend on Sun Java 1.5 and mysql-server
  Packages
- 
+
 * 2008-07-14 - marcus.klein@open-xchange.com
 
  - Bugfix #11619: Fixed code problem if on updating task an external participant
@@ -4297,7 +4301,7 @@
 * 2008-06-27 - dennis.sieben@open-xchange.com
 
  - Bugfix #11519: sieve filter could not be saved
- 
+
 * 2008-06-26 - francisco.laguna@open-xchange.com
 
  - Bugfix #11051: Ask OXFolderAccess only if a folder is public / private. Ignore share state.
@@ -4342,7 +4346,7 @@
  - Bugfix #11349: If a conflicting appointment is in a shared folder, which is readable, provide the title in the
                    conflict.
  - Bugfix #4778 (sic!): Supply title in GUIs freebusy query.
- 
+
 * 2008-06-24 - dennis.sieben@open-xchange.com
 
  - Bugfix #11494: Can't create a vacation notice
@@ -4371,7 +4375,7 @@
 * 2008-06-23 - dennis.sieben@open-xchange.com
 
  - Bugfix #11448: Wrong folder names in sieve scripts
-  
+
 * 2008-06-23 - thorben.betten@open-xchange.com
 
  - Bugfix #11104: Fixed mapping of exported contacts in German Outlook CSV
@@ -4402,7 +4406,7 @@
 
 * 2008-06-18 - sebastian.kauss@open-xchange.com
 
- - Bugfix #11250: [L3] List of day and month view is not sorted 
+ - Bugfix #11250: [L3] List of day and month view is not sorted
    correctly if there are serial appointments
 
 * 2008-06-17 - thorben.betten@open-xchange.com
@@ -4412,7 +4416,7 @@
 
 * 2008-06-17 - ben.pahne@open-xchange.com
 
- - Bugfix #11274: Some contacts were not deletable 
+ - Bugfix #11274: Some contacts were not deletable
  - Bugfix #11371: Not accessable links and attachments deleted
 
 * 2008-06-13 - thorben.betten@open-xchange.com
@@ -4562,7 +4566,7 @@
 
 * 2008-04-21 - sebastian.kauss@open-xchange.com
 
- - Bugfix #10881: HTTP API incompatibility: 
+ - Bugfix #10881: HTTP API incompatibility:
                   appointment request missing field ignore
 
 * 2008-04-21 - marcus.klein@open-xchange.com
@@ -4637,7 +4641,7 @@
    The config parameter com.openexchange.session.sessionContainerTimeout
    is now used in the sessiond implementation
 
- - Bugfix #10372: end date of recurring appointment is wrong in 
+ - Bugfix #10372: end date of recurring appointment is wrong in
                   search
 
  - Bugfix #10925: Context is missing in WebDAV/XML AppointmentWriter
@@ -4648,14 +4652,14 @@
 
 * 2008-03-12 - sebastian.kauss@open-xchange.com
 
- - Bugfix #11012: [L3] WebDAV interface doesn't send Free/Busy 
+ - Bugfix #11012: [L3] WebDAV interface doesn't send Free/Busy
                        times as UTC
 
 * 2008-03-11 - sebastian.kauss@open-xchange.com
 
  - Bugfix #10124: API does not return deleted items properly
 
- - Bugfix #10991: Unable to create tasks via WebDAV/XML if task 
+ - Bugfix #10991: Unable to create tasks via WebDAV/XML if task
                   with attachment already exists in the folder
 
 * 2008-03-06 - thorben.betten@open-xchange.com
@@ -4787,7 +4791,7 @@
 * 2008-01-16 - marcus.klein@open-xchange.com
 
  - Bugfix #8411: Fixed completely missing recurrence rule in WebDAV iCal
-   interface. 
+   interface.
 
 * 2008-01-15 - sebastian.kauss@open-xchange.com
 
@@ -4800,10 +4804,10 @@
 
 * 2008-01-11 - sebastian.kauss@open-xchange.com
 
- - Bugfix #6960: Missing recurrence_id when deleting a 
+ - Bugfix #6960: Missing recurrence_id when deleting a
    synchronized exception
 
- - Bugfix: #9734: add number_of_attachments and number_of_links to 
+ - Bugfix: #9734: add number_of_attachments and number_of_links to
    json array (calendar, contacts, tasks)
 
  - Bugfix: #9742: Whole-day appointment series with two participants in
@@ -4972,8 +4976,8 @@
 
 * 2007-10-29 - ben.pahne@open-xchange.com
 
- - Fixed Bug 9975: Some connections didn't get closed during an error 
- 
+ - Fixed Bug 9975: Some connections didn't get closed during an error
+
 * 2007-10-29 - marcus.klein@open-xchange.com
 
  - Bugfix #9869: Set default upload quota to infinity.
@@ -5092,7 +5096,7 @@
    update method and the field delete_exception then this exeption
    was just marked as deleted exception without a real delete.
    This has been fixed.
-   
+
   - Removed unused imports
 
   - Fixed bug #9599. By adding a new users the confirm message was
@@ -5200,7 +5204,7 @@
 * 2007-09-06 - martin.kauss@open-xchange.com
 
  - Fixed bugs #9205 and 9132
-   9205: Move with participants from a public to a private folder failed 
+   9205: Move with participants from a public to a private folder failed
    with an error message. This has been fixed.
    9132: If the original recurring appointment contains a resource an error
    occurred if an exception is created. This has been fixed.
@@ -5230,20 +5234,20 @@
    supported/turned off
 
 * 2007-09-04 - francico.laguna@open-xchange.com
- 
+
   - Fixed Bug #9204: Participant Notifications emails about tasks now sport
      the default DateFormat (not DateTimeFormat) for the users locale without
      timezone information.
-     
-  - Fixed Bug #9064: Added update task to fix name collision 
+
+  - Fixed Bug #9064: Added update task to fix name collision
      in personal infostore folder names.
- 
+
   - Fixed Bug #9112: Log filestore exception and provide simpler message
- 
+
 * 2007-09-03 - ben.pahne@open-xchange.com
- 
+
   - Fixed Bug 9154: Movings contacts not working
- 
+
 * 2007-08-30 - marcus.klein@open-xchange.com
 
  - Bugfix #7276: Fixed handling for task loading to not miss permission checks.
@@ -5343,7 +5347,7 @@
 
 * 2007-08-21 - francisco.laguna@open-xchange.com
 
- - Fixed bug #8971. User userId and not contactId for internal user participants 
+ - Fixed bug #8971. User userId and not contactId for internal user participants
    in ICAL import.
 
 * 2007-08-20 - martin.kauss@open-xchange.com
@@ -5407,7 +5411,7 @@
    ADMINISTER right is granted to user
  - Bugfix #8900: Removed unnecessary informations from html error page
    template
- 
+
 ############## PAY ATTENTION TO ME ! ################
  - CONFIG change: new property file "HTMLEntities.properties" which
    holds known HTML entities and their character mapping
@@ -5452,8 +5456,8 @@
 
 * 2007-08-13 - sebastian.kauss@open-xchange.com
 
- - Fixed Bug #8785 - Only iCal imported fullday holiday appointments 
-                     are shown on the start page. Added new ajax method 
+ - Fixed Bug #8785 - Only iCal imported fullday holiday appointments
+                     are shown on the start page. Added new ajax method
                      newappointments for portal search.
 
  - Fixed Bug #8760 - Appointment conflicts were not in ajax response after
@@ -5462,7 +5466,7 @@
 * 2007-08-13 - martin.kauss@open-xchange.com
 
  - Bugfix #8505 and #8722. Reminder data still exist after an appointment was
-   deleted. In addition, an update task exist to fix corrupt data in the 
+   deleted. In addition, an update task exist to fix corrupt data in the
    database from older version. INFO: A config file has been changed:
    updatetasks.cfg
 
@@ -5471,10 +5475,10 @@
 
 * 2007-08-13 - tobias.prinz@open-xchange.com
 
- - Bugfix #8475: Opposed to the definition, UserParticipants are not 
-   supposed to be identified by e-mail address, so I changed this in 
+ - Bugfix #8475: Opposed to the definition, UserParticipants are not
+   supposed to be identified by e-mail address, so I changed this in
    OXContainerConverter.
-   
+
 * 2007-08-13 - thorben.betten@open-xchange.com
 
  - Moved flag to store mail default folder have been checked to session due
@@ -5498,7 +5502,7 @@
 
  - Fixed bug #8527: Versitparser now does not break if empty properties
    are in a VCard or ICal file.
-   
+
 * 2007-08-10 - thorben.betten@open-xchange.com
 
  - Forgot to delete temporary uploaded files manually after sending message
@@ -5583,7 +5587,7 @@
 
 * 2007-08-06 - martin.kauss@open-xchange.com
 
- - Documented calendar.properties options and parameters.   
+ - Documented calendar.properties options and parameters.
 
  - Fixed bug #8510. Creating an recurring exception and setting a reminder
    for the exception exchanged the reminder from the recurring appointment
@@ -5612,8 +5616,8 @@
 * 2007-08-03 - francisco.laguna@open-xchange.com
 
  - Fixed bug #8673. Added a new servletmapping to allow Vista Home Basic to connect
-   on the first level. 
-   
+   on the first level.
+
 ########### LOOK MA! NO HANDS! CONFIGCHANGE CONFIGCHANGE#############
 
 in the servletmapping.properties we have a new entry:
@@ -5637,7 +5641,7 @@ JkMount /infostore/* ajp13
 * 2007-08-02 - sebastian.kauss@open-xchange.com
 
  - Fixed Bug #7393 - Folder 0 cannot be resolved
- - Fixed Bug #8618 - ICal import is possible if calendar module is disabled 
+ - Fixed Bug #8618 - ICal import is possible if calendar module is disabled
  - Fixed Bug #8635 - Use transaction to generate unique id for reminder
  - Fixed Bug #8545 - Reminder import use more database connections
  - Fixed Bug #7142 - Log permission exception as debug
@@ -5658,7 +5662,7 @@ JkMount /infostore/* ajp13
 
 * 2007-08-02 - francisco.laguna@open-xchange.com
 
- - Bugfix #7936: Changed error messages for infostore and attachments. 
+ - Bugfix #7936: Changed error messages for infostore and attachments.
 
 * 2007-08-01 - marcus.klein@open-xchange.com
 
@@ -5668,14 +5672,14 @@ JkMount /infostore/* ajp13
 
 * 2007-08-01 - francisco.laguna@open-xchange.com
 
- - Fixed Bug #8630 - Check module permission for multiple module 
+ - Fixed Bug #8630 - Check module permission for multiple module
    (partial fix for infostore and attachments), note though, there is no
    module permission explicitely for attachments.
 
 * 2007-08-01 - sebastian.kauss@open-xchange.com
 
  - Fixed Bug #8177 - Statement not closed if inserting reminder fails
- - Fixed Bug #6077 - Redesign of reminder exception handling 
+ - Fixed Bug #6077 - Redesign of reminder exception handling
  - Fixed Bug #6990 - Replace JSONException with OXJSONException
  - Fixed Bug #8182 - Deleted objects are not return in modified request
 
@@ -5694,8 +5698,8 @@ JkMount /infostore/* ajp13
  - Improving logging
  - Bugfix #8643: Fixed response code for LOCK requests
  - Bugfix #8644: When infostore is disabled, WebDAV is also disabled
- 
- 
+
+
 * 2007-07-31 - thorben.betten@open-xchange.com
 
  - Multiple servlet changed to use JSON objects to create the multiple
@@ -5747,7 +5751,7 @@ JkMount /infostore/* ajp13
  - Removed Suns BASE64 en/decoder.
 
 * 2007-07-23 - martin.kauss@open-xchange.com
- 
+
  - Fixed bug #8490. The wrong folder was send to the client if a shared folder
    was requested but the current user was also a participant in an appointment.
    This has been fixed.
@@ -5805,12 +5809,12 @@ JkMount /infostore/* ajp13
  - Fix for bug #8392: Changed webdav servlet to expect ENCODED URIs. To ensure
    that they remain encoded the following option has to be set in the Apache configuration:
    JkOptions +ForwardURICompatUnparsed
-   
+
 ############## PAY ATTENTION TO ME ! ################
  - CONFIG change: Option in apache configuration must be set:
 JkOptions +ForwardURICompatUnparsed
 #####################################################
-   
+
 
 * 2007-07-13 - thorben.betten@open-xchange.com
 
@@ -5842,7 +5846,7 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-07-10 - tobias.prinz@open-xchange.com
 
- - Bugfix #7949: Changed log-level for USER_INPUT exceptions 
+ - Bugfix #7949: Changed log-level for USER_INPUT exceptions
    from warn() to debug().
 
 * 2007-07-10 - martin.kauss@open-xchange.com
@@ -5871,12 +5875,12 @@ JkOptions +ForwardURICompatUnparsed
 
  - Bugfix #7710: Now the French Outlook value for the private field is
    recognized, too.
- - Bugfix #7949: Now using LOG.warn() instead of LOG.error() in case 
+ - Bugfix #7949: Now using LOG.warn() instead of LOG.error() in case
    of USER_INPUT exception.
  - Bugfix #8342: Searching for "target" attribute when parsing links
    inside html content of an email. If not present or its value is not
    equal to "_blank" it's going to be replaced.
- 
+
 * 2007-07-09 - thorben.betten@open-xchange.com
 
  - Bugfix #8335: Remembering subscription status on folder rename for
@@ -5907,15 +5911,15 @@ JkOptions +ForwardURICompatUnparsed
 
  - Fixed bug #8050: Now calling "ant -f build.xml all-i18n" on the
    server's buildfile will cause it to compare the German and the
-   English .po/.pot files to check whether all texts have been 
+   English .po/.pot files to check whether all texts have been
    translated.
- - Fixed bug #7473 (importer): Trigger times in ICal are always 
+ - Fixed bug #7473 (importer): Trigger times in ICal are always
    negative, alarmtimes in OX always positive. Just switching that now.
  - Fixed bug #7710 (importer): Now private flag is correctly read.
    This needed a ContactSwitcher able to translate several strings
-   to a boolean value. Hopefully, the French translation is correct 
+   to a boolean value. Hopefully, the French translation is correct
    also...
- 
+
 * 2007-07-05 - thorben.betten@open-xchange.com
 
  - Fixed message headers 'X-Mailer' & 'Organization' settings when sending
@@ -5949,17 +5953,17 @@ JkOptions +ForwardURICompatUnparsed
 * 2007-07-05 - martin.kauss@open-xchange.com
 
  - Added new feature that the conflict handling can be disabled.
-   If the conflict flag is false, no conflict resolution or detection 
-   is done, even if a resource is booked. This can lead into 
+   If the conflict flag is false, no conflict resolution or detection
+   is done, even if a resource is booked. This can lead into
    overbooking of resources and this is not a bug but a feature.
 
  - Added new  feature that the free/busy handling can be disabled.
-   If the free/busy flag is false, no free/busy results are returned, 
+   If the free/busy flag is false, no free/busy results are returned,
    even if the requested user or resource has appointments in
    the given timeframe. This is not a bug but a feature.
 
- - Fixed bug #8290. A multi span whole day account was 
-   sometimes shown wrong in the mini calendar. This 
+ - Fixed bug #8290. A multi span whole day account was
+   sometimes shown wrong in the mini calendar. This
    could happen if the start of the appointment is before
    the start of the mini calendar. This has been fixed.
 
@@ -5967,7 +5971,7 @@ JkOptions +ForwardURICompatUnparsed
    is not in the first week after the start one occurrence is not calculated.
    This has been fixed.
 
- - Fixed bug #7878. The first recurring calculation result was never 
+ - Fixed bug #7878. The first recurring calculation result was never
    provided by the free/busy interface. This has been fixed.
 
 * 2007-07-04 - marcus.klein@open-xchange.com
@@ -6006,21 +6010,21 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-07-04 - francisco.laguna@open-xchange.com
 
- - Fixed Bug #7870: Applied patch that corrects the HTTP status 
+ - Fixed Bug #7870: Applied patch that corrects the HTTP status
    codes for webdav MOVE and COPY requests.
-  
+
  - Fixed Bug #8127: Applied patch that moves the property cleaning
    to the delete event handler for infoitems.
-   
+
  - Fixed Bug #8111: Removed some unnecessary selects
- 
+
  - Bug #7792: Logging HTTP Status 500 Exceptions as "Error".
- 
+
 * 2007-07-03 - tobias.prinz@open-xchange.com
 
- - Fixed bug #7718 (importer). Now the DESCRIPTION property of 
+ - Fixed bug #7718 (importer). Now the DESCRIPTION property of
    VTODO is mapped to our Task.NOTE property.
- - Fixed bug #7719 (importer). Added special handling for TELEX 
+ - Fixed bug #7719 (importer). Added special handling for TELEX
    element which VCARD considers a mail object, but of course
    it does not pass the check for a proper mail adress (VCard is
    more tolerant than us).
@@ -6112,7 +6116,7 @@ JkOptions +ForwardURICompatUnparsed
  - Fixed bug #7734. If an appointment was moved to another time, the reminder
    was not re-calculated. This has been fixed.
 
- - Fixed bug #7273. The confirm state was not changed if an appointment was 
+ - Fixed bug #7273. The confirm state was not changed if an appointment was
    moved to a different time. Now the confirm state is set to NONE.
 
 * 2007-06-28 - marcus.klein@open-xchange.com
@@ -6293,11 +6297,11 @@ JkOptions +ForwardURICompatUnparsed
  - Partial fix #6825: Now handling all messages where data given is too
    long for our database. This makes part (3) of the bug report a lot better,
    yet it still needs translation (and possibly i18n).
- 
+
 * 2007-05-29 - francisco.laguna@open-xchange.com
 
  - Partial Fix 7557: Annotation Processor also checks class declarations
- 
+
 * 2007-05-25 - tobias.prinz@open-xchange.com
 
  - Bugfix #6825 (part): OxContainerConverter did not discern between external
@@ -6306,7 +6310,7 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-05-24 - tobias.prinz@open-xchange.com
 
- - Bugfix #7538 : AJAXServlet.substitute used String.replaceAll which 
+ - Bugfix #7538 : AJAXServlet.substitute used String.replaceAll which
    removed some backslashes. This lead to unescaped quotation marks in
    error messages, which broke the JSON response. Fixed this for all
    response callbacks upon a HTTP-POST.
@@ -6335,7 +6339,7 @@ JkOptions +ForwardURICompatUnparsed
 * 2007-05-23 - thorben.betten@open-xchange.com
 
  - Bugfix #7280: Changes to apply to new tnef.jar v.1.3.1
- 
+
  Changes made in bugfix branch:
  - Bugfix #7401: Improved template for Message Disposition Notification (MDN)
  - Bugfix #7480: Fixed parsing of href elements occuring inside img's src
@@ -6360,12 +6364,12 @@ JkOptions +ForwardURICompatUnparsed
 * 2007-05-23 - marcus.klein@open-xchange.com
 
   - Bugfix #7275: Changed error message once again.
-   
+
 * 2007-05-22 - tobias.prinz@open-xchange.com
 
  - Added new error category "WARNING".
  - Bugfix #7109: Added server side solution using WARNING for partial inserts.
- - Bugfix #7472: Added handling of PRIVATE flag. Treating CONFIDENTIAL flag 
+ - Bugfix #7472: Added handling of PRIVATE flag. Treating CONFIDENTIAL flag
    as PRIVATE flag.
 
 * 2007-05-22 - francisco.laguna@open-xchange.com
@@ -6382,10 +6386,10 @@ JkOptions +ForwardURICompatUnparsed
 
   - Bugfix: Loading the contact folder via CSV import did not work properly
     when folder was not cached already. Fixed this in CSVLibrary.java
-    
+
 * 2007-05-18 - tobias.prinz@open-xchange.com
 
-  - Bugfix #7386: Forgot to add exception to exception list when 
+  - Bugfix #7386: Forgot to add exception to exception list when
     encountering major parsing error in ICalImporter.
 
 * 2007-05-18 - marcus.klein@open-xchange.com
@@ -6399,10 +6403,10 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-05-16 - tobias.prinz@open-xchange.com
 
-  - Bugfix #7249: Validating e-mail before inserting e-mail 
+  - Bugfix #7249: Validating e-mail before inserting e-mail
     address from uploaded VCard...
   - Fixed response of ImportExportWriter in case of exception.
-  - Added yet another translation possibility for ContactField: 
+  - Added yet another translation possibility for ContactField:
     Constants used in AJAX/Servlet part are now understood.
 
 * 2007-05-16 - marcus.klein@open-xchange.com
@@ -6416,12 +6420,12 @@ JkOptions +ForwardURICompatUnparsed
  - An error message was rewritten like mentioned in bug #7292
 
  - Fixe bug #7281. The private folder id was used from the first participant
-   when an appointment was updated. This has been fixed. 
+   when an appointment was updated. This has been fixed.
 
 * 2007-05-15 - tobias.prinz@open-xchange.com
 
-  - Bugfix (reported by Suphi): Sending a Outlook CSV file as normal CSV 
-    file caused ClassCastException because of different date formats. 
+  - Bugfix (reported by Suphi): Sending a Outlook CSV file as normal CSV
+    file caused ClassCastException because of different date formats.
     Catching it now, refactored the CSV importers to make that easier.
   - Bugfix #7250 / #7107: Changed VCardTokenizer to work on ByteArrays
     instead of Strings to be independend of encoding.
@@ -6443,8 +6447,8 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-05-14 - martin.kauss@open-xchange.com
 
- - Database changes (alter field length) to fix bug #6514. The mail address 
-   can now contain 286 chars. 
+ - Database changes (alter field length) to fix bug #6514. The mail address
+   can now contain 286 chars.
 
  - Build in some configuration paramater to disable the fast pre fetch and to
    set the max. pre fetch block size.
@@ -6458,7 +6462,7 @@ JkOptions +ForwardURICompatUnparsed
 * 2007-05-11 - tobias.prinz@open-xchange.com
 
  - Removed special chars and used Unicode \u??? style in ContactFieldMappers
- - Bugfix #7248 / #7107: Changed parsing of VCard files with less than five N 
+ - Bugfix #7248 / #7107: Changed parsing of VCard files with less than five N
    elements or 7 ADR elements in OXContainerConverter.
 
 * 2007-05-11 - thorben.betten@open-xchange.com
@@ -6487,9 +6491,9 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-05-09 - tobias.prinz@open-xchange.com
 
- - Fixed bug #7106: Several conversions of Streams to strings which 
+ - Fixed bug #7106: Several conversions of Streams to strings which
    did rely on UTF-8 as default encoding. Changed to explizit usage.
- - Fixed bug in OutlookImporter that made the importer not act on getting 
+ - Fixed bug in OutlookImporter that made the importer not act on getting
    an Outlook CSV file.
 
 * 2007-05-09 - thorben.betten@open-xchange.com
@@ -6506,12 +6510,12 @@ JkOptions +ForwardURICompatUnparsed
 
  - Code clean up in some calendar classes. Avoided the use of the deprecated
    OXFolderTools.
- 
+
  - Optimized calendar performance by reducing single SQL statements. Now many
    requests are bundled and executed by some requests. Additional the conflict
    resolution was optimized by reducing SQL queries and using an cached object
    instead.
- 
+
 * 2007-05-09 - marcus.klein@open-xchange.com
 
   - Bugfix #7121: Changed database authentication mechanism to prevent security
@@ -6536,7 +6540,7 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-05-08 - sebastian.kauss@open-xchange.com
 
-  - Fixed Bug #7083: Fixed a problem in the webdav xml interface 
+  - Fixed Bug #7083: Fixed a problem in the webdav xml interface
     that the last modified attributes was not used in request for groups and resources.
 
   - Fixed Bug #7152: Fixed a problem that active sessions are not decremented correctly.
@@ -6561,11 +6565,11 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-05-07 - tobias.prinz@open-xchange.com
 
-  - Bugfix #7105: Parser has become more tolerant to different amounts of 
-    cells per line. Fixes the reported exception but not the basic problem 
+  - Bugfix #7105: Parser has become more tolerant to different amounts of
+    cells per line. Fixes the reported exception but not the basic problem
     of Outlook imports.
   - Worked on response handling of ImportServlet. Should work now in any case.
-  
+
 * 2007-05-07 - marcus.klein@open-xchange.com
 
   - Bugfix #6127: Fixed a small coding error causing the complete request to
@@ -6581,7 +6585,7 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-05-07 - francisco.laguna@open-xchange.org
 
-  - Bugfix #7053. Changed query for locks. Doesn't load locks and counts them but checks it query matches. 
+  - Bugfix #7053. Changed query for locks. Doesn't load locks and counts them but checks it query matches.
   - Bugfix #7131. Fixed NPE in HEAD query for folders.
   - Bugfix #6334. NPE due to autoboxing on partial GET for folders.
   - Removed some printStackTrace calls.
@@ -6597,9 +6601,9 @@ JkOptions +ForwardURICompatUnparsed
    of a broken file. Now the appropriate exception is caught inside
    the while-loop and the loop is stopped.
  - Added some more error messages to the importers to make it easier
-   for the GUI team to know whether an import did work partially or 
+   for the GUI team to know whether an import did work partially or
    not at all.
-   
+
 * 2007-05-04 - stefan.preuss@open-xchange.org
 
   - Bugfix #7112. Setting "Color quoted lines" has no effect.
@@ -6643,7 +6647,7 @@ JkOptions +ForwardURICompatUnparsed
    from recurrin appointments. This has been fixed.
 
 * 2007-05-02 - martin.kauss@open-xchange.com
- 
+
  - Fixed bug #6400. An error message is thrown if a user moves an
    recurring exception into a different folder.
 
@@ -6666,7 +6670,7 @@ JkOptions +ForwardURICompatUnparsed
  - Bugfix #7008: Fixed comma-separation in multiple request
  - Bugfix #6994: Proper decoding a original message's subject on creating
    reply's display version
- - Bugfix #7007: Using java.text.Collator to sort strings locale-specific 
+ - Bugfix #7007: Using java.text.Collator to sort strings locale-specific
  - Bugfix #6971: Server crashes if backend services cannot be initialized
  - Added update task to add column 'passwordMech' to table 'user' if not
    present
@@ -6710,13 +6714,13 @@ JkOptions +ForwardURICompatUnparsed
  - Fixed Bug 6688  for this branch: Contact loses display_name information when setting flag
 
 * 2007-04-25 francisco.laguna@open-xchange.com
- 
+
  - Corrected some error messages
  - Fixed Bug #6842. Use setHeader to remove pragma header
  - Fixed Bug #6157. Don't format error messages in Exception class
- 
+
 * 2007-04-25 ben.pahne@open-xchange.com
- 
+
  - Fixed Bug #6743, Upload contact image: error messages incorrect
 
 * 2007-04-25 - thorben.betten@open-xchange.com
@@ -6727,7 +6731,7 @@ JkOptions +ForwardURICompatUnparsed
  - Optimized folder-cache's write-lock usage on modifying action(s)
 
 * 2007-04-24 - francisco.laguna@open-xchange.com
- 
+
   - Fixed Bug #6893 Omit X-OX-Reminder header on appointment and task delete
   - Fixed Bug #6618 Change server.pot strings.
   - Partially fixed Bug #5659 : Added timezone to dates.
@@ -6784,7 +6788,7 @@ JkOptions +ForwardURICompatUnparsed
 
  - Changed behavior of ImporterServlet to be stricter: Now broken files
   are not parsed as far as possible. System simply throws exception.
-   
+
 * 2007-04-20 - ben.pahne@open-xchange.com
 
  - Fixed Bug #6779: Users can now edit their own information in the global
@@ -6806,9 +6810,9 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-04-18 - tobias.prinz@open-xchange.com
 
-  - fixed import tests for iCal Importer, couldn't find bug in 
+  - fixed import tests for iCal Importer, couldn't find bug in
     export though. Reassigned to developer.
-  - refactored CSV- and Outlook-CSV importers to make re-use easier. 
+  - refactored CSV- and Outlook-CSV importers to make re-use easier.
 
 * 2007-04-18 - thorben.betten@open-xchange.com
 
@@ -6962,13 +6966,13 @@ JkOptions +ForwardURICompatUnparsed
 
  - Fixed counting of established IMAP connections
  - Try to fix the bug related to fetch a newly created message with
-   getMessageByUID() 
+   getMessageByUID()
 
 * 2007-03-22 - francisco.laguna@open-xchange.com
 
  - Bugfix # 5485. ParticipantNotify tries to resolve a resource to a person
-   if it can't be found. 
- - Bugfix # 6334. Error in size calculation for partial GET.   
+   if it can't be found.
+ - Bugfix # 6334. Error in size calculation for partial GET.
  - Bugfix # 6315. Transfer lock ownership to mailadmin when a user is deleted
  - Throw delete events when removing infoitems during user delete to remove subordinate locks.
  - Event Handling to remove remaining locks if an item is deleted.
@@ -7053,13 +7057,13 @@ JkOptions +ForwardURICompatUnparsed
 
 * 2007-03-13 - tobias.prinz@open-xchange.com
 
-  - Split the infamous ImportExport servlet into two servlets, changed 
+  - Split the infamous ImportExport servlet into two servlets, changed
     parameter setup according to rest of the HTTP API, changed Format,
     changed tests accordingly. Changed AJAXServlet to handle uploads
     from servlets.
   - ###CHANGED SERVLETMAPPING.PROPERTIES!### to
     refer to two servlets now instead of one.
-  - Changed CSVParser to list lines it could not parse instead from 
+  - Changed CSVParser to list lines it could not parse instead from
     breaking.
 
 * 2007-03-13 - thorben.betten@open-xchange.com
@@ -7097,7 +7101,7 @@ JkOptions +ForwardURICompatUnparsed
    allowance of folder subsription status
 #################################################
 - Implemented respect of folder subsription status: GUI can ask for field
-  314/"subsribed" to check/set folder's subsription status. 
+  314/"subsribed" to check/set folder's subsription status.
 
 * 2007-03-09 - thorben.betten@open-xchange.com
 
@@ -7120,7 +7124,7 @@ JkOptions +ForwardURICompatUnparsed
 
    - Fixed bug #6251: Quota inconsistencies on master-slave setup.
    - Fixed bug #6336: Added null-check to QuotaRequest.
- 
+
 
 * 2007-03-08 - thorben.betten@open-xchange.com
 
@@ -7180,16 +7184,16 @@ JkOptions +ForwardURICompatUnparsed
     Hibernate does it kinda he same way. You'll get used to it.
   - Added two basic CSV handling classes - one of them a parser. Can be found
     in ...importerexporter.csv - maybe useful for other projects.
-  - Further Work on importers and exporters. Okay, we agreed not to mention 
-    new development, but since I was already typing and even the 
+  - Further Work on importers and exporters. Okay, we agreed not to mention
+    new development, but since I was already typing and even the
     system.properties.in has been updated, which usually is worth an e-mail...
-  
+
 * 2007-02-16 - tobias.prinz@open-xchange.com
 
   - Work on importers and exporters.
   - Added a handy class to translate between constants used in Types.class
     and in FolderObject.class: ModuleTypeTranslator
-  
+
 * 2007-02-15 - tobias.prinz@open-xchange.com
 
   - Work on importers and exporters
