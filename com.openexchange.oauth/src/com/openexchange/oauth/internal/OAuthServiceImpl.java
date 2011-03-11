@@ -85,8 +85,6 @@ import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.folderstorage.FolderEventConstants;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
