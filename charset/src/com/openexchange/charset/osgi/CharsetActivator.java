@@ -121,7 +121,7 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
             }
             {
                 final CharsetProvider[] results = ModifyCharsetStandardProvider.modifyCharsetExtendedProvider();
-                backupStandardCharsetProvider = results[0];
+                backupStandardCharsetProvider = null == results ? null : results[0];
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("Standard & external charset provider replaced with collection charset provider");
@@ -148,10 +148,14 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
             /*
              * Restore original
              */
-            ModifyCharsetExtendedProvider.restoreCharsetExtendedProvider(backupExtendedCharsetProvider);
-            backupExtendedCharsetProvider = null;
-            ModifyCharsetStandardProvider.restoreCharsetExtendedProvider(backupStandardCharsetProvider);
-            backupStandardCharsetProvider = null;
+            if (null != backupExtendedCharsetProvider) {
+                ModifyCharsetExtendedProvider.restoreCharsetExtendedProvider(backupExtendedCharsetProvider);
+                backupExtendedCharsetProvider = null;
+            }
+            if (null != backupStandardCharsetProvider) {
+                ModifyCharsetStandardProvider.restoreCharsetExtendedProvider(backupStandardCharsetProvider);
+                backupStandardCharsetProvider = null;
+            }
             collectionCharsetProvider = null;
             if (LOG.isInfoEnabled()) {
                 LOG.info("Collection charset provider replaced with former standard/external charset provider");
