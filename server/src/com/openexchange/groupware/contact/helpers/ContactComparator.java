@@ -52,6 +52,7 @@ package com.openexchange.groupware.contact.helpers;
 import java.util.Comparator;
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 
 /**
  * A special implementation of a comparator that uses the first not null attribute of a contact in order of surname, display name, company,
@@ -60,27 +61,40 @@ import com.openexchange.groupware.container.Contact;
  */
 public class ContactComparator implements Comparator<Contact> {
 
-    private static final AlphanumComparator alphanumComparator = new AlphanumComparator();
+	private Comparator comparator;
+	private int weight = 1;
 
     /**
      * Default constructor.
      */
     public ContactComparator() {
         super();
+        this.comparator = new AlphanumComparator();
+    }
+    
+    public ContactComparator(Comparator comp, Order sortOrder) {
+        this();
+        this.comparator = comp;
+        if(sortOrder == Order.DESCENDING)
+        	this.weight = -1;
     }
 
     public int compare(final Contact contact1, final Contact contact2) {
         final String s1 = getFirstNotNull(contact1);
         final String s2 = getFirstNotNull(contact2);
-        return alphanumComparator.compare(s1, s2);
+        return weight * comparator.compare(s1, s2);
     }
 
     private String getFirstNotNull(final Contact contact) {
         final String retval;
-        if (contact.containsSurName()) {
+        if (contact.containsYomiLastName()) {
+            retval = contact.getYomiLastName();
+        } else if (contact.containsSurName()) {
             retval = contact.getSurName();
         } else if (contact.containsDisplayName()) {
             retval = contact.getDisplayName();
+        } else if (contact.containsYomiCompany()) {
+        	retval = contact.getYomiCompany();
         } else if (contact.containsCompany()) {
             retval = contact.getCompany();
         } else if (contact.containsEmail1()) {

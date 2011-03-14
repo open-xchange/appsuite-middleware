@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class UseCountComparator implements Comparator<Contact> {
 
-    private ContactComparator contactComparator;
+    private Comparator contactComparator;
 
     private boolean specialSort;
 
@@ -67,6 +67,12 @@ public class UseCountComparator implements Comparator<Contact> {
         this.specialSort = specialSort;
         this.contactComparator = new ContactComparator();
     }
+    
+    public UseCountComparator(boolean specialSort, Comparator comp) {
+        this(specialSort);
+        this.contactComparator = comp;
+    }
+
 
     public int compare(Contact o1, Contact o2) {
         if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
