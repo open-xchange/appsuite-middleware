@@ -83,7 +83,9 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 %dir /opt/open-xchange/etc/groupware/
+%dir /opt/open-xchange/etc/admindaemon/
 %dir /opt/open-xchange/bundles
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
+/opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/facebookmessaging.properties
