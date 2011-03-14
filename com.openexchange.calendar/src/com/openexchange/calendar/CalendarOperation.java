@@ -180,7 +180,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     if (DEBUG && action_folder != inFolder) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":",I(oid),":",I(action_folder),":",inFolder }));
                     }
-                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5));
+                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5, I(oid)));
                 }
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));
@@ -897,7 +897,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         }
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception (fid!inFolder) for user:oid:fid:cols ", I(so.getUserId()), ":", I(cdao.getObjectID()),":",I(oids[index][1]),":",colss.toString() }));
                     }
-                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5));
+                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5, I(cdao.getObjectID())));
                 }
             }
             rsNext(false);

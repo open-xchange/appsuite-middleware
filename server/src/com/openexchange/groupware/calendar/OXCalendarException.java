@@ -159,7 +159,7 @@ public class OXCalendarException extends OXException {
         LOAD_PERMISSION_EXCEPTION_2("Got the wrong folder identification. You do not have the appropriate permissions to modify this object.", 59, AbstractOXException.Category.PERMISSION),
         LOAD_PERMISSION_EXCEPTION_3("Got the wrong shared folder identification. You do not have the appropriate permissions to modify this object.", 60, AbstractOXException.Category.PERMISSION),
         LOAD_PERMISSION_EXCEPTION_4("You do not have the appropriate permissions to move this object.", 61, AbstractOXException.Category.PERMISSION),
-        LOAD_PERMISSION_EXCEPTION_5("You do not have the appropriate permissions to read this object", 62, AbstractOXException.Category.PERMISSION),
+        LOAD_PERMISSION_EXCEPTION_5("You do not have the appropriate permissions to read this object %1$d.", 62, AbstractOXException.Category.PERMISSION),
         LOAD_PERMISSION_EXCEPTION_6("You do not have the appropriate permissions to create an object", 63, AbstractOXException.Category.PERMISSION),
         RECURRING_MISSING_YEARLY_MONTH("Fatal error. (YEARLY) Missing or wrong Month value: %d", 64, AbstractOXException.Category.USER_INPUT),
         RECURRING_ALREADY_EXCEPTION("Fatal error. You are trying to create a new recurring from an exception!", 65, AbstractOXException.Category.USER_INPUT),

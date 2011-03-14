@@ -283,7 +283,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             		}
             	}
             	if (!found) {
-            		throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5));
+            		throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5, I(cdao.getObjectID())));
             	}
             }
 
