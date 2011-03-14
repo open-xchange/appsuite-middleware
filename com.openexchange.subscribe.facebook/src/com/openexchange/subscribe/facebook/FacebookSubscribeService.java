@@ -50,11 +50,14 @@
 package com.openexchange.subscribe.facebook;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
 import com.openexchange.subscribe.AbstractSubscribeService;
@@ -143,6 +146,12 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
 
         }
         super.modifyOutgoing(subscription);
+    }
+
+    public void deleteAllUsingOAuthAccount(Context context, int id) throws SubscriptionException {
+        Map<String, Object> query = new HashMap<String, Object>();
+        query.put("account", String.valueOf(id));
+        removeWhereConfigMatches(context, query);
     }
 
 }

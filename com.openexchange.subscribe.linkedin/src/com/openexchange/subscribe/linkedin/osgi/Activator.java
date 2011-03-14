@@ -57,10 +57,13 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.context.ContextService;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.linkedin.LinkedInSubscribeService;
+import com.openexchange.subscribe.linkedin.groupware.LinkedInSubscriptionsOAuthAccountDeleteListener;
 
 public class Activator implements BundleActivator {
 
@@ -76,14 +79,19 @@ public class Activator implements BundleActivator {
 
     private LinkedInService linkedInService;
 
+    private ContextService contextService;
+
     public void start(BundleContext context) throws Exception {
         bundleContext = context;
         services = new ArrayList<ServiceRegistration>();
         // react dynamically to the appearance/disappearance of LinkedinService
         trackers.push(new ServiceTracker(context, LinkedInService.class.getName(), new LinkedInServiceRegisterer(context, this)));
 
-        // react dynamically to the appearance/disappearance of LinkedinService
+        // react dynamically to the appearance/disappearance of OAuthServiceMetadata
         trackers.push(new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this)));
+
+        // react dynamically to the appearance/disappearance of ContextService
+        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new ContextServiceRegisterer(context, this)));
 
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
@@ -97,13 +105,20 @@ public class Activator implements BundleActivator {
     }
 
     public void registerServices() {
-        if (null != oAuthServiceMetadata && null != linkedInService){
+        if (null != oAuthServiceMetadata && null != linkedInService && null != contextService){
             final LinkedInSubscribeService linkedInSubscribeService = new LinkedInSubscribeService(this);
             final ServiceRegistration serviceRegistration = bundleContext.registerService(
                 SubscribeService.class.getName(),
                 linkedInSubscribeService,
                 null);
             services.add(serviceRegistration);
+            
+            try {
+                services.add(bundleContext.registerService(OAuthAccountDeleteListener.class.getName(), new LinkedInSubscriptionsOAuthAccountDeleteListener(linkedInSubscribeService, contextService), null)); 
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+            
             LOG.info("LinkedInSubscribeService was started.");
         }
     }
@@ -130,6 +145,10 @@ public class Activator implements BundleActivator {
 
     public void setLinkedInService(LinkedInService linkedInService) {
         this.linkedInService = linkedInService;
+    }
+    
+    public void setContextService(ContextService contexts) {
+        this.contextService = contexts;
     }
 
 }

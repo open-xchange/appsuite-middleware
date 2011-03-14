@@ -60,6 +60,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -558,6 +559,43 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             dbProvider.releaseWriteConnection(ctx, writeConnection);
         }
     }
-    
-    
+
+    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws SubscriptionException {
+        Connection writeConnection = null;
+        try {
+            writeConnection = dbProvider.getWriteConnection(ctx);
+            txPolicy.setAutoCommit(writeConnection, false);
+            DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("source_id", PLACEHOLDER)).AND(new EQUALS("configuration_id", PLACEHOLDER)));
+            List<Object> values = new ArrayList<Object>(Arrays.asList(null, null, null));
+            values.set(0, ctx.getContextId());
+            values.set(1, sourceId);
+            
+            List<Integer> configIds = storageService.search(ctx, query);
+            for (Integer configId : configIds) {
+                values.set(2, configId);
+                int deleted = new StatementBuilder().executeStatement(writeConnection, delete, values);
+                if(deleted == 1) {
+                    // Delete the generic configuration only if the source_id matched
+                    storageService.delete(writeConnection, ctx, configId);
+                }
+            }
+            txPolicy.commit(writeConnection);
+        } catch (GenericConfigStorageException e) {
+            throw new SubscriptionException(e);
+        } catch (DBPoolingException e) {
+            throw new SubscriptionException(e);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            try {
+                if(writeConnection != null) {
+                    txPolicy.rollback(writeConnection);
+                    txPolicy.setAutoCommit(writeConnection, true);
+                }
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            }
+            dbProvider.releaseWriteConnection(ctx, writeConnection);
+        }        
+    }
 }

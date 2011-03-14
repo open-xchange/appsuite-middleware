@@ -57,11 +57,14 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.context.ContextService;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
 import com.openexchange.oauth.facebook.OAuthServiceMetaDataFacebookImpl;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.facebook.FacebookSubscribeService;
+import com.openexchange.subscribe.facebook.groupware.FacebookSubscriptionsOAuthAccountDeleteListener;
 
 /**
  * {@link FacebookRegisterer}
@@ -77,10 +80,13 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
     private final Lock lock = new ReentrantLock();
 
     private ServiceRegistration registration;
+    private ServiceRegistration registration2;
 
     private OAuthServiceMetaData facebookMetaData;
 
     private FacebookService facebookService;
+
+    private ContextService contextService;
 
     public FacebookRegisterer(BundleContext context) {
         super();
@@ -100,14 +106,19 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
             if (obj instanceof FacebookService) {
                 facebookService = (FacebookService) obj;
             }
-            needsRegistration = null != facebookMetaData && null != facebookService && registration == null;
+            if (obj instanceof ContextService) {
+                contextService = (ContextService) obj;
+            }
+            needsRegistration = null != facebookMetaData && null != facebookService && null != contextService && registration == null;
         } finally {
             lock.unlock();
         }
         if (needsRegistration) {
             LOG.info("Registering facebook subscribe service.");
             FacebookSubscribeService facebookSubscribeService = new FacebookSubscribeService(facebookMetaData, facebookService);
+            FacebookSubscriptionsOAuthAccountDeleteListener deleteListener = new FacebookSubscriptionsOAuthAccountDeleteListener(facebookSubscribeService, contextService);
             registration = context.registerService(SubscribeService.class.getName(), facebookSubscribeService, null);
+            registration2 = context.registerService(OAuthAccountDeleteListener.class.getName(), deleteListener, null);
         }
         return obj;
     }
@@ -131,6 +142,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
             if (registration != null && (facebookMetaData == null || facebookService == null)) {
                 unregister = registration;
                 registration = null;
+                
             }
         } finally {
             lock.unlock();
@@ -138,6 +150,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
         if (null != unregister) {
             LOG.info("Unregistering facebook subscribe service.");
             unregister.unregister();
+            registration2.unregister();
         }
         context.ungetService(reference);
     }

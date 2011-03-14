@@ -47,32 +47,45 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.linkedin.osgi;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.contexts.Context;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.context.ContextService;
+import com.openexchange.oauth.linkedin.LinkedInService;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link ContextServiceRegisterer}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface SubscriptionStorage {
+public class ContextServiceRegisterer implements ServiceTrackerCustomizer {
 
-    public void rememberSubscription(Subscription subscription) throws SubscriptionException;
-
-    public void forgetSubscription(Subscription subscription) throws SubscriptionException;
-
-    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws SubscriptionException;
-
-    public Subscription getSubscription(Context ctx, int id) throws SubscriptionException;
-
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws SubscriptionException;
-
-    public void updateSubscription(Subscription subscription) throws SubscriptionException;
-
-    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws SubscriptionException;
-
-    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws SubscriptionException;
+    private BundleContext context;
+    private Activator activator;
     
-    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws SubscriptionException;
+    public ContextServiceRegisterer(BundleContext context, Activator activator){
+        this.context = context;
+        this.activator = activator;
+    }
+
+    public Object addingService(ServiceReference reference) {
+        ContextService contexts = (ContextService) context.getService(reference);        
+        activator.setContextService(contexts);
+        activator.registerServices();
+        return contexts;
+    }
+
+    public void modifiedService(ServiceReference arg0, Object arg1) {
+      //nothing to do here
+    }
+
+    public void removedService(ServiceReference reference, Object arg1) {
+        activator.setContextService(null);
+        activator.unregisterServices();
+        context.ungetService(reference);
+    }
+
 }

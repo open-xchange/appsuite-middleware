@@ -47,32 +47,52 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.facebook.groupware;
 
-import java.util.List;
+import java.sql.Connection;
 import java.util.Map;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthException;
+import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.facebook.FacebookSubscribeService;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link FacebookSubscriptionsOAuthAccountDeleteListener}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface SubscriptionStorage {
+public class FacebookSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
 
-    public void rememberSubscription(Subscription subscription) throws SubscriptionException;
+    private FacebookSubscribeService fbService;
+    private ContextService contexts;
 
-    public void forgetSubscription(Subscription subscription) throws SubscriptionException;
-
-    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws SubscriptionException;
-
-    public Subscription getSubscription(Context ctx, int id) throws SubscriptionException;
-
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws SubscriptionException;
-
-    public void updateSubscription(Subscription subscription) throws SubscriptionException;
-
-    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws SubscriptionException;
-
-    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws SubscriptionException;
+    public FacebookSubscriptionsOAuthAccountDeleteListener(FacebookSubscribeService fbService, ContextService contexts) {
+        this.fbService = fbService;
+        this.contexts = contexts;
+    }
     
-    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws SubscriptionException;
+    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OAuthException {
+        try {
+            fbService.deleteAllUsingOAuthAccount(getContext(cid), id);
+        } catch (SubscriptionException e) {
+            throw new OAuthException(e);
+        }
+    }
+
+    private Context getContext(int cid) throws OAuthException {
+        try {
+            return contexts.getContext(cid);
+        } catch (ContextException e) {
+            throw new OAuthException(e);
+        }
+    }
+
+    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OAuthException {
+        // IGNORE
+    }
+
 }

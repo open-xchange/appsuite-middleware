@@ -50,6 +50,8 @@
 package com.openexchange.subscribe.linkedin;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -132,5 +134,11 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
             
         }        
         super.modifyOutgoing(subscription);
+    }
+    
+    public void deleteAllUsingOAuthAccount(Context context, int id) throws SubscriptionException {
+        Map<String, Object> query = new HashMap<String, Object>();
+        query.put("account", String.valueOf(id));
+        removeWhereConfigMatches(context, query);
     }
 }

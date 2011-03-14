@@ -263,4 +263,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             }
         }
     }
+    
+    
+    protected void removeWhereConfigMatches(Context context, Map<String, Object> query) throws SubscriptionException {
+        STORAGE.deleteAllSubscriptionsWhereConfigMatches(query, getSubscriptionSource().getId(), context);
+    }
 }
