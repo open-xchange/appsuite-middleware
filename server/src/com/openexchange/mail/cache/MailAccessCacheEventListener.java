@@ -115,7 +115,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             try {
                 mac.clearUserEntries(session);
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder(128).append("Detected timed-out session: ").append(session.getSessionID()).append(
+                    LOG.info(new StringBuilder(128).append("Detected a removed session: ").append(session.getSessionID()).append(
                         ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
                         " in context ").append(session.getContextId()).toString());
                 }
