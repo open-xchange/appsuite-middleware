@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.contact;
 
+import java.util.Date;
+
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -83,7 +85,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         //create a new folder
-        newFolder = Create.createPublicFolder(client, "Testfolder2", FolderObject.CONTACT);
+        newFolder = Create.createPublicFolder(client, "SearchInAllFoldersTest ("+new Date().getTime()+")", FolderObject.CONTACT);
         //create a contact in the private folder
         contact1 = new Contact();
         contact1.setDisplayName("Herbert Meier");

@@ -50,6 +50,9 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.ajax.folder.Create.ocl;
+
+import java.util.Date;
+
 import org.json.JSONArray;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -95,7 +98,7 @@ public class Bug13931Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
-        folder = Create.folder(privateFolderId, "Folder to test bug 13931", FolderObject.CONTACT, FolderObject.PRIVATE, ocl);
+        folder = Create.folder(privateFolderId, "Folder to test bug 13931 ("+new Date().getTime()+")", FolderObject.CONTACT, FolderObject.PRIVATE, ocl);
         CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
         response.fillObject(folder);
         folderId = folder.getObjectID();
