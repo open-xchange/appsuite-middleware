@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -125,8 +126,23 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         assertTrue("Should contain field #20", actual.contains(20));
     }
     
+    public void testGetAllContactsOrderedByCollationAscending() {
+		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		
+		for(String graphem: sinograph){
+			manager.newAction( manager.generateContact(folderID, graphem) );
+		}
+
+		int fieldNum = ContactField.SUR_NAME.getNumber();
+        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.ASCENDING, "gb2312" );
+
+        for(int i = 0, len = sinograph.size(); i < len; i++){
+        	String expected = sinograph.get(i);
+        	assertEquals("Element #"+i, expected, allContacts[i].getSurName());
+        }
+    }
     
-    public void testGetAllContactsOrderedByCollation() {
+    public void testGetAllContactsOrderedByCollationDescending() {
 		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
 		
 		for(String graphem: sinograph){
@@ -142,6 +158,45 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         }
     }
 
+    
+    /**
+     * The "wonder field" is 607, which implies sorting by last name, company name, email1, email2 and display name.
+     * Currently not testing e-mail since it is not supported yet.
+     */
+	public void testGetAllContactsOrderedByCollationOrderedByWonderField() {
+		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁"); //,"科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+
+    	List<String> lastNames = Arrays.asList( "阿", "波","次","的");
+    	List<String> displayNames = Arrays.asList( "鹅", "富");
+    	List<String> companyNames = Arrays.asList( "哥","河","洁");
+    	//List<String> email1s = Arrays.asList( "科@somewhere.invalid","了@somewhere.invalid","么@somewhere.invalid");
+    	//List<String> email2s = Arrays.asList( "呢@somewhere.invalid","哦@somewhere.invalid","批@somewhere.invalid","七@somewhere.invalid");
+    	
+    	List<List<String>> values = Arrays.asList(lastNames, displayNames, companyNames); //,email1s, email2s);
+    	List<ContactField> fields = Arrays.asList( ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.COMPANY); //ContactField.EMAIL1, ContactField.EMAIL2 );
+    	
+    	int valPos = 0;
+		for(ContactField field: fields) {
+			List<String> values2 = values.get(valPos++);
+			for(String value: values2){
+				Contact tmp = new Contact();
+				tmp.setParentFolderID(folderID);
+				tmp.set(field.getNumber(), value);
+				tmp.setInfo(value); //we'll use this field to compare afterwards
+				manager.newAction(tmp);
+			}
+		}
+
+		int fieldNum = ContactField.SUR_NAME.getNumber();
+        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, -1, Order.ASCENDING, "gb2312" );
+
+        for(int i = 0, len = sinograph.size(); i < len; i++){
+        	//String expected = sinograph.get(len -1 -i);
+        	String expected = sinograph.get(i);
+        	assertEquals("Element #"+i, expected, allContacts[i].getInfo());
+        }
+    }
+	
     public void testUpdateContactAndGetUpdates() {
         Contact expected = generateContact();
 
@@ -159,4 +214,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         assertEquals("Display name should have been updated", expected.getDisplayName(), actual.getDisplayName());
     }
 
+    /**
+     * Does DESC really invert search order?
+     */
 }
