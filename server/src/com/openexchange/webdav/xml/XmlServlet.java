@@ -69,8 +69,10 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
@@ -116,8 +118,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     public static final int OK_STATUS = 1200;
 
-    public static final String MODIFICATION_EXCEPTION = "[" + MODIFICATION_STATUS
-            + "] This object was modified on the server";
+    public static final String MODIFICATION_EXCEPTION = "[" + MODIFICATION_STATUS + "] This object was modified on the server";
 
     public static final String OBJECT_NOT_FOUND_EXCEPTION = "[" + OBJECT_NOT_FOUND_STATUS + "] Object not found";
 
@@ -127,8 +128,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     public static final String USER_INPUT_EXCEPTION = "[%s] invalid user input";
 
-    public static final String APPOINTMENT_CONFLICT_EXCEPTION = "[" + APPOINTMENT_CONFLICT_STATUS
-            + "] Appointments Conflicted";
+    public static final String APPOINTMENT_CONFLICT_EXCEPTION = "[" + APPOINTMENT_CONFLICT_STATUS + "] Appointments Conflicted";
 
     public static final String MANDATORY_FIELD_EXCEPTION = "[%s] Missing field";
 
@@ -168,7 +168,9 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         }
 
         XmlPullParser parser = null;
-        final PendingInvocations<I> pendingInvocations = new PendingInvocations<I>(new LinkedList<QueuedAction<I>>(), new LastModifiedCache());
+        final PendingInvocations<I> pendingInvocations = new PendingInvocations<I>(
+            new LinkedList<QueuedAction<I>>(),
+            new LastModifiedCache());
         try {
             parser = new KXmlParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
@@ -191,28 +193,103 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
                     commit(resp.getOutputStream(), getSession(req), pendingInvocations);
                 } else {
-                    doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
+                    doOXError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
                     return;
                 }
             } else {
-                doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
+                doOXError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
                 return;
             }
         } catch (final IOException e) {
             LOG.error("doPropPatch", e);
-            doError(req, resp);
+            doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         } catch (final XmlPullParserException e) {
             LOG.error("doPropPatch", e);
-            doError(req, resp);
+            doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         } catch (final AbstractOXException e) {
             LOG.error("doPropPatch", e);
-            doError(req, resp);
+            doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
+    private void doOXError(final HttpServletRequest req, final HttpServletResponse resp, final int serverResponseCode, final String msg) throws ServletException {
+        final StringBuilder sb = new StringBuilder();
+        startErrorXML(sb, serverResponseCode);
+        appendErrorMessage(sb, msg);
+        closeErrorXML(sb);
+
+        try {
+            final OutputStream os = resp.getOutputStream();
+            os.write(sb.toString().getBytes());
+        } catch (final IOException e) {
+            LOG.error("doOXError", e);
+            throw new ServletException(e);
+        }
+    }
+
+    private void doOXError(final HttpServletRequest req, final HttpServletResponse resp, final int serverResponseCode, final Exception exception) throws ServletException {
+        final StringBuilder sb = new StringBuilder();
+        startErrorXML(sb, serverResponseCode);
+        appendException(sb, exception);
+        closeErrorXML(sb);
+
+        try {
+            final OutputStream os = resp.getOutputStream();
+            os.write(sb.toString().getBytes());
+        } catch (final IOException e) {
+            LOG.error("doOXError", e);
+            throw new ServletException(e);
+        }
+    }
+
+    private void startErrorXML(final StringBuilder sb, final int serverResponseCode) {
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+        sb.append("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\"" + Version.NAME + "\">\n");
+        sb.append("<D:href>0</D:href>\n");
+        sb.append("<D:propstat>\n");
+        sb.append("<D:status>");
+        sb.append(serverResponseCode);
+        sb.append("</D:status>\n");
+    }
+
+    private void closeErrorXML(final StringBuilder sb) {
+        sb.append("</D:propstat>\n");
+        sb.append("</D:multistatus>");
+    }
+
+    private void appendErrorMessage(final StringBuilder sb, final String message) {
+        sb.append("<D:responsedescription>[1400] ");
+        sb.append(message);
+        sb.append("</D:responsedescription>\n");
+    }
+
+    private void appendException(final StringBuilder sb, final Exception e) {
+        sb.append("<D:responsedescription>[");
+
+        final int descriptionCode;
+        final String message;
+        if (e instanceof AbstractOXException) {
+            final AbstractOXException o = (AbstractOXException) e;
+            if (o.getComponent().equals(EnumComponent.CONTACT) && o.getDetailNumber() == ContactExceptionCodes.INVALID_EMAIL.getDetailNumber()) {
+                descriptionCode = 1500;
+                message = o.getMessage();
+            } else {
+                descriptionCode = 1400;
+                message = o.getMessage();
+            }
+        } else {
+            descriptionCode = 1400;
+            message = e.getMessage();
+        }
+
+        sb.append(descriptionCode);
+        sb.append("] ");
+        sb.append(message);
+        sb.append("</D:responsedescription>\n");
+    }
+
     @Override
-    public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
+    public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("PROPFIND");
         }
@@ -247,7 +324,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                 final Element eProp = el.getChild(prop, dav);
 
                 if (eProp == null) {
-                    doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "expected element: prop");
+                    doOXError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "expected element: prop");
                     return;
                 }
 
@@ -258,8 +335,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                     hasObjectMode = true;
                 }
 
-                final Element eObjectId = eProp.getChild(DataFields.OBJECT_ID, Namespace
-                        .getNamespace(PREFIX, NAMESPACE));
+                final Element eObjectId = eProp.getChild(DataFields.OBJECT_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
                 if (eObjectId != null) {
                     hasObjectId = true;
                 }
@@ -273,13 +349,16 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         System.out.println("invalid value in element lastsync");
                     }
 
-                    final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
-                            NAMESPACE));
+                    final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
                     if (eFolderId != null) {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, CommonFields.FOLDER_ID, eFolderId.getText()));
+                            throw new OXConflictException(new WebdavException(
+                                WebdavException.Code.INVALID_VALUE,
+                                exc,
+                                CommonFields.FOLDER_ID,
+                                eFolderId.getText()));
                         }
                     }
 
@@ -299,7 +378,10 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                             } else if (value[a].trim().equals("LIST")) {
                                 bList = true;
                             } else {
-                                throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, "objectmode", value[a]));
+                                throw new OXConflictException(new WebdavException(
+                                    WebdavException.Code.INVALID_VALUE,
+                                    "objectmode",
+                                    value[a]));
                             }
                         }
                     }
@@ -307,28 +389,34 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                     try {
                         object_id = Integer.parseInt(eObjectId.getText());
                     } catch (final NumberFormatException exc) {
-                        throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, DataFields.OBJECT_ID, eObjectId.getText()));
+                        throw new OXConflictException(new WebdavException(
+                            WebdavException.Code.INVALID_VALUE,
+                            exc,
+                            DataFields.OBJECT_ID,
+                            eObjectId.getText()));
                     }
 
-                    final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
-                            NAMESPACE));
+                    final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
                     if (eFolderId != null) {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, CommonFields.FOLDER_ID, eFolderId.getText()));
+                            throw new OXConflictException(new WebdavException(
+                                WebdavException.Code.INVALID_VALUE,
+                                exc,
+                                CommonFields.FOLDER_ID,
+                                eFolderId.getText()));
                         }
                     }
                 } else {
-                    doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "expected element: object_id or lastsync");
+                    doOXError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "expected element: object_id or lastsync");
                     return;
                 }
             }
 
             // SEND FIRST XML LINE
             os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\""
-                    + Version.NAME + "\">").getBytes());
+            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\"" + Version.NAME + "\">").getBytes());
 
             if (hasObjectMode) {
                 if (lastsync == null) {
@@ -342,51 +430,50 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             os.write(("</D:multistatus>").getBytes());
             os.flush();
         } catch (final OXPermissionException opexc) {
-            doError(req, resp, HttpServletResponse.SC_FORBIDDEN, opexc.getMessage());
+            doOXError(req, resp, HttpServletResponse.SC_FORBIDDEN, opexc);
         } catch (final OXConflictException ocexc) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(ocexc.getMessage(), ocexc);
             }
-            doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + ocexc.getMessage());
+            doOXError(req, resp, HttpServletResponse.SC_CONFLICT, ocexc);
         } catch (final org.jdom.JDOMException exc) {
             LOG.error("doPropFind", exc);
-            doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
+            doOXError(req, resp, HttpServletResponse.SC_BAD_REQUEST, exc);
         } catch (final AbstractOXException exc) {
             if (AbstractOXException.Category.PERMISSION.equals(exc.getCategory())) {
-                doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
+                doOXError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc);
             } else if (AbstractOXException.Category.CONCURRENT_MODIFICATION.equals(exc.getCategory())) {
                 LOG.error("doPropFind", exc);
-                doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
+                doOXError(req, resp, HttpServletResponse.SC_CONFLICT, exc);
             } else {
                 LOG.error("doPropFind", exc);
-                doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
+                doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc);
             }
         } catch (final Exception exc) {
             LOG.error("doPropFind", exc);
-            doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
+            doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc);
         }
     }
 
-    public void doError(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
-        doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
-    }
+    // public void doError(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
+    // doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
+    // }
+    //
+    // public void doError(final HttpServletRequest req, final HttpServletResponse resp, final int code, final String msg)
+    // throws ServletException {
+    // try {
+    // if (LOG.isDebugEnabled()) {
+    // LOG.debug("STATUS: " + msg + ": (" + code + ')');
+    // }
+    //
+    // resp.sendError(code, msg);
+    // resp.setContentType("text/html");
+    // } catch (final Exception exc) {
+    // LOG.error("doError", exc);
+    // }
+    // }
 
-    public void doError(final HttpServletRequest req, final HttpServletResponse resp, final int code, final String msg)
-            throws ServletException {
-        try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("STATUS: " + msg + ": (" + code + ')');
-            }
-
-            resp.sendError(code, msg);
-            resp.setContentType("text/html");
-        } catch (final Exception exc) {
-            LOG.error("doError", exc);
-        }
-    }
-
-    protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
+    protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
 
         while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
             if (isTag(parser, "set", davUri)) {
@@ -398,13 +485,11 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     }
 
-    protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations)
-            throws XmlPullParserException, IOException, AbstractOXException {
+    protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
         openProp(req, resp, parser, pendingInvocations);
     }
 
-    protected void openProp(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations)
-            throws XmlPullParserException, IOException, AbstractOXException {
+    protected void openProp(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
         parser.nextTag();
         parser.require(XmlPullParser.START_TAG, davUri, prop);
 
@@ -436,24 +521,19 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         parser.require(XmlPullParser.END_TAG, davUri, "set");
     }
 
-    public boolean isTag(final XmlPullParser parser, final String name, final String namespace)
-            throws XmlPullParserException {
+    public boolean isTag(final XmlPullParser parser, final String name, final String namespace) throws XmlPullParserException {
         return parser.getEventType() == XmlPullParser.START_TAG && (name == null || name.equals(parser.getName()));
     }
 
-    public boolean endTag(final XmlPullParser parser, final String name, final String namespace)
-            throws XmlPullParserException {
+    public boolean endTag(final XmlPullParser parser, final String name, final String namespace) throws XmlPullParserException {
         return parser.getEventType() == XmlPullParser.END_TAG && (name == null || name.equals(parser.getName()));
     }
 
-    protected void writeResponse(final DataObject dataobject, final int status, final String message,
-            final String client_id, final OutputStream os, final XMLOutputter xo) throws IOException {
+    protected void writeResponse(final DataObject dataobject, final int status, final String message, final String client_id, final OutputStream os, final XMLOutputter xo) throws IOException {
         writeResponse(dataobject, status, message, client_id, os, xo, null);
     }
 
-    protected void writeResponse(final DataObject dataobject, final int status, final String message,
-            final String client_id, final OutputStream os, final XMLOutputter xo, final Appointment[] conflicts)
-            throws IOException {
+    protected void writeResponse(final DataObject dataobject, final int status, final String message, final String client_id, final OutputStream os, final XMLOutputter xo, final Appointment[] conflicts) throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug(message + ':' + status);
         }
@@ -517,7 +597,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                 }
 
                 eConflictItem.setText(textBuilder.append(conflicts[a].getStartDate().getTime()).append(',').append(
-                        conflicts[a].getEndDate().getTime()).append(',').append(conflicts[a].getFullTime()).toString());
+                    conflicts[a].getEndDate().getTime()).append(',').append(conflicts[a].getFullTime()).toString());
                 textBuilder.setLength(0);
 
                 eConflictItems.addContent(eConflictItem);
@@ -533,22 +613,16 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     }
 
     /**
-     * This method is invoked when XML input could be successfully parsed and
-     * pending actions are supposed to be performed
+     * This method is invoked when XML input could be successfully parsed and pending actions are supposed to be performed
      * 
-     * @param os
-     *            The output stream to write response to
-     * @param session
-     *            The session providing needed user data
-     * @throws IOException
-     *             If writing response fails
-     * @throws AbstractOXException
-     *             If an OX exception occurs
+     * @param os The output stream to write response to
+     * @param session The session providing needed user data
+     * @throws IOException If writing response fails
+     * @throws AbstractOXException If an OX exception occurs
      */
     private final void commit(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException, AbstractOXException {
         os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-        os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\""
-                + Version.NAME + "\">").getBytes());
+        os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\"" + Version.NAME + "\">").getBytes());
         os.flush();
         performActions(os, session, pendingInvocations);
 
@@ -558,30 +632,21 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     /**
      * Performs pending actions gathered through parsing XML input
      * 
-     * @param os
-     *            The output stream to write response to
-     * @param session
-     *            The session providing needed user data
+     * @param os The output stream to write response to
+     * @param session The session providing needed user data
      * @param pendingInvocations queues the objects to process.
-     * @throws IOException
-     *             If writing response fails
-     * @throws AbstractOXException
-     *             If an OX exception occurs
+     * @throws IOException If writing response fails
+     * @throws AbstractOXException If an OX exception occurs
      */
-    protected abstract void performActions(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException,
-            AbstractOXException;
+    protected abstract void performActions(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException, AbstractOXException;
 
-    protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser,
-            PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException;
+    protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser, PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException;
 
-    protected abstract void startWriter(Session sessionObj, Context ctx, int objectId, int folderId, OutputStream os)
-            throws Exception;
+    protected abstract void startWriter(Session sessionObj, Context ctx, int objectId, int folderId, OutputStream os) throws Exception;
 
-    protected abstract void startWriter(Session sessionObj, Context ctx, int folderId, boolean bModified,
-            boolean bDelete, Date lastsync, OutputStream os) throws Exception;
+    protected abstract void startWriter(Session sessionObj, Context ctx, int folderId, boolean bModified, boolean bDelete, Date lastsync, OutputStream os) throws Exception;
 
-    protected abstract void startWriter(Session sessionObj, Context ctx, int folderId, boolean bModified,
-            boolean bDelete, boolean bList, Date lastsync, OutputStream os) throws Exception;
+    protected abstract void startWriter(Session sessionObj, Context ctx, int folderId, boolean bModified, boolean bDelete, boolean bList, Date lastsync, OutputStream os) throws Exception;
 
     protected String getErrorMessage(final OXException exc, final String message) {
         return getErrorMessage(message, exc.getErrorCode());

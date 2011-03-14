@@ -51,9 +51,9 @@ package com.openexchange.groupware.container;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.tools.StringCollection;
 
@@ -197,7 +197,7 @@ public class DistributionListEntryObject {
         try {
             new QuotedInternetAddress(emailaddress);
         } catch (final AddressException e) {
-            throw new ContactException(Category.USER_INPUT, ContactException.INVALID_ADDRESS, 99, emailaddress);
+            throw ContactExceptionCodes.INVALID_EMAIL.create(e, emailaddress);
         }
         this.emailaddress = emailaddress;
         b_emailaddress = true;
