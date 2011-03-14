@@ -102,6 +102,7 @@ public final class MailNotifyPushListenerRegistry {
      */
     public void fireEvent(final String mboxid) throws PushException {
         final PushListener listener;
+        LOG.debug("checking whether to fire event for " + mboxid);
         if (null != (listener = map.get(mboxid))) {
             LOG.debug("fireEvent, mboxid=" + mboxid);
             listener.notifyNewMail();
@@ -117,15 +118,42 @@ public final class MailNotifyPushListenerRegistry {
      * @return <code>true</code> if push listener service could be successfully added; otherwise <code>false</code>
      */
     public boolean addPushListener(final int contextId, final int userId, final MailNotifyPushListener pushListener) throws PushException {
-        return (null == map.putIfAbsent(getMboxId(contextId, userId), pushListener));
+        boolean notYetPushed = true;
+        for(final String id : getMboxIds(contextId, userId)) {
+            LOG.debug("adding alias " + id + " to map");
+            final boolean pushFailed = (null == map.putIfAbsent(id, pushListener) ? false : true);
+            if( notYetPushed && pushFailed ) {
+                notYetPushed = false;
+            }
+        }
+        return notYetPushed;
     }
 
-    private String getMboxId(final int contextId, final int userId) throws PushException {
+    /**
+     * return all the users aliases with domain stripped off and localpart to lowercase
+     * 
+     * @param contextId
+     * @param userId
+     * @return String Array
+     * @throws PushException
+     */
+    private final String[] getMboxIds(final int contextId, final int userId) throws PushException {
         Context storageContext;
         try {
             storageContext = ContextStorage.getStorageContext(contextId);
             User user = UserStorage.getInstance().getUser(userId, storageContext);
-            return user.getLoginInfo();
+            final String[] ret = new String[user.getAliases().length];
+            int i=0;
+            for(final String alias : user.getAliases()) {
+                final int idx = alias.indexOf("@");
+                if( idx != -1) {
+                    ret[i] = alias.substring(0, idx).toLowerCase();
+                } else {
+                    ret[i] = alias.toLowerCase();
+                }
+                i++;
+            }
+            return ret;
         } catch (final ContextException e) {
             throw new PushException(e);
         } catch (final LdapException e) {
@@ -190,7 +218,7 @@ public final class MailNotifyPushListenerRegistry {
      * @throws PushException 
      */
     public boolean purgeUserPushListener(final int contextId, final int userId) throws PushException {
-        return removeListener(getMboxId(contextId, userId));
+        return removeListener(getMboxIds(contextId, userId));
     }
 
     /**
@@ -205,17 +233,19 @@ public final class MailNotifyPushListenerRegistry {
     public boolean removePushListener(final int contextId, final int userId) throws PushException {
         final SessiondService sessiondService = PushServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
-            return removeListener(getMboxId(contextId, userId));
+            return removeListener(getMboxIds(contextId, userId));
         }
         return false;
     }
 
-    private boolean removeListener(final String mboxId) {
-        final MailNotifyPushListener listener = map.remove(mboxId);
-        if (null != listener) {
-            listener.close();
-            return true;
+    private boolean removeListener(final String[] mboxIds) {
+        for(final String id : mboxIds) {
+            LOG.debug("removing alias" + id + " from map");
+            final MailNotifyPushListener listener = map.remove(id);
+            if (null != listener) {
+                listener.close();
+            }
         }
-        return false;
+        return true;
     }
 }
