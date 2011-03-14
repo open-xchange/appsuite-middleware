@@ -85,9 +85,18 @@ public class CollationContactComparator implements Comparator<Contact>{
         if(o2 == null) {
             return 1;
         }
+        
         Object f1 = o1.get(orderBy.getNumber());
         Object f2 = o2.get(orderBy.getNumber());
-
+        if(f1 == f2) {
+            return 0;
+        }
+        if(f1 == null && f2 != null) {
+            return -1;
+        }
+        if(f2 == null) {
+            return 1;
+        }
         return orderDir * collator.compare(f1, f2);
 	}
 
