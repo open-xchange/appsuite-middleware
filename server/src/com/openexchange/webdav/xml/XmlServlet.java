@@ -245,6 +245,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     private void startErrorXML(final StringBuilder sb, final int serverResponseCode) {
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
         sb.append("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\"" + Version.NAME + "\">\n");
+        sb.append("<D:response>\n");
         sb.append("<D:href>0</D:href>\n");
         sb.append("<D:propstat>\n");
         sb.append("<D:status>");
@@ -254,6 +255,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     private void closeErrorXML(final StringBuilder sb) {
         sb.append("</D:propstat>\n");
+        sb.append("</D:response>\n");
         sb.append("</D:multistatus>");
     }
 
