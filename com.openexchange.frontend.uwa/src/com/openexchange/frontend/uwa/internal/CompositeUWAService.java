@@ -265,13 +265,17 @@ public class CompositeUWAService implements UWAWidgetService {
     }
 
     private void regularUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+        String id = widget.getId();
+        String dbId = IDMangler.unmangle(id).get(1);
         try {
+            widget.setId(dbId);
             userScope.update(widget, modified);
         } catch (DBPoolingException e) {
             throw new UWAWidgetException(e);
         } catch (SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         }
+        widget.setId(id);
         positionUpdate(widget, modified);
     }
 
