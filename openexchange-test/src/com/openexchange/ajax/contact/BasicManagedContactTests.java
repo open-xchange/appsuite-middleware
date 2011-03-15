@@ -49,14 +49,18 @@
 
 package com.openexchange.ajax.contact;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONException;
+
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -191,7 +195,6 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, -1, Order.ASCENDING, "gb2312" );
 
         for(int i = 0, len = sinograph.size(); i < len; i++){
-        	//String expected = sinograph.get(len -1 -i);
         	String expected = sinograph.get(i);
         	assertEquals("Element #"+i, expected, allContacts[i].getInfo());
         }
@@ -214,7 +217,9 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         assertEquals("Display name should have been updated", expected.getDisplayName(), actual.getDisplayName());
     }
 
-    /**
-     * Does DESC really invert search order?
-     */
+    public void testAllWithGBK() throws Exception {
+    	//{"action":"all","module":"contacts","columns":"20,1,5,2,602","folder":"66","collation":"gbk","sort":"502","order":"asc"}
+    	Contact[] allAction = manager.allAction(getClient().getValues().getPrivateContactFolder(), new int[]{20,1,5,2,602}, 502, Order.ASCENDING, "gbk");
+    	assertTrue("Should find more than 0 contacts in the private contact folder", allAction.length > 0);
+    }
 }
