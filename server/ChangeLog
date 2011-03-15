@@ -2,6 +2,7 @@
 
  - Bugfix #16324: Supporting IPv6 addresses for IMAP and SMTP backend connections.
  - Bugfix #17217: Removed not documented and not used preferences items: /modules/olox20/module and /modules/filestorage/module.
+ - Bugfix #18640: Re-added erroneously removed import.
 
 * 2011-03-11 - francisco.laguna@open-xchange.com
 
