@@ -51,15 +51,19 @@ package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
+
 import junit.framework.JUnit4TestAdapter;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
@@ -84,8 +88,6 @@ public class Bug7470Test extends AbstractContactTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug7470Test.class);
 	}
-	
-	
 	
 	@BeforeClass
 	public static void initialize() throws Exception {
