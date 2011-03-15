@@ -132,5 +132,20 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
         return null;
     }
+
+    public OAuthInteraction initOAuth(String callbackUrl) throws OAuthException {
+        return null;
+    }
     
+    public boolean needsRequestToken() {
+        return true;
+    }
+
+    public String getScope() {
+        return null;
+    }
+
+    public String processAuthorizationURL(final String authUrl) {
+        return authUrl;
+    }
 }
