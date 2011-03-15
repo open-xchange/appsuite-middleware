@@ -325,15 +325,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
 
-        final SuperCollator collation = getCollation(collation2);
+        final SuperCollator collation = SuperCollator.get(collation2);
         final StringBuilder order = new StringBuilder();
-        boolean specialSort = false;
-        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING && order_field != Contact.USE_COUNT_GLOBAL_FIRST) {
+        if (order_field > 0 && order_field != Contact.USE_COUNT_GLOBAL_FIRST) {
         	order.append( generateOrder(order_field, orderMechanism, collation) );
         } else {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
                 Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2 });
-            specialSort = true;
         }
         
         if (from != 0 || to != 0) {
@@ -370,19 +368,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             DBPool.closeReaderSilent(ctx, con);
         }
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
-            java.util.Arrays.sort(contacts, new UseCountComparator(specialSort));
-        } else if (specialSort && collation != null) {
-            java.util.Arrays.sort(contacts, new ContactComparator(Collator.getInstance(collation.getJavaLocale()), Order.getBy(orderMechanism)));
-        } else if (specialSort && collation == null) {
-            java.util.Arrays.sort(contacts, new ContactComparator());
+            java.util.Arrays.sort(contacts, new UseCountComparator(false));
         }
 
         return new ArrayIterator<Contact>(contacts);
     }
-    
-    private SuperCollator getCollation(String collation) {
-		return SuperCollator.get(collation);
-	}
 
 	public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXException {
         final ContactSql cs = new ContactMySql(session, ctx);
@@ -394,7 +384,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         String select = generateSelect(cols);
         String whereFolder = checkFolderRights(conv, cs);
         String whereConditions = conv.getPreparedWhereString();
-        String order = generateOrder(order_field, orderMechanism, getCollation(collation));
+        String order = generateOrder(order_field, orderMechanism, SuperCollator.get(collation));
         
         //build query
         StringBuilder query = new StringBuilder(select);
@@ -1615,7 +1605,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
         if(addCollation)
         	order.append(" CONVERT(");
-        order.append("co.").append(Contacts.mapping[realOrderField].getDBFieldName());
+        order.append(generateFieldPart(realOrderField));
         if(addCollation)
         	order.append(" USING '")
         		.append(collation.getSqlCharset())
@@ -1632,6 +1622,21 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         return order.append(' ').toString();
 	}
+    
+    private String generateFieldPart(int fieldNum){
+    	if(Contact.SPECIAL_SORTING != fieldNum)
+    		return "co." + Contacts.mapping[fieldNum].getDBFieldName();
+
+    	String prefix = "co.";
+    	StringBuffer buffy = new StringBuffer();
+    	List<ContactField> fieldsToCheck = java.util.Arrays.asList(ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2 );
+    	for(ContactField field: fieldsToCheck)
+    		buffy.append("IFNULL(").append(prefix).append(field.getFieldName()).append(',');
+    	buffy.append("NULL");
+    	for(ContactField field: fieldsToCheck)
+    		buffy.append(')');
+    	return buffy.toString();
+    }
 
 	private String checkFolderRights(ContactSearchtermSqlConverter conv, ContactSql cs) throws OXException {
         
