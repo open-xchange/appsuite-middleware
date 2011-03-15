@@ -179,6 +179,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
 
     public void update(T thing, List<? extends Attribute<T>> updatedAttributes) throws SQLException, DBPoolingException {
         updatedAttributes.remove(metadata.getIdField());
+        updatedAttributes.retainAll(getAttributes());
         UPDATE update = builder.update(updatedAttributes);
         
         List<Object> values = Tools.values(thing, updatedAttributes, overridesToDB);
