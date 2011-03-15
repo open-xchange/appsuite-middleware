@@ -60,6 +60,8 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
@@ -75,6 +77,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * For serialization
      */
     private static final long serialVersionUID = -4492376747507390066L;
+
+    private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");
 
     private boolean contextadmin = false;
 
@@ -2159,12 +2163,61 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
+     * Returns the port of the imap server of this user object
+     *
+     * @return An {@link int} containing the port number
+     */
+    final public int getImapPort() {
+        // we should be open to the future and accept values like
+        // hostname:port
+        if (this.imapServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
+            if (matcher.matches() && null != matcher.group(4)) {
+                return Integer.parseInt(matcher.group(4));
+            }
+        }
+        return 143;
+    }
+
+    /**
      * Returns the hostname for the imap server of this user object
      *
      * @return A {@link String} containing the hostname for the imap server
      */
-    public final String getImapServer() {
+    final public String getImapServer() {
+        // we should be open to the future and accept values like
+        // hostname:port
+        if (this.imapServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
+            if (matcher.matches() && null != matcher.group(2)) {
+                return matcher.group(2);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the hostname for the imap server of this user object
+     *
+     * @return A {@link String} containing the hostname for the imap server
+     */
+    public final String getImapServerString() {
         return imapServer;
+    }
+
+    /**
+     * Returns the schema part of the imap server url of this user object
+     *
+     * @return A {@link String} containing the schema of the imap server url
+     */
+    final public String getImapSchema() {
+        if (this.imapServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
+            if (matcher.matches() && null != matcher.group(1)) {
+                return matcher.group(1);
+            }
+        }
+        return "imap://";
     }
 
     /**
@@ -2210,7 +2263,39 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@link String} containing the hostname for the smtp server
      */
-    public final String getSmtpServer() {
+    final public String getSmtpServer() {
+        // we should be open to the future and accept values like
+        // hostname:port
+        if (this.smtpServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
+            if (matcher.matches() && null != matcher.group(2)) {
+                return matcher.group(2);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the schema part of the smtp server url of this user object
+     *
+     * @return A {@link String} containing the schema of the smtp server url
+     */
+    final public String getSmtpSchema() {
+        if (this.smtpServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
+            if (matcher.matches() && null != matcher.group(1)) {
+                return matcher.group(1);
+            }
+        }
+        return "smtp://";
+    }
+
+    /**
+     * Returns the hostname for the smtp server of this user object
+     *
+     * @return A {@link String} containing the hostname for the smtp server
+     */
+    public final String getSmtpServerString() {
         return smtpServer;
     }
 
@@ -2229,6 +2314,23 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             this.smtpServerset = true;
         }
         this.smtpServer = smtpServer;
+    }
+
+    /**
+     * Returns the port for the smtp server of this user object
+     *
+     * @return An {@link int} containing the port for the smtp server
+     */
+    final public int getSmtpPort() {
+        // we should be open to the future and accept values like
+        // hostname:port
+        if (this.smtpServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
+            if (matcher.matches() && null != matcher.group(4)) {
+                return Integer.parseInt(matcher.group(4));
+            }
+        }
+        return 25;
     }
 
     /**
