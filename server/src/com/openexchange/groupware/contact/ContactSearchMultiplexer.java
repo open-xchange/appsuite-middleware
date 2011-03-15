@@ -63,7 +63,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.l10n.I18nMap;
+import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -171,7 +171,7 @@ public class ContactSearchMultiplexer {
 		if(collation == null)
 			return new DefaultContactComparator(orderBy, orderDir);
 		
-		I18nMap myI18nMap = I18nMap.get(collation);
+		SuperCollator myI18nMap = SuperCollator.get(collation);
 		ContactField myField = ContactField.getByValue(orderBy);
 		
 		return new CollationContactComparator(myField, orderDir, myI18nMap.getJavaLocale());

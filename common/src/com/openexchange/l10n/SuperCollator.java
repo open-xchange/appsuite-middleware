@@ -53,13 +53,19 @@ package com.openexchange.l10n;
 import java.util.Locale;
 
 /**
+ * This enum combines collations, charsets and locales for Java and MySQL
+ * into one consistent package. This way, you always know which collation 
+ * to use for a Java locale or the other way around.
+ * Note that the only unique attribute is the mysql collation: Both locales
+ * and charsets might occur more than once.
+ * 
  * @author tobiasp
  *
  */
-public enum I18nMap {
+public enum SuperCollator {
 	PRC_1(Locale.PRC, "gb2312", "gb2312_chinese_ci"),
 	PRC_2(Locale.PRC, "gbk", "gbk_chinese_ci"),
-	CHINA_1(Locale.TAIWAN, "big5", "big5_chinese_ci"),
+	CHINA_TAIWAN(Locale.TAIWAN, "big5", "big5_chinese_ci"),
 	CHINA_2(Locale.CHINESE, "gb2312", "gb2312_chinese_ci"),
 	CHINA_3(Locale.CHINA, "gb2312", "gb2312_chinese_ci"),
 	DEFAULT(Locale.getDefault(), "utf8", "utf8_general_ci");
@@ -80,14 +86,14 @@ public enum I18nMap {
 		return locale;
 	}
 
-	I18nMap(Locale local, String sqlCharset, String collation){
+	SuperCollator(Locale local, String sqlCharset, String collation){
 		this.locale = local;
 		this.sqlCharset = sqlCharset;
 		this.collation = collation;
 	}
 	
-	public static I18nMap get(String something){
-		for(I18nMap loc : values()){
+	public static SuperCollator get(String something){
+		for(SuperCollator loc : values()){
 			if(loc.getSqlCollation().equalsIgnoreCase(something))
 				return loc;
 			if(loc.getSqlCharset().equalsIgnoreCase(something))
@@ -101,7 +107,7 @@ public enum I18nMap {
 			if(javaLocale.getVariant().equalsIgnoreCase(something))
 				return loc;
 		}
-		return DEFAULT;
+		return null;
 	}
 
 }

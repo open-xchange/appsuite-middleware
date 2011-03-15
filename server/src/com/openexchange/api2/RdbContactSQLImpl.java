@@ -56,7 +56,6 @@ import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import gnu.trove.TIntHashSet;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,6 +63,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.Collator;
+import java.text.RuleBasedCollator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -73,6 +73,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.print.attribute.IntegerSyntax;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,16 +93,16 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
-import com.openexchange.groupware.contact.ContactConfig.Property;
-import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.helpers.CollationContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -118,11 +120,11 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.l10n.I18nMap;
+import com.openexchange.l10n.SuperCollator;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.impl.DBPool;
@@ -131,6 +133,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
+import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -300,7 +303,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXConflictException, OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final String collation2, final int[] cols) throws ContactException, OXConflictException, OXException {
         int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
         cs.setFolder(folderId);
@@ -322,26 +325,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
 
+        final SuperCollator collation = getCollation(collation2);
         final StringBuilder order = new StringBuilder();
-        final boolean specialSort;
+        boolean specialSort = false;
         if (order_field > 0 && order_field != Contact.SPECIAL_SORTING && order_field != Contact.USE_COUNT_GLOBAL_FIRST) {
-            specialSort = false;
-            order.append(" ORDER BY co.");
-            final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
-            order.append(Contacts.mapping[realOrderField].getDBFieldName());
-            order.append(' ');
-            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
-            if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
-                order.append(realOrderMechanism);
-            } else {
-                order.append("ASC");
-            }
-            order.append(' ');
+        	order.append( generateOrder(order_field, orderMechanism, collation) );
         } else {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
                 Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2 });
             specialSort = true;
         }
+        
         if (from != 0 || to != 0) {
             order.append(" LIMIT ");
             order.append(from);
@@ -368,7 +362,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
                 tmp.add(contact);
             }
-            sortByCollation(tmp, order_field, orderMechanism, collation);
             contacts = tmp.toArray(new Contact[tmp.size()]);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
@@ -376,15 +369,22 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
-        
-        
-        sortContacts(order_field, orderMechanism, collation, specialSort, contacts);
+        if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
+            java.util.Arrays.sort(contacts, new UseCountComparator(specialSort));
+        } else if (specialSort && collation != null) {
+            java.util.Arrays.sort(contacts, new ContactComparator(Collator.getInstance(collation.getJavaLocale()), Order.getBy(orderMechanism)));
+        } else if (specialSort && collation == null) {
+            java.util.Arrays.sort(contacts, new ContactComparator());
+        }
 
         return new ArrayIterator<Contact>(contacts);
     }
+    
+    private SuperCollator getCollation(String collation) {
+		return SuperCollator.get(collation);
+	}
 
-   
-    public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXException {
+	public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXException {
         final ContactSql cs = new ContactMySql(session, ctx);
         ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
         conv.setCharset(collation);
@@ -394,7 +394,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         String select = generateSelect(cols);
         String whereFolder = checkFolderRights(conv, cs);
         String whereConditions = conv.getPreparedWhereString();
-        String order = generateOrder(order_field, orderMechanism);
+        String order = generateOrder(order_field, orderMechanism, getCollation(collation));
         
         //build query
         StringBuilder query = new StringBuilder(select);
@@ -444,6 +444,25 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         return new ArrayIterator<Contact>(contacts);
     }
+  
+
+	private void sortByCollation(List<Contact> tmp, int orderField, String orderDir, String collation) {
+		if(collation == null)
+			return;
+		
+		ContactField field = ContactField.getByValue(orderField);
+		SuperCollator mapping = SuperCollator.get(collation);
+		if(field == null){
+			LOG.error("Sorting of requested contacts failed, because field #"+orderField+" could not be mapped to a contact field");
+			return;
+		}
+		if(mapping == null){
+			LOG.error("Sorting of requested contacts failed, because no collation could be founf for "+orderField);
+			return;
+		}
+		CollationContactComparator comparator = new CollationContactComparator(field, orderDir, mapping.getJavaLocale());
+		Collections.sort(tmp, comparator);
+	}
 
 	private String generateSelect(int[] cols) {
         final StringBuilder fieldsBuilder = new StringBuilder();
@@ -620,7 +639,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             DBPool.closeReaderSilent(ctx, con);
         }
 
-        sortContacts(order_field, orderMechanism, collation, specialSort, contacts);
+        if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
+            java.util.Collections.sort(contacts, new UseCountComparator(specialSort));
+        } else if (specialSort) {
+            java.util.Collections.sort(contacts, new ContactComparator());
+        }
         return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
 
@@ -1581,14 +1604,25 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw ContactExceptionCodes.AGGREGATING_CONTACTS_NOT_ENABLED.create();
     }
 
-    private String generateOrder(int order_field, String orderMechanism) {
+    private String generateOrder(int order_field, String orderMechanism, SuperCollator collation) {
     	if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING)
     		return null;
 
+    	boolean addCollation = collation != null && collation != SuperCollator.DEFAULT; 
+    	
     	StringBuilder order = new StringBuilder();
-        order.append(" ORDER BY co.");
+        order.append(" ORDER BY ");
         final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
-        order.append(Contacts.mapping[realOrderField].getDBFieldName());
+        if(addCollation)
+        	order.append(" CONVERT(");
+        order.append("co.").append(Contacts.mapping[realOrderField].getDBFieldName());
+        if(addCollation)
+        	order.append(" USING '")
+        		.append(collation.getSqlCharset())
+        		.append("') COLLATE '")
+        		.append(collation.getSqlCollation())
+        		.append("'");
+
         order.append(' ');
         final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
         if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
@@ -1636,70 +1670,5 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         return cs.buildFolderSearch(userId, memberInGroups, folders2, session);
 	}
-	
-	private void sortContacts(final int order_field, String orderDir, final String collation,
-			final boolean specialSort, final Contact[] contacts) {
-		Order order = Order.ASCENDING;
-		if(orderDir != null && orderDir.toUpperCase().startsWith("DESC"))
-			order = Order.DESCENDING;
-		
-		Collator collator = null;
-        if(collation != null) {
-			Locale locale = I18nMap.get(collation).getJavaLocale();
-			collator = Collator.getInstance(locale);
-		}
-        
-        if (order_field == Contact.USE_COUNT_GLOBAL_FIRST && collator == null) {
-            java.util.Arrays.sort(contacts, new UseCountComparator(specialSort));
-        } else if (order_field == Contact.USE_COUNT_GLOBAL_FIRST && collation != null) {
-        	java.util.Arrays.sort(contacts, new UseCountComparator(specialSort, new ContactComparator(collator, order)));
-        } else if (specialSort && collator == null) {
-            java.util.Arrays.sort(contacts, new ContactComparator());
-        } else if (specialSort && collator != null) {
-            java.util.Arrays.sort(contacts, new ContactComparator(collator, order));
-        }
-	}
-	
-	private void sortContacts(final int order_field, final String collation,final String orderDir,
-			final boolean specialSort, final List<Contact> contacts) {
-		Order order = Order.ASCENDING;
-		if(orderDir != null && orderDir.toUpperCase().startsWith("DESC"))
-			order = Order.DESCENDING;
-		
-		Collator collator = null;
-        if(collation != null) {
-			Locale locale = I18nMap.get(collation).getJavaLocale();
-			collator = Collator.getInstance(locale);
-		}
-        
-        if (order_field == Contact.USE_COUNT_GLOBAL_FIRST && collator == null) {
-            java.util.Collections.sort(contacts, new UseCountComparator(specialSort));
-        } else if (order_field == Contact.USE_COUNT_GLOBAL_FIRST && collation != null) {
-        	java.util.Collections.sort(contacts, new UseCountComparator(specialSort, collator));
-        } else if (specialSort && collator == null) {
-            java.util.Collections.sort(contacts, new ContactComparator());
-        } else if (specialSort && collator != null) {
-            java.util.Collections.sort(contacts, new ContactComparator(collator, order));
-        } else if (!specialSort && collator != null) {
-            java.util.Collections.sort(contacts, new ContactComparator(collator, order));
-        }
-	}
 
-	private void sortByCollation(List<Contact> tmp, int orderField, String orderDir, String collation) {
-		if(collation == null)
-			return;
-		
-		ContactField field = ContactField.getByValue(orderField);
-		I18nMap mapping = I18nMap.get(collation);
-		if(field == null){
-			LOG.error("Sorting of requested contacts failed, because field #"+orderField+" could not be mapped to a contact field");
-			return;
-		}
-		if(mapping == null){
-			LOG.error("Sorting of requested contacts failed, because no collation could be found for "+orderField);
-			return;
-		}
-		CollationContactComparator comparator = new CollationContactComparator(field, orderDir, mapping.getJavaLocale());
-		Collections.sort(tmp, comparator);
-	}
 }

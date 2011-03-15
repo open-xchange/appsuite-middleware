@@ -59,4 +59,9 @@ public enum Order {
 
     DESCENDING;
 
+    public static Order getBy(String something){
+    	if(something.toUpperCase().startsWith("DESC"))
+    		return DESCENDING;
+    	return ASCENDING;
+    }
 }
