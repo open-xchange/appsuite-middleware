@@ -117,7 +117,7 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
         mailAccountDescription.setMailSecure(false);
         mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
         mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
-        mailAccountDescription.setTransportServer(null);
+        mailAccountDescription.setTransportServer((String) null);
         response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
         assertTrue("Valid access data in mail account do not pass validation but should", response.isValidated());
 
