@@ -86,7 +86,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/groupware/settings/*
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) /opt/open-xchange/etc/groupware/*
+%config(noreplace) /opt/open-xchange/etc/groupware/mobilityconfiguration.properties
 
 %changelog
 * Thu Jul 29 2010 - benjamin.otterbach@open-xchange.com
