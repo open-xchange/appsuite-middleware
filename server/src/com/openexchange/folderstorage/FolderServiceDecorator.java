@@ -53,7 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link FolderServiceDecorator} - The decorator for {@link FolderService}.
@@ -68,12 +70,15 @@ public final class FolderServiceDecorator {
 
     private List<ContentType> allowedContentTypes;
 
+    private final Map<String, Object> properties;
+
     /**
      * Initializes a new {@link FolderServiceDecorator}.
      */
     public FolderServiceDecorator() {
         super();
         allowedContentTypes = Collections.<ContentType> emptyList();
+        properties = new ConcurrentHashMap<String, Object>(8);
     }
 
     /**
@@ -92,9 +97,8 @@ public final class FolderServiceDecorator {
      * @return This decorator with allowed content types applied
      */
     public FolderServiceDecorator setAllowedContentTypes(final List<ContentType> allowedContentTypes) {
-        this.allowedContentTypes =
-            (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? Collections.<ContentType> emptyList() : new ArrayList<ContentType>(
-                allowedContentTypes);
+        this.allowedContentTypes = (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? Collections.<ContentType> emptyList() : new ArrayList<ContentType>(
+            allowedContentTypes);
         return this;
     }
 
@@ -135,6 +139,52 @@ public final class FolderServiceDecorator {
      */
     public FolderServiceDecorator setLocale(final Locale locale) {
         this.locale = locale;
+        return this;
+    }
+
+    /**
+     * Checks for existence of specified property.
+     * 
+     * @param propertyName The property name
+     * @return <code>true</code> if such a property exists; otherwsie <code>false</code>
+     */
+    public boolean containsProperty(String propertyName) {
+        return properties.containsKey(propertyName);
+    }
+
+    /**
+     * Puts specified property.
+     * 
+     * @param propertyName The property name
+     * @param propertyValue The property value
+     * @return This decorator with property put
+     */
+    public FolderServiceDecorator put(String propertyName, Object propertyValue) {
+        properties.put(propertyName, propertyValue);
+        return this;
+    }
+
+    /**
+     * Removes specified property.
+     * 
+     * @param propertyName The property name
+     * @return This decorator with property removed
+     */
+    public FolderServiceDecorator remove(String propertyName) {
+        properties.remove(propertyName);
+        return this;
+    }
+
+    /**
+     * Puts specified properties.
+     * 
+     * @param properties The properties to put
+     * @return This decorator with properties put
+     */
+    public FolderServiceDecorator putProperties(Map<? extends String, ? extends Object> properties) {
+        if (null != properties) {
+            this.properties.putAll(properties);
+        }
         return this;
     }
 
