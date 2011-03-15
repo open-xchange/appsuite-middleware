@@ -55,6 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -71,9 +72,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.properties.AdminProperties;
@@ -116,6 +117,8 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceException;
 import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
@@ -162,9 +165,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     // DEFAULTS FOR USER CREATE; SHOULD BE MOVED TO PROPERTIES FILE
     private static final String DEFAULT_TIMEZONE_CREATE = "Europe/Berlin";
 
-    private static final String DEFAULT_SMTP_SERVER_CREATE = "smtp://localhost";
+    private static final String DEFAULT_SMTP_SERVER_CREATE = "smtp://localhost:25";
 
-    private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost";
+    private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost:143";
 
     private static final String ALIAS = "alias";
 
@@ -266,7 +269,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
-                stmt.setString(1, usrdata.getImapSchema() + usrdata.getImapServer() + ":" + usrdata.getImapPort());
+                stmt.setString(1, URIParser.parse(usrdata.getImapServer(), URIDefaults.IMAP).toString());
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
@@ -300,7 +303,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
-                stmt.setString(1, usrdata.getSmtpSchema() + usrdata.getSmtpServer() + ":" + usrdata.getSmtpPort());
+                stmt.setString(1, URIParser.parse(usrdata.getSmtpServer(), URIDefaults.SMTP).toString());
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
@@ -729,6 +732,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error(e.getMessage(), e);
             rollback(con);
             throw new StorageException(e.toString());
+        } catch (URISyntaxException e) {
+            log.error(e.getMessage(), e);
+            rollback(con);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (folder_update != null) {
@@ -769,7 +776,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
         if (user.isImapServerset() || null != user.getImapServer()) {
             changed.add(Attribute.MAIL_URL_LITERAL);
-            account.parseMailServerURL(null == user.getImapServer() ? DEFAULT_IMAP_SERVER_CREATE : user.getImapSchema() + user.getImapServer() + ":" + user.getImapPort());
+            String imapServer = user.getImapServer();
+            if (null == imapServer) {
+                imapServer = DEFAULT_IMAP_SERVER_CREATE;
+            }
+            try {
+                account.setMailServer(URIParser.parse(imapServer, URIDefaults.IMAP));
+            } catch (URISyntaxException e) {
+                log.error("Problem storing the primary mail account.", e);
+                throw new StorageException(e.toString());
+            }
         }
         if (user.isImapLoginset() || null != user.getImapLogin()) {
             changed.add(Attribute.LOGIN_LITERAL);
@@ -806,7 +822,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         if (user.isSmtpServerset() || null != user.getSmtpServer()) {
             changed.add(Attribute.TRANSPORT_URL_LITERAL);
-            account.parseTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
+            String smtpServer = user.getSmtpServer();
+            if (null == smtpServer) {
+                smtpServer = DEFAULT_SMTP_SERVER_CREATE;
+            }
+            try {
+                account.setTransportServer(URIParser.parse(smtpServer, URIDefaults.SMTP));
+            } catch (URISyntaxException e) {
+                log.error("Problem storing the primary mail account.", e);
+                throw new StorageException(e.toString());
+            }
         }
         try {
             if (!changed.isEmpty()) {
@@ -872,21 +897,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setBoolean(9, usrdata.getMailenabled().booleanValue());
 
                 // imap and smtp server
-                if (usrdata.getImapServer() != null) {
-                    // TODO: This should be fixed in the future so that we don't
-                    // split it up before we concatenate it here
-                    stmt.setString(10, usrdata.getImapSchema() + usrdata.getImapServer() + ":" + usrdata.getImapPort());
-                } else {
-                    stmt.setString(10, DEFAULT_IMAP_SERVER_CREATE);
+                String imapServer = usrdata.getImapServer();
+                if (null == imapServer) {
+                    imapServer = DEFAULT_IMAP_SERVER_CREATE;
                 }
+                stmt.setString(10, URIParser.parse(imapServer, URIDefaults.IMAP).toString());
 
-                if (usrdata.getSmtpServer() != null) {
-                    // TODO: This should be fixed in the future so that we don't
-                    // split it up before we concatenate it here
-                    stmt.setString(11, usrdata.getSmtpSchema() + usrdata.getSmtpServer() + ":" + usrdata.getSmtpPort());
-                } else {
-                    stmt.setString(11, DEFAULT_SMTP_SERVER_CREATE);
+                String smtpServer = usrdata.getSmtpServer();
+                if (null == smtpServer) {
+                    smtpServer = DEFAULT_SMTP_SERVER_CREATE;
                 }
+                stmt.setString(11, URIParser.parse(smtpServer, URIDefaults.SMTP).toString());
 
                 stmt.setInt(12, contactId);
 
@@ -1223,6 +1244,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final InvocationTargetException e) {
             log.error("InvocationTarget Error", e);
             throw new StorageException(e);
+        } catch (URISyntaxException e) {
+            log.error("InvocationTarget Error", e);
+            throw new StorageException(e);
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -1261,7 +1285,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
-        account.parseMailServerURL(null == user.getImapServer() ? DEFAULT_IMAP_SERVER_CREATE : user.getImapSchema() + user.getImapServer() + ":" + user.getImapPort());
+        String imapServer = user.getImapServer();
+        if (null == imapServer) {
+            imapServer = DEFAULT_IMAP_SERVER_CREATE;
+        }
+        try {
+            account.setMailServer(URIParser.parse(imapServer, URIDefaults.IMAP));
+        } catch (URISyntaxException e) {
+            log.error("Problem storing the primary mail account.", e);
+            throw new StorageException(e.toString());
+        }
         account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         account.setPrimaryAddress(user.getPrimaryEmail());
         final String lang = user.getLanguage();
@@ -1278,7 +1311,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         defaultName = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
         account.setConfirmedSpam(null == user.getMail_folder_confirmed_spam_name() ? defaultName : user.getMail_folder_confirmed_spam_name());
         account.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK);
-        account.parseTransportServerURL(null == user.getSmtpServer() ? DEFAULT_SMTP_SERVER_CREATE : user.getSmtpSchema() + user.getSmtpServer() + ":" + user.getSmtpPort());
+        String smtpServer = user.getSmtpServer();
+        if (null == smtpServer) {
+            smtpServer = DEFAULT_SMTP_SERVER_CREATE;
+        }
+        try {
+            account.setTransportServer(URIParser.parse(smtpServer, URIDefaults.SMTP));
+        } catch (URISyntaxException e) {
+            log.error("Problem storing the primary mail account.", e);
+            throw new StorageException(e.toString());
+        }
         try {
             mass.insertMailAccount(account, userId, context, null, con);
         } catch (final MailAccountException e) {

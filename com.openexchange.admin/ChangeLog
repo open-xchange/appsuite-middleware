@@ -1,3 +1,7 @@
+* 2011-03-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #16324: Supporting IPv6 addresses for IMAP and SMTP backend connections.
+
 * 2011-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
