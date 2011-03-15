@@ -50,11 +50,16 @@
 package com.openexchange.mailaccount;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
+import com.openexchange.tools.net.URITools;
 
 /**
  * {@link MailAccountDescription} - Container object describing a mail account to insert/update.
@@ -399,42 +404,63 @@ public final class MailAccountDescription implements Serializable {
         if (null == mailServer) {
             return null;
         }
-        final StringBuilder sb = new StringBuilder(32);
-        sb.append(mailProtocol);
-        if (mailSecure) {
-            sb.append('s');
+        String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
+        try {
+            return mailServerUrl = URITools.generateURI(protocol, mailServer, mailPort).toString();
+        } catch (URISyntaxException e) {
+            LOG.error(e.getMessage(), e);
+            final StringBuilder sb = new StringBuilder(32);
+            sb.append(mailProtocol);
+            if (mailSecure) {
+                sb.append('s');
+            }
+            return mailServerUrl = sb.append("://").append(mailServer).append(':').append(mailPort).toString();
         }
-        return mailServerUrl = sb.append("://").append(mailServer).append(':').append(mailPort).toString();
     }
 
     /**
      * Parses specified mail server URL
      * 
      * @param mailServerURL The mail server URL to parse
+     * @throws MailAccountException 
      */
     public void parseMailServerURL(final String mailServerURL) {
         if (null == mailServerURL) {
-            setMailServer(null);
+            setMailServer((String) null);
             return;
         }
-        final String[] tmp = MailConfig.parseProtocol(mailServerURL);
-        final String prot;
-        final Object[] parsed;
-        if (tmp != null) {
-            prot = tmp[0];
-            parsed = parseServerAndPort(tmp[1], getMailPort());
-        } else {
-            prot = getMailProtocol();
-            parsed = parseServerAndPort(mailServerURL, getMailPort());
+        try {
+            setMailServer(URIParser.parse(mailServerURL, URIDefaults.IMAP));
+        } catch (URISyntaxException e) {
+            LOG.error(e.getMessage(), e);
+            // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
+            // instead now.
+            // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, mailServerURL);
+            final String[] tmp = MailConfig.parseProtocol(mailServerURL);
+            final String prot;
+            final Object[] parsed;
+            if (tmp != null) {
+                prot = tmp[0];
+                parsed = parseServerAndPort(tmp[1], getMailPort());
+            } else {
+                prot = getMailProtocol();
+                parsed = parseServerAndPort(mailServerURL, getMailPort());
+            }
+            if (prot.endsWith("s")) {
+                setMailSecure(true);
+                setMailProtocol(prot.substring(0, prot.length() - 1));
+            } else {
+                setMailProtocol(prot);
+            }
+            setMailServer(parsed[0].toString());
+            setMailPort(((Integer) parsed[1]).intValue());
         }
-        if (prot.endsWith("s")) {
-            setMailSecure(true);
-            setMailProtocol(prot.substring(0, prot.length() - 1));
-        } else {
-            setMailProtocol(prot);
-        }
-        setMailServer(parsed[0].toString());
-        setMailPort(((Integer) parsed[1]).intValue());
+    }
+
+    public void setMailServer(URI mailServer) {
+        setMailProtocol(mailServer.getScheme());
+        setMailServer(mailServer.getHost());
+        setMailPort(mailServer.getPort());
     }
 
     /**
@@ -444,27 +470,41 @@ public final class MailAccountDescription implements Serializable {
      */
     public void parseTransportServerURL(final String transportServerURL) {
         if (null == transportServerURL) {
-            setTransportServer(null);
+            setTransportServer((String) null);
             return;
         }
-        final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
-        final String prot;
-        final Object[] parsed;
-        if (tmp != null) {
-            prot = tmp[0];
-            parsed = parseServerAndPort(tmp[1], getTransportPort());
-        } else {
-            prot = getTransportProtocol();
-            parsed = parseServerAndPort(transportServerURL, getTransportPort());
+        try {
+            setTransportServer(URIParser.parse(transportServerURL, URIDefaults.SMTP));
+        } catch (URISyntaxException e) {
+            LOG.error(e.getMessage(), e);
+            // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
+            // instead now.
+            // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, transportServerURL);
+            final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
+            final String prot;
+            final Object[] parsed;
+            if (tmp != null) {
+                prot = tmp[0];
+                parsed = parseServerAndPort(tmp[1], getTransportPort());
+            } else {
+                prot = getTransportProtocol();
+                parsed = parseServerAndPort(transportServerURL, getTransportPort());
+            }
+            if (prot.endsWith("s")) {
+                setTransportSecure(true);
+                setTransportProtocol(prot.substring(0, prot.length() - 1));
+            } else {
+                setTransportProtocol(prot);
+            }
+            setTransportServer(parsed[0].toString());
+            setTransportPort(((Integer) parsed[1]).intValue());
         }
-        if (prot.endsWith("s")) {
-            setTransportSecure(true);
-            setTransportProtocol(prot.substring(0, prot.length() - 1));
-        } else {
-            setTransportProtocol(prot);
-        }
-        setTransportServer(parsed[0].toString());
-        setTransportPort(((Integer) parsed[1]).intValue());
+    }
+
+    public void setTransportServer(URI transportServer) {
+        setTransportProtocol(transportServer.getScheme());
+        setTransportServer(URITools.getHost(transportServer));
+        setTransportPort(transportServer.getPort());
     }
 
     public String generateTransportServerURL() {
@@ -474,12 +514,19 @@ public final class MailAccountDescription implements Serializable {
         if (null == transportServer) {
             return null;
         }
-        final StringBuilder sb = new StringBuilder(32);
-        sb.append(transportProtocol);
-        if (transportSecure) {
-            sb.append('s');
+        String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
+        try {
+            return transportUrl = URITools.generateURI(protocol, transportServer, transportPort).toString();
+        } catch (URISyntaxException e) {
+            LOG.error(e.getMessage(), e);
+            // Old implementation is not capable of handling IPv6 addresses.
+            final StringBuilder sb = new StringBuilder(32);
+            sb.append(transportProtocol);
+            if (transportSecure) {
+                sb.append('s');
+            }
+            return transportUrl = sb.append("://").append(transportServer).append(':').append(transportPort).toString();
         }
-        return transportUrl = sb.append("://").append(transportServer).append(':').append(transportPort).toString();
     }
 
     /**

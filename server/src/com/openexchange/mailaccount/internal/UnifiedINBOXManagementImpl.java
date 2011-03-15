@@ -138,7 +138,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             mailAccountDescription.setSpam("spam");
             mailAccountDescription.setSpamHandler("NoSpamHandler");
             // No transport settings
-            mailAccountDescription.setTransportServer(null);
+            mailAccountDescription.setTransportServer((String) null);
             mailAccountDescription.setTrash("trash");
             // Create it
             if (null == con) {

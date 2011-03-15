@@ -398,7 +398,9 @@ public class MailException extends AbstractOXException {
         /**
          * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
          */
-        RECIPIENTS_EXCEEDED("Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' again.", Category.CODE_ERROR, 76);
+        RECIPIENTS_EXCEEDED("Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' again.", Category.CODE_ERROR, 76),
+        /** Unable to parse mail server URI "%1$s". */
+        URI_PARSE_FAILED("Unable to parse mail server URI \"%1$s\".", Category.USER_INPUT, 77);
 
 
         private final String message;

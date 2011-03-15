@@ -51,6 +51,8 @@ package com.openexchange.imap.config;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Map;
 import javax.mail.MessagingException;
@@ -65,6 +67,8 @@ import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.session.Session;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -73,8 +77,6 @@ import com.sun.mail.imap.IMAPStore;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPConfig extends MailConfig {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPConfig.class);
 
     private static final String PROTOCOL_IMAP_SECURE = "imaps";
 
@@ -251,28 +253,16 @@ public final class IMAPConfig extends MailConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) {
-        imapServer = serverURL;
-        imapPort = 143;
-        {
-            final String[] parsed = parseProtocol(imapServer);
-            if (parsed == null) {
-                secure = false;
-            } else {
-                secure = PROTOCOL_IMAP_SECURE.equals(parsed[0]);
-                imapServer = parsed[1];
-            }
-            final int pos = imapServer.indexOf(':');
-            if (pos > -1) {
-                try {
-                    imapPort = Integer.parseInt(imapServer.substring(pos + 1));
-                } catch (final NumberFormatException e) {
-                    LOG.error("IMAP port could not be parsed to an integer value. Using fallback value 143", e);
-                    imapPort = 143;
-                }
-                imapServer = imapServer.substring(0, pos);
-            }
+    protected void parseServerURL(final String serverURL) throws IMAPException {
+        final URI uri;
+        try {
+            uri = URIParser.parse(serverURL, URIDefaults.IMAP);
+        } catch (URISyntaxException e) {
+            throw IMAPException.create(IMAPException.Code.URI_PARSE_FAILED, e, serverURL);
         }
+        secure = PROTOCOL_IMAP_SECURE.equals(uri.getScheme());
+        imapServer = uri.getHost();
+        imapPort = uri.getPort();
     }
 
     /**

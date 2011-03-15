@@ -130,7 +130,9 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
     /**
      * Duplicate transport account for user %1$s in context %2$s.
      */
-    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CODE_ERROR, 17);    
+    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CODE_ERROR, 17),
+    /** Unable to parse mail server URI "%1$s". */
+    URI_PARSE_FAILED(MailAccountExceptionStrings.URI_PARSE_FAILED_MSG, Category.SETUP_ERROR, 18);    
 
     /**
      * Message of the exception.

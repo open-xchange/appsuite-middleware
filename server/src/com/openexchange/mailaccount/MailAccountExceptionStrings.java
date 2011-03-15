@@ -112,6 +112,10 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Duplicate transport account for user %1$s in context %2$s.
     public static final String DUPLICATE_TRANSPORT_ACCOUNT_MSG = "Duplicate transport account for user %1$s in context %2$s.";
 
+    // Is thrown if the URI to the mail server can not be understood.
+    // %1$s is replaced with the not understandable mail server URI.
+    public static final String URI_PARSE_FAILED_MSG = "Unable to parse mail server URI \"%1$s\".";
+
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.
      */

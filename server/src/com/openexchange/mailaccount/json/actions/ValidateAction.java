@@ -49,6 +49,8 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailException.Code;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -73,6 +76,9 @@ import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
+import com.openexchange.tools.net.URITools;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -197,26 +203,14 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             mailConfig.setLogin(accountDescription.getLogin());
             mailConfig.setPassword(accountDescription.getPassword());
             // Set server and port
-            final String server;
-            {
-                final String[] tmp = MailConfig.parseProtocol(mailServerURL);
-                server = tmp == null ? mailServerURL : tmp[1];
+            final URI uri;
+            try {
+                uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
+            } catch (URISyntaxException e) {
+                throw new MailException(Code.URI_PARSE_FAILED, e, mailServerURL);
             }
-            final int pos = server.indexOf(':');
-            if (pos == -1) {
-                mailConfig.setPort(143);
-                mailConfig.setServer(server);
-            } else {
-                final String sPort = server.substring(pos + 1);
-                try {
-                    mailConfig.setPort(Integer.parseInt(sPort));
-                } catch (final NumberFormatException e) {
-                    LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
-                        "\". Using fallback 143 instead."), e);
-                    mailConfig.setPort(143);
-                }
-                mailConfig.setServer(server.substring(0, pos));
-            }
+            mailConfig.setServer(uri.getHost());
+            mailConfig.setPort(uri.getPort());
             mailConfig.setSecure(accountDescription.isMailSecure());
             mailAccess.setCacheable(false);
             return mailAccess;
@@ -261,26 +255,14 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
         transportConfig.setPassword(password);
         // Set server and port
-        final String server;
-        {
-            final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
-            server = tmp == null ? transportServerURL : tmp[1];
+        final URI uri;
+        try {
+            uri = URIParser.parse(transportServerURL, URIDefaults.SMTP);
+        } catch (URISyntaxException e) {
+            throw new MailException(Code.URI_PARSE_FAILED, e, transportServerURL);
         }
-        final int pos = server.indexOf(':');
-        if (pos == -1) {
-            transportConfig.setPort(25);
-            transportConfig.setServer(server);
-        } else {
-            final String sPort = server.substring(pos + 1);
-            try {
-                transportConfig.setPort(Integer.parseInt(sPort));
-            } catch (final NumberFormatException e) {
-                LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
-                    "\". Using fallback 25 instead."), e);
-                transportConfig.setPort(25);
-            }
-            transportConfig.setServer(server.substring(0, pos));
-        }
+        transportConfig.setServer(URITools.getHost(uri));
+        transportConfig.setPort(uri.getPort());
         transportConfig.setSecure(accountDescription.isTransportSecure());
         boolean validated = true;
         // Now try to connect

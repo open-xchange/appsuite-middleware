@@ -109,9 +109,9 @@ public class OXMailfilterException extends AbstractOXException {
          */
         ID_MISSING("The id is missing inside the update request or has a non integer type", Category.CODE_ERROR, 9),
         /**
-         * A server name cannot be found in the server URL
+         * A server name cannot be found in the server URL "%1$s".
          */
-        NO_SERVERNAME_IN_SERVERURL("A server name cannot be found in the server URL", Category.CODE_ERROR, 10),
+        NO_SERVERNAME_IN_SERVERURL("A server name cannot be found in the server URL \"%1$s\".", Category.CODE_ERROR, 10),
         /**
          * The login type given in the config file is not a valid one
          */

@@ -51,76 +51,34 @@ package com.openexchange.tools.net;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * {@link URIParser}
+ * {@link URITools}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class URIParser {
+public final class URITools {
 
-    // The magic is the not being there of the dot character that would allow the match to IPv4 addresses. Place here \. in the pattern to
-    // break it.
-    private static final Pattern IPV6_PATTERN = Pattern.compile("^(?:(?:([a-zA-Z][0-9a-zA-Z]*)://\\[)|\\[)?([0-9a-zA-Z:]*?)(?:\\]|(?:\\]:(.*)))?$");
-
-    private static final Pattern IPV4_PATTERN = Pattern.compile("^(?:([a-zA-Z][0-9a-zA-Z]*)://)?(.*?)(?::(.*))?$");
-
-    private URIParser() {
+    private URITools() {
         super();
     }
 
-    public static final URI parse(String input, URIDefaults defaults) throws URISyntaxException {
-        Matcher matcher6 = IPV6_PATTERN.matcher(input);
-        Matcher matcher4 = IPV4_PATTERN.matcher(input);
-        final Matcher matcher;
-        if (matcher6.matches()) {
-            matcher = matcher6;
-        } else if (matcher4.matches()) {
-            matcher = matcher4;
-        } else {
-            // Try fallback.
-            return new URI(input);
-        }
-        final int port = parsePort(input, matcher.group(3));
-        final String scheme = matcher.group(1);
-        final int usedPort = applyDefault(port, scheme, defaults);
-        final String usedScheme = applyDefault(scheme, port, defaults);
-        return new URI(usedScheme, null, matcher.group(2), usedPort, null, null, null);
+    public static final URI changeHost(URI uri, String newHost) throws URISyntaxException {
+        return new URI(uri.getScheme(), uri.getUserInfo(), newHost, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
     }
 
-    private static final int parsePort(String input, String port) throws URISyntaxException {
-        int retval;
-        if (null != port) {
-            try {
-                retval = Integer.parseInt(port);
-            } catch (NumberFormatException e) {
-                throw new URISyntaxException(input, e.getMessage());
-            }
-        } else {
-            retval = -1;
+    public static final URI generateURI(String protocol, String host, int port) throws URISyntaxException {
+        return new URI(protocol, null, host, port, null, null, null);
+    }
+
+    public static final String getHost(URI uri) {
+        String retval = uri.getHost();
+        if (null == retval || retval.length() == 0) {
+            return retval;
+        }
+        if (retval.indexOf(':') > 0 && retval.startsWith("[") && retval.endsWith("]")) {
+            retval = retval.substring(1, retval.length() -1);
         }
         return retval;
-    }
-
-    private static final int applyDefault(int port, String scheme, URIDefaults defaults) {
-        if (-1 == port) {
-            if (null != defaults.getSSLProtocol() && defaults.getSSLProtocol().equals(scheme)) {
-                return defaults.getSSLPort();
-            }
-            return defaults.getPort();
-        }
-        return port;
-    }
-
-    private static final String applyDefault(String scheme, int port, URIDefaults defaults) {
-        if (null == scheme) {
-            if (defaults.getSSLPort() == port) {
-                return defaults.getSSLProtocol();
-            }
-            return defaults.getProtocol();
-        }
-        return scheme;
     }
 }

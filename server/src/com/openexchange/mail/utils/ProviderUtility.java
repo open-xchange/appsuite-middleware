@@ -50,8 +50,13 @@
 package com.openexchange.mail.utils;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Locale;
-import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
 
 /**
  * {@link ProviderUtility}
@@ -73,31 +78,28 @@ public final class ProviderUtility {
      * @param serverUrl The server URL
      * @param defaultPort The default port to use if server URL does not specify a port
      * @return An instance of {@link InetSocketAddress} denoting given server URL
+     * @throws MailAccountException if the server URL can not be parsed.
      */
-    public static InetSocketAddress toSocketAddr(final String serverUrl, final int defaultPort) {
-        if (serverUrl == null) {
-            return null;
+    public static InetSocketAddress toSocketAddr(final String serverUrl, final int defaultPort) throws MailAccountException {
+        final URI uri;
+        try {
+            uri = URIParser.parse(serverUrl, new URIDefaults() {
+                public String getProtocol() {
+                    return null;
+                }
+                public String getSSLProtocol() {
+                    return null;
+                }
+                public int getPort() {
+                    return defaultPort;
+                }
+                public int getSSLPort() {
+                    return defaultPort;
+                }});
+        } catch (URISyntaxException e) {
+            throw MailAccountExceptionMessages.URI_PARSE_FAILED.create(e, serverUrl);
         }
-        String hostname;
-        {
-            final String[] parsed = MailConfig.parseProtocol(serverUrl);
-            if (parsed == null) {
-                hostname = serverUrl;
-            } else {
-                hostname = parsed[1];
-            }
-        }
-        final int port;
-        {
-            final int pos = hostname.indexOf(':');
-            if (pos > -1) {
-                port = Integer.parseInt(hostname.substring(pos + 1));
-                hostname = hostname.substring(0, pos);
-            } else {
-                port = defaultPort;
-            }
-        }
-        return new InetSocketAddress(hostname, port);
+        return new InetSocketAddress(uri.getHost(), uri.getPort());
     }
 
     /**

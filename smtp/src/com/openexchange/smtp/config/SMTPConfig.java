@@ -49,9 +49,14 @@
 
 package com.openexchange.smtp.config;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.smtp.SMTPException;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
 
 /**
  * {@link SMTPConfig} - The SMTP configuration.
@@ -112,23 +117,16 @@ public final class SMTPConfig extends TransportConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) {
-        smtpServer = serverURL;
-        smtpPort = 25;
-        {
-            final String[] parsed = parseProtocol(smtpServer);
-            if (parsed == null) {
-                secure = false;
-            } else {
-                secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
-                smtpServer = parsed[1];
-            }
-            final int pos = smtpServer.indexOf(':');
-            if (pos > -1) {
-                smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
-                smtpServer = smtpServer.substring(0, pos);
-            }
+    protected void parseServerURL(final String serverURL) throws SMTPException {
+        final URI uri;
+        try {
+            uri = URIParser.parse(serverURL, URIDefaults.SMTP);
+        } catch (URISyntaxException e) {
+            throw new SMTPException(SMTPException.Code.URI_PARSE_FAILED, e, serverURL);
         }
+        secure = PROTOCOL_SMTP_SECURE.equals(uri.getScheme());
+        smtpServer = uri.getHost();
+        smtpPort = uri.getPort();
     }
 
     @Override

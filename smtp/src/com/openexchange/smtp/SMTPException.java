@@ -113,8 +113,9 @@ public final class SMTPException extends MIMEMailException {
         /**
          * No storage access because mail connection is not connected
          */
-        NOT_CONNECTED("No storage access because mail connection is not connected", Category.CODE_ERROR, 3012);
-
+        NOT_CONNECTED("No storage access because mail connection is not connected", Category.CODE_ERROR, 3012),
+        /** Unable to parse SMTP server URI "%1$s". */
+        URI_PARSE_FAILED("Unable to parse SMTP server URI \"%1$s\".", Category.SETUP_ERROR, 3013);
 
         private final String message;
 
@@ -174,7 +175,7 @@ public final class SMTPException extends MIMEMailException {
      * @param messageArgs The message arguments
      */
     public SMTPException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(SMTPProvider.PROTOCOL_SMTP, code.category, code.detailNumber, code.message, cause);
+        super(SMTPProvider.PROTOCOL_SMTP, code.getCategory(), code.getNumber(), code.getMessage(), cause);
         super.setMessageArgs(messageArgs);
     }
 

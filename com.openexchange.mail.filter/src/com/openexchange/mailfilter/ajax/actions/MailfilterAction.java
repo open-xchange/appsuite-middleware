@@ -51,11 +51,11 @@ package com.openexchange.mailfilter.ajax.actions;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jsieve.SieveException;
@@ -91,6 +91,8 @@ import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
@@ -135,8 +137,6 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     }
 
     private static final AbstractObject2JSON2Object<Rule> CONVERTER = new Rule2JSON2Rule();
-
-    private final Pattern p = Pattern.compile("^(?:([^:]*)://)?([^:]*)(.*)$");
 
     private final String scriptname;
 
@@ -640,12 +640,13 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
             if (null != storageUser) {
                 final String mailServerURL = storageUser.getImapServer();
-                final Matcher m = p.matcher(mailServerURL);
-                if (m.matches()) {
-                    sieve_server = m.group(2);
-                } else {
-                    throw new OXMailfilterException(Code.NO_SERVERNAME_IN_SERVERURL);
+                final URI uri;
+                try {
+                    uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
+                } catch (URISyntaxException e) {
+                    throw new OXMailfilterException(Code.NO_SERVERNAME_IN_SERVERURL, e, mailServerURL);
                 }
+                sieve_server = uri.getHost();
                 try {
                     sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
                 } catch (final RuntimeException e) {

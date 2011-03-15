@@ -50,39 +50,62 @@
 package com.openexchange.tools.net;
 
 /**
- * {@link URIDefaults}
- *
+ * This interface defines the defaults for the {@link URIParser}. If no protocol or port is specified in the input, this defaults are used.
+ * The non SSL defaults are always preferred. The SSL defaults only help in determining the protocol or the port if the other part is parsed.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum URIDefaults {
-    NULL(null, -1, null, -1),
-    IMAP("imap", 143, "imaps", 993);
+public interface URIDefaults {
 
-    private final String protocol;
-    private final int port;
-    private final String protocolSSL;
-    private final int portSSL;
+    String getProtocol();
 
-    private URIDefaults(String protocol, int port, String protocolSSL, int portSSL) {
-        this.protocol = protocol;
-        this.port = port;
-        this.protocolSSL = protocolSSL;
-        this.portSSL = portSSL;
-    }
+    String getSSLProtocol();
 
-    public String getProtocol() {
-        return protocol;
-    }
+    int getPort();
 
-    public int getPort() {
-        return port;
-    }
+    int getSSLPort();
 
-    public String getSSLProtocol() {
-        return protocolSSL;
-    }
+    static URIDefaults IMAP = new URIDefaults() {
+        public String getProtocol() {
+            return "imap";
+        }
+        public String getSSLProtocol() {
+            return "imaps";
+        }
+        public int getPort() {
+            return 143;
+        }
+        public int getSSLPort() {
+            return 993;
+        }
+    };
 
-    public int getSSLPort() {
-        return portSSL;
-    }
+    static URIDefaults NULL = new URIDefaults() {
+        public String getProtocol() {
+            return null;
+        }
+        public String getSSLProtocol() {
+            return null;
+        }
+        public int getPort() {
+            return -1;
+        }
+        public int getSSLPort() {
+            return -1;
+        }
+    };
+
+    static URIDefaults SMTP = new URIDefaults() {
+        public String getProtocol() {
+            return "smtp";
+        }
+        public String getSSLProtocol() {
+            return "smtps";
+        }
+        public int getPort() {
+            return 25;
+        }
+        public int getSSLPort() {
+            return 465;
+        }
+    };
 }

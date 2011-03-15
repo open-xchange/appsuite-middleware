@@ -345,7 +345,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
             } else {
                 // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NOT_FOUND, I(id), I(user), I(cid));
-                mailAccount.setTransportServer(null);
+                mailAccount.setTransportServer((String) null);
             }
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
