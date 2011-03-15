@@ -63,7 +63,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.json.Enabled;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.GUI;
 import com.openexchange.file.storage.json.actions.accounts.AccountActionFactory;
@@ -197,7 +196,6 @@ public class FileStorageJSONActivator extends DeferredActivator {
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new FileMultipleAdapter(), null));
         // registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
         // registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
-        registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(), null));
         registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
         registrations.add(context.registerService(FileMetadataParserService.class.getName(), FileMetadataParser.getInstance(), null));
     }
