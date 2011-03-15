@@ -47,35 +47,28 @@
  *
  */
 
-package com.openexchange.file.storage.json;
+package com.openexchange.groupware.settings.tree.modules.olox20;
 
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.SharedNode;
+import com.openexchange.groupware.settings.tree.AbstractModules;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
- * {@link GUI}
+ * {@link Active} - Contains initialization for the modules configuration tree setting OLOX v2.0.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public class GUI implements PreferencesItemService {
+public class Active extends AbstractModules {
 
-    private static final String NAME = "gui";
-
-    /**
-     * Default constructor.
-     */
-    public GUI() {
+    public Active() {
         super();
     }
 
     public String[] getPath() {
-        return new String[]{"modules", "filestorage" , NAME};
+        return new String[] { "modules", "olox20", "active" };
     }
 
-    public IValueHandler getSharedValue() {
-        return new SharedNode(NAME, 13);
+    @Override
+    protected boolean getModule(final UserConfiguration userConfig) {
+        return userConfig.hasOLOX20();
     }
-
 }

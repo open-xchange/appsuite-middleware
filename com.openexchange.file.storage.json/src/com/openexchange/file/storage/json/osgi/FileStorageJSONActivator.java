@@ -64,7 +64,6 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.json.FileMetadataParser;
-import com.openexchange.file.storage.json.GUI;
 import com.openexchange.file.storage.json.actions.accounts.AccountActionFactory;
 import com.openexchange.file.storage.json.multiple.AccountMultipleHandler;
 import com.openexchange.file.storage.json.multiple.FileMultipleAdapter;
@@ -74,7 +73,6 @@ import com.openexchange.file.storage.json.servlets.FileServlet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -196,7 +194,6 @@ public class FileStorageJSONActivator extends DeferredActivator {
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new FileMultipleAdapter(), null));
         // registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
         // registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
-        registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
         registrations.add(context.registerService(FileMetadataParserService.class.getName(), FileMetadataParser.getInstance(), null));
     }
 
