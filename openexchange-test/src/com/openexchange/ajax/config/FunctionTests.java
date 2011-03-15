@@ -253,6 +253,16 @@ public class FunctionTests extends AbstractAJAXSession {
         }
     }
 
+    public void testOLOX20Module() throws Throwable {
+        final GetResponse response = client.execute(new GetRequest(Tree.OLOX20Module));
+        assertFalse("Module for OLOX20 must be always false to prevent UI plugin loading.", response.getBoolean());
+    }
+
+    public void testOLOX20Active() throws Throwable {
+        final GetResponse response = client.execute(new GetRequest(Tree.OLOX20Active));
+        LOG.info("Is the user allowed to use OXtender for Microsoft Outlook 2: " + response.getBoolean());
+    }
+
     private void testBoolean(final Tree param, final boolean testWrite) throws Throwable {
         // Remember for restore.
         final boolean oldValue = client.execute(new GetRequest(param)).getBoolean();

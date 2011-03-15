@@ -460,7 +460,11 @@ public enum Tree {
     
     OXUpdater("/modules/com.openexchange.oxupdater"),
     
-    ActiveSync("/modules/com.openexchange.usm.eas/module");
+    ActiveSync("/modules/com.openexchange.usm.eas/module"),
+
+    OLOX20Module("/modules/olox20/module"),
+
+    OLOX20Active("/modules/olox20/active");
 
     private final String path;
 
