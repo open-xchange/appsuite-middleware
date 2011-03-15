@@ -258,18 +258,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getImapServer() == null && usrdata.isImapServerset()) {
+            if (usrdata.getImapServerString() == null && usrdata.isImapServerset()) {
                 stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-            } else if (usrdata.getImapServer() != null) {
+            } else if (usrdata.getImapServerString() != null) {
                 stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
-                stmt.setString(1, URIParser.parse(usrdata.getImapServer(), URIDefaults.IMAP).toString());
+                stmt.setString(1, URIParser.parse(usrdata.getImapServerString(), URIDefaults.IMAP).toString());
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
@@ -292,18 +292,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getSmtpServer() == null && usrdata.isSmtpServerset()) {
+            if (usrdata.getSmtpServerString() == null && usrdata.isSmtpServerset()) {
                 stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-            } else if (usrdata.getSmtpServer() != null) {
+            } else if (usrdata.getSmtpServerString() != null) {
                 stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
-                stmt.setString(1, URIParser.parse(usrdata.getSmtpServer(), URIDefaults.SMTP).toString());
+                stmt.setString(1, URIParser.parse(usrdata.getSmtpServerString(), URIDefaults.SMTP).toString());
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
@@ -774,9 +774,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         account.setDefaultFlag(true);
         account.setId(0);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
-        if (user.isImapServerset() || null != user.getImapServer()) {
+        if (user.isImapServerset() || null != user.getImapServerString()) {
             changed.add(Attribute.MAIL_URL_LITERAL);
-            String imapServer = user.getImapServer();
+            String imapServer = user.getImapServerString();
             if (null == imapServer) {
                 imapServer = DEFAULT_IMAP_SERVER_CREATE;
             }
@@ -820,9 +820,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             changed.add(Attribute.CONFIRMED_SPAM_LITERAL);
             account.setConfirmedSpam(user.getMail_folder_confirmed_spam_name());
         }
-        if (user.isSmtpServerset() || null != user.getSmtpServer()) {
+        if (user.isSmtpServerset() || null != user.getSmtpServerString()) {
             changed.add(Attribute.TRANSPORT_URL_LITERAL);
-            String smtpServer = user.getSmtpServer();
+            String smtpServer = user.getSmtpServerString();
             if (null == smtpServer) {
                 smtpServer = DEFAULT_SMTP_SERVER_CREATE;
             }
@@ -897,13 +897,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setBoolean(9, usrdata.getMailenabled().booleanValue());
 
                 // imap and smtp server
-                String imapServer = usrdata.getImapServer();
+                String imapServer = usrdata.getImapServerString();
                 if (null == imapServer) {
                     imapServer = DEFAULT_IMAP_SERVER_CREATE;
                 }
                 stmt.setString(10, URIParser.parse(imapServer, URIDefaults.IMAP).toString());
 
-                String smtpServer = usrdata.getSmtpServer();
+                String smtpServer = usrdata.getSmtpServerString();
                 if (null == smtpServer) {
                     smtpServer = DEFAULT_SMTP_SERVER_CREATE;
                 }
@@ -1285,7 +1285,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
-        String imapServer = user.getImapServer();
+        String imapServer = user.getImapServerString();
         if (null == imapServer) {
             imapServer = DEFAULT_IMAP_SERVER_CREATE;
         }
@@ -1311,7 +1311,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         defaultName = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
         account.setConfirmedSpam(null == user.getMail_folder_confirmed_spam_name() ? defaultName : user.getMail_folder_confirmed_spam_name());
         account.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK);
-        String smtpServer = user.getSmtpServer();
+        String smtpServer = user.getSmtpServerString();
         if (null == smtpServer) {
             smtpServer = DEFAULT_SMTP_SERVER_CREATE;
         }

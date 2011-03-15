@@ -1492,7 +1492,7 @@ public class UserTest extends AbstractTest {
         assertEquals("FaxBusiness not equal", a.getFax_business(), b.getFax_business());
         assertEquals("FaxHome not equal", a.getFax_home(), b.getFax_home());
         assertEquals("FaxOther not equal", a.getFax_other(), b.getFax_other());
-        assertEquals("ImapServer not equal", a.getImapServer(), b.getImapServer());
+        assertEquals("ImapServer not equal", a.getImapServerString(), b.getImapServerString());
         assertEquals("InstantMessenger not equal", a.getInstant_messenger1(), b.getInstant_messenger1());
         assertEquals("InstantMessenger2 not equal", a.getInstant_messenger2(), b.getInstant_messenger2());
         assertEquals("IpPhone not equal", a.getTelephone_ip(), b.getTelephone_ip());
@@ -1534,7 +1534,7 @@ public class UserTest extends AbstractTest {
         assertEquals("SecondPostalCode not equal", a.getPostal_code_other(), b.getPostal_code_other());
         assertEquals("SecondState not equal", a.getState_other(), b.getState_other());
         assertEquals("SecondStreet not equal", a.getStreet_other(), b.getStreet_other());
-        assertEquals("SmtpServer not equal", a.getSmtpServer(), b.getSmtpServer());
+        assertEquals("SmtpServer not equal", a.getSmtpServerString(), b.getSmtpServerString());
         assertEquals("SpouseName not equal", a.getSpouse_name(), b.getSpouse_name());
         assertEquals("State not equal", a.getState_home(), b.getState_home());
         assertEquals("Street not equal", a.getStreet_home(), b.getStreet_home());
@@ -1664,7 +1664,7 @@ public class UserTest extends AbstractTest {
         retval.setFax_business(usr.getFax_business()+change_suffix);
         retval.setFax_home(usr.getFax_home()+change_suffix);
         retval.setFax_other(usr.getFax_other()+change_suffix);
-        URI uri = URIParser.parse(usr.getImapServer(), URIDefaults.IMAP);
+        URI uri = URIParser.parse(usr.getImapServerString(), URIDefaults.IMAP);
         retval.setImapServer(URITools.changeHost(uri, uri.getHost() + change_suffix).toString());
         retval.setInstant_messenger1(usr.getInstant_messenger1()+change_suffix);
         retval.setInstant_messenger2(usr.getInstant_messenger2()+change_suffix);
@@ -1705,7 +1705,7 @@ public class UserTest extends AbstractTest {
         retval.setPostal_code_other(usr.getPostal_code_other()+change_suffix);
         retval.setState_other(usr.getState_other()+change_suffix);
         retval.setStreet_other(usr.getStreet_other()+change_suffix);
-        uri = URIParser.parse(usr.getSmtpServer(), URIDefaults.SMTP);
+        uri = URIParser.parse(usr.getSmtpServerString(), URIDefaults.SMTP);
         retval.setSmtpServer(URITools.changeHost(uri, uri.getHost() + change_suffix).toString());
         retval.setSpouse_name(usr.getSpouse_name()+change_suffix);
         retval.setState_home(usr.getState_home()+change_suffix);
