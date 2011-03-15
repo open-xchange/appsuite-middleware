@@ -51,6 +51,7 @@ package com.openexchange.folderstorage;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -186,6 +187,15 @@ public final class FolderServiceDecorator {
             this.properties.putAll(properties);
         }
         return this;
+    }
+
+    /**
+     * Gets this decorator's properties.
+     * 
+     * @return The properties
+     */
+    public Map<String, Object> getProperties() {
+        return new HashMap<String, Object>(properties);
     }
 
 }
