@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-03-01 11:23+0100\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2011-03-15 15:07+0100\n"
+"Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2069,6 +2069,14 @@ msgstr ""
 "Mapping von OCL-Berechtigungswert %1$s auf JSON-Berechtigungswert nicht "
 "möglich"
 
+msgid "Unable to parse SMTP server URI \"%1$s\"."
+msgstr "Analyse von SMTP Server URI \"%1$s\" fehlgeschlagen."
+
+#. Is thrown if the URI to the mail server can not be understood.
+#. %1$s is replaced with the not understandable mail server URI.
+msgid "Unable to parse mail server URI \"%1$s\"."
+msgstr "Analyse von Mail Server URI \"%1$s\" fehlgeschlagen."
+
 msgid "Unable to parse value \"%1$s\" within field %2$s as a number."
 msgstr "Parsen des Werts \"%1$s\" im Feld %2$s als Zahl fehlgeschlagen"
 
@@ -2477,9 +2485,10 @@ msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Verschieben dieses "
 "Objekts."
 
-msgid "You do not have the appropriate permissions to read this object"
+msgid "You do not have the appropriate permissions to read this object %1$d."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objekts."
+"Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objekts "
+"%1$d."
 
 msgid ""
 "You do not have the necessary permissions for appointments in folder %1$d."
