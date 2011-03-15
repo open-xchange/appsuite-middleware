@@ -1325,7 +1325,7 @@ public class UserTest extends AbstractTest {
         usr.setFax_business("FaxBusiness");
         usr.setFax_home("FaxHome");
         usr.setFax_other("FaxOther");
-        usr.setImapServer("localhost");
+        usr.setImapServer("imap://localhost:143");
         usr.setInstant_messenger1("InstantMessenger");
         usr.setInstant_messenger2("InstantMessenger2");
         usr.setTelephone_ip("IpPhone");
@@ -1367,7 +1367,7 @@ public class UserTest extends AbstractTest {
         usr.setPostal_code_other("SecondPostalCode");
         usr.setState_other("SecondState");
         usr.setStreet_other("SecondStreet");
-        usr.setSmtpServer("SmtpServer");
+        usr.setSmtpServer("smtp://localhost:25");
         usr.setSpouse_name("SpouseName");
         usr.setState_home("State");
         usr.setStreet_home("Street");
