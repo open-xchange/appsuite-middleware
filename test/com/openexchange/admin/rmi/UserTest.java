@@ -81,9 +81,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
-import com.openexchange.tools.net.URIDefaults;
-import com.openexchange.tools.net.URIParser;
-import com.openexchange.tools.net.URITools;
 
 /**
  *
@@ -1664,8 +1661,8 @@ public class UserTest extends AbstractTest {
         retval.setFax_business(usr.getFax_business()+change_suffix);
         retval.setFax_home(usr.getFax_home()+change_suffix);
         retval.setFax_other(usr.getFax_other()+change_suffix);
-        URI uri = URIParser.parse(usr.getImapServerString(), URIDefaults.IMAP);
-        retval.setImapServer(URITools.changeHost(uri, uri.getHost() + change_suffix).toString());
+        URI uri = new URI(usr.getImapServerString());
+        retval.setImapServer(new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost() + change_suffix, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment()).toString());
         retval.setInstant_messenger1(usr.getInstant_messenger1()+change_suffix);
         retval.setInstant_messenger2(usr.getInstant_messenger2()+change_suffix);
         retval.setTelephone_ip(usr.getTelephone_ip()+change_suffix);
@@ -1705,8 +1702,8 @@ public class UserTest extends AbstractTest {
         retval.setPostal_code_other(usr.getPostal_code_other()+change_suffix);
         retval.setState_other(usr.getState_other()+change_suffix);
         retval.setStreet_other(usr.getStreet_other()+change_suffix);
-        uri = URIParser.parse(usr.getSmtpServerString(), URIDefaults.SMTP);
-        retval.setSmtpServer(URITools.changeHost(uri, uri.getHost() + change_suffix).toString());
+        uri = new URI(usr.getSmtpServerString());
+        retval.setSmtpServer(new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost() + change_suffix, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment()).toString());
         retval.setSpouse_name(usr.getSpouse_name()+change_suffix);
         retval.setState_home(usr.getState_home()+change_suffix);
         retval.setStreet_home(usr.getStreet_home()+change_suffix);
