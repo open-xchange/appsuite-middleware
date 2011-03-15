@@ -149,7 +149,7 @@ public final class FolderServiceDecorator {
      * @param propertyName The property name
      * @return <code>true</code> if such a property exists; otherwsie <code>false</code>
      */
-    public boolean containsProperty(String propertyName) {
+    public boolean containsProperty(final String propertyName) {
         return properties.containsKey(propertyName);
     }
 
@@ -160,7 +160,7 @@ public final class FolderServiceDecorator {
      * @param propertyValue The property value
      * @return This decorator with property put
      */
-    public FolderServiceDecorator put(String propertyName, Object propertyValue) {
+    public FolderServiceDecorator put(final String propertyName, final Object propertyValue) {
         properties.put(propertyName, propertyValue);
         return this;
     }
@@ -171,7 +171,7 @@ public final class FolderServiceDecorator {
      * @param propertyName The property name
      * @return This decorator with property removed
      */
-    public FolderServiceDecorator remove(String propertyName) {
+    public FolderServiceDecorator remove(final String propertyName) {
         properties.remove(propertyName);
         return this;
     }
@@ -182,11 +182,21 @@ public final class FolderServiceDecorator {
      * @param properties The properties to put
      * @return This decorator with properties put
      */
-    public FolderServiceDecorator putProperties(Map<? extends String, ? extends Object> properties) {
+    public FolderServiceDecorator putProperties(final Map<? extends String, ? extends Object> properties) {
         if (null != properties) {
             this.properties.putAll(properties);
         }
         return this;
+    }
+
+    /**
+     * Gets the named property.
+     * 
+     * @param propertyName The property name
+     * @return The property value or <code>null</code>
+     */
+    public Object getProperty(final String propertyName) {
+        return properties.get(propertyName);
     }
 
     /**
