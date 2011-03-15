@@ -161,6 +161,9 @@ public final class FolderServiceDecorator {
      * @return This decorator with property put
      */
     public FolderServiceDecorator put(final String propertyName, final Object propertyValue) {
+        if (null == propertyName || null == propertyValue) {
+            return this;
+        }
         properties.put(propertyName, propertyValue);
         return this;
     }

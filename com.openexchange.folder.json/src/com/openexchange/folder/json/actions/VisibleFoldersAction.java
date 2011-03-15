@@ -113,6 +113,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
             all = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        final String mailRootFolders = request.getParameter("mailRootFolders");
         final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
         /*
          * Get folder service
@@ -129,7 +130,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PrivateType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes));
+                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put("mailRootFolders", mailRootFolders));
         /*
          * Get all shared folders
          */

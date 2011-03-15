@@ -71,6 +71,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
@@ -175,7 +176,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Only primary account folders
              */
             final int accountId = MailAccount.DEFAULT_ID;
-            final Session session = storageParameters.getSession();
+            final ServerSession session = getServerSession(storageParameters);
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
@@ -198,8 +199,49 @@ public final class MailFolderStorage implements FolderStorage {
                 final MailFolder tmp = folders.get(j);
                 list.add(new MailId(prepareFullname(mailAccess.getAccountId(), tmp.getFullname()), j).setName(tmp.getName()));
             }
+            /*
+             * Add external account root folders
+             */
+            final FolderServiceDecorator decorator = storageParameters.getDecorator();
+            if (null != decorator) {
+                final Object property = decorator.getProperty("mailRootFolders");
+                if (Boolean.parseBoolean(property.toString()) && session.getUserConfiguration().isMultipleMailAccounts()) {
+                    final MailAccountStorageService mass = MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                    final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
+                    final List<MailAccount> tmp = new ArrayList<MailAccount>(accounts.length);
+                    for (final MailAccount mailAccount : accounts) {
+                        if (!mailAccount.isDefaultAccount()) {
+                            tmp.add(mailAccount);
+                        }
+                    }
+                    Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
+                    if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(tmp.get(0).getMailProtocol())) {
+                        /*
+                         * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                         */
+                        final UnifiedINBOXManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedINBOXManagement.class);
+                        if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                            tmp.remove(0);
+                        }
+                    }
+                    int start = list.size();
+                    final int sz = tmp.size();
+                    for (int j = 0; j < sz; j++) {
+                        list.add(new MailId(prepareFullname(tmp.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), start++).setName(MailFolder.DEFAULT_FOLDER_NAME));
+                    }
+                }
+            }
+            /*
+             * Return
+             */
             return list.toArray(new SortableId[list.size()]);
         } catch (final MailException e) {
+            throw new FolderException(e);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        } catch (final MailAccountException e) {
+            throw new FolderException(e);
+        } catch (final ContextException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
