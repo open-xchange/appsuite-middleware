@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.osgi;
 
+import java.rmi.Remote;
+import java.rmi.registry.Registry;
 import java.util.Dictionary;
 import java.util.Stack;
 
@@ -62,6 +64,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.daemons.osgi.RMITracker;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -80,6 +83,7 @@ public class Activator implements BundleActivator {
     private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
     public void start(BundleContext context) throws Exception {
+        
         trackers.push(new ServiceTracker(
             context,
             PipesAndFiltersService.class.getName(),
@@ -118,6 +122,12 @@ public class Activator implements BundleActivator {
             throw e;
         }
         this.daemon.initRMI(context);
+        
+        Registry registry = AdminDaemon.getRegistry();
+        RMITracker rmiTracker = new RMITracker(context, registry);
+        trackers.push(rmiTracker);
+        rmiTracker.open();
+        
 
         if (log.isInfoEnabled()) {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
