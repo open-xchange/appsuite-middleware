@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.daemons;
 
+import com.openexchange.admin.daemons.osgi.RMITracker;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
@@ -83,6 +84,7 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -177,7 +179,6 @@ public class AdminDaemon {
     }
 
     public void initRMI(final BundleContext context) {
-
         try {
             final int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
             try {
@@ -217,6 +218,7 @@ public class AdminDaemon {
             registry.bind(OXLoginInterface.RMI_NAME, oxlogin_stub_v2);
             registry.bind(OXAdminCoreInterface.RMI_NAME, oxadmincore_stub);
             registry.bind(OXTaskMgmtInterface.RMI_NAME, oxtaskmgmt_stub);
+            
         } catch (final RemoteException e) {
             LOG.fatal("Error creating RMI registry!",e);
             System.exit(1);
@@ -227,7 +229,7 @@ public class AdminDaemon {
             LOG.fatal("Error while creating one instance for RMI interface", e);
         }
     }
-
+    
     public void unregisterRMI() {
         try {
             registry.unbind(OXUserInterface.RMI_NAME);
