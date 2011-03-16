@@ -369,6 +369,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
             java.util.Arrays.sort(contacts, new UseCountComparator(false));
+        } else if(collation == null) {
+        	java.util.Arrays.sort(contacts, new ContactComparator());
         }
 
         return new ArrayIterator<Contact>(contacts);
