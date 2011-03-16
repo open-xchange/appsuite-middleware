@@ -69,8 +69,10 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
@@ -137,6 +139,8 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     public static final String SERVER_ERROR_EXCEPTION = "[%s] Server Error - ";
 
     public static final String OK = "[" + OK_STATUS + "] OK";
+    
+    public static final String INDIVIDUAL_ERROR = "[%s] [%s]";
 
     public static final String _contentType = "text/xml; charset=UTF-8";
 
@@ -191,22 +195,22 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
                     commit(resp.getOutputStream(), getSession(req), pendingInvocations);
                 } else {
-                    doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
+                    doOXError(req, resp, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, parser);
                     return;
                 }
             } else {
-                doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
+                doOXError(req, resp, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, parser);
                 return;
             }
         } catch (final IOException e) {
             LOG.error("doPropPatch", e);
-            doError(req, resp);
+            doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, parser);
         } catch (final XmlPullParserException e) {
             LOG.error("doPropPatch", e);
-            doError(req, resp);
+            doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, parser);
         } catch (final AbstractOXException e) {
             LOG.error("doPropPatch", e);
-            doError(req, resp);
+            doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, parser);
         }
     }
 
@@ -383,6 +387,66 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         } catch (final Exception exc) {
             LOG.error("doError", exc);
         }
+    }
+    
+    private void doOXError(final HttpServletRequest req, final HttpServletResponse resp, final int httpErrorCode, final String description, final XmlPullParser parser) throws ServletException {
+        final DataObject dataObject = new DataObject() {
+            @Override
+            public int getObjectID() {
+                return 0;
+            }
+        };
+        try {
+            String clientId = "not found";
+            
+            while (!(parser.getEventType() == XmlPullParser.END_DOCUMENT)) {
+                if (isTag(parser, "client_id", "ox")) {
+                    clientId = parser.nextText();
+                    break;
+                } else {
+                    parser.next();
+                }
+            }
+            
+            final OutputStream os = resp.getOutputStream();
+            os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
+            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\"" + Version.NAME + "\">").getBytes());
+            os.flush();
+            
+            writeResponse(dataObject, httpErrorCode, description, clientId, resp.getOutputStream(), new XMLOutputter());
+
+            os.write(("</D:multistatus>").getBytes());
+        } catch (IOException e) {
+            LOG.error("doOXError", e);
+            doError(req, resp, httpErrorCode, description);
+        } catch (XmlPullParserException e) {
+            LOG.error("doOXError", e);
+            doError(req, resp, httpErrorCode, description);
+        }
+    }
+    
+    private void doOXError(final HttpServletRequest req, final HttpServletResponse resp, final int httpErrorCode, final Exception exception, final XmlPullParser parser) throws ServletException {
+        doOXError(req, resp, httpErrorCode, createResponseErrorMessage(exception), parser);
+    }
+    
+    private String createResponseErrorMessage(final Exception e) {
+        final int descriptionCode;
+        final String message;
+        if (e instanceof AbstractOXException) {
+            final AbstractOXException o = (AbstractOXException) e;
+            if (o.getComponent().equals(EnumComponent.CONTACT) && o.getDetailNumber() == ContactExceptionCodes.INVALID_EMAIL.getDetailNumber()) {
+                descriptionCode = 1500;
+                message = o.getMessage();
+            } else {
+                descriptionCode = 1400;
+                message = o.getMessage();
+            }
+        } else {
+            descriptionCode = 1400;
+            message = e.getMessage();
+        }
+        
+        return String.format(INDIVIDUAL_ERROR, descriptionCode, message);
     }
 
     protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp,
