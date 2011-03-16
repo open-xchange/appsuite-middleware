@@ -411,8 +411,20 @@ public final class CacheFolderStorage implements FolderStorage {
      * @throws FolderException If removal fails
      */
     public void removeSingleFromCache(final String id, final String treeId, final int userId, final Session session) throws FolderException {
+        removeSingleFromCache(id, treeId, userId, session.getContextId(), session);
+    }
+
+    /**
+     * Removes a single folder from cache.
+     * 
+     * @param id The folder identifier
+     * @param treeId The tree identifier
+     * @param contextId The context identifier
+     * @param session The session
+     * @throws FolderException If removal fails
+     */
+    public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final Session session) throws FolderException {
         try {
-            final int contextId = session.getContextId();
             globalCache.remove(newCacheKey(id, treeId, contextId));
             if (userId > 0) {
                 final FolderMap folderMap = optFolderMapFrom(session);
