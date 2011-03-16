@@ -100,14 +100,11 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             // Check if Unified INBOX account already exists for given user
-            final MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId, con);
-            for (final MailAccount mailAccount : existingAccounts) {
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                    // User already has the Unified INBOX account set
-                    throw MailAccountExceptionMessages.DUPLICATE_UNIFIED_INBOX_ACCOUNT.create(
-                        Integer.valueOf(userId),
-                        Integer.valueOf(contextId));
-                }
+            if (exists(userId, contextId, con)) {
+                // User already has the Unified INBOX account set
+                throw MailAccountExceptionMessages.DUPLICATE_UNIFIED_INBOX_ACCOUNT.create(
+                    Integer.valueOf(userId),
+                    Integer.valueOf(contextId));
             }
             final Context ctx;
             {
