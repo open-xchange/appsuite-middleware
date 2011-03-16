@@ -401,7 +401,7 @@ public final class MailAccountDescription implements Serializable {
         if (null != mailServerUrl) {
             return mailServerUrl;
         }
-        if (null == mailServer) {
+        if (isEmpty(mailServer)) {
             return null;
         }
         String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
@@ -511,7 +511,7 @@ public final class MailAccountDescription implements Serializable {
         if (null != transportUrl) {
             return transportUrl;
         }
-        if (null == transportServer) {
+        if (isEmpty(transportServer)) {
             return null;
         }
         String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
@@ -918,6 +918,18 @@ public final class MailAccountDescription implements Serializable {
             port = defaultPort;
         }
         return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
     }
 
 }
