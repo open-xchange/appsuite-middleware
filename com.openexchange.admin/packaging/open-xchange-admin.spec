@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -403,6 +403,10 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Mar 16 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18666: CLT listuser is now capable to work with IPv6 IMAP and SMTP backends.
+* Tue Mar 15 2011 - marcus.klein@open-xchange.com
+ - Bugfix #16324: Supporting IPv6 addresses for IMAP and SMTP backend connections.
 * Tue Mar 01 2011 - marcus.klein@open-xchange.com
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
  - Bugfix #18479: OLOX2 should not be enabled for PIM mobility users.
