@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 9
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -80,6 +80,9 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 /opt/open-xchange/bundles/*
 /opt/open-xchange/sbin/*
 %changelog
+* Thu Mar 10 2011 - benjamin.otterbach@open-xchange.com
+ - Bugfix #18588: Report client requests wrong values for OLOX2 reporting
+   - Changed request value from regex to wildcard
 * Tue Dec 21 2010 - benjamin.otterbach@open-xchange.com
   - Changes for bugfix #17859
 * Fri May 28 2010 - benjamin.otterbach@open-xchange.com

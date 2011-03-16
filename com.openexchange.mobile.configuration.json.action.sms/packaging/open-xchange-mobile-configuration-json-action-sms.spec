@@ -80,6 +80,8 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 
 %changelog
+* Wed Mar 16 2011 - choeger@open-xchange.com
+  - Bugfix #18662 - Mobile configuration packages cant be installed on debian squeeze
 * Sat Jun 26 2010 - manuel.kraft@open-xchange.com
   - adding SMS implementation and fixed libs in build file
 * Fri Jun 25 2010 - benjamin.otterbach@open-xchange.com

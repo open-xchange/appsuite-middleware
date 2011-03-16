@@ -11,7 +11,7 @@
 
 	<property name="tmp.dir" value="tmp" />
 
-	<property name="version" value="6.19.0.0" />
+	<property name="version" value="6.20.0.0" />
 	<property name="bundle.name" value="${project.name}.jar" />
 	<property name="composite.name" value="open-xchange-report-client-${version}" />
 	<property name="etcdir"  value="etc"/>

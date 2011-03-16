@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 9
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -82,5 +82,7 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 %config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell-multiple-gui.properties
 %{docroot}/ox6/plugins/com.openexchange.upsell.multiple.gui/*
 %changelog
+* Tue Mar 15 2011 - mkraft@open-xchange.com
+ - bugfix #18530 https://bugs.open-xchange.com/show_bug.cgi?id=18530
 * Mon Sep 27 2010 - mkraft@open-xchange.com
  - Initial
