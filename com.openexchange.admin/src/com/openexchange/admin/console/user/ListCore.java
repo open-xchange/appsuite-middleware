@@ -250,6 +250,14 @@ public abstract class ListCore extends UserAbstraction {
         notallowedOrReplace.put("GUI_Spam_filter_capabilities_enabled", "");
         notallowedOrReplace.put("Spam_filter_enabled", "");
         notallowedOrReplace.put("Gui_spam_filter_enabled", "GUI_Spam_filter_capabilities_enabled");
+        notallowedOrReplace.put("ImapSchema", "");
+        notallowedOrReplace.put("ImapServer", "");
+        notallowedOrReplace.put("ImapServerString", "ImapServer");
+        notallowedOrReplace.put("ImapPort", "");
+        notallowedOrReplace.put("SmtpSchema", "");
+        notallowedOrReplace.put("SmtpServer", "");
+        notallowedOrReplace.put("SmtpServerString", "SmtpServer");
+        notallowedOrReplace.put("SmtpPort", "");
         final ArrayList<MethodAndNames> methArrayList = getGetters(methods, notallowedOrReplace);
 
         final ArrayList<String> columnnames = new ArrayList<String>(32);
