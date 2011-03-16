@@ -8,7 +8,7 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-mobile-configuration-json-action-sms
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-mobile-configuration-json (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre|java6-runtime, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-mobile-configuration-json (>= @OXVERSION@)
 Provides: 
 Description: Mobility Provisioning SMS transport.
 Conflicts: 
