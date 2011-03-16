@@ -95,7 +95,7 @@ public class OrderByTest extends TestCase {
         final int pos = user.indexOf('@');
         final String contextName;
         if (pos == -1) {
-            contextName = "defaultcontext";
+            contextName = config.getContextName();
         } else {
             contextName = user.substring(pos + 1);
             user = user.substring(0, pos);
