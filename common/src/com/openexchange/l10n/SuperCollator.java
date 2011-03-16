@@ -118,6 +118,9 @@ public enum SuperCollator {
 	}
 
 	public static SuperCollator getByJavaLocale(String something) {
+		if(something == null)
+			return null;
+		
 		String[] parts = something.split("_");
 
 		String lang = null, country = null, variant = null;
