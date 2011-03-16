@@ -1,3 +1,7 @@
+* 2011-03-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #18666: CLT listuser is now capable to work with IPv6 IMAP and SMTP backends.
+
 * 2011-03-15 - marcus.klein@open-xchange.com
 
  - Bugfix #16324: Supporting IPv6 addresses for IMAP and SMTP backend connections.
