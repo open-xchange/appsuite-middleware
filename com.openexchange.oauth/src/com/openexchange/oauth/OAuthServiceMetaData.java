@@ -114,8 +114,8 @@ public interface OAuthServiceMetaData {
     /**
      * Processes specified arguments.
      * 
-     * @param arguments The arguments
-     * @param parameter The parameters
+     * @param arguments The arguments. You can store additional information here
+     * @param parameter The parameters. The request parameters sent to the callback url. You may want to extract items from these and store them in arguments for later processing
      * @param state The state
      */
     void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state);
@@ -128,5 +128,13 @@ public interface OAuthServiceMetaData {
      * @throws OAuthException If an error occurs returning the token
      */
     OAuthToken getOAuthToken(Map<String, Object> arguments) throws OAuthException;
+
+    /**
+     * Initiates contact and returns the initial oauth interaction. This is an optional method, just return null when you
+     * do not need to do anything special here.
+     * @param callbackUrl
+     * @return
+     */
+    OAuthInteraction initOAuth(String callbackUrl) throws OAuthException;
     
 }

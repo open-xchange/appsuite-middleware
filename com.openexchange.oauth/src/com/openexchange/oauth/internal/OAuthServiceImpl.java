@@ -219,6 +219,10 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             /*
              * Get appropriate Scribe service implementation
              */
+            OAuthInteraction interaction = metaData.initOAuth(callbackUrl);
+            if (interaction != null)  {
+                return interaction;
+            }
             final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
             final Token scribeToken;
             if (metaData.needsRequestToken()) {
