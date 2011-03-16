@@ -1,3 +1,7 @@
+* 2011-03-16 - thorben.betten@open-xchange.
+
+ - Bugfix #18617: Using specified connection to load newly created mail account
+
 * 2011-03-15 - marcus.klein@open-xchange.com
 
  - Bugfix #16324: Supporting IPv6 addresses for IMAP and SMTP backend connections.

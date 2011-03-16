@@ -209,9 +209,55 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         final int[] ids = delegate.getUserMailAccountIDs(user, cid, con);
         final MailAccount[] accounts = new MailAccount[ids.length];
         for (int i = 0; i < accounts.length; i++) {
-            accounts[i] = getMailAccount(ids[i], user, cid);
+            accounts[i] = getMailAccount0(ids[i], user, cid, con);
         }
         return accounts;
+    }
+
+    private MailAccount getMailAccount0(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getMailAccount(id, user, cid);
+        }
+        try {
+            final CacheKey key = newCacheKey(cacheService, id, user, cid);
+            final Cache cache = cacheService.getCache(REGION_NAME);
+            if (cache.get(key) == null) {
+                /*
+                 * Not contained in cache. Load with specified connection
+                 */
+                final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
+                cache.put(key, mailAccount);
+            }
+            /*
+             * Return reloading mail account
+             */
+            final RdbMailAccountStorage d = delegate;
+            final Lock l = cacheLock;
+            final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
+    
+                public Serializable getKey() {
+                    return key;
+                }
+    
+                public MailAccount load() throws MailAccountException {
+                    return d.getMailAccount(id, user, cid);
+                }
+    
+                public Lock getCacheLock() {
+                    return l;
+                }
+            };
+            return new MailAccountReloader(factory, REGION_NAME);
+
+        } catch (final MailAccountException e) {
+            throw e;
+        } catch (final AbstractOXException e) {
+            if (e instanceof MailAccountException) {
+                throw (MailAccountException) e;
+            }
+            throw new MailAccountException(e);
+        }
     }
 
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws MailAccountException {
