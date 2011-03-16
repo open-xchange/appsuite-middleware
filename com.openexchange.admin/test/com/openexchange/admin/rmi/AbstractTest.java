@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 public abstract class AbstractTest {
     
     protected  static String TEST_DOMAIN = "example.org";
-    protected  static String change_suffix = "_changed";
+    protected  static String change_suffix = "-changed";
     
     protected static String getRMIHostUrl(){
         String host = "localhost";
