@@ -72,6 +72,9 @@ public final class URIParser {
     }
 
     public static final URI parse(String input, URIDefaults defaults) throws URISyntaxException {
+        if (null == input || 0 == input.length()) {
+            return null;
+        }
         Matcher matcher6 = IPV6_PATTERN.matcher(input);
         Matcher matcher4 = IPV4_PATTERN.matcher(input);
         final Matcher matcher;

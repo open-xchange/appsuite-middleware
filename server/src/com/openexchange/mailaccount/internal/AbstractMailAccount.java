@@ -488,9 +488,14 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     public void setMailServer(URI mailServer) {
-        setMailProtocol(mailServer.getScheme());
-        setMailServer(URITools.getHost(mailServer));
-        setMailPort(mailServer.getPort());
+        if (null == mailServer) {
+            // Parse like old parser to prevent problems.
+            setMailServer("");
+        } else {
+            setMailProtocol(mailServer.getScheme());
+            setMailServer(URITools.getHost(mailServer));
+            setMailPort(mailServer.getPort());
+        }
     }
 
     /**
@@ -512,9 +517,14 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     public void setTransportServer(URI transportServer) {
-        setTransportProtocol(transportServer.getScheme());
-        setTransportServer(URITools.getHost(transportServer));
-        setTransportPort(transportServer.getPort());
+        if (null == transportServer) {
+            // Parse like old parser to prevent problems.
+            setTransportServer("");
+        } else {
+            setTransportProtocol(transportServer.getScheme());
+            setTransportServer(URITools.getHost(transportServer));
+            setTransportPort(transportServer.getPort());
+        }
     }
 
     public String generateTransportServerURL() {
@@ -711,21 +721,6 @@ public abstract class AbstractMailAccount implements MailAccount {
         sb.append("\nname=").append(getName()).append(" primary-address=").append(getPrimaryAddress());
         sb.append("\nmail-server=").append(generateMailServerURL()).append(" transport-server=").append(generateTransportServerURL());
         return sb.toString();
-    }
-
-    private static Object[] parseServerAndPort(final String server, final int defaultPort) {
-        final int pos = server.indexOf(':');
-        if (pos == -1) {
-            return new Object[] { server, Integer.valueOf(defaultPort) };
-        }
-        int port;
-        try {
-            port = Integer.parseInt(server.substring(pos + 1));
-        } catch (final NumberFormatException e) {
-            LOG.warn("Unable to parse port out of URL: " + server + ". Using default port instead.", e);
-            port = defaultPort;
-        }
-        return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
     }
 
     private static boolean isEmpty(final String string) {

@@ -458,9 +458,14 @@ public final class MailAccountDescription implements Serializable {
     }
 
     public void setMailServer(URI mailServer) {
-        setMailProtocol(mailServer.getScheme());
-        setMailServer(mailServer.getHost());
-        setMailPort(mailServer.getPort());
+        if (null == mailServer) {
+            // Parse like old parser to prevent problems.
+            setMailServer("");
+        } else {
+            setMailProtocol(mailServer.getScheme());
+            setMailServer(mailServer.getHost());
+            setMailPort(mailServer.getPort());
+        }
     }
 
     /**
@@ -502,9 +507,14 @@ public final class MailAccountDescription implements Serializable {
     }
 
     public void setTransportServer(URI transportServer) {
-        setTransportProtocol(transportServer.getScheme());
-        setTransportServer(URITools.getHost(transportServer));
-        setTransportPort(transportServer.getPort());
+        if (null == transportServer) {
+            // Parse like old parser to prevent problems.
+            setTransportServer(""); 
+        } else {
+            setTransportProtocol(transportServer.getScheme());
+            setTransportServer(URITools.getHost(transportServer));
+            setTransportPort(transportServer.getPort());
+        }
     }
 
     public String generateTransportServerURL() {

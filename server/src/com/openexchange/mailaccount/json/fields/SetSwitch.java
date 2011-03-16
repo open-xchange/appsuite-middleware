@@ -180,7 +180,7 @@ public class SetSwitch implements AttributeSwitch {
         try {
             desc.setTransportPort(Integer.parseInt(value.toString()));
         } catch (final NumberFormatException e) {
-            LOG.error(
+            LOG.debug(
                 new StringBuilder("Transport port is not a number: ").append(value).append(". Setting to fallback port 25.").toString(),
                 e);
             desc.setTransportPort(25);
