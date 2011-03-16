@@ -227,7 +227,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                  * Not contained in cache. Load with specified connection
                  */
                 final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
-                cache.put(key, mailAccount);
+                cacheLock.lock();
+                try {
+                    cache.put(key, mailAccount);
+                } finally {
+                    cacheLock.unlock();
+                }
             }
             /*
              * Return reloading mail account
