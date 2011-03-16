@@ -853,7 +853,7 @@ public class UserTest extends AbstractTest {
                     } else if(map_obj.getMethodName().toLowerCase().contains("mail")) {
                         map_obj.getSetter().invoke(tmp_usr,getChangedEmailAddress(oldvalue, "_singlechange"));
                     } else {
-                        map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
+                        map_obj.getSetter().invoke(tmp_usr, oldvalue+"-singlechange");
                     }
                     //System.out.println("Setting String via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
 
