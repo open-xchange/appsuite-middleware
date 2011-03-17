@@ -80,7 +80,12 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     private boolean configured = false;
 
+    private boolean hasServerProvider = false;
+    private boolean initialised = false;
+    
     private ComponentRegistration componentRegistration;
+
+    private ConfigCascade configCascade;
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -92,7 +97,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         componentRegistration = new ComponentRegistration(context, new StringComponent("CCA"), "com.openexchange.config.cascade", ConfigCascadeExceptionFactory.getInstance());
         
         
-        final ConfigCascade configCascade = new ConfigCascade();
+        configCascade = new ConfigCascade();
         
         final ServiceTracker stringParsers = track(StringParser.class);
         
@@ -117,8 +122,9 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 if (isServerProvider(reference)) {
                     String scopes = getScopes(provider);
                     configure(scopes, configCascade);
-                    registerService(ConfigViewFactory.class, configCascade);
                 }
+                hasServerProvider = true;
+                register();
                 return provider;
             }
 
@@ -133,9 +139,19 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         });
         
         configCascade.setProvider("server", new TrackingProvider(serverProviders));
+        initialised = true;
+        
+        register();
         
         openTrackers();
+
+
+    }
     
+    private void register() {
+        if(initialised && hasServerProvider) {
+            registerService(ConfigViewFactory.class, configCascade);
+        }
     }
     
     @Override
