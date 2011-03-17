@@ -121,6 +121,8 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 if (isServerProvider(reference)) {
                     String scopes = getScopes(provider);
                     configure(scopes, configCascade);
+                    configCascade.setProvider("server", provider);
+                    registerService(ConfigViewFactory.class, configCascade);
                 }
                 return provider;
             }
@@ -135,11 +137,9 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             
         });
         
-        configCascade.setProvider("server", new TrackingProvider(serverProviders));
 
         openTrackers();
 
-        registerService(ConfigViewFactory.class, configCascade);
 
         
     }
