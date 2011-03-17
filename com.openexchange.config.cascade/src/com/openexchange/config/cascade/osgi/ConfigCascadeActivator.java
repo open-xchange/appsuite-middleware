@@ -84,7 +84,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     private ConfigCascade configCascade;
 
-    private int INFINITY = 10000;
+    private int INFINITY = 10;
     
     @Override
     protected Class<?>[] getNeededServices() {
