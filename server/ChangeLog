@@ -1,3 +1,7 @@
+* 2011-03-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #18683: Checking for POP3 account before performing delete listener actions
+
 * 2011-03-17 - marcus.klein@open-xchange.com
 
  - Bugfix #18643: Fixed old mail accounts without transport server for IPv6 support.
@@ -6,7 +10,7 @@
 
  - Bugfix #18643: Fixed mail accounts without transport server for IPv6 support.
 
-* 2011-03-16 - thorben.betten@open-xchange.
+* 2011-03-16 - thorben.betten@open-xchange.com
 
  - Bugfix #18617: Using specified connection to load newly created mail account
 

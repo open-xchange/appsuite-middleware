@@ -50,12 +50,18 @@
 package com.openexchange.pop3.storage.mailaccount.util;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import com.openexchange.mail.MailException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.pop3.POP3Access;
+import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageProperties;
@@ -63,6 +69,7 @@ import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageTrashContainer;
 import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageUIDLMap;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link StorageDeleteListener} - Delete listener for mail account POP3 storage.
@@ -84,6 +91,38 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
 
     public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
         try {
+            /*
+             * Check if account denotes a POP3 account
+             */
+            final String url;
+            {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = con.prepareStatement("SELECT url FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+                    stmt.setLong(1, cid);
+                    stmt.setLong(2, id);
+                    stmt.setLong(3, user);
+                    rs = stmt.executeQuery();
+                    if (!rs.next()) {
+                        /*
+                         * Strange...
+                         */
+                        return;
+                    }
+                    url = rs.getString(1).toLowerCase(Locale.ENGLISH);
+                } catch (final SQLException e) {
+                    throw MailAccountExceptionMessages.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(rs, stmt);
+                }
+            }
+            if (!url.startsWith(POP3Provider.PROTOCOL_POP3.getName())) {
+                /*
+                 * Not a POP3 account...
+                 */
+                return;
+            }
             /*
              * Delete storage content for user if a valid session can be found
              */
