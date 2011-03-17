@@ -536,6 +536,7 @@ public class ContactMySql implements ContactSql {
     }
 
     public void setInternalUsers(int[] userIds) {
+        this.where = null;
         this.userIds = userIds;
     }
 

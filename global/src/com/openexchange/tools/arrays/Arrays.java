@@ -136,4 +136,16 @@ public final class Arrays {
         System.arraycopy(toClone, 0, retval, 0, toClone.length);
         return retval;
     }
+
+    public static int[] extract(int[] source, int start, int length) {
+        final int realLength;
+        if (start + length > source.length) {
+            realLength = source.length - start;
+        } else {
+            realLength = length;
+        }
+        final int[] retval = new int[realLength];
+        System.arraycopy(source, start, retval, 0, realLength);
+        return retval;
+    }
 }
