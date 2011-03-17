@@ -512,7 +512,12 @@ public abstract class AbstractMailAccount implements MailAccount {
         try {
             setTransportServer(URIParser.parse(transportServerURL, URIDefaults.SMTP));
         } catch (URISyntaxException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, transportServerURL);
+            if ("smtp://:25".equals(transportServerURL)) {
+                // Workaround for ugly value in database.
+                setTransportServer((URI) null);
+            } else {
+                throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, transportServerURL);
+            }
         }
     }
 
