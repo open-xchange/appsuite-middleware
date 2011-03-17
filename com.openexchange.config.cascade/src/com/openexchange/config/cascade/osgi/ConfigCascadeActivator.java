@@ -139,14 +139,6 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
         openTrackers();
 
-        for(int i = 0; serverProviders.getTrackingCount() == 0 && i < INFINITY; i++) {
-            serverProviders.waitForService(1000);
-        }
-        if(serverProviders.getTrackingCount() == 0) {
-            LOG.error("No Server Provider Found for Config Cascade. Config Cascade will remain inactive.");
-            return;
-        }
-        
         registerService(ConfigViewFactory.class, configCascade);
 
         
