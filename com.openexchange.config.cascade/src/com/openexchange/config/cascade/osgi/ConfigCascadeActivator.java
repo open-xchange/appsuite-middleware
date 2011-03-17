@@ -117,6 +117,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 if (isServerProvider(reference)) {
                     String scopes = getScopes(provider);
                     configure(scopes, configCascade);
+                    registerService(ConfigViewFactory.class, configCascade);
                 }
                 return provider;
             }
@@ -135,7 +136,6 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         
         openTrackers();
     
-        registerService(ConfigViewFactory.class, configCascade);
     }
     
     @Override
