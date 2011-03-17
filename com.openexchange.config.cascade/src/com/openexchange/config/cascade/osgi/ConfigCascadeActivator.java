@@ -80,12 +80,11 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     private boolean configured = false;
 
-    private boolean hasServerProvider = false;
-    private boolean initialised = false;
-    
     private ComponentRegistration componentRegistration;
 
     private ConfigCascade configCascade;
+
+    private int INFINITY = 10000;
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -123,8 +122,6 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                     String scopes = getScopes(provider);
                     configure(scopes, configCascade);
                 }
-                hasServerProvider = true;
-                register();
                 return provider;
             }
 
@@ -139,20 +136,22 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         });
         
         configCascade.setProvider("server", new TrackingProvider(serverProviders));
-        initialised = true;
-        
-        register();
-        
+
         openTrackers();
 
+        for(int i = 0; serverProviders.getTrackingCount() == 0 && i < INFINITY; i++) {
+            serverProviders.waitForService(1000);
+        }
+        if(serverProviders.getTrackingCount() == 0) {
+            LOG.error("No Server Provider Found for Config Cascade. Config Cascade will remain inactive.");
+            return;
+        }
+        
+        registerService(ConfigViewFactory.class, configCascade);
 
+        
     }
     
-    private void register() {
-        if(initialised && hasServerProvider) {
-            registerService(ConfigViewFactory.class, configCascade);
-        }
-    }
     
     @Override
     protected void stopBundle() throws Exception {
