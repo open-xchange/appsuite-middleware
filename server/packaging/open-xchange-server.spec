@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -769,7 +769,11 @@ fi
 %doc doc/examples
 
 %changelog
-* Wed Mar 16 2011 - thorben.betten@open-xchange.
+* Thu Mar 17 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18643: Fixed old mail accounts without transport server for IPv6 support.
+* Thu Mar 17 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18683: Checking for POP3 account before performing delete listener actions
+* Wed Mar 16 2011 - thorben.betten@open-xchange.com
  - Bugfix #18617: Using specified connection to load newly created mail account
 * Wed Mar 16 2011 - marcus.klein@open-xchange.com
  - Bugfix #18643: Fixed mail accounts without transport server for IPv6 support.

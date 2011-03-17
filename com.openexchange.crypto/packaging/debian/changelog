@@ -1,3 +1,9 @@
+open-xchange-crypto (6.20.0.0-2) unstable; urgency=low
+
+  * build for 6.20.0-rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 17 Mar 2011 13:11:19 +0000
+
 open-xchange-crypto (6.20.0.0-1) unstable; urgency=low
 
   * build for 6.20.0-rev1
