@@ -1787,7 +1787,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } catch (final GeneralSecurityException e) {
-            return "Failed on decrypting mail account password for account "+id+" user: "+user+", cid: "+cid;
+            return "Failed on decrypting mail account password for account "+id+" user: "+user+", cid: "+cid+ "Reason: "+e.toString();
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (con != null) {
