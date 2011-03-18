@@ -393,25 +393,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     	
 		
 	}
-    
-    public void changeModuleAccessGlobal(int filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws InvalidCredentialsException, StorageException {
-        int addBits = addAccess.getPermissionBits();
-        int removeBits = removeAccess.getPermissionBits();
-        if (log.isDebugEnabled()) {
-            log.debug("Adding " + addBits + " removing " + removeBits + " to filter " + filter);
-        }
-        
-        try {
-            basicauth.doAuthentication(auth);
-            OXToolMySQLStorage.getInstance().changeAccessCombination(filter, addBits, removeBits);
-        } catch (InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-    }
 
     public User create(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         // Call common create method directly because we already have out access module
@@ -1202,10 +1183,32 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      * @see com.openexchange.admin.rmi.OXUserInterface#changeModuleAccessGlobal(java.lang.String, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void changeModuleAccessGlobal(String filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
-        UserModuleAccess namedAccessCombination = ClientAdminThread.cache.getNamedAccessCombination(filter);
-        if (namedAccessCombination == null) {
-            throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
+        int permissionBits = -1;
+        try {
+            permissionBits = Integer.parseInt(filter);
+        } catch (NumberFormatException nfe) {
+            UserModuleAccess namedAccessCombination = ClientAdminThread.cache.getNamedAccessCombination(filter);
+            if (namedAccessCombination == null) {
+                throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
+            }
+            permissionBits = namedAccessCombination.getPermissionBits();
         }
-        changeModuleAccessGlobal(namedAccessCombination.getPermissionBits(), addAccess, removeAccess, auth);
+        
+        int addBits = addAccess.getPermissionBits();
+        int removeBits = removeAccess.getPermissionBits();
+        if (log.isDebugEnabled()) {
+            log.debug("Adding " + addBits + " removing " + removeBits + " to filter " + filter);
+        }
+        
+        try {
+            basicauth.doAuthentication(auth);
+            OXToolMySQLStorage.getInstance().changeAccessCombination(permissionBits, addBits, removeBits);
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 }

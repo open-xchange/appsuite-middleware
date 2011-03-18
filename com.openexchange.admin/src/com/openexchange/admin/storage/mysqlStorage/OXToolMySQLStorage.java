@@ -2299,8 +2299,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (filter != -1) {
                 update.WHERE(new EQUALS(column, PLACEHOLDER));
                 values.add(filter);
-            } else {
-                throw new SQLException();
             }
             new StatementBuilder().executeStatement(con, update, values);
         } catch (PoolException e) {
