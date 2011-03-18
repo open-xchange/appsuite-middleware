@@ -2166,10 +2166,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * Returns the port of the imap server of this user object
      *
      * @return An {@link int} containing the port number
+     * @deprecated since 6.20. Use {@link #getImapServerString()} instead.
      */
+    @Deprecated
     final public int getImapPort() {
-        // we should be open to the future and accept values like
-        // hostname:port
         if (this.imapServer != null) {
             final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
             if (matcher.matches() && null != matcher.group(4)) {
@@ -2183,10 +2183,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * Returns the hostname for the imap server of this user object
      *
      * @return A {@link String} containing the hostname for the imap server
+     * @deprecated since 6.20. Use {@link #getImapServerString()} instead.
      */
+    @Deprecated
     final public String getImapServer() {
-        // we should be open to the future and accept values like
-        // hostname:port
         if (this.imapServer != null) {
             final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
             if (matcher.matches() && null != matcher.group(2)) {
@@ -2197,9 +2197,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
-     * Returns the hostname for the imap server of this user object
+     * Returns the URL of the IMAP server of this user object. This method will once be replaced by the {@link #getImapServer()} method to
+     * get a Bean style conform API.
      *
-     * @return A {@link String} containing the hostname for the imap server
+     * @return A {@link String} containing the URL for the IMAP server.
      */
     public final String getImapServerString() {
         return imapServer;
@@ -2209,7 +2210,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * Returns the schema part of the imap server url of this user object
      *
      * @return A {@link String} containing the schema of the imap server url
+     * @deprecated since 6.20. Use {@link #getImapServerString()} instead.
      */
+    @Deprecated
     final public String getImapSchema() {
         if (this.imapServer != null) {
             final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
@@ -2262,10 +2265,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * Returns the hostname for the smtp server of this user object
      *
      * @return A {@link String} containing the hostname for the smtp server
+     * @deprecated since 6.20. Use {@link #getSmtpServerString()} instead.
      */
+    @Deprecated
     final public String getSmtpServer() {
-        // we should be open to the future and accept values like
-        // hostname:port
         if (this.smtpServer != null) {
             final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
             if (matcher.matches() && null != matcher.group(2)) {
@@ -2279,7 +2282,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * Returns the schema part of the smtp server url of this user object
      *
      * @return A {@link String} containing the schema of the smtp server url
+     * @deprecated since 6.20. Use {@link #getSmtpServerString()} instead.
      */
+    @Deprecated
     final public String getSmtpSchema() {
         if (this.smtpServer != null) {
             final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
@@ -2291,9 +2296,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
-     * Returns the hostname for the smtp server of this user object
+     * Returns the URL of the SMTP server of this user object. This method will once be replaced by the {@link #getImapServer()} method to
+     * get a Bean style conform API.
      *
-     * @return A {@link String} containing the hostname for the smtp server
+     * @return A {@link String} containing the URL for the SMTP server.
      */
     public final String getSmtpServerString() {
         return smtpServer;
@@ -2320,10 +2326,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * Returns the port for the smtp server of this user object
      *
      * @return An {@link int} containing the port for the smtp server
+     * @deprecated since 6.20. Use {@link #getSmtpServerString()} instead.
      */
+    @Deprecated
     final public int getSmtpPort() {
-        // we should be open to the future and accept values like
-        // hostname:port
         if (this.smtpServer != null) {
             final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
             if (matcher.matches() && null != matcher.group(4)) {
