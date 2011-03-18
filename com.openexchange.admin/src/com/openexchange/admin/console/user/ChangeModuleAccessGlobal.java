@@ -134,10 +134,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
     }
 
     private void execute() throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException {
-        if (filterString != null)
-            oxusr.changeModuleAccessGlobal(filterString, addAccess, removeAccess, auth);
-        else
-            oxusr.changeModuleAccessGlobal(filter, addAccess, removeAccess, auth);
+        oxusr.changeModuleAccessGlobal(filterString, addAccess, removeAccess, auth);
     }
 
     private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException {
@@ -321,16 +318,10 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
                 removeAccess.setPublicFolderEditable(true);
         }
 
-        String filterString = null;
         if (parser.getOptionValue(filterOption) == null) {
-            filter = -1;
+            this.filterString = null;
         } else {
-            filterString = (String) parser.getOptionValue(filterOption);
-            try {
-                filter = Integer.parseInt(filterString);
-            } catch (NumberFormatException nfe) {
-                this.filterString = filterString;
-            }
+            this.filterString = (String) parser.getOptionValue(filterOption);
         }
     }
 
