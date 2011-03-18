@@ -389,16 +389,17 @@ public interface OXUserInterface extends Remote {
     public void changeModuleAccess(final Context ctx, final User user, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
+     * This method changes module Permissions for all (!) users in all (!) contexts. This can be filtered by already existing access combinations.
+     * If no filter is given, all users are changed.
      * 
-     * @param ctx Context object
-     * @param filter The call affects only users with exactly this access combination. null for no filter.
+     * @param filter The call affects only users with exactly this access combination. This is either a String representing a defined module access combination or an Integer (masked as String) for direct definitions. null for no filter.
      * @param addAccess Access rights to be added
      * @param removeAccess Access rights to be removed
-     * @throws InvalidCredentialsException 
-     * @throws StorageException
-     * @throws InvalidDataException 
-     * @throws DatabaseUpdateException 
-     * @throws NoSuchContextException 
+     * @param auth Credentials for authenticating against server. Must be the master Admin.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
      */
     public void changeModuleAccessGlobal(String filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
 
