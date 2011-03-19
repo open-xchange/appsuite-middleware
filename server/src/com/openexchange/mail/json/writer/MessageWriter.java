@@ -78,7 +78,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.parser.handlers.RawJSONMessageHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
-import com.openexchange.mail.structure.parser.MIMEStructureHandler;
+import com.openexchange.mail.structure.handler.MIMEStructureHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;

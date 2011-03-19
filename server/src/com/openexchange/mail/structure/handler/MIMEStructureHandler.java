@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.structure.parser;
+package com.openexchange.mail.structure.handler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
