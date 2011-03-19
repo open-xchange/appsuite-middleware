@@ -283,6 +283,16 @@ public class ContentType extends ParameterizedHeader {
         parseContentType(contentType);
     }
 
+    /**
+     * Resets this {@link ContentType} instance.
+     */
+    public void reset() {
+        parameterList = new ParameterList();
+        primaryType = null;
+        subType = null;
+        baseType = null;
+    }
+
     @Override
     public int compareTo(final ParameterizedHeader other) {
         if (this == other) {
