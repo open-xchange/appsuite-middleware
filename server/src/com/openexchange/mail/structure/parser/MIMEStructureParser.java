@@ -50,29 +50,39 @@
 package com.openexchange.mail.structure.parser;
 
 import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.activation.DataHandler;
+import javax.mail.Flags;
 import javax.mail.MessagingException;
-import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.session.Session;
 
 /**
  * {@link MIMEStructureParser}
@@ -88,19 +98,214 @@ public final class MIMEStructureParser {
         super();
     }
 
-    public ComposedMailMessage parseStructure(final JSONObject jsonStructure) {
-        return null;
+    /**
+     * Parses specified JSON mail structure to a {@link MailMessage} instance.
+     * 
+     * @param jsonStructure The JSON mail structure
+     * @return The {@link MailMessage} instance
+     * @throws MailException If parsing fails
+     */
+    public MailMessage parseStructure(final JSONObject jsonStructure) throws MailException {
+        /*
+         * Parse JSON to MIME message
+         */
+        final MimeMessage mimeMessage = parseStructure2Message(jsonStructure);
+        /*
+         * Create appropriate MailMessage instance
+         */
+        return MIMEMessageConverter.convertMessage(mimeMessage);
     }
 
-    private MimeMessage parseStructure2Message(final JSONObject jsonStructure) throws MailException {
+    /**
+     * Parses specified JSON mail structure to a transportable {@link ComposedMailMessage} instance.
+     * 
+     * @param jsonStructure The JSON mail structure
+     * @param session The session
+     * @return The transportable {@link ComposedMailMessage} instance
+     * @throws MailException If parsing fails
+     */
+    public ComposedMailMessage parseStructure(final JSONObject jsonStructure, final Session session) throws MailException {
         try {
-            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            /*
+             * Create appropriate ComposedMailMessage instance
+             */
+            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            return new ComposedMailWrapper(parseStructure(jsonStructure), session, ctx);
+        } catch (final ContextException e) {
+            throw new MailException(e);
+        }
+    }
 
-            final JSONObject jsonHeaders = jsonStructure.getJSONObject("headers");
+    private static MimeMessage parseStructure2Message(final JSONObject jsonStructure) throws MailException {
+        final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+        parseMessage(jsonStructure, mimeMessage);
+        return mimeMessage;
+    }
 
-            return mimeMessage;
+    private static void parseMessage(final JSONObject jsonMessage, final MimeMessage mimeMessage) throws MailException {
+        parseFlags(jsonMessage, mimeMessage);
+        parsePart(jsonMessage, mimeMessage);
+    }
+
+    private static void parseFlags(final JSONObject jsonMessage, final MimeMessage mimeMessage) throws MailException {
+        try {
+            Flags msgFlags = null;
+            /*
+             * System flags
+             */
+            if (jsonMessage.hasAndNotNull("flags")) {
+                msgFlags = new Flags();
+                final int flags = jsonMessage.getInt("flags");
+                if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
+                    msgFlags.add(Flags.Flag.ANSWERED);
+                }
+                if ((flags & MailMessage.FLAG_DELETED) > 0) {
+                    msgFlags.add(Flags.Flag.DELETED);
+                }
+                if ((flags & MailMessage.FLAG_DRAFT) > 0) {
+                    msgFlags.add(Flags.Flag.DRAFT);
+                }
+                if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
+                    msgFlags.add(Flags.Flag.FLAGGED);
+                }
+                if ((flags & MailMessage.FLAG_RECENT) > 0) {
+                    msgFlags.add(Flags.Flag.RECENT);
+                }
+                if ((flags & MailMessage.FLAG_SEEN) > 0) {
+                    msgFlags.add(Flags.Flag.SEEN);
+                }
+                if ((flags & MailMessage.FLAG_USER) > 0) {
+                    msgFlags.add(Flags.Flag.USER);
+                }
+                if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
+                    msgFlags.add(MailMessage.USER_FORWARDED);
+                }
+                if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
+                    msgFlags.add(MailMessage.USER_READ_ACK);
+                }
+            }
+            /*
+             * Color label
+             */
+            if (jsonMessage.hasAndNotNull("color_label")) {
+                if (msgFlags == null) {
+                    msgFlags = new Flags();
+                }
+                msgFlags.add(MailMessage.getColorLabelStringValue(jsonMessage.getInt("color_label")));
+            }
+            /*
+             * User flags
+             */
+            if (jsonMessage.hasAndNotNull("user")) {
+                if (msgFlags == null) {
+                    msgFlags = new Flags();
+                }
+                final JSONArray jsonUser = jsonMessage.getJSONArray("user");
+                final int length = jsonUser.length();
+                for (int i = length - 1; i >= 0; i--) {
+                    msgFlags.add(jsonUser.getString(i));
+                }
+            }
+            /*
+             * Finally, apply flags to message
+             */
+            if (msgFlags != null) {
+                mimeMessage.setFlags(msgFlags, true);
+            }
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    private static void parsePart(final JSONObject jsonPart, final MimePart mimePart) throws MailException {
+        try {
+            /*
+             * Parse headers
+             */
+            final ContentType contentType = new ContentType(MIMETypes.MIME_DEFAULT);
+            parseHeaders(jsonPart.getJSONObject("headers"), mimePart, contentType);
+            /*
+             * Determine Content-Type
+             */
+            if (contentType.startsWith("text/")) {
+                /*
+                 * A text/* part
+                 */
+                parseSimpleBodyText(jsonPart.getJSONObject("body"), mimePart, contentType);
+            } else if (contentType.startsWith("multipart/")) {
+                /*
+                 * A multipart
+                 */
+                parseMultipartBody(jsonPart.getJSONArray("body"), mimePart);
+            } else if (contentType.startsWith("message/rfc822")) {
+                /*
+                 * A nested message
+                 */
+                parseMessageBody(jsonPart.getJSONObject("body"), mimePart);
+            } else {
+                parseSimpleBodyBinary(jsonPart.getJSONObject("body"), mimePart, contentType);
+            }
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        }
+    }
+
+    private static void parseMessageBody(final JSONObject jsonMessage, final MimePart mimePart) throws MailException {
+        try {
+            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            parseMessage(jsonMessage, mimeMessage);
+            mimePart.setContent(mimeMessage, "message/rfc822");
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    private static void parseMultipartBody(final JSONArray jsonMultiparts, final MimePart mimePart) throws MailException {
+        try {
+            final MimeMultipart multipart = new MimeMultipart();
+            final int length = jsonMultiparts.length();
+            for (int i = length - 1; i >= 0; i--) {
+                final MimeBodyPart bodyPart = new MimeBodyPart();
+                parsePart(jsonMultiparts.getJSONObject(i), bodyPart);
+                multipart.addBodyPart(bodyPart);
+            }
+            mimePart.setContent(multipart);
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    private static void parseSimpleBodyText(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws MailException {
+        try {
+            if (isText(contentType.getBaseType())) {
+                mimePart.setText(jsonBody.getString("data"), contentType.getCharsetParameter(), contentType.getSubType());
+            } else {
+                mimePart.setDataHandler(new DataHandler(new MessageDataSource(jsonBody.getString("data"), contentType)));
+            }
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } catch (final UnsupportedEncodingException e) {
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+        }
+    }
+
+    private static void parseSimpleBodyBinary(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws MailException {
+        try {
+            mimePart.setDataHandler(new DataHandler(new MessageDataSource(Base64.decodeBase64(jsonBody.getString("data").getBytes(
+                "US-ASCII")), contentType.getBaseType())));
+            mimePart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } catch (final UnsupportedEncodingException e) {
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
         }
     }
 
@@ -121,7 +326,7 @@ public final class MIMEStructureParser {
 
     private static final Set<String> HEADERS_DATE = new HashSet<String>(Arrays.asList("date"));
 
-    private static void parseHeaders(final JSONObject jsonHeaders, final MimePart mimePart) throws JSONException, MessagingException, MailException {
+    private static void parseHeaders(final JSONObject jsonHeaders, final MimePart mimePart, final ContentType contentType) throws MailException {
         try {
             for (final Entry<String, Object> entry : jsonHeaders.entrySet()) {
                 final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
@@ -145,7 +350,7 @@ public final class MIMEStructureParser {
                     mimePart.setHeader(name, jsonDate.getString("date"));
                 } else if ("content-type".equals(name)) {
                     final JSONObject jsonContentType = (JSONObject) entry.getValue();
-                    final ContentType contentType = new ContentType();
+                    contentType.reset();
                     contentType.setBaseType(jsonContentType.getString("type"));
                     parseParameterList(jsonContentType.getJSONObject("params"), contentType);
                     mimePart.setHeader(name, contentType.toString(true));
@@ -169,8 +374,14 @@ public final class MIMEStructureParser {
                 }
             }
         } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            throw new MessagingException(e.getMessage(), e);
+            /*
+             * Cannot occur
+             */
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -185,5 +396,33 @@ public final class MIMEStructureParser {
             }
         }
     }
-    
+
+    private static final String PRIMARY_TEXT = "text/";
+
+    private static final String[] SUB_TEXT = { "plain", "enriched", "richtext", "rtf" };
+
+    /**
+     * Checks if content type matches one of text content types:
+     * <ul>
+     * <li><code>text/plain</code></li>
+     * <li><code>text/enriched</code></li>
+     * <li><code>text/richtext</code></li>
+     * <li><code>text/rtf</code></li>
+     * </ul>
+     * 
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches text; otherwise <code>false</code>
+     */
+    private static boolean isText(final String contentType) {
+        if (contentType.startsWith(PRIMARY_TEXT, 0)) {
+            final int off = PRIMARY_TEXT.length();
+            for (final String subtype : SUB_TEXT) {
+                if (contentType.startsWith(subtype, off)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }
