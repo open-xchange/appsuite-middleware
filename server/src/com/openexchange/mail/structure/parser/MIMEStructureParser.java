@@ -94,7 +94,7 @@ public final class MIMEStructureParser {
     /**
      * Initializes a new {@link MIMEStructureParser}.
      */
-    public MIMEStructureParser() {
+    private MIMEStructureParser() {
         super();
     }
 
