@@ -515,20 +515,30 @@ public final class MailMessageParser {
                          * VPart successfully converted. Generate appropriate body part.
                          */
                         final TNEFBodyPart part = new TNEFBodyPart();
+                        /*
+                         * Determine VPart's Content-Type
+                         */
+                        final String contentTypeStr;
                         {
-                            final String text = calendar.toString();
-                            part.setText(text, "UTF-8", "calendar");
-                            part.setSize(text.length());
+                            final net.fortuna.ical4j.model.Property method = calendar.getProperties().getProperty(net.fortuna.ical4j.model.Property.METHOD);
+                            if (null == method) {
+                                contentTypeStr = "text/calendar; charset=UTF-8";
+                            } else {
+                                contentTypeStr = new StringBuilder("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString();
+                            }
                         }
                         /*
-                         * Determine VPart's method
+                         * Set part's body
                          */
-                        final net.fortuna.ical4j.model.Property method = calendar.getProperties().getProperty(net.fortuna.ical4j.model.Property.METHOD);
-                        if (null == method) {
-                            part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/calendar; charset=UTF-8");
-                        } else {
-                            part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString());
+                        {
+                            final byte[] bytes = calendar.toString().getBytes("UTF-8");
+                            part.setDataHandler(new DataHandler(new MessageDataSource(bytes, contentTypeStr)));
+                            part.setSize(bytes.length);
                         }
+                        /*
+                         * Set part's headers
+                         */
+                        part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                         {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
