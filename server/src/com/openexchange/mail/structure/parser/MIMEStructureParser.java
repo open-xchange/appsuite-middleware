@@ -282,9 +282,13 @@ public final class MIMEStructureParser {
     private static void parseSimpleBodyText(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws MailException {
         try {
             if (isText(contentType.getBaseType())) {
-                mimePart.setText(jsonBody.getString("data"), contentType.getCharsetParameter(), contentType.getSubType());
+                final byte[] bytes = jsonBody.getString("data").toString().getBytes("UTF-8");
+                mimePart.setDataHandler(new DataHandler(new MessageDataSource(bytes, contentType.toString(true))));
+                mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString(true));
             } else {
-                mimePart.setDataHandler(new DataHandler(new MessageDataSource(jsonBody.getString("data"), contentType)));
+                final byte[] bytes = jsonBody.getString("data").toString().getBytes("UTF-8");
+                mimePart.setDataHandler(new DataHandler(new MessageDataSource(bytes, contentType.toString(true))));
+                mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString(true));
             }
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
