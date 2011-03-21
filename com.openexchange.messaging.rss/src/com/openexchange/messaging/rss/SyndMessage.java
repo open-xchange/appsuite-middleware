@@ -188,7 +188,12 @@ public class SyndMessage implements MessagingMessage {
     }
 
     public String getId() {
-        return entry.getLink();
+        if (entry.getPublishedDate() != null) {
+            return entry.getLink() + "/" + entry.getPublishedDate().getTime();
+        } else {
+            return entry.getLink();
+        }
+        
     }
 
     public long getReceivedDate() {

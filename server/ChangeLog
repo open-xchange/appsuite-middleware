@@ -1,3 +1,7 @@
+* 2011-03-21 - steffen.templin@open-xchange.com
+
+ - Bugfix #18729: RSS feed from "Tagesschau" only shows the first headline
+ 
 * 2011-03-21 - choeger@open-xchange.com
 
  - Bugfix #18713: oauth-twitter is missing after updating
