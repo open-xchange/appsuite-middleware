@@ -282,8 +282,7 @@ public final class MIMEStructureParser {
     private static void parseSimpleBodyText(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws MailException {
         try {
             if (isText(contentType.getBaseType())) {
-                final byte[] bytes = jsonBody.getString("data").toString().getBytes("UTF-8");
-                mimePart.setDataHandler(new DataHandler(new MessageDataSource(bytes, contentType.toString(true))));
+                mimePart.setText(jsonBody.getString("data"), "UTF-8", contentType.getSubType());
                 mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString(true));
             } else {
                 final byte[] bytes = jsonBody.getString("data").toString().getBytes("UTF-8");
@@ -403,15 +402,13 @@ public final class MIMEStructureParser {
 
     private static final String PRIMARY_TEXT = "text/";
 
-    private static final String[] SUB_TEXT = { "plain", "enriched", "richtext", "rtf" };
+    private static final String[] SUB_TEXT = { "plain", "htm" };
 
     /**
      * Checks if content type matches one of text content types:
      * <ul>
      * <li><code>text/plain</code></li>
-     * <li><code>text/enriched</code></li>
-     * <li><code>text/richtext</code></li>
-     * <li><code>text/rtf</code></li>
+     * <li><code>text/htm</code>&nbsp;or&nbsp;<code>text/html</code></li>
      * </ul>
      * 
      * @param contentType The content type
