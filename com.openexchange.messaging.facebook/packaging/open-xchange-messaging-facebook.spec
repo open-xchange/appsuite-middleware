@@ -48,7 +48,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Messaging Facebook Bundle
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-secret >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-facebook >= @OXVERSION@ open-xchange-secret >= @OXVERSION@
 %if 0%{?sles_version} >= 10
 Requires:   open-xchange-xerces-ibm
 Conflicts:  open-xchange-xerces-sun

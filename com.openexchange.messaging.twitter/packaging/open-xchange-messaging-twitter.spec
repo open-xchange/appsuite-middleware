@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Messaging Twitter Bundle
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-twitter >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-secret >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-twitter >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-twitter >= @OXVERSION@ open-xchange-secret >= @OXVERSION@
 #
 
 %description

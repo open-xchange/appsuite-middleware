@@ -8,5 +8,5 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-messaging-twitter
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre|java6-runtime, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-messaging (>= @OXVERSION@), open-xchange-messaging-generic (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-twitter (>= @OXVERSION@), open-xchange-html (>= @OXVERSION@), open-xchange-oauth (>= @OXVERSION@), open-xchange-secret (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre|java6-runtime, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-messaging (>= @OXVERSION@), open-xchange-messaging-generic (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-twitter (>= @OXVERSION@), open-xchange-html (>= @OXVERSION@), open-xchange-oauth (>= @OXVERSION@), open-xchange-oauth-twitter (>= @OXVERSION@), open-xchange-secret (>= @OXVERSION@)
 Description: The Open-Xchange Messaging Twitter Bundle
