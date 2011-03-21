@@ -1,3 +1,7 @@
+* 2011-03-14 - choeger@open-xchange.com
+
+ - Bugfix #18615 - [L3] mail push does not work when login does not match mailbox name
+
 * 2010-09-23 - wolfgang.rosenauer@open-xchange.com
 
  - Support multicast networking
