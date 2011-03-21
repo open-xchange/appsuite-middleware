@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 25
+%define		ox_release 26
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -725,6 +725,12 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Mar 21 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18219: Unable to access publications created by PIM users.
+* Mon Mar 21 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18329: Fixed ArrayIndexOutOfBoundsException in jTidy library
+* Thu Mar 17 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18681: Removed caching of user contacts and corrected SQL query to load them when context has more than 1000 users.
 * Wed Mar 09 2011 - steffen.templin@open-xchange.com
  - Bugfix #18442: UPLOAD_DIRECTORY filling up with unused files.
 * Wed Mar 02 2011 - thorben.betten@open-xchange.com
