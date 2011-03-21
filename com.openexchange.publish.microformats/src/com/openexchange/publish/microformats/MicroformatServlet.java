@@ -81,7 +81,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
-import com.openexchange.publish.microformats.tools.UncloseableWriter;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.user.UserService;
@@ -197,7 +196,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
             final HashMap<String, Object> variables = new HashMap<String, Object>();
             final User user = getUser(publication);
-            final Contact userContact = getContact(new PublicationSession(publication), publication.getContext(), user.getContactId());
+            final Contact userContact = getContact(new PublicationSession(publication), publication.getContext());
             
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
@@ -243,9 +242,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 		return retVal;
 	}
 
-	private Contact getContact(final PublicationSession publicationSession, final Context context, final int contactId) throws OXException {
+	private Contact getContact(final PublicationSession publicationSession, final Context context) throws OXException {
         final ContactInterface contactInterface = contacts.getContactInterfaceProvider(FolderObject.SYSTEM_LDAP_FOLDER_ID, context.getContextId()).newContactInterface(publicationSession);
-        final Contact contact = contactInterface.getObjectById(contactId, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        final Contact contact = contactInterface.getUserById(publicationSession.getUserId(), false);
+
         return contact;
     }
 
