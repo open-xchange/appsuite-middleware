@@ -68,101 +68,6 @@ public abstract class UserStorage {
     private static final Log LOG = LogFactory.getLog(UserStorage.class);
 
     /**
-     * Attribute name of alias.
-     */
-    public static String ALIAS;
-
-    /**
-     * Attribute name of appointmentDays.
-     */
-    public static String APPOINTMENTDAYS;
-
-    /**
-     * Attribute name of the display name.
-     */
-    public static String DISPLAYNAME;
-
-    /**
-     * Attribute name of givenName.
-     */
-    public static String GIVENNAME;
-
-    /**
-     * Attribute name of the identifier.
-     */
-    public static String IDENTIFIER;
-
-    /**
-     * Attribute name of imapServer.
-     */
-    public static String IMAPSERVER;
-
-    /**
-     * Attribute name of preferredLanguage.
-     */
-    public static String LANGUAGE;
-
-    /**
-     * Attribute name of mail.
-     */
-    public static String MAIL;
-
-    /**
-     * Attribute name of mailDomain.
-     */
-    public static String MAILDOMAIN;
-
-    /**
-     * Attribute name of mailEnabled.
-     */
-    public static String MAILENABLED;
-
-    /**
-     * Value of mailEnabled if user is activated..
-     */
-    public static String MAILENABLED_OK;
-
-    /**
-     * Attribute name of modifyTimestamp.
-     */
-    public static String MODIFYTIMESTAMP;
-
-    /**
-     * Attribute name of shadowLastChange.
-     */
-    public static String SHADOWLASTCHANGE;
-
-    /**
-     * Attribute name of smtpServer.
-     */
-    public static String SMTPSERVER;
-
-    /**
-     * Attribute name of sureName.
-     */
-    public static String SURENAME;
-
-    /**
-     * Attribute name of taskDays.
-     */
-    public static String TASKDAYS;
-
-    /**
-     * Attribute name of timeZone.
-     */
-    public static String TIMEZONE;
-
-    /**
-     * Attribute name of uid.
-     */
-    public static String UID;
-
-    /**
-     * Attribute name of userPassword.
-     */
-    public static String USERPASSWORD;
-
-    /**
      * The instance
      */
     private static UserStorage instance;
@@ -355,11 +260,6 @@ public abstract class UserStorage {
             LOG.error("Duplicate initialization of UserStorage.");
             return;
         }
-        try {
-            loadProperties();
-        } catch (final LdapException e) {
-            throw new UserException(e);
-        }
         instance = new CachingUserStorage(new RdbUserStorage());
         instance.startInternal();
     }
@@ -419,42 +319,5 @@ public abstract class UserStorage {
             LOG.error(e.getMessage(), e);
             return null;
         }
-    }
-
-    static void loadProperties() throws LdapException {
-            ALIAS = LdapUtility.findProperty(Names.USER_ATTRIBUTE_ALIAS);
-            APPOINTMENTDAYS = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_APPOINTMENTDAYS);
-            DISPLAYNAME = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_DISPLAYNAME);
-            GIVENNAME = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_GIVENNAME);
-            IDENTIFIER = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_IDENTIFIER);
-            IMAPSERVER = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_IMAPSERVER);
-            LANGUAGE = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_PREFERREDLANGUAGE);
-            MAIL = LdapUtility.findProperty(Names.USER_ATTRIBUTE_MAIL);
-            MAILDOMAIN = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_MAILDOMAIN);
-            MAILENABLED = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_MAILENABLED);
-            MAILENABLED_OK = LdapUtility.findProperty(Names.MAILENABLED_OK);
-            MODIFYTIMESTAMP = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_MODIFYTIMESTAMP);
-            SHADOWLASTCHANGE = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_SHADOWLASTCHANGE);
-            SMTPSERVER = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_SMTPSERVER);
-            SURENAME = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_SURENAME);
-            TASKDAYS = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_TASKDAYS);
-            TIMEZONE = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_TIMEZONE);
-            UID = LdapUtility.findProperty(Names.USER_ATTRIBUTE_UID);
-            USERPASSWORD = LdapUtility.findProperty(Names
-                .USER_ATTRIBUTE_PASSWORD);
     }
 }

@@ -138,14 +138,16 @@ public final class Arrays {
     }
 
     public static int[] extract(int[] source, int start, int length) {
-        final int realLength;
-        if (start + length > source.length) {
-            realLength = source.length - start;
-        } else {
-            realLength = length;
-        }
+        final int realLength = determineRealSize(source.length, start, length);
         final int[] retval = new int[realLength];
         System.arraycopy(source, start, retval, 0, realLength);
         return retval;
+    }
+
+    public static int determineRealSize(int size, int start, int length) {
+        if (start + length > size) {
+            return size - start;
+        }
+        return length;
     }
 }

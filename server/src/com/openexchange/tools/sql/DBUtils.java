@@ -75,14 +75,10 @@ import com.openexchange.groupware.contexts.Context;
  */
 public final class DBUtils {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(DBUtils.class);
 
-    /**
-     * Prevent instantiation
-     */
+    public static final int IN_LIMIT = 1000;
+
     private DBUtils() {
         super();
     }
