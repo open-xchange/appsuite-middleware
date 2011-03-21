@@ -55,7 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.structure.parser.MIMEStructureHandler;
+import com.openexchange.mail.structure.handler.MIMEStructureHandler;
 import com.openexchange.sessiond.impl.SessionObject;
 
 /**
