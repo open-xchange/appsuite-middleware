@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -134,6 +134,18 @@ public final class Arrays {
         @SuppressWarnings("unchecked")
         T[] retval = (T[]) Array.newInstance(toClone.getClass().getComponentType(), toClone.length);
         System.arraycopy(toClone, 0, retval, 0, toClone.length);
+        return retval;
+    }
+
+    public static int[] extract(int[] source, int start, int length) {
+        final int realLength;
+        if (start + length > source.length) {
+            realLength = source.length - start;
+        } else {
+            realLength = length;
+        }
+        final int[] retval = new int[realLength];
+        System.arraycopy(source, start, retval, 0, realLength);
         return retval;
     }
 }
