@@ -1,3 +1,7 @@
+* 2011-03-21 - dennis.sieben@open-xchange.com
+
+ - Bugfix #18556 - [L3] Upsell Multiple doesn't hide flash UWA widgets
+
 * 2011-03-15 - mkraft@open-xchange.com
 
  - bugfix #18530 https://bugs.open-xchange.com/show_bug.cgi?id=18530

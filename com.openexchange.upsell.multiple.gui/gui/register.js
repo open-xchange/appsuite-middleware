@@ -105,7 +105,7 @@ upsell = {
       },
       //feature calender
       calendar: {
-        name: ["modules/portal","modules/calendar", "modules/calendar/freebusy", "modules/calendar/team", "modules/calendar/mini_calender", "modules/calendar/new/add_participants", "modules/calendar/new/remove_participants", "modules/calendar/new/add_attachment", "modules/calendar/new/delete_attachment","modules/tasks","modules/tasks/new/add_participants", "modules/tasks/new/remove_participants", "modules/tasks/new/add_attachment", "modules/tasks/new/delete_attachment", "configuration/mail/accounts/new"],
+        name: ["sidepanel/tasks.share", "sidepanel/contacts.share", "sidepanel/calendar.share", "modules/portal","modules/calendar", "modules/calendar/freebusy", "modules/calendar/team", "modules/calendar/mini_calender", "modules/calendar/new/add_participants", "modules/calendar/new/remove_participants", "modules/calendar/new/add_attachment", "modules/calendar/new/delete_attachment","modules/tasks","modules/tasks/new/add_participants", "modules/tasks/new/remove_participants", "modules/tasks/new/add_attachment", "modules/tasks/new/delete_attachment", "configuration/mail/accounts/new", "sidepanel/premium"],
         title: _("Enhance your system with &#8222;Teamwork Capabilities&#8220;"),
         intro: _("Make your team successful and cooperate with each other <br>on tasks, shared files and your team-calendar!"),
         list: {
@@ -146,7 +146,7 @@ upsell = {
       },
       //feature mobility
       mobility: {
-        name: ["modules/usm/eas", "modules/mobility"],
+        name: ["modules/usm/eas", "modules/mobility", "sidepanel/calendar.sync.mobile" , "sidepanel/contacts.sync.mobile"],
         title: _("Enhance your system with &#8222;Business Mobility&#8220;"),
         product_name: _("Mail Push or Mail Professional"),
         intro: _("With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail, calendar, contacts, etc.) effortlessly and manageable on the spot."),
@@ -191,7 +191,7 @@ upsell = {
       
       //feature outlook
       outlook: {
-        name: ["modules/outlook"],
+        name: ["modules/outlook", "sidepanel/sync.outlook"],
         title: _("Enhance your system with &#8222;Outlook Oxtender&#8220;"),
         intro: _("If Outlook&copy; is your preferred choice,<br>use it as your local Groupware Client."),
         list: {
@@ -265,6 +265,8 @@ upsell = {
   init: function (feature, win) {
     if(!upsell.config.init){
       
+      
+      
       //registration
       register("Feature_Not_Available", upsell.init);
       
@@ -275,6 +277,7 @@ upsell = {
       })
       
       jQuery('#upsell_window .detail_show').live('click', function() {
+        
         if(jQuery("#upsell_window .detail").is(':visible')){
           jQuery('#upsell_window .detail').hide();
           jQuery(this).html(_('more'));
@@ -321,6 +324,7 @@ upsell = {
   },
   
   _get_display_type: function(){
+    upsell._prepare_flash_content_for_ie(true);
     jQuery.getJSON(
       "/ajax/upsell/multiple?session="+parent.session+"&action=get_method",
       function(data){
@@ -383,6 +387,7 @@ upsell = {
   
   //close current window
   _close_dialouge: function(){
+    upsell._prepare_flash_content_for_ie(false);
     jQuery('#upsell_window').animate({opacity: 0}, 500);
     jQuery('.simplemodal-overlay').animate({opacity: 0}, 500, function(){
       jQuery.modal.close();
@@ -584,6 +589,29 @@ upsell = {
   //reload and activate feature
   _do_reload: function(data){
     location.reload();
+  },
+  _prepare_flash_content_for_ie: function(flag){
+   if (flag) {
+      jQuery("iframe").each(
+        function () {
+          var n = jQuery(this), src = n.attr("src") + "";
+          if (/^http/.test(src)) {
+            n.data("visibility", n.css("visibility")).css("visibility", "hidden");
+          }
+        }
+    	);
+    } else {
+      jQuery("iframe").each(
+        function () {
+          var n = jQuery(this), src = n.attr("src") + "";
+          if (/^http/.test(src)) {
+            n.css("visibility", n.data("visibility"));
+          }
+        }
+      );
+    }
+   
+   
   }
 };
 
