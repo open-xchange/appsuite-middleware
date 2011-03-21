@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,78 +75,92 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page> {
+public class ContactObjectsByVcardFileStep extends
+		AbstractStep<Contact[], Page> {
 
-    private static final ContactSanitizer SANITIZER = new ContactSanitizer();
+	private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
-    private static final Log LOG = LogFactory.getLog(ContactObjectsByVcardFileStep.class);
+	private static final Log LOG = LogFactory
+			.getLog(ContactObjectsByVcardFileStep.class);
 
-    private List<String> unwantedLines = new ArrayList<String>();
+	private List<String> unwantedLines = new ArrayList<String>();
 
-    public ContactObjectsByVcardFileStep() {
+	public ContactObjectsByVcardFileStep() {
 
-    }
+	}
 
-    public ContactObjectsByVcardFileStep(final String description, final List<String> unwantedLines) {
-        this.description = description;
-        this.unwantedLines = unwantedLines;
-    }
+	public ContactObjectsByVcardFileStep(final String description,
+			final List<String> unwantedLines) {
+		this.description = description;
+		this.unwantedLines = unwantedLines;
+	}
 
-    @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
-        final Vector<Contact> contactObjects = new Vector<Contact>();
-        final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+	@Override
+	public void execute(final WebClient webClient) throws SubscriptionException {
+		final Vector<Contact> contactObjects = new Vector<Contact>();
+		final OXContainerConverter oxContainerConverter = new OXContainerConverter(
+				(TimeZone) null, (String) null);
 
-        String pageString = input.getWebResponse().getContentAsString();
-        LOG.debug("The page to scan for vCards is : " + pageString);
+		if (null != input) {
+			String pageString = input.getWebResponse().getContentAsString();
+			if (null != pageString) {
+				LOG.debug("The page to scan for vCards is : " + pageString);
 
-        while (pageString.contains("BEGIN:VCARD")) {
-            final int beginIndex = pageString.indexOf("BEGIN:VCARD");
-            final int endIndex = pageString.indexOf("END:VCARD") + 9;
-            String vcardString = pageString.substring(beginIndex, endIndex) + "\n";
-            vcardString = deleteUnwantedLines(vcardString, unwantedLines);
-            pageString = pageString.substring(endIndex);
-            try {
-                final byte[] vcard = vcardString.getBytes("UTF-8");
-                final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-                VersitDefinition.Reader versitReader;
-                versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");
-                final VersitObject versitObject = def.parse(versitReader);
-                final Contact contactObject = oxContainerConverter.convertContact(versitObject);
-                SANITIZER.sanitize(contactObject);
-                contactObjects.add(contactObject);
-            } catch (final VersitException e) {
-                LOG.error(e);
-            } catch (final ConverterException e) {
-                LOG.error(e);
-            } catch (final IOException e) {
-                LOG.error(e);
-            }
+				while (pageString.contains("BEGIN:VCARD")) {
+					final int beginIndex = pageString.indexOf("BEGIN:VCARD");
+					final int endIndex = pageString.indexOf("END:VCARD") + 9;
+					String vcardString = pageString.substring(beginIndex,
+							endIndex)
+							+ "\n";
+					vcardString = deleteUnwantedLines(vcardString,
+							unwantedLines);
+					pageString = pageString.substring(endIndex);
+					try {
+						final byte[] vcard = vcardString.getBytes("UTF-8");
+						final VersitDefinition def = Versit
+								.getDefinition("text/x-vcard");
+						VersitDefinition.Reader versitReader;
+						versitReader = def.getReader(new ByteArrayInputStream(
+								vcard), "UTF-8");
+						final VersitObject versitObject = def
+								.parse(versitReader);
+						final Contact contactObject = oxContainerConverter
+								.convertContact(versitObject);
+						SANITIZER.sanitize(contactObject);
+						contactObjects.add(contactObject);
+					} catch (final VersitException e) {
+						LOG.error(e);
+					} catch (final ConverterException e) {
+						LOG.error(e);
+					} catch (final IOException e) {
+						LOG.error(e);
+					}
 
-        }
+				}
+			}
+			executedSuccessfully = true;
 
-        executedSuccessfully = true;
+			output = new Contact[contactObjects.size()];
+			for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
+				output[i] = contactObjects.get(i);
+			}
+		}
+	}
 
-        output = new Contact[contactObjects.size()];
-        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
-            output[i] = contactObjects.get(i);
-        }
+	private String deleteUnwantedLines(String vcardString,
+			final List<String> unwantedLines) {
+		for (final String regexToReplace : unwantedLines) {
+			vcardString = vcardString.replaceAll(regexToReplace, "");
+		}
+		return vcardString;
+	}
 
-    }
+	public List<String> getUnwantedLines() {
+		return unwantedLines;
+	}
 
-    private String deleteUnwantedLines(String vcardString, final List<String> unwantedLines) {
-        for (final String regexToReplace : unwantedLines) {
-            vcardString = vcardString.replaceAll(regexToReplace, "");
-        }
-        return vcardString;
-    }
-
-    public List<String> getUnwantedLines() {
-        return unwantedLines;
-    }
-
-    public void setUnwantedLines(final List<String> unwantedLines) {
-        this.unwantedLines = unwantedLines;
-    }
+	public void setUnwantedLines(final List<String> unwantedLines) {
+		this.unwantedLines = unwantedLines;
+	}
 
 }

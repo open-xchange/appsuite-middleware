@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,52 +70,61 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
-
 /**
  * {@link CalendarObjectsByICalFileStep}
- *
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObject[], Page> {
-    
-    private static final Log LOG = LogFactory.getLog(CalendarObjectsByICalFileStep.class);
-    
-    public CalendarObjectsByICalFileStep(){
-        
-    }
-    
-    public void execute(WebClient webClient) {
-        ArrayList<CalendarDataObject> tempEvents = new ArrayList<CalendarDataObject>();
-        ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
+public class CalendarObjectsByICalFileStep extends
+		AbstractStep<CalendarDataObject[], Page> {
 
-        try {
-            LOG.debug("This should be an iCal-File : \n" + input.getWebResponse().getContentAsString());
-            String iCalFile = input.getWebResponse().getContentAsString();
-            ICalParser iCalParser = workflow.getActivator().getICalParser();
-                                                                
-            if (iCalParser != null) {                
-                tempEvents = (ArrayList<CalendarDataObject>) iCalParser.parseAppointments(
-                    iCalFile,
-                    TimeZone.getDefault(),
-                    new ContextImpl(23),
-                    new ArrayList<ConversionError>(),
-                    new ArrayList<ConversionWarning>());
-            } else {
-                LOG.error("No iCal-Parser found!");
-            }
-            events.addAll(tempEvents);
-            
-        } catch (ConversionError e) {
-            LOG.error(e.getMessage(), e);
-        } catch (FailingHttpStatusCodeException e) {
-            LOG.error(e.getMessage(), e);
-        }
+	private static final Log LOG = LogFactory
+			.getLog(CalendarObjectsByICalFileStep.class);
 
-        output = new CalendarDataObject[events.size()];
-        for (int i = 0; i < events.size() && i < output.length; i++) {
-            output[i] = events.get(i);
-        }
-        executedSuccessfully = true;
-    }
+	public CalendarObjectsByICalFileStep() {
+
+	}
+
+	public void execute(WebClient webClient) {
+		ArrayList<CalendarDataObject> tempEvents = new ArrayList<CalendarDataObject>();
+		ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
+
+		if (null != input) {
+			try {
+				LOG.debug("This should be an iCal-File : \n"
+						+ input.getWebResponse().getContentAsString());
+				String iCalFile = input.getWebResponse().getContentAsString();
+				if (null != iCalFile) {
+					ICalParser iCalParser = workflow.getActivator()
+							.getICalParser();
+
+					if (iCalParser != null) {
+						tempEvents = (ArrayList<CalendarDataObject>) iCalParser
+								.parseAppointments(iCalFile, TimeZone
+										.getDefault(), new ContextImpl(23),
+										new ArrayList<ConversionError>(),
+										new ArrayList<ConversionWarning>());
+					} else {
+						LOG.error("No iCal-Parser found!");
+					}
+					events.addAll(tempEvents);
+					for (CalendarDataObject event : events) {
+						event.setNotification(false);
+					}
+				}
+
+			} catch (ConversionError e) {
+				LOG.error(e.getMessage(), e);
+			} catch (FailingHttpStatusCodeException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
+
+		output = new CalendarDataObject[events.size()];
+		for (int i = 0; i < events.size() && i < output.length; i++) {
+			output[i] = events.get(i);
+		}
+		executedSuccessfully = true;
+	}
 
 }
