@@ -1,9 +1,3 @@
-open-xchange-global (6.20.0.0-4) unstable; urgency=low
-
-  * build for PTF 2011031510000187
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 21 Mar 2011 17:05:45 +0000
-
 open-xchange-global (6.20.0.0-3) unstable; urgency=low
 
   * build for 6.20.0-rev3
