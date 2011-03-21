@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -769,8 +769,13 @@ fi
 %doc doc/examples
 
 %changelog
+* Mon Mar 21 2011 - choeger@open-xchange.com
+ - Bugfix #18713: oauth-twitter is missing after updating
+* Sun Mar 20 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18698: Setting appropriate javax.activation.DataHandler instance for mail part
 * Thu Mar 17 2011 - marcus.klein@open-xchange.com
  - Bugfix #18643: Fixed old mail accounts without transport server for IPv6 support.
+ - Bugfix #18681: Removed caching of user contacts and corrected SQL query to load them when context has more than 1000 users.
 * Thu Mar 17 2011 - thorben.betten@open-xchange.com
  - Bugfix #18683: Checking for POP3 account before performing delete listener actions
 * Wed Mar 16 2011 - thorben.betten@open-xchange.com

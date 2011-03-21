@@ -1,3 +1,9 @@
+open-xchange-config-cascade-context (6.20.0.0-3) unstable; urgency=low
+
+  * build for 6.20.0-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 21 Mar 2011 15:09:00 +0000
+
 open-xchange-config-cascade-context (6.20.0.0-2) unstable; urgency=low
 
   * build for 6.20.0-rev2
