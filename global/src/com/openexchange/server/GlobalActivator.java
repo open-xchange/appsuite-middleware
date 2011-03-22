@@ -51,6 +51,7 @@ package com.openexchange.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -148,6 +149,9 @@ public final class GlobalActivator implements BundleActivator {
             @Override
             protected Collection<StringParser> getParsers() {
                 Object[] services = parserTracker.getServices();
+                if(services == null) {
+                    return Collections.emptyList();
+                }
                 List<StringParser> parsers = new ArrayList<StringParser>(services.length);
                 
                 for (Object object : services) {
