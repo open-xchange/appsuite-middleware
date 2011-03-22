@@ -50,6 +50,7 @@
 package com.openexchange.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -150,7 +151,7 @@ public final class GlobalActivator implements BundleActivator {
             protected Collection<StringParser> getParsers() {
                 Object[] services = parserTracker.getServices();
                 if(services == null) {
-                    return Collections.emptyList();
+                    return Arrays.asList(standardParsersComposite);
                 }
                 List<StringParser> parsers = new ArrayList<StringParser>(services.length);
                 
