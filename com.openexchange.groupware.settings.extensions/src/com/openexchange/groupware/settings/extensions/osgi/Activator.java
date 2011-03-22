@@ -112,7 +112,7 @@ public class Activator implements BundleActivator {
                     export(viewFactory, property, propertyName);
                 }
             }
-        } catch (ConfigCascadeException x) {
+        } catch (Throwable x) {
             LOG.error(x.getMessage(), x);
         }
         
