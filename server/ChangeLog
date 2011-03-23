@@ -1,6 +1,7 @@
 * 2011-03-23 - thorben.betten@open-xchange.com
 
  - Bugfix #18709: Removing starting white-space character on html2text conversion
+ - Bugfix #18633: Proper removal from user-sensitive folder cache on move operation
 
 * 2011-03-21 - steffen.templin@open-xchange.com
 

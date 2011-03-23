@@ -53,7 +53,6 @@ import gnu.trove.TIntArrayList;
 import gnu.trove.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -438,7 +437,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 if (userId > 0) {
                     final FolderMap folderMap = optFolderMapFrom(session);
                     if (null != folderMap) {
-                        folderMap.remove(id, treeId);
+                        folderMap.remove(id, FolderStorage.REAL_TREE_ID);
                     }
                 }
             }
@@ -1302,13 +1301,13 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param contextId The context identifier
      */
     public static void dropUserEntries(final int userId, final int contextId) {
-        SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null != service) {
-            for (Session session : service.getSessions(userId, contextId)) {
+            for (final Session session : service.getSessions(userId, contextId)) {
                 final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
                 if (null == lock) {
                     synchronized (session) {
-                        FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+                        final FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
                         if (null != map) {
                             map.clear();
                         }
@@ -1316,7 +1315,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 } else {
                     lock.lock();
                     try {
-                        FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
+                        final FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
                         if (null != map) {
                             map.clear();
                         }
