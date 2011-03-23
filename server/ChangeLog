@@ -1,3 +1,7 @@
+* 2011-03-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #18709: Removing starting white-space character on html2text conversion
+
 * 2011-03-21 - steffen.templin@open-xchange.com
 
  - Bugfix #18729: RSS feed from "Tagesschau" only shows the first headline

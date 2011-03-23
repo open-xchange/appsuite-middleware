@@ -403,6 +403,11 @@ public final class HTML2TextHandler implements HTMLHandler {
     private static final Pattern PAT_CONTROL = Pattern.compile("[\n\f\r]+");
 
     /**
+     * Detects starting indentions: \t or "    "
+     */
+    private static final Pattern PAT_START_INDENT = Pattern.compile("^(?:(\t)|([ ]{2,}))+");
+
+    /**
      * Detects indentions: \t or "    "
      */
     private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{2,}))+");
@@ -475,6 +480,10 @@ public final class HTML2TextHandler implements HTMLHandler {
                             preparedText = preparedText.substring(i);
                         }
                     }
+                    /*
+                     * Remove starting indention
+                     */
+                    preparedText = PAT_START_INDENT.matcher(preparedText).replaceFirst(STR_EMPTY);
                     /*
                      * Turn remaining indentions to space characters
                      */
