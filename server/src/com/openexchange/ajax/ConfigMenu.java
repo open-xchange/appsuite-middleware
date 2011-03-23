@@ -231,8 +231,12 @@ public class ConfigMenu extends SessionServlet {
             final String value = (String) setting.getSingleValue();
             if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
                 final JSONArray array = new JSONArray(value);
-                for (int i = 0; i < array.length(); i++) {
-                    setting.addMultiValue(array.getString(i));
+                if(array.length() == 0) {
+                    setting.setEmptyMultiValue();
+                } else {
+                    for (int i = 0; i < array.length(); i++) {
+                        setting.addMultiValue(array.getString(i));
+                    }
                 }
                 setting.setSingleValue(null);
             }

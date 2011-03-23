@@ -179,20 +179,22 @@ public class Activator implements BundleActivator {
                                     arr.put(o);
                                 }
                                 value = arr.toString();
+                            } else if (setting.isEmptyMultivalue()) {
+                                value = "[]";
                             }
                         }
+                        try {
+                            String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
                         if(value != null) {
-                            try {
-                                String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
                                 // Clients have a habit of dumping the config back at us, so we only save differing values.
                                 if(!value.equals(oldValue)) {
                                     viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
                                 }
-                            } catch (ConfigCascadeException e) {
-                                throw new SettingException(e);
-                            }
+                            
                         } else {
-                            //TODO: Remove user specific setting
+                            
+                        }} catch (ConfigCascadeException e) {
+                            throw new SettingException(e);
                         }
                         
                     }

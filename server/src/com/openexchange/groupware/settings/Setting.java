@@ -143,6 +143,10 @@ public class Setting {
         }
         return retval;
     }
+    
+    public boolean isEmptyMultivalue() {
+        return multiValue != null && multiValue.isEmpty();
+    }
 
     /**
      * @return the single value.
@@ -170,6 +174,10 @@ public class Setting {
                 multiValue.add(value);
             }
         }
+    }
+
+    public void setEmptyMultiValue() {
+        this.multiValue = new ArrayList<Object>();
     }
 
     /**
@@ -352,4 +360,5 @@ public class Setting {
     public IValueHandler getShared() {
         return shared;
     }
+
 }
