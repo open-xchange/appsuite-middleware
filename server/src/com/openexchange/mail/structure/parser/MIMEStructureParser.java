@@ -91,6 +91,64 @@ import com.openexchange.session.Session;
  */
 public final class MIMEStructureParser {
 
+    public static void main(final String[] args) {
+        try {
+            {
+                final JSONObject jsonMail = new JSONObject("{\n" + 
+                		"  \"user\": [],\n" + 
+                		"  \"headers\": {\n" + 
+                		"    \"to\": [{\"address\": \"bob@foobar.com\"}, {\"address\": \"cane@rofl.com\"}],\n" + 
+                		"    \"received\": [\n" + 
+                		"      \"from localhost (localhost.localdomain [127.0.0.1]) by ox.open-xchange.com (Postfix) with ESMTP id 63BA22AC4004 for <holger.achtziger@open-xchange.com>; Fri, 30 Oct 2009 08:54:58 +0100 (CET)\",\n" + 
+                		"      \"from ox.open-xchange.com ([127.0.0.1]) by localhost (ox.open-xchange.com [127.0.0.1]) (amavisd-new, port 10024) with ESMTP id UjQ1iBeTBbxN for <holger.achtziger@open-xchange.com>; Fri, 30 Oct 2009 08:54:58 +0100 (CET)\"\n" + 
+                		"    ],\n" + 
+                		"    \"content-disposition\": {\n" + 
+                		"      \"type\": \"inline\",\n" + 
+                		"      \"params\": {\"filename\": \"foo.txt\"}\n" + 
+                		"    },\n" + 
+                		"    \"from\": [{\n" + 
+                		"      \"address\": \"alice@foobar.com\",\n" + 
+                		"      \"personal\": \"Alice Doe\"\n" + 
+                		"    }],\n" + 
+                		"    \"subject\": \"The mail subject\",\n" + 
+                		"    \"content-type\": {\n" + 
+                		"      \"type\": \"text/plain\",\n" + 
+                		"      \"params\": {\n" + 
+                		"        \"charset\": \"UTF-8\",\n" + 
+                		"        \"name\": \"foo.txt\"\n" + 
+                		"      }\n" + 
+                		"    },\n" + 
+                		"    \"date\": {\n" + 
+                		"      \"utc\": 1258214589000,\n" + 
+                		"      \"date\": \"Sat, 14 Nov 2009 17:03:09 +0100 (CET)\"\n" + 
+                		"    },\n" + 
+                		"    \"mime-version\": \"1.0\",\n" + 
+                		"    \"x-priority\": \"3\",\n" + 
+                		"    \"message-id\": \"<1837640730.5.1258214590077.JavaMail.foobar@foobar>\"\n" + 
+                		"  },\n" + 
+                		"  \"color_label\": 0,\n" + 
+                		"  \"flags\": 0,\n" + 
+                		"  \"received_date\": null,\n" + 
+                		"  \"body\": {\n" + 
+                		"    \"data\": \"Hello Dave.\\nPeople have been asking ...\",\n" + 
+                		"    \"id\": \"1\"\n" + 
+                		"  }\n" + 
+                		"}");
+                
+                final MailMessage mail = parseStructure(jsonMail);
+                System.out.println(mail.getSource());
+            }
+            
+            {
+                
+            }
+            
+            
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Initializes a new {@link MIMEStructureParser}.
      */
@@ -105,7 +163,7 @@ public final class MIMEStructureParser {
      * @return The {@link MailMessage} instance
      * @throws MailException If parsing fails
      */
-    public MailMessage parseStructure(final JSONObject jsonStructure) throws MailException {
+    public static MailMessage parseStructure(final JSONObject jsonStructure) throws MailException {
         /*
          * Parse JSON to MIME message
          */
@@ -124,7 +182,7 @@ public final class MIMEStructureParser {
      * @return The transportable {@link ComposedMailMessage} instance
      * @throws MailException If parsing fails
      */
-    public ComposedMailMessage parseStructure(final JSONObject jsonStructure, final Session session) throws MailException {
+    public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final Session session) throws MailException {
         try {
             /*
              * Create appropriate ComposedMailMessage instance
@@ -336,6 +394,8 @@ public final class MIMEStructureParser {
                 if (HEADERS_ADDRESS.contains(name)) {
                     final JSONArray jsonAddresses = (JSONArray) entry.getValue();
                     final int length = jsonAddresses.length();
+                    final StringBuilder builder = new StringBuilder(32 * length);
+                    final String delim = ", ";
                     for (int i = length - 1; i >= 0; i--) {
                         final JSONObject jsonAddress = jsonAddresses.getJSONObject(i);
                         final String address = jsonAddress.getString("address");
@@ -346,33 +406,35 @@ public final class MIMEStructureParser {
                             personal = null;
                         }
                         final QuotedInternetAddress qia = new QuotedInternetAddress(address, personal, "UTF-8");
-                        mimePart.addHeader(name, qia.toString());
+                        builder.insert(0, qia.toString()).insert(0, delim);
                     }
+                    mimePart.setHeader(toHeaderCase(name), builder.delete(0, delim.length()).toString());
                 } else if (HEADERS_DATE.contains(name)) {
                     final JSONObject jsonDate = (JSONObject) entry.getValue();
-                    mimePart.setHeader(name, jsonDate.getString("date"));
+                    mimePart.setHeader(toHeaderCase(name), jsonDate.getString("date"));
                 } else if ("content-type".equals(name)) {
                     final JSONObject jsonContentType = (JSONObject) entry.getValue();
                     contentType.reset();
                     contentType.setBaseType(jsonContentType.getString("type"));
                     parseParameterList(jsonContentType.getJSONObject("params"), contentType);
-                    mimePart.setHeader(name, contentType.toString(true));
+                    mimePart.setHeader(toHeaderCase(name), contentType.toString(true));
                 } else if ("content-disposition".equals(name)) {
                     final JSONObject jsonContentDisposition = (JSONObject) entry.getValue();
                     final ContentDisposition contentDisposition = new ContentDisposition();
                     contentDisposition.setDisposition(jsonContentDisposition.getString("type"));
                     parseParameterList(jsonContentDisposition.getJSONObject("params"), contentDisposition);
-                    mimePart.setHeader(name, contentDisposition.toString(true));
+                    mimePart.setHeader(toHeaderCase(name), contentDisposition.toString(true));
                 } else {
                     final Object value = entry.getValue();
                     if (value instanceof JSONArray) {
                         final JSONArray jsonHeader = (JSONArray) value;
                         final int length = jsonHeader.length();
+                        final String headerName = toHeaderCase(name);
                         for (int i = length - 1; i >= 0; i--) {
-                            mimePart.addHeader(name, jsonHeader.getString(i));
+                            mimePart.addHeader(headerName, jsonHeader.getString(i));
                         }
                     } else {
-                        mimePart.setHeader(name, (String) value);
+                        mimePart.setHeader(toHeaderCase(name), (String) value);
                     }
                 }
             }
@@ -424,6 +486,29 @@ public final class MIMEStructureParser {
             }
         }
         return false;
+    }
+
+    private static String toHeaderCase(final String name) {
+        if (null == name) {
+            return null;
+        }
+        final char[] chars = name.toCharArray();
+        final int len = chars.length;
+        if (len <= 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder();
+        sb.append(Character.toUpperCase(chars[0]));
+        int i = 1;
+        while (i < len) {
+            final char c = chars[i++];
+            if ('-' == c && i < len) {
+                sb.append(c).append(Character.toUpperCase(chars[i++]));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
 }
