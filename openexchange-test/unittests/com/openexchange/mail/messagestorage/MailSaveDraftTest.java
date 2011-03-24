@@ -106,7 +106,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                  * Check content
                  */
                 String content = mail.getContent().toString();
-                assertEquals("Content mismatch", "The first line", content.trim());
+                assertEquals("Content mismatch", "The first line", content);
                 /*
                  * Edit draft
                  */
@@ -133,8 +133,8 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                 /*
                  * Check content again
                  */
-                final String expected = "The first line\n And the second line";
-                content = mail.getContent().toString().trim();
+                final String expected = "The first line\nAnd the second line";
+                content = mail.getContent().toString();
                 if (!expected.equals(content.replaceAll("\r\n", "\n"))) {
                     final StringBuilder sb = new StringBuilder(1024);
                     sb.append("Expected value:\n");
