@@ -165,22 +165,45 @@ public abstract class AbstractICalParserTest extends TestCase {
         super.tearDown();
     }
 
+    // single appointment
     protected CalendarDataObject parseAppointment(final String icalText, final TimeZone defaultTZ) throws ConversionError {
-        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() ).get(0);
+    	return parseAppointments(icalText, defaultTZ).get(0);
     }
 
     protected CalendarDataObject parseAppointment(final String icalText) throws ConversionError {
         return parseAppointment(icalText, TimeZone.getDefault());
     }
 
+    //multiple appointments
+    protected List<CalendarDataObject> parseAppointments(final String icalText) throws ConversionError {
+        return parseAppointments(icalText, TimeZone.getDefault());
+    }
+    
+    protected List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ) throws ConversionError {
+        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() );
+    }
+    
+    
+    //single task
     protected Task parseTask(final String icalText,  final TimeZone defaultTZ) throws ConversionError {
-        return parser.parseTasks(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>()).get(0);
+        return parseTasks(icalText,defaultTZ).get(0);
     }
 
     protected Task parseTask(final String icalText) throws ConversionError {
-        return parser.parseTasks(icalText, TimeZone.getDefault(), new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>()).get(0);
+        return parseTasks(icalText).get(0);
     }
 
+    //multiple tasks
+    protected List<Task> parseTasks(final String icalText,  final TimeZone defaultTZ) throws ConversionError {
+        return parser.parseTasks(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>());
+    }
+
+    protected List<Task> parseTasks(final String icalText) throws ConversionError {
+        return parseTasks(icalText, TimeZone.getDefault());
+    }
+
+    
+    
     protected Appointment appointmentWithRecurrence(final String recurrence, final Date start, final Date end) throws ConversionError {
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
