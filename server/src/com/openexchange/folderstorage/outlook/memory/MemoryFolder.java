@@ -53,7 +53,7 @@ import java.util.Date;
 import com.openexchange.folderstorage.Permission;
 
 /**
- * {@link MemoryFolder}
+ * {@link MemoryFolder} - The in-memory representation of a virtual folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
