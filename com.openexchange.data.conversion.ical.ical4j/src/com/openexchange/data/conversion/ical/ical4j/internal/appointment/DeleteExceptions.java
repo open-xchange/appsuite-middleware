@@ -49,6 +49,8 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.DateList;
@@ -60,6 +62,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -117,8 +120,18 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
             for (int j = 0; j < size2; j++) {
                 final net.fortuna.ical4j.model.Date icaldate = (net.fortuna.ical4j.model.Date) dates.get(j);
                 final java.util.Date date = ParserTools.recalculateAsNeeded(icaldate, exdate, timeZone);
-                appointment.addDeleteException(date);
+                appointment.addDeleteException(normalize(date));
             }
         }
     }
+
+	private Date normalize(Date date) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
 }

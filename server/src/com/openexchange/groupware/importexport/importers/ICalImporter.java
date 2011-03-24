@@ -55,12 +55,18 @@ import gnu.trove.TObjectProcedure;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -241,178 +247,274 @@ public class ICalImporter extends AbstractImporter {
 		final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
 		if (appointmentFolderId != -1) {
-			List<CalendarDataObject> appointments;
-			try {
-				appointments = parser.parseAppointments(is, defaultTz, ctx,
-						errors, warnings);
-			} catch (final ConversionError conversionError) {
-				throw new ImportExportException(conversionError);
-			}
-			final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
-
-			for (final ConversionError error : errors) {
-				errorMap.put(error.getIndex(), error);
-			}
-
-			final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
-
-			for (final ConversionWarning warning : warnings) {
-				List<ConversionWarning> warningList = warningMap.get(warning
-						.getIndex());
-				if (warningList == null) {
-					warningList = new LinkedList<ConversionWarning>();
-					warningMap.put(warning.getIndex(), warningList);
-				}
-				warningList.add(warning);
-			}
-
-			Map uid2id = new HashMap<String, Integer>();
-			HashMap<String, LinkedList<CalendarDataObject>> waitingLounge = new HashMap<String, LinkedList<CalendarDataObject>>();
-
-			int index = 0;
-			final Iterator<CalendarDataObject> iter = appointments.iterator();
-
-			boolean suppressNotification = (optionalParams != null && optionalParams
-					.containsKey("suppressNotification"));
-			while (iter.hasNext()) {
-				final ImportResult importResult = new ImportResult();
-				final ConversionError error = errorMap.get(index);
-				if (error != null) {
-					errorMap.remove(index);
-					importResult.setException(new ImportExportException(error));
-				} else {
-					final CalendarDataObject appointmentObj = iter.next();
-					appointmentObj.setContext(session.getContext());
-					appointmentObj.setParentFolderID(appointmentFolderId);
-					appointmentObj.setIgnoreConflicts(true);
-					if (suppressNotification) {
-						appointmentObj.setNotification(false);
-					}
-					// Check for possible full-time appointment
-					check4FullTime(appointmentObj);
-					try {
-						final Appointment[] conflicts = appointmentInterface
-								.insertAppointmentObject(appointmentObj);
-						if (conflicts == null || conflicts.length == 0) {
-							importResult.setObjectId(String
-									.valueOf(appointmentObj.getObjectID()));
-							importResult.setDate(appointmentObj
-									.getLastModified());
-							importResult.setFolder(String
-									.valueOf(appointmentFolderId));
-						} else {
-							importResult
-									.setException(ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT
-											.create());
-						}
-					} catch (final OXException e) {
-						LOG.error(e.getMessage(), e);
-						importResult.setException(e);
-					}
-					final List<ConversionWarning> warningList = warningMap
-							.get(index);
-					if (warningList != null) {
-						importResult.addWarnings(warningList);
-						importResult
-								.setException(ImportExportExceptionCodes.WARNINGS
-										.create(I(warningList.size())));
-					}
-				}
-				importResult.setEntryNumber(index);
-				list.add(importResult);
-				index++;
-			}
-			if (!errorMap.isEmpty()) {
-				errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
-
-					public boolean execute(final ConversionError error) {
-						final ImportResult importResult = new ImportResult();
-						importResult.setEntryNumber(error.getIndex());
-						importResult.setException(new ImportExportException(
-								error));
-						list.add(importResult);
-						return true;
-					}
-				});
-			}
+			importAppointment(session, is, optionalParams, appointmentFolderId,
+					appointmentInterface, parser, ctx, defaultTz, list, errors,
+					warnings);
 		}
 		if (taskFolderId != -1) {
-			List<Task> tasks;
-			try {
-				tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
-			} catch (final ConversionError conversionError) {
-				throw new ImportExportException(conversionError);
-			}
-			final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
-
-			for (final ConversionError error : errors) {
-				errorMap.put(error.getIndex(), error);
-			}
-
-			final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
-
-			for (final ConversionWarning warning : warnings) {
-				List<ConversionWarning> warningList = warningMap.get(warning
-						.getIndex());
-				if (warningList == null) {
-					warningList = new LinkedList<ConversionWarning>();
-					warningMap.put(warning.getIndex(), warningList);
-				}
-				warningList.add(warning);
-			}
-
-			int index = 0;
-			final Iterator<Task> iter = tasks.iterator();
-			while (iter.hasNext()) {
-				final ImportResult importResult = new ImportResult();
-				final ConversionError error = errorMap.get(index);
-				if (error != null) {
-					errorMap.remove(index);
-					importResult.setException(new ImportExportException(error));
-				} else {
-					// IGNORE WARNINGS. Protocol doesn't allow for warnings.
-					// TODO: Verify This
-					final Task task = iter.next();
-					task.setParentFolderID(taskFolderId);
-					try {
-						taskInterface.insertTaskObject(task);
-						importResult.setObjectId(String.valueOf(task
-								.getObjectID()));
-						importResult.setDate(task.getLastModified());
-						importResult.setFolder(String.valueOf(taskFolderId));
-					} catch (final OXException e) {
-						LOG.error(e.getMessage(), e);
-						importResult.setException(e);
-					}
-
-					final List<ConversionWarning> warningList = warningMap
-							.get(index);
-					if (warningList != null) {
-						importResult.addWarnings(warningList);
-						importResult
-								.setException(ImportExportExceptionCodes.WARNINGS
-										.create(I(warningList.size())));
-					}
-				}
-				importResult.setEntryNumber(index);
-				list.add(importResult);
-				index++;
-			}
-			if (!errorMap.isEmpty()) {
-				errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
-
-					public boolean execute(final ConversionError error) {
-						final ImportResult importResult = new ImportResult();
-						importResult.setEntryNumber(error.getIndex());
-						importResult.setException(new ImportExportException(
-								error));
-						list.add(importResult);
-						return true;
-					}
-				});
-			}
+			importTask(is, taskFolderId, taskInterface, parser, ctx, defaultTz,
+					list, errors, warnings);
 		}
 		return list;
+	}
+
+	private void importTask(final InputStream is, int taskFolderId,
+			final TasksSQLInterface taskInterface, final ICalParser parser,
+			final Context ctx, final TimeZone defaultTz,
+			final List<ImportResult> list, final List<ConversionError> errors,
+			final List<ConversionWarning> warnings)
+			throws ImportExportException {
+		List<Task> tasks;
+		try {
+			tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
+		} catch (final ConversionError conversionError) {
+			throw new ImportExportException(conversionError);
+		}
+		final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
+
+		for (final ConversionError error : errors) {
+			errorMap.put(error.getIndex(), error);
+		}
+
+		final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
+
+		for (final ConversionWarning warning : warnings) {
+			List<ConversionWarning> warningList = warningMap.get(warning
+					.getIndex());
+			if (warningList == null) {
+				warningList = new LinkedList<ConversionWarning>();
+				warningMap.put(warning.getIndex(), warningList);
+			}
+			warningList.add(warning);
+		}
+
+		int index = 0;
+		final Iterator<Task> iter = tasks.iterator();
+		while (iter.hasNext()) {
+			final ImportResult importResult = new ImportResult();
+			final ConversionError error = errorMap.get(index);
+			if (error != null) {
+				errorMap.remove(index);
+				importResult.setException(new ImportExportException(error));
+			} else {
+				// IGNORE WARNINGS. Protocol doesn't allow for warnings.
+				// TODO: Verify This
+				final Task task = iter.next();
+				task.setParentFolderID(taskFolderId);
+				try {
+					taskInterface.insertTaskObject(task);
+					importResult.setObjectId(String.valueOf(task
+							.getObjectID()));
+					importResult.setDate(task.getLastModified());
+					importResult.setFolder(String.valueOf(taskFolderId));
+				} catch (final OXException e) {
+					LOG.error(e.getMessage(), e);
+					importResult.setException(e);
+				}
+
+				final List<ConversionWarning> warningList = warningMap
+						.get(index);
+				if (warningList != null) {
+					importResult.addWarnings(warningList);
+					importResult
+							.setException(ImportExportExceptionCodes.WARNINGS
+									.create(I(warningList.size())));
+				}
+			}
+			importResult.setEntryNumber(index);
+			list.add(importResult);
+			index++;
+		}
+		if (!errorMap.isEmpty()) {
+			errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
+
+				public boolean execute(final ConversionError error) {
+					final ImportResult importResult = new ImportResult();
+					importResult.setEntryNumber(error.getIndex());
+					importResult.setException(new ImportExportException(
+							error));
+					list.add(importResult);
+					return true;
+				}
+			});
+		}
+	}
+
+	private void importAppointment(final ServerSession session,
+			final InputStream is, final Map<String, String[]> optionalParams,
+			int appointmentFolderId,
+			final AppointmentSQLInterface appointmentInterface,
+			final ICalParser parser, final Context ctx,
+			final TimeZone defaultTz, final List<ImportResult> list,
+			final List<ConversionError> errors,
+			final List<ConversionWarning> warnings)
+			throws ImportExportException {
+		List<CalendarDataObject> appointments;
+		try {
+			appointments = parser.parseAppointments(is, defaultTz, ctx,
+					errors, warnings);
+		} catch (final ConversionError conversionError) {
+			throw new ImportExportException(conversionError);
+		}
+		final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
+
+		for (final ConversionError error : errors) {
+			errorMap.put(error.getIndex(), error);
+		}
+
+		sortSeriesMastersFirst(appointments);
+		Map<Integer, Integer> pos2Master = handleChangeExceptions(appointments);
+		Map<Integer, Integer> master2id = new HashMap<Integer,Integer>();
+		
+		final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
+
+		for (final ConversionWarning warning : warnings) {
+			List<ConversionWarning> warningList = warningMap.get(warning
+					.getIndex());
+			if (warningList == null) {
+				warningList = new LinkedList<ConversionWarning>();
+				warningMap.put(warning.getIndex(), warningList);
+			}
+			warningList.add(warning);
+		}
+
+		int index = 0;
+		final Iterator<CalendarDataObject> iter = appointments.iterator();
+		
+		boolean suppressNotification = (optionalParams != null && optionalParams
+				.containsKey("suppressNotification"));
+		while (iter.hasNext()) {
+			final ImportResult importResult = new ImportResult();
+			final ConversionError error = errorMap.get(index);
+			if (error != null) {
+				errorMap.remove(index);
+				importResult.setException(new ImportExportException(error));
+			} else {
+				final CalendarDataObject appointmentObj = iter.next();
+				appointmentObj.setContext(session.getContext());
+				appointmentObj.setParentFolderID(appointmentFolderId);
+				appointmentObj.setIgnoreConflicts(true);
+				if (suppressNotification) {
+					appointmentObj.setNotification(false);
+				}
+				// Check for possible full-time appointment
+				check4FullTime(appointmentObj);
+				try {
+					boolean isMaster = appointmentObj.containsUid() && !pos2Master.containsKey(index);
+					boolean isChange = appointmentObj.containsUid() && pos2Master.containsKey(index);
+					Date changeDate = new Date(Long.MAX_VALUE);
+					Integer masterID = master2id.get(pos2Master.get(index));
+					if(isChange){
+						appointmentObj.setRecurrenceID(masterID);
+						appointmentObj.removeUid();
+						appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+					}
+					final Appointment[] conflicts;
+					if(isChange){
+						appointmentObj.setObjectID(masterID);
+						conflicts = appointmentInterface.updateAppointmentObject(appointmentObj, appointmentFolderId, changeDate);
+					}  else {
+						conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
+					}
+					if(isMaster)
+						master2id.put(index, appointmentObj.getObjectID());
+					if (conflicts == null || conflicts.length == 0) {
+						importResult.setObjectId(String
+								.valueOf(appointmentObj.getObjectID()));
+						importResult.setDate(appointmentObj
+								.getLastModified());
+						importResult.setFolder(String
+								.valueOf(appointmentFolderId));
+					} else {
+						importResult
+								.setException(ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT
+										.create());
+					}
+				} catch (final OXException e) {
+					LOG.error(e.getMessage(), e);
+					importResult.setException(e);
+				}
+				final List<ConversionWarning> warningList = warningMap
+						.get(index);
+				if (warningList != null) {
+					importResult.addWarnings(warningList);
+					importResult
+							.setException(ImportExportExceptionCodes.WARNINGS
+									.create(I(warningList.size())));
+				}
+			}
+			importResult.setEntryNumber(index);
+			list.add(importResult);
+			index++;
+		}
+		if (!errorMap.isEmpty()) {
+			errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
+
+				public boolean execute(final ConversionError error) {
+					final ImportResult importResult = new ImportResult();
+					importResult.setEntryNumber(error.getIndex());
+					importResult.setException(new ImportExportException(
+							error));
+					list.add(importResult);
+					return true;
+				}
+			});
+		}
+	}
+
+	private Date calculateRecurrenceDatePosition(Date startDate) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		cal.setTime(startDate);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
+
+	private void sortSeriesMastersFirst(List<CalendarDataObject> appointments) {
+		Collections.sort(appointments, new Comparator<CalendarDataObject>(){
+			public int compare(CalendarDataObject o1, CalendarDataObject o2) {
+				if( o1.containsRecurrenceType() && !o2.containsRecurrenceType())
+					return -1;
+				if( !o1.containsRecurrenceType() && o2.containsRecurrenceType())
+					return 1;
+				return 0;
+			}});
+	}
+	/**
+	 * @return mapping for position of a recurrence in the list to the position of the recurrence master
+	 */
+	private Map<Integer, Integer> handleChangeExceptions(List<CalendarDataObject> appointments) {
+		Map<String, Integer> uid2master = new HashMap<String,Integer>();
+		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+		CalendarDataObject app;
+			
+		//find master
+		for(int pos = 0, len = appointments.size(); pos < len; pos++){
+			app = appointments.get(pos);
+			if(! app.containsUid())
+				continue;
+			
+			String uid = app.getUid();
+			if(! uid2master.containsKey(uid))
+				uid2master.put(uid, pos);
+		}
+		
+		//references to master
+		for(int pos = 0, len = appointments.size(); pos < len; pos++){
+			app = appointments.get(pos);
+			if(! app.containsUid())
+				continue;
+			
+			String uid = app.getUid();
+			Integer masterPos = uid2master.get(uid);
+				
+			if(pos > masterPos) //only work on change exceptions, not on the series master 
+				map.put(pos, uid2master.get(uid));
+		}
+		
+		return map;
 	}
 
 	private ICalParser retrieveIcalParser() throws ImportExportException {
