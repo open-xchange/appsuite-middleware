@@ -2,14 +2,15 @@
 # Antje Faber <antje.faber@open-xchange.com>, 2010.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2010.
 # Joëlle Cornavin <jcornavin@laposte.net>, 2010.
+# Sandrine, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: server\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2010-11-11 15:35+0100\n"
-"Last-Translator: Joëlle Cornavin <jcornavin@laposte.net>\n"
-"Language-Team: French <>\n"
+"PO-Revision-Date: 2011-02-22 22:46+0100\n"
+"Last-Translator: Sandrine\n"
+"Language-Team: French <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -45,6 +46,7 @@ msgstr "Participants"
 msgid "Comments"
 msgstr "Commentaires"
 
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:61
@@ -53,6 +55,7 @@ msgstr "Commentaires"
 msgid "Login"
 msgstr "Connexion"
 
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:63
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:63
@@ -92,7 +95,9 @@ msgstr "Pourriel confirmé"
 msgid "Confirmed spam folder"
 msgstr "Dossier de pourriel confirmé"
 
+#. The name for the drafts folder
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Brouillons"
 
@@ -108,7 +113,9 @@ msgstr "Envoyé"
 msgid "Sent folder"
 msgstr "Dossier envoyé"
 
+#. The name for the spam folder
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Pourriel"
 
@@ -116,7 +123,9 @@ msgstr "Pourriel"
 msgid "Spam folder"
 msgstr "Dossier de pourriel"
 
+#. The name for the trash folder
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Corbeille"
 
@@ -240,6 +249,18 @@ msgstr ""
 msgid "Publish Infostore Document"
 msgstr "Publier le document du dépôt de données"
 
+#. The name for the INBOX folder
+#. The internationalized name for the INBOX mail folder
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:62
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:69
+msgid "Inbox"
+msgstr "Boîte de réception"
+
+#. The name for the sent folder
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:68
+msgid "Sent items"
+msgstr "Éléments envoyés"
+
 #. Name of the parent folder for the private user folders.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
@@ -322,11 +343,6 @@ msgstr "Tous les utilisateurs"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:71
 msgid "Standard group"
 msgstr "Groupe par défaut"
-
-#. The internationalized name for the INBOX mail folder
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:69
-msgid "Inbox"
-msgstr "Boîte de réception"
 
 #. The internationalized subject for a read acknowledgement
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:72
@@ -1291,53 +1307,58 @@ msgstr "Tâche (tentative)"
 #. -
 #. * MISC
 #.
-#. No resources have been scheduled.
+#. Reminder
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:634
+msgid "Reminder"
+msgstr "Rappel"
+
+#. No resources have been scheduled.
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:637
 msgid "No resources have been scheduled."
 msgstr "Aucune ressource n'a été planifiée."
 
 #. No series
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:637
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:640
 msgid "No series"
 msgstr "Pas de répétition"
 
 #. No start date
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:640
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:643
 msgid "No start date"
 msgstr "Pas de date de début"
 
 #. No end date
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:643
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:646
 msgid "No end date"
 msgstr "Pas de date de fin"
 
 #. No due date
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:646
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:649
 msgid "No due date"
 msgstr "Pas de date d'échéance"
 
 #. No delete exceptions
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:649
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:652
 msgid "No delete exceptions"
 msgstr "Pas d'exceptions de suppression"
 
 #. No change exceptions
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:652
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:655
 msgid "No change exceptions"
 msgstr "Pas d'exceptions de changement"
 
 #. Mail to resource %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:655
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:658
 msgid "Mail to resource %1$s"
 msgstr "Envoyer un courriel à la ressource %1$s"
 
 #. Resource
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:658
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:661
 msgid "Resource"
 msgstr "Ressource"
 
 #. Not set
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:661
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:664
 msgid "Not set"
 msgstr "Non défini"
 
@@ -1345,18 +1366,18 @@ msgstr "Non défini"
 #. * Confirmation actions
 #.
 #. accepted
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:667
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:694
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:670
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:697
 msgid "accepted"
 msgstr "acceptée"
 
 #. declined
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:669
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:697
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:672
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:700
 msgid "declined"
 msgstr "déclinée"
 
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:671
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:674
 msgid "tentatively accepted"
 msgstr "accepté provisoirement"
 
@@ -1364,17 +1385,17 @@ msgstr "accepté provisoirement"
 #. * TASK PRIORITIES
 #.
 #. low
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:678
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:681
 msgid "Low"
 msgstr "Basse"
 
 #. normal
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:681
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:684
 msgid "Normal"
 msgstr "Normal"
 
 #. high
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:684
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:687
 msgid "High"
 msgstr "Haute"
 
@@ -1382,17 +1403,17 @@ msgstr "Haute"
 #. * Confirmation statuses
 #.
 #. waiting
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:691
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:694
 msgid "waiting"
 msgstr "en attente"
 
 #. tentative
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:700
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:703
 msgid "tentative"
 msgstr "tentative"
 
 #. external
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:703
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:706
 msgid "external"
 msgstr "externe"
 
@@ -1400,43 +1421,43 @@ msgstr "externe"
 #. * Line patterns
 #.
 #. Location: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:710
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:713
 msgid "Location: %1$s"
 msgstr "Emplacement : %1$s"
 
 #. Description: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:713
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:716
 msgid "Description: %1$s"
 msgstr "Description : %1$s"
 
 #. Folder: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:716
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:719
 msgid "Folder: %1$s"
 msgstr "Dossier : %1$s"
 
 #. Start date: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:719
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:722
 msgid "Start date: %1$s"
 msgstr "Date de début : %1$s"
 
 #. End date: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:722
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:725
 msgid "End date: %1$s"
 msgstr "Date de fin : %1$s"
 
 #. Due date: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:725
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:728
 msgid "Due date: %1$s"
 msgstr "Date d'échéance : %1$s"
 
 #. Series: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:728
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:731
 msgid "Series: %1$s"
 msgstr "Série : %1$s"
 
 #. Comments:
 #. %1$s: Placeholder for comments
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:732
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:735
 msgid ""
 "Comments:\n"
 "%1$s"
@@ -1445,22 +1466,22 @@ msgstr ""
 "%1$s"
 
 #. Priority: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:735
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:738
 msgid "Priority: %1$s"
 msgstr "Priorité : %1$s"
 
 #. Status: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:738
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:741
 msgid "Status: %1$s"
 msgstr "État : %1$s"
 
 #. Delete exceptions: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:741
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:744
 msgid "Delete exceptions: %1$s"
 msgstr "Exceptions de suppression : %1$s"
 
 #. Change exceptions: %1$s
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:744
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:747
 msgid "Change exceptions: %1$s"
 msgstr "Exceptions de modification : %1$s"
 
@@ -1468,7 +1489,7 @@ msgstr "Exceptions de modification : %1$s"
 #. %1$s: Placeholder for recurrence title
 #. %2$s: Placeholder for change exception's date
 #. Example: My Recurring Appointment on 2009-12-06
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:750
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:753
 msgid "Change exception of %1$s on %2$s"
 msgstr "Exceptions de modification : %1$s le %2$s"
 
@@ -1476,38 +1497,38 @@ msgstr "Exceptions de modification : %1$s le %2$s"
 #. * Task statuses
 #.
 #. Not started
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:757
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:760
 msgid "Not started"
 msgstr "Non démarré"
 
 #. In progress
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:760
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:763
 msgid "In progress"
 msgstr "En cours"
 
 #. Done
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:763
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:766
 msgid "Done"
 msgstr "Terminé"
 
 #. Waiting
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:766
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:769
 msgid "Waiting"
 msgstr "En attente"
 
 #. Deferred
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:769
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:772
 msgid "Deferred"
 msgstr "Mis en attente"
 
 #. -
 #. * Added/Removed participant
 #.
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:775
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:778
 msgid "Added"
 msgstr "Ajouté"
 
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:777
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:780
 msgid "Removed"
 msgstr "Supprimé"
 
@@ -1515,22 +1536,22 @@ msgstr "Supprimé"
 #. * Numeric recurrence templates
 #.
 #. The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:784
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:787
 msgid "st"
 msgstr "er"
 
 #. The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:787
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:790
 msgid "nd"
 msgstr "e"
 
 #. The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:790
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:793
 msgid "rd"
 msgstr "e"
 
 #. The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:793
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:796
 msgid "th"
 msgstr "e"
 
@@ -1538,72 +1559,72 @@ msgstr "e"
 #. * Recurrence templates
 #.
 #. and
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:800
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:803
 msgid "and"
 msgstr "et"
 
 #. Each day
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:803
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:806
 msgid "Each day"
 msgstr "Chaque jour"
 
 #. Each %1$s days; e.g. "Each 2 days"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:806
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:809
 msgid "Each %1$s days"
 msgstr "Tous les %1$s jours"
 
 #. Each week on %1$s; e.g. "Each week on Monday"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:809
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:812
 msgid "Each week on %1$s"
 msgstr "Toutes les semaines le %1$s"
 
 #. Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:812
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:815
 msgid "Each %1$s weeks on %2$s"
 msgstr "Toutes les %1$s semaines le %2$s"
 
 #. On %1$s day every month; e.g. "On 1st day every month"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:815
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:818
 msgid "On %1$s day every month"
 msgstr "Chaque %1$s jour tous les mois"
 
 #. On %1$s day every %2$s month; e.g. "On 1st day every 2nd month"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:818
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:821
 msgid "On %1$s day every %2$s month"
 msgstr "Le %1$s jour tous les %2$s mois"
 
 #. On %1$s %2$s each month; e.g. "On first Monday each month"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:821
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:824
 msgid "On %1$s %2$s each month"
 msgstr "Le %1$s %2$s de chaque mois"
 
 #. On %1$s %2$s each %3$s month; e.g. "On first Monday each 3rd month"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:824
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:827
 msgid "On %1$s %2$s each %3$s month"
 msgstr "Le %1$s %2$s tous les %3$s mois"
 
 #. Each %1$s %2$s; e.g. "Each 10th October"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:827
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:830
 msgid "Each %1$s %2$s"
 msgstr "Chaque %1$s %2$s"
 
 #. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:830
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:833
 msgid "On %1$s %2$s in %3$s"
 msgstr "Le %1$s %2$s de %3$s"
 
 #. ", ends after %1$s appointment(s)"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:833
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:836
 msgid ", ends after %1$s appointment(s)"
 msgstr " ; se termine après %1$s rendez-vous"
 
 #. ", ends after %1$s task(s)"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:836
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:839
 msgid ", ends after %1$s task(s)"
 msgstr " ; se termine après %1$s tâche(s)"
 
 #. ", ends on %1$s"
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:839
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:842
 msgid ", ends on %1$s"
 msgstr " ; se termine à %1$s"
 
@@ -1611,62 +1632,62 @@ msgstr " ; se termine à %1$s"
 #. * Months
 #.
 #. January
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:846
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:849
 msgid "January"
 msgstr "Janvier"
 
 #. February
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:849
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:852
 msgid "February"
 msgstr "Février"
 
 #. March
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:852
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:855
 msgid "March"
 msgstr "Mars"
 
 #. April
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:855
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:858
 msgid "April"
 msgstr "Avril"
 
 #. May
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:858
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:861
 msgid "May"
 msgstr "Mai"
 
 #. June
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:861
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:864
 msgid "June"
 msgstr "Juin"
 
 #. July
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:864
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:867
 msgid "July"
 msgstr "Juillet"
 
 #. August
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:867
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:870
 msgid "August"
 msgstr "Août"
 
 #. September
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:870
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:873
 msgid "September"
 msgstr "Septembre"
 
 #. October
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:873
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:876
 msgid "October"
 msgstr "Octobre"
 
 #. November
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:876
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:879
 msgid "November"
 msgstr "Novembre"
 
 #. December
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:879
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:882
 msgid "December"
 msgstr "Décembre"
 
@@ -1674,48 +1695,48 @@ msgstr "Décembre"
 #. * Weekdays
 #.
 #. Monday
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:886
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:889
 msgid "Monday"
 msgstr "Lundi"
 
 #. Tuesday
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:889
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:892
 msgid "Tuesday"
 msgstr "Mardi"
 
 #. Wednesday
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:892
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:895
 msgid "Wednesday"
 msgstr "Mercredi"
 
 #. Thursday
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:895
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:898
 msgid "Thursday"
 msgstr "Jeudi"
 
 #. Friday
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:898
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:901
 msgid "Friday"
 msgstr "Vendredi"
 
 #. Saturday
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:901
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:904
 msgid "Saturday"
 msgstr "Samedi"
 
 #. Sunday
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:904
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:907
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:910
 msgid "Sunday"
 msgstr "Dimanche"
 
 #. Weekday
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:910
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:913
 msgid "Weekday"
 msgstr "Jour de semaine"
 
 #. Weekend day
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:913
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:916
 msgid "Weekend day"
 msgstr "Jour de fin de semaine"
 
@@ -1723,27 +1744,27 @@ msgstr "Jour de fin de semaine"
 #. * Monthly1 constants
 #.
 #. first
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:920
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:923
 msgid "first"
 msgstr "premier"
 
 #. second
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:923
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:926
 msgid "second"
 msgstr "deuxième"
 
 #. third
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:926
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:929
 msgid "third"
 msgstr "troisième"
 
 #. fourth
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:929
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:932
 msgid "fourth"
 msgstr "quatrième"
 
 #. last
-#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:932
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:935
 msgid "last"
 msgstr "dernier"
 
@@ -3766,5 +3787,4 @@ msgstr "UTC"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/TimeZones.java:506
 msgid "Zulu"
 msgstr "Zoulou"
-
 
