@@ -53,6 +53,7 @@ import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -523,7 +524,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         // Do we need the "time" in an exception?
 
-        Set<Date> expectedExceptions = new HashSet<Date>(Arrays.asList(exceptions));
+        Set<Date> expectedExceptions = new HashSet<Date>(Arrays.asList(D("26/01/1981 00:00"), D("30/01/1981 00:00")));
 
         assertNotNull(appointment.getDeleteException());
         for(final Date exception  : appointment.getDeleteException()) {
