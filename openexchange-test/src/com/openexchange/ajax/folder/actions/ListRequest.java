@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -60,7 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     private static final int[] DEFAULT_COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
+        FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
         FolderObject.CREATED_BY };
 
     private final String parentFolder;
@@ -68,23 +69,26 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
     private final int[] columns;
 
     private final boolean ignoreMail;
+
+    private final Modules[] allowedModules;
     
     private final boolean failOnError;
 
-    public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail, boolean failOnError) {
+    public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail, Modules[] allowedModules, boolean failOnError) {
         super(api);
         this.parentFolder = parentFolder;
         this.columns = columns;
         this.ignoreMail = ignoreMail;
+        this.allowedModules = allowedModules;
         this.failOnError = failOnError;
+    }
+
+    public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail, boolean failOnError) {
+        this(api, parentFolder, columns, ignoreMail, null, failOnError);
     }
     
     public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail) {
-        super(api);
-        this.parentFolder = parentFolder;
-        this.columns = columns;
-        this.ignoreMail = ignoreMail;
-        this.failOnError = true;
+        this(api, parentFolder, columns, ignoreMail, null, true);
     }
 
     public ListRequest(API api, String parentFolder) {
@@ -97,6 +101,10 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     public ListRequest(API api, String parentFolder, boolean ignoreMail) {
         this(api, parentFolder, DEFAULT_COLUMNS, ignoreMail);
+    }
+
+    public ListRequest(API api, String parentFolder, Modules[] allowedModules) {
+        this(api, parentFolder, DEFAULT_COLUMNS, false, allowedModules, true);
     }
 
     public Object getBody() {
@@ -114,6 +122,9 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (ignoreMail) {
             params.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder"));
+        }
+        if (null != allowedModules && allowedModules.length > 0) {
+            params.add(new Parameter("allowed_modules", Strings.join(allowedModules, ",")));
         }
     }
 

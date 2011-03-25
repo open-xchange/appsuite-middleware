@@ -50,12 +50,15 @@
 package com.openexchange.ajax.folder;
 
 import java.util.Iterator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.folder.actions.Modules;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -70,6 +73,8 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ListTest extends AbstractAJAXSession {
+
+    private static final Log LOG = LogFactory.getLog(ListTest.class);
 
     private AJAXClient client;
     private AJAXClient client2;
@@ -158,6 +163,20 @@ public class ListTest extends AbstractAJAXSession {
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
         assertTrue("Subfolders expected below private folder.", length > 0);
+    }
+
+    public void testListPrivateWithModules() throws Throwable {
+        // List root's subfolders by their type
+        final ListRequest request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), new Modules[] { Modules.MAIL });
+        final ListResponse response = client.execute(request);
+        final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
+        final int length = jsonArray.length();
+        assertTrue("Subfolders expected below private folder.", length > 0);
+        Iterator<FolderObject> iter = response.getFolder();
+        while (iter.hasNext()) {
+            FolderObject folder = iter.next();
+            LOG.info(folder.getFolderName() + ':' + folder.getFullName());
+        }
     }
 
     public void testListPublic() throws Throwable {
