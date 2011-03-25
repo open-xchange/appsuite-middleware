@@ -492,7 +492,14 @@ public abstract class AbstractMailAccount implements MailAccount {
             // Parse like old parser to prevent problems.
             setMailServer("");
         } else {
-            setMailProtocol(mailServer.getScheme());
+            String protocol = mailServer.getScheme();
+            if (protocol.endsWith("s")) {
+                setMailSecure(true);
+                setMailProtocol(protocol.substring(0, protocol.length() - 1));
+            } else {
+                setMailSecure(false);
+                setMailProtocol(protocol);
+            }
             setMailServer(URITools.getHost(mailServer));
             setMailPort(mailServer.getPort());
         }
@@ -526,6 +533,14 @@ public abstract class AbstractMailAccount implements MailAccount {
             // Parse like old parser to prevent problems.
             setTransportServer("");
         } else {
+            String protocol = transportServer.getScheme();
+            if (protocol.endsWith("s")) {
+                setTransportSecure(true);
+                setTransportProtocol(protocol.substring(0, protocol.length() - 1));
+            } else {
+                setTransportSecure(false);
+                setTransportProtocol(protocol);
+            }
             setTransportProtocol(transportServer.getScheme());
             setTransportServer(URITools.getHost(transportServer));
             setTransportPort(transportServer.getPort());

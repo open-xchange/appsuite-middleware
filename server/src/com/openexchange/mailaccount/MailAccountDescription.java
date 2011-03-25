@@ -462,7 +462,14 @@ public final class MailAccountDescription implements Serializable {
             // Parse like old parser to prevent problems.
             setMailServer("");
         } else {
-            setMailProtocol(mailServer.getScheme());
+            String protocol = mailServer.getScheme();
+            if (protocol.endsWith("s")) {
+                setMailSecure(true);
+                setMailProtocol(protocol.substring(0, protocol.length() - 1));
+            } else {
+                setMailSecure(false);
+                setMailProtocol(protocol);
+            }
             setMailServer(mailServer.getHost());
             setMailPort(mailServer.getPort());
         }
@@ -511,7 +518,14 @@ public final class MailAccountDescription implements Serializable {
             // Parse like old parser to prevent problems.
             setTransportServer(""); 
         } else {
-            setTransportProtocol(transportServer.getScheme());
+            String protocol = transportServer.getScheme();
+            if (protocol.endsWith("s")) {
+                setTransportSecure(true);
+                setTransportProtocol(protocol.substring(0, protocol.length() - 1));
+            } else {
+                setTransportSecure(false);
+                setTransportProtocol(protocol);
+            }
             setTransportServer(URITools.getHost(transportServer));
             setTransportPort(transportServer.getPort());
         }
