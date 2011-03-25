@@ -315,8 +315,9 @@ public class ICal4JParser implements ICalParser {
             	workaroundFor16613(
             	workaroundFor16367(
             	workaroundFor17492(
+            	workaroundFor17963(
             					removeAnnoyingWhitespaces(chunk.toString()
-                )))))
+                ))))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader); 
         } catch (final IOException e) {
@@ -328,7 +329,11 @@ public class ICal4JParser implements ICalParser {
         return null;
     }
 
-    private String workaroundFor17492(String input) {
+    private String workaroundFor17963(String input) {
+    	return input.replaceAll("EXDATE:(\\d+)([\\n\\r])", "EXDATE:$1T000000$2");
+	}
+
+	private String workaroundFor17492(String input) {
     	return input.replaceAll(";SCHEDULE-AGENT=", ";X-CALDAV-SCHEDULE-AGENT=");
 	}
 
