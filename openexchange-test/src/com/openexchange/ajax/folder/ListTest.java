@@ -108,15 +108,15 @@ public class ListTest extends AbstractAJAXSession {
             final JSONArray jsonSubArray = jsonArray.getJSONArray(i);
             if (0 == i) {
                 assertEquals("Private folder expected at first position, but isn't.", "1", jsonSubArray.get(0));
-                assertTrue("Subfolders expected below private folder.", jsonSubArray.getBoolean(3));
+                assertTrue("Subfolders expected below private folder.", jsonSubArray.getBoolean(response.getColumnPos(FolderObject.SUBFOLDERS)));
             } else if (1 == i) {
                 assertEquals("Public folder expected at second position, but isn't.", "2", jsonSubArray.get(0));
-                assertTrue("Subfolders expected below public folder.", jsonSubArray.getBoolean(3));
+                assertTrue("Subfolders expected below public folder.", jsonSubArray.getBoolean(response.getColumnPos(FolderObject.SUBFOLDERS)));
             } else if (2 == i) {
                 assertEquals("Shared folder expected at third position, but isn't.", "3", jsonSubArray.get(0));
             } else {
                 assertEquals("InfoStore folder expected at fourth position, but isn't.", "9", jsonSubArray.get(0));
-                assertTrue("Subfolders expected below infostore folder.", jsonSubArray.getBoolean(3));
+                assertTrue("Subfolders expected below infostore folder.", jsonSubArray.getBoolean(response.getColumnPos(FolderObject.SUBFOLDERS)));
             }
         }
 
