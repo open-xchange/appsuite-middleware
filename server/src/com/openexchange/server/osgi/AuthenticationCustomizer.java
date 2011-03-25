@@ -58,60 +58,37 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.service.Authentication;
 
 /**
- * Authentication service tracker putting the service into the static
- * authentication class.
+ * Authentication service tracker putting the service into the static authentication class.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AuthenticationCustomizer implements ServiceTrackerCustomizer {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(AuthenticationCustomizer.class);
 
-    /**
-     * Reference to the bundle context.
-     */
     private final BundleContext context;
 
-    /**
-     * Default constructor.
-     * @param context the bundle context.
-     */
     public AuthenticationCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object addingService(final ServiceReference reference) {
-        final AuthenticationService auth = (AuthenticationService) context
-            .getService(reference);
+        final AuthenticationService auth = (AuthenticationService) context.getService(reference);
         if (Authentication.setService(auth)) {
             return auth;
         }
         LOG.error("Several authentication services found. Remove all except one!");
-        context.ungetService(reference);
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void modifiedService(final ServiceReference reference,
         final Object service) {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void removedService(final ServiceReference reference,
-        final Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         final AuthenticationService auth = (AuthenticationService) service;
-        if (Authentication.dropService(auth)) {
+        if (!Authentication.dropService(auth)) {
             LOG.error("Removed authentication services was not active!");
         }
         context.ungetService(reference);
