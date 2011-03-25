@@ -189,13 +189,6 @@ public class CSVContactImporter extends AbstractImporter {
         return results;
     }
 
-	private void purgeBOM(List<String> fields) {
-		if(fields == null || fields.size() == 0)
-			return;
-		String first = fields.get(0);
-		fields.set(0, Strings.trimBOM(first));
-	}
-
 	protected CSVParser getCSVParser() {
         return new CSVParser();
     }
