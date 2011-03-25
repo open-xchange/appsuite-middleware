@@ -41,7 +41,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 24
+%define		ox_release 25
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -100,6 +100,8 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/push_mailnotify.properties
 %changelog
+* Mon Mar 14 2011 - choeger@open-xchange.com
+ - Bugfix #18615 - [L3] mail push does not work when login does not match mailbox name
 * Thu Sep 23 2010 - wolfgang.rosenauer@open-xchange.com
  - Support multicast networking
 * Thu Sep 16 2010 - wolfgang.rosenauer@open-xchange.com

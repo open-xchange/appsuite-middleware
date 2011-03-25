@@ -1,3 +1,9 @@
+open-xchange-contactcollector (6.18.2.0-25) unstable; urgency=low
+
+  * build for public ptf 2011-03-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 25 Mar 2011 08:22:54 +0000
+
 open-xchange-contactcollector (6.18.2.0-24) unstable; urgency=low
 
   * build for public ptf 2011-03-11
