@@ -1,3 +1,9 @@
+open-xchange-admin-soap (6.20.0.0-4) unstable; urgency=low
+
+  * build for PTF 2011032310000251
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 25 Mar 2011 14:51:43 +0000
+
 open-xchange-admin-soap (6.20.0.0-3) unstable; urgency=low
 
   * build for 6.20.0-rev3
