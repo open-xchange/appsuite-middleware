@@ -52,9 +52,7 @@ package com.openexchange.test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import com.openexchange.groupware.importexport.ImportExportStandaloneSuite;
-import com.openexchange.groupware.infostore.WebdavFolderAliasesTest;
-import com.openexchange.pubsub.TemplateTestSuite;
+
 
 public class UnitTests {
 
@@ -118,7 +116,7 @@ public class UnitTests {
 
         tests.addTestSuite(com.openexchange.groupware.tasks.DowngradeTest.class);
 
-        tests.addTestSuite(WebdavFolderAliasesTest.class);
+        tests.addTestSuite(com.openexchange.groupware.infostore.WebdavFolderAliasesTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.webdav.PermissionTest.class);
@@ -166,8 +164,9 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
         
-        tests.addTest(ImportExportStandaloneSuite.suite());
-        tests.addTest(TemplateTestSuite.suite());
+        tests.addTestSuite(com.openexchange.l10n.SuperCollatorTest.class);
+        tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
+        tests.addTest(com.openexchange.pubsub.TemplateTestSuite.suite());
         
         // Slow Tests
         tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
