@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -769,8 +769,15 @@ fi
 %doc doc/examples
 
 %changelog
+* Fri Mar 25 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18755: Correctly setting the secure flag for mail account URLs when parsing with IPv6 capable URIParser.
+* Wed Mar 23 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18709: Removing starting white-space character on html2text conversion
+ - Bugfix #18633: Proper removal from user-sensitive folder cache on move operation
 * Mon Mar 21 2011 - choeger@open-xchange.com
  - Bugfix #18713: oauth-twitter is missing after updating
+* Mon Mar 21 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18729: RSS feed from "Tagesschau" only shows the first headline
 * Sun Mar 20 2011 - thorben.betten@open-xchange.com
  - Bugfix #18698: Setting appropriate javax.activation.DataHandler instance for mail part
 * Thu Mar 17 2011 - marcus.klein@open-xchange.com
