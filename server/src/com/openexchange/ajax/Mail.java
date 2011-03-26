@@ -3373,7 +3373,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private final Response actionPutTransportMail(final ServerSession session, final String body, final ParamContainer paramContainer, final MailServletInterface mailIntefaceArg) {
         final Response response = new Response();
-        Object responseData = null;
+        JSONValue responseData = null;
         try {
             final InternetAddress[] recipients;
             {
@@ -3416,7 +3416,15 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Transport mail
                  */
-                responseData = mailInterface.sendMessage(composedMail, ComposeType.NEW, accountId);
+                final String id = mailInterface.sendMessage(composedMail, ComposeType.NEW, accountId);
+                final int pos = id.lastIndexOf(MailPath.SEPERATOR);
+                if (-1 == pos) {
+                    throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, id);
+                }
+                final JSONObject responseObj = new JSONObject();
+                responseObj.put(FolderChildFields.FOLDER_ID, id.substring(0, pos));
+                responseObj.put(DataFields.ID, id.substring(pos + 1));
+                responseData = responseObj;
                 /*
                  * Trigger contact collector
                  */
