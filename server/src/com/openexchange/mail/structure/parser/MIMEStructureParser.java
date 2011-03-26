@@ -212,56 +212,63 @@ public final class MIMEStructureParser {
              * System flags
              */
             if (jsonMessage.hasAndNotNull("flags")) {
-                msgFlags = new Flags();
                 final int flags = jsonMessage.getInt("flags");
-                if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
-                    msgFlags.add(Flags.Flag.ANSWERED);
-                }
-                if ((flags & MailMessage.FLAG_DELETED) > 0) {
-                    msgFlags.add(Flags.Flag.DELETED);
-                }
-                if ((flags & MailMessage.FLAG_DRAFT) > 0) {
-                    msgFlags.add(Flags.Flag.DRAFT);
-                }
-                if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
-                    msgFlags.add(Flags.Flag.FLAGGED);
-                }
-                if ((flags & MailMessage.FLAG_RECENT) > 0) {
-                    msgFlags.add(Flags.Flag.RECENT);
-                }
-                if ((flags & MailMessage.FLAG_SEEN) > 0) {
-                    msgFlags.add(Flags.Flag.SEEN);
-                }
-                if ((flags & MailMessage.FLAG_USER) > 0) {
-                    msgFlags.add(Flags.Flag.USER);
-                }
-                if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
-                    msgFlags.add(MailMessage.USER_FORWARDED);
-                }
-                if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
-                    msgFlags.add(MailMessage.USER_READ_ACK);
+                if (flags > 0) {
+                    msgFlags = new Flags();
+                    if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
+                        msgFlags.add(Flags.Flag.ANSWERED);
+                    }
+                    if ((flags & MailMessage.FLAG_DELETED) > 0) {
+                        msgFlags.add(Flags.Flag.DELETED);
+                    }
+                    if ((flags & MailMessage.FLAG_DRAFT) > 0) {
+                        msgFlags.add(Flags.Flag.DRAFT);
+                    }
+                    if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
+                        msgFlags.add(Flags.Flag.FLAGGED);
+                    }
+                    if ((flags & MailMessage.FLAG_RECENT) > 0) {
+                        msgFlags.add(Flags.Flag.RECENT);
+                    }
+                    if ((flags & MailMessage.FLAG_SEEN) > 0) {
+                        msgFlags.add(Flags.Flag.SEEN);
+                    }
+                    if ((flags & MailMessage.FLAG_USER) > 0) {
+                        msgFlags.add(Flags.Flag.USER);
+                    }
+                    if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
+                        msgFlags.add(MailMessage.USER_FORWARDED);
+                    }
+                    if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
+                        msgFlags.add(MailMessage.USER_READ_ACK);
+                    }
                 }
             }
             /*
              * Color label
              */
             if (jsonMessage.hasAndNotNull("color_label")) {
-                if (msgFlags == null) {
-                    msgFlags = new Flags();
+                final int colorLabel = jsonMessage.getInt("color_label");
+                if (colorLabel != MailMessage.COLOR_LABEL_NONE) {
+                    if (msgFlags == null) {
+                        msgFlags = new Flags();
+                    }
+                    msgFlags.add(MailMessage.getColorLabelStringValue(colorLabel));
                 }
-                msgFlags.add(MailMessage.getColorLabelStringValue(jsonMessage.getInt("color_label")));
             }
             /*
              * User flags
              */
             if (jsonMessage.hasAndNotNull("user")) {
-                if (msgFlags == null) {
-                    msgFlags = new Flags();
-                }
                 final JSONArray jsonUser = jsonMessage.getJSONArray("user");
                 final int length = jsonUser.length();
-                for (int i = length - 1; i >= 0; i--) {
-                    msgFlags.add(jsonUser.getString(i));
+                if (length > 0) {
+                    if (msgFlags == null) {
+                        msgFlags = new Flags();
+                    }
+                    for (int i = length - 1; i >= 0; i--) {
+                        msgFlags.add(jsonUser.getString(i));
+                    }
                 }
             }
             /*
