@@ -66,7 +66,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 
 public final class MailRequest {
@@ -169,6 +168,8 @@ public final class MailRequest {
             } else {
                 MAIL_SERVLET.actionPutUpdateMail(session, writer, jsonObject, mailInterface);
             }
+        }  else if (action.equalsIgnoreCase("transport")) {
+            MAIL_SERVLET.actionPutTransportMail(session, writer, jsonObject, mailInterface);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
             handleMultiple(jsonObject, mailInterface, CollectableOperation.COPY);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {

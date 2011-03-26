@@ -3384,6 +3384,9 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Parse structured JSON mail object
              */
             final ComposedMailMessage composedMail = MIMEStructureParser.parseStructure(new JSONObject(body), session);
+            if (recipients != null && recipients.length > 0) {
+                composedMail.addRecipients(recipients);
+            }
             /*
              * Transport mail
              */

@@ -83,6 +83,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MIMEStructureParser}
@@ -192,6 +193,21 @@ public final class MIMEStructureParser {
         } catch (final ContextException e) {
             throw new MailException(e);
         }
+    }
+
+    /**
+     * Parses specified JSON mail structure to a transportable {@link ComposedMailMessage} instance.
+     * 
+     * @param jsonStructure The JSON mail structure
+     * @param session The session
+     * @return The transportable {@link ComposedMailMessage} instance
+     * @throws MailException If parsing fails
+     */
+    public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final ServerSession session) throws MailException {
+        /*
+         * Create appropriate ComposedMailMessage instance
+         */
+        return new ComposedMailWrapper(parseStructure(jsonStructure), session, session.getContext());
     }
 
     private static MimeMessage parseStructure2Message(final JSONObject jsonStructure) throws MailException {
