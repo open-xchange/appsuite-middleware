@@ -103,7 +103,6 @@ import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.MailAccountSMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
-import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.SMTPServiceRegistry;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
@@ -509,7 +508,7 @@ public final class SMTPTransport extends MailTransport {
             final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm);
             composedMail.setFiller(smtpFiller);
             try {
-                smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType);
+                smtpFiller.fillMail(composedMail, smtpMessage, sendType);
 
                 /*
                  * Check recipients

@@ -58,6 +58,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
@@ -121,7 +122,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
      * @throws MailException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type) throws MessagingException, MailException, IOException {
+    public void fillMail(final ComposedMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type) throws MessagingException, MailException, IOException {
         /*
          * Check for reply
          */
