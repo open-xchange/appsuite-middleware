@@ -158,6 +158,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -378,6 +379,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             actionPutDeleteMails(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_UPDATE)) {
             actionPutUpdateMail(req, resp);
+        } else if (actionStr.equalsIgnoreCase("transport")) {
+            actionPutTransportMail(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_COPY)) {
             actionPutCopyMail(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_MATTACH)) {
@@ -3321,6 +3324,115 @@ public class Mail extends PermissionServlet implements UploadListener {
                 responseObj.put(FolderChildFields.FOLDER_ID, folder);
                 responseObj.put(DataFields.ID, ids[0]);
                 responseData = responseObj;
+            }
+        } catch (final MailException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final Exception e) {
+            final AbstractOXException wrapper = getWrappingOXException(e);
+            LOG.error(wrapper.getMessage(), wrapper);
+            response.setException(wrapper);
+        }
+        // Close response and flush print writer
+        response.setData(responseData == null ? JSONObject.NULL : responseData);
+        response.setTimestamp(null);
+        return response;
+    }
+
+    public void actionPutTransportMail(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mailInterface) throws JSONException {
+        ResponseWriter.write(
+            actionPutTransportMail(
+                session,
+                jsonObj.getString(ResponseFields.DATA),
+                ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
+                mailInterface),
+            writer);
+    }
+
+    private final void actionPutTransportMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        try {
+            ResponseWriter.write(
+                actionPutTransportMail(getSessionObject(req), getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
+                resp.getWriter());
+        } catch (final JSONException e) {
+            final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+            LOG.error(oxe.getMessage(), oxe);
+            final Response response = new Response();
+            response.setException(oxe);
+            try {
+                ResponseWriter.write(response, resp.getWriter());
+            } catch (final JSONException e1) {
+                LOG.error(RESPONSE_ERROR, e1);
+                sendError(resp);
+            }
+        }
+    }
+
+    private final Response actionPutTransportMail(final ServerSession session, final String body, final ParamContainer paramContainer, final MailServletInterface mailIntefaceArg) {
+        final Response response = new Response();
+        Object responseData = null;
+        try {
+            final InternetAddress[] recipients;
+            {
+                final String recipientsStr = paramContainer.getStringParam("recipients");
+                recipients = null == recipientsStr ? null : QuotedInternetAddress.parseHeader(recipientsStr, false);
+            }
+            /*
+             * Parse structured JSON mail object
+             */
+            final ComposedMailMessage composedMail = MIMEStructureParser.parseStructure(new JSONObject(body), session);
+            /*
+             * Transport mail
+             */
+            MailServletInterface mailInterface = mailIntefaceArg;
+            boolean closeMailInterface = false;
+            try {
+                if (mailInterface == null) {
+                    mailInterface = MailServletInterface.getInstance(session);
+                    closeMailInterface = true;
+                }
+                /*
+                 * Determine account
+                 */
+                int accountId;
+                try {
+                    final InternetAddress[] fromAddrs = composedMail.getFrom();
+                    accountId = resolveFrom2Account(session, fromAddrs != null && fromAddrs.length > 0 ? fromAddrs[0] : null, true, true);
+                } catch (final MailException e) {
+                    if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
+                        // Re-throw
+                        throw e;
+                    }
+                    LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                    // Send with default account's transport provider
+                    accountId = MailAccount.DEFAULT_ID;
+                }
+                /*
+                 * Transport mail
+                 */
+                responseData = mailInterface.sendMessage(composedMail, ComposeType.NEW, accountId);
+                /*
+                 * Trigger contact collector
+                 */
+                try {
+                    final ServerUserSetting setting = ServerUserSetting.getInstance();
+                    final int contextId = session.getContextId();
+                    final int userId = session.getUserId();
+                    if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
+                        contextId,
+                        userId).booleanValue()) {
+                        triggerContactCollector(session, composedMail);
+                    }
+                } catch (final SettingException e) {
+                    LOG.warn("Contact collector could not be triggered.", e);
+                }
+            } finally {
+                if (closeMailInterface && mailInterface != null) {
+                    mailInterface.close(true);
+                }
             }
         } catch (final MailException e) {
             LOG.error(e.getMessage(), e);
