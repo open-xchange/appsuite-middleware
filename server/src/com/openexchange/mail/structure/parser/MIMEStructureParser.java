@@ -389,6 +389,7 @@ public final class MIMEStructureParser {
 
     private static void parseHeaders(final JSONObject jsonHeaders, final MimePart mimePart, final ContentType contentType) throws MailException {
         try {
+            final StringBuilder headerNameBuilder = new StringBuilder(16);
             for (final Entry<String, Object> entry : jsonHeaders.entrySet()) {
                 final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
                 if (HEADERS_ADDRESS.contains(name)) {
@@ -408,33 +409,33 @@ public final class MIMEStructureParser {
                         final QuotedInternetAddress qia = new QuotedInternetAddress(address, personal, "UTF-8");
                         builder.insert(0, qia.toString()).insert(0, delim);
                     }
-                    mimePart.setHeader(toHeaderCase(name), builder.delete(0, delim.length()).toString());
+                    mimePart.setHeader(toHeaderCase(name, headerNameBuilder), builder.delete(0, delim.length()).toString());
                 } else if (HEADERS_DATE.contains(name)) {
                     final JSONObject jsonDate = (JSONObject) entry.getValue();
-                    mimePart.setHeader(toHeaderCase(name), jsonDate.getString("date"));
+                    mimePart.setHeader(toHeaderCase(name, headerNameBuilder), jsonDate.getString("date"));
                 } else if ("content-type".equals(name)) {
                     final JSONObject jsonContentType = (JSONObject) entry.getValue();
                     contentType.reset();
                     contentType.setBaseType(jsonContentType.getString("type"));
                     parseParameterList(jsonContentType.getJSONObject("params"), contentType);
-                    mimePart.setHeader(toHeaderCase(name), contentType.toString(true));
+                    mimePart.setHeader(toHeaderCase(name, headerNameBuilder), contentType.toString(true));
                 } else if ("content-disposition".equals(name)) {
                     final JSONObject jsonContentDisposition = (JSONObject) entry.getValue();
                     final ContentDisposition contentDisposition = new ContentDisposition();
                     contentDisposition.setDisposition(jsonContentDisposition.getString("type"));
                     parseParameterList(jsonContentDisposition.getJSONObject("params"), contentDisposition);
-                    mimePart.setHeader(toHeaderCase(name), contentDisposition.toString(true));
+                    mimePart.setHeader(toHeaderCase(name, headerNameBuilder), contentDisposition.toString(true));
                 } else {
                     final Object value = entry.getValue();
                     if (value instanceof JSONArray) {
                         final JSONArray jsonHeader = (JSONArray) value;
                         final int length = jsonHeader.length();
-                        final String headerName = toHeaderCase(name);
+                        final String headerName = toHeaderCase(name, headerNameBuilder);
                         for (int i = length - 1; i >= 0; i--) {
                             mimePart.addHeader(headerName, jsonHeader.getString(i));
                         }
                     } else {
-                        mimePart.setHeader(toHeaderCase(name), (String) value);
+                        mimePart.setHeader(toHeaderCase(name, headerNameBuilder), (String) value);
                     }
                 }
             }
@@ -488,16 +489,28 @@ public final class MIMEStructureParser {
         return false;
     }
 
-    private static String toHeaderCase(final String name) {
+    private static String toHeaderCase(final String name, final StringBuilder builder) {
         if (null == name) {
             return null;
+        }
+        if ("mime-version".equals(name)) {
+            return "MIME-Version";
+        }
+        if ("message-id".equals(name)) {
+            return "Message-ID";
         }
         final char[] chars = name.toCharArray();
         final int len = chars.length;
         if (len <= 0) {
             return "";
         }
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb;
+        if (builder == null) {
+            sb = new StringBuilder(len);
+        } else {
+            sb = builder;
+            sb.setLength(0);
+        }
         sb.append(Character.toUpperCase(chars[0]));
         int i = 1;
         while (i < len) {
