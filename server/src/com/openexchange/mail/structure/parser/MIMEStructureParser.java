@@ -376,7 +376,7 @@ public final class MIMEStructureParser {
         try {
             final MimeMultipart multipart = new MimeMultipart(subtype);
             final int length = jsonMultiparts.length();
-            for (int i = length - 1; i >= 0; i--) {
+            for (int i = 0; i < length; i++) {
                 final MimeBodyPart bodyPart = new MimeBodyPart();
                 parsePart(jsonMultiparts.getJSONObject(i), bodyPart);
                 multipart.addBodyPart(bodyPart);
