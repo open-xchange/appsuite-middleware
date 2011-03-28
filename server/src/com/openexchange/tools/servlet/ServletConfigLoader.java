@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -146,7 +146,7 @@ public final class ServletConfigLoader {
      * @return The path with wildcard characters stripped off
      */
     private static String ignoreWildcards(final String path) {
-        return path.replaceAll("\\*|\\?", "");
+        return null == path ? null : path.replaceAll("\\*|\\?", "");
     }
 
     /**
