@@ -15,12 +15,11 @@
 
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-push-malpoll-${version}"/>
+    <property name="composite.name" value="open-xchange-push-imapidle-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
     <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
@@ -36,7 +35,9 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="pushjar" value="com.openexchange.push.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
+    <property name="imapjar" value="com.openexchange.imap.jar"/>
     <property name="configreadjar" value="com.openexchange.configread.jar"/>
+    <property name="mailjar" value="mail-1.4.3.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -47,7 +48,9 @@
         <pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${pushjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${imapjar}"/>
         <pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
     </path>
 
     <!-- Compile -->
@@ -81,8 +84,6 @@
         </copy>
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-        <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">

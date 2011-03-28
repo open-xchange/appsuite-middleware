@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-push-malpoll
+oxroot=$(CURDIR)/debian/open-xchange-push-imapidle
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
