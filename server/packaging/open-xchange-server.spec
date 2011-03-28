@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 27
+%define		ox_release 28
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -725,6 +725,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Mar 28 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18080: Considering module when checking public folder access
+* Mon Mar 28 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18745: SQL IN is a lot faster than INNER JOIN with UNION ALL. Fixed a N+1 select problem.
 * Mon Mar 21 2011 - steffen.templin@open-xchange.com
  - Bugfix #18219: Unable to access publications created by PIM users.
 * Mon Mar 21 2011 - thorben.betten@open-xchange.com
