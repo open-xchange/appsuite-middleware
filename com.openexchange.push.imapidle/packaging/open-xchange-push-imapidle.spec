@@ -77,4 +77,4 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/bundles
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) /opt/open-xchange/etc/groupware/malpoll.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/push_imapidle.properties
