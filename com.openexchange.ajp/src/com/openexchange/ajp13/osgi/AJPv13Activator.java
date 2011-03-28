@@ -178,6 +178,9 @@ public final class AJPv13Activator extends DeferredActivator {
              */
             trackers = new ArrayList<ServiceTracker>(1);
             trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceTracker(context)));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
             /*
              * Register services
              */
@@ -209,6 +212,12 @@ public final class AJPv13Activator extends DeferredActivator {
                     registrations.remove(0).unregister();
                 }
                 registrations = null;
+            }
+            if (trackers != null) {
+                while (!trackers.isEmpty()) {
+                    trackers.remove(0).close();
+                }
+                trackers = null;
             }
             if (inits != null) {
                 while (!inits.isEmpty()) {
