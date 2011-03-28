@@ -1,0 +1,5 @@
+open-xchange-push-imapidle (6.20.0.0-0) unstable; urgency=low
+
+  * initial release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 28 Mar 2011 13:20:00 +0000

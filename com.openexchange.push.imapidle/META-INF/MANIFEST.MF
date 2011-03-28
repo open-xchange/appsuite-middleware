@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange IMAP IDLE Bundle
+Bundle-SymbolicName: com.openexchange.push.imapidle
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.config,
+ com.openexchange.context,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.update,
+ com.openexchange.imap,
+ com.openexchange.mail,
+ com.openexchange.mail.api,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.service,
+ com.openexchange.mail.utils,
+ com.openexchange.mailaccount,
+ com.openexchange.push,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.threadpool,
+ com.openexchange.tools,
+ com.sun.mail.imap,
+ javax.mail,
+ org.apache.commons.logging;version="1.0.4",
+ org.osgi.framework;version="1.4.0",
+ org.osgi.service.event;version="1.1.0",
+ org.osgi.util.tracker;version="1.3.3"
+Bundle-Activator: com.openexchange.push.imapidle.osgi.ImapIdleActivator
+Bundle-ClassPath: .
