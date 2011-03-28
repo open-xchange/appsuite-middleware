@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.structure.parser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -84,6 +86,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MIMEStructureParser}
@@ -155,6 +158,32 @@ public final class MIMEStructureParser {
      */
     private MIMEStructureParser() {
         super();
+    }
+
+    /**
+     * Parses specified JSON mail structure to corresponding RFC822 bytes.
+     * 
+     * @param jsonStructure The JSON mail structure
+     * @return The RFC822 bytes
+     * @throws MailException If parsing fails
+     */
+    public static byte[] parseStructure2MIME(final JSONObject jsonStructure) throws MailException {
+        try {
+            /*
+             * Parse JSON to MIME message
+             */
+            final MimeMessage mimeMessage = parseStructure2Message(jsonStructure);
+            /*
+             * Write MIME message's source
+             */
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+            mimeMessage.writeTo(out);
+            return out.toByteArray();
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
     }
 
     /**
@@ -319,7 +348,7 @@ public final class MIMEStructureParser {
                 /*
                  * A multipart
                  */
-                parseMultipartBody(jsonPart.getJSONArray("body"), mimePart);
+                parseMultipartBody(jsonPart.getJSONArray("body"), mimePart, contentType.getSubType());
             } else if (contentType.startsWith("message/rfc822")) {
                 /*
                  * A nested message
@@ -343,9 +372,9 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static void parseMultipartBody(final JSONArray jsonMultiparts, final MimePart mimePart) throws MailException {
+    private static void parseMultipartBody(final JSONArray jsonMultiparts, final MimePart mimePart, final String subtype) throws MailException {
         try {
-            final MimeMultipart multipart = new MimeMultipart();
+            final MimeMultipart multipart = new MimeMultipart(subtype);
             final int length = jsonMultiparts.length();
             for (int i = length - 1; i >= 0; i--) {
                 final MimeBodyPart bodyPart = new MimeBodyPart();
