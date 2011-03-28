@@ -1,7 +1,11 @@
+* 2011-03-28 - marcus.klein@open-xchange.com
+
+ - Bugfix #18745: SQL IN is a lot faster than INNER JOIN with UNION ALL. Fixed a N+1 select problem.
+
 * 2011-03-28 - thorben.betten@open-xchange.com
 
  - Bugfix #18080: Considering module when checking public folder access
- 
+
 * 2011-03-17 - marcus.klein@open-xchange.com
  
  - Bugfix #18681: Removed caching of user contacts and corrected SQL query to load them when context has more than 1000 users.

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,12 +51,13 @@ package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -69,6 +70,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -83,6 +85,7 @@ import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * This class implements the user storage using a relational database instead
@@ -106,7 +109,7 @@ public class RdbUserStorage extends UserStorage {
     private static final String SELECT_LOGIN = "SELECT id,uid FROM login2user where cid=? AND id IN (";
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
-    
+
     private static final String SQL_UPDATE_PASSWORD = "UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
 
 
@@ -172,78 +175,52 @@ public class RdbUserStorage extends UserStorage {
         return getUser(ctx, con, new int[] { userId })[0];
     }
 
-    private static final int LIMIT = 1000;
-
     private User[] getUser(final Context ctx, final Connection con, final int[] userIds) throws UserException {
         final int length = userIds.length;
         if (0 == length) {
             return new User[0];
         }
         final Map<Integer, UserImpl> users = new HashMap<Integer, UserImpl>(length);
-        PreparedStatement stmt = null;
-        ResultSet result = null;
         try {
-            final TIntIntHashMap userMap;
-            if (length <= LIMIT) {
-                final StringBuilder sb = new StringBuilder(512);
-                sb.append("SELECT u.id,u.userPassword,u.mailEnabled,u.imapServer,u.imapLogin,u.smtpServer,u.mailDomain,u.shadowLastChange,u.mail,u.timeZone,u.preferredLanguage,u.passwordMech,u.contactId FROM user AS u");
-                if (1 == length) {
-                    sb.append(" WHERE u.id = ? AND u.cid = ?");
-                } else {
-                    sb.append(" INNER JOIN (");
-                    sb.append("SELECT ? AS id");
-                    for (int i = 1; i < length; i++) {
-                        sb.append(" UNION ALL SELECT ?");
+            for (int i = 0; i < userIds.length; i += IN_LIMIT) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    final int[] currentUserIds = Arrays.extract(userIds, i, IN_LIMIT);
+                    stmt = con.prepareStatement(getIN(SELECT_USER, currentUserIds.length));
+                    int pos = 1;
+                    stmt.setInt(pos++, ctx.getContextId());
+                    for (final int userId : currentUserIds) {
+                        stmt.setInt(pos++, userId);
                     }
-                    sb.append(") AS x ON u.id = x.id WHERE u.cid = ?");
-                }
-                stmt = con.prepareStatement(sb.toString());
-                int pos = 1;
-                userMap = new TIntIntHashMap(length, 1);
-                for (int index = 0; index < length; index++) {
-                    final int userId = userIds[index];
-                    stmt.setInt(pos++, userId);
-                    userMap.put(userId, index);
-                }
-                stmt.setInt(pos++, ctx.getContextId());
-            } else {
-                stmt = con.prepareStatement("SELECT u.id,u.userPassword,u.mailEnabled,u.imapServer,u.imapLogin,u.smtpServer,u.mailDomain,u.shadowLastChange,u.mail,u.timeZone,u.preferredLanguage,u.passwordMech,u.contactId FROM user AS u WHERE u.cid = ?");
-                userMap = new TIntIntHashMap(length, 1);
-                for (int index = 0; index < length; index++) {
-                    userMap.put(userIds[index], index);
-                }
-                stmt.setInt(1, ctx.getContextId());
-            }
-            result = stmt.executeQuery();
-            int pos;
-            while (result.next()) {
-                pos = 1;
-                final int userId = result.getInt(pos++);
-                if (userMap.containsKey(userId)) {
-                    final UserImpl user = new UserImpl();
-                    user.setId(userId);
-                    user.setUserPassword(result.getString(pos++));
-                    user.setMailEnabled(result.getBoolean(pos++));
-                    user.setImapServer(result.getString(pos++));
-                    user.setImapLogin(result.getString(pos++));
-                    user.setSmtpServer(result.getString(pos++));
-                    user.setMailDomain(result.getString(pos++));
-                    user.setShadowLastChange(result.getInt(pos++));
-                    if (result.wasNull()) {
-                        user.setShadowLastChange(-1);
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        final UserImpl user = new UserImpl();
+                        pos = 1;
+                        user.setId(result.getInt(pos++));
+                        user.setUserPassword(result.getString(pos++));
+                        user.setMailEnabled(result.getBoolean(pos++));
+                        user.setImapServer(result.getString(pos++));
+                        user.setImapLogin(result.getString(pos++));
+                        user.setSmtpServer(result.getString(pos++));
+                        user.setMailDomain(result.getString(pos++));
+                        user.setShadowLastChange(result.getInt(pos++));
+                        if (result.wasNull()) {
+                            user.setShadowLastChange(-1);
+                        }
+                        user.setMail(result.getString(pos++));
+                        user.setTimeZone(result.getString(pos++));
+                        user.setPreferredLanguage(result.getString(pos++));
+                        user.setPasswordMech(result.getString(pos++));
+                        user.setContactId(result.getInt(pos++));
+                        users.put(I(user.getId()), user);
                     }
-                    user.setMail(result.getString(pos++));
-                    user.setTimeZone(result.getString(pos++));
-                    user.setPreferredLanguage(result.getString(pos++));
-                    user.setPasswordMech(result.getString(pos++));
-                    user.setContactId(result.getInt(pos++));
-                    users.put(I(user.getId()), user);
+                } finally {
+                    closeSQLStuff(result, stmt);
                 }
             }
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.LOAD_FAILED, e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
         }
         for (final int userId : userIds) {
             if (!users.containsKey(I(userId))) {
@@ -295,51 +272,63 @@ public class RdbUserStorage extends UserStorage {
     }
 
     private void loadLoginInfo(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
         try {
-            final String sql = getIN(SELECT_LOGIN, users.size());
-            stmt = con.prepareStatement(sql);
-            int pos = 1;
-            stmt.setInt(pos++, context.getContextId());
-            for (final Integer userId : users.keySet()) {
-                stmt.setInt(pos++, userId.intValue());
-            }
-            result = stmt.executeQuery();
-            while (result.next()) {
-                users.get(I(result.getInt(1))).setLoginInfo(result.getString(2));
+            Iterator<Integer> iter = users.keySet().iterator();
+            for (int i = 0; i < users.size(); i += IN_LIMIT) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    stmt = con.prepareStatement(getIN(SELECT_LOGIN, length));
+                    int pos = 1;
+                    stmt.setInt(pos++, context.getContextId());
+                    for (int j = 0; j < length; j++) {
+                        stmt.setInt(pos++, i(iter.next()));
+                    }
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        users.get(I(result.getInt(1))).setLoginInfo(result.getString(2));
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
             }
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
         }
     }
 
     private void loadContact(final Context ctx, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
         try {
-            stmt = con.prepareStatement(getIN(SELECT_CONTACT, users.size()));
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            final Map<Integer, UserImpl> userByContactId = new HashMap<Integer, UserImpl>(users.size(), 1);
-            for (final UserImpl user : users.values()) {
-                stmt.setInt(pos++, user.getContactId());
-                userByContactId.put(I(user.getContactId()), user);
-            }
-            result = stmt.executeQuery();
-            while (result.next()) {
-                pos = 1;
-                final UserImpl user = userByContactId.get(I(result.getInt(pos++)));
-                user.setGivenName(result.getString(pos++));
-                user.setSurname(result.getString(pos++));
-                user.setDisplayName(result.getString(pos++));
+            Iterator<UserImpl> iter = users.values().iterator();
+            for (int i = 0; i < users.size(); i += IN_LIMIT) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    stmt = con.prepareStatement(getIN(SELECT_CONTACT, length));
+                    int pos = 1;
+                    stmt.setInt(pos++, ctx.getContextId());
+                    final Map<Integer, UserImpl> userByContactId = new HashMap<Integer, UserImpl>(length, 1);
+                    for (int j = 0; j < length; j++) {
+                        UserImpl user = iter.next();
+                        stmt.setInt(pos++, user.getContactId());
+                        userByContactId.put(I(user.getContactId()), user);
+                    }
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        pos = 1;
+                        final UserImpl user = userByContactId.get(I(result.getInt(pos++)));
+                        user.setGivenName(result.getString(pos++));
+                        user.setSurname(result.getString(pos++));
+                        user.setDisplayName(result.getString(pos++));
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
             }
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
         }
     }
 
@@ -350,79 +339,84 @@ public class RdbUserStorage extends UserStorage {
             userGroups.add(I(0));
             tmp.put(I(user.getId()), userGroups);
         }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
         try {
-            final String sql = getIN("SELECT member,id FROM groups_member WHERE cid=? AND member IN (", users.size());
-            stmt = con.prepareStatement(sql);
-            int pos = 1;
-            stmt.setInt(pos++, context.getContextId());
-            for (final User user : users.values()) {
-                stmt.setInt(pos++, user.getId());
-            }
-            result = stmt.executeQuery();
-            while (result.next()) {
-                tmp.get(I(result.getInt(1))).add(I(result.getInt(2)));
+            Iterator<Integer> iter = users.keySet().iterator();
+            for (int i = 0; i < users.size(); i += IN_LIMIT) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    final String sql = getIN("SELECT member,id FROM groups_member WHERE cid=? AND member IN (", length);
+                    stmt = con.prepareStatement(sql);
+                    int pos = 1;
+                    stmt.setInt(pos++, context.getContextId());
+                    for (int j = 0; j < length; j++) {
+                        stmt.setInt(pos++, i(iter.next()));
+                    }
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        tmp.get(I(result.getInt(1))).add(I(result.getInt(2)));
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
             }
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
         }
         for (final UserImpl user : users.values()) {
             user.setGroups(I2i(tmp.get(I(user.getId()))));
         }
     }
-    
-    private static final String STR_ALIAS = "alias";
-    
+
     private void loadAttributes(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
         final Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
-        PreparedStatement stmt = null;
-        ResultSet result = null;
         try {
-            stmt = con.prepareStatement(getIN(SELECT_ATTRS, users.size()));
-            int pos = 1;
-            stmt.setInt(pos++, context.getContextId());
-            for (final User user : users.values()) {
-                stmt.setInt(pos++, user.getId());
-                usersAttrs.put(I(user.getId()), new HashMap<String, Set<String>>());
-            }
-            result = stmt.executeQuery();
-            /*
-             * Gather attributes
-             */
-            while (result.next()) {
-                final Map<String, Set<String>> attrs = usersAttrs.get(I(result.getInt(1)));
-                final String name = result.getString(2);
-                Set<String> set = attrs.get(name);
-                if (null == set) {
-                    set = new HashSet<String>();
-                    attrs.put(name, set);
+            Iterator<Integer> iter = users.keySet().iterator();
+            for (int i = 0; i < users.size(); i += IN_LIMIT) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    stmt = con.prepareStatement(getIN(SELECT_ATTRS, length));
+                    int pos = 1;
+                    stmt.setInt(pos++, context.getContextId());
+                    for (int j = 0; j < length; j++) {
+                        int userId = i(iter.next());
+                        stmt.setInt(pos++, userId);
+                        usersAttrs.put(I(userId), new HashMap<String, Set<String>>());
+                    }
+                    result = stmt.executeQuery();
+                    // Gather attributes
+                    while (result.next()) {
+                        final Map<String, Set<String>> attrs = usersAttrs.get(I(result.getInt(1)));
+                        final String name = result.getString(2);
+                        Set<String> set = attrs.get(name);
+                        if (null == set) {
+                            set = new HashSet<String>();
+                            attrs.put(name, set);
+                        }
+                        set.add(result.getString(3));
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
                 }
-                set.add(result.getString(3));
             }
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
         }
         for (final UserImpl user : users.values()) {
             final Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
-            /*
-             * Check for aliases
-             */
+            // Check for aliases
             {
-                final Set<String> aliases = attrs.get(STR_ALIAS);
+                final Set<String> aliases = attrs.get("alias");
                 if (aliases == null) {
                     user.setAliases(new String[0]);
                 } else {
                     user.setAliases(aliases.toArray(new String[aliases.size()]));
                 }
             }
-            /*
-             * Apply attributes
-             */
+            // Apply attributes
             for (final Map.Entry<String, Set<String>> entry : attrs.entrySet()) {
                 entry.setValue(Collections.unmodifiableSet(entry.getValue()));
             }
