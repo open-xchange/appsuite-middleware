@@ -283,7 +283,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                         user.getId(),
                         ctx), OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
                 }
-                if (parentFolder.getType() == FolderObject.PUBLIC && !userConfig.hasFullPublicFolderAccess()) {
+                if ((parentFolder.getType() == FolderObject.PUBLIC) && !userConfig.hasFullPublicFolderAccess() && (folderObj.getModule() != FolderObject.INFOSTORE)) {
                     throw new OXFolderException(
                         FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
                         OXFolderUtility.getUserName(user.getId(), ctx),
