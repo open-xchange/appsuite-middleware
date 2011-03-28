@@ -366,6 +366,23 @@ public abstract class MailPart implements Serializable, Cloneable {
     }
 
     /**
+     * Sets a header
+     * 
+     * @param name The header name
+     * @param value The header value
+     */
+    public void setHeader(final String name, final String value) {
+        if (null == value) {
+            return;
+        }
+        if (null == headers) {
+            headers = new HeaderCollection();
+            b_headers = true;
+        }
+        headers.setHeader(name, value);
+    }
+
+    /**
      * Adds a header collection
      * 
      * @param headers The header collection
