@@ -1,3 +1,9 @@
+open-xchange-publish-basic (6.20.0.0-4) unstable; urgency=low
+
+  * build for public ptf 2011-03-30
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 28 Mar 2011 14:00:05 +0000
+
 open-xchange-publish-basic (6.20.0.0-3) unstable; urgency=low
 
   * build for 6.20.0-rev3
