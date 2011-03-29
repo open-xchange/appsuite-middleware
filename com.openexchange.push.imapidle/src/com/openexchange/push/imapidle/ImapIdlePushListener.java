@@ -52,9 +52,6 @@ package com.openexchange.push.imapidle;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
-import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.mail.MailException;
@@ -205,17 +202,6 @@ public final class ImapIdlePushListener implements PushListener {
             }
             return;
         }
-        try {
-            final ContextService contextService = ImapIdleServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
-            final Context context = contextService.getContext(contextId);
-            if (context.isReadOnly()) {
-                return;
-            }
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        } catch (final ContextException e) {
-            throw new PushException(e);
-        }
         MailAccess<?, ?> mailAccess = null;
         try {
             final MailService mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
@@ -229,7 +215,7 @@ public final class ImapIdlePushListener implements PushListener {
             if( ! (fstore instanceof IMAPFolderStorage) ) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
             }
-            IMAPFolderStorage istore = (IMAPFolderStorage) mailAccess.getFolderStorage();
+            IMAPFolderStorage istore = (IMAPFolderStorage) fstore;
             IMAPStore imapStore = istore.getImapStore();
             IMAPFolder inbox = (IMAPFolder) imapStore.getFolder(folder);
             if( ! inbox.isOpen() ) {
