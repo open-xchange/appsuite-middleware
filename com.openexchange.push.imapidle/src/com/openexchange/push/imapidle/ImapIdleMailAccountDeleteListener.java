@@ -52,7 +52,6 @@ package com.openexchange.push.imapidle;
 import java.sql.Connection;
 import java.util.Map;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.mailaccount.MailAccountException;
 
 /**
  * {@link ImapIdleMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for IMAP IDLE bundle.
@@ -67,11 +66,11 @@ public final class ImapIdleMailAccountDeleteListener implements MailAccountDelet
         super();
     }
 
-    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
         // Nothing to do
     }
 
-    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
         if (ImapIdlePushListener.getAccountId() == id) {
             ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
         }
