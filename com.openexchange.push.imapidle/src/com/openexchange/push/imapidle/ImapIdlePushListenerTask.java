@@ -49,16 +49,16 @@
 
 package com.openexchange.push.imapidle;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.push.PushException;
-import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * Simple {@link Runnable} to trigger a listener's {@link ImapIdlePushListener#checkNewMail()} method.
  */
 public final class ImapIdlePushListenerTask implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListenerTask.class);
+    private static final Log LOG = LogFactory.getLog(ImapIdlePushListenerTask.class);
 
     private final ImapIdlePushListener listener;
 
@@ -76,18 +76,4 @@ public final class ImapIdlePushListenerTask implements Runnable {
             LOG.error(e.getMessage(), e);
         }
     }
-
-    public void afterExecute(Throwable t) {
-    }
-
-    public void beforeExecute(Thread t) {
-    }
-
-    public Object call() throws Exception {
-        return null;
-    }
-
-    public void setThreadName(ThreadRenamer threadRenamer) {
-    }
-
 }
