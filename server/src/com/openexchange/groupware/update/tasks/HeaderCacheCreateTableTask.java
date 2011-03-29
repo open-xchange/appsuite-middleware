@@ -63,7 +63,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.tools.update.Tools;
@@ -80,7 +79,7 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
     }
 
     public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
+        return UpdateTaskPriority.NORMAL.priority;
     }
 
     private static String getCreateMailUUIDTable() {
