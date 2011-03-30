@@ -23,7 +23,7 @@ sub new {
 sub doRequest {
     my $inSelf = shift;
     my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXUtilService" );
-    my $creds = SOAP::Data->type("Credentials")->value(\SOAP::Data->value(SOAP::Data->name("login" => "oxadminmaster"),SOAP::Data->name("password" => "secret")));
+    my $creds = $inSelf->{'mastercreds'};
     
     my $id    = $ARGV[0] || die "must supply id of filestore";
 

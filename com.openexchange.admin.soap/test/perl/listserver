@@ -25,7 +25,7 @@ sub doRequest {
     my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXUtilService" );
     
     my $pattern = SOAP::Data->value("*");
-    my $creds = SOAP::Data->type("Credentials")->value(\SOAP::Data->value(SOAP::Data->name("login" => "oxadminmaster"),SOAP::Data->name("password" => "secret")));
+    my $creds = $inSelf->{'mastercreds'};
     
     my $som_entry = 
       $soap->listServer($pattern,$creds);
