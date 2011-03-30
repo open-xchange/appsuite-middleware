@@ -113,6 +113,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -653,7 +654,8 @@ public class MIMEMessageFiller {
         /*
          * HTML content with embedded images
          */
-        final String content = (String) mail.getContent();
+        final TextBodyMailPart textBodyPart = mail.getBodyPart();
+        final String content = (String) textBodyPart.getContent();
         final boolean embeddedImages;
         if (sendMultipartAlternative || mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
             embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content, session);
@@ -668,7 +670,7 @@ public class MIMEMessageFiller {
              * If any condition is true, we ought to create a multipart/ message
              */
             if (sendMultipartAlternative) {
-                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages);
+                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages, textBodyPart);
                 if (primaryMultipart == null) {
                     primaryMultipart = alternativeMultipart;
                 } else {
@@ -696,7 +698,12 @@ public class MIMEMessageFiller {
                     /*
                      * Append text content
                      */
-                    primaryMultipart.addBodyPart(createTextBodyPart(content, false));
+                    final String plainText = textBodyPart.getPlainText();
+                    if (null == plainText) {
+                        primaryMultipart.addBodyPart(createTextBodyPart(plainText, false, false), 0);
+                    } else {
+                        primaryMultipart.addBodyPart(createTextBodyPart(content, false, true), 0);
+                    }
                 } else {
                     /*
                      * Append html content
@@ -945,11 +952,12 @@ public class MIMEMessageFiller {
      * @param mailBody The composed mail's HTML content
      * @param embeddedImages <code>true</code> if specified HTML content contains inline images (an appropriate "multipart/related" object
      *            is going to be created ); otherwise <code>false</code>.
+     * @param textBodyPart The text body part
      * @return An appropriate "multipart/alternative" object.
      * @throws MailException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
      */
-    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages) throws MailException, MessagingException {
+    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final TextBodyMailPart textBodyPart) throws MailException, MessagingException {
         /*
          * Create an "alternative" multipart
          */
@@ -985,7 +993,12 @@ public class MIMEMessageFiller {
         /*
          * Define & add text content to first index position
          */
-        alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent, true), 0);
+        final String plainText = textBodyPart.getPlainText();
+        if (null == plainText) {
+            alternativeMultipart.addBodyPart(createTextBodyPart(plainText, true, false), 0);
+        } else {
+            alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent, true, true), 0);
+        }
         return alternativeMultipart;
     }
 
@@ -1188,12 +1201,13 @@ public class MIMEMessageFiller {
     /**
      * Creates a body part of type <code>text/plain</code> from given HTML content
      * 
-     * @param htmlContent The HTML content
+     * @param content The content
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
+     * @param isHtml Whether provided content is HTML or not
      * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      */
-    protected final BodyPart createTextBodyPart(final String htmlContent, final boolean appendHref) throws MessagingException {
+    protected final BodyPart createTextBodyPart(final String content, final boolean appendHref, final boolean isHtml) throws MessagingException {
         /*
          * Convert html content to regular text. First: Create a body part for text content
          */
@@ -1202,10 +1216,12 @@ public class MIMEMessageFiller {
          * Define text content
          */
         final String textContent;
-        if (htmlContent == null || htmlContent.length() == 0) {
+        if (content == null || content.length() == 0) {
             textContent = "";
+        } else if (isHtml) {
+            textContent = performLineFolding(htmlService.html2text(htmlService.getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()), appendHref), usm.getAutoLinebreak());
         } else {
-            textContent = performLineFolding(htmlService.html2text(htmlService.getConformHTML(htmlContent, MailProperties.getInstance().getDefaultMimeCharset()), appendHref), usm.getAutoLinebreak());
+            textContent = performLineFolding(content, usm.getAutoLinebreak());
         }
         text.setText(textContent, MailProperties.getInstance().getDefaultMimeCharset());
         // text.setText(performLineFolding(getConverter().convertWithQuotes(

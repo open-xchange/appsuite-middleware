@@ -69,6 +69,8 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 
     private StringBuilder mailBody;
 
+    private StringBuilder plainText;
+
     private transient DataSource dataSource;
 
     /**
@@ -83,7 +85,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
         this.mailBody = new StringBuilder(mailBody);
     }
 
-/**
+    /**
      * Gets a copy of this {@link TextBodyMailPart}.
      * 
      * @return A copy of this {@link TextBodyMailPart
@@ -101,6 +103,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
     protected final void fillInstance(final TextBodyMailPart newInstance) {
         newInstance.mailBody = new StringBuilder(this.mailBody.length());
         newInstance.mailBody.append(this.mailBody.toString());
+        newInstance.plainText = null == plainText ? null : new StringBuilder(plainText.toString());
         newInstance.dataSource = null;
     }
 
@@ -123,6 +126,42 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      */
     public void append(final String text) {
         mailBody.append(text);
+    }
+
+    /**
+     * Sets this part's optional plain text.
+     * 
+     * @param text The mail body as plain text
+     */
+    public void setPlainText(final String text) {
+        if (null == plainText) {
+            plainText = new StringBuilder(text);
+        } else {
+            plainText.setLength(0);
+            plainText.append(text);
+        }
+    }
+
+    /**
+     * Gets this part's optional plain text.
+     * 
+     * @return The mail body as plain text or <code>null</code>
+     */
+    public String getPlainText() {
+        return null == plainText ? null : plainText.toString();
+    }
+
+    /**
+     * Appends specified plain text to this part.
+     * 
+     * @param text The plain text to append
+     */
+    public void appendPlainText(final String text) {
+        if (null == plainText) {
+            plainText = new StringBuilder(text);
+        } else {
+            plainText.append(text);
+        }
     }
 
     private DataSource getDataSource() throws MailException {
