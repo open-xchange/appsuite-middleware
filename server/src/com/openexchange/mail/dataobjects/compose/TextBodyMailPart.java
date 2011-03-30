@@ -165,6 +165,15 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
     public String getPlainText() {
         return null == plainText ? null : plainText.toString();
     }
+   
+    /**
+     * Gets this part's HTML text.
+     * 
+     * @return The mail body as HTML text or <code>null</code>
+     */
+    public String getHTML() {
+        return null == mailBody ? null : mailBody.toString();
+    }
 
     /**
      * Appends specified plain text to this part.
