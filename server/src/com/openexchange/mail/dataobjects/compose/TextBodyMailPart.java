@@ -84,7 +84,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      */
     public TextBodyMailPart(final String mailBody) {
         super();
-        this.mailBody = new StringBuilder(mailBody);
+        this.mailBody = null == mailBody ? null : new StringBuilder(mailBody);
     }
 
     /**
@@ -103,8 +103,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * @param newInstance The new instance to fill
      */
     protected final void fillInstance(final TextBodyMailPart newInstance) {
-        newInstance.mailBody = new StringBuilder(this.mailBody.length());
-        newInstance.mailBody.append(this.mailBody.toString());
+        newInstance.mailBody = null == mailBody ? null : new StringBuilder(mailBody.toString());
         newInstance.plainText = null == plainText ? null : new StringBuilder(plainText.toString());
         newInstance.dataSource = null;
     }
@@ -117,6 +116,13 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * @param mailBody The mail body as HTML content
      */
     public void setText(final String mailBody) {
+        if (null == mailBody) {
+            this.mailBody = null;
+        }
+        if (null == this.mailBody) {
+            this.mailBody = new StringBuilder(mailBody);
+            return;
+        }
         this.mailBody.setLength(0);
         this.mailBody.append(mailBody);
     }
