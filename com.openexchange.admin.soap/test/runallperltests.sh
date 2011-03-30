@@ -3,7 +3,7 @@
 runcmd() {
    cmd="$1"
    arg="$2"
-   ./$cmd $arg|| { echo "running $cmd failed"; exit 1; }
+   ./$cmd $arg|| { echo "running $cmd failed" | tee FAIL; exit; }
 }
 
 cmdpath="$1/perl"
