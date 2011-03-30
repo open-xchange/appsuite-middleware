@@ -31,6 +31,7 @@ sub doRequest {
     
     if ( $som_entry->fault() ) {
         $inSelf->fault_output($som_entry);
+	exit(1);
     } else {
         my $fields = [ "id", "name", "displayname", "members" ]; 
         

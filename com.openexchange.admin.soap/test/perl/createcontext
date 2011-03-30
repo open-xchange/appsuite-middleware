@@ -44,6 +44,7 @@ sub doRequest {
 			SOAP::Data->name("sur_name" => $surname),
 			SOAP::Data->name("given_name" => $gname),
 			SOAP::Data->name("primaryEmail" => $email),
+			SOAP::Data->name("email1" => $email),
 			SOAP::Data->name("language" => $lang),
 			SOAP::Data->name("timezone" => $timezone)
 			)),
@@ -53,6 +54,7 @@ sub doRequest {
     
   if ( $som_entry->fault() ) {
     $inSelf->fault_output($som_entry);
+    exit(1);
   } else {
     print "Fine\n";
   }

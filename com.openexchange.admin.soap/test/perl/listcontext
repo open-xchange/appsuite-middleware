@@ -32,6 +32,7 @@ sub doRequest {
     
     if ( $som_entry->fault() ) {
         $inSelf->fault_output($som_entry);
+	exit(1);
     } else {
         my $fields = [ "id", "filestoreId", "filestore_name", "enabled", "maxQuota", "usedQuota", "name", "loginMappings" ]; 
         
