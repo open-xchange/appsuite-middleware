@@ -7,7 +7,8 @@ our @ENV_OPTIONS = ( "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFO
 sub new {
 	my ($inPkg) = @_;
 	my $self = {};
-	$self->{'basisUrl'} = "http://127.0.0.1/servlet/axis2/services/";
+	my $shost = $ENV{"SOAPHOST"} || "127.0.0.1";
+	$self->{'basisUrl'} = "http://$shost/servlet/axis2/services/";
 	$self->{'serviceNs'} = "http://soap.admin.openexchange.com";
 	$self->{'Context'} = SOAP::Data->type("Context")->value(
 			     \SOAP::Data->value(
