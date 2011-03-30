@@ -130,10 +130,17 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
     /**
      * Appends specified HTML text to this part.
      * 
-     * @param text The HTML content to append
+     * @param html The HTML text to append
      */
-    public void append(final String text) {
-        mailBody.append(text);
+    public void append(final String html) {
+        if (null == html) {
+            return;
+        }
+        if (null == this.mailBody) {
+            this.mailBody = new StringBuilder(html);
+            return;
+        }
+        mailBody.append(html);
     }
 
     /**
@@ -178,7 +185,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
          */
         if (null == dataSource) {
             try {
-                dataSource = new MessageDataSource(mailBody.toString(), getContentType());
+                dataSource = new MessageDataSource(getHTMLContent(), getContentType());
             } catch (final UnsupportedEncodingException e) {
                 throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
             }
@@ -192,6 +199,10 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      */
     @Override
     public Object getContent() throws MailException {
+        return getHTMLContent();
+    }
+
+    private String getHTMLContent() throws MailException {
         if (null != mailBody) {
             return mailBody.toString();
         }
