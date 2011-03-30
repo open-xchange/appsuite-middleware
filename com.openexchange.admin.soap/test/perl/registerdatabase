@@ -30,12 +30,14 @@ sub doRequest {
     my $maxctx = 42042;
     my $weight = 100;
     my $user   = "openexchange";
-    my $passwd = "secret";
+    my $passwd = $ENV{"DBPW"} || "secret";
+    my $dbhost = $ENV{"DBHOST"} || "localhost";
     
     my $som_entry = 
       $soap->registerDatabase(
     	      SOAP::Data->value("Database")->value(\SOAP::Data->value(
     	           SOAP::Data->name("name" => $name),
+    	           SOAP::Data->name("url" => "jdbc:mysql://$dbhost/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000"),
     	           SOAP::Data->name("master" => $master),
     	           SOAP::Data->name("maxUnits" => $maxctx),
     	           SOAP::Data->name("clusterWeight" => $weight),
