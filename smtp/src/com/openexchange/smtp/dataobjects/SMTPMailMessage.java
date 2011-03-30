@@ -70,7 +70,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	private static final long serialVersionUID = 9031153888416594901L;
 
-	private SMTPBodyPart mailPart;
+	private TextBodyMailPart mailPart;
 
 	private String uid;
 
@@ -117,7 +117,12 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	@Override
 	public void setBodyPart(final TextBodyMailPart mailPart) {
-		this.mailPart = (SMTPBodyPart) mailPart;
+		this.mailPart = mailPart;
+	}
+
+	@Override
+	public TextBodyMailPart getBodyPart() {
+	    return mailPart;
 	}
 
 	@Override

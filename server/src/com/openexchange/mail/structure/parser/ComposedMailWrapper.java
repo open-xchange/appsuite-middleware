@@ -911,6 +911,11 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
+    public TextBodyMailPart getBodyPart() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public MailPart removeEnclosedPart(final int index) {
         throw new UnsupportedOperationException();
     }

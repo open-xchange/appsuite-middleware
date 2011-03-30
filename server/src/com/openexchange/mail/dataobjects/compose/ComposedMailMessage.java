@@ -289,6 +289,15 @@ public abstract class ComposedMailMessage extends MailMessage {
     public abstract void setBodyPart(TextBodyMailPart mailPart);
 
     /**
+     * Gets this composed message's body part.
+     * <p>
+     * The body part's content is supposed to be HTML content which is ought to be converted to appropriate MIME type on transport.
+     * 
+     * @return The body part
+     */
+    public abstract TextBodyMailPart getBodyPart();
+
+    /**
      * Removes the enclosed part at the specified position. Shifts any subsequent parts to the left (subtracts one from their indices).
      * Returns the part that was removed.
      * 
