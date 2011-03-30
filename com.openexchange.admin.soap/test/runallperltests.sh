@@ -3,6 +3,7 @@
 runcmd() {
    cmd="$1"
    arg="$2"
+   echo "running \"$cmd $arg\" now"
    ./$cmd $arg|| { echo "running $cmd failed" | tee FAIL; exit; }
 }
 
@@ -13,8 +14,9 @@ cd $cmdpath
 
 
 runcmd registerdatabase
-runcmd registerfilestore | cut -d" " -f 2 > /tmp/fnr
+runcmd registerfilestore | tee /tmp/debug.out | cut -d" " -f 2 > /tmp/fnr
 read FNR < /tmp/fnr && rm -f /tmp/fnr
+cat /tmp/debug.out
 runcmd registerserver
 runcmd createcontext
 runcmd createuser
