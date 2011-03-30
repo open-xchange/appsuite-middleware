@@ -23,9 +23,9 @@ sub new {
 sub doRequest {
   my $inSelf = shift;
   my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXContextService" );
-  
+ 
   my $admin = "oxadmin";
-  my $adminpass = "secret";
+  my $adminpass = $ENV{"MASTERPW"} || "secret";
   my $displayname = "admin user";
   my $surname = "admin";
   my $gname = "OX";
