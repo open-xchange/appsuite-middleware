@@ -17,6 +17,7 @@ runcmd registerdatabase
 runcmd registerfilestore | tee /tmp/debug.out | cut -d" " -f 2 > /tmp/fnr
 read FNR < /tmp/fnr && rm -f /tmp/fnr
 cat /tmp/debug.out
+echo "<<< $FNR >>>"
 runcmd registerserver
 runcmd createcontext
 runcmd createuser
