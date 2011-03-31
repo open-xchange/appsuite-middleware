@@ -1,7 +1,7 @@
 #@(#) Tables for the Configuration Database
 
 CREATE TABLE configdb_sequence (
-    id INT4 UNSIGNED AUTO_INCREMENT,
+    id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
