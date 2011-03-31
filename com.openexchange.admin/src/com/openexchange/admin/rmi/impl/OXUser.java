@@ -1184,14 +1184,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      */
     public void changeModuleAccessGlobal(String filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
         int permissionBits = -1;
-        try {
-            permissionBits = Integer.parseInt(filter);
-        } catch (NumberFormatException nfe) {
-            UserModuleAccess namedAccessCombination = ClientAdminThread.cache.getNamedAccessCombination(filter);
-            if (namedAccessCombination == null) {
-                throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
+        if (filter != null) {
+            try {
+                permissionBits = Integer.parseInt(filter);
+            } catch (NumberFormatException nfe) {
+                UserModuleAccess namedAccessCombination = ClientAdminThread.cache.getNamedAccessCombination(filter);
+                if (namedAccessCombination == null) {
+                    throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
+                }
+                permissionBits = namedAccessCombination.getPermissionBits();
             }
-            permissionBits = namedAccessCombination.getPermissionBits();
         }
         
         int addBits = addAccess.getPermissionBits();
