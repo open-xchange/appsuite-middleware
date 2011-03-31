@@ -1182,7 +1182,26 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.OXUserInterface#changeModuleAccessGlobal(java.lang.String, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public void changeModuleAccessGlobal(String filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
+    public void changeModuleAccessGlobal(final String filter, final UserModuleAccess addAccess, final UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
+        try {
+            doNullCheck(addAccess, removeAccess);
+        } catch (final InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Some parameters are null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(filter + " - " + addAccess + " - "+ removeAccess + " - " + auth);
+        }
+
+        try {
+            basicauth.doAuthentication(auth);
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        
         int permissionBits = -1;
         if (filter != null) {
             try {
@@ -1201,16 +1220,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (log.isDebugEnabled()) {
             log.debug("Adding " + addBits + " removing " + removeBits + " to filter " + filter);
         }
-        
+
         try {
-            basicauth.doAuthentication(auth);
-            OXToolMySQLStorage.getInstance().changeAccessCombination(permissionBits, addBits, removeBits);
-        } catch (InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
+            tool.changeAccessCombination(permissionBits, addBits, removeBits);
         } catch (StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
+
     }
 }
