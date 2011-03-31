@@ -1,3 +1,8 @@
+* 2011-03-31 - martin.herfurth@open-xchange.com
+
+ - Bugfix #18821: [L3] "changeaccessglobal" mentioned in Release Notes but
+   isn't available on system
+
 * 2011-03-31 - marcus.klein@open-xchange.com
 
  - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
