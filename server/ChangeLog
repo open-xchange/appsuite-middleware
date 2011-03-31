@@ -1,3 +1,7 @@
+* 2011-03-31 - marcus.klein@open-xchange.com
+
+ - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
+
 * 2011-03-02 - thorben.betten@open-xchange.co
 
  - Bugfix #17891: Fixed possible IndexOutOfBounsdException when checking quotes in personal part of an email address

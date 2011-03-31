@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -398,6 +398,7 @@ public final class IDGenerator {
             tmp.put(I(Types.GENERIC_CONFIGURATION), "CALL get_genconf_id(?)");
             tmp.put(I(Types.SUBSCRIPTION), "CALL get_subscriptions_id(?)");
             tmp.put(I(Types.PUBLICATION), "CALL get_publications_id(?)");
+            tmp.put(I(Types.EAV_NODE), "CALL get_eav_id(?)");
             TYPES = tmp;
         }
 
@@ -459,7 +460,11 @@ public final class IDGenerator {
                 stmt = con.prepareStatement("UPDATE " + table + " SET id=id+1");
                 stmt.execute();
                 stmt.close();
-                stmt = con.prepareStatement("SELECT id FROM " + table);
+                // A single developer machine was not able to generate unique identifier. The result of the SELECT contained multiple rows.
+                // All investigations did not show any possiblity to fix this. Only the last highest identifier was correct. Without sorting
+                // the first returned identifier was always a little slower than the last highest and correct one. We need to ask MySQL
+                // consultants for this scary issue.
+                stmt = con.prepareStatement("SELECT id FROM " + table + " ORDER BY id DESC LIMIT 1");
                 result = stmt.executeQuery();
                 if (result.next()) {
                     newId = result.getInt(1);
@@ -529,6 +534,7 @@ public final class IDGenerator {
             tmp.put(I(Types.GENERIC_CONFIGURATION), "sequence_genconf");
             tmp.put(I(Types.SUBSCRIPTION), "sequence_subscriptions");
             tmp.put(I(Types.PUBLICATION), "sequence_publications");
+            tmp.put(I(Types.EAV_NODE), "sequence_uid_eav_node");
             TABLES = tmp;
         }
 
