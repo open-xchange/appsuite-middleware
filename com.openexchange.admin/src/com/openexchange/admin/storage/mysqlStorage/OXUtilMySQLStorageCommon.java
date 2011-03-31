@@ -104,12 +104,16 @@ public class OXUtilMySQLStorageCommon {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
+        boolean created = false;
         try {
             con.setAutoCommit(false);
             if (existsDatabase(con, db.getScheme())) {
                 throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
             }
             createDatabase(con, db.getScheme());
+            // Only delete the schema if it has been created successfully. Otherwise it may happen that we delete a longly existing schema.
+            // See bug 18788.
+            created = true;
             con.setCatalog(db.getScheme());
             pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
@@ -117,11 +121,15 @@ public class OXUtilMySQLStorageCommon {
             con.commit();
         } catch (SQLException e) {
             rollback(con);
-            deleteDatabase(con, db);
+            if (created) {
+                deleteDatabase(con, db);
+            }
             throw new StorageException(e.toString());
         } catch (StorageException e) {
             rollback(con);
-            deleteDatabase(con, db);
+            if (created) {
+                deleteDatabase(con, db);
+            }
             throw e;
         } finally {
             autocommit(con);
