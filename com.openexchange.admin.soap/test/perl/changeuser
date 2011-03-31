@@ -6,7 +6,7 @@ use base qw(BasicCommandlineOptions);
 
 
 #Use the SOAP::Lite Perl module
-use SOAP::Lite +trace => 'debug';
+#use SOAP::Lite +trace => 'debug';
 use SOAP::Lite;
 
 my $test = new Createuser();
