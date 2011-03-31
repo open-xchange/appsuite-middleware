@@ -541,7 +541,6 @@ public abstract class AbstractMailAccount implements MailAccount {
                 setTransportSecure(false);
                 setTransportProtocol(protocol);
             }
-            setTransportProtocol(transportServer.getScheme());
             setTransportServer(URITools.getHost(transportServer));
             setTransportPort(transportServer.getPort());
         }
