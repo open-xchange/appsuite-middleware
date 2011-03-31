@@ -87,7 +87,7 @@ public class FormDescriptionWriter {
     }
 
     public FormDescriptionWriter() {
-        this(null);
+        this(Translator.EMPTY);
     }
 
     public JSONArray write(DynamicFormDescription form) throws JSONException {
