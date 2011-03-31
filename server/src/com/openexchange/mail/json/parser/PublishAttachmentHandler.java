@@ -113,7 +113,7 @@ import com.openexchange.user.UserService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class PublishAttachmentHandler extends AbstractAttachmentHandler {
+public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PublishAttachmentHandler.class);
 

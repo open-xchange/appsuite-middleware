@@ -60,7 +60,7 @@ import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-interface IAttachmentHandler {
+public interface IAttachmentHandler {
 
     /**
      * Sets the text part which may be modified.

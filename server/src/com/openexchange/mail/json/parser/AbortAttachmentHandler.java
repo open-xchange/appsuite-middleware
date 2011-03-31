@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AbortAttachmentHandler extends AbstractAttachmentHandler {
+public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbortAttachmentHandler.class);
 
