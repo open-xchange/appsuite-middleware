@@ -125,7 +125,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
     private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         filterOption = setShortLongOpt(parser, FILTER_SHORT, FILTER_LONG, FILTER_DESCRIPTION, true, NeededQuadState.notneeded);
-        setModuleAccessOptions(parser);
+        setModuleAccessOptions(parser, false, false);
     }
 
     private void prepare(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException {
