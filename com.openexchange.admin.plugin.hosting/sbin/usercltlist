@@ -11,3 +11,4 @@ deleteresource
 changeresource
 listresource
 getaccesscombinationnameforuser
+changeaccessglobal

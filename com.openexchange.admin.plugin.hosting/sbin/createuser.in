@@ -67,7 +67,7 @@ ox_set_JAVA_BIN
 test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
 
 BNAME=$(basename $0)
-CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|change\|getaccesscombinationnameforuser\|list\)\(.*\)/\1 \2/') )
+CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|changeaccessglobal\|getaccesscombinationnameforuser\|list\|change\)\(.*\)/\1 \2/') )
 MODULE=${CMDARR[1]}
 
 case "${CMDARR[0]}" in
@@ -82,6 +82,10 @@ case "${CMDARR[0]}" in
     ;;
     "getaccesscombinationnameforuser")
     ACTION="GetAccessCombinationName"
+	MODULE=user
+    ;;
+    "changeaccessglobal")
+    ACTION="ChangeModuleAccessGlobal"
 	MODULE=user
     ;;
     "list")
