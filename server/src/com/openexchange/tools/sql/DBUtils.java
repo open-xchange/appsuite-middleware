@@ -199,6 +199,23 @@ public final class DBUtils {
     }
 
     /**
+     * Starts a transaction on the given connection. This implementation sets autocommit to false and even executes a START TRANSACTION
+     * statement to ensure isolation levels for the current connection.
+     * @param con connection to start the transaction on.
+     * @throws SQLException if starting the transaction fails.
+     */
+    public static void startTransaction(final Connection con) throws SQLException {
+        Statement stmt = null;
+        try {
+            con.setAutoCommit(false);
+            stmt = con.createStatement();
+            LOG.info("Started transaction " + stmt.execute("START TRANSACTION"));
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
      * Rolls a transaction of a connection back.
      * 
      * @param con connection to roll back.
