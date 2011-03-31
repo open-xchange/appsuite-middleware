@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -1009,8 +1010,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         try {
             final Database db = getNextDBHandleByWeight(configCon);
-            configCon.setAutoCommit(false);
-            findOrCreateSchema(ctx, configCon, db);
+            startTransaction(configCon);
+            findOrCreateSchema(configCon, db);
+            contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
             contextCommon.fillLogin2ContextTable(ctx, configCon);
             configCon.commit();
             return writeContext(configCon, ctx, adminUser, access);
@@ -1288,7 +1290,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     /**
      * @param configCon a write connection to the configuration database that is already in a transaction.
      */
-    private void findOrCreateSchema(Context ctx, Connection configCon, Database db) throws StorageException {
+    private void findOrCreateSchema(Connection configCon, Database db) throws StorageException {
         final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
         String schemaName;
         if (this.CONTEXTS_PER_SCHEMA == 1 || (schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon)) == null) {
@@ -1304,7 +1306,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } else {
             db.setScheme(schemaName);
         }
-        contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
     }
 
     private void createDatabaseAndMappingForContext(final Database db, final Connection configCon, final int context_id) throws SQLException, StorageException {
