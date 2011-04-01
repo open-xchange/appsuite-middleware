@@ -75,8 +75,6 @@ import com.openexchange.server.impl.DBPool;
  * To register an additional database sequence table, the method <code>IDGenerator.registerType()</code>
  * can be used, see {@link IDGenerator#registerType(String, int)}.
  *
- * TODO Generate/Fetch a group of identifier instead of fetching every time only
- * one identifier.
  * TODO move this class to some package for mysql storage.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -84,6 +82,7 @@ public final class IDGenerator {
 
     public static enum Implementations {
         NODBFUNCTION(new NoDBFunction()),
+        MYSQLFUNCTION(new MySQLFunction()),
         PREPAREDSTATEMENT(new PreparedStatementImpl()),
         CALLABLESTATEMENT(new CallableStatementImpl());
 
@@ -98,19 +97,13 @@ public final class IDGenerator {
         }
     }
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(IDGenerator.class);
+    static final Log LOG = LogFactory.getLog(IDGenerator.class);
 
     /**
-     * Actual implementation.
+     * Used implementation.
      */
-    private static final Implementation GETID_IMPL = Implementations.NODBFUNCTION.getImpl();
+    private static final Implementation GETID_IMPL = Implementations.MYSQLFUNCTION.getImpl();
 
-    /**
-     * Private constructor prevents instantiation.
-     */
     private IDGenerator() {
         super();
     }
@@ -229,6 +222,9 @@ public final class IDGenerator {
          * {@link Implementations#NODBFUNCTION}:
          * <code>configdb_sequence</code>
          * <p>
+         * {@link Implementations#MYSQLFUNCTION}:
+         * <code>configdb_sequence</code>
+         * <p>
          * {@link Implementations#PREPAREDSTATEMENT}:
          * <code>CALL get_configdb_id()</code>
          *
@@ -242,9 +238,8 @@ public final class IDGenerator {
     /**
      * This implementation uses the stored procedure and a callable statement to
      * get unique identifier from the database.
-     * TODO start values are missing.
      */
-    private static class CallableStatementImpl implements Implementation {
+    static class CallableStatementImpl implements Implementation {
 
         /**
          * Maps the groupware types to sql functions.
@@ -265,9 +260,6 @@ public final class IDGenerator {
             return retval;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             int newId = -1;
             CallableStatement call = null;
@@ -294,9 +286,6 @@ public final class IDGenerator {
             return newId;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void registerType(final String sql, final int type) throws SQLException {
             if (TYPES.containsKey(I(type))) {
                 throw new SQLException("Type " + type + " already in use");
@@ -329,9 +318,8 @@ public final class IDGenerator {
     /**
      * This implementation uses the stored procedure and a prepared statement to
      * get unique identifier from the database.
-     * TODO start values are missing.
      */
-    private static class PreparedStatementImpl implements Implementation {
+    static class PreparedStatementImpl implements Implementation {
 
         /**
          * Maps the groupware types to sql functions.
@@ -352,9 +340,6 @@ public final class IDGenerator {
             return retval;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             int newId = -1;
             PreparedStatement stmt = null;
@@ -402,9 +387,6 @@ public final class IDGenerator {
             TYPES = tmp;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void registerType(final String sql, final int type) throws SQLException {
             if (TYPES.containsKey(I(type))) {
                 throw new SQLException("Type " + type + " already in use");
@@ -417,7 +399,7 @@ public final class IDGenerator {
      * This implementation uses only SELECT, INSERT and UPDATE sql commands to
      * generate unique identifier.
      */
-    private static class NoDBFunction implements Implementation {
+    static class NoDBFunction implements Implementation {
 
         /**
          * Maps the groupware types to sql functions.
@@ -438,9 +420,6 @@ public final class IDGenerator {
             return retval;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             final int retval;
             if (type <= -1) {
@@ -460,11 +439,7 @@ public final class IDGenerator {
                 stmt = con.prepareStatement("UPDATE " + table + " SET id=id+1");
                 stmt.execute();
                 stmt.close();
-                // A single developer machine was not able to generate unique identifier. The result of the SELECT contained multiple rows.
-                // All investigations did not show any possiblity to fix this. Only the last highest identifier was correct. Without sorting
-                // the first returned identifier was always a little slower than the last highest and correct one. We need to ask MySQL
-                // consultants for this scary issue.
-                stmt = con.prepareStatement("SELECT id FROM " + table + " ORDER BY id DESC LIMIT 1");
+                stmt = con.prepareStatement("SELECT id FROM " + table);
                 result = stmt.executeQuery();
                 if (result.next()) {
                     newId = result.getInt(1);
@@ -538,9 +513,134 @@ public final class IDGenerator {
             TABLES = tmp;
         }
 
+        public void registerType(final String sql, final int type) throws SQLException {
+            if (TABLES.containsKey(I(type))) {
+                throw new SQLException("Type " + type + " already in use.");
+            }
+            TABLES.put(I(type), sql);
+        }
+    }
+
+    /**
+     * This implementation uses MySQL specific last_insert_id() function to generate unique identifier.
+     * We discovered that we are not able to generate unique identifier with the {@link NoDBFunction} implementation on some MySQL
+     * instances. The result of the SELECT contained multiple rows. All investigations did not show any possibility to fix this. Only the
+     * last highest identifier was correct. Without sorting the first returned identifier was always a little slower than the last highest
+     * and correct one. See bug 18788. An ugly fix is to select with the following command: SELECT id FROM sequence ORDER BY id DESC LIMIT 1
+     */
+    static class MySQLFunction implements Implementation {
+
         /**
-         * {@inheritDoc}
+         * Maps the groupware types to sql functions.
          */
+        private static final Map<Integer, String> TABLES;
+
+        /**
+         * Returns the appropriate unique identifier sql function for the type.
+         * @param type Type of the object thats needs a unique identifier.
+         * @return the sql function generating the unique identifier.
+         * @throws SQLException if no table for the type is defined.
+         */
+        private String getSequenceTable(final int type) throws SQLException {
+            final String retval = TABLES.get(I(type));
+            if (null == retval) {
+                throw new SQLException("No table defined for type: " + type);
+            }
+            return retval;
+        }
+
+        public int getId(final int contextId, final int type, final Connection con) throws SQLException {
+            final int retval;
+            if (type <= -1) {
+                retval = getInternal(type, con);
+            } else {
+                retval = getInternal(contextId, type, con);
+            }
+            return retval;
+        }
+
+        private int getInternal(final int type, final Connection con) throws SQLException {
+            final String table = getSequenceTable(type);
+            int newId = -1;
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = con.prepareStatement("UPDATE " + table + " SET id=last_insert_id(id+1)");
+                stmt.execute();
+                stmt.close();
+                stmt = con.prepareStatement("SELECT last_insert_id()");
+                result = stmt.executeQuery();
+                if (result.next()) {
+                    newId = result.getInt(1);
+                }
+            } catch (final SQLException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("SQL Problem: " + stmt);
+                }
+                throw e;
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+            if (-1 == newId) {
+                throw new SQLException("Table " + table + " contains no row.");
+            }
+            return newId;
+        }
+
+        private int getInternal(final int contextId, final int type, final Connection con) throws SQLException {
+            final String table = getSequenceTable(type);
+            int newId = -1;
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = con.prepareStatement("UPDATE " + table + " SET id=last_insert_id(id+1) WHERE cid=?");
+                stmt.setInt(1, contextId);
+                stmt.execute();
+                stmt.close();
+                stmt = con.prepareStatement("SELECT last_insert_id()");
+                result = stmt.executeQuery();
+                if (result.next()) {
+                    newId = result.getInt(1);
+                }
+            } catch (final SQLException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("SQL Problem: " + stmt);
+                }
+                throw e;
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+            if (-1 == newId) {
+                throw new SQLException("Table " + table + " contains no row for context " + contextId);
+            }
+            return newId;
+        }
+
+        static {
+            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
+            tmp.put(I(-1), "configdb_sequence");
+            tmp.put(I(Types.APPOINTMENT), "sequence_calendar");
+            tmp.put(I(Types.CONTACT), "sequence_contact");
+            tmp.put(I(Types.FOLDER), "sequence_folder");
+            tmp.put(I(Types.TASK), "sequence_task");
+            tmp.put(I(Types.USER_SETTING), "sequence_gui_setting");
+            tmp.put(I(Types.REMINDER), "sequence_reminder");
+            tmp.put(I(Types.ICAL), "sequence_ical");
+            tmp.put(I(Types.PRINCIPAL), "sequence_principal");
+            tmp.put(I(Types.RESOURCE), "sequence_resource");
+            tmp.put(I(Types.INFOSTORE), "sequence_infostore");
+            tmp.put(I(Types.ATTACHMENT), "sequence_attachment");
+            tmp.put(I(Types.WEBDAV), "sequence_webdav");
+            tmp.put(I(Types.UID_NUMBER), "sequence_uid_number");
+            tmp.put(I(Types.GID_NUMBER), "sequence_gid_number");
+            tmp.put(I(Types.MAIL_SERVICE), "sequence_mail_service");
+            tmp.put(I(Types.GENERIC_CONFIGURATION), "sequence_genconf");
+            tmp.put(I(Types.SUBSCRIPTION), "sequence_subscriptions");
+            tmp.put(I(Types.PUBLICATION), "sequence_publications");
+            tmp.put(I(Types.EAV_NODE), "sequence_uid_eav_node");
+            TABLES = tmp;
+        }
+
         public void registerType(final String sql, final int type) throws SQLException {
             if (TABLES.containsKey(I(type))) {
                 throw new SQLException("Type " + type + " already in use.");
