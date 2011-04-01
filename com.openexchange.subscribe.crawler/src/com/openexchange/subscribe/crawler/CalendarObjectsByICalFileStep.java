@@ -125,21 +125,21 @@ public class CalendarObjectsByICalFileStep extends
 		for (int i = 0; i < events.size() && i < output.length; i++) {
 			output[i] = events.get(i);
 			//TODO: This needs to be removed again
-			System.out.println("event retrieved is : " + events.get(i).getTitle());
-            System.out.println("Timezone is : " + events.get(i).getTimezone());
-            System.out.println("Start Date is : " + events.get(i).getStartDate());
-            System.out.println("End Date is : " + events.get(i).getEndDate());
-            System.out.println("Description is : " + events.get(i).getNote());
+			LOG.info("event retrieved is : " + events.get(i).getTitle());
+			LOG.info("Timezone is : " + events.get(i).getTimezone());
+            LOG.info("Start Date is : " + events.get(i).getStartDate());
+            LOG.info("End Date is : " + events.get(i).getEndDate());
+            LOG.info("Description is : " + events.get(i).getNote());
             if (null != events.get(i).getParticipants()) {
-                System.out.println("No. of Participants : " + events.get(i).getParticipants().length);
+            	LOG.info("No. of Participants : " + events.get(i).getParticipants().length);
                 for (Participant participant : events.get(i).getParticipants()) {
-                    System.out.println("   Participant : display_name : " + participant.getDisplayName() + ", email : " + participant.getEmailAddress());
+                	LOG.info("   Participant : display_name : " + participant.getDisplayName() + ", email : " + participant.getEmailAddress());
                 }
             }
             System.out.println("----------");
 		}
 		//TODO: This needs to be removed again
-		System.out.println("***** (CalendarObjectsByICalFileStep) This is the number of CalendarDataObjects that went in : "+events.size());
+		LOG.info("***** (CalendarObjectsByICalFileStep) This is the number of CalendarDataObjects that went in : "+events.size());
 		executedSuccessfully = true;
 	}
 
