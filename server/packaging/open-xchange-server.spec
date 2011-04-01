@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 24
+%define		ox_release 25
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Mar 31 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
 * Wed Mar 02 2011 - thorben.betten@open-xchange.co
  - Bugfix #17891: Fixed possible IndexOutOfBounsdException when checking quotes in personal part of an email address
  - Bugfix #18296: Introduced property to hide POP3 storage folders
