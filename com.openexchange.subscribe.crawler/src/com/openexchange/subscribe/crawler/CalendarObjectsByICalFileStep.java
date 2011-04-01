@@ -67,6 +67,7 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
@@ -123,7 +124,22 @@ public class CalendarObjectsByICalFileStep extends
 		output = new CalendarDataObject[events.size()];
 		for (int i = 0; i < events.size() && i < output.length; i++) {
 			output[i] = events.get(i);
+			//TODO: This needs to be removed again
+			System.out.println("event retrieved is : " + events.get(i).getTitle());
+            System.out.println("Timezone is : " + events.get(i).getTimezone());
+            System.out.println("Start Date is : " + events.get(i).getStartDate());
+            System.out.println("End Date is : " + events.get(i).getEndDate());
+            System.out.println("Description is : " + events.get(i).getNote());
+            if (null != events.get(i).getParticipants()) {
+                System.out.println("No. of Participants : " + events.get(i).getParticipants().length);
+                for (Participant participant : events.get(i).getParticipants()) {
+                    System.out.println("   Participant : display_name : " + participant.getDisplayName() + ", email : " + participant.getEmailAddress());
+                }
+            }
+            System.out.println("----------");
 		}
+		//TODO: This needs to be removed again
+		System.out.println("***** (CalendarObjectsByICalFileStep) This is the number of CalendarDataObjects that went in : "+events.size());
 		executedSuccessfully = true;
 	}
 

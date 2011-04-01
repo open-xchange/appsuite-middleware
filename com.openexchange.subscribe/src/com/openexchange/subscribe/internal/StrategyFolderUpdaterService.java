@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -90,6 +90,8 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
         Object session = strategy.startSession(subscription);
         
         Collection<T> dataInFolder = strategy.getData(subscription, session);
+      //TODO: This needs to be removed
+        System.out.println("***** (StrategyFolderUpdaterService) Number of Objects in Folder already (should be 0): " + dataInFolder.size());
         
         for(T element : data) {
             try {
@@ -98,12 +100,15 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
                     strategy.save(element, session);
                 } else {
                     strategy.update(bestMatch, element, session);
+                    //TODO: This needs to be removed
+                    System.out.println("(StrategyFolderUpdaterService) Update, this should NOT be happening");
                 }
             } catch (AbstractOXException x) {
                 LOG.error(x.getMessage(), x);
             }
         }
-        
+        //TODO: This needs to be removed
+        System.out.println("***** (StrategyFolderUpdaterService) Number of Objects to be saved / updated in the subscription: " + data.size());
         strategy.closeSession(session);
     }
 
