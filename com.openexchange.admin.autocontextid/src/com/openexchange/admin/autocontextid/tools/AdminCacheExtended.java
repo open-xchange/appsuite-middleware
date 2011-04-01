@@ -67,6 +67,7 @@ public class AdminCacheExtended extends AdminCache {
 
     public void initIDGenerator() throws SQLException {
         Implementations.NODBFUNCTION.getImpl().registerType("sequence_context", -2);
+        Implementations.MYSQLFUNCTION.getImpl().registerType("sequence_context", -2);
         Implementations.PREPAREDSTATEMENT.getImpl().registerType("CALL get_context_id()", -2);
         Implementations.CALLABLESTATEMENT.getImpl().registerType("{call get_context_id()}", -2);
     }
