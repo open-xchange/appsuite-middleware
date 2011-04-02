@@ -369,7 +369,7 @@ public final class AllFetch {
                     final Response response = r[len];
                     final List<MailMessage> l = new ArrayList<MailMessage>(len);
                     if (response.isOK()) {
-                        final int recentCount = imapFolder.getNewMessageCount();
+                        // final int recentCount = imapFolder.getNewMessageCount();
                         final String fullname = imapFolder.getFullName();
                         for (int j = 0; j < len; j++) {
                             final Response resp = r[j];
@@ -418,8 +418,8 @@ public final class AllFetch {
                     }
                     Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
                     return l.toArray(new MailMessage[l.size()]);
-                } catch (final MessagingException e) {
-                    throw new ProtocolException(e.getMessage(), e);
+                //} catch (final MessagingException e) {
+                //    throw new ProtocolException(e.getMessage(), e);
                 } finally {
                     if (null != tracerState) {
                         try {
