@@ -54,6 +54,10 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
+import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
+import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
+import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -363,6 +367,18 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.FacebookCrawlerSubscriptionRemoverTask(),
 
         // Remove linkedin subscriptions to force use of new oauth
-        new com.openexchange.groupware.update.tasks.LinkedInCrawlerSubscriptionsRemoverTask()
+        new com.openexchange.groupware.update.tasks.LinkedInCrawlerSubscriptionsRemoverTask(),
+        
+        // Switch the column type of 'value' in contextAttribute to TEXT
+        new AllowTextInValuesOfDynamicContextAttributesTask(),
+        
+        // Switch the column type of 'value' in user_attribute to TEXT
+        new AllowTextInValuesOfDynamicUserAttributesTask(),
+        
+        // Recreate the index on the context attributes table
+        new CreateIndexOnContextAttributesTask(),
+        
+        // Recreate the index on the user attributes table for alias lookup
+        new CreateIndexOnUserAttributesForAliasLookupTask()
     };
 }

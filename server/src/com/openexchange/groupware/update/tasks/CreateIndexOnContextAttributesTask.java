@@ -47,31 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.contexts.impl.sql;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.SortableId.Priority;
+import com.openexchange.groupware.update.CreateIndexUpdateTask;
+import com.openexchange.server.services.ServerServiceRegistry;
+
 
 /**
- * {@link ContextAttributeCreateTable}
- * 
+ * {@link CreateIndexOnContextAttributesTask}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContextAttributeCreateTable extends AbstractCreateTableImpl {
+public class CreateIndexOnContextAttributesTask extends CreateIndexUpdateTask {
 
-    private static final String[] TABLE = new String[]{"contextAttribute"};
-    private static final String[] CREATE_TABLE = new String[] { "CREATE TABLE `contextAttribute` (`cid` INT4 unsigned NOT NULL, `name` varchar(128) collate utf8_unicode_ci NOT NULL, `value` TEXT collate utf8_unicode_ci NOT NULL, KEY `cid` (`cid`,`name`,`value`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+    public CreateIndexOnContextAttributesTask() {
+        super(null, "contextAttribute", "cid", "cid", "name", "value(20)");
+    }
 
+    public String[] getDependencies() {
+        return new String[]{AllowTextInValuesOfDynamicContextAttributesTask.class.getName()};
+    }
+
+    public int addedWithVersion() {
+        return NO_VERSION;
+    }
+
+    public int getPriority() {
+        return Priority.NORMAL.ordinal();
+    }
+    
     @Override
-    protected String[] getCreateStatements() {
-        return CREATE_TABLE;
+    public DatabaseService getDatabaseService() {
+        return ServerServiceRegistry.getInstance().getService(DatabaseService.class);
     }
 
-    public String[] requiredTables() {
-        return NO_TABLES;
-    }
-
-    public String[] tablesToCreate() {
-        return TABLE;
-    }
 
 }

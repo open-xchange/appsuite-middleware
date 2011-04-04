@@ -47,31 +47,61 @@
  *
  */
 
-package com.openexchange.groupware.contexts.impl.sql;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.SortableId.Priority;
+import com.openexchange.groupware.update.ChangeColumnTypeUpdateTask;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
+
 
 /**
- * {@link ContextAttributeCreateTable}
- * 
+ * {@link AllowTextInValuesOfDynamicUserAttributesTask}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContextAttributeCreateTable extends AbstractCreateTableImpl {
+public class AllowTextInValuesOfDynamicUserAttributesTask extends ChangeColumnTypeUpdateTask {
 
-    private static final String[] TABLE = new String[]{"contextAttribute"};
-    private static final String[] CREATE_TABLE = new String[] { "CREATE TABLE `contextAttribute` (`cid` INT4 unsigned NOT NULL, `name` varchar(128) collate utf8_unicode_ci NOT NULL, `value` TEXT collate utf8_unicode_ci NOT NULL, KEY `cid` (`cid`,`name`,`value`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+    public AllowTextInValuesOfDynamicUserAttributesTask() {
+        super(null, "user_attribute", "value", "TEXT");
+    }
 
+    public String[] getDependencies() {
+        return new String[0];
+    }
+
+    public int addedWithVersion() {
+        return NO_VERSION;
+    }
+
+    public int getPriority() {
+        return Priority.NORMAL.ordinal();
+    }
+    
     @Override
-    protected String[] getCreateStatements() {
-        return CREATE_TABLE;
+    protected Column modifyColumn(Column c) {
+        return new Column("value", "TEXT collate utf8_unicode_ci NOT NULL");
     }
-
-    public String[] requiredTables() {
-        return NO_TABLES;
+    
+    @Override
+    protected void before(Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DROP INDEX cid ON user_attribute");
+            stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
-
-    public String[] tablesToCreate() {
-        return TABLE;
+    
+    @Override
+    public DatabaseService getDatabaseService() {
+        return ServerServiceRegistry.getInstance().getService(DatabaseService.class);
     }
 
 }

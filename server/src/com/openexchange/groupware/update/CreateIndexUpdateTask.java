@@ -47,31 +47,76 @@
  *
  */
 
-package com.openexchange.groupware.contexts.impl.sql;
+package com.openexchange.groupware.update;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.update.Index;
+import com.openexchange.tools.update.IndexNotFoundException;
+
 
 /**
- * {@link ContextAttributeCreateTable}
- * 
+ * A {@link CreateIndexUpdateTask} is an abstract superclass for UpdateTasks wanting to create an index. It checks for the presence of a named (using only the name as criterion)
+ * index, and, if it is not found, creates the index.
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContextAttributeCreateTable extends AbstractCreateTableImpl {
+public abstract class CreateIndexUpdateTask implements UpdateTaskV2 {
 
-    private static final String[] TABLE = new String[]{"contextAttribute"};
-    private static final String[] CREATE_TABLE = new String[] { "CREATE TABLE `contextAttribute` (`cid` INT4 unsigned NOT NULL, `name` varchar(128) collate utf8_unicode_ci NOT NULL, `value` TEXT collate utf8_unicode_ci NOT NULL, KEY `cid` (`cid`,`name`,`value`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
-
-    @Override
-    protected String[] getCreateStatements() {
-        return CREATE_TABLE;
+    private DatabaseService dbService;
+    private Index index;
+    
+    public CreateIndexUpdateTask(DatabaseService dbService, String table, String indexName, String...columns) {
+        this.dbService = dbService;
+        index = new Index();
+        index.setTable(table);
+        index.setName(indexName);
+        index.setColumns(columns);
+    }
+    
+    public TaskAttributes getAttributes() {
+        return new Attributes(UpdateConcurrency.BACKGROUND);
     }
 
-    public String[] requiredTables() {
-        return NO_TABLES;
+
+    public void perform(PerformParameters params) throws AbstractOXException {
+        perform(params.getSchema(), params.getContextId());
     }
 
-    public String[] tablesToCreate() {
-        return TABLE;
+
+    public void perform(Schema schema, int contextId) throws AbstractOXException {
+        Connection con = null;
+        try {
+            con = getDatabaseService().getForUpdateTask(contextId);
+            if ( ! hasIndex(con) ) {
+                createIndex(con);
+            }
+        } catch (SQLException x) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
+        } finally {
+            if(con != null) {
+                getDatabaseService().backForUpdateTask(contextId, con);
+            }
+        }
+    }
+
+    public DatabaseService getDatabaseService() {
+        return dbService;
+    }
+
+    protected void createIndex(Connection con) throws SQLException {
+        index.create(con);        
+    }
+
+    private boolean hasIndex(Connection con) throws SQLException {
+        try {
+            Index.findByName(con, index.getTable(), index.getName());
+        } catch (IndexNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
 }
