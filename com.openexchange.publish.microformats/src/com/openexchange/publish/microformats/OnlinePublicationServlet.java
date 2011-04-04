@@ -91,11 +91,11 @@ public class OnlinePublicationServlet extends HttpServlet {
 
     protected boolean checkProtected(final Publication publication, final Map<String, String> args, final HttpServletResponse resp) throws IOException {
         final Map<String, Object> configuration = publication.getConfiguration();
-        if (configuration.containsKey(PROTECTED) && (Boolean) configuration.get("protected")) {
+        if (configuration.containsKey(PROTECTED) && ((Boolean) configuration.get("protected")).booleanValue()) {
             final String secret = (String) configuration.get(SECRET);
             if (!secret.equals(args.get(SECRET))) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                resp.getWriter().println("Don't know site this publication");
+                resp.getWriter().println("Cannot find the publication site.");
                 return false;
             }
         }

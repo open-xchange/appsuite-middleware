@@ -78,9 +78,9 @@ public enum PublicationErrorMessage implements OXErrorMessage {
      */
     IDGiven(Category.CODE_ERROR, 4, "Do not set a ID when saving a publication", "Unable to save a given ID."),
     /**
-     * Could not find Publication (according ID and Context).
+     * Cannot find the publication site (according ID and Context).
      */
-    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Publication"),
+    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Cannot find the publication site."),
     UniquenessConstraintViolation(Category.USER_INPUT, 6, "Choose a different value", "%s has already been taken (Field: %s)"),
     AccessDenied(Category.PERMISSION, 7, "Try again when you have the correct permissions", "You do not have the permissions to undertake the chosen action (%s)");
     

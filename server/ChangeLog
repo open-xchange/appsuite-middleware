@@ -5,6 +5,7 @@
 * 2011-04-04 - marcus.klein@open-xchange.com
 
  - Bugfix #18806: Removed debug output into console log file.
+ - Bugfix #18781: Improved an exception message.
 
 * 2011-03-31 - marcus.klein@open-xchange.com
 
