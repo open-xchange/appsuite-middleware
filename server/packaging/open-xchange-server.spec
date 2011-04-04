@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 29
+%define		ox_release 30
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -725,6 +725,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Mar 31 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
 * Mon Mar 28 2011 - thorben.betten@open-xchange.com
  - Bugfix #18080: Considering module when checking public folder access
 * Mon Mar 28 2011 - marcus.klein@open-xchange.com

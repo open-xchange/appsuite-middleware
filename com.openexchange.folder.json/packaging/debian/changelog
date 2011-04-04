@@ -1,3 +1,9 @@
+open-xchange-folder-json (6.18.2.0-27) unstable; urgency=low
+
+  * build for public ptf 2011-04-05
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Apr 2011 09:12:03 +0000
+
 open-xchange-folder-json (6.18.2.0-26) unstable; urgency=low
 
   * build for public ptf 2011-03-31
