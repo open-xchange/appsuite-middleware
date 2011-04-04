@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -144,6 +144,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Mar 31 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
 * Tue Mar 01 2011 - marcus.klein@open-xchange.com
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Tue Mar 01 2011 - choeger@open-xchange.com
