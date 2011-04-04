@@ -161,8 +161,6 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
         newElement.setContext(subscription.getContext());
         addPrefixToUID(newElement);  
-        // TODO: this needs to go
-        LOG.info(newElement.getNotification());
         calendarSql.insertAppointmentObject(newElement);
     }
 
