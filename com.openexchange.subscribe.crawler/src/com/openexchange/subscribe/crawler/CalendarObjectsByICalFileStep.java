@@ -105,8 +105,8 @@ public class CalendarObjectsByICalFileStep extends
 								.parseAppointments(iCalFile, TimeZone
 										.getDefault(),
 										//TODO: this needs to be in again
-										//workflow.getSubscription().getContext(),
-										new ContextImpl(23),
+										workflow.getSubscription().getContext(),
+										//new ContextImpl(23),
 										conversionErrors,
 										new ArrayList<ConversionWarning>());						
 					} else {
