@@ -230,7 +230,7 @@ public class ContactTestManager implements TestManager {
      * Remembers this contact for cleanup later.
      */
     public Contact newAction(Contact contactToCreate) {
-        InsertRequest request = new InsertRequest(contactToCreate);
+        InsertRequest request = new InsertRequest(contactToCreate, getFailOnError());
         InsertResponse response = null;
         try {
             response = getClient().execute(request);
