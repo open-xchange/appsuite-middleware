@@ -85,7 +85,7 @@ public class AllowTextInValuesOfDynamicUserAttributesTask extends ChangeColumnTy
     
     @Override
     protected Column modifyColumn(Column c) {
-        return new Column("value", "TEXT collate utf8_unicode_ci NOT NULL");
+        return new Column("value", "TEXT CHARACTER SET utf8 collate utf8_unicode_ci NOT NULL");
     }
     
     @Override
