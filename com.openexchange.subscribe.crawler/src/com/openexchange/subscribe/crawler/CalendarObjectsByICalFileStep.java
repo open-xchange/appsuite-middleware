@@ -132,7 +132,7 @@ public class CalendarObjectsByICalFileStep extends
 		
 		//TODO: This needs to be removed
 		for (CalendarDataObject cdo : output){
-			System.out.println(cdo.getNotification());
+			LOG.info("Notification enabled? : " + cdo.getNotification());
 		}
 		executedSuccessfully = true;
 	}
