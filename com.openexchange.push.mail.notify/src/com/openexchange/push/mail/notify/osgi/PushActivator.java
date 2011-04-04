@@ -91,6 +91,10 @@ public final class PushActivator extends DeferredActivator {
     
     private static final String PROP_IMAP_LOGIN_DELIMITER = "com.openexchange.push.mail.notify.imap_login_delimiter";
 
+    private static final String PROP_USE_OX_LOGIN = "com.openexchange.push.mail.notify.use_ox_login";
+
+    private static final String PROP_USE_EMAIL_ADDRESS = "com.openexchange.push.mail.notify.use_full_email_address";
+
     private List<ServiceRegistration> serviceRegistrations;
 
     private boolean multicast;
@@ -100,6 +104,10 @@ public final class PushActivator extends DeferredActivator {
     private String imapLoginDelimiter;
 
     private int udpListenPort;
+
+    private boolean useOXLogin;
+
+    private boolean useEmailAddress;
 
     private Future<Object> udpThread;
 
@@ -153,7 +161,7 @@ public final class PushActivator extends DeferredActivator {
              * Register push manager
              */
             serviceRegistrations = new ArrayList<ServiceRegistration>(3);
-            serviceRegistrations.add(context.registerService(PushManagerService.class.getName(), new MailNotifyPushManagerService(), null));
+            serviceRegistrations.add(context.registerService(PushManagerService.class.getName(), new MailNotifyPushManagerService(useOXLogin, useEmailAddress), null));
             serviceRegistrations.add(context.registerService(
                 MailAccountDeleteListener.class.getName(),
                 new MailNotifyPushMailAccountDeleteListener(),
@@ -210,6 +218,7 @@ public final class PushActivator extends DeferredActivator {
                 multicast = true;
             }
         }
+
         tmp = configurationService.getProperty(PROP_UDP_LISTEN_HOST);
         if (null != tmp) {
             udpListenHost = tmp.trim();
@@ -217,6 +226,7 @@ public final class PushActivator extends DeferredActivator {
         } else {
             throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, PROP_UDP_LISTEN_HOST);
         }
+
         tmp = configurationService.getProperty(PROP_IMAP_LOGIN_DELIMITER);
         if (null != tmp) {
             imapLoginDelimiter = tmp.trim();
@@ -225,6 +235,7 @@ public final class PushActivator extends DeferredActivator {
             imapLoginDelimiter = null;
             sb.append("\t" + PROP_IMAP_LOGIN_DELIMITER + ": not set" + CRLF);
         }
+
         tmp = configurationService.getProperty(PROP_UDP_LISTEN_PORT);
         if (null != tmp) {
             try {
@@ -236,6 +247,25 @@ public final class PushActivator extends DeferredActivator {
         } else {
             throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, PROP_UDP_LISTEN_PORT);
         }
+
+        tmp = configurationService.getProperty(PROP_USE_OX_LOGIN);
+        useOXLogin = false;
+        if (null != tmp) {
+            if (tmp.trim().equals("true")) {
+                sb.append("\t" + PROP_USE_OX_LOGIN + ": true" + CRLF);
+                useOXLogin = true;
+            }
+        }
+
+        tmp = configurationService.getProperty(PROP_USE_EMAIL_ADDRESS);
+        useEmailAddress = false;
+        if (null != tmp) {
+            if (tmp.trim().equals("true")) {
+                sb.append("\t" + PROP_USE_EMAIL_ADDRESS + ": true" + CRLF);
+                useEmailAddress = true;
+            }
+        }
+
         LOG.info(sb);
     }
 

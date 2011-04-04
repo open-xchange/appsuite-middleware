@@ -61,10 +61,6 @@ import com.openexchange.session.Session;
  */
 public final class MailNotifyPushListener implements PushListener {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListener.class);
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * A placeholder constant for account ID.
      */

@@ -73,9 +73,45 @@ public final class MailNotifyPushListenerRegistry {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListenerRegistry.class);
     
+    
+    /**
+     * @return the useOXLogin
+     */
+    public final boolean isUseOXLogin() {
+        return useOXLogin;
+    }
+
+    
+    /**
+     * @param useOXLogin the useOXLogin to set
+     */
+    public final void setUseOXLogin(boolean useOXLogin) {
+        this.useOXLogin = useOXLogin;
+    }
+
+    
+    /**
+     * @return the useEmailAddress
+     */
+    public final boolean isUseEmailAddress() {
+        return useEmailAddress;
+    }
+
+    
+    /**
+     * @param useEmailAddress the useEmailAddress to set
+     */
+    public final void setUseEmailAddress(boolean useEmailAddress) {
+        this.useEmailAddress = useEmailAddress;
+    }
+
     private static final MailNotifyPushListenerRegistry instance = new MailNotifyPushListenerRegistry();
 
     private final ConcurrentMap<String, MailNotifyPushListener> map;
+
+    private boolean useOXLogin;
+
+    private boolean useEmailAddress;
 
     /**
      * Initializes a new {@link MailNotifyPushListenerRegistry}.
@@ -142,16 +178,27 @@ public final class MailNotifyPushListenerRegistry {
         try {
             storageContext = ContextStorage.getStorageContext(contextId);
             User user = UserStorage.getInstance().getUser(userId, storageContext);
-            final String[] ret = new String[user.getAliases().length];
+            int alength = user.getAliases().length;
+            if( useOXLogin ) {
+                alength++;
+            }
+            final String[] ret = new String[alength];
             int i=0;
             for(final String alias : user.getAliases()) {
-                final int idx = alias.indexOf("@");
-                if( idx != -1) {
-                    ret[i] = alias.substring(0, idx).toLowerCase();
-                } else {
+                if( useEmailAddress ) {
                     ret[i] = alias.toLowerCase();
+                } else {
+                    final int idx = alias.indexOf("@");
+                    if( idx != -1) {
+                        ret[i] = alias.substring(0, idx).toLowerCase();
+                    } else {
+                        ret[i] = alias.toLowerCase();
+                    }
                 }
                 i++;
+            }
+            if( useOXLogin ) {
+                ret[i] = user.getLoginInfo().toLowerCase();
             }
             return ret;
         } catch (final ContextException e) {
