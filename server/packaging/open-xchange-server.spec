@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -769,6 +769,18 @@ fi
 %doc doc/examples
 
 %changelog
+* Mon Apr 04 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18806: Removed debug output into console log file.
+ - Bugfix #18781: Improved an exception message.
+* Mon Apr 04 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #18835: Change column type of value column to TEXT.
+* Thu Mar 31 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
+ - Bugfix #18824: Fixed a coding problem setting the protocol with the additional S for secure.
+* Mon Mar 28 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18745: SQL IN is a lot faster than INNER JOIN with UNION ALL. Fixed a N+1 select problem.
+* Mon Mar 28 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18769: Proper initialization of AJP bundle
 * Fri Mar 25 2011 - marcus.klein@open-xchange.com
  - Bugfix #18755: Correctly setting the secure flag for mail account URLs when parsing with IPv6 capable URIParser.
 * Wed Mar 23 2011 - thorben.betten@open-xchange.com

@@ -1,3 +1,9 @@
+open-xchange-data-retrieval-attachment (6.20.0.0-5) unstable; urgency=low
+
+  * build for public ptf 2011-04-13
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Apr 2011 13:16:45 +0000
+
 open-xchange-data-retrieval-attachment (6.20.0.0-4) unstable; urgency=low
 
   * build for public ptf 2011-03-30
