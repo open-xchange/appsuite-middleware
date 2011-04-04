@@ -1,3 +1,7 @@
+* 2011-04-04 - choeger@open-xchange.com
+
+ - Bugfix #18834 - [L3] mail push should also check ox login name on external new mail trigger
+
 * 2011-03-14 - choeger@open-xchange.com
 
  - Bugfix #18615 - [L3] mail push does not work when login does not match mailbox name

@@ -83,6 +83,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-682
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/push_mailnotify.properties
+   if ! ox_exists_property com.openexchange.push.mail.notify.use_ox_login $pfile; then
+       ox_set_property com.openexchange.push.mail.notify.use_ox_login false $pfile
+   fi
+   if ! ox_exists_property com.openexchange.push.mail.notify.use_full_email_address $pfile; then
+       ox_set_property com.openexchange.push.mail.notify.use_full_email_address false $pfile
+   fi
+
    # SoftwareChange_Request-449
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/push_mailnotify.properties

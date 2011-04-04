@@ -62,17 +62,27 @@ public final class MailNotifyPushManagerService implements PushManagerService {
 
     private final String name;
 
+    private boolean useOXLogin;
+    
+    private boolean useEmailAddress;
+
     /**
      * Initializes a new {@link MailNotifyPushManagerService}.
      */
-    public MailNotifyPushManagerService() {
+    public MailNotifyPushManagerService(final boolean useOXLogin, final boolean useEmailAddress) {
         super();
         name = "Mail Push Manager";
+        
+        this.useOXLogin = useOXLogin;
+        this.useEmailAddress = useEmailAddress;
     }
 
     public PushListener startListener(final Session session) throws PushException {
         final MailNotifyPushListener pushListener = MailNotifyPushListener.newInstance(session);
-        if (MailNotifyPushListenerRegistry.getInstance().addPushListener(
+        MailNotifyPushListenerRegistry listener = MailNotifyPushListenerRegistry.getInstance();
+        listener.setUseEmailAddress(useEmailAddress);
+        listener.setUseOXLogin(useOXLogin);
+        if (listener.addPushListener(
             session.getContextId(),
             session.getUserId(),
             pushListener)) {
