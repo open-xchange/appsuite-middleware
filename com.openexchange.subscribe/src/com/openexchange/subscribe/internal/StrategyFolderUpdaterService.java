@@ -89,9 +89,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
     public void save(Collection<T> data, Subscription subscription) throws AbstractOXException {
         Object session = strategy.startSession(subscription);
         
-        Collection<T> dataInFolder = strategy.getData(subscription, session);
-      //TODO: This needs to be removed
-        LOG.info("***** (StrategyFolderUpdaterService) Number of Objects in Folder already (should be 0): " + dataInFolder.size());
+        Collection<T> dataInFolder = strategy.getData(subscription, session);      
         
         for(T element : data) {
             try {
@@ -99,16 +97,12 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
                 if(bestMatch == null) {
                     strategy.save(element, session);
                 } else {
-                    strategy.update(bestMatch, element, session);
-                    //TODO: This needs to be removed
-                    LOG.info("(StrategyFolderUpdaterService) Update, this should NOT be happening");
+                    strategy.update(bestMatch, element, session);                    
                 }
             } catch (AbstractOXException x) {
                 LOG.error(x.getMessage(), x);
             }
-        }
-        //TODO: This needs to be removed
-        LOG.info("***** (StrategyFolderUpdaterService) Number of Objects to be saved / updated in the subscription: " + data.size());
+        }        
         strategy.closeSession(session);
     }
 

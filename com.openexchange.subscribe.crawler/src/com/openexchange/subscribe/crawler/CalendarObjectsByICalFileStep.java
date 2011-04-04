@@ -95,8 +95,6 @@ public class CalendarObjectsByICalFileStep extends
 				LOG.debug("This should be an iCal-File : \n"
 						+ input.getWebResponse().getContentAsString());
 				String iCalFile = input.getWebResponse().getContentAsString();
-				// TODO: this needs to be removed
-				LOG.info("This is the iCal-File  : " + iCalFile);
 				if (null != iCalFile) {
 					ICalParser iCalParser = workflow.getActivator()
 							.getICalParser();
@@ -108,11 +106,7 @@ public class CalendarObjectsByICalFileStep extends
 										.getDefault(), workflow
 										.getSubscription().getContext(),
 										conversionErrors,
-										new ArrayList<ConversionWarning>());
-						// TODO: this needs to be removed
-						LOG
-								.info("***** (CalendarObjectsByICalFileStep) This is the number of conversion errors : "
-										+ conversionErrors.size());
+										new ArrayList<ConversionWarning>());						
 					} else {
 						LOG.error("No iCal-Parser found!");
 					}
@@ -132,27 +126,7 @@ public class CalendarObjectsByICalFileStep extends
 		output = new CalendarDataObject[events.size()];
 		for (int i = 0; i < events.size() && i < output.length; i++) {
 			output[i] = events.get(i);
-			// TODO: This needs to be removed again
-			LOG.info("event retrieved is : " + events.get(i).getTitle());
-			LOG.info("Timezone is : " + events.get(i).getTimezone());
-			LOG.info("Start Date is : " + events.get(i).getStartDate());
-			LOG.info("End Date is : " + events.get(i).getEndDate());
-			LOG.info("Description is : " + events.get(i).getNote());
-			if (null != events.get(i).getParticipants()) {
-				LOG.info("No. of Participants : "
-						+ events.get(i).getParticipants().length);
-				for (Participant participant : events.get(i).getParticipants()) {
-					LOG.info("   Participant : display_name : "
-							+ participant.getDisplayName() + ", email : "
-							+ participant.getEmailAddress());
-				}
-			}
-			System.out.println("----------");
-		}
-		// TODO: This needs to be removed again
-		LOG
-				.info("***** (CalendarObjectsByICalFileStep) This is the number of CalendarDataObjects that went in : "
-						+ events.size());
+		}		
 		executedSuccessfully = true;
 	}
 
