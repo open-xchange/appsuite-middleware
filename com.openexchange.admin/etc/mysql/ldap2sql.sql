@@ -86,8 +86,8 @@ CREATE TABLE user_attribute (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     name VARCHAR(128) NOT NULL,
-    value VARCHAR(128) NOT NULL,
-    INDEX (cid,name,value),
+    value TEXT NOT NULL,
+    INDEX (cid,name,value(20)),
     FOREIGN KEY (cid, id) REFERENCES user(cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
