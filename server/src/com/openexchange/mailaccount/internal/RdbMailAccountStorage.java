@@ -1745,6 +1745,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int id = -1;
+        String type = "mail account";
         try {
             con = Database.get(cid, false);
             stmt = con.prepareStatement(SELECT_PASSWORD1);
@@ -1771,7 +1772,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setInt(2, user);
 
             rs = stmt.executeQuery();
-
+            type = "transport account";
             while (rs.next()) {
                 id = rs.getInt(1);
                 if (id != MailAccount.DEFAULT_ID) {
@@ -1787,7 +1788,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } catch (final GeneralSecurityException e) {
-            return "Failed on decrypting mail account password for account "+id+" user: "+user+", cid: "+cid+ "Reason: "+e.toString();
+            return "Failed on decrypting "+type+" password for account "+id+" user: "+user+", cid: "+cid+ "Reason: "+e.toString();
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (con != null) {
