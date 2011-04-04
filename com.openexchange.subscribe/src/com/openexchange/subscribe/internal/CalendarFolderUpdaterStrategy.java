@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -79,6 +83,8 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
     private static final int[] COMPARISON_COLUMNS = {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.UID, Appointment.NOTE, Appointment.LAST_MODIFIED, Appointment.SEQUENCE };
 
+    private static final Log LOG = LogFactory.getLog(CalendarFolderUpdaterStrategy.class);
+    
     public int calculateSimilarityScore(CalendarDataObject original, CalendarDataObject candidate, Object session) throws AbstractOXException {
         int score = 0;
         // A score of 10 is sufficient for a match        
@@ -155,6 +161,8 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
         newElement.setContext(subscription.getContext());
         addPrefixToUID(newElement);  
+        // TODO: this needs to go
+        LOG.info(newElement.getNotification());
         calendarSql.insertAppointmentObject(newElement);
     }
 

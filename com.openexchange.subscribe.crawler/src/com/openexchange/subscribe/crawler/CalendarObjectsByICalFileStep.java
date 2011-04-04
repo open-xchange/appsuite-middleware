@@ -103,8 +103,10 @@ public class CalendarObjectsByICalFileStep extends
 						ArrayList<ConversionError> conversionErrors = new ArrayList<ConversionError>();
 						tempEvents = (ArrayList<CalendarDataObject>) iCalParser
 								.parseAppointments(iCalFile, TimeZone
-										.getDefault(), workflow
-										.getSubscription().getContext(),
+										.getDefault(),
+										//TODO: this needs to be in again
+										//.getSubscription().getContext(),
+										new ContextImpl(23),
 										conversionErrors,
 										new ArrayList<ConversionWarning>());						
 					} else {
@@ -126,7 +128,12 @@ public class CalendarObjectsByICalFileStep extends
 		output = new CalendarDataObject[events.size()];
 		for (int i = 0; i < events.size() && i < output.length; i++) {
 			output[i] = events.get(i);
-		}		
+		}
+		
+		//TODO: This needs to be removed
+		for (CalendarDataObject cdo : output){
+			System.out.println(cdo.getNotification());
+		}
 		executedSuccessfully = true;
 	}
 
