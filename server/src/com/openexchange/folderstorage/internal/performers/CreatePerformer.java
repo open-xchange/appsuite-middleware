@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
@@ -277,32 +278,50 @@ public final class CreatePerformer extends AbstractPerformer {
                  * Special handling for mail folders on root level
                  */
                 if (FolderStorage.PRIVATE_ID.equals(parentId) && MailContentType.getInstance().toString().equals(folderContentType.toString())) {
-                    final Folder clone4Real = (Folder) toCreate.clone();
                     final String rootId = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
-                    clone4Real.setParentID(rootId);
-                    capStorage.createFolder(clone4Real, storageParameters);
-                    toCreate.setID(clone4Real.getID());
                     /*
-                     * Update parent's last-modified time stamp
+                     * Check if create is allowed
                      */
-                    final boolean started = realStorage.startTransaction(storageParameters, true);
-                    try {
-                        realStorage.updateLastModified(System.currentTimeMillis(), FolderStorage.REAL_TREE_ID, parentId, storageParameters);
-                        if (started) {
-                            realStorage.commitTransaction(storageParameters);
+                    final Permission rootPermission;
+                    {
+                        final Folder rootFolder = capStorage.getFolder(treeId, rootId, storageParameters);
+                        final List<ContentType> contentTypes = Collections.<ContentType> emptyList();
+                        if (null == getSession()) {
+                            rootPermission = CalculatePermission.calculate(rootFolder, getUser(), getContext(), contentTypes);
+                        } else {
+                            rootPermission = CalculatePermission.calculate(rootFolder, getSession(), contentTypes);
                         }
-                    } catch (final FolderException e) {
-                        if (started) {
-                            realStorage.rollback(storageParameters);
-                        }
-                        throw e;
-                    } catch (final Exception e) {
-                        if (started) {
-                            realStorage.rollback(storageParameters);
-                        }
-                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
-                    return toCreate.getID();
+                    if (rootPermission.getFolderPermission() >= Permission.CREATE_SUB_FOLDERS) {
+                        /*
+                         * Creation of subfolders is allowed
+                         */
+                        final Folder clone4Real = (Folder) toCreate.clone();
+                        clone4Real.setParentID(rootId);
+                        capStorage.createFolder(clone4Real, storageParameters);
+                        toCreate.setID(clone4Real.getID());
+                        /*
+                         * Update parent's last-modified time stamp
+                         */
+                        final boolean started = realStorage.startTransaction(storageParameters, true);
+                        try {
+                            realStorage.updateLastModified(System.currentTimeMillis(), FolderStorage.REAL_TREE_ID, parentId, storageParameters);
+                            if (started) {
+                                realStorage.commitTransaction(storageParameters);
+                            }
+                        } catch (final FolderException e) {
+                            if (started) {
+                                realStorage.rollback(storageParameters);
+                            }
+                            throw e;
+                        } catch (final Exception e) {
+                            if (started) {
+                                realStorage.rollback(storageParameters);
+                            }
+                            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        }
+                        return toCreate.getID();
+                    }
                 }
                 /*
                  * 1. Create at default location in capable real storage
