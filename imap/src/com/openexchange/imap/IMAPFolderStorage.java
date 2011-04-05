@@ -268,7 +268,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (null != mailFolder) {
             try {
                 IMAPFolder folder = (IMAPFolder) (DEFAULT_FOLDER_ID.equals(fullName) ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
-                if (!folder.exists()) {
+                if (!doesExist(folder)) {
                     folder = checkForNamespaceFolder(fullName);
                 }
                 if (null == folder) {
@@ -320,7 +320,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         try {
             IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
             synchronized (f) {
-                if (!f.exists()) {
+                if (!doesExist(f)) {
                     f = checkForNamespaceFolder(fullName);
                     if (null == f) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
@@ -344,7 +344,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         try {
             IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
             synchronized (f) {
-                if (!f.exists()) {
+                if (!doesExist(f)) {
                     f = checkForNamespaceFolder(fullName);
                     if (null == f) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
@@ -364,7 +364,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public boolean exists(final String fullname) throws MailException {
         try {
-            if (DEFAULT_FOLDER_ID.equals(fullname)) {
+            if (DEFAULT_FOLDER_ID.equals(fullname) || STR_INBOX.equals(fullname)) {
                 return true;
             }
             if (imapStore.getFolder(fullname).exists()) {
@@ -463,7 +463,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
-            if (parent.exists()) {
+            if (doesExist(parent)) {
                 /*
                  * Holds LOOK-UP right?
                  */
@@ -659,7 +659,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 parent = (IMAPFolder) imapStore.getFolder(parentFullname);
                 isParentDefault = false;
             }
-            if (!parent.exists()) {
+            if (!doesExist(parent)) {
                 parent = checkForNamespaceFolder(parentFullname);
                 if (null == parent) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
@@ -743,7 +743,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
                  */
                 synchronized (createMe) {
-                    if (createMe.exists()) {
+                    if (doesExist(createMe)) {
                         throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, createMe.getFullName());
                     }
                     final int ftype;
@@ -860,7 +860,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final MessagingException e) {
             if (createMe != null && created) {
                 try {
-                    if (createMe.exists()) {
+                    if (doesExist(createMe)) {
                         createMe.delete(true);
                     }
                 } catch (final Throwable e2) {
@@ -878,7 +878,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL.getNumber() != e.getDetailNumber()) {
                 if (createMe != null && created) {
                     try {
-                        if (createMe.exists()) {
+                        if (doesExist(createMe)) {
                             createMe.delete(true);
                         }
                     } catch (final Throwable e2) {
@@ -893,7 +893,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final MailException e) {
             if (createMe != null && created) {
                 try {
-                    if (createMe.exists()) {
+                    if (doesExist(createMe)) {
                         createMe.delete(true);
                     }
                 } catch (final Throwable e2) {
@@ -907,7 +907,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final AbstractOXException e) {
             if (createMe != null && created) {
                 try {
-                    if (createMe.exists()) {
+                    if (doesExist(createMe)) {
                         createMe.delete(true);
                     }
                 } catch (final Throwable e2) {
@@ -921,7 +921,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final Exception e) {
             if (createMe != null && created) {
                 try {
-                    if (createMe.exists()) {
+                    if (doesExist(createMe)) {
                         createMe.delete(true);
                     }
                 } catch (final Throwable e2) {
@@ -958,7 +958,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolder renameMe = (IMAPFolder) imapStore.getFolder(fullname);
-            if (!renameMe.exists()) {
+            if (!doesExist(renameMe)) {
                 renameMe = checkForNamespaceFolder(fullname);
                 if (null == renameMe) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
@@ -1022,7 +1022,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             par,
                             new StringBuilder(par.getFullName()).append(separator).toString());
                 }
-                if (renameFolder.exists()) {
+                if (doesExist(renameFolder)) {
                     throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
                 }
                 if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
@@ -1077,7 +1077,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, renameMe.getFullName(), newFullName);
                 }
                 renameMe = (IMAPFolder) imapStore.getFolder(oldFullName);
-                if (renameMe.exists()) {
+                if (doesExist(renameMe)) {
                     deleteFolder(renameMe);
                 }
                 renameMe = (IMAPFolder) imapStore.getFolder(newFullName);
@@ -1116,7 +1116,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
             IMAPFolder moveMe = (IMAPFolder) imapStore.getFolder(fullname);
-            if (!moveMe.exists()) {
+            if (!doesExist(moveMe)) {
                 moveMe = checkForNamespaceFolder(fullname);
                 if (null == moveMe) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
@@ -1184,7 +1184,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         destFolder = (IMAPFolder) imapStore.getFolder(newParent);
                         isDestRoot = false;
                     }
-                    if (!destFolder.exists()) {
+                    if (!doesExist(destFolder)) {
                         destFolder = checkForNamespaceFolder(newParent);
                         if (null == destFolder) {
                             /*
@@ -1315,7 +1315,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 par,
                                 new StringBuilder(par.getFullName()).append(separator).toString());
                     }
-                    if (renameFolder.exists()) {
+                    if (doesExist(renameFolder)) {
                         throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
                     }
                     if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
@@ -1377,7 +1377,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, moveMe.getFullName(), newFullName);
                     }
                     moveMe = (IMAPFolder) imapStore.getFolder(oldFullName);
-                    if (moveMe.exists()) {
+                    if (doesExist(moveMe)) {
                         deleteFolder(moveMe);
                     }
                     moveMe = (IMAPFolder) imapStore.getFolder(newFullName);
@@ -1411,7 +1411,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
             IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullname);
-            if (!updateMe.exists()) {
+            if (!doesExist(updateMe)) {
                 updateMe = checkForNamespaceFolder(fullname);
                 if (null == updateMe) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
@@ -1534,7 +1534,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private void deleteTemporaryCreatedFolder(final IMAPFolder temporaryFolder) throws MessagingException {
-        if (temporaryFolder.exists()) {
+        if (doesExist(temporaryFolder)) {
             try {
                 temporaryFolder.delete(true);
             } catch (final MessagingException e1) {
@@ -1550,7 +1550,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
             IMAPFolder deleteMe = (IMAPFolder) imapStore.getFolder(fullname);
-            if (!deleteMe.exists()) {
+            if (!doesExist(deleteMe)) {
                 deleteMe = checkForNamespaceFolder(fullname);
                 if (null == deleteMe) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
@@ -1582,7 +1582,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         IMAPFolder newFolder =
                             (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
                                 name).toString());
-                        while (newFolder.exists()) {
+                        while (doesExist(newFolder)) {
                             /*
                              * A folder of the same name already exists. Append appropriate appendix to folder name and check existence
                              * again.
@@ -1621,7 +1621,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
             IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
-            if (!f.exists()) {
+            if (!doesExist(f)) {
                 f = checkForNamespaceFolder(fullname);
                 if (null == f) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
@@ -1826,7 +1826,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return EMPTY_PATH;
             }
             IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
-            if (!f.exists()) {
+            if (!doesExist(f)) {
                 f = checkForNamespaceFolder(fullname);
                 if (null == f) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
@@ -1904,7 +1904,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
             synchronized (f) {
-                if (!isDefaultFolder && !f.exists()) {
+                if (!isDefaultFolder && !doesExist(f)) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                 }
                 try {
@@ -2040,7 +2040,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         final String fullName = deleteMe.getFullName();
         if (getChecker().isDefaultFolder(fullName)) {
             throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_DELETE, imapConfig, session, fullName);
-        } else if (!deleteMe.exists()) {
+        } else if (!doesExist(deleteMe)) {
             throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
         }
         try {
@@ -2189,7 +2189,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         /*
          * Move by creating a new folder, copying all messages and deleting old folder
          */
-        if (checkForDuplicate && newFolder.exists()) {
+        if (checkForDuplicate && doesExist(newFolder)) {
             throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, newFolder.getName());
         }
         /*
@@ -2498,6 +2498,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final MessagingException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    private static boolean doesExist(final IMAPFolder imapFolder) throws MessagingException {
+        return STR_INBOX.equals(imapFolder.getFullName()) || imapFolder.exists();
     }
 
 }

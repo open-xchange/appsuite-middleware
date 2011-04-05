@@ -236,7 +236,7 @@ public final class IMAPFolderConverter {
                 // Convert non-root folder
                 final IMAPMailFolder mailFolder = new IMAPMailFolder();
                 mailFolder.setRootFolder(false);
-                final boolean exists = imapFolder.exists(); // Fires: LIST "" INBOX/sub1
+                final boolean exists = "INBOX".equals(imapFullname) || imapFolder.exists(); // Fires: LIST "" INBOX/sub1
                 mailFolder.setExists(exists);
                 mailFolder.setSeparator(imapFolder.getSeparator());
                 // Shared?

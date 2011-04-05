@@ -949,7 +949,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullname);
                 try {
-                    if (!destFolder.exists()) {
+                    if (!STR_INBOX.equals(destFullname) && !destFolder.exists()) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, destFullname);
                     }
                     if ((destFolder.getType() & Folder.HOLDS_MESSAGES) == 0) {

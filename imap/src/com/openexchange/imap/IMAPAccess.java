@@ -290,7 +290,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Obtain IMAP folder
              */
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullname);
-            final boolean exists = imapFolder.exists();
+            final boolean exists = "INBOX".equals(fullname) || imapFolder.exists();
             final IMAPConfig imapConfig = getIMAPConfig();
             if (!exists) {
                 throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);

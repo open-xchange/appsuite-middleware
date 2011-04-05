@@ -334,7 +334,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
          * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
          */
         synchronized (retval) {
-            if (!isDefaultFolder && !retval.exists()) {
+            if (!isDefaultFolder && !STR_INBOX.equals(fullname) && !retval.exists()) {
                 throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, retval.getFullName());
             }
             if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
