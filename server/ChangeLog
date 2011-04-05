@@ -4,6 +4,7 @@
  - Bugfix #18806: Suppress JavaMail debug logging
  - Bugfix #18852: Fixed selecting referenced message on forward operation
  - Bugfix #18842: Assume INBOX exists regardless of IMAP server's LIST response
+ - Bugfix #18807: Fixed possible NPE
 
 * 2011-04-05 - marcus.klein@open-xchange.com
 
