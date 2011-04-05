@@ -77,9 +77,17 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class ImapIdlePushListener implements PushListener {
 
+    
+    /**
+     * @param debugEnabled the debugEnabled to set
+     */
+    public static final void setDebugEnabled(boolean debugEnabled) {
+        DEBUG_ENABLED = debugEnabled;
+    }
+
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListener.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
     /**
      * A placeholder constant for account ID.
@@ -87,6 +95,8 @@ public final class ImapIdlePushListener implements PushListener {
     private static final int ACCOUNT_ID = 0;
 
     private static volatile String folder;
+    
+    private static int errordelay;
 
     /**
      * Gets the account ID constant.
@@ -139,6 +149,10 @@ public final class ImapIdlePushListener implements PushListener {
     private final int contextId;
 
     private volatile Future<Object> imapIdleFuture;
+
+    private MailAccess<?, ?> mailAccess;
+
+    private MailService mailService;
     
     /**
      * Initializes a new {@link ImapIdlePushListener}.
@@ -151,6 +165,25 @@ public final class ImapIdlePushListener implements PushListener {
         this.session = session;
         userId = session.getUserId();
         contextId = session.getContextId();
+        mailAccess = null;
+        mailService = null;
+        errordelay = 1000;
+    }
+
+    
+    /**
+     * @return the errordelay
+     */
+    public static final int getErrordelay() {
+        return errordelay;
+    }
+
+    
+    /**
+     * @param errordelay the errordelay to set
+     */
+    public static final void setErrordelay(int errordelay) {
+        ImapIdlePushListener.errordelay = errordelay;
     }
 
     @Override
@@ -170,7 +203,15 @@ public final class ImapIdlePushListener implements PushListener {
         final ThreadPoolService threadPoolService;
         try {
             threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
+            IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
+            if( imcf.isWatcherEnabled() ) {
+                LOG.error("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
+            }
+            mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
         } catch (final ServiceException e) {
+            throw new PushException(e);
+        } catch (MailException e) {
             throw new PushException(e);
         }
         imapIdleFuture = threadPoolService.submit(ThreadPools.task(new ImapIdlePushListenerTask(this)));
@@ -197,19 +238,13 @@ public final class ImapIdlePushListener implements PushListener {
              * Still in process...
              */
             if (DEBUG_ENABLED) {
-                LOG.debug(new StringBuilder(64).append("Listener still in process for user ").append(userId).append(" in context ").append(
+                LOG.info(new StringBuilder(64).append("Listener still in process for user ").append(userId).append(" in context ").append(
                     contextId).append(". Return immediately.").toString());
             }
             return;
         }
-        MailAccess<?, ?> mailAccess = null;
         try {
-            final MailService mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
-            IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
-            if( imcf.isWatcherEnabled() ) {
-                LOG.error("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
-            }
             mailAccess.connect();
             Object fstore = mailAccess.getFolderStorage();
             if( ! (fstore instanceof IMAPFolderStorage) ) {
@@ -222,24 +257,38 @@ public final class ImapIdlePushListener implements PushListener {
                 inbox.open(IMAPFolder.READ_WRITE);
             }
             if( DEBUG_ENABLED ) {
-                LOG.debug("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                LOG.info("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
             }
             inbox.idle(true);
             if( inbox.getNewMessageCount() > 0 ) {
                 if( DEBUG_ENABLED ) {
-                    LOG.debug("IDLE: new mail for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                    int nmails = inbox.getNewMessageCount();
+                    LOG.info("IDLE: " + nmails + " new mail(s) for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
                 }
                 notifyNewMail();
             }
-        } catch (final ServiceException e) {
-            throw new PushException(e);
+            /* NOTE: we cannot throw Exceptions because that would stop the IDLE'ing when e.g.
+             * IMAP server is down/busy for a moment or if e.g. cyrus client timeout happens
+             * (idling for too long)
+             */
         } catch (MailException e) {
-            throw new PushException(e);
+            // throw new PushException(e);
+            LOG.error("ERROR in IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
+            try {
+                Thread.sleep(errordelay);
+            } catch (InterruptedException e1) {
+                LOG.error("ERROR in IDLE'ing: " + e.getMessage(), e);
+            }
         } catch (MessagingException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e.toString());
+            LOG.error("ERROR in IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
+            try {
+                Thread.sleep(errordelay);
+            } catch (InterruptedException e1) {
+                LOG.error("ERROR in IDLE'ing: " + e.getMessage(), e);
+            }
         } finally {
-            if( mailAccess != null && mailAccess.isConnected() ) {
-                mailAccess.close(false);
+            if( null != mailAccess ) {
+                mailAccess.close(true);
             }
             running.set(false);
         }

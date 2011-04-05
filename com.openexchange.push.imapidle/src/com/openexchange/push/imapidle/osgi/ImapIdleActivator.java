@@ -84,6 +84,8 @@ public final class ImapIdleActivator extends DeferredActivator {
     private List<ServiceRegistration> serviceRegistrations;
 
     private String folder;
+    
+    private int errordelay;
 
     private ServiceTracker sessiondTracker;
 
@@ -159,10 +161,16 @@ public final class ImapIdleActivator extends DeferredActivator {
                     folder = tmp.trim();
                 }
             }
+
+            errordelay = configurationService.getIntProperty("com.openexchange.push.imapidle.errordelay",1000);
+
+            boolean debug = configurationService.getBoolProperty("com.openexchange.push.imapidle.debug", true);
+            ImapIdlePushListener.setFolder(folder);
+            ImapIdlePushListener.setDebugEnabled(debug);
+            
             /*
              * Start-up
              */
-            ImapIdlePushListener.setFolder(folder);
             /*
              * Register push manager
              */
@@ -173,6 +181,11 @@ public final class ImapIdleActivator extends DeferredActivator {
                 new ImapIdleMailAccountDeleteListener(),
                 null));
             serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new ImapIdleDeleteListener(), null));
+
+            LOG.info("com.openexchange.push.imapidle bundle started");
+            LOG.info(debug ? " debugging enabled" : "debugging disabled");
+            LOG.info("Foldername: " + folder);
+            LOG.info("Error delay: " + errordelay + "");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
