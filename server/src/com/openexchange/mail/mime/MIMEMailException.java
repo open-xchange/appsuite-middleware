@@ -128,13 +128,13 @@ public class MIMEMailException extends MailException {
          */
         ILLEGAL_WRITE("Illegal write attempt: %1$s", Category.CODE_ERROR, 1004),
         /**
-         * Invalid method on a expunged message: %1$s
+         * Mail(s) could not be found in folder
          * <p>
          * The exception thrown when an invalid method is invoked on an expunged Message. The only valid methods on an expunged Message are
          * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
          * </p>
          */
-        MESSAGE_REMOVED("Invalid method on an expunged message: %1$s", Category.CODE_ERROR, 1005),
+        MESSAGE_REMOVED(String.format(MailException.Code.MAIL_NOT_FOUND.getMessage(), "", ""), MailException.Code.MAIL_NOT_FOUND.getCategory(), MailException.Code.MAIL_NOT_FOUND.getNumber()),
         /**
          * Method not supported: %1$s
          * <p>

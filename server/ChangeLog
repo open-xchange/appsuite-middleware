@@ -6,6 +6,7 @@
  - Bugfix #18842: Assume INBOX exists regardless of IMAP server's LIST response
  - Bugfix #18807: Fixed possible NPE
  - Bugfix #18797: Allow root level subfolders if Cyrus' "altNamespace" feature is enabled
+ - Bugfix #18840: Proper error message if a javax.mail.MessageRemovedException occurs
 
 * 2011-04-05 - marcus.klein@open-xchange.com
 
