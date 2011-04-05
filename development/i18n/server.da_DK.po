@@ -1,21 +1,20 @@
-# translation of server.de_DE.po to deutsch
-# Antje Faber, 2007.
-# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.
-# translation of server.new.de_DE.po to
-# translation of server.de_DE.po to
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: server.de_DE\n"
+"Project-Id-Version: server.da_DK\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2011-02-08 15:12+0100\n"
-"Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
-"Language-Team: deutsch <de@li.org>\n"
+"PO-Revision-Date: 2010-11-23 17:55+0100\n"
+"Last-Translator: Caspar Milan <milan@netsite.dk>\n"
+"Language-Team: Catalan\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Pootle 1.1.0\n"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
@@ -24,27 +23,27 @@ msgstr "Kalender"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
 msgid "Week"
-msgstr "Woche"
+msgstr "Uge"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
 msgid "All-day events"
-msgstr "Ganztägige Ereignisse"
+msgstr "Heldags-begivenheder"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
 msgid "Events"
-msgstr "Ereignisse"
+msgstr "begivenheder"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
 msgid "Location"
-msgstr "Ort"
+msgstr "Sted"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
 msgid "Participants"
-msgstr "Teilnehmer"
+msgstr "Deltagere"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
 msgid "Comments"
-msgstr "Kommentare"
+msgstr "Kommentarer"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
@@ -53,7 +52,7 @@ msgstr "Kommentare"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
 msgid "Login"
-msgstr "Login"
+msgstr "Log ind"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
@@ -62,56 +61,62 @@ msgstr "Login"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:63
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
-msgstr "Passwort"
+msgstr "Password"
 
 #. The name for the folder of a facebook account containing user's wall posts.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/NameStrings.java:62
 msgid "Wall posts"
-msgstr "Pinnwand-Meldungen"
+msgstr ""
 
 #. The name for the folder of a facebook account containing user's action links.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/NameStrings.java:65
 msgid "Action links"
-msgstr "Aktionslinks"
+msgstr ""
 
 #. The name for an album posted by a Facebook user/group
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/NameStrings.java:68
 msgid "Album"
-msgstr "Album"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
+#, fuzzy
 msgid "Confirmed ham"
-msgstr "Bestätigter Ham"
+msgstr "Godkendt e-mail"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:67
+#, fuzzy
 msgid "Confirmed ham folder"
-msgstr "Bestätigter Ham-Ordner"
+msgstr "Godkendt e-mail"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
+#, fuzzy
 msgid "Confirmed spam"
-msgstr "Bestätigter Spam"
+msgstr "Bekræftet spam"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:71
+#, fuzzy
 msgid "Confirmed spam folder"
-msgstr "Bestätigter Spam-Ordner"
+msgstr "Bekræftet spam"
 
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
-msgstr "Entwürfe"
+msgstr "Kladder"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:75
+#, fuzzy
 msgid "Drafts folder"
-msgstr "Entwürfe-Ordner"
+msgstr "Private mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:77
 msgid "Sent"
-msgstr "Gesendet"
+msgstr "Sendt"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:79
+#, fuzzy
 msgid "Sent folder"
-msgstr "Ordner Gesendet"
+msgstr "Delte mapper"
 
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
@@ -120,70 +125,80 @@ msgid "Spam"
 msgstr "Spam"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:83
+#, fuzzy
 msgid "Spam folder"
-msgstr "Spam-Ordner"
+msgstr "Delte mapper"
 
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
-msgstr "Mülleimer"
+msgstr "Papirkurv"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:87
+#, fuzzy
 msgid "Trash folder"
-msgstr "Ordner Papierkorb"
+msgstr "Private mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:89
+#, fuzzy
 msgid "Mail port"
-msgstr "Mail-Port"
+msgstr "E-mail port"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:91
+#, fuzzy
 msgid "Mail protocol"
-msgstr "Mail-Protokoll"
+msgstr "E-mail protokol"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:93
 msgid "Secure mail connection"
-msgstr "Sichere Mailverbindung"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:95
+#, fuzzy
 msgid "Mail server"
-msgstr "Mailserver"
+msgstr "E-mail server"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:97
+#, fuzzy
 msgid "Primary address"
-msgstr "Primäre Adresse"
+msgstr "Primære adresse"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:99
 msgid "Personal"
-msgstr "Persönlich"
+msgstr "Personlig"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:101
 msgid "SMTP login"
-msgstr "SMTP-Login"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:103
+#, fuzzy
 msgid "SMTP password"
-msgstr "SMTP-Passwort"
+msgstr "Password"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:105
 msgid "SMTP port"
-msgstr "SMTP-Port"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:107
+#, fuzzy
 msgid "SMTP protocol"
-msgstr "SMTP-Protokoll"
+msgstr "E-mail protokol"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:109
 msgid "Secure SMTP connection"
-msgstr "Sichere SMTP-Verbindung"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:111
+#, fuzzy
 msgid "SMTP server"
-msgstr "SMTP-Server"
+msgstr "E-mail server"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:113
+#, fuzzy
 msgid "Unified mail enabled"
-msgstr "Unified Mail aktiviert"
+msgstr "Samlet e-mail slået til"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
@@ -194,25 +209,26 @@ msgstr "URL"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
 msgid "Site"
-msgstr "Site"
+msgstr "Side"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:63
+#, fuzzy
 msgid "Apply a Template (optional)"
-msgstr "Template anwenden (optional)"
+msgstr "Template (valgfri)"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:65
 msgid "Add cipher code"
-msgstr "Chiffre hinzufügen"
+msgstr "Tilføj cifferkode"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:69
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
 msgid "OXMF Contacts"
-msgstr "OXMF-Kontakte"
+msgstr "OXMF Kontaktpersoner"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:71
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:65
 msgid "OXMF Infostore"
-msgstr "OXMF-InfoStore"
+msgstr "OXMF Infostore"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:61
 msgid ""
@@ -230,49 +246,49 @@ msgid ""
 "data:\n"
 "Data published by %s on %s\n"
 msgstr ""
-"Datenschutzhinweis:\n"
-"Alle Daten und Verweise, die Sie auf dieser Webseite sehen, wurden unter der "
-"Annahme veröffentlicht, dass der Inhaber der Daten zur Weitergabe der Daten "
-"berechtigt war. Open-Xchange und seine verbundenen Unternehmen sind nicht "
-"verantwortlich für die Weitergabe der Daten. Jede unberechtigte Verwendung "
-"oder Weitergabe dieser Daten ist verboten.\n"
-"Wenn Sie beabsichtigen, diese Daten zu speichern, zu verarbeiten oder "
-"weiterzugeben, stellen Sie bitte sicher, dass Sie dazu die entsprechenden "
-"Rechte haben, insbesondere die Zustimmung der betroffenen Personen.\n"
-"Wenn Sie feststellen, dass Ihre personenbezogenen Daten ohne Ihr "
-"Einverständnis oder andere Daten fälschlicherweise hier veröffentlicht "
-"wurden, senden Sie bitte eine Mail mit der URL/Adresse dieser Seite %s an "
-"den Herausgeber der Daten:\n"
-"Daten veröffentlicht von %s am %s\n"
+"Privatliv:\n"
+"Data og enhver referencer på denne webside, er delt med dig under antagelse "
+"af at ejeren af dataen er berettiget til at gøre den tilgængelig for dig. "
+"Hverken Open-Xchange, eller nogen af dets datterselskaber eller affiliates "
+"kan holdes ansvarlig for dets publikation eller gen-publikation .\n"
+"Ethvert uautoriseret brug eller spredning af denne data er forbudt. Hvis du "
+"har intentioner om at gemme, bruge eller give dataen videre, skal du være "
+"sikker på du har ret til det.\n"
+"Hvis du er et af menneskerne der er listet eller ansvarlig for en ressource, "
+"der er listet på denne side, og du ikke er enig med publikationen, send "
+"venligst en e-mail med URL'en til denne side til %s og til forlæggeren af "
+"dataen:\n"
+"Data publiceret af %s den %s\n"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
+#, fuzzy
 msgid "Publish Infostore Document"
-msgstr "InfoStore-Dokument veröffentlichen"
+msgstr "Offentlig infostore"
 
 #. The name for the INBOX folder
 #. The internationalized name for the INBOX mail folder
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:62
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:69
 msgid "Inbox"
-msgstr "Posteingang"
+msgstr ""
 
 #. The name for the sent folder
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:68
 msgid "Sent items"
-msgstr "Gesendete Objekte"
+msgstr ""
 
 #. Name of the parent folder for the private user folders.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
-msgstr "Persönliche Ordner"
+msgstr "Private mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
-msgstr "Öffentliche Ordner"
+msgstr "Offentlige mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
-msgstr "Freigegebene Ordner"
+msgstr "Delte mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
@@ -280,23 +296,23 @@ msgstr "System"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:70
 msgid "Shared address book"
-msgstr "Freigegebenes Adressbuch"
+msgstr "Delt adressebog"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:72
 msgid "Global address book"
-msgstr "Globales Adressbuch"
+msgstr "Global adressebog"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:74
 msgid "OX folders"
-msgstr "OX-Ordner"
+msgstr "OX mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:76
 msgid "Projects"
-msgstr "Projekte"
+msgstr "Projekter"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:78
 msgid "Infostore"
-msgstr "InfoStore"
+msgstr "Infostore"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:80
 msgid "Userstore"
@@ -304,50 +320,50 @@ msgstr "Userstore"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:82
 msgid "Public infostore"
-msgstr "Öffentlicher InfoStore"
+msgstr "Offentlig infostore"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:84
 msgid "Other task folders"
-msgstr "Weitere Aufgabenordner"
+msgstr "Andre opgaver mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:86
 msgid "Other calendar folders"
-msgstr "Weitere Kalenderordner"
+msgstr "Andre kalender mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:88
 msgid "Other contact folders"
-msgstr "Weitere Kontaktordner"
+msgstr "Andre kontakt mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
 msgid "Other infostore folders"
-msgstr "Weitere InfoStore-Ordner"
+msgstr "Andre infostore mapper"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Tasks"
-msgstr "Aufgaben"
+msgstr "Opgaver"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
-msgstr "Kontakte"
+msgstr "Kontaktpersoner"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:98
 msgid "Collected addresses"
-msgstr "Gesammelte Adressen"
+msgstr "Samlede adresser"
 
 #. Display name of group with identifier 0. This group always contains all existing users of a context.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All users"
-msgstr "Alle Anwender"
+msgstr "All brugere"
 
 #. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:71
 msgid "Standard group"
-msgstr "Standardgruppe"
+msgstr "Standard gruppe"
 
 #. The internationalized subject for a read acknowledgement
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:72
 msgid "Read Acknowledgement"
-msgstr "Lesebestätigung"
+msgstr "Bekræftelse på læsning"
 
 #. The text body of a received read acknowledgement
 #. #DATE# is replaced with the sent date of referenced email
@@ -362,13 +378,12 @@ msgid ""
 "on the recipients computer. There is no guarantee that the recipient has "
 "read or understood the message contents."
 msgstr ""
-"Dies ist eine Empfangsbestätigung für die am #DATE# gesendete E-Mail an "
-"#RECIPIENT# mit dem Betreff \"#SUBJECT#\".\n"
+"Dette er en kvittering for modtagelsen af den e-mail du sendte den #DATE# "
+"til #RECIPIENT# med emnet \"#SUBJECT#\".\n"
 "\n"
-"Bitte beachten Sie, dass diese Empfangsbestätigung lediglich das Anzeigen "
-"der Nachricht auf dem Rechner des Empfängers bestätigt. Es gibt keine "
-"Garantie, dass der Empfänger die E-Mail gelesen oder deren Inhalt verstanden "
-"hat."
+"Bemærk: Denne kvittering bekræfter kun at e-mailen har været vist på "
+"modtagernes computere. Det er ingen garanti for en modtager har læst eller "
+"forstået e-mailens indhold."
 
 #. The prefixed text on reply.
 #. #DATE# is replaced with the sent date of referenced email
@@ -376,7 +391,7 @@ msgstr ""
 #. #SENDER# is replaced with personal and/or email address of the sender
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:84
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
-msgstr "#SENDER# hat am #DATE# um #TIME# geschrieben:"
+msgstr "Den #DATE# kl. #TIME# skrev #SENDER#:"
 
 #. The prefixed text on inline forward.
 #. #FROM# is replaced with personal and/or email address of original message's From header
@@ -394,16 +409,16 @@ msgid ""
 "Date: #DATE# at #TIME#\n"
 "Subject: #SUBJECT#"
 msgstr ""
-"---------- Ursprüngliche Nachricht ----------\n"
-"Von: #FROM#\n"
-"An: #TO##CC_LINE#\n"
-"Datum: #DATE# um #TIME#\n"
-"Betreff: #SUBJECT#"
+"---------- Original e-mail ----------\n"
+"Fra: #FROM#\n"
+"Til: #TO##CC_LINE#\n"
+"Dato: #DATE# kl. #TIME#\n"
+"Emne: #SUBJECT#"
 
 #. The internationalized default subject.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "[No Subject]"
-msgstr "[Kein Betreff]"
+msgstr "[Intet emne]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
@@ -411,19 +426,19 @@ msgstr "[Kein Betreff]"
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
 msgstr ""
-"Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
+"De tilgængelige vedhæftninger for denne e-mail kan hentes via følgende links:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "The links will be deleted by #DATE#"
-msgstr "Die Links werden bis #DATE# gelöscht"
+msgstr "Links vil blive slettet den #DATE#"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "Dear Sir or Madam"
-msgstr "Sehr geehrte(r) Dame/Herr"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -452,14 +467,14 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Ein neuer Termin wurde erstellt von [created_by].\n"
-"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"En ny aftale blev oprettet af [created_by].\n"
+"Du kan se denne aftale i din kalender:\n"
 "[link]\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
@@ -467,15 +482,15 @@ msgstr ""
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
-"==========\n"
+"Deltagere\n"
+"============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
-"==========\n"
+"Ressourcer\n"
+"=========\n"
 "[resources]\n"
 "\n"
-"=========================================="
+"========================================== "
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:94
 msgid ""
@@ -501,29 +516,30 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Ein neuer Termin wurde erstellt von [created_by].\n"
+"En ny aftale blev oprettet af [created_by].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location]\n"
 "[start]\n"
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
-"====================="
+"=========================================="
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:124
+#, fuzzy
 msgid ""
 "A new appointment was created by [created_by] on behalf of [behalf_of].\n"
 "You can check this appointment in your calendar:\n"
@@ -550,15 +566,14 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Ein neuer Termin wurde erstellt von [created_by] im Auftrag von "
-"[behalf_of].\n"
-"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"En ny aftale blev oprettet af [created_by].\n"
+"Du kan se denne aftale i din kalender:\n"
 "[link]\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
@@ -566,17 +581,18 @@ msgstr ""
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
-"==========\n"
+"Deltagere\n"
+"============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
-"==========\n"
+"Ressourcer\n"
+"=========\n"
 "[resources]\n"
 "\n"
-"=========================================="
+"========================================== "
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:157
+#, fuzzy
 msgid ""
 "A new appointment was created by [created_by] on behalf of [behalf_of].\n"
 "\n"
@@ -600,28 +616,27 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Ein neuer Termin wurde erstellt von [created_by] im Auftrag von "
-"[behalf_of].\n"
+"En ny aftale blev oprettet af [created_by].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location]\n"
 "[start]\n"
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
-"====================="
+"=========================================="
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:194
 msgid ""
@@ -652,14 +667,14 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Eine neue Aufgabe wurde erstellt von [created_by].\n"
-"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"En ny opgave blev oprettet af [created_by].\n"
+"Du kan se denne opgave under dine opgaver:\n"
 "[link]\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von: [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Opgave\n"
+"====\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
@@ -669,11 +684,11 @@ msgstr ""
 "[end]\n"
 "[series]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -706,12 +721,12 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Eine neue Aufgabe wurde erstellt von [created_by].\n"
+"En ny opgave blev oprettet af [created_by].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Opgave\n"
+"====\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
@@ -721,15 +736,15 @@ msgstr ""
 "[end]\n"
 "[series]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:266
 msgid ""
@@ -758,14 +773,14 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Dieser Termin findet nicht statt.\n"
-"Er wurde entweder von [changed_by] gelöscht oder\n"
-"Sie wurden von der Liste der Teilnehmer entfernt.\n"
+"Denne aftale finder ikke sted.\n"
+"Den blev enten slettet af [changed_by] eller\n"
+"du er blevet fjernet fra listen over deltagere.\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am:  [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
@@ -773,11 +788,11 @@ msgstr ""
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -811,13 +826,13 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Diese Aufgabe wurde entweder von [changed_by] gelöscht\n"
-"oder Sie wurden aus der Liste der Teilnehmer entfernt.\n"
+"Denne opgave blev enten slettet af [changed_by] eller\n"
+"du er blevet fjernet fra listen over deltagere.\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am:  [creation_datetime]\n"
+"Opgave\n"
+"====\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
@@ -827,15 +842,15 @@ msgstr ""
 "[end]\n"
 "[series]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:334
 msgid ""
@@ -864,14 +879,14 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Dieser Termin wurde geändert von [changed_by].\n"
-"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"Denne aftale blev ændret af [changed_by].\n"
+"Du kan se denne aftale i din kalender:\n"
 "[link]\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
@@ -879,11 +894,11 @@ msgstr ""
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -914,12 +929,12 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Dieser Termin wurde geändert von [changed_by].\n"
+"Denne aftale blev ændret af [changed_by].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
@@ -927,11 +942,11 @@ msgstr ""
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -966,14 +981,14 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Diese Aufgabe wurde geändert von [changed_by].\n"
-"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"Denne opgave blev ændret af [changed_by].\n"
+"Du kan se denne opgave i dine opgaver:\n"
 "[link]\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Opgave\n"
+"====\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
@@ -983,11 +998,11 @@ msgstr ""
 "[end]\n"
 "[series]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1020,12 +1035,12 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Diese Aufgabe wurde geändert von [changed_by].\n"
+"Denne opgave blev ændret af [changed_by].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Opgave\n"
+"====\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
@@ -1035,11 +1050,11 @@ msgstr ""
 "[end]\n"
 "[series]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1072,14 +1087,14 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by] hat diesen Termin [confirmation_action].\n"
-"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"[changed_by] har [confirmation_action] denne aftale.\n"
+"Du kan se denne aftale i din kalender:\n"
 "[link]\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
@@ -1087,11 +1102,11 @@ msgstr ""
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1122,12 +1137,12 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by] hat diesen Termin [confirmation_action].\n"
+"[changed_by] har [confirmation_action] denne aftale.\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Aftale\n"
+"===========\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
@@ -1135,11 +1150,11 @@ msgstr ""
 "[end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1174,14 +1189,14 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by] hat diese Aufgabe [confirmation_action].\n"
-"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"[changed_by] har [confirmation_action] denne opgave.\n"
+"Du kan se denne opgave i dine opgaver:\n"
 "[link]\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Opgave\n"
+"====\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
@@ -1191,11 +1206,11 @@ msgstr ""
 "[end]\n"
 "[series]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1228,12 +1243,12 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by] hat diese Aufgabe [confirmation_action].\n"
+"[changed_by] har [confirmation_action] denne opgave.\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Task\n"
+"====\n"
+"Oprettet af: [created_by]\n"
+"Oprettet den: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
@@ -1243,11 +1258,11 @@ msgstr ""
 "[end]\n"
 "[series]\n"
 "[description]\n"
-"Teilnehmer\n"
+"Deltagere\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Ressourcer\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1258,51 +1273,51 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:605
 msgid "New Appointment"
-msgstr "Neuer Termin"
+msgstr "Ny aftale"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:607
 msgid "Appointment changed"
-msgstr "Termin geändert"
+msgstr "Aftale ændret"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:609
 msgid "Appointment deleted"
-msgstr "Termin gelöscht"
+msgstr "Aftale slettet"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:611
 msgid "Appointment (accepted)"
-msgstr "Termin (bestätigt)"
+msgstr "Aftale (accepteret)"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:613
 msgid "Appointment (declined)"
-msgstr "Termin (abgelehnt)"
+msgstr "Aftale (afslået)"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:615
 msgid "Appointment (tentative)"
-msgstr "Termin (vorläufig)"
+msgstr "Aftale (foreløbig)"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:617
 msgid "New task"
-msgstr "Neue Aufgabe"
+msgstr "Ny opgave"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:619
 msgid "Task changed"
-msgstr "Aufgabe geändert"
+msgstr "Opgave ændret"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:621
 msgid "Task deleted"
-msgstr "Aufgabe gelöscht"
+msgstr "Opgave slettet"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:623
 msgid "Task (accepted)"
-msgstr "Aufgabe (bestätigt)"
+msgstr "Opgave (accepteret)"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:625
 msgid "Task (declined)"
-msgstr "Aufgabe (abgelehnt)"
+msgstr "Opgave (afslået)"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:627
 msgid "Task (tentative)"
-msgstr "Aufgabe (vorläufig)"
+msgstr "Opgave (foreløbig)"
 
 #. -
 #. * MISC
@@ -1310,47 +1325,47 @@ msgstr "Aufgabe (vorläufig)"
 #. Reminder
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:634
 msgid "Reminder"
-msgstr "Erinnerung"
+msgstr ""
 
 #. No resources have been scheduled.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:637
 msgid "No resources have been scheduled."
-msgstr "Es wurden keine Ressourcen zugewiesen."
+msgstr "Ingen ressourcer er blevet planlagt."
 
 #. No series
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:640
 msgid "No series"
-msgstr "Keine Serie"
+msgstr "Ingen serier"
 
 #. No start date
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:643
 msgid "No start date"
-msgstr "Kein Startdatum"
+msgstr "Ingen startdato"
 
 #. No end date
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:646
 msgid "No end date"
-msgstr "Kein Enddatum"
+msgstr "Ingen slutdato"
 
 #. No due date
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:649
 msgid "No due date"
-msgstr "Kein Fälligkeitsdatum"
+msgstr "Ingen forfaldsdato"
 
 #. No delete exceptions
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:652
 msgid "No delete exceptions"
-msgstr "Keine Löschausnahmen"
+msgstr "Slet ikke undtagelser"
 
 #. No change exceptions
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:655
 msgid "No change exceptions"
-msgstr "Keine Änderungsausnahmen"
+msgstr "Ændre ikke undtagelser."
 
 #. Mail to resource %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:658
 msgid "Mail to resource %1$s"
-msgstr "E-Mail an Ressource %1$s"
+msgstr "E-mail til ressource %1$s"
 
 #. Resource
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:661
@@ -1360,7 +1375,7 @@ msgstr "Ressource"
 #. Not set
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:664
 msgid "Not set"
-msgstr "Nicht festgelegt"
+msgstr "Ikke sat"
 
 #. -
 #. * Confirmation actions
@@ -1369,17 +1384,17 @@ msgstr "Nicht festgelegt"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:670
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:697
 msgid "accepted"
-msgstr "bestätigt"
+msgstr "accepteret"
 
 #. declined
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:672
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:700
 msgid "declined"
-msgstr "abgelehnt"
+msgstr "afslået"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:674
 msgid "tentatively accepted"
-msgstr "vorläufig bestätigt"
+msgstr "foreløbig accepteret"
 
 #. -
 #. * TASK PRIORITIES
@@ -1387,7 +1402,7 @@ msgstr "vorläufig bestätigt"
 #. low
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:681
 msgid "Low"
-msgstr "Niedrig"
+msgstr "Lav"
 
 #. normal
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:684
@@ -1397,7 +1412,7 @@ msgstr "Normal"
 #. high
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:687
 msgid "High"
-msgstr "Hoch"
+msgstr "Høj"
 
 #. -
 #. * Confirmation statuses
@@ -1405,17 +1420,17 @@ msgstr "Hoch"
 #. waiting
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:694
 msgid "waiting"
-msgstr "Wartestatus"
+msgstr "afventer"
 
 #. tentative
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:703
 msgid "tentative"
-msgstr "vorläufig"
+msgstr "foreløbig"
 
 #. external
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:706
 msgid "external"
-msgstr "extern"
+msgstr "ekstern"
 
 #. -
 #. * Line patterns
@@ -1423,37 +1438,37 @@ msgstr "extern"
 #. Location: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:713
 msgid "Location: %1$s"
-msgstr "Ort: %1$s"
+msgstr "Sted: %1$s"
 
 #. Description: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:716
 msgid "Description: %1$s"
-msgstr "Beschreibung: %1$s"
+msgstr "Beskrivelse: %1$s"
 
 #. Folder: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:719
 msgid "Folder: %1$s"
-msgstr "Ordner: %1$s"
+msgstr "Mappe: %1$s"
 
 #. Start date: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:722
 msgid "Start date: %1$s"
-msgstr "Startdatum: %1$s"
+msgstr "Startdato: %1$s"
 
 #. End date: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:725
 msgid "End date: %1$s"
-msgstr "Enddatum: %1$s"
+msgstr "Slutdato: %1$s"
 
 #. Due date: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:728
 msgid "Due date: %1$s"
-msgstr "Fälligkeitsdatum: %1$s"
+msgstr "Forfaldsdato: %1$s"
 
 #. Series: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:731
 msgid "Series: %1$s"
-msgstr "Serie: %1$s"
+msgstr "Serier: %1$s"
 
 #. Comments:
 #. %1$s: Placeholder for comments
@@ -1462,13 +1477,13 @@ msgid ""
 "Comments:\n"
 "%1$s"
 msgstr ""
-"Kommentare:\n"
+"Kommentarer:\n"
 "%1$s"
 
 #. Priority: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:738
 msgid "Priority: %1$s"
-msgstr "Priorität: %1$s"
+msgstr "Prioritet: %1$s"
 
 #. Status: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:741
@@ -1478,12 +1493,12 @@ msgstr "Status: %1$s"
 #. Delete exceptions: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:744
 msgid "Delete exceptions: %1$s"
-msgstr "Löschausnahme: %1$s"
+msgstr "Slet undtagelser: %1$s"
 
 #. Change exceptions: %1$s
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:747
 msgid "Change exceptions: %1$s"
-msgstr "Änderungsausnahme: %1$s"
+msgstr "Ændre undtagelser: %1$s"
 
 #. Change exception of %1$s on %2$s
 #. %1$s: Placeholder for recurrence title
@@ -1491,7 +1506,7 @@ msgstr "Änderungsausnahme: %1$s"
 #. Example: My Recurring Appointment on 2009-12-06
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:753
 msgid "Change exception of %1$s on %2$s"
-msgstr "Änderungsausnahme von %1$s am %2$s"
+msgstr "Ændre undtagelse for %1$s den %2$s"
 
 #. -
 #. * Task statuses
@@ -1499,38 +1514,38 @@ msgstr "Änderungsausnahme von %1$s am %2$s"
 #. Not started
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:760
 msgid "Not started"
-msgstr "Nicht begonnen"
+msgstr "Ikke startet"
 
 #. In progress
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:763
 msgid "In progress"
-msgstr "In Bearbeitung"
+msgstr "I gang"
 
 #. Done
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:766
 msgid "Done"
-msgstr "Erledigt"
+msgstr "Udført"
 
 #. Waiting
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:769
 msgid "Waiting"
-msgstr "Wartestatus"
+msgstr "Afventer"
 
 #. Deferred
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:772
 msgid "Deferred"
-msgstr "Verschoben"
+msgstr "Udskudt"
 
 #. -
 #. * Added/Removed participant
 #.
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:778
 msgid "Added"
-msgstr "Hinzugefügt"
+msgstr "Tilføjet"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:780
 msgid "Removed"
-msgstr "Entfernt"
+msgstr "Fjernet"
 
 #. -
 #. * Numeric recurrence templates
@@ -1561,72 +1576,72 @@ msgstr "."
 #. and
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:803
 msgid "and"
-msgstr "und"
+msgstr "og"
 
 #. Each day
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:806
 msgid "Each day"
-msgstr "Jeden Tag"
+msgstr "Hver dag"
 
 #. Each %1$s days; e.g. "Each 2 days"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:809
 msgid "Each %1$s days"
-msgstr "Alle %1$s Tage"
+msgstr "Hver %1$s dag"
 
 #. Each week on %1$s; e.g. "Each week on Monday"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:812
 msgid "Each week on %1$s"
-msgstr "Jede Woche am %1$s"
+msgstr "Hver uge på %1$s"
 
 #. Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:815
 msgid "Each %1$s weeks on %2$s"
-msgstr "Alle %1$s Wochen am %2$s"
+msgstr "Hver %1$s uge på %2$s"
 
 #. On %1$s day every month; e.g. "On 1st day every month"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:818
 msgid "On %1$s day every month"
-msgstr "Am %1$s Tag jeden Monats"
+msgstr "Den %1$s dag hver måned"
 
 #. On %1$s day every %2$s month; e.g. "On 1st day every 2nd month"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:821
 msgid "On %1$s day every %2$s month"
-msgstr "Am %1$s Tag jeden %2$s Monat"
+msgstr "Den %1$s dag hver %2$s måned"
 
 #. On %1$s %2$s each month; e.g. "On first Monday each month"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:824
 msgid "On %1$s %2$s each month"
-msgstr "Am %1$s %2$s jeden Monats"
+msgstr "Den %1$s %2$s hver måned"
 
 #. On %1$s %2$s each %3$s month; e.g. "On first Monday each 3rd month"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:827
 msgid "On %1$s %2$s each %3$s month"
-msgstr "Am %1$s %2$s jeden %3$s Monats"
+msgstr "Den %1$s %2$s hver %3$s måned"
 
 #. Each %1$s %2$s; e.g. "Each 10th October"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:830
 msgid "Each %1$s %2$s"
-msgstr "Jeden %1$s %2$s"
+msgstr "Hver %1$s %2$s"
 
 #. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:833
 msgid "On %1$s %2$s in %3$s"
-msgstr "Am %1$s %2$s in %3$s"
+msgstr "Den %1$s %2$s i %3$s"
 
 #. ", ends after %1$s appointment(s)"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:836
 msgid ", ends after %1$s appointment(s)"
-msgstr ", endet nach %1$s Termin(en)"
+msgstr ", slutter efter %1$s aftale(r)"
 
 #. ", ends after %1$s task(s)"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:839
 msgid ", ends after %1$s task(s)"
-msgstr ", endet nach %1$s Aufgab(en)"
+msgstr ", sluter efter %1$s opgave(r)"
 
 #. ", ends on %1$s"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:842
 msgid ", ends on %1$s"
-msgstr ", endet am %1$s"
+msgstr ", slutter den %1$s"
 
 #. -
 #. * Months
@@ -1644,7 +1659,7 @@ msgstr "Februar"
 #. March
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:855
 msgid "March"
-msgstr "März"
+msgstr "Marts"
 
 #. April
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:858
@@ -1654,7 +1669,7 @@ msgstr "April"
 #. May
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:861
 msgid "May"
-msgstr "Mai"
+msgstr "Maj"
 
 #. June
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:864
@@ -1689,7 +1704,7 @@ msgstr "November"
 #. December
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:882
 msgid "December"
-msgstr "Dezember"
+msgstr "December"
 
 #. -
 #. * Weekdays
@@ -1697,48 +1712,48 @@ msgstr "Dezember"
 #. Monday
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:889
 msgid "Monday"
-msgstr "Montag"
+msgstr "Mandag"
 
 #. Tuesday
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:892
 msgid "Tuesday"
-msgstr "Dienstag"
+msgstr "Tirsdag"
 
 #. Wednesday
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:895
 msgid "Wednesday"
-msgstr "Mittwoch"
+msgstr "Onsdag"
 
 #. Thursday
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:898
 msgid "Thursday"
-msgstr "Donnerstag"
+msgstr "Torsdag"
 
 #. Friday
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:901
 msgid "Friday"
-msgstr "Freitag"
+msgstr "Fredag"
 
 #. Saturday
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:904
 msgid "Saturday"
-msgstr "Samstag"
+msgstr "Lørdag"
 
 #. Sunday
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:907
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:910
 msgid "Sunday"
-msgstr "Sonntag"
+msgstr "Søndag"
 
 #. Weekday
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:913
 msgid "Weekday"
-msgstr "Wochentag"
+msgstr "Hverdag"
 
 #. Weekend day
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:916
 msgid "Weekend day"
-msgstr "Wochenendtag"
+msgstr "Weekend dag"
 
 #. -
 #. * Monthly1 constants
@@ -1746,47 +1761,47 @@ msgstr "Wochenendtag"
 #. first
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:923
 msgid "first"
-msgstr "ersten"
+msgstr "først"
 
 #. second
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:926
 msgid "second"
-msgstr "zweiten"
+msgstr "anden"
 
 #. third
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:929
 msgid "third"
-msgstr "dritten"
+msgstr "tredje"
 
 #. fourth
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:932
 msgid "fourth"
-msgstr "vierten"
+msgstr "fjerde"
 
 #. last
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:935
 msgid "last"
-msgstr "letzten"
+msgstr "sidste"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
-msgstr "Afrika/Abidjan"
+msgstr "Africa/Abidjan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:3
 msgid "Africa/Accra"
-msgstr "Afrika/Accra"
+msgstr "Africa/Accra"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:4
 msgid "Africa/Addis Ababa"
-msgstr "Afrika/Addis Abeba"
+msgstr "Africa/Addis Ababa"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:5
 msgid "Africa/Algiers"
-msgstr "Afrika/Algerien"
+msgstr "Africa/Algiers"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:6
 msgid "Africa/Asmara"
-msgstr "Afrika/Asmara"
+msgstr "Africa/Asmara"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:7
 msgid "Africa/Asmera"
@@ -1794,171 +1809,171 @@ msgstr "Africa/Asmera"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:8
 msgid "Africa/Bamako"
-msgstr "Afrika/Bamako"
+msgstr "Africa/Bamako"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:9
 msgid "Africa/Bangui"
-msgstr "Afrika/Bangui"
+msgstr "Africa/Bangui"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:10
 msgid "Africa/Banjul"
-msgstr "Afrika/Banjul"
+msgstr "Africa/Banjul"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:11
 msgid "Africa/Bissau"
-msgstr "Afrika/Bissau"
+msgstr "Africa/Bissau"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:12
 msgid "Africa/Blantyre"
-msgstr "Afrika/Blantyre"
+msgstr "Africa/Blantyre"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:13
 msgid "Africa/Brazzaville"
-msgstr "Afrika/Brazzaville"
+msgstr "Africa/Brazzaville"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:14
 msgid "Africa/Bujumbura"
-msgstr "Afrika/Bujumbura"
+msgstr "Africa/Bujumbura"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:15
 msgid "Africa/Cairo"
-msgstr "Afrika/Kairo"
+msgstr "Africa/Cairo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:16
 msgid "Africa/Casablanca"
-msgstr "Afrika/Casablanca"
+msgstr "Africa/Casablanca"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:17
 msgid "Africa/Ceuta"
-msgstr "Afrika/Ceuta"
+msgstr "Africa/Ceuta"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:18
 msgid "Africa/Conakry"
-msgstr "Afrika/Conakry"
+msgstr "Africa/Conakry"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:19
 msgid "Africa/Dakar"
-msgstr "Afrika/Dakar"
+msgstr "Africa/Dakar"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:20
 msgid "Africa/Dar es Salaam"
-msgstr "Afrika/Dar es Salaam"
+msgstr "Africa/Dar es Salaam"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:21
 msgid "Africa/Djibouti"
-msgstr "Afrika/Dschibuti"
+msgstr "Africa/Djibouti"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:22
 msgid "Africa/Douala"
-msgstr "Afrika/Douala"
+msgstr "Africa/Douala"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:23
 msgid "Africa/El Aaiun"
-msgstr "Afrika/El Aaiun"
+msgstr "Africa/El Aaiun"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:24
 msgid "Africa/Freetown"
-msgstr "Afrika/Freetown"
+msgstr "Africa/Freetown"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:25
 msgid "Africa/Gaborone"
-msgstr "Afrika/Gaborone"
+msgstr "Africa/Gaborone"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:26
 msgid "Africa/Harare"
-msgstr "Afrika/Harare"
+msgstr "Africa/Harare"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:27
 msgid "Africa/Johannesburg"
-msgstr "Afrika/Johannesburg"
+msgstr "Africa/Johannesburg"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:28
 msgid "Africa/Kampala"
-msgstr "Afrika/Kampala"
+msgstr "Africa/Kampala"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:29
 msgid "Africa/Khartoum"
-msgstr "Afrika/Khartoum"
+msgstr "Africa/Khartoum"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:30
 msgid "Africa/Kigali"
-msgstr "Afrika/Kigali"
+msgstr "Africa/Kigali"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:31
 msgid "Africa/Kinshasa"
-msgstr "Afrika/Kinshasa"
+msgstr "Africa/Kinshasa"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:32
 msgid "Africa/Lagos"
-msgstr "Afrika/Lagos"
+msgstr "Africa/Lagos"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:33
 msgid "Africa/Libreville"
-msgstr "Afrika/Libreville"
+msgstr "Africa/Libreville"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:34
 msgid "Africa/Lome"
-msgstr "Afrika/Lome"
+msgstr "Africa/Lome"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:35
 msgid "Africa/Luanda"
-msgstr "Afrika/Luanda"
+msgstr "Africa/Luanda"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:36
 msgid "Africa/Lubumbashi"
-msgstr "Afrika/Lubumbashi"
+msgstr "Africa/Lubumbashi"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:37
 msgid "Africa/Lusaka"
-msgstr "Afrika/Lusaka"
+msgstr "Africa/Lusaka"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:38
 msgid "Africa/Malabo"
-msgstr "Afrika/Malabo"
+msgstr "Africa/Malabo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:39
 msgid "Africa/Maputo"
-msgstr "Afrika/Maputo"
+msgstr "Africa/Maputo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:40
 msgid "Africa/Maseru"
-msgstr "Afrika/Maseru"
+msgstr "Africa/Maseru"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:41
 msgid "Africa/Mbabane"
-msgstr "Afrika/Mbabane"
+msgstr "Africa/Mbabane"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:42
 msgid "Africa/Mogadishu"
-msgstr "Afrika/Mogadishu"
+msgstr "Africa/Mogadishu"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:43
 msgid "Africa/Monrovia"
-msgstr "Afrika/Monrovia"
+msgstr "Africa/Monrovia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:44
 msgid "Africa/Nairobi"
-msgstr "Afrika/Nairobi"
+msgstr "Africa/Nairobi"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:45
 msgid "Africa/Ndjamena"
-msgstr "Afrika/Ndjamena"
+msgstr "Africa/Ndjamena"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:46
 msgid "Africa/Niamey"
-msgstr "Afrika/Niamey"
+msgstr "Africa/Niamey"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:47
 msgid "Africa/Nouakchott"
-msgstr "Afrika/Nouakchott"
+msgstr "Africa/Nouakchott"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:48
 msgid "Africa/Ouagadougou"
-msgstr "Afrika/Ouagadougou"
+msgstr "Africa/Ouagadougou"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:49
 msgid "Africa/Porto-Novo"
-msgstr "Afrika/Porto Novo"
+msgstr "Africa/Porto-Novo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:50
 msgid "Africa/Sao Tome"
@@ -1966,675 +1981,675 @@ msgstr "Africa/Sao Tome"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:51
 msgid "Africa/Timbuktu"
-msgstr "Afrika/Timbuktu"
+msgstr "Africa/Timbuktu"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:52
 msgid "Africa/Tripoli"
-msgstr "Afrika/Tripoli"
+msgstr "Africa/Tripoli"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:53
 msgid "Africa/Tunis"
-msgstr "Afrika/Tunis"
+msgstr "Africa/Tunis"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:54
 msgid "Africa/Windhoek"
-msgstr "Afrika/Windhoek"
+msgstr "Africa/Windhoek"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:55
 msgid "America/Adak"
-msgstr "Amerika/Adak"
+msgstr "America/Adak"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:56
 msgid "America/Anchorage"
-msgstr "Amerika/Anchorage"
+msgstr "America/Anchorage"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:57
 msgid "America/Anguilla"
-msgstr "Amerika/Anguilla"
+msgstr "America/Anguilla"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:58
 msgid "America/Antigua"
-msgstr "Amerika/Antigua"
+msgstr "America/Antigua"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:59
 msgid "America/Araguaina"
-msgstr "Amerika/Araguaina"
+msgstr "America/Araguaina"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:60
 msgid "America/Argentina/Buenos Aires"
-msgstr "Amerika/Argentinien/Buenos Aires"
+msgstr "America/Argentina/Buenos Aires"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:61
 msgid "America/Argentina/Catamarca"
-msgstr "Amerika/Argentinien/Catamarca"
+msgstr "America/Argentina/Catamarca"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:62
 msgid "America/Argentina/ComodRivadavia"
-msgstr "Amerika/Argentinien/ComodRivadavia"
+msgstr "America/Argentina/ComodRivadavia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:63
 msgid "America/Argentina/Cordoba"
-msgstr "Amerika/Argentinien/Cordoba"
+msgstr "America/Argentina/Cordoba"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:64
 msgid "America/Argentina/Jujuy"
-msgstr "Amerika/Argentinien/Jujuy"
+msgstr "America/Argentina/Jujuy"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:65
 msgid "America/Argentina/La Rioja"
-msgstr "Amerika/Argentinien/La Rioja"
+msgstr "America/Argentina/La Rioja"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:66
 msgid "America/Argentina/Mendoza"
-msgstr "Amerika/Argentinien/Mendoza"
+msgstr "America/Argentina/Mendoza"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:67
 msgid "America/Argentina/Rio Gallegos"
-msgstr "Amerika/Argentinien/Rio Gallegos"
+msgstr "America/Argentina/Rio Gallegos"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:68
 msgid "America/Argentina/Salta"
-msgstr "Amerika/Argentinien/Salta"
+msgstr "America/Argentina/Salta"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:69
 msgid "America/Argentina/San Juan"
-msgstr "Amerika/Argentinien/San Juan"
+msgstr "America/Argentina/San Juan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:70
 msgid "America/Argentina/San Luis"
-msgstr "Amerika/Argentinien/San Luis"
+msgstr "America/Argentina/San Luis"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:71
 msgid "America/Argentina/Tucuman"
-msgstr "Amerika/Argentinien/Tucuman"
+msgstr "America/Argentina/Tucuman"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:72
 msgid "America/Argentina/Ushuaia"
-msgstr "Amerika/Argentinien/Ushuaia"
+msgstr "America/Argentina/Ushuaia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:73
 msgid "America/Aruba"
-msgstr "Amerika/Aruba"
+msgstr "America/Aruba"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:74
 msgid "America/Asuncion"
-msgstr "Amerika/Asuncion"
+msgstr "America/Asuncion"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:75
 msgid "America/Atikokan"
-msgstr "Amerika/Atikokan"
+msgstr "America/Atikokan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:76
 msgid "America/Atka"
-msgstr "Amerika/Atka"
+msgstr "America/Atka"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:77
 msgid "America/Bahia"
-msgstr "Amerika/Bahia"
+msgstr "America/Bahia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:78
 msgid "America/Barbados"
-msgstr "Amerika/Barbados"
+msgstr "America/Barbados"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:79
 msgid "America/Belem"
-msgstr "Amerika/Belem"
+msgstr "America/Belem"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:80
 msgid "America/Belize"
-msgstr "Amerika/Belize"
+msgstr "America/Belize"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:81
 msgid "America/Blanc-Sablon"
-msgstr "Amerika/Blanc-Sablon"
+msgstr "America/Blanc-Sablon"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:82
 msgid "America/Boa Vista"
-msgstr "Amerika/Boa Vista"
+msgstr "America/Boa Vista"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:83
 msgid "America/Bogota"
-msgstr "Amerika/Bogota"
+msgstr "America/Bogota"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:84
 msgid "America/Boise"
-msgstr "Amerika/Boise"
+msgstr "America/Boise"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:85
 msgid "America/Buenos Aires"
-msgstr "Amerika/Buenos Aires"
+msgstr "America/Buenos Aires"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:86
 msgid "America/Cambridge Bay"
-msgstr "Amerika/Cambridge Bay"
+msgstr "America/Cambridge Bay"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:87
 msgid "America/Campo Grande"
-msgstr "Amerika/Campo Grande"
+msgstr "America/Campo Grande"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:88
 msgid "America/Cancun"
-msgstr "Amerika/Cancun"
+msgstr "America/Cancun"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:89
 msgid "America/Caracas"
-msgstr "Amerika/Caracas"
+msgstr "America/Caracas"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:90
 msgid "America/Catamarca"
-msgstr "Amerika/Catamarca"
+msgstr "America/Catamarca"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:91
 msgid "America/Cayenne"
-msgstr "Amerika/Cayenne"
+msgstr "America/Cayenne"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:92
 msgid "America/Cayman"
-msgstr "Amerika/Cayman"
+msgstr "America/Cayman"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:93
 msgid "America/Chicago"
-msgstr "Amerika/Chicago"
+msgstr "America/Chicago"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:94
 msgid "America/Chihuahua"
-msgstr "Amerika/Chihuahua"
+msgstr "America/Chihuahua"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:95
 msgid "America/Coral Harbour"
-msgstr "Amerika/Coral Harbour"
+msgstr "America/Coral Harbour"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:96
 msgid "America/Cordoba"
-msgstr "Amerika/Cordoba"
+msgstr "America/Cordoba"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:97
 msgid "America/Costa Rica"
-msgstr "Amerika/Costa Rica"
+msgstr "America/Costa Rica"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:98
 msgid "America/Cuiaba"
-msgstr "Amerika/Cuiaba"
+msgstr "America/Cuiaba"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:99
 msgid "America/Curacao"
-msgstr "Amerika/Curacao"
+msgstr "America/Curacao"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:100
 msgid "America/Danmarkshavn"
-msgstr "Amerika/Danmarkshavn"
+msgstr "America/Danmarkshavn"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:101
 msgid "America/Dawson"
-msgstr "Amerika/Dawson"
+msgstr "America/Dawson"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:102
 msgid "America/Dawson Creek"
-msgstr "Amerika/Dawson Creek"
+msgstr "America/Dawson Creek"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:103
 msgid "America/Denver"
-msgstr "Amerika/Denver"
+msgstr "America/Denver"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:104
 msgid "America/Detroit"
-msgstr "Amerika/Detroit"
+msgstr "America/Detroit"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:105
 msgid "America/Dominica"
-msgstr "Amerika/Dominica"
+msgstr "America/Dominica"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:106
 msgid "America/Edmonton"
-msgstr "Amerika/Edmonton"
+msgstr "America/Edmonton"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:107
 msgid "America/Eirunepe"
-msgstr "Amerika/Eirunepe"
+msgstr "America/Eirunepe"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:108
 msgid "America/El Salvador"
-msgstr "Amerika/El Salvador"
+msgstr "America/El Salvador"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:109
 msgid "America/Ensenada"
-msgstr "Amerika/Ensenada"
+msgstr "America/Ensenada"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:110
 msgid "America/Fort Wayne"
-msgstr "Amerika/Fort Wayne"
+msgstr "America/Fort Wayne"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:111
 msgid "America/Fortaleza"
-msgstr "Amerika/Fortaleza"
+msgstr "America/Fortaleza"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:112
 msgid "America/Glace Bay"
-msgstr "Amerika/Glace Bay"
+msgstr "America/Glace Bay"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:113
 msgid "America/Godthab"
-msgstr "Amerika/Godthab"
+msgstr "America/Godthab"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:114
 msgid "America/Goose Bay"
-msgstr "Amerika/Goose Bay"
+msgstr "America/Goose Bay"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:115
 msgid "America/Grand Turk"
-msgstr "Amerika/Grand Turk"
+msgstr "America/Grand Turk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:116
 msgid "America/Grenada"
-msgstr "Amerika/Grenada"
+msgstr "America/Grenada"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:117
 msgid "America/Guadeloupe"
-msgstr "Amerika/Guadeloupe"
+msgstr "America/Guadeloupe"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:118
 msgid "America/Guatemala"
-msgstr "Amerika/Guatemala"
+msgstr "America/Guatemala"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:119
 msgid "America/Guayaquil"
-msgstr "Amerika/Guayaquil"
+msgstr "America/Guayaquil"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:120
 msgid "America/Guyana"
-msgstr "Amerika/Guyana"
+msgstr "America/Guyana"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:121
 msgid "America/Halifax"
-msgstr "Amerika/Halifax"
+msgstr "America/Halifax"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:122
 msgid "America/Havana"
-msgstr "Amerika/Havanna"
+msgstr "America/Havana"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:123
 msgid "America/Hermosillo"
-msgstr "Amerika/Hermosillo"
+msgstr "America/Hermosillo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:124
 msgid "America/Indiana/Indianapolis"
-msgstr "Amerika/Indiana/Indianapolis"
+msgstr "America/Indiana/Indianapolis"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:125
 msgid "America/Indiana/Knox"
-msgstr "Amerika/Indiana/Knox"
+msgstr "America/Indiana/Knox"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:126
 msgid "America/Indiana/Marengo"
-msgstr "Amerika/Indiana/Marengo"
+msgstr "America/Indiana/Marengo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:127
 msgid "America/Indiana/Petersburg"
-msgstr "Amerika/Indiana/Petersburg"
+msgstr "America/Indiana/Petersburg"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:128
 msgid "America/Indiana/Tell City"
-msgstr "Amerika/Indiana/Tell City"
+msgstr "America/Indiana/Tell City"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:129
 msgid "America/Indiana/Vevay"
-msgstr "Amerika/Indiana/Vevay"
+msgstr "America/Indiana/Vevay"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:130
 msgid "America/Indiana/Vincennes"
-msgstr "Amerika/Indiana/Vincennes"
+msgstr "America/Indiana/Vincennes"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:131
 msgid "America/Indiana/Winamac"
-msgstr "Amerika/Indiana/Winamac"
+msgstr "America/Indiana/Winamac"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:132
 msgid "America/Indianapolis"
-msgstr "Amerika/Indianapolis"
+msgstr "America/Indianapolis"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:133
 msgid "America/Inuvik"
-msgstr "Amerika/Inuvik"
+msgstr "America/Inuvik"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:134
 msgid "America/Iqaluit"
-msgstr "Amerika/Iqaluit"
+msgstr "America/Iqaluit"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:135
 msgid "America/Jamaica"
-msgstr "Amerika/Jamaika"
+msgstr "America/Jamaica"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:136
 msgid "America/Jujuy"
-msgstr "Amerika/Jujuy"
+msgstr "America/Jujuy"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:137
 msgid "America/Juneau"
-msgstr "Amerika/Juneau"
+msgstr "America/Juneau"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:138
 msgid "America/Kentucky/Louisville"
-msgstr "Amerika/Kentucky/Louisville"
+msgstr "America/Kentucky/Louisville"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:139
 msgid "America/Kentucky/Monticello"
-msgstr "Amerika/Kentucky/Monticello"
+msgstr "America/Kentucky/Monticello"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:140
 msgid "America/Knox IN"
-msgstr "Amerika/Knox IN"
+msgstr "America/Knox IN"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:141
 msgid "America/La Paz"
-msgstr "Amerika/La Paz"
+msgstr "America/La Paz"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:142
 msgid "America/Lima"
-msgstr "Amerika/Lima"
+msgstr "America/Lima"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:143
 msgid "America/Los Angeles"
-msgstr "Amerika/Los Angeles"
+msgstr "America/Los Angeles"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:144
 msgid "America/Louisville"
-msgstr "Amerika/Louisville"
+msgstr "America/Louisville"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:145
 msgid "America/Maceio"
-msgstr "Amerika/Maceio"
+msgstr "America/Maceio"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:146
 msgid "America/Managua"
-msgstr "Amerika/Managua"
+msgstr "America/Managua"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:147
 msgid "America/Manaus"
-msgstr "Amerika/Manaus"
+msgstr "America/Manaus"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:148
 msgid "America/Marigot"
-msgstr "Amerika/Marigot"
+msgstr "America/Marigot"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:149
 msgid "America/Martinique"
-msgstr "Amerika/Martinique"
+msgstr "America/Martinique"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:150
 msgid "America/Mazatlan"
-msgstr "Amerika/Mazatlan"
+msgstr "America/Mazatlan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:151
 msgid "America/Mendoza"
-msgstr "Amerika/Mendoza"
+msgstr "America/Mendoza"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:152
 msgid "America/Menominee"
-msgstr "Amerika/Menominee"
+msgstr "America/Menominee"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:153
 msgid "America/Merida"
-msgstr "Amerika/Merida"
+msgstr "America/Merida"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:154
 msgid "America/Mexico City"
-msgstr "Amerika/Mexiko Stadt"
+msgstr "America/Mexico City"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:155
 msgid "America/Miquelon"
-msgstr "Amerika/Miquelon"
+msgstr "America/Miquelon"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:156
 msgid "America/Moncton"
-msgstr "Amerika/Moncton"
+msgstr "America/Moncton"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:157
 msgid "America/Monterrey"
-msgstr "Amerika/Monterrey"
+msgstr "America/Monterrey"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:158
 msgid "America/Montevideo"
-msgstr "Amerika/Montevideo"
+msgstr "America/Montevideo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:159
 msgid "America/Montreal"
-msgstr "Amerika/Montreal"
+msgstr "America/Montreal"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:160
 msgid "America/Montserrat"
-msgstr "Amerika/Montserrat"
+msgstr "America/Montserrat"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:161
 msgid "America/Nassau"
-msgstr "Amerika/Nassau"
+msgstr "America/Nassau"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:162
 msgid "America/New York"
-msgstr "Amerika/New York"
+msgstr "America/New York"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:163
 msgid "America/Nipigon"
-msgstr "Amerika/Nipigon"
+msgstr "America/Nipigon"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:164
 msgid "America/Nome"
-msgstr "Amerika/Nome"
+msgstr "America/Nome"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:165
 msgid "America/Noronha"
-msgstr "Amerika/Noronha"
+msgstr "America/Noronha"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:166
 msgid "America/North Dakota/Center"
-msgstr "Amerika/North Dakota/Center"
+msgstr "America/North Dakota/Center"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:167
 msgid "America/North Dakota/New Salem"
-msgstr "Amerika/North Dakota/New Salem"
+msgstr "America/North Dakota/New Salem"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:168
 msgid "America/Panama"
-msgstr "Amerika/Panama"
+msgstr "America/Panama"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:169
 msgid "America/Pangnirtung"
-msgstr "Amerika/Pangnirtung"
+msgstr "America/Pangnirtung"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:170
 msgid "America/Paramaribo"
-msgstr "Amerika/Paramaribo"
+msgstr "America/Paramaribo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:171
 msgid "America/Phoenix"
-msgstr "Amerika/Phoenix"
+msgstr "America/Phoenix"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:172
 msgid "America/Port-au-Prince"
-msgstr "Amerika/Port-au-Prince"
+msgstr "America/Port-au-Prince"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:173
 msgid "America/Port of Spain"
-msgstr "Amerika/Port of Spain"
+msgstr "America/Port of Spain"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:174
 msgid "America/Porto Acre"
-msgstr "Amerika/Porto Acre"
+msgstr "America/Porto Acre"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:175
 msgid "America/Porto Velho"
-msgstr "Amerika/Porto Velho"
+msgstr "America/Porto Velho"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:176
 msgid "America/Puerto Rico"
-msgstr "Amerika/Puerto Rico"
+msgstr "America/Puerto Rico"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:177
 msgid "America/Rainy River"
-msgstr "Amerika/Rainy River"
+msgstr "America/Rainy River"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:178
 msgid "America/Rankin Inlet"
-msgstr "Amerika/Rankin Inlet"
+msgstr "America/Rankin Inlet"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:179
 msgid "America/Recife"
-msgstr "Amerika/Recife"
+msgstr "America/Recife"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:180
 msgid "America/Regina"
-msgstr "Amerika/Regina"
+msgstr "America/Regina"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:181
 msgid "America/Resolute"
-msgstr "Amerika/Resolute"
+msgstr "America/Resolute"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:182
 msgid "America/Rio Branco"
-msgstr "Amerika/Rio Branco"
+msgstr "America/Rio Branco"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:183
 msgid "America/Rosario"
-msgstr "Amerika/Rosario"
+msgstr "America/Rosario"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:184
 msgid "America/Santarem"
-msgstr "Amerika/Santarem"
+msgstr "America/Santarem"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:185
 msgid "America/Santiago"
-msgstr "Amerika/Santiago"
+msgstr "America/Santiago"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:186
 msgid "America/Santo Domingo"
-msgstr "Amerika/Santo Domingo"
+msgstr "America/Santo Domingo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:187
 msgid "America/Sao Paulo"
-msgstr "Amerika/Sao Paulo"
+msgstr "America/Sao Paulo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:188
 msgid "America/Scoresbysund"
-msgstr "Amerika/Scoresbysund"
+msgstr "America/Scoresbysund"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:189
 msgid "America/Shiprock"
-msgstr "Amerika/Shiprock"
+msgstr "America/Shiprock"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:190
 msgid "America/St Barthelemy"
-msgstr "Amerika/St Barthelemy"
+msgstr "America/St Barthelemy"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:191
 msgid "America/St Johns"
-msgstr "Amerika/St Johns"
+msgstr "America/St Johns"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:192
 msgid "America/St Kitts"
-msgstr "Amerika/St Kitts"
+msgstr "America/St Kitts"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:193
 msgid "America/St Lucia"
-msgstr "Amerika/St Lucia"
+msgstr "America/St Lucia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:194
 msgid "America/St Thomas"
-msgstr "Amerika/St Thomas"
+msgstr "America/St Thomas"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:195
 msgid "America/St Vincent"
-msgstr "Amerika/St Vincent"
+msgstr "America/St Vincent"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:196
 msgid "America/Swift Current"
-msgstr "Amerika/Swift Current"
+msgstr "America/Swift Current"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:197
 msgid "America/Tegucigalpa"
-msgstr "Amerika/Tegucigalpa"
+msgstr "America/Tegucigalpa"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:198
 msgid "America/Thule"
-msgstr "Amerika/Thule"
+msgstr "America/Thule"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:199
 msgid "America/Thunder Bay"
-msgstr "Amerika/Thunder Bay"
+msgstr "America/Thunder Bay"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:200
 msgid "America/Tijuana"
-msgstr "Amerika/Tijuana"
+msgstr "America/Tijuana"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:201
 msgid "America/Toronto"
-msgstr "Amerika/Toronto"
+msgstr "America/Toronto"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:202
 msgid "America/Tortola"
-msgstr "Amerika/Tortola"
+msgstr "America/Tortola"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:203
 msgid "America/Vancouver"
-msgstr "Amerika/Vancouver"
+msgstr "America/Vancouver"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:204
 msgid "America/Virgin"
-msgstr "Amerika/Virgin"
+msgstr "America/Virgin"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:205
 msgid "America/Whitehorse"
-msgstr "Amerika/Whitehorse"
+msgstr "America/Whitehorse"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:206
 msgid "America/Winnipeg"
-msgstr "Amerika/Winnipeg"
+msgstr "America/Winnipeg"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:207
 msgid "America/Yakutat"
-msgstr "Amerika/Yakutat"
+msgstr "America/Yakutat"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:208
 msgid "America/Yellowknife"
-msgstr "Amerika/Yellowknife"
+msgstr "America/Yellowknife"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:209
 msgid "Antarctica/Casey"
-msgstr "Antarktik/Casey"
+msgstr "Antarctica/Casey"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:210
 msgid "Antarctica/Davis"
-msgstr "Antarktik/Davis"
+msgstr "Antarctica/Davis"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:211
 msgid "Antarctica/DumontDUrville"
-msgstr "Antarktik/DumontDUrville"
+msgstr "Antarctica/DumontDUrville"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:212
 msgid "Antarctica/Mawson"
-msgstr "Antarktik/Mawson"
+msgstr "Antarctica/Mawson"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:213
 msgid "Antarctica/McMurdo"
-msgstr "Antarktik/McMurdo"
+msgstr "Antarctica/McMurdo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:214
 msgid "Antarctica/Palmer"
-msgstr "Antarktik/Palmer"
+msgstr "Antarctica/Palmer"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:215
 msgid "Antarctica/Rothera"
-msgstr "Antarktik/Rothera"
+msgstr "Antarctica/Rothera"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:216
 msgid "Antarctica/South Pole"
-msgstr "Antarktik/Südpol"
+msgstr "Antarctica/South Pole"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:217
 msgid "Antarctica/Syowa"
-msgstr "Antarktik/Syowa"
+msgstr "Antarctica/Syowa"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:218
 msgid "Antarctica/Vostok"
-msgstr "Antarktik/Vostok"
+msgstr "Antarctica/Vostok"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:219
 msgid "Arctic/Longyearbyen"
@@ -2642,31 +2657,31 @@ msgstr "Arctic/Longyearbyen"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:220
 msgid "Asia/Aden"
-msgstr "Asien/Aden"
+msgstr "Asia/Aden"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:221
 msgid "Asia/Almaty"
-msgstr "Asien/Almaty"
+msgstr "Asia/Almaty"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:222
 msgid "Asia/Amman"
-msgstr "Asien/Amman"
+msgstr "Asia/Amman"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:223
 msgid "Asia/Anadyr"
-msgstr "Asien/Anadyr"
+msgstr "Asia/Anadyr"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:224
 msgid "Asia/Aqtau"
-msgstr "Asien/Aqtau"
+msgstr "Asia/Aqtau"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:225
 msgid "Asia/Aqtobe"
-msgstr "Asien/Aqtobe"
+msgstr "Asia/Aqtobe"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:226
 msgid "Asia/Ashgabat"
-msgstr "Asien/Ashgabat"
+msgstr "Asia/Ashgabat"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:227
 msgid "Asia/Ashkhabad"
@@ -2674,775 +2689,775 @@ msgstr "Asia/Ashkhabad"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:228
 msgid "Asia/Baghdad"
-msgstr "Asien/Baghdad"
+msgstr "Asia/Baghdad"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:229
 msgid "Asia/Bahrain"
-msgstr "Asien/Bahrain"
+msgstr "Asia/Bahrain"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:230
 msgid "Asia/Baku"
-msgstr "Asien/Baku"
+msgstr "Asia/Baku"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:231
 msgid "Asia/Bangkok"
-msgstr "Asien/Bangkok"
+msgstr "Asia/Bangkok"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:232
 msgid "Asia/Beirut"
-msgstr "Asien/Beirut"
+msgstr "Asia/Beirut"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:233
 msgid "Asia/Bishkek"
-msgstr "Asien/Bishkek"
+msgstr "Asia/Bishkek"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:234
 msgid "Asia/Brunei"
-msgstr "Asien/Brunei"
+msgstr "Asia/Brunei"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:235
 msgid "Asia/Calcutta"
-msgstr "Asien/Kalkutta"
+msgstr "Asia/Calcutta"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:236
 msgid "Asia/Choibalsan"
-msgstr "Asien/Choibalsan"
+msgstr "Asia/Choibalsan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:237
 msgid "Asia/Chongqing"
-msgstr "Asien/Chongqing"
+msgstr "Asia/Chongqing"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:238
 msgid "Asia/Chungking"
-msgstr "Asien/Chungking"
+msgstr "Asia/Chungking"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:239
 msgid "Asia/Colombo"
-msgstr "Asien/Colombo"
+msgstr "Asia/Colombo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:240
 msgid "Asia/Dacca"
-msgstr "Asien/Dacca"
+msgstr "Asia/Dacca"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:241
 msgid "Asia/Damascus"
-msgstr "Asien/Damaskus"
+msgstr "Asia/Damascus"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:242
 msgid "Asia/Dhaka"
-msgstr "Asien/Dhaka"
+msgstr "Asia/Dhaka"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:243
 msgid "Asia/Dili"
-msgstr "Asien/Dili"
+msgstr "Asia/Dili"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:244
 msgid "Asia/Dubai"
-msgstr "Asien/Dubai"
+msgstr "Asia/Dubai"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:245
 msgid "Asia/Dushanbe"
-msgstr "Asien/Dushanbe"
+msgstr "Asia/Dushanbe"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:246
 msgid "Asia/Gaza"
-msgstr "Asien/Gaza"
+msgstr "Asia/Gaza"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:247
 msgid "Asia/Harbin"
-msgstr "Asien/Harbin"
+msgstr "Asia/Harbin"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:248
 msgid "Asia/Ho Chi Minh"
-msgstr "Asien/Ho-Chi-Minh-Stadt"
+msgstr "Asia/Ho Chi Minh"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:249
 msgid "Asia/Hong Kong"
-msgstr "Asien/Hongkong"
+msgstr "Asia/Hong Kong"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:250
 msgid "Asia/Hovd"
-msgstr "Asien/Hovd"
+msgstr "Asia/Hovd"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:251
 msgid "Asia/Irkutsk"
-msgstr "Asien/Irkutsk"
+msgstr "Asia/Irkutsk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:252
 msgid "Asia/Istanbul"
-msgstr "Asien/Istanbul"
+msgstr "Asia/Istanbul"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:253
 msgid "Asia/Jakarta"
-msgstr "Asien/Jakarta"
+msgstr "Asia/Jakarta"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:254
 msgid "Asia/Jayapura"
-msgstr "Asien/Jayapura"
+msgstr "Asia/Jayapura"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:255
 msgid "Asia/Jerusalem"
-msgstr "Asien/Jerusalem"
+msgstr "Asia/Jerusalem"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:256
 msgid "Asia/Kabul"
-msgstr "Asien/Kabul"
+msgstr "Asia/Kabul"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:257
 msgid "Asia/Kamchatka"
-msgstr "Asien/Kamchatka"
+msgstr "Asia/Kamchatka"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:258
 msgid "Asia/Karachi"
-msgstr "Asien/Karachi"
+msgstr "Asia/Karachi"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:259
 msgid "Asia/Kashgar"
-msgstr "Asien/Kashgar"
+msgstr "Asia/Kashgar"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:260
 msgid "Asia/Kathmandu"
-msgstr "Asien/Katmandu"
+msgstr "Asia/Kathmandu"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:261
 msgid "Asia/Katmandu"
-msgstr "Asien/Katmandu"
+msgstr "Asia/Katmandu"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:262
 msgid "Asia/Kolkata"
-msgstr "Asien/Kolkata"
+msgstr "Asia/Kolkata"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:263
 msgid "Asia/Krasnoyarsk"
-msgstr "Asien/Krasnoyarsk"
+msgstr "Asia/Krasnoyarsk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:264
 msgid "Asia/Kuala Lumpur"
-msgstr "Asien/Kuala Lumpur"
+msgstr "Asia/Kuala Lumpur"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:265
 msgid "Asia/Kuching"
-msgstr "Asien/Kuching"
+msgstr "Asia/Kuching"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:266
 msgid "Asia/Kuwait"
-msgstr "Asien/Kuwait"
+msgstr "Asia/Kuwait"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:267
 msgid "Asia/Macao"
-msgstr "Asien/Macao"
+msgstr "Asia/Macao"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:268
 msgid "Asia/Macau"
-msgstr "Asien/Macau"
+msgstr "Asia/Macau"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:269
 msgid "Asia/Magadan"
-msgstr "Asien/Magadan"
+msgstr "Asia/Magadan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:270
 msgid "Asia/Makassar"
-msgstr "Asien/Makassar"
+msgstr "Asia/Makassar"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:271
 msgid "Asia/Manila"
-msgstr "Asien/Manila"
+msgstr "Asia/Manila"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:272
 msgid "Asia/Muscat"
-msgstr "Asien/Muscat"
+msgstr "Asia/Muscat"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:273
 msgid "Asia/Nicosia"
-msgstr "Asien/Nicosia"
+msgstr "Asia/Nicosia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:274
 msgid "Asia/Novosibirsk"
-msgstr "Asien/Nowosibirsk"
+msgstr "Asia/Novosibirsk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:275
 msgid "Asia/Omsk"
-msgstr "Asien/Omsk"
+msgstr "Asia/Omsk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:276
 msgid "Asia/Oral"
-msgstr "Asien/Oral"
+msgstr "Asia/Oral"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:277
 msgid "Asia/Phnom Penh"
-msgstr "Asien/Phnom Penh"
+msgstr "Asia/Phnom Penh"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:278
 msgid "Asia/Pontianak"
-msgstr "Asien/Pontianak"
+msgstr "Asia/Pontianak"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:279
 msgid "Asia/Pyongyang"
-msgstr "Asien/Pyongyang"
+msgstr "Asia/Pyongyang"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:280
 msgid "Asia/Qatar"
-msgstr "Asien/Katar"
+msgstr "Asia/Qatar"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:281
 msgid "Asia/Qyzylorda"
-msgstr "Asien/Qyzylorda"
+msgstr "Asia/Qyzylorda"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:282
 msgid "Asia/Rangoon"
-msgstr "Asien/Rangoon"
+msgstr "Asia/Rangoon"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:283
 msgid "Asia/Riyadh"
-msgstr "Asien/Riyadh"
+msgstr "Asia/Riyadh"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:284
 msgid "Asia/Riyadh87"
-msgstr "Asien/Riyadh87"
+msgstr "Asia/Riyadh87"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:285
 msgid "Asia/Riyadh88"
-msgstr "Asien/Riyadh88"
+msgstr "Asia/Riyadh88"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:286
 msgid "Asia/Riyadh89"
-msgstr "Asien/Riyadh89"
+msgstr "Asia/Riyadh89"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:287
 msgid "Asia/Saigon"
-msgstr "Asien/Saigon"
+msgstr "Asia/Saigon"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:288
 msgid "Asia/Sakhalin"
-msgstr "Asien/Sakhalin"
+msgstr "Asia/Sakhalin"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:289
 msgid "Asia/Samarkand"
-msgstr "Asien/Samarkand"
+msgstr "Asia/Samarkand"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:290
 msgid "Asia/Seoul"
-msgstr "Asien/Seoul"
+msgstr "Asia/Seoul"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:291
 msgid "Asia/Shanghai"
-msgstr "Asien/Shanghai"
+msgstr "Asia/Shanghai"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:292
 msgid "Asia/Singapore"
-msgstr "Asien/Singapore"
+msgstr "Asia/Singapore"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:293
 msgid "Asia/Taipei"
-msgstr "Asien/Taipei"
+msgstr "Asia/Taipei"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:294
 msgid "Asia/Tashkent"
-msgstr "Asien/Taschkent"
+msgstr "Asia/Tashkent"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:295
 msgid "Asia/Tbilisi"
-msgstr "Asien/Tbilisi"
+msgstr "Asia/Tbilisi"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:296
 msgid "Asia/Tehran"
-msgstr "Asien/Teheran"
+msgstr "Asia/Tehran"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:297
 msgid "Asia/Tel Aviv"
-msgstr "Asien/Tel Aviv"
+msgstr "Asia/Tel Aviv"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:298
 msgid "Asia/Thimbu"
-msgstr "Asien/Thimbu"
+msgstr "Asia/Thimbu"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:299
 msgid "Asia/Thimphu"
-msgstr "Asien/Thimphu"
+msgstr "Asia/Thimphu"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:300
 msgid "Asia/Tokyo"
-msgstr "Asien/Tokio"
+msgstr "Asia/Tokyo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:301
 msgid "Asia/Ujung Pandang"
-msgstr "Asien/Ujung Pandang"
+msgstr "Asia/Ujung Pandang"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:302
 msgid "Asia/Ulaanbaatar"
-msgstr "Asien/Ulan-Bator"
+msgstr "Asia/Ulaanbaatar"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:303
 msgid "Asia/Ulan Bator"
-msgstr "Asien/Ulan-Bator"
+msgstr "Asia/Ulan Bator"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:304
 msgid "Asia/Urumqi"
-msgstr "Asien/Urumqi"
+msgstr "Asia/Urumqi"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:305
 msgid "Asia/Vientiane"
-msgstr "Asien/Vientiane"
+msgstr "Asia/Vientiane"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:306
 msgid "Asia/Vladivostok"
-msgstr "Asien/Wladiwostok"
+msgstr "Asia/Vladivostok"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:307
 msgid "Asia/Yakutsk"
-msgstr "Asien/Yakutsk"
+msgstr "Asia/Yakutsk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:308
 msgid "Asia/Yekaterinburg"
-msgstr "Asien/Yekaterinburg"
+msgstr "Asia/Yekaterinburg"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:309
 msgid "Asia/Yerevan"
-msgstr "Asien/Yerevan"
+msgstr "Asia/Yerevan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:310
 msgid "Atlantic/Azores"
-msgstr "Atlantik/Azoren"
+msgstr "Atlantic/Azores"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:311
 msgid "Atlantic/Bermuda"
-msgstr "Atlantik/Bermudas"
+msgstr "Atlantic/Bermuda"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:312
 msgid "Atlantic/Canary"
-msgstr "Atlantik/Kanaren"
+msgstr "Atlantic/Canary"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:313
 msgid "Atlantic/Cape Verde"
-msgstr "Atlantik/Kapverden"
+msgstr "Atlantic/Cape Verde"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:314
 msgid "Atlantic/Faeroe"
-msgstr "Atlantik/Färöer"
+msgstr "Atlantic/Faeroe"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:315
 msgid "Atlantic/Faroe"
-msgstr "Atlantik/Färöer"
+msgstr "Atlantic/Faroe"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:316
 msgid "Atlantic/Jan Mayen"
-msgstr "Atlantik/Jan Mayen"
+msgstr "Atlantic/Jan Mayen"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:317
 msgid "Atlantic/Madeira"
-msgstr "Atlantik/Madeira"
+msgstr "Atlantic/Madeira"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:318
 msgid "Atlantic/Reykjavik"
-msgstr "Atlantik/Reykjavik"
+msgstr "Atlantic/Reykjavik"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:319
 msgid "Atlantic/South Georgia"
-msgstr "Atlantik/South Georgia"
+msgstr "Atlantic/South Georgia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:320
 msgid "Atlantic/St Helena"
-msgstr "Atlantik/St Helena"
+msgstr "Atlantic/St Helena"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:321
 msgid "Atlantic/Stanley"
-msgstr "Atlantik/Stanley"
+msgstr "Atlantic/Stanley"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:322
 msgid "Australia/ACT"
-msgstr "Australien/ACT"
+msgstr "Australia/ACT"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:323
 msgid "Australia/Adelaide"
-msgstr "Australien/Adelaide"
+msgstr "Australia/Adelaide"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:324
 msgid "Australia/Brisbane"
-msgstr "Australien/Brisbane"
+msgstr "Australia/Brisbane"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:325
 msgid "Australia/Broken Hill"
-msgstr "Australien/Broken Hill"
+msgstr "Australia/Broken Hill"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:326
 msgid "Australia/Canberra"
-msgstr "Australien/Canberra"
+msgstr "Australia/Canberra"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:327
 msgid "Australia/Currie"
-msgstr "Australien/Currie"
+msgstr "Australia/Currie"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:328
 msgid "Australia/Darwin"
-msgstr "Australien/Darwin"
+msgstr "Australia/Darwin"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:329
 msgid "Australia/Eucla"
-msgstr "Australien/Eucla"
+msgstr "Australia/Eucla"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:330
 msgid "Australia/Hobart"
-msgstr "Australien/Hobart"
+msgstr "Australia/Hobart"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:331
 msgid "Australia/LHI"
-msgstr "Australien/LHI"
+msgstr "Australia/LHI"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:332
 msgid "Australia/Lindeman"
-msgstr "Australien/Lindeman"
+msgstr "Australia/Lindeman"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:333
 msgid "Australia/Lord Howe"
-msgstr "Australien/Lord Howe"
+msgstr "Australia/Lord Howe"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:334
 msgid "Australia/Melbourne"
-msgstr "Australien/Melbourne"
+msgstr "Australia/Melbourne"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:335
 msgid "Australia/NSW"
-msgstr "Australien/NSW"
+msgstr "Australia/NSW"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:336
 msgid "Australia/North"
-msgstr "Australien/Nord"
+msgstr "Australia/North"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:337
 msgid "Australia/Perth"
-msgstr "Australien/Perth"
+msgstr "Australia/Perth"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:338
 msgid "Australia/Queensland"
-msgstr "Australien/Queensland"
+msgstr "Australia/Queensland"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:339
 msgid "Australia/South"
-msgstr "Australien/Süd"
+msgstr "Australia/South"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:340
 msgid "Australia/Sydney"
-msgstr "Australien/Sydney"
+msgstr "Australia/Sydney"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:341
 msgid "Australia/Tasmania"
-msgstr "Australien/Tasmanien"
+msgstr "Australia/Tasmania"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:342
 msgid "Australia/Victoria"
-msgstr "Australien/Victoria"
+msgstr "Australia/Victoria"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:343
 msgid "Australia/West"
-msgstr "Australien/West"
+msgstr "Australia/West"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:344
 msgid "Australia/Yancowinna"
-msgstr "Australien/Yancowinna"
+msgstr "Australia/Yancowinna"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:345
 msgid "Brazil/Acre"
-msgstr "Brasilien/Acre"
+msgstr "Brazil/Acre"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:346
 msgid "Brazil/DeNoronha"
-msgstr "Brasilien/DeNoronha"
+msgstr "Brazil/DeNoronha"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:347
 msgid "Brazil/East"
-msgstr "Brasilien/Ost"
+msgstr "Brazil/East"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:348
 msgid "Brazil/West"
-msgstr "Brasilien/West"
+msgstr "Brazil/West"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:349
 msgid "Canada/Atlantic"
-msgstr "Kanada/Atlantik"
+msgstr "Canada/Atlantic"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:350
 msgid "Canada/Central"
-msgstr "Kanada/Central"
+msgstr "Canada/Central"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:351
 msgid "Canada/East-Saskatchewan"
-msgstr "Kanada/Ost-Saskatchewan"
+msgstr "Canada/East-Saskatchewan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:352
 msgid "Canada/Eastern"
-msgstr "Kanada/Ost"
+msgstr "Canada/Eastern"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:353
 msgid "Canada/Mountain"
-msgstr "Kanada/Mountain"
+msgstr "Canada/Mountain"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:354
 msgid "Canada/Newfoundland"
-msgstr "Kanada/Neufundland"
+msgstr "Canada/Newfoundland"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:355
 msgid "Canada/Pacific"
-msgstr "Kanada/Pazifik"
+msgstr "Canada/Pacific"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:356
 msgid "Canada/Saskatchewan"
-msgstr "Kanada/Saskatchewan"
+msgstr "Canada/Saskatchewan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:357
 msgid "Canada/Yukon"
-msgstr "Kanada/Yukon"
+msgstr "Canada/Yukon"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:358
 msgid "Chile/Continental"
-msgstr "Chile/Kontinent"
+msgstr "Chile/Continental"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:359
 msgid "Chile/EasterIsland"
-msgstr "Chile/Osterinsel"
+msgstr "Chile/EasterIsland"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:360
 msgid "Cuba"
-msgstr "Kuba"
+msgstr "Cuba"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:361
 msgid "Egypt"
-msgstr "Ägypten"
+msgstr "Egypt"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:362
 msgid "Eire"
-msgstr "Irland"
+msgstr "Eire"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:363
 msgid "Europe/Amsterdam"
-msgstr "Europa/Amsterdam"
+msgstr "Europe/Amsterdam"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:364
 msgid "Europe/Andorra"
-msgstr "Europa/Andorra"
+msgstr "Europe/Andorra"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:365
 msgid "Europe/Athens"
-msgstr "Europa/Athen"
+msgstr "Europe/Athens"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:366
 msgid "Europe/Belfast"
-msgstr "Europa/Belfast"
+msgstr "Europe/Belfast"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:367
 msgid "Europe/Belgrade"
-msgstr "Europa/Belgrad"
+msgstr "Europe/Belgrade"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:368
 msgid "Europe/Berlin"
-msgstr "Europa/Berlin"
+msgstr "Europe/Berlin"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:369
 msgid "Europe/Bratislava"
-msgstr "Europa/Bratislava"
+msgstr "Europe/Bratislava"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:370
 msgid "Europe/Brussels"
-msgstr "Europa/Brüssel"
+msgstr "Europe/Brussels"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:371
 msgid "Europe/Bucharest"
-msgstr "Europa/Bukarest"
+msgstr "Europe/Bucharest"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:372
 msgid "Europe/Budapest"
-msgstr "Europa/Budapest"
+msgstr "Europe/Budapest"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:373
 msgid "Europe/Chisinau"
-msgstr "Europa/Chisinau"
+msgstr "Europe/Chisinau"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:374
 msgid "Europe/Copenhagen"
-msgstr "Europa/Kopenhagen"
+msgstr "Europe/Copenhagen"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:375
 msgid "Europe/Dublin"
-msgstr "Europa/Dublin"
+msgstr "Europe/Dublin"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:376
 msgid "Europe/Gibraltar"
-msgstr "Europa/Gibraltar"
+msgstr "Europe/Gibraltar"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:377
 msgid "Europe/Guernsey"
-msgstr "Europa/Guernsey"
+msgstr "Europe/Guernsey"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:378
 msgid "Europe/Helsinki"
-msgstr "Europa/Helsinki"
+msgstr "Europe/Helsinki"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:379
 msgid "Europe/Isle of Man"
-msgstr "Europa/Isle of Man"
+msgstr "Europe/Isle of Man"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:380
 msgid "Europe/Istanbul"
-msgstr "Europa/Istanbul"
+msgstr "Europe/Istanbul"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:381
 msgid "Europe/Jersey"
-msgstr "Europa/Jersey"
+msgstr "Europe/Jersey"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:382
 msgid "Europe/Kaliningrad"
-msgstr "Europa/Kaliningrad"
+msgstr "Europe/Kaliningrad"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:383
 msgid "Europe/Kiev"
-msgstr "Europa/Kiew"
+msgstr "Europe/Kiev"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:384
 msgid "Europe/Lisbon"
-msgstr "Europa/Lissabon"
+msgstr "Europe/Lisbon"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:385
 msgid "Europe/Ljubljana"
-msgstr "Europa/Ljubljana"
+msgstr "Europe/Ljubljana"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:386
 msgid "Europe/London"
-msgstr "Europa/London"
+msgstr "Europe/London"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:387
 msgid "Europe/Luxembourg"
-msgstr "Europa/Luxemburg"
+msgstr "Europe/Luxembourg"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:388
 msgid "Europe/Madrid"
-msgstr "Europa/Madrid"
+msgstr "Europe/Madrid"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:389
 msgid "Europe/Malta"
-msgstr "Europa/Malta"
+msgstr "Europe/Malta"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:390
 msgid "Europe/Mariehamn"
-msgstr "Europa/Mariehamn"
+msgstr "Europe/Mariehamn"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:391
 msgid "Europe/Minsk"
-msgstr "Europa/Minsk"
+msgstr "Europe/Minsk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:392
 msgid "Europe/Monaco"
-msgstr "Europa/Monaco"
+msgstr "Europe/Monaco"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:393
 msgid "Europe/Moscow"
-msgstr "Europa/Moskau"
+msgstr "Europe/Moscow"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:394
 msgid "Europe/Nicosia"
-msgstr "Europa/Nicosia"
+msgstr "Europe/Nicosia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:395
 msgid "Europe/Oslo"
-msgstr "Europa/Oslo"
+msgstr "Europe/Oslo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:396
 msgid "Europe/Paris"
-msgstr "Europa/Paris"
+msgstr "Europe/Paris"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:397
 msgid "Europe/Podgorica"
-msgstr "Europa/Podgorica"
+msgstr "Europe/Podgorica"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:398
 msgid "Europe/Prague"
-msgstr "Europa/Prag"
+msgstr "Europe/Prague"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:399
 msgid "Europe/Riga"
-msgstr "Europa/Riga"
+msgstr "Europe/Riga"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:400
 msgid "Europe/Rome"
-msgstr "Europa/Rom"
+msgstr "Europe/Rome"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:401
 msgid "Europe/Samara"
-msgstr "Europa/Samara"
+msgstr "Europe/Samara"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:402
 msgid "Europe/San Marino"
-msgstr "Europa/San Marino"
+msgstr "Europe/San Marino"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:403
 msgid "Europe/Sarajevo"
-msgstr "Europa/Sarajevo"
+msgstr "Europe/Sarajevo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:404
 msgid "Europe/Simferopol"
-msgstr "Europa/Simferopol"
+msgstr "Europe/Simferopol"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:405
 msgid "Europe/Skopje"
-msgstr "Europa/Skopje"
+msgstr "Europe/Skopje"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:406
 msgid "Europe/Sofia"
-msgstr "Europa/Sofia"
+msgstr "Europe/Sofia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:407
 msgid "Europe/Stockholm"
-msgstr "Europa/Stockholm"
+msgstr "Europe/Stockholm"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:408
 msgid "Europe/Tallinn"
-msgstr "Europa/Tallinn"
+msgstr "Europe/Tallinn"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:409
 msgid "Europe/Tirane"
-msgstr "Europa/Tirane"
+msgstr "Europe/Tirane"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:410
 msgid "Europe/Tiraspol"
-msgstr "Europa/Tiraspol"
+msgstr "Europe/Tiraspol"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:411
 msgid "Europe/Uzhgorod"
-msgstr "Europa/Uzhgorod"
+msgstr "Europe/Uzhgorod"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:412
 msgid "Europe/Vaduz"
-msgstr "Europa/Vaduz"
+msgstr "Europe/Vaduz"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:413
 msgid "Europe/Vatican"
-msgstr "Europa/Vatikan"
+msgstr "Europe/Vatican"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:414
 msgid "Europe/Vienna"
-msgstr "Europa/Wien"
+msgstr "Europe/Vienna"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:415
 msgid "Europe/Vilnius"
-msgstr "Europa/Vilnius"
+msgstr "Europe/Vilnius"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:416
 msgid "Europe/Volgograd"
-msgstr "Europa/Wolgograd"
+msgstr "Europe/Volgograd"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:417
 msgid "Europe/Warsaw"
-msgstr "Europa/Warschau"
+msgstr "Europe/Warsaw"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:418
 msgid "Europe/Zagreb"
-msgstr "Europa/Zagreb"
+msgstr "Europe/Zagreb"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:419
 msgid "Europe/Zaporozhye"
-msgstr "Europa/Zaporozhye"
+msgstr "Europe/Zaporozhye"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:420
 msgid "Europe/Zurich"
-msgstr "Europa/Zürich"
+msgstr "Europe/Zurich"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:421
 msgid "Greenwich"
@@ -3454,51 +3469,51 @@ msgstr "Hongkong"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:423
 msgid "Iceland"
-msgstr "Island"
+msgstr "Iceland"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:424
 msgid "Indian/Antananarivo"
-msgstr "Indien/Antananarivo"
+msgstr "Indian/Antananarivo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:425
 msgid "Indian/Chagos"
-msgstr "Indien/Chagos"
+msgstr "Indian/Chagos"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:426
 msgid "Indian/Christmas"
-msgstr "Indien/Christmas"
+msgstr "Indian/Christmas"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:427
 msgid "Indian/Cocos"
-msgstr "Indien/Cocos"
+msgstr "Indian/Cocos"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:428
 msgid "Indian/Comoro"
-msgstr "Indien/Comoro"
+msgstr "Indian/Comoro"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:429
 msgid "Indian/Kerguelen"
-msgstr "Indien/Kerguelen"
+msgstr "Indian/Kerguelen"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:430
 msgid "Indian/Mahe"
-msgstr "Indien/Mahe"
+msgstr "Indian/Mahe"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:431
 msgid "Indian/Maldives"
-msgstr "Indien/Malediven"
+msgstr "Indian/Maldives"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:432
 msgid "Indian/Mauritius"
-msgstr "Indien/Mauritius"
+msgstr "Indian/Mauritius"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:433
 msgid "Indian/Mayotte"
-msgstr "Indien/Mayotte"
+msgstr "Indian/Mayotte"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:434
 msgid "Indian/Reunion"
-msgstr "Indien/Reunion"
+msgstr "Indian/Reunion"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:435
 msgid "Iran"
@@ -3510,7 +3525,7 @@ msgstr "Israel"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:437
 msgid "Jamaica"
-msgstr "Jamaika"
+msgstr "Jamaica"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:438
 msgid "Japan"
@@ -3522,15 +3537,15 @@ msgstr "Kwajalein"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:440
 msgid "Libya"
-msgstr "Libyen"
+msgstr "Libya"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:441
 msgid "Mexico/BajaNorte"
-msgstr "Mexiko/BajaNorte"
+msgstr "Mexico/BajaNorte"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:442
 msgid "Mexico/BajaSur"
-msgstr "Mexiko/BajaSur"
+msgstr "Mexico/BajaSur"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:443
 msgid "Mexico/General"
@@ -3538,15 +3553,15 @@ msgstr "Mexico/General"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:444
 msgid "Mideast/Riyadh87"
-msgstr "Mittlerer Osten/Riad87"
+msgstr "Mideast/Riyadh87"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:445
 msgid "Mideast/Riyadh88"
-msgstr "Mittlerer Osten/Riad88"
+msgstr "Mideast/Riyadh88"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:446
 msgid "Mideast/Riyadh89"
-msgstr "Mittlerer Osten/Riad89"
+msgstr "Mideast/Riyadh89"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:447
 msgid "Navajo"
@@ -3554,167 +3569,167 @@ msgstr "Navajo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:448
 msgid "Pacific/Apia"
-msgstr "Pazifik/Apia"
+msgstr "Pacific/Apia"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:449
 msgid "Pacific/Auckland"
-msgstr "Pazifik/Auckland"
+msgstr "Pacific/Auckland"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:450
 msgid "Pacific/Chatham"
-msgstr "Pazifik/Chatham"
+msgstr "Pacific/Chatham"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:451
 msgid "Pacific/Easter"
-msgstr "Pazifik/Easter"
+msgstr "Pacific/Easter"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:452
 msgid "Pacific/Efate"
-msgstr "Pazifik/Efate"
+msgstr "Pacific/Efate"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:453
 msgid "Pacific/Enderbury"
-msgstr "Pazifik/Enderbury"
+msgstr "Pacific/Enderbury"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:454
 msgid "Pacific/Fakaofo"
-msgstr "Pazifik/Fakaofo"
+msgstr "Pacific/Fakaofo"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:455
 msgid "Pacific/Fiji"
-msgstr "Pazifik/Fidschi"
+msgstr "Pacific/Fiji"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:456
 msgid "Pacific/Funafuti"
-msgstr "Pazifik/Funafuti"
+msgstr "Pacific/Funafuti"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:457
 msgid "Pacific/Galapagos"
-msgstr "Pazifik/Galapagos"
+msgstr "Pacific/Galapagos"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:458
 msgid "Pacific/Gambier"
-msgstr "Pazifik/Gambier"
+msgstr "Pacific/Gambier"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:459
 msgid "Pacific/Guadalcanal"
-msgstr "Pazifik/Guadalcanal"
+msgstr "Pacific/Guadalcanal"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:460
 msgid "Pacific/Guam"
-msgstr "Pazifik/Guam"
+msgstr "Pacific/Guam"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:461
 msgid "Pacific/Honolulu"
-msgstr "Pazifik/Honolulu"
+msgstr "Pacific/Honolulu"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:462
 msgid "Pacific/Johnston"
-msgstr "Pazifik/Johnston"
+msgstr "Pacific/Johnston"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:463
 msgid "Pacific/Kiritimati"
-msgstr "Pazifik/Kiritimati"
+msgstr "Pacific/Kiritimati"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:464
 msgid "Pacific/Kosrae"
-msgstr "Pazifik/Kosrae"
+msgstr "Pacific/Kosrae"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:465
 msgid "Pacific/Kwajalein"
-msgstr "Pazifik/Kwajalein"
+msgstr "Pacific/Kwajalein"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:466
 msgid "Pacific/Majuro"
-msgstr "Pazifik/Majuro"
+msgstr "Pacific/Majuro"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:467
 msgid "Pacific/Marquesas"
-msgstr "Pazifik/Marquesas"
+msgstr "Pacific/Marquesas"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:468
 msgid "Pacific/Midway"
-msgstr "Pazifik/Midway"
+msgstr "Pacific/Midway"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:469
 msgid "Pacific/Nauru"
-msgstr "Pazifik/Nauru"
+msgstr "Pacific/Nauru"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:470
 msgid "Pacific/Niue"
-msgstr "Pazifik/Niue"
+msgstr "Pacific/Niue"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:471
 msgid "Pacific/Norfolk"
-msgstr "Pazifik/Norfolk"
+msgstr "Pacific/Norfolk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:472
 msgid "Pacific/Noumea"
-msgstr "Pazifik/Noumea"
+msgstr "Pacific/Noumea"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:473
 msgid "Pacific/Pago Pago"
-msgstr "Pazifik/Pago Pago"
+msgstr "Pacific/Pago Pago"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:474
 msgid "Pacific/Palau"
-msgstr "Pazifik/Palau"
+msgstr "Pacific/Palau"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:475
 msgid "Pacific/Pitcairn"
-msgstr "Pazifik/Pitcairn"
+msgstr "Pacific/Pitcairn"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:476
 msgid "Pacific/Ponape"
-msgstr "Pazifik/Ponape"
+msgstr "Pacific/Ponape"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:477
 msgid "Pacific/Port Moresby"
-msgstr "Pazifik/Port Moresby"
+msgstr "Pacific/Port Moresby"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:478
 msgid "Pacific/Rarotonga"
-msgstr "Pazifik/Rarotonga"
+msgstr "Pacific/Rarotonga"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:479
 msgid "Pacific/Saipan"
-msgstr "Pazifik/Saipan"
+msgstr "Pacific/Saipan"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:480
 msgid "Pacific/Samoa"
-msgstr "Pazifik/Samoa"
+msgstr "Pacific/Samoa"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:481
 msgid "Pacific/Tahiti"
-msgstr "Pazifik/Tahiti"
+msgstr "Pacific/Tahiti"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:482
 msgid "Pacific/Tarawa"
-msgstr "Pazifik/Tarawa"
+msgstr "Pacific/Tarawa"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:483
 msgid "Pacific/Tongatapu"
-msgstr "Pazifik/Tongatapu"
+msgstr "Pacific/Tongatapu"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:484
 msgid "Pacific/Truk"
-msgstr "Pazifik/Truk"
+msgstr "Pacific/Truk"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:485
 msgid "Pacific/Wake"
-msgstr "Pazifik/Wake"
+msgstr "Pacific/Wake"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:486
 msgid "Pacific/Wallis"
-msgstr "Pazifik/Wallis"
+msgstr "Pacific/Wallis"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:487
 msgid "Pacific/Yap"
-msgstr "Pazifik/Yap"
+msgstr "Pacific/Yap"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:488
 msgid "Poland"
-msgstr "Polen"
+msgstr "Poland"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:489
 msgid "Portugal"
@@ -3722,11 +3737,11 @@ msgstr "Portugal"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:490
 msgid "Singapore"
-msgstr "Singapur"
+msgstr "Singapore"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:491
 msgid "Turkey"
-msgstr "Türkei"
+msgstr "Turkey"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:492
 msgid "US/Alaska"
@@ -3746,11 +3761,11 @@ msgstr "US/Central"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:496
 msgid "US/East-Indiana"
-msgstr "US/Ost-Indiana"
+msgstr "US/East-Indiana"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:497
 msgid "US/Eastern"
-msgstr "US/Osten"
+msgstr "US/Eastern"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:498
 msgid "US/Hawaii"
@@ -3770,7 +3785,7 @@ msgstr "US/Mountain"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:502
 msgid "US/Pacific"
-msgstr "US/Pazifik"
+msgstr "US/Pacific"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:503
 msgid "US/Pacific-New"
@@ -3787,3 +3802,30 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/tmp/TimeZones.java:506
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Confirmed Ham Fullname"
+#~ msgstr "Godkendt e-mail"
+
+#~ msgid "Confirmed Spam Fullname"
+#~ msgstr "Bekræftet spam"
+
+#~ msgid "Drafts Fullname"
+#~ msgstr "Kladder"
+
+#~ msgid "Sent Fullname"
+#~ msgstr "Sendt post"
+
+#~ msgid "Spam Fullname"
+#~ msgstr "Spam"
+
+#~ msgid "Trash Fullname"
+#~ msgstr "Papirkurv"
+
+#~ msgid "Mail Secure"
+#~ msgstr "E-mail sikkerhed"
+
+#~ msgid "Transport Login"
+#~ msgstr "Transport Login"
+
+#~ msgid "Transport Password"
+#~ msgstr "Transport Password"
