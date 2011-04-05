@@ -126,9 +126,11 @@ public class POParser {
         }
 
         final String valueString = value.toString();
-        translations.setTranslation(key.toString(), valueString);
-        if (alternateKey != null) {
-            translations.setTranslation(alternateKey.toString(), valueString);
+        if (!"".equals(valueString)) {
+            translations.setTranslation(key.toString(), valueString);
+            if (alternateKey != null) {
+                translations.setTranslation(alternateKey.toString(), valueString);
+            }
         }
     }
 

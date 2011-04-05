@@ -11,6 +11,7 @@
 * 2011-04-05 - marcus.klein@open-xchange.com
 
  - Bugfix #18775: Improved mechanism to find correct user for an IMAP ACL.
+ - Bugfix #18613: Interpreting an empty msgstr in PO files as not translated string.
 
 * 2011-04-04 - francisco.laguna@open-xchange.com
 
