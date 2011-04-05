@@ -141,11 +141,10 @@ public final class Create {
         folder.setFolderName(name);
         folder.setModule(type);
         folder.setType(FolderObject.PRIVATE);
-        final OCLPermission perm = new OCLPermission();
-        perm.setEntity(admin);
-        perm.setGroupPermission(false);
-        perm.setFolderAdmin(true);
-        perm.setAllPermission(
+        final OCLPermission perm = ocl(
+            admin,
+            false,
+            true,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,

@@ -66,13 +66,18 @@ import com.openexchange.groupware.container.FolderObject;
 public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
     private final String[] folderIds;
-
     private final Date lastModified;
+    private final boolean failOnError;
 
-    public DeleteRequest(API api, String[] folderIds, Date lastModified) {
+    public DeleteRequest(API api, String[] folderIds, Date lastModified, boolean failOnError) {
         super(api);
         this.folderIds = folderIds;
         this.lastModified = lastModified;
+        this.failOnError = failOnError;
+    }
+
+    public DeleteRequest(API api, String[] folderIds, Date lastModified) {
+        this(api, folderIds, lastModified, true);
     }
 
     public DeleteRequest(API api, String folderId, Date lastModified) {
@@ -87,7 +92,7 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         this(api, new int[] { folderId }, lastModified);
     }
 
-    public DeleteRequest(API api, final FolderObject... folder) {
+    public DeleteRequest(API api, boolean failOnError, final FolderObject... folder) {
         super(api);
         folderIds = new String[folder.length];
         Date maxLastModified = new Date(Long.MIN_VALUE);
@@ -102,6 +107,11 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
             }
         }
         lastModified = maxLastModified;
+        this.failOnError = failOnError;
+    }
+
+    public DeleteRequest(API api, final FolderObject... folder) {
+        this(api, true, folder);
     }
 
     public Object getBody() {
@@ -123,6 +133,6 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     }
 
     public CommonDeleteParser getParser() {
-        return new CommonDeleteParser(true);
+        return new CommonDeleteParser(failOnError);
     }
 }

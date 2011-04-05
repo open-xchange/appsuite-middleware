@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder;
 
 import java.io.IOException;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.folder.actions.API;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -148,4 +150,84 @@ public class FunctionTests extends AbstractAJAXSession {
         }
     }
 
+    public void testFailDeleteFolder() throws AjaxException, IOException, JSONException, OXJSONException, OXException {
+        int userId = client.getValues().getUserId();
+        int secId = client2.getValues().getUserId();
+        FolderObject parent = null;
+        FolderObject child01 = null;
+        FolderObject child02 = null;
+        FolderObject subChild01 = null;
+        try {
+            OCLPermission[] perms = new OCLPermission[] {
+                Create.ocl(userId, false, true, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+                Create.ocl(secId, false, false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
+            };
+            {
+                FolderObject folder = Create.folder(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "DeleteMeImmediately", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
+                InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, folder));
+                GetResponse response2 = client.execute(new GetRequest(API.OX_NEW, response.getId()));
+                parent = response2.getFolder();
+                parent.setLastModified(response2.getTimestamp());
+            }
+            {
+                FolderObject folder = Create.folder(parent.getObjectID(), "DeleteMeImmediatelyChild01", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
+                InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, folder));
+                GetResponse response2 = client.execute(new GetRequest(API.OX_NEW, response.getId()));
+                child01 = response2.getFolder();
+                child01.setLastModified(response2.getTimestamp());
+            }
+            {
+                FolderObject folder = Create.folder(parent.getObjectID(), "DeleteMeImmediatelyChild02", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
+                InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, folder));
+                GetResponse response2 = client.execute(new GetRequest(API.OX_NEW, response.getId()));
+                child02 = response2.getFolder();
+                child02.setLastModified(response2.getTimestamp());
+            }
+            perms = new OCLPermission[] {
+                Create.ocl(userId, false, false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+                Create.ocl(secId, false, true, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
+            };
+            {
+                FolderObject folder = Create.folder(child01.getObjectID(), "NonDeleteableSubChild01", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
+                InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, folder));
+                GetResponse response2 = client.execute(new GetRequest(API.OX_NEW, response.getId()));
+                subChild01 = response2.getFolder();
+                subChild01.setLastModified(response2.getTimestamp());
+            }
+            // And finally the test
+            CommonDeleteResponse response = client.execute(new DeleteRequest(API.OX_NEW, false, parent));
+            JSONArray notDeleted = (JSONArray) response.getData();
+            assertEquals("Expected identifier of not deletable folder.", 1, notDeleted.length());
+            assertEquals("Wrong folder identifier", parent.getObjectID(), notDeleted.getInt(0));
+        } finally {
+            if (null != subChild01) {
+                try {
+                    client2.execute(new DeleteRequest(API.OX_NEW, subChild01));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (null != child02) {
+                try {
+                    client.execute(new DeleteRequest(API.OX_NEW, child02));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (null != child01) {
+                try {
+                    client.execute(new DeleteRequest(API.OX_NEW, child01));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (null != parent) {
+                try {
+                    client.execute(new DeleteRequest(API.OX_NEW, parent));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }
