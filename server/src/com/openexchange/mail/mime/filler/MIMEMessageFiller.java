@@ -700,9 +700,9 @@ public class MIMEMessageFiller {
                      */
                     final String plainText = textBodyPart.getPlainText();
                     if (null == plainText) {
-                        primaryMultipart.addBodyPart(createTextBodyPart(plainText, false, false), 0);
-                    } else {
                         primaryMultipart.addBodyPart(createTextBodyPart(content, false, true), 0);
+                    } else {
+                        primaryMultipart.addBodyPart(createTextBodyPart(plainText, false, false), 0);
                     }
                 } else {
                     /*
@@ -995,9 +995,9 @@ public class MIMEMessageFiller {
          */
         final String plainText = textBodyPart.getPlainText();
         if (null == plainText) {
-            alternativeMultipart.addBodyPart(createTextBodyPart(plainText, true, false), 0);
-        } else {
             alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent, true, true), 0);
+        } else {
+            alternativeMultipart.addBodyPart(createTextBodyPart(plainText, true, false), 0);
         }
         return alternativeMultipart;
     }

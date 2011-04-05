@@ -1,3 +1,7 @@
+* 2011-04-05 - thorben.betten@open-xchange.com
+
+ - Bugfix #18856: Proper composal of plain-text part
+
 * 2011-04-05 - marcus.klein@open-xchange.com
 
  - Bugfix #18775: Improved mechanism to find correct user for an IMAP ACL.
