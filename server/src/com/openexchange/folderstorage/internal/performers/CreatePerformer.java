@@ -65,6 +65,9 @@ import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -270,6 +273,37 @@ public final class CreatePerformer extends AbstractPerformer {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
                 }
                 checkOpenedStorage(capStorage, openedStorages);
+                /*
+                 * Special handling for mail folders on root level
+                 */
+                if (FolderStorage.PRIVATE_ID.equals(parentId) && MailContentType.getInstance().toString().equals(folderContentType.toString())) {
+                    final Folder clone4Real = (Folder) toCreate.clone();
+                    final String rootId = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+                    clone4Real.setParentID(rootId);
+                    capStorage.createFolder(clone4Real, storageParameters);
+                    toCreate.setID(clone4Real.getID());
+                    /*
+                     * Update parent's last-modified time stamp
+                     */
+                    final boolean started = realStorage.startTransaction(storageParameters, true);
+                    try {
+                        realStorage.updateLastModified(System.currentTimeMillis(), FolderStorage.REAL_TREE_ID, parentId, storageParameters);
+                        if (started) {
+                            realStorage.commitTransaction(storageParameters);
+                        }
+                    } catch (final FolderException e) {
+                        if (started) {
+                            realStorage.rollback(storageParameters);
+                        }
+                        throw e;
+                    } catch (final Exception e) {
+                        if (started) {
+                            realStorage.rollback(storageParameters);
+                        }
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    }
+                    return toCreate.getID();
+                }
                 /*
                  * 1. Create at default location in capable real storage
                  */

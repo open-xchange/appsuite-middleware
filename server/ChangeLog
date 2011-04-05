@@ -5,6 +5,7 @@
  - Bugfix #18852: Fixed selecting referenced message on forward operation
  - Bugfix #18842: Assume INBOX exists regardless of IMAP server's LIST response
  - Bugfix #18807: Fixed possible NPE
+ - Bugfix #18797: Allow root level subfolders if Cyrus' "altNamespace" feature is enabled
 
 * 2011-04-05 - marcus.klein@open-xchange.com
 
