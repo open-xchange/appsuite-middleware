@@ -707,7 +707,7 @@ public final class MessageParser {
                          * The mail itself
                          */
                         if (null == access) {
-                            access = MailAccess.getInstance(session);
+                            access = MailAccess.getInstance(session, msgref.getAccountId());
                             access.connect();
                         }
                         final MailMessage referencedMail =
