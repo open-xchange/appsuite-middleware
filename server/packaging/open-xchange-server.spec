@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -769,6 +769,10 @@ fi
 %doc doc/examples
 
 %changelog
+* Tue Apr 05 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18775: Improved mechanism to find correct user for an IMAP ACL.
+* Tue Apr 05 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18856: Proper composal of plain-text part
 * Mon Apr 04 2011 - marcus.klein@open-xchange.com
  - Bugfix #18806: Removed debug output into console log file.
  - Bugfix #18781: Improved an exception message.

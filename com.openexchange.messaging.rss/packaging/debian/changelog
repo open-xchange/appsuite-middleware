@@ -1,3 +1,9 @@
+open-xchange-messaging-rss (6.20.0.0-6) unstable; urgency=low
+
+  * another build for public ptf 2011-04-04 (2011-04-13)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 05 Apr 2011 13:45:19 +0000
+
 open-xchange-messaging-rss (6.20.0.0-5) unstable; urgency=low
 
   * build for public ptf 2011-04-13
