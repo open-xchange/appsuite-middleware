@@ -1,6 +1,7 @@
 * 2011-04-05 - thorben.betten@open-xchange.com
 
  - Bugfix #18856: Proper composal of plain-text part
+ - Bugfix #18806: Suppress JavaMail debug logging
 
 * 2011-04-05 - marcus.klein@open-xchange.com
 

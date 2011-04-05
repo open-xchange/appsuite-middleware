@@ -51,6 +51,8 @@ package com.openexchange.pop3.connect;
 
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
@@ -88,6 +90,25 @@ import com.sun.mail.pop3.POP3Store;
 public final class POP3StoreConnector {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3StoreConnector.class);
+
+    private static final PrintStream EMPTY_PRINTER = new PrintStream(new OutputStream() {
+
+        @Override
+        public void write(int b) throws IOException {
+            // Do nothing
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            // Do nothing
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            // Do nothing
+        }
+
+    });
 
     /**
      * The result after establishing a connection to POP3 server.
@@ -314,6 +335,9 @@ public final class POP3StoreConnector {
             if (Boolean.parseBoolean(pop3Session.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 pop3Session.setDebug(true);
                 pop3Session.setDebugOut(System.out);
+            } else {
+                pop3Session.setDebug(false);
+                pop3Session.setDebugOut(EMPTY_PRINTER);
             }
             /*
              * Get store
