@@ -255,6 +255,9 @@ public abstract class AbstractAJAXTest extends TestCase {
         if (null == seconduser) {
             seconduser = getAJAXProperty("seconduser");
         }
+        if(! seconduser.contains("@")){
+        	seconduser += "@" + getAJAXProperty("contextName");
+        }
         return seconduser;
     }
 
