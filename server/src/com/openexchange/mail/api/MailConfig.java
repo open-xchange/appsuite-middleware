@@ -51,10 +51,12 @@ package com.openexchange.mail.api;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.internet.AddressException;
@@ -413,30 +415,50 @@ public abstract class MailConfig {
                     throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
                 }
                 final Set<Integer> userIds = new HashSet<Integer>();
-                for (final MailAccount candidate : accounts) {
-                    final InetSocketAddress shouldMatch;
-                    switch (MailProperties.getInstance().getMailServerSource()) {
-                    case USER:
-                        shouldMatch = toSocketAddr(candidate.generateMailServerURL(), 143);
-                        break;
-                    case GLOBAL:
-                        shouldMatch = toSocketAddr(MailProperties.getInstance().getMailServer(), 143);
-                        break;
-                    default:
-                        throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
+                if (accounts.length == 1) {
+                    // On ASE some accounts are configured to connect to localhost, some to the full qualified local host name. The socket
+                    // would then not match. If we only find one then, use it.
+                    userIds.add(I(accounts[0].getUserId()));
+                } else {
+                    for (final MailAccount candidate : accounts) {
+                        final InetSocketAddress shouldMatch;
+                        switch (MailProperties.getInstance().getMailServerSource()) {
+                        case USER:
+                            shouldMatch = toSocketAddr(candidate.generateMailServerURL(), 143);
+                            break;
+                        case GLOBAL:
+                            shouldMatch = toSocketAddr(MailProperties.getInstance().getMailServer(), 143);
+                            break;
+                        default:
+                            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
+                        }
+                        if (server.equals(shouldMatch)) {
+                            userIds.add(I(candidate.getUserId()));
+                        }
                     }
-                    if (server.equals(shouldMatch)) {
-                        userIds.add(I(candidate.getUserId()));
+                }
+                // Prefer the default mail account. 
+                Set<Integer> notDefaultAccount = new HashSet<Integer>();
+                if (userIds.size() > 1) {
+                    Iterator<Integer> iter = userIds.iterator();
+                    while (iter.hasNext()) {
+                        int userId = i(iter.next());
+                        for (MailAccount candidate : accounts) {
+                            if (candidate.getUserId() == userId && !candidate.isDefaultAccount()) {
+                                notDefaultAccount.add(I(userId));
+                            }
+                        }
                     }
+                }
+                if (notDefaultAccount.size() < userIds.size()) {
+                    userIds.removeAll(notDefaultAccount);
                 }
                 return I2i(userIds);
             case USER_NAME:
                 return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
             }
         }
-        /*
-         * Find user name by user's imap login
-         */
+        // Find user name by user's imap login
         final MailAccount[] accounts = storageService.resolveLogin(pattern, server, ctx.getContextId());
         final int[] retval = new int[accounts.length];
         for (int i = 0; i < retval.length; i++) {

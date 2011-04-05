@@ -1,3 +1,7 @@
+* 2011-04-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #18775: Improved mechanism to find correct user for an IMAP ACL.
+
 * 2011-04-04 - francisco.laguna@open-xchange.com
 
  - Bugfix #18835: Change column type of value column to TEXT.
