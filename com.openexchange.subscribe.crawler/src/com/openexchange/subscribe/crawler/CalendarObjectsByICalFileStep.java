@@ -49,15 +49,8 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.TimeZone;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -97,13 +90,17 @@ public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObje
                 tempEvents = (ArrayList<CalendarDataObject>) iCalParser.parseAppointments(
                     iCalFile,
                     TimeZone.getDefault(),
-                    new ContextImpl(23),
+                    workflow.getSubscription().getContext(),
                     new ArrayList<ConversionError>(),
                     new ArrayList<ConversionWarning>());
             } else {
                 LOG.error("No iCal-Parser found!");
             }
             events.addAll(tempEvents);
+            for (CalendarDataObject event : events){
+                event.setNotification(false);
+            }
+            
             
         } catch (ConversionError e) {
             LOG.error(e.getMessage(), e);
