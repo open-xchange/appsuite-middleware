@@ -311,7 +311,7 @@ public final class MessageUtility {
      * @return The byte content
      * @throws IOException If an I/O error occurs
      */
-    public static byte[] getStream(final InputStream in) throws IOException {
+    public static byte[] getBytesFrom(final InputStream in) throws IOException {
         if (null == in) {
             return new byte[0];
         }
