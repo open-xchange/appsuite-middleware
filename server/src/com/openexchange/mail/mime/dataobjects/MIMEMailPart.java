@@ -81,7 +81,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEMailPart extends MailPart {
+public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     private static final long serialVersionUID = -1142595512657302179L;
 
@@ -267,15 +267,6 @@ public final class MIMEMailPart extends MailPart {
         }
     }
 
-    /**
-     * Gets an {@link InputStream} to the raw data with any Content-Transfer-Encoding intact. This method is useful if the
-     * "Content-Transfer-Encoding" header is incorrect or corrupt, which would prevent the {@link #getInputStream()} method or
-     * {@link #getContent()} method from returning the correct data. In such a case the application may use this method and attempt to
-     * decode the raw data itself.
-     * 
-     * @return The raw input stream
-     * @throws MailException If an error occurs
-     */
     public InputStream getRawInputStream() throws MailException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);

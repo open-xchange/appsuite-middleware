@@ -62,7 +62,7 @@ import com.openexchange.mail.dataobjects.MailPart;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEMailMessage extends MailMessage {
+public final class MIMEMailMessage extends MailMessage implements MIMERawSource {
 
     private static final long serialVersionUID = 4593386724062676753L;
 
@@ -184,6 +184,10 @@ public final class MIMEMailMessage extends MailMessage {
     @Override
     public MailPart getEnclosedMailPart(final int index) throws MailException {
         return mailPart.getEnclosedMailPart(index);
+    }
+
+    public InputStream getRawInputStream() throws MailException {
+        return mailPart.getRawInputStream();
     }
 
     @Override
