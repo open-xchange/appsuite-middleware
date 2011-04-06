@@ -50,6 +50,7 @@
 package com.openexchange.mail.utils;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -62,6 +63,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message processing.
@@ -296,6 +298,46 @@ public final class MessageUtility {
         } finally {
             try {
                 isr.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Gets the byte content from specified input stream.
+     * 
+     * @param in The input stream to get the byte content from
+     * @return The byte content
+     * @throws IOException If an I/O error occurs
+     */
+    public static byte[] getStream(final InputStream in) throws IOException {
+        if (null == in) {
+            return new byte[0];
+        }
+        try {
+            final byte[] buf = new byte[BUFSIZE];
+            int len = 0;
+            if ((len = in.read(buf, 0, buf.length)) <= 0) {
+                return new byte[0];
+            }
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
+            do {
+                out.write(buf, 0, len);
+            } while ((len = in.read(buf, 0, buf.length)) > 0);
+            return out.toByteArray();
+        } catch (final IOException e) {
+            if ("No content".equals(e.getMessage())) {
+                /*-
+                 * Special JavaMail I/O error to indicate no content available from IMAP server.
+                 * Return the empty string in this case.
+                 */
+                return new byte[0];
+            }
+            throw e;
+        } finally {
+            try {
+                in.close();
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
             }
