@@ -104,6 +104,8 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
         }
         if (needsRegistration) {
             LOG.info("Registering Facebook MetaData service.");
+            LOG.info("Parameter com.openexchange.facebook.apiKey : " + configurationService.getProperty("com.openexchange.facebook.apiKey"));
+            LOG.info("Parameter com.openexchange.facebook.secretKey :" + configurationService.getProperty("com.openexchange.facebook.secretKey"));
             OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(configurationService);
             registration = context.registerService(OAuthServiceMetaData.class.getName(),
                 facebookMetaDataService, null);
