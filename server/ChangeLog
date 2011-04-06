@@ -1,3 +1,7 @@
+* 2011-04-06 - francisco.laguna@open-xchange.com
+
+ - Bugfix #18865: Lazily load ipcheck whitelist on first access.
+
 * 2011-04-06 - thorben.betten@open-xchange.com
 
  - Bugfix #18851: Proper display of non-ascii characters even though "Content-Transfer-Encoding: 7bit" is set
