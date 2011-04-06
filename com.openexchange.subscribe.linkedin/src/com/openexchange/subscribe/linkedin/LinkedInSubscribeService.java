@@ -88,7 +88,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
 
         DynamicFormDescription form = new DynamicFormDescription();
 
-        FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
+        FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
         oauthAccount.setOption("type", activator.getOAuthServiceMetadata().getId());
         form.add(oauthAccount);
 

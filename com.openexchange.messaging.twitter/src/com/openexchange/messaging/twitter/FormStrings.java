@@ -58,10 +58,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class FormStrings implements LocalizableStrings {
 
-    public static final String FORM_LABEL_LOGIN = "Login";
-
-    public static final String FORM_LABEL_PASSWORD = "Password";
-
+    public static final String ACCOUNT_LABEL = "The OAuth Account to use";
+    
     public FormStrings() {
         super();
     }

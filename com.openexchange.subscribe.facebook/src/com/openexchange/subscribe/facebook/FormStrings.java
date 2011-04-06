@@ -47,21 +47,19 @@
  *
  */
 
-package com.openexchange.messaging.facebook;
+package com.openexchange.subscribe.facebook;
 
 import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
  * {@link FormStrings}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FormStrings implements LocalizableStrings {
-
+    
     public static final String ACCOUNT_LABEL = "The OAuth Account to use";
-  
-
-    public FormStrings() {
-        super();
-    }
+    
+    
 }

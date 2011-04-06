@@ -1,6 +1,7 @@
 * 2011-04-06 - francisco.laguna@open-xchange.com
 
  - Bugfix #18865: Lazily load ipcheck whitelist on first access.
+ - Bugfix #18618: Make account label translatable.
 
 * 2011-04-06 - thorben.betten@open-xchange.com
 

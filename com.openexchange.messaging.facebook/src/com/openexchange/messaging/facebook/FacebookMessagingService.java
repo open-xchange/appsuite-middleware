@@ -104,7 +104,7 @@ public final class FacebookMessagingService implements MessagingService {
         /*
          * API & secret key
          */
-        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
+        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
         oauthAccount.setOption("type", "com.openexchange.oauth.facebook");
         tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);

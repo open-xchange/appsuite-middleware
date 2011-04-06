@@ -109,7 +109,7 @@ public final class TwitterMessagingService implements MessagingService {
         /*
          * API & secret key
          */
-        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
+        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
         oauthAccount.setOption("type", "com.openexchange.oauth.twitter");
         tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
