@@ -869,18 +869,25 @@ public final class MailMessageParser {
 
     private static String readContent(final MailPart mailPart, final ContentType contentType) throws MailException, IOException {
         if (is7BitTransferEncoding(mailPart) && (mailPart instanceof MIMERawSource)) {
-            final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
-            if (!MessageUtility.isAscii(bytes)) {
-                try {
-                    return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
-                } catch (final UnsupportedEncodingException e) {
-                    return new String(bytes, "US-ASCII");
+            try {
+                final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
+                if (!MessageUtility.isAscii(bytes)) {
+                    try {
+                        return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+                    } catch (final UnsupportedEncodingException e) {
+                        return new String(bytes, "US-ASCII");
+                    }
+                }
+                /*
+                 * Return ASCII string
+                 */
+                return new String(bytes, "US-ASCII");
+            } catch (final MailException e) {
+                // getRawInputStream() failed
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("MIMERawSource.getRawInputStream() failed. Fallback to transfer-decoded reading.", e);
                 }
             }
-            /*
-             * Return ASCII string
-             */
-            return new String(bytes, "US-ASCII");
         }
         /*
          * Read content
