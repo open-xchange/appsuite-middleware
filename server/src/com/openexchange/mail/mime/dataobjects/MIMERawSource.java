@@ -61,9 +61,8 @@ public interface MIMERawSource {
 
     /**
      * Gets an {@link InputStream} to the raw data with any Content-Transfer-Encoding intact. This method is useful if the
-     * "Content-Transfer-Encoding" header is incorrect or corrupt, which would prevent the {@link #getInputStream()} method or
-     * {@link #getContent()} method from returning the correct data. In such a case the application may use this method and attempt to
-     * decode the raw data itself.
+     * "Content-Transfer-Encoding" header is incorrect or corrupt. In such a case the application may use this method and attempt to decode
+     * the raw data itself.
      * 
      * @return The raw input stream
      * @throws MailException If an error occurs
