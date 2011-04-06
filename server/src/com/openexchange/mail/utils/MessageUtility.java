@@ -344,4 +344,18 @@ public final class MessageUtility {
         }
     }
 
+    /**
+     * Check if specified bytes contain ascii-only content.
+     * 
+     * @param bytes The bytes to check
+     * @return <code>true</code> if bytes are ascii-only; otherwise <code>false</code>
+     */
+    public static boolean isAscii(final byte[] bytes) {
+        boolean isAscci = true;
+        for (int i = 0; (i < bytes.length) && isAscci; i++) {
+            isAscci = bytes[i] > 0;
+        }
+        return isAscci;
+    }
+
 }
