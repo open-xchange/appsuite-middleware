@@ -114,6 +114,8 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private final List<IPRange> ranges = new CopyOnWriteArrayList<IPRange>();
 
+    private boolean rangesLoaded;
+
     /**
      * Initializes a new {@link SessionServlet}.
      */
@@ -125,11 +127,19 @@ public abstract class SessionServlet extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        initRanges();
+        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
+    }
+
+    private void initRanges() {
+        if (rangesLoaded) {
+            return;
+        }
         if (checkIP) {
             final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if (configurationService == null) {
-                LOG.fatal("No configuration service available, can not read whitelist");
-            } else {
+
+            if (configurationService != null) {
+                rangesLoaded = true;
                 final String text = configurationService.getText(SESSION_WHITELIST_FILE);
                 if (text != null) {
                     LOG.info("Exceptions from IP Check have been defined.");
@@ -142,21 +152,21 @@ public abstract class SessionServlet extends AJAXServlet {
                     }
                 }
             }
+        } else {
+            rangesLoaded = true;
         }
-        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
     protected void initializeSession(final HttpServletRequest req) throws SessiondException, AbstractOXException {
-        if(null != getSessionObject(req)) {
-            return ;
+        if (null != getSessionObject(req)) {
+            return;
         }
         /*
          * Remember session
          */
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
-            throw new SessiondException(
-                new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+            throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
         }
         final String sessionId = getSessionId(req);
         final ServerSession session = getSession(req, sessionId, sessiondService);
@@ -219,7 +229,14 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private void checkIP(final Session session, final String actual) throws SessiondException {
-        checkIP(checkIP, ranges, session, actual);
+        checkIP(checkIP, getRanges(), session, actual);
+    }
+
+    private List<IPRange> getRanges() {
+        if(!rangesLoaded) {
+            initRanges();
+        }
+        return ranges;
     }
 
     /**
@@ -339,7 +356,7 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Finds appropriate local session.
      * 
-     * @param hashSource defines how the cookie should be found 
+     * @param hashSource defines how the cookie should be found
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
@@ -449,7 +466,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
     }
-    
+
     public static void removeJSESSIONID(HttpServletRequest req, HttpServletResponse resp) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
@@ -462,7 +479,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 respCookie.setPath("/");
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
-            } 
+            }
         }
     }
 
