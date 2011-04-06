@@ -72,17 +72,7 @@ import com.openexchange.oauth.OAuthToken;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData {
-
-    /**
-     * The default API key.
-     */
-    private static final String KEY_API = "d36ebc9e274a89e3bd0c239cea4acb48";
-
-    /**
-     * The default secret key.
-     */
-    private static final String KEY_SECRET = "903e8006dbad9204bb74c26eb3ca2310";
+public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData {    
     
     private ConfigurationService configurationService;
 
@@ -106,19 +96,13 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public String getAPIKey() {        
-        if (null == configurationService) {
-            return KEY_API;
-        }
-        return configurationService.getProperty("com.openexchange.facebook.apiKey", KEY_API);
+    public String getAPIKey() {                
+        return configurationService.getProperty("com.openexchange.facebook.apiKey");
     }
 
     @Override
     public String getAPISecret() {        
-        if (null == configurationService) {
-            return KEY_SECRET;
-        }
-        return configurationService.getProperty("com.openexchange.facebook.secretKey", KEY_SECRET);
+        return configurationService.getProperty("com.openexchange.facebook.secretKey");
     }
 
     public boolean needsRequestToken() {
