@@ -52,6 +52,7 @@ package com.openexchange.mail.parser;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -93,11 +94,14 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
+import com.openexchange.mail.mime.dataobjects.MIMERawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.tnef.TNEF2ICal;
 
@@ -864,6 +868,23 @@ public final class MailMessageParser {
     }
 
     private static String readContent(final MailPart mailPart, final ContentType contentType) throws MailException, IOException {
+        if (is7BitTransferEncoding(mailPart) && (mailPart instanceof MIMERawSource)) {
+            final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
+            if (!MessageUtility.isAscii(bytes)) {
+                try {
+                    return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+                } catch (final UnsupportedEncodingException e) {
+                    return new String(bytes, "US-ASCII");
+                }
+            }
+            /*
+             * Return ASCII string
+             */
+            return new String(bytes, "US-ASCII");
+        }
+        /*
+         * Read content
+         */
         final String charset = getCharset(mailPart, contentType);
         try {
             return MessageUtility.readMailPart(mailPart, charset);
@@ -878,6 +899,17 @@ public final class MailMessageParser {
             }
             return MessageUtility.readMailPart(mailPart, fallback);
         }
+    }
+
+    private static boolean is7BitTransferEncoding(final MailPart mailPart) {
+        final String transferEncoding = mailPart.getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
+        /*-
+         * Taken from RFC 2045 Section 6.1. (Content-Transfer-Encoding Syntax):
+         * ...
+         * "Content-Transfer-Encoding: 7BIT" is assumed if the Content-Transfer-Encoding header field is not present.
+         * ...
+         */
+        return (null == transferEncoding || "7bit".equalsIgnoreCase(transferEncoding.trim()));
     }
 
     private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {

@@ -1,3 +1,7 @@
+* 2011-04-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #18851: Proper display of non-ascii characters even though "Content-Transfer-Encoding: 7bit" is set
+
 * 2011-04-05 - thorben.betten@open-xchange.com
 
  - Bugfix #18856: Proper composal of plain-text part
