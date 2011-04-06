@@ -146,7 +146,7 @@ public final class IMAPFolderConverter {
 
     private static final String ATTRIBUTE_HAS_CHILDREN = "\\HasChildren";
 
-    private static final String ATTRIBUTE_HAS_NO_CHILDREN = "\\HasNoChildren";
+    // private static final String ATTRIBUTE_HAS_NO_CHILDREN = "\\HasNoChildren";
 
     /**
      * Prevent instantiation
@@ -289,8 +289,6 @@ public final class IMAPFolderConverter {
                             if (hasChildren) {
                                 if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
                                     mailFolder.setSubfolders(true);
-                                } else if (ATTRIBUTE_HAS_NO_CHILDREN.equalsIgnoreCase(attribute)) {
-                                    mailFolder.setSubfolders(false);
                                 }
                             }
                         }
@@ -495,8 +493,6 @@ public final class IMAPFolderConverter {
                     if (hasChildren) {
                         if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
                             mailFolder.setSubfolders(true);
-                        } else if (ATTRIBUTE_HAS_NO_CHILDREN.equalsIgnoreCase(attribute)) {
-                            mailFolder.setSubfolders(false);
                         }
                     }
                 }
