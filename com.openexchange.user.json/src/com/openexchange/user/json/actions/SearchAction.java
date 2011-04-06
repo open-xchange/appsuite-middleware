@@ -213,10 +213,8 @@ public final class SearchAction extends AbstractUserAction {
             /*
              * TODO: Sort users if a user field was denoted by sort field
              */
-            /*
-             * Determine max. last-modified time stamp
-             */
-            Date lastModified = contacts[0].getLastModified();
+            // Determine max. last-modified time stamp
+            Date lastModified = new Date(0);
             for (int i = 1; i < contacts.length; i++) {
                 final Date lm = contacts[i].getLastModified();
                 if (lastModified.before(lm)) {
