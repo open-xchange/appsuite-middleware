@@ -6,6 +6,7 @@
 
  - Bugfix #18787: Throwing a more meaningful error if quota is exceeded
  - Bugfix #15227: Introduced new locale-sensitive error code
+ - Bugfix #18890: Introduced entity-to-ACL mapping for MDaemon IMAP server
 
 * 2011-04-06 - francisco.laguna@open-xchange.com
 

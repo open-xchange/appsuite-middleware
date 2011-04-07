@@ -118,7 +118,24 @@ public enum IMAPServer {
         public boolean matches(final String greeting) {
             return greeting.indexOf("Sun Java(tm) System Messaging Server") >= 0;
         }
-    });
+    }),
+    /**
+     * MDaemon
+     */
+    MDAEMON("MDaemon", MDaemonEntity2ACL.class.getName(), new ArgumentGenerator() {
+
+        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
+        }
+    }, new GreetingMatcher() {
+
+        @Override
+        public boolean matches(final String greeting) {
+            return toLowerCase(greeting).indexOf(toLowerCase(MDAEMON.getName())) >= 0;
+        }
+    }),
+    
+    ;
 
     private final String impl;
 
