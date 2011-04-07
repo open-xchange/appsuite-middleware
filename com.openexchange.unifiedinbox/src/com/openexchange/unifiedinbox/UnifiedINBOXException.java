@@ -130,7 +130,12 @@ public final class UnifiedINBOXException extends MIMEMailException {
         /**
          * Request aborted due to timeout of %1$s %2$s.
          */
-        TIMEOUT("Request aborted due to timeout of %1$s %2$s.", Category.CODE_ERROR, 2014);
+        TIMEOUT("Request aborted due to timeout of %1$s %2$s.", Category.CODE_ERROR, 2014),
+        /**
+         * Invalid destination folder. Don't know where to append the mails.
+         */
+        INVALID_DESTINATION_FOLDER("Invalid destination folder. Don't know where to append the mails.", Category.USER_INPUT, 2015),
+        ;
 
         private final String message;
 

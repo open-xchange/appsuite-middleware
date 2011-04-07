@@ -667,7 +667,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
     public String[] appendMessages(final String destFullname, final MailMessage[] mailMessages) throws MailException {
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(destFullname)) {
             // TODO: Error code OR default account?!
-            throw new IllegalArgumentException("Invalid destination folder. Don't know where to append the mails.");
+            throw new UnifiedINBOXException(UnifiedINBOXException.Code.INVALID_DESTINATION_FOLDER, new Object[0]);
         }
         // Parse destination folder
         final FullnameArgument destFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(destFullname);
