@@ -336,7 +336,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
                 return dbres;
             }
         } else {
-            throw new OXResellerException(Code.EITHER_ADD_EDIT_OR_REMOVE);
+            return null;
         }
     }
 

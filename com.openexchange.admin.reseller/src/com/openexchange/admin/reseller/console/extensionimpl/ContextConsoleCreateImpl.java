@@ -122,7 +122,10 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                     final int i = idarray[ResellerConstants.ADD_RESTRICTION.getIndex()];
                     if (-1 != i) {
                         if (nextLine[i].length() > 0) {
-                            ctxext.setRestriction(getRestrictions(getRestrictionFromCSV(nextLine, i)));
+                            final HashSet<Restriction> restrictions = getRestrictions(getRestrictionFromCSV(nextLine, i));
+                            if (null != restrictions) {
+                                ctxext.setRestriction(restrictions);
+                            }
                         }
                     }
                 }
@@ -141,7 +144,10 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                     final int i = idarray[ResellerConstants.ADD_RESTRICTION.getIndex()];
                     if (-1 != i) {
                         if (nextLine[i].length() > 0) {
-                            firstExtensionByName.setRestriction(getRestrictions(getRestrictionFromCSV(nextLine, i)));
+                            final HashSet<Restriction> restrictions = getRestrictions(getRestrictionFromCSV(nextLine, i));
+                            if (null != restrictions) {
+                                firstExtensionByName.setRestriction(restrictions);
+                            }
                         }
                     }
                 }
@@ -211,6 +217,14 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
 
     }
 
+    /**
+     * 
+     * 
+     * @param addres
+     * @return might return null
+     * @throws InvalidDataException
+     * @throws OXResellerException
+     */
     private HashSet<Restriction> getRestrictions(final HashSet<Restriction> addres) throws InvalidDataException, OXResellerException {
         HashSet<Restriction> restrictions = null;
         if (!addres.isEmpty()) {

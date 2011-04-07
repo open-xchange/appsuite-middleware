@@ -104,8 +104,9 @@ public class Change extends ResellerAbstraction {
             final ResellerAdmin dbadm = rsi.getData(adm, auth);
             final HashSet<Restriction> dbres = dbadm.getRestrictions();
             final HashSet<Restriction> retRestrictions = handleAddEditRemoveRestrictions(dbres, adm.getRestrictions(), removeRes, editRes);
-            adm.setRestrictions(retRestrictions);
-
+            if (null != retRestrictions) {
+                adm.setRestrictions(retRestrictions);
+            }
             rsi.change(adm, auth);
             displayChangedMessage(successtext, null, parser);
             sysexit(0);

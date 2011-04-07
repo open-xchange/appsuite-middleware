@@ -105,13 +105,20 @@ public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
             }
             final HashSet<Restriction> restrictions = ResellerAbstraction.handleAddEditRemoveRestrictions(dbres, addres, removeRes, editRes);
             if (null == firstExtensionByName) {
-                OXContextExtensionImpl ctxext = new OXContextExtensionImpl(restrictions);
+                final OXContextExtensionImpl ctxext;
+                if (null != restrictions) {
+                    ctxext = new OXContextExtensionImpl(restrictions);
+                } else {
+                    ctxext = new OXContextExtensionImpl();
+                }
                 if( null != customid ) {
                     ctxext.setCustomid(customid);
                 }
                 ctx.addExtension(ctxext);
             } else {
-                firstExtensionByName.setRestriction(restrictions);
+                if (null != restrictions) {
+                    firstExtensionByName.setRestriction(restrictions);
+                }
                 if( null != customid ) {
                     firstExtensionByName.setCustomid(customid);
                 }
