@@ -62,7 +62,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TimeSpanParser implements StringParser {
+public class TimeSpanParser  implements StringParser {
     
     private static final Map<String, Long> UNITS = new HashMap<String, Long>() {
         private static final long serialVersionUID = 4341197305332412108L;
@@ -89,6 +89,9 @@ public class TimeSpanParser implements StringParser {
      * @return
      */
     public static Long parseTimespan(final String span) {
+        if(span == null) {
+            return -1l;
+        }
         final StringBuilder numberBuilder = new StringBuilder();
         final StringBuilder unitBuilder = new StringBuilder();
         int mode = 0;
