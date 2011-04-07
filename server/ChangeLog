@@ -1,3 +1,7 @@
+* 2011-04-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #18804: User contacts are not mixed up anymore if a part of them is already cached.
+
 * 2011-04-07 - thorben.betten@open-xchange.com
 
  - Bugfix #18787: Throwing a more meaningful error if quota is exceeded

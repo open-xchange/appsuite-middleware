@@ -51,19 +51,17 @@ package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -120,17 +118,7 @@ public class CachingUserStorage extends UserStorage {
     }
 
     private User createProxy(final Context ctx, final int userId, final CacheService cacheService, final User user) throws UserException {
-        final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
-            public Serializable getKey() {
-                return cacheService.newCacheKey(ctx.getContextId(), userId);
-            }
-            public User load() throws LdapException {
-                return getDelegate().getUser(userId, ctx);
-            }
-            public Lock getCacheLock() {
-                return CachingUserStorage.this.getCacheLock();
-            }
-        };
+        final UserFactory factory = new UserFactory(delegate, cacheService, cacheLock, ctx, userId);
         try {
             return null == user ? new UserReloader(factory, REGION_NAME) : new UserReloader(factory, user, REGION_NAME);
         } catch (final AbstractOXException e) {
@@ -168,79 +156,28 @@ public class CachingUserStorage extends UserStorage {
         } catch (final CacheException e) {
             throw new UserException(e);
         }
-        final List<User> retval = new ArrayList<User>(userIds.length);
+        Map<Integer, User> map = new HashMap<Integer, User>(userIds.length, 1);
         final List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
-        final int contextId = ctx.getContextId();
         for (final int userId : userIds) {
-            final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
-                public Serializable getKey() {
-                    return cacheService.newCacheKey(contextId, userId);
-                }
-                public User load() throws LdapException {
-                    return getDelegate().getUser(userId, ctx);
-                }
-                public Lock getCacheLock() {
-                    return CachingUserStorage.this.getCacheLock();
-                }
-            };
-            User user = null;
-            {
-                final Serializable key = factory.getKey();
-                final Object object = cache.get(key);
-                if (object instanceof Condition) {
-                    /*
-                     * Wait for another thread to load the object.
-                     */
-                    final Condition cond = (Condition) object;
-                    final Lock lock = factory.getCacheLock();
-                    lock.lock();
-                    try {
-                        if (cond.await(1, TimeUnit.SECONDS)) {
-                            /*
-                             * Another thread finished loading the object.
-                             */
-                            final Object tmp = cache.get(key);
-                            if (tmp instanceof User) {
-                                user = (User) tmp;
-                            }
-                        }
-                    } catch (final InterruptedException e) {
-                        user = null;
-                    } finally {
-                        lock.unlock();
-                    }
-                } else {
-                    user = (User) object;
-                }
-            }
-            if (null == user) {
-                toLoad.add(I(userId));
-            } else {
+            final UserFactory factory = new UserFactory(delegate, cacheService, cacheLock, ctx, userId);
+            final Object object = cache.get(factory.getKey());
+            if (object instanceof User) {
                 try {
-                    retval.add(new UserReloader(factory, user, REGION_NAME));
+                    map.put(I(userId), new UserReloader(factory, (User) object, REGION_NAME));
                 } catch (final CacheException e) {
                     throw new UserException(e);
                 }
+            } else {
+                toLoad.add(I(userId));
             }
         }
         final User[] loaded = delegate.getUser(ctx, I2i(toLoad));
         for (final User user : loaded) {
-            final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
-                public Serializable getKey() {
-                    return cacheService.newCacheKey(contextId, user.getId());
-                }
-                public User load() throws LdapException {
-                    return getDelegate().getUser(user.getId(), ctx);
-                }
-                public Lock getCacheLock() {
-                    return CachingUserStorage.this.getCacheLock();
-                }
-            };
-            try {
-                retval.add(new UserReloader(factory, user, REGION_NAME));
-            } catch (final CacheException e) {
-                throw new UserException(e);
-            }
+            map.put(I(user.getId()), createProxy(ctx, user.getId(), cacheService, user));
+        }
+        final List<User> retval = new ArrayList<User>(userIds.length);
+        for (int userId : userIds) {
+            retval.add(map.get(I(userId)));
         }
         return retval.toArray(new User[retval.size()]);
     }
@@ -410,5 +347,4 @@ public class CachingUserStorage extends UserStorage {
     Lock getCacheLock() {
         return cacheLock;
     }
-
 }
