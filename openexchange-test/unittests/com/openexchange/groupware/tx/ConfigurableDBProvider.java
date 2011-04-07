@@ -70,6 +70,7 @@ public class ConfigurableDBProvider implements DBProvider {
 		try {
 			return DriverManager.getConnection(url,login,password);
 		} catch (final SQLException e) {
+		    // Ignore
 		}
 		return null;
 	}
@@ -83,6 +84,7 @@ public class ConfigurableDBProvider implements DBProvider {
 				con.close();
 			}
 		} catch (final SQLException e) {
+		    // Ignore
 		}
 	}
 
