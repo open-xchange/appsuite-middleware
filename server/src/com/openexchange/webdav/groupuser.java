@@ -233,9 +233,9 @@ public final class groupuser extends PermissionServlet {
 
         if (lastsync == null) {
             if (s_groups == null || s_groups.equals("*")) {
-                group = groupstorage.getGroups(ctx);
+                group = groupstorage.getGroups(true, ctx);
             } else {
-                group = groupstorage.searchGroups(s_groups, ctx);
+                group = groupstorage.searchGroups(s_groups, true, ctx);
             }
         } else {
             group = groupstorage.listModifiedGroups(lastsync, ctx);

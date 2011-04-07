@@ -185,7 +185,7 @@ public final class Logic {
         if (!group.isSimpleNameSet()) {
             return;
         }
-        final Group[] others = storage.searchGroups(group.getSimpleName(), ctx);
+        final Group[] others = storage.searchGroups(group.getSimpleName(), true, ctx);
         for (final Group other : others) {
             if (group.getSimpleName().equals(other.getSimpleName())
                 && group.getIdentifier() != other.getIdentifier()) {

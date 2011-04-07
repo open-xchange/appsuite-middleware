@@ -139,11 +139,12 @@ public abstract class GroupStorage {
      * attributes in the same order.
      * 
      * @param pattern this pattern will be searched in the displayName of the group.
+     * @param loadMembers - switch whether members should be loaded, too (decreases performance, don't use if not needed)
      * @param The context.
      * @return an array of groups that match the search pattern.
      * @throws GroupException if searching has some storage related problem.
      */
-    public abstract Group[] searchGroups(String pattern, Context context) throws GroupException;
+    public abstract Group[] searchGroups(String pattern, boolean loadMembers, Context context) throws GroupException;
 
     /**
      * This method returns groups that have been modified since the given timestamp.
@@ -168,11 +169,12 @@ public abstract class GroupStorage {
     /**
      * Returns the data objects of all groups.
      * 
-     * @param The context.
+     * @param context - the context.
+     * @param loadMembers - switch whether members should be loaded, too (decreases performance, don't use if not needed) 
      * @return all groups.
      * @throws LdapException if an error occurs.
      */
-    public abstract Group[] getGroups(Context context) throws LdapException;
+    public abstract Group[] getGroups(boolean loadMembers, Context context) throws LdapException;
 
     /**
      * Creates a new instance implementing the group storage interface.

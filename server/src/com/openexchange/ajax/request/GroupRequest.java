@@ -68,6 +68,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
+import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
@@ -101,6 +102,8 @@ public class GroupRequest {
             retval = actionGet(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
             retval = actionSearch(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
+            retval = actionAll(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
             retval = actionUpdates(jsonObject);
         } else {
@@ -194,19 +197,51 @@ public class GroupRequest {
 
     public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, LdapException, GroupException, AjaxException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
+
         String searchpattern = null;
         if (jData.has(SearchFields.PATTERN)) {
             searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
         }
+        
+        boolean loadMembers = true;
+        if (jsonObj.has(AJAXServlet.PARAMETER_LOAD_MEMBERS)){ 
+        	loadMembers = DataParser.checkBoolean(jsonObj, AJAXServlet.PARAMETER_LOAD_MEMBERS);
+        }
+        
         timestamp = new Date(0);
         final JSONArray jsonResponseArray = new JSONArray();
         final GroupStorage groupStorage = GroupStorage.getInstance();
         Group[] groups = null;
         if ("*".equals(searchpattern)) {
-            groups = groupStorage.getGroups(session.getContext());
+            groups = groupStorage.getGroups(loadMembers, session.getContext());
         } else {
-            groups = groupStorage.searchGroups(searchpattern, session.getContext());
+            groups = groupStorage.searchGroups(searchpattern, loadMembers, session.getContext());
         }
+        final GroupWriter groupWriter = new GroupWriter();
+        for (int a = 0; a < groups.length; a++) {
+            final JSONObject jsonGroupObj = new JSONObject();
+            groupWriter.writeGroup(groups[a], jsonGroupObj);
+            if (groups[a].getLastModified().after(timestamp)) {
+                timestamp = groups[a].getLastModified();
+            }
+            jsonResponseArray.put(jsonGroupObj);
+        }
+        return jsonResponseArray;
+    }
+
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, LdapException, GroupException, AjaxException {
+        timestamp = new Date(0);
+        
+        boolean loadMembers = true;
+        if (jsonObj.has(AJAXServlet.PARAMETER_LOAD_MEMBERS)){ 
+        	loadMembers = DataParser.checkBoolean(jsonObj, AJAXServlet.PARAMETER_LOAD_MEMBERS);
+        }
+
+        
+        final JSONArray jsonResponseArray = new JSONArray();
+        final GroupStorage groupStorage = GroupStorage.getInstance();
+        Group[] groups = null;
+        groups = groupStorage.getGroups(loadMembers, session.getContext());
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < groups.length; a++) {
             final JSONObject jsonGroupObj = new JSONObject();

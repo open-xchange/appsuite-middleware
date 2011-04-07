@@ -107,8 +107,8 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] getGroups(final Context ctx) throws LdapException {
-        final Group[] groups = delegate.getGroups(ctx);
+    public Group[] getGroups(boolean loadMembers, final Context ctx) throws LdapException {
+        final Group[] groups = delegate.getGroups(loadMembers, ctx);
         final Group[] retval = new Group[groups.length + 1];
         try {
             retval[0] = GroupTools.getGroupZero(ctx);
@@ -153,7 +153,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] searchGroups(final String pattern, final Context ctx) throws GroupException {
+    public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context ctx) throws GroupException {
         final Pattern pat = Pattern.compile(pattern.replace("*", ".*"), Pattern
             .CASE_INSENSITIVE);
         final Group zero;
@@ -166,7 +166,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
         }
         final Matcher match = pat.matcher(zero.getDisplayName());
         final List<Group> groups = new ArrayList<Group>();
-        groups.addAll(Arrays.asList(delegate.searchGroups(pattern, ctx)));
+        groups.addAll(Arrays.asList(delegate.searchGroups(pattern, loadMembers, ctx)));
         if (match.find()) {
             groups.add(zero);
         }

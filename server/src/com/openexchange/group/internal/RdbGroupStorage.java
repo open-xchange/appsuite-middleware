@@ -52,6 +52,7 @@ package com.openexchange.group.internal;
 import static com.openexchange.group.internal.SQLStrings.INSERT_GROUP;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,6 +60,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
@@ -299,11 +301,12 @@ public class RdbGroupStorage extends GroupStorage {
         return groups;
     }
 
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public Group[] searchGroups(final String pattern, final Context context) throws GroupException {
+    public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context context) throws GroupException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -328,8 +331,8 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
-                group.setMember(selectMember(con, context,
-                    group.getIdentifier()));
+                if(loadMembers)
+                	group.setMember(selectMember(con, context, group.getIdentifier()));
                 groups.add(group);
             }
         } catch (final SQLException e) {
@@ -346,7 +349,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] getGroups(final Context context) throws LdapException {
+    public Group[] getGroups(final boolean loadMembers, final Context context) throws LdapException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -368,8 +371,8 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
-                group.setMember(selectMember(con, context,
-                    group.getIdentifier()));
+                if(loadMembers)
+                	group.setMember(selectMember(con, context, group.getIdentifier()));
                 tmp.add(group);
             }
             groups = tmp.toArray(new Group[tmp.size()]);
