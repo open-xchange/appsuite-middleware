@@ -267,6 +267,9 @@ public final class MessageUtility {
      * @throws IOException If an I/O error occurs
      */
     public static String readStream(final InputStream inStream, final String charset) throws IOException {
+        if (null == inStream) {
+            return STR_EMPTY;
+        }
         final InputStreamReader isr;
         try {
             isr = new InputStreamReader(inStream, charset);
