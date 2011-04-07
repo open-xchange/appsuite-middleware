@@ -65,7 +65,7 @@ import com.openexchange.resource.Resource;
 
 /**
  * These tests use the recurrence_position field to access change exceptions.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
@@ -222,20 +222,20 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
-        
+
         Appointment series = positiveAssertionOnChangeException.getSeries();
         Appointment exception = positiveAssertionOnChangeException.getChangeException();
-        
+
         changes = new Changes();
-        
+
         Resource res = resourceManager.search("*").get(0);
-        
+
         ResourceParticipant resParticipant = new ResourceParticipant(res);
         Participant[] participants = new ResourceParticipant[]{resParticipant };
         changes.put(Appointment.PARTICIPANTS, participants );
-        
+
         positiveAssertionOnUpdate.check(exception, changes, new Expectations()); //yepp doing this only to perform update, not to compare fields at all
-        
+
         exception = calendarManager.get(exception); //update exception from server
         series = calendarManager.get(series); //update series from server
         assertTrue("Should contain the resource in the change exception" , java.util.Arrays.asList(exception.getParticipants()).contains(resParticipant));
@@ -251,21 +251,21 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
-        
+
         Appointment series = positiveAssertionOnChangeException.getSeries();
         Appointment exception = positiveAssertionOnChangeException.getChangeException();
-        
+
         changes = new Changes();
-                
+
         UserResolver resolver = new UserResolver(getClient());
-        User[] resolveUser = resolver.resolveUser(getSeconduser());
+        User[] resolveUser = resolver.resolveUser(getAJAXProperty("seconduser"));
         assertTrue("Precondition: Cannot start without having another user ready", resolveUser.length > 0);
         UserParticipant userParticipant = new UserParticipant(resolveUser[0].getId());
         Participant[] participants = new UserParticipant[]{userParticipant };
         changes.put(Appointment.PARTICIPANTS, participants );
-        
+
         positiveAssertionOnUpdate.check(exception, changes, new Expectations());
-        
+
         exception = calendarManager.get(exception); //update exception from server
         series = calendarManager.get(series); //update series from server
         assertTrue("Should contain the participant in the change exception" , java.util.Arrays.asList(exception.getParticipants()).contains(userParticipant));
