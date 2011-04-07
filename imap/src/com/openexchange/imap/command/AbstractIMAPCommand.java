@@ -50,8 +50,10 @@
 package com.openexchange.imap.command;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.mail.mime.QuotaExceededException;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -150,10 +152,17 @@ public abstract class AbstractIMAPCommand<T> {
                         imapCmd,
                         response.toString()));
                 } else if (response.isNO()) {
+                    final String error = response.toString();
+                    if (error.toLowerCase(Locale.ENGLISH).indexOf("quota") >= 0) {
+                        /*
+                         * Assume a quota exceeded exception
+                         */
+                        throw new QuotaExceededException(response);
+                    }
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         imapCmd,
-                        response.toString()));
+                        error));
                 } else {
                     protocol.handleResult(response);
                 }

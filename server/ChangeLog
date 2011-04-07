@@ -1,3 +1,7 @@
+* 2011-04-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #18787: Throwing a more meaningful error if quota is exceeded
+
 * 2011-04-06 - francisco.laguna@open-xchange.com
 
  - Bugfix #18865: Lazily load ipcheck whitelist on first access.
