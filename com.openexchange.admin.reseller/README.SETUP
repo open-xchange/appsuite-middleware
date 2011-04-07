@@ -53,9 +53,9 @@ admins do not know, which context ids are already used.
 
 To add the new tables to the configdb, either run
 
- $ mysql -u openexchange -p<YOURPW> \
+ $ mysql -u openexchange -p<YOURPW> configdb \
     < /opt/open-xchange/etc/admindaemon/mysql/reseller.sql
- $ mysql -u openexchange -p<YOURPW> \
+ $ mysql -u openexchange -p<YOURPW> configdb \
     < /opt/open-xchange/etc/admindaemon/mysql/autocid.sql
 
 or on a fresh setup, when running initconfigdb, add the following arguments:
