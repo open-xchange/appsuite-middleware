@@ -117,6 +117,13 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
             stmt = con.prepareStatement(getIN(SQL, contexts.size()));
             int pos = 1;
             for (Integer cid : contexts.keySet()) {
+                final Context ctx = contexts.get(cid);
+                OXContextExtensionImpl ctxext = (OXContextExtensionImpl)ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
+                // add extension of none present (Bug 18881)
+                if( null == ctxext ) {
+                    ctxext = new OXContextExtensionImpl();
+                    ctx.addExtension(ctxext);
+                }
                 stmt.setInt(pos++, cid.intValue());
             }
             rs = stmt.executeQuery();
@@ -126,14 +133,8 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
                 Context context = contexts.get(I(cid));
                 OXContextExtensionImpl ctxext = (OXContextExtensionImpl)context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
                 final HashSet<Restriction> restrictions;
-                if( null != ctxext ) {
-                    // context has already an extension, that can happen, if multiple restrictions had been applied
-                    restrictions = ctxext.getRestriction();
-                    context.removeExtension(ctxext);
-                } else {
-                    restrictions = new HashSet<Restriction>();
-                    ctxext = new OXContextExtensionImpl();
-                }
+                restrictions = ctxext.getRestriction();
+                context.removeExtension(ctxext);
                 ctxext.setCustomid(rs.getString(2));
                 int rid = rs.getInt(3);
                 if( rid > 0 ) {

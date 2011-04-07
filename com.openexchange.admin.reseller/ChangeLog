@@ -1,3 +1,7 @@
+* 2011-04-07 - choeger@open-xchange.com
+
+ - Bugfix #18881: listcontext for masteradmin does not work when reseller plugin installed
+
 * 2011-04-07 - dennis.sieben@open-xchange.com
 
  - Bugfix #18883 - changecontext does not work when reseller package is installed
