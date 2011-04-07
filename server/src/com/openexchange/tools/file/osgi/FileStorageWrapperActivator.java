@@ -102,7 +102,7 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
     }
-
+ 
     private static class QFSTrackerCustomizer implements ServiceTrackerCustomizer {
 
         private final BundleContext context;

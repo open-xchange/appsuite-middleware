@@ -65,7 +65,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.tx.TransactionException;
 import junit.framework.TestCase;
@@ -269,5 +272,20 @@ public abstract class SQLTestCase extends TestCase {
         builder.append(") VALUES (").append(questionMarks).append(")");
         
         exec(builder.toString(), values);
+    }
+
+    
+    protected void assertEntry(String tableName, Object...attrs) throws DBPoolingException, SQLException {
+        StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
+        String key = null;
+        for(Object object : attrs) {
+            if(key == null) {
+                key = (String) object;
+            } else {
+                builder.append(key).append(" = ").append(object);
+                key = null;
+            }
+        }
+        assertResult(builder.toString());
     }
 }

@@ -53,15 +53,14 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.internal.LocalFileStorageFactory;
+import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 
-public class LocalFileStorageActivator implements BundleActivator {
+public class DefaultFileStorageActivator implements BundleActivator {
 
     private ServiceRegistration reg;
 
     public void start(final BundleContext context) throws Exception {
-        final FileStorageFactory fm = new LocalFileStorageFactory();
-        reg = context.registerService(FileStorageFactory.class.getName(), fm, null);
+        reg = context.registerService(FileStorageFactory.class.getName(), new CompositeFileStorageFactory(), null);
     }
 
     public void stop(final BundleContext context) throws Exception {
