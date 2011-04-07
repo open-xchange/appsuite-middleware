@@ -68,6 +68,10 @@ public class SOAPUserAttributes {
     }
     
     public SOAPUserAttributes(Map<String, Map<String, String>> userAttributes) {
+        if(null == userAttributes) {
+            this.namespaces = new UserAttributesNamespace[0];
+            return;
+        }
         UserAttributesNamespace[] arr = new UserAttributesNamespace[userAttributes.size()];
         int index = 0;
         for(Map.Entry<String, Map<String, String>> namespace : userAttributes.entrySet()) {
