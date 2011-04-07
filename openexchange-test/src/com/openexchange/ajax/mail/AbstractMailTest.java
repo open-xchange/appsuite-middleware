@@ -55,6 +55,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -135,10 +136,14 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     protected final JSONObject createSelfAddressed25KBMailObject(String subject) throws AjaxException, JSONException, IOException, SAXException {
         return createEMail(getSendAddress(), subject, MailContentType.ALTERNATIVE.toString(), LARGE_MAIL_TEXT_BODY);
     }
-    
-    protected JSONObject createEMail(String recipient, String subject, String content_type, String text) throws AjaxException, JSONException, IOException, SAXException{
+
+    protected JSONObject createEMail(String recipient, String subject, String content_type, String text) throws AjaxException, JSONException, IOException {
+        return createEMail(getClient(), recipient, subject, content_type, text);
+    }
+
+    protected static JSONObject createEMail(AJAXClient client, String recipient, String subject, String content_type, String text) throws AjaxException, JSONException, IOException {
         final JSONObject myMail = new JSONObject();
-        myMail.put(MailJSONField.FROM.getKey(), getSendAddress());
+        myMail.put(MailJSONField.FROM.getKey(), getSendAddress(client));
         myMail.put(MailJSONField.RECIPIENT_TO.getKey(), recipient);
         myMail.put(MailJSONField.RECIPIENT_CC.getKey(), "");
         myMail.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
@@ -225,8 +230,12 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     /**
      * @return User's default send address
      */
-    protected String getSendAddress() throws AjaxException, IOException, SAXException, JSONException {
-        return getClient().getValues().getSendAddress();
+    protected String getSendAddress() throws AjaxException, IOException, JSONException {
+        return getSendAddress(getClient());
+    }
+
+    protected static String getSendAddress(AJAXClient client) throws AjaxException, IOException, JSONException {
+        return client.getValues().getSendAddress();
     }
 
     /**
@@ -239,12 +248,16 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
         return getClient().getValues().getTimeZone();
     }
-    
-    protected String[] sendMail(String mail) throws AjaxException, IOException, SAXException, JSONException {
-        SendResponse response = client.execute(new SendRequest(mail) );
+
+    protected String[] sendMail(String mail) throws AjaxException, IOException, JSONException {
+        return sendMail(client, mail);
+    }
+
+    protected static String[] sendMail(AJAXClient client, String mail) throws AjaxException, IOException, JSONException {
+        SendResponse response = client.execute(new SendRequest(mail));
         return response.getFolderAndID();
     }
-    
+
     protected String generateMail() throws Exception {
         JSONObject mailObject = createSelfAddressed25KBMailObject();
        return mailObject.toString();

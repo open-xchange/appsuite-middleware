@@ -72,20 +72,15 @@ public class ReplyTest extends AbstractReplyTest {
     }
 
     public void testShouldReplyToSenderOnly() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
-        AJAXClient client1 = null;
         AJAXClient client2 = null;
         try {
-            client1 = new AJAXClient(User.User1);
+            // note: doesn't work the other way around on the dev system, because only the first account is set up correctly.
             client2 = new AJAXClient(User.User2);
-
-            String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
-            String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
+            String mail2 = client2.getValues().getSendAddress();
     
-            this.client = client2;
-            JSONObject mySentMail = createEMail(mail1, "Reply test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
-            sendMail(mySentMail.toString());
+            JSONObject mySentMail = createEMail(client2, getSendAddress(), "Reply test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
+            sendMail(client2, mySentMail.toString());
     
-            this.client = client1;
             JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());
             TestMail myReplyMail = new TestMail(getReplyEMail(new TestMail(myReceivedMail)));
     
@@ -97,14 +92,9 @@ public class ReplyTest extends AbstractReplyTest {
             List<String> from = myReplyMail.getFrom();
             assertNullOrEmpty("New sender field should be empty, because GUI offers selection there", from);
         } finally {
-            if (null != client1) {
-                client1.logout();
-            }
             if (null != client2) {
                 client2.logout();
             }
         }
     }
-
-
 }
