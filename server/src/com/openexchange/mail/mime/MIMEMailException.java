@@ -238,9 +238,13 @@ public class MIMEMailException extends MailException {
          */
         MESSAGING_ERROR("Messaging error: %1$s", Category.CODE_ERROR, 1023),
         /**
-         * The quota on mail server is exceeded
+         * The quota on mail server exceeded.
          */
-        QUOTA_EXCEEDED("Mail server's quota is exceeded", Category.EXTERNAL_RESOURCE_FULL, 1024),
+        QUOTA_EXCEEDED("The quota on mail server exceeded.", Category.EXTERNAL_RESOURCE_FULL, 1024),
+        /**
+         * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s).
+         */
+        QUOTA_EXCEEDED_EXT("The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, context=%4$s).", QUOTA_EXCEEDED.category, QUOTA_EXCEEDED.detailNumber),
         /**
          * A command to mail server failed. Server response: %1$s
          */
@@ -574,6 +578,18 @@ public class MIMEMailException extends MailException {
                     e,
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                     mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+            } else if (nextException instanceof com.openexchange.mail.mime.QuotaExceededException) {
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.QUOTA_EXCEEDED_EXT,
+                        e,
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()),
+                        nextException.getMessage());
+                }
+                return new MIMEMailException(Code.QUOTA_EXCEEDED, e, nextException.getMessage());
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
