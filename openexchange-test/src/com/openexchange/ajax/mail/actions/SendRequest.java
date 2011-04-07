@@ -131,7 +131,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
         return new SendParser(true);
     }
 
-    class SendParser extends AbstractUploadParser<SendResponse> {
+    private static final class SendParser extends AbstractUploadParser<SendResponse> {
 
         public SendParser(final boolean failOnError) {
             super(failOnError);
