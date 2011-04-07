@@ -53,7 +53,7 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.Response;
 
 /**
- * {@link QuotaExceededException} - Thrown to indicate than quota restrictions (either number of messages or storage size) were exceeded.
+ * {@link QuotaExceededException} - Thrown to indicate that quota restrictions (either number of messages or storage size) were exceeded.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
