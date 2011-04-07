@@ -54,7 +54,6 @@ import junit.framework.TestSuite;
 
 /**
  * Test suite for iCal tests.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ICalTestSuite {
 
@@ -73,7 +72,9 @@ public final class ICalTestSuite {
 		tests.addTestSuite(Bug11920Test.class);
 		tests.addTestSuite(Bug11996Test.class);
 		tests.addTestSuite(Bug12414Test.class);
-        tests.addTestSuite(Bug12470Test.class);
+		tests.addTestSuite(Bug12470Test.class);
+		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
+		tests.addTestSuite(ICalSeriesTests.class);
 		return tests;
 	}
 }
