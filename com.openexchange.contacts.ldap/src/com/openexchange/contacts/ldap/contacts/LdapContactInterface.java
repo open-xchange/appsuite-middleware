@@ -325,7 +325,7 @@ public class LdapContactInterface implements ContactInterface {
             if (null == this.contactIFace.cached_contacts) {
                 try {
                     // Fill
-                    arrayList = getLDAPContacts(folderId, columns, null, null, null, false);
+                    arrayList = getLDAPContacts(folderId, columns, null, null, new SortInfo(Contact.SUR_NAME, Order.asc), false);
                     this.contactIFace.cached_contacts = Collections.synchronizedList(new ArrayList<Contact>());
                     this.contactIFace.cached_contacts.addAll(arrayList);
                 } finally {
@@ -468,7 +468,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     private void addFilterFor(final String fieldname, final String searchString, final StringBuilder sb) {
-        if (null != searchString) {
+        if (null != searchString && null != fieldname) {
             if ("*".equals(searchString)) {
                 sb.append("(");
                 sb.append(fieldname);
@@ -503,7 +503,7 @@ public class LdapContactInterface implements ContactInterface {
         final Mappings mappings = folderprop.getMappings();
         final List<String> attr = new ArrayList<String>();
         final String displayname = mappings.getDisplayname();
-        if (0 != displayname.length()) {
+        if (null != displayname && 0 != displayname.length()) {
             attr.add(displayname);
         }
         final String email1 = mappings.getEmail1();

@@ -236,13 +236,15 @@ public class LdapJNDIImpl implements LdapInterface {
                 return new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL), new DeletedControl() };
             }
         } else {
-            if (null != sortField && folderprop.getSorting().equals(Sorting.server)) {
-                final SortKey sortKey = new SortKey(getFieldFromColumn(sortField.getField(), distributionlist), sortField.getSort().equals(Order.asc), null);
+            final String fieldFromColumn;
+            if (null != sortField && folderprop.getSorting().equals(Sorting.server)&& null != (fieldFromColumn = getFieldFromColumn(sortField.getField(), distributionlist))) {
+                final SortKey sortKey = new SortKey(fieldFromColumn, sortField.getSort().equals(Order.asc), null);
                 final SortKey[] sortKeyArray = new SortKey[] { sortKey };
                 if (0 == pagesize) {
                     return new Control[] { new SortControl(sortKeyArray, Control.CRITICAL) };
                 } else {
-                    return new Control[] { new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
+                    return new Control[] {
+                        new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
                 }
             } else {
                 if (0 == pagesize) {

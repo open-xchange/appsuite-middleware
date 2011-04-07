@@ -763,7 +763,7 @@ public class Mapper {
     private static DistributionListEntryObject getDistriEntry(final LdapGetter getter, int folderid, final Mappings mappings) throws LdapException {
         final DistributionListEntryObject retval = new DistributionListEntryObject();
         final String displayname = mappings.getDisplayname();
-        if (0 != displayname.length()) {
+        if (null != displayname && 0 != displayname.length()) {
             retval.setDisplayname(getter.getAttribute(displayname));
         }
         final String email1 = mappings.getEmail1();
