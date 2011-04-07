@@ -50,6 +50,8 @@
 package com.openexchange.ajax.mail.actions;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -112,13 +114,13 @@ public class SendRequest implements AJAXRequest<SendResponse> {
     }
 
     public Parameter[] getParameters() {
-        final Parameter[] retval = new Parameter[upload == null ? 2 : 3];
-        retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-        retval[1] = new FieldParameter("json_0", mailStr);
-        if (upload != null) {
-            retval[2] = new FileParameter("file_0", "text.txt", upload, "text/plain; charset=us-ascii");
+        final List<Parameter> params = new ArrayList<AJAXRequest.Parameter>(4);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
+        params.add(new FieldParameter("json_0", mailStr));
+        if (null != upload) {
+            params.add(new FileParameter("file_0", "text.txt", upload, "text/plain; charset=us-ascii"));
         }
-        return retval;
+        return params.toArray(new Parameter[params.size()]);
     }
 
     public String getServletPath() {
