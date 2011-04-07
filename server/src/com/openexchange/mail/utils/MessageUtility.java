@@ -351,9 +351,13 @@ public final class MessageUtility {
      * @return <code>true</code> if bytes are ascii-only; otherwise <code>false</code>
      */
     public static boolean isAscii(final byte[] bytes) {
+        if (null == bytes || 0 == bytes.length) {
+            return true;
+        }
+        final int len = bytes.length;
         boolean isAscci = true;
-        for (int i = 0; (i < bytes.length) && isAscci; i++) {
-            isAscci = bytes[i] > 0;
+        for (int i = 0; (i < len) && isAscci; i++) {
+            isAscci = bytes[i] >= 0;
         }
         return isAscci;
     }
