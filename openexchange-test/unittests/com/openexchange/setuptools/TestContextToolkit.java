@@ -112,7 +112,7 @@ public class TestContextToolkit {
        GroupStorage gStorage = null;
         try {
             gStorage = GroupStorage.getInstance();
-            return gStorage.searchGroups(group, ctx)[0].getIdentifier();
+            return gStorage.searchGroups(group, true, ctx)[0].getIdentifier();
         } catch (final GroupException e) {
             e.printStackTrace();
             return -1;

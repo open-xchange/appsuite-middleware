@@ -54,8 +54,8 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.group.actions.AbstractGroupResponse;
 import com.openexchange.ajax.group.actions.ListRequest;
-import com.openexchange.ajax.group.actions.ListResponse;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
 import com.openexchange.group.Group;
@@ -77,7 +77,7 @@ public class GroupResolver {
     }
     
     public Group[] resolveGroup(String pattern) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        SearchRequest req = new SearchRequest(pattern, false);
+        SearchRequest req = new SearchRequest(pattern, true, false);
         SearchResponse response = client.execute(req);
         return response.getGroups();
     }
@@ -87,7 +87,7 @@ public class GroupResolver {
             return new Group[0];
         }
         ListRequest req = new ListRequest(groupIds, true);
-        ListResponse response = client.execute(req);
+        AbstractGroupResponse response = client.execute(req);
         return response.getGroups();
     }
 }
