@@ -298,10 +298,7 @@ public final class MailFields {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof MailFields)) {
             return false;
         }
         final MailFields other = (MailFields) obj;
