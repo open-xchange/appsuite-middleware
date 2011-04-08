@@ -79,6 +79,20 @@ public final class MailFields {
     /**
      * Initializes a new instance of {@link MailFields} pre-filled with specified array of {@link MailField} constants.
      * 
+     * @param mailField The mail field to add
+     * @param mailFields Further mail fields to add
+     */
+    public MailFields(final MailField mailField, final MailField... mailFields) {
+        this();
+        arr[mailField.ordinal()] = true;
+        for (final MailField mf : mailFields) {
+            arr[mf.ordinal()] = true;
+        }
+    }
+
+    /**
+     * Initializes a new instance of {@link MailFields} pre-filled with specified array of {@link MailField} constants.
+     * 
      * @param mailFields The mail fields to add
      */
     public MailFields(final MailField[] mailFields) {
