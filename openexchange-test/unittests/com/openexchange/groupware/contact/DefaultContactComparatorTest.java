@@ -52,6 +52,7 @@ package com.openexchange.groupware.contact;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.search.Order;
 import junit.framework.TestCase;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
@@ -89,7 +90,7 @@ public class DefaultContactComparatorTest extends TestCase {
     }
     
     public void testDesc() {
-        assertBigger(c1, c2, Contact.OBJECT_ID, "desc");
+        assertBigger(c1, c2, Contact.OBJECT_ID, Order.DESCENDING);
     }
     
     public void testSpecial() {
@@ -113,11 +114,11 @@ public class DefaultContactComparatorTest extends TestCase {
     
     
     private void assertBigger(Contact c1, Contact c2, int field) {
-        assertBigger(c1, c2, field, "ASC");
+        assertBigger(c1, c2, field, Order.ASCENDING);
     }
     
-    private void assertBigger(Contact c1, Contact c2, int field, String orderDir) {
-        assertTrue("c1 was lower or equal than c2", 0 < new DefaultContactComparator(field, orderDir).compare(c1, c2));
+    private void assertBigger(Contact c1, Contact c2, int field, Order order) {
+        assertTrue("c1 was lower or equal than c2", 0 < new DefaultContactComparator(field, order).compare(c1, c2));
     }
     
 }

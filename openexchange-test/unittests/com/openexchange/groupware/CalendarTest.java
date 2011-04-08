@@ -89,6 +89,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -551,7 +552,7 @@ public class CalendarTest extends TestCase {
             AppointmentSearchObject searchObj = new AppointmentSearchObject(); 
             searchObj.setPattern("test");
             searchObj.addFolder(folder_id);
-            SearchIterator si = csql.searchAppointments(searchObj, 0, "ASC", cols);
+            SearchIterator si = csql.searchAppointments(searchObj, 0, Order.ASCENDING, cols);
             boolean gotresults = si.hasNext();
             assertTrue("Got real results by searching \"test\"", gotresults);
             while (si.hasNext()) {
@@ -579,7 +580,7 @@ public class CalendarTest extends TestCase {
             searchObj.setPattern("*");
             searchObj.addFolder(public_folder_id);
            
-            si = csql.searchAppointments(searchObj, 0, "ASC", cols);
+            si = csql.searchAppointments(searchObj, 0, Order.ASCENDING, cols);
             gotresults = si.hasNext();
             assertTrue("Got real results by searching \"*\"", gotresults);
             while (si.hasNext()) {
@@ -589,7 +590,7 @@ public class CalendarTest extends TestCase {
             si.close();
             
             searchObj.setPattern("*.*");
-            si = csql.searchAppointments(searchObj, 0, "ASC", cols);
+            si = csql.searchAppointments(searchObj, 0, Order.ASCENDING, cols);
             gotresults = si.hasNext();
             assertTrue("Got some results by searching \"*e*\"", !gotresults);
             si.close();

@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
@@ -143,7 +144,7 @@ public class OrderByTest extends TestCase {
             final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(
                 searchObject,
                 Contact.USERFIELD20,
-                "ASC",
+                Order.ASCENDING,
                 null,
                 columns);
 
