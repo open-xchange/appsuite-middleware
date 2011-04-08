@@ -158,6 +158,10 @@ public class FileStorageThreadTest extends TestCase {
 
     public void testStateFileIsCorrect() throws Throwable {
         final File testfile = File.createTempFile("filestorage", ".test");
+        if (testfile.exists()) {
+            // Probably from some other test. Just get rid of it.
+            rmdir(testfile);
+        }
         final FileStorage fm = new LocalFileStorage(tempFile.toURI());
     	SortedSet<String> set = new TreeSet<String>();
     	for (int j = 0; j < 10; j++) {
