@@ -1761,7 +1761,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean allFetch = true;
             if (MAILFIELDS_DEFAULT.equals(lowCostFields)) {
                 try {
+                    final long start = System.currentTimeMillis();
                     final long[] uids = IMAPSort.allUIDs(imapFolder, OrderDirection.DESC.equals(order), imapConfig);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     if (null != uids) {
                         final int len = uids.length;
                         final List<MailMessage> list = new ArrayList<MailMessage>(len);
