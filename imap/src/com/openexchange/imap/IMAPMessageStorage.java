@@ -1760,15 +1760,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         {
             boolean allFetch = true;
             if (MAILFIELDS_ID_AND_REC_DATE.equals(lowCostFields)) {
-                final long[] uids = IMAPSort.allUIDs(imapFolder, OrderDirection.DESC.equals(order), imapConfig);
-                if (null != uids) {
-                    final int len = uids.length;
-                    final List<MailMessage> list = new ArrayList<MailMessage>(len);
-                    for (int i = 0; i < len; i++) {
-                        list.add(new IDMailMessage(String.valueOf(uids[i]), fullname));
+                try {
+                    final long[] uids = IMAPSort.allUIDs(imapFolder, OrderDirection.DESC.equals(order), imapConfig);
+                    if (null != uids) {
+                        final int len = uids.length;
+                        final List<MailMessage> list = new ArrayList<MailMessage>(len);
+                        for (int i = 0; i < len; i++) {
+                            list.add(new IDMailMessage(String.valueOf(uids[i]), fullname));
+                        }
+                        retval = list.toArray(new MailMessage[list.size()]);
+                        allFetch = false;
                     }
-                    retval = list.toArray(new MailMessage[list.size()]);
-                    allFetch = false;
+                } catch (final MessagingException e) {
+                    LOG.warn(
+                        new StringBuilder("SORT command on IMAP server \"").append(imapConfig.getServer()).append("\" failed with login ").append(
+                            imapConfig.getLogin()).append(" (user=").append(session.getUserId()).append(", context=").append(
+                            session.getContextId()).append("): ").append(e.getMessage()),
+                        e);
                 }
             }
             if (allFetch) {
