@@ -99,6 +99,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -417,7 +418,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
-                if (MailSortField.RECEIVED_DATE.equals(sortField) && onlyLowCostFields(usedFields)) {
+                if (((null == sortField) || MailSortField.RECEIVED_DATE.equals(sortField)) && onlyLowCostFields(usedFields)) {
                     final MailMessage[] mailMessages = performLowCostFetch(fullname, usedFields, order, indexRange);
                     imapFolderStorage.updateCacheIfDiffer(fullname, mailMessages.length);
                     return mailMessages;
@@ -1740,6 +1741,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
+    private static final MailFields MAILFIELDS_ID_AND_REC_DATE = new MailFields(MailField.ID, MailField.FOLDER_ID, MailField.RECEIVED_DATE);
+
     /**
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
      * 
@@ -1753,16 +1756,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         /*
          * Perform simple fetch
          */
-        MailMessage[] retval;
+        MailMessage[] retval = null;
         {
-            final LowCostItem[] lowCostItems = getLowCostItems(lowCostFields);
-            final long start = System.currentTimeMillis();
-            retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order), imapConfig, session);
-            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            if (DEBUG) {
-                LOG.debug(new StringBuilder(128).append(fullname).append(": IMAP all fetch >>>FETCH 1:* (").append(
-                    AllFetch.getFetchCommand(lowCostItems)).append(")<<< took ").append((System.currentTimeMillis() - start)).append(
-                    STR_MSEC).toString(), new Throwable());
+            boolean allFetch = true;
+            if (MAILFIELDS_ID_AND_REC_DATE.equals(lowCostFields)) {
+                final long[] uids = IMAPSort.allUIDs(imapFolder, OrderDirection.DESC.equals(order), imapConfig);
+                if (null != uids) {
+                    final int len = uids.length;
+                    final List<MailMessage> list = new ArrayList<MailMessage>(len);
+                    for (int i = 0; i < len; i++) {
+                        list.add(new IDMailMessage(String.valueOf(uids[i]), fullname));
+                    }
+                    retval = list.toArray(new MailMessage[list.size()]);
+                    allFetch = false;
+                }
+            }
+            if (allFetch) {
+                final LowCostItem[] lowCostItems = getLowCostItems(lowCostFields);
+                final long start = System.currentTimeMillis();
+                retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order), imapConfig, session);
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                if (DEBUG) {
+                    LOG.debug(new StringBuilder(128).append(fullname).append(": IMAP all fetch >>>FETCH 1:* (").append(
+                        AllFetch.getFetchCommand(lowCostItems)).append(")<<< took ").append((System.currentTimeMillis() - start)).append(
+                        STR_MSEC).toString(), new Throwable());
+                }
             }
         }
         if (retval == null || retval.length == 0) {
