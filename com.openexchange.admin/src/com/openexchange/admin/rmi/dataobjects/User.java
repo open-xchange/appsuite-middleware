@@ -53,6 +53,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3910,6 +3911,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     final public List<String> getAliasesForSOAP() {
+        if(this.aliases == null) {
+            return new LinkedList<String>();
+        }
         return new LinkedList<String>(this.aliases);
     }
 
