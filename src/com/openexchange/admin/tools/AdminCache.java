@@ -149,9 +149,7 @@ public class AdminCache {
         this.prop = new PropertyHandler(System.getProperties());
         cacheSqlScripts();
         configureAuthentication(); // disabling authentication mechs
-        if (!masterAuthenticationDisabled) {
-            readMasterCredentials();
-        }
+        readMasterCredentials();
         this.log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
