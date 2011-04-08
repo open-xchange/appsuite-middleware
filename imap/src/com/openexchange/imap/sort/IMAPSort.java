@@ -322,12 +322,13 @@ public final class IMAPSort {
                 final Response response = r[r.length - 1];
                 final TLongArrayList list = new TLongArrayList(256);
                 if (response.isOK()) {
+                    final String key = "SORT";
                     for (int i = 0, len = r.length; i < len; i++) {
                         if (!(r[i] instanceof IMAPResponse)) {
                             continue;
                         }
                         final IMAPResponse ir = (IMAPResponse) r[i];
-                        if (ir.keyEquals("SORT")) {
+                        if (ir.keyEquals(key)) {
                             String num;
                             while ((num = ir.readAtomString()) != null) {
                                 try {

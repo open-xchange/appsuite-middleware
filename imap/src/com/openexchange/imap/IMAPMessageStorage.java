@@ -1741,7 +1741,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static final MailFields MAILFIELDS_ID_AND_REC_DATE = new MailFields(MailField.ID, MailField.FOLDER_ID, MailField.RECEIVED_DATE);
+    private static final MailFields MAILFIELDS_DEFAULT = new MailFields(MailField.ID, MailField.FOLDER_ID, MailField.RECEIVED_DATE);
 
     /**
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
@@ -1759,7 +1759,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         MailMessage[] retval = null;
         {
             boolean allFetch = true;
-            if (MAILFIELDS_ID_AND_REC_DATE.equals(lowCostFields)) {
+            if (MAILFIELDS_DEFAULT.equals(lowCostFields)) {
                 try {
                     final long[] uids = IMAPSort.allUIDs(imapFolder, OrderDirection.DESC.equals(order), imapConfig);
                     if (null != uids) {
