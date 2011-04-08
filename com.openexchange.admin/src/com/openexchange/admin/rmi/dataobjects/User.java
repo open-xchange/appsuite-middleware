@@ -3907,12 +3907,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
 
     final public void setAliasesForSOAP(List<String> aliases) {
-        this.aliases = new HashSet<String>(aliases);
+        if(aliases != null) {
+            this.aliases = new HashSet<String>(aliases);
+        }
     }
 
     final public List<String> getAliasesForSOAP() {
         if(this.aliases == null) {
-            return new LinkedList<String>();
+            return null;
         }
         return new LinkedList<String>(this.aliases);
     }
