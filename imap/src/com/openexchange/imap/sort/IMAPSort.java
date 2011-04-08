@@ -344,9 +344,7 @@ public final class IMAPSort {
                                 list.add(Long.parseLong(num));
                             } catch (final NumberFormatException e) {
                                 LOG.error(e.getMessage(), e);
-                                final ProtocolException pe = new ProtocolException("Invalid UID: " + num);
-                                pe.initCause(e);
-                                throw pe;
+                                throw new ProtocolException("Invalid UID: " + num, e);
                             }
                         }
                     }
