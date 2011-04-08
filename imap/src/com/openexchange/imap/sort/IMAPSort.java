@@ -314,8 +314,12 @@ public final class IMAPSort {
         /*
          * Cast & return
          */
-        return ((long[]) imapFolder.doCommand(new SORTProtocolCommand(descending)));
+        return ((long[]) imapFolder.doCommand(descending ? PROTCMD_SORT_DESC : PROTCMD_SORT_ASC));
     }
+
+    private static final IMAPFolder.ProtocolCommand PROTCMD_SORT_ASC = new SORTProtocolCommand(false);
+
+    private static final IMAPFolder.ProtocolCommand PROTCMD_SORT_DESC = new SORTProtocolCommand(true);
 
     private static final class SORTProtocolCommand implements IMAPFolder.ProtocolCommand {
 
