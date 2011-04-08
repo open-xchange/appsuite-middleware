@@ -132,8 +132,11 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
                 int cid = rs.getInt(1);
                 Context context = contexts.get(I(cid));
                 OXContextExtensionImpl ctxext = (OXContextExtensionImpl)context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
-                final HashSet<Restriction> restrictions;
+                HashSet<Restriction> restrictions;
                 restrictions = ctxext.getRestriction();
+                if( null == restrictions ) {
+                    restrictions = new HashSet<Restriction>();
+                }
                 context.removeExtension(ctxext);
                 ctxext.setCustomid(rs.getString(2));
                 int rid = rs.getInt(3);
