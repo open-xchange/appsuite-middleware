@@ -314,60 +314,67 @@ public final class IMAPSort {
         /*
          * Execute command
          */
-        final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
-                final Response[] r = p.command(command, null);
-                final Response response = r[r.length - 1];
-                final TLongArrayList list = new TLongArrayList(256);
-                if (response.isOK()) {
-                    final String key = "SORT";
-                    for (int i = 0, len = r.length; i < len; i++) {
-                        if (!(r[i] instanceof IMAPResponse)) {
-                            continue;
-                        }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
-                        if (ir.keyEquals(key)) {
-                            String num;
-                            while ((num = ir.readAtomString()) != null) {
-                                try {
-                                    list.add(Long.parseLong(num));
-                                } catch (final NumberFormatException e) {
-                                    LOG.error(e.getMessage(), e);
-                                    final ProtocolException pe = new ProtocolException("Invalid UID: " + num);
-                                    pe.initCause(e);
-                                    throw pe;
-                                }
-                            }
-                        }
-                        r[i] = null;
-                    }
-                    p.notifyResponseHandlers(r);
-                } else if (response.isBAD()) {
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        response.toString()));
-                } else if (response.isNO()) {
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        response.toString()));
-                } else {
-                    p.handleResult(response);
-                }
-                /*
-                 * Return UIDs
-                 */
-                return list.toNativeArray();
-            }
-            
-        });
+        final Object val = imapFolder.doCommand(new SORTProtocolCommand(descending));
         /*
          * Cast & return
          */
         return (long[]) val;
     }
+
+    private static final class SORTProtocolCommand implements IMAPFolder.ProtocolCommand {
+
+        private final boolean descending;
+
+        public SORTProtocolCommand(boolean descending) {
+            this.descending = descending;
+        }
+
+        public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
+            final Response[] r = p.command(command, null);
+            final Response response = r[r.length - 1];
+            final TLongArrayList list = new TLongArrayList(256);
+            if (response.isOK()) {
+                final String key = "SORT";
+                for (int i = 0, len = r.length; i < len; i++) {
+                    if (!(r[i] instanceof IMAPResponse)) {
+                        continue;
+                    }
+                    final IMAPResponse ir = (IMAPResponse) r[i];
+                    if (ir.keyEquals(key)) {
+                        String num;
+                        while ((num = ir.readAtomString()) != null) {
+                            try {
+                                list.add(Long.parseLong(num));
+                            } catch (final NumberFormatException e) {
+                                LOG.error(e.getMessage(), e);
+                                final ProtocolException pe = new ProtocolException("Invalid UID: " + num);
+                                pe.initCause(e);
+                                throw pe;
+                            }
+                        }
+                    }
+                    r[i] = null;
+                }
+                p.notifyResponseHandlers(r);
+            } else if (response.isBAD()) {
+                throw new BadCommandException(IMAPException.getFormattedMessage(
+                    IMAPException.Code.PROTOCOL_ERROR,
+                    command,
+                    response.toString()));
+            } else if (response.isNO()) {
+                throw new CommandFailedException(IMAPException.getFormattedMessage(
+                    IMAPException.Code.PROTOCOL_ERROR,
+                    command,
+                    response.toString()));
+            } else {
+                p.handleResult(response);
+            }
+            /*
+             * Return UIDs
+             */
+            return list.toNativeArray();
+        }
+    } // End of SORTProtocolCommand
 
 }
