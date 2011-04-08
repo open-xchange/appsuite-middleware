@@ -52,12 +52,14 @@ package com.openexchange.imap.sort;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
+import gnu.trove.TLongArrayList;
 import java.util.Locale;
 import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
+import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
@@ -67,9 +69,13 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailProperties;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.IMAPResponse;
 
 /**
  * {@link IMAPSort} - Perform the IMAP sort.
@@ -280,6 +286,81 @@ public final class IMAPSort {
             throw IMAPException.create(IMAPException.Code.UNSUPPORTED_SORT_FIELD, sortField.getKey());
         }
         return imapSortCritBuilder.toString();
+    }
+
+    /**
+     * Gets all UIDs of specified (selected) IMAP folder in either ascending or descending received date order.
+     * 
+     * @param imapFolder The (selected) IMAP folder
+     * @param descending Whether in ascending or descending received date order
+     * @param imapConfig The IMAP configuration
+     * @return The sorted UIDs or <code>null</code> if needed capabilities aren't supported
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static long[] allUIDs(final IMAPFolder imapFolder, final boolean descending, final IMAPConfig imapConfig) throws MessagingException {
+        final IMAPCapabilities capabilities = imapConfig.getImapCapabilities();
+        if (!capabilities.hasSort() || !capabilities.hasUIDPlus()) {
+            /*
+             * Missing necessary extensions
+             */
+            return null;
+        }
+        /*
+         * Execute command
+         */
+        final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
+                final Response[] r = p.command(command, null);
+                final Response response = r[r.length - 1];
+                final TLongArrayList list = new TLongArrayList(256);
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals("SORT")) {
+                            String num;
+                            while ((num = ir.readAtomString()) != null) {
+                                try {
+                                    list.add(Long.parseLong(num));
+                                } catch (final NumberFormatException e) {
+                                    LOG.error(e.getMessage(), e);
+                                    final ProtocolException pe = new ProtocolException("Invalid UID: " + num);
+                                    pe.initCause(e);
+                                    throw pe;
+                                }
+                            }
+                        }
+                        r[i] = null;
+                    }
+                    p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else {
+                    p.handleResult(response);
+                }
+                /*
+                 * Return UIDs
+                 */
+                return list.toNativeArray();
+            }
+            
+        });
+        /*
+         * Cast & return
+         */
+        return (long[]) val;
     }
 
 }
