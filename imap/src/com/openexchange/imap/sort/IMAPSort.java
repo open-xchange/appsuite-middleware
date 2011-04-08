@@ -298,6 +298,12 @@ public final class IMAPSort {
      * @throws MessagingException If a messaging error occurs
      */
     public static long[] allUIDs(final IMAPFolder imapFolder, final boolean descending, final IMAPConfig imapConfig) throws MessagingException {
+        if (imapFolder.getMessageCount() == 0) {
+            /*
+             * Empty folder...
+             */
+            return new long[0];
+        }
         final IMAPCapabilities capabilities = imapConfig.getImapCapabilities();
         if (!capabilities.hasSort() || !capabilities.hasUIDPlus()) {
             /*
