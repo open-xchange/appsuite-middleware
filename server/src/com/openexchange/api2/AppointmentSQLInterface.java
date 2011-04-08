@@ -57,6 +57,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -184,7 +185,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator containing AppointmentObjects
      * @throws OXException
      */
-    public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, String orderDir, int[] cols) throws OXException;
+    public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int[] cols) throws OXException;
     
     /**
      * Loads one appointment by the given ID

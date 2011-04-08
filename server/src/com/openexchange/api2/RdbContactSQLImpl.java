@@ -55,6 +55,7 @@ import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
+import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import gnu.trove.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -62,23 +63,16 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.Collator;
-import java.text.RuleBasedCollator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.print.attribute.IntegerSyntax;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -120,9 +114,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.preferences.ServerUserSetting;
@@ -133,7 +127,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -303,7 +296,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final String collation2, final int[] cols) throws ContactException, OXConflictException, OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final Order orderMechanism, final String collation2, final int[] cols) throws ContactException, OXConflictException, OXException {
         int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
         cs.setFolder(folderId);
@@ -376,7 +369,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return new ArrayIterator<Contact>(contacts);
     }
 
-	public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXException {
+	public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final Order order, final String collation, final int[] cols) throws ContactException, OXException {
         final ContactSql cs = new ContactMySql(session, ctx);
         ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
         conv.setCharset(collation);
@@ -386,7 +379,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         String select = generateSelect(cols);
         String whereFolder = checkFolderRights(conv, cs);
         String whereConditions = conv.getPreparedWhereString();
-        String order = generateOrder(order_field, orderMechanism, SuperCollator.get(collation));
+        String sqlOrder = generateOrder(order_field, order, SuperCollator.get(collation));
         
         //build query
         StringBuilder query = new StringBuilder(select);
@@ -398,8 +391,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if(whereFolder != null && !conv.hasFolders()){ //if the filter does not check for folders...
         	query.append(" AND ").append(whereFolder).append(" "); //...search all folders you have access rights to
         }
-        if(order != null)
-        	query.append(order).append(" ");
+        if(sqlOrder != null)
+        	query.append(sqlOrder).append(" ");
 
         String queryStr = query.toString();
         
@@ -426,7 +419,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 final Contact contact = convertResultSet2ContactObject(result, cols, false, con);
                 tmp.add(contact);
             }
-            sortByCollation(tmp, order_field, orderMechanism, collation);
+            sortByCollation(tmp, order_field, order, collation);
             contacts = tmp.toArray(new Contact[tmp.size()]);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
@@ -438,7 +431,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     }
   
 
-	private void sortByCollation(List<Contact> tmp, int orderField, String orderDir, String collation) {
+	private void sortByCollation(List<Contact> tmp, int orderField, Order order, String collation) {
 		if(collation == null)
 			return;
 		
@@ -452,7 +445,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 			LOG.error("Sorting of requested contacts failed, because no collation could be founf for "+orderField);
 			return;
 		}
-		CollationContactComparator comparator = new CollationContactComparator(field, orderDir, mapping.getJavaLocale());
+		CollationContactComparator comparator = new CollationContactComparator(field, order, mapping.getJavaLocale());
 		Collections.sort(tmp, comparator);
 	}
 
@@ -479,7 +472,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return sb.toString();
 	}
 
-	public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final String orderMechanism, final String collation, final int[] cols) throws ContactException, OXException {
+	public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final Order order, final String collation, final int[] cols) throws ContactException, OXException {
         int[] extendedCols = cols;
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
@@ -530,27 +523,27 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
         Search.checkPatternLength(searchobject);
-        final StringBuilder order = new StringBuilder();
+        final StringBuilder sqlOrder = new StringBuilder();
         final boolean specialSort;
-        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING) {
+        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING && !Order.NO_ORDER.equals(order)) {
             specialSort = false;
-            order.append(" ORDER BY co.");
+            sqlOrder.append(" ORDER BY co.");
             final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
-            order.append(Contacts.mapping[realOrderField].getDBFieldName());
-            order.append(' ');
-            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            sqlOrder.append(Contacts.mapping[realOrderField].getDBFieldName());
+            sqlOrder.append(' ');
+            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : forSQLCommand(order);
             if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
-                order.append(realOrderMechanism);
+                sqlOrder.append(realOrderMechanism);
             } else {
-                order.append("ASC");
+                sqlOrder.append("ASC");
             }
-            order.append(' ');
+            sqlOrder.append(' ');
         } else {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
                 Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
             specialSort = true;
         }
-        cs.setOrder(order.toString());
+        cs.setOrder(sqlOrder.toString());
         cs.setContactSearchObject(searchobject);
         cs.setSelect(cs.iFgetColsString(extendedCols).toString());
         final Connection con;
@@ -639,14 +632,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
 
-    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int order_field, final Order order, final int[] cols) throws OXException {
         boolean error = false;
-        String orderDir = orderMechanism;
+        String orderDir = forSQLCommand(order);
         int orderBy = order_field;
         if (orderBy == 0) {
             orderBy = 502;
         }
-        if (orderDir == null || orderDir.length() < 1) {
+        if (" ".equals(orderDir)) {
             orderDir = " ASC ";
         }
         Connection readcon = null;
@@ -679,9 +672,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             final ContactSql cs = new ContactMySql(session, ctx);
             cs.setFolder(folderId);
             cs.setSearchHabit(" OR ");
-            final String order = new StringBuilder(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(
+            final String sqlOrder = new StringBuilder(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(
                 ' ').append(orderDir).append(' ').toString();
-            cs.setOrder(order);
+            cs.setOrder(sqlOrder);
 
             final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
@@ -1596,33 +1589,33 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw ContactExceptionCodes.AGGREGATING_CONTACTS_NOT_ENABLED.create();
     }
 
-    private String generateOrder(int order_field, String orderMechanism, SuperCollator collation) {
-    	if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING)
+    private String generateOrder(int order_field, Order order, SuperCollator collation) {
+    	if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING || order.equals(Order.NO_ORDER))
     		return null;
 
     	boolean addCollation = collation != null && collation != SuperCollator.DEFAULT; 
     	
-    	StringBuilder order = new StringBuilder();
-        order.append(" ORDER BY ");
+    	StringBuilder sqlOrder = new StringBuilder();
+        sqlOrder.append(" ORDER BY ");
         final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
         if(addCollation)
-        	order.append(" CONVERT(");
-        order.append(generateFieldPart(realOrderField));
+        	sqlOrder.append(" CONVERT(");
+        sqlOrder.append(generateFieldPart(realOrderField));
         if(addCollation)
-        	order.append(" USING '")
+        	sqlOrder.append(" USING '")
         		.append(collation.getSqlCharset())
         		.append("') COLLATE '")
         		.append(collation.getSqlCollation())
         		.append("'");
 
-        order.append(' ');
-        final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+        sqlOrder.append(' ');
+        final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : forSQLCommand(order);
         if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
-            order.append(realOrderMechanism);
+            sqlOrder.append(realOrderMechanism);
         } else {
-            order.append("ASC");
+            sqlOrder.append("ASC");
         }
-        return order.append(' ').toString();
+        return sqlOrder.append(' ').toString();
 	}
     
     private String generateFieldPart(int fieldNum){

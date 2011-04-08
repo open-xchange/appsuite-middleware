@@ -55,13 +55,10 @@ package com.openexchange.groupware.search;
  */
 public enum Order {
 
+    NO_ORDER,
+
     ASCENDING,
 
     DESCENDING;
 
-    public static Order getBy(String something){
-    	if(something.toUpperCase().startsWith("DESC"))
-    		return DESCENDING;
-    	return ASCENDING;
-    }
 }

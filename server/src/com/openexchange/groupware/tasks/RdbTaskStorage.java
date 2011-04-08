@@ -66,6 +66,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
@@ -177,7 +178,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator list(final Context ctx, final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] columns, final boolean onlyOwn, final int userId, final boolean noPrivate) throws TaskException {
+    TaskIterator list(final Context ctx, final int folderId, final int from, final int to, final int orderBy, final Order order, final int[] columns, final boolean onlyOwn, final int userId, final boolean noPrivate) throws TaskException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, false));
@@ -189,7 +190,7 @@ public class RdbTaskStorage extends TaskStorage {
         if (noPrivate) {
             sql.append(NO_PRIVATE);
         }
-        sql.append(SQL.getOrder(orderBy, orderDir));
+        sql.append(SQL.getOrder(orderBy, order));
         sql.append(SQL.getLimit(from, to));
         return new TaskIterator2(ctx, userId, sql.toString(), new StatementSetter() {
 
@@ -208,7 +209,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final String orderDir, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws TaskException {
+    TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws TaskException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, true));
@@ -226,7 +227,7 @@ public class RdbTaskStorage extends TaskStorage {
             sql.append(patternCondition);
         }
         sql.append(" GROUP BY task.id");
-        sql.append(SQL.getOrder(orderBy, orderDir));
+        sql.append(SQL.getOrder(orderBy, order));
         return new TaskIterator2(ctx, userId, sql.toString(), new StatementSetter() {
 
             public void perform(final PreparedStatement stmt) throws SQLException {

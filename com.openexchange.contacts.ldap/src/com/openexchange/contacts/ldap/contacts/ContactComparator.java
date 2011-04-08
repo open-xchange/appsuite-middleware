@@ -53,209 +53,317 @@ import java.util.Comparator;
 import java.util.Date;
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 
 public class ContactComparator implements Comparator<Contact> {
-
-    private final int orderfield;
     
     private final AlphanumComparator alphanumComparator = new AlphanumComparator();
 
-    public ContactComparator(final int orderfield) {
+    private final int orderfield;
+    private final Order order;
+
+    public ContactComparator(final int orderfield, Order order) {
+        super();
         this.orderfield = orderfield;
+        this.order = order;
     }
 
     public int compare(Contact o1, Contact o2) {
+        int retval;
         switch (this.orderfield) {
         case -1:
             // Default sort
             final String s1 = getFirstNotNull(o1);
             final String s2 = getFirstNotNull(o2);
-            return alphanumComparator.compare(s1, s2);
+            retval = alphanumComparator.compare(s1, s2);
+            break;
         case Contact.ANNIVERSARY:
-            return compareDate(o1.getAnniversary(), o2.getAnniversary());
+            retval = compareDate(o1.getAnniversary(), o2.getAnniversary());
+            break;
         case Contact.ASSISTANT_NAME:
-            return compareString(o1.getAssistantName(), o2.getAssistantName());
+            retval = compareString(o1.getAssistantName(), o2.getAssistantName());
+            break;
         case Contact.BIRTHDAY:
-            return compareDate(o1.getBirthday(), o2.getBirthday());
+            retval = compareDate(o1.getBirthday(), o2.getBirthday());
+            break;
         case Contact.BRANCHES:
-            return compareString(o1.getBranches(), o2.getBranches());
+            retval = compareString(o1.getBranches(), o2.getBranches());
+            break;
         case Contact.BUSINESS_CATEGORY:
-            return compareString(o1.getBusinessCategory(), o2.getBusinessCategory());
+            retval = compareString(o1.getBusinessCategory(), o2.getBusinessCategory());
+            break;
         case Contact.CELLULAR_TELEPHONE1:
-            return compareString(o1.getCellularTelephone1(), o2.getCellularTelephone1());
+            retval = compareString(o1.getCellularTelephone1(), o2.getCellularTelephone1());
+            break;
         case Contact.CELLULAR_TELEPHONE2:
-            return compareString(o1.getCellularTelephone2(), o2.getCellularTelephone2());
+            retval = compareString(o1.getCellularTelephone2(), o2.getCellularTelephone2());
+            break;
         case Contact.CITY_BUSINESS:
-            return compareString(o1.getCityBusiness(), o2.getCityBusiness());
+            retval = compareString(o1.getCityBusiness(), o2.getCityBusiness());
+            break;
         case Contact.CITY_HOME:
-            return compareString(o1.getCityHome(), o2.getCityHome());
+            retval = compareString(o1.getCityHome(), o2.getCityHome());
+            break;
         case Contact.CITY_OTHER:
-            return compareString(o1.getCityOther(), o2.getCityOther());
+            retval = compareString(o1.getCityOther(), o2.getCityOther());
+            break;
         case Contact.COMMERCIAL_REGISTER:
-            return compareString(o1.getCommercialRegister(), o2.getCommercialRegister());
+            retval = compareString(o1.getCommercialRegister(), o2.getCommercialRegister());
+            break;
         case Contact.COMPANY:
-            return compareString(o1.getCompany(), o2.getCompany());
+            retval = compareString(o1.getCompany(), o2.getCompany());
+            break;
         case Contact.CONTEXTID:
-            return intcompare(o1.getContextId(), o2.getContextId());
+            retval = intcompare(o1.getContextId(), o2.getContextId());
+            break;
         case Contact.COUNTRY_BUSINESS:
-            return compareString(o1.getCountryBusiness(), o2.getCountryBusiness());
+            retval = compareString(o1.getCountryBusiness(), o2.getCountryBusiness());
+            break;
         case Contact.COUNTRY_HOME:
-            return compareString(o1.getCountryHome(), o2.getCountryHome());
+            retval = compareString(o1.getCountryHome(), o2.getCountryHome());
+            break;
         case Contact.COUNTRY_OTHER:
-            return compareString(o1.getCountryOther(), o2.getCountryOther());
+            retval = compareString(o1.getCountryOther(), o2.getCountryOther());
+            break;
         case Contact.DEFAULT_ADDRESS:
-            return intcompare(o1.getDefaultAddress(), o2.getDefaultAddress());
+            retval = intcompare(o1.getDefaultAddress(), o2.getDefaultAddress());
+            break;
         case Contact.DEPARTMENT:
-            return compareString(o1.getDepartment(), o2.getDepartment());
+            retval = compareString(o1.getDepartment(), o2.getDepartment());
+            break;
         case Contact.DISPLAY_NAME:
-            return compareString(o1.getDisplayName(), o2.getDisplayName());
+            retval = compareString(o1.getDisplayName(), o2.getDisplayName());
+            break;
         case Contact.EMAIL1:
-            return compareString(o1.getEmail1(), o2.getEmail1());
+            retval = compareString(o1.getEmail1(), o2.getEmail1());
+            break;
         case Contact.EMAIL2:
-            return compareString(o1.getEmail2(), o2.getEmail2());
+            retval = compareString(o1.getEmail2(), o2.getEmail2());
+            break;
         case Contact.EMAIL3:
-            return compareString(o1.getEmail3(), o2.getEmail3());
+            retval = compareString(o1.getEmail3(), o2.getEmail3());
+            break;
         case Contact.EMPLOYEE_TYPE:
-            return compareString(o1.getEmployeeType(), o2.getEmployeeType());
+            retval = compareString(o1.getEmployeeType(), o2.getEmployeeType());
+            break;
         case Contact.FAX_BUSINESS:
-            return compareString(o1.getFaxBusiness(), o2.getFaxBusiness());
+            retval = compareString(o1.getFaxBusiness(), o2.getFaxBusiness());
+            break;
         case Contact.FAX_HOME:
-            return compareString(o1.getFaxHome(), o2.getFaxHome());
+            retval = compareString(o1.getFaxHome(), o2.getFaxHome());
+            break;
         case Contact.FAX_OTHER:
-            return compareString(o1.getFaxOther(), o2.getFaxOther());
+            retval = compareString(o1.getFaxOther(), o2.getFaxOther());
+            break;
         case Contact.FILE_AS:
-            return compareString(o1.getFileAs(), o2.getFileAs());
+            retval = compareString(o1.getFileAs(), o2.getFileAs());
+            break;
         case Contact.GIVEN_NAME:
-            return compareString(o1.getGivenName(), o2.getGivenName());
+            retval = compareString(o1.getGivenName(), o2.getGivenName());
+            break;
         case Contact.INFO:
-            return compareString(o1.getInfo(), o2.getInfo());
+            retval = compareString(o1.getInfo(), o2.getInfo());
+            break;
         case Contact.INSTANT_MESSENGER1:
-            return compareString(o1.getInstantMessenger1(), o2.getInstantMessenger1());
+            retval = compareString(o1.getInstantMessenger1(), o2.getInstantMessenger1());
+            break;
         case Contact.INSTANT_MESSENGER2:
-            return compareString(o1.getInstantMessenger2(), o2.getInstantMessenger2());
+            retval = compareString(o1.getInstantMessenger2(), o2.getInstantMessenger2());
+            break;
         case Contact.INTERNAL_USERID:
-            return intcompare(o1.getInternalUserId(), o2.getInternalUserId());
+            retval = intcompare(o1.getInternalUserId(), o2.getInternalUserId());
+            break;
         case Contact.MANAGER_NAME:
-            return compareString(o1.getManagerName(), o2.getManagerName());
+            retval = compareString(o1.getManagerName(), o2.getManagerName());
+            break;
         case Contact.MARITAL_STATUS:
-            return compareString(o1.getMaritalStatus(), o2.getMaritalStatus());
+            retval = compareString(o1.getMaritalStatus(), o2.getMaritalStatus());
+            break;
         case Contact.MIDDLE_NAME:
-            return compareString(o1.getMiddleName(), o2.getMiddleName());
+            retval = compareString(o1.getMiddleName(), o2.getMiddleName());
+            break;
         case Contact.NICKNAME:
-            return compareString(o1.getNickname(), o2.getNickname());
+            retval = compareString(o1.getNickname(), o2.getNickname());
+            break;
         case Contact.NOTE:
-            return compareString(o1.getNote(), o2.getNote());
+            retval = compareString(o1.getNote(), o2.getNote());
+            break;
         case Contact.NUMBER_OF_CHILDREN:
-            return compareString(o1.getNumberOfChildren(), o2.getNumberOfChildren());
+            retval = compareString(o1.getNumberOfChildren(), o2.getNumberOfChildren());
+            break;
         case Contact.NUMBER_OF_EMPLOYEE:
-            return compareString(o1.getNumberOfEmployee(), o2.getNumberOfEmployee());
+            retval = compareString(o1.getNumberOfEmployee(), o2.getNumberOfEmployee());
+            break;
         case Contact.POSITION:
-            return compareString(o1.getPosition(), o2.getPosition());
+            retval = compareString(o1.getPosition(), o2.getPosition());
+            break;
         case Contact.POSTAL_CODE_BUSINESS:
-            return compareString(o1.getPostalCodeBusiness(), o2.getPostalCodeBusiness());
+            retval = compareString(o1.getPostalCodeBusiness(), o2.getPostalCodeBusiness());
+            break;
         case Contact.POSTAL_CODE_HOME:
-            return compareString(o1.getPostalCodeHome(), o2.getPostalCodeHome());
+            retval = compareString(o1.getPostalCodeHome(), o2.getPostalCodeHome());
+            break;
         case Contact.POSTAL_CODE_OTHER:
-            return compareString(o1.getPostalCodeOther(), o2.getPostalCodeOther());
+            retval = compareString(o1.getPostalCodeOther(), o2.getPostalCodeOther());
+            break;
         case Contact.PROFESSION:
-            return compareString(o1.getProfession(), o2.getProfession());
+            retval = compareString(o1.getProfession(), o2.getProfession());
+            break;
         case Contact.ROOM_NUMBER:
-            return compareString(o1.getRoomNumber(), o2.getRoomNumber());
+            retval = compareString(o1.getRoomNumber(), o2.getRoomNumber());
+            break;
         case Contact.SALES_VOLUME:
-            return compareString(o1.getSalesVolume(), o2.getSalesVolume());
+            retval = compareString(o1.getSalesVolume(), o2.getSalesVolume());
+            break;
         case Contact.SPOUSE_NAME:
-            return compareString(o1.getSpouseName(), o2.getSpouseName());
+            retval = compareString(o1.getSpouseName(), o2.getSpouseName());
+            break;
         case Contact.STATE_BUSINESS:
-            return compareString(o1.getStateBusiness(), o2.getStateBusiness());
+            retval = compareString(o1.getStateBusiness(), o2.getStateBusiness());
+            break;
         case Contact.STATE_HOME:
-            return compareString(o1.getStateHome(), o2.getStateHome());
+            retval = compareString(o1.getStateHome(), o2.getStateHome());
+            break;
         case Contact.STATE_OTHER:
-            return compareString(o1.getStateOther(), o2.getStateOther());
+            retval = compareString(o1.getStateOther(), o2.getStateOther());
+            break;
         case Contact.SUFFIX:
-            return compareString(o1.getSuffix(), o2.getSuffix());
+            retval = compareString(o1.getSuffix(), o2.getSuffix());
+            break;
         case Contact.SUR_NAME:
-            return compareString(o1.getSurName(), o2.getSurName());
+            retval = compareString(o1.getSurName(), o2.getSurName());
+            break;
         case Contact.TAX_ID:
-            return compareString(o1.getTaxID(), o2.getTaxID());
+            retval = compareString(o1.getTaxID(), o2.getTaxID());
+            break;
         case Contact.TELEPHONE_ASSISTANT:
-            return compareString(o1.getTelephoneAssistant(), o2.getTelephoneAssistant());
+            retval = compareString(o1.getTelephoneAssistant(), o2.getTelephoneAssistant());
+            break;
         case Contact.TELEPHONE_BUSINESS1:
-            return compareString(o1.getTelephoneBusiness1(), o2.getTelephoneBusiness1());
+            retval = compareString(o1.getTelephoneBusiness1(), o2.getTelephoneBusiness1());
+            break;
         case Contact.TELEPHONE_BUSINESS2:
-            return compareString(o1.getTelephoneBusiness2(), o2.getTelephoneBusiness2());
+            retval = compareString(o1.getTelephoneBusiness2(), o2.getTelephoneBusiness2());
+            break;
         case Contact.TELEPHONE_CALLBACK:
-            return compareString(o1.getTelephoneCallback(), o2.getTelephoneCallback());
+            retval = compareString(o1.getTelephoneCallback(), o2.getTelephoneCallback());
+            break;
         case Contact.TELEPHONE_CAR:
-            return compareString(o1.getTelephoneCar(), o2.getTelephoneCar());
+            retval = compareString(o1.getTelephoneCar(), o2.getTelephoneCar());
+            break;
         case Contact.TELEPHONE_COMPANY:
-            return compareString(o1.getTelephoneCompany(), o2.getTelephoneCompany());
+            retval = compareString(o1.getTelephoneCompany(), o2.getTelephoneCompany());
+            break;
         case Contact.TELEPHONE_HOME1:
-            return compareString(o1.getTelephoneHome1(), o2.getTelephoneHome1());
+            retval = compareString(o1.getTelephoneHome1(), o2.getTelephoneHome1());
+            break;
         case Contact.TELEPHONE_HOME2:
-            return compareString(o1.getTelephoneHome2(), o2.getTelephoneHome2());
+            retval = compareString(o1.getTelephoneHome2(), o2.getTelephoneHome2());
+            break;
         case Contact.TELEPHONE_IP:
-            return compareString(o1.getTelephoneIP(), o2.getTelephoneIP());
+            retval = compareString(o1.getTelephoneIP(), o2.getTelephoneIP());
+            break;
         case Contact.TELEPHONE_ISDN:
-            return compareString(o1.getTelephoneISDN(), o2.getTelephoneISDN());
+            retval = compareString(o1.getTelephoneISDN(), o2.getTelephoneISDN());
+            break;
         case Contact.TELEPHONE_OTHER:
-            return compareString(o1.getTelephoneOther(), o2.getTelephoneOther());
+            retval = compareString(o1.getTelephoneOther(), o2.getTelephoneOther());
+            break;
         case Contact.TELEPHONE_PAGER:
-            return compareString(o1.getTelephonePager(), o2.getTelephonePager());
+            retval = compareString(o1.getTelephonePager(), o2.getTelephonePager());
+            break;
         case Contact.TELEPHONE_PRIMARY:
-            return compareString(o1.getTelephonePrimary(), o2.getTelephonePrimary());
+            retval = compareString(o1.getTelephonePrimary(), o2.getTelephonePrimary());
+            break;
         case Contact.TELEPHONE_RADIO:
-            return compareString(o1.getTelephoneRadio(), o2.getTelephoneRadio());
+            retval = compareString(o1.getTelephoneRadio(), o2.getTelephoneRadio());
+            break;
         case Contact.TELEPHONE_TELEX:
-            return compareString(o1.getTelephoneTelex(), o2.getTelephoneTelex());
+            retval = compareString(o1.getTelephoneTelex(), o2.getTelephoneTelex());
+            break;
         case Contact.TELEPHONE_TTYTDD:
-            return compareString(o1.getTelephoneTTYTTD(), o2.getTelephoneTTYTTD());
+            retval = compareString(o1.getTelephoneTTYTTD(), o2.getTelephoneTTYTTD());
+            break;
         case Contact.TITLE:
-            return compareString(o1.getTitle(), o2.getTitle());
+            retval = compareString(o1.getTitle(), o2.getTitle());
+            break;
         case Contact.URL:
-            return compareString(o1.getURL(), o2.getURL());
+            retval = compareString(o1.getURL(), o2.getURL());
+            break;
         case Contact.USERFIELD01:
-            return compareString(o1.getUserField01(), o2.getUserField01());
+            retval = compareString(o1.getUserField01(), o2.getUserField01());
+            break;
         case Contact.USERFIELD02:
-            return compareString(o1.getUserField02(), o2.getUserField02());
+            retval = compareString(o1.getUserField02(), o2.getUserField02());
+            break;
         case Contact.USERFIELD03:
-            return compareString(o1.getUserField03(), o2.getUserField03());
+            retval = compareString(o1.getUserField03(), o2.getUserField03());
+            break;
         case Contact.USERFIELD04:
-            return compareString(o1.getUserField04(), o2.getUserField04());
+            retval = compareString(o1.getUserField04(), o2.getUserField04());
+            break;
         case Contact.USERFIELD05:
-            return compareString(o1.getUserField05(), o2.getUserField05());
+            retval = compareString(o1.getUserField05(), o2.getUserField05());
+            break;
         case Contact.USERFIELD06:
-            return compareString(o1.getUserField06(), o2.getUserField06());
+            retval = compareString(o1.getUserField06(), o2.getUserField06());
+            break;
         case Contact.USERFIELD07:
-            return compareString(o1.getUserField07(), o2.getUserField07());
+            retval = compareString(o1.getUserField07(), o2.getUserField07());
+            break;
         case Contact.USERFIELD08:
-            return compareString(o1.getUserField08(), o2.getUserField08());
+            retval = compareString(o1.getUserField08(), o2.getUserField08());
+            break;
         case Contact.USERFIELD09:
-            return compareString(o1.getUserField09(), o2.getUserField09());
+            retval = compareString(o1.getUserField09(), o2.getUserField09());
+            break;
         case Contact.USERFIELD10:
-            return compareString(o1.getUserField10(), o2.getUserField10());
+            retval = compareString(o1.getUserField10(), o2.getUserField10());
+            break;
         case Contact.USERFIELD11:
-            return compareString(o1.getUserField11(), o2.getUserField11());
+            retval = compareString(o1.getUserField11(), o2.getUserField11());
+            break;
         case Contact.USERFIELD12:
-            return compareString(o1.getUserField12(), o2.getUserField12());
+            retval = compareString(o1.getUserField12(), o2.getUserField12());
+            break;
         case Contact.USERFIELD13:
-            return compareString(o1.getUserField13(), o2.getUserField13());
+            retval = compareString(o1.getUserField13(), o2.getUserField13());
+            break;
         case Contact.USERFIELD14:
-            return compareString(o1.getUserField14(), o2.getUserField14());
+            retval = compareString(o1.getUserField14(), o2.getUserField14());
+            break;
         case Contact.USERFIELD15:
-            return compareString(o1.getUserField15(), o2.getUserField15());
+            retval = compareString(o1.getUserField15(), o2.getUserField15());
+            break;
         case Contact.USERFIELD16:
-            return compareString(o1.getUserField16(), o2.getUserField16());
+            retval = compareString(o1.getUserField16(), o2.getUserField16());
+            break;
         case Contact.USERFIELD17:
-            return compareString(o1.getUserField17(), o2.getUserField17());
+            retval = compareString(o1.getUserField17(), o2.getUserField17());
+            break;
         case Contact.USERFIELD18:
-            return compareString(o1.getUserField18(), o2.getUserField18());
+            retval = compareString(o1.getUserField18(), o2.getUserField18());
+            break;
         case Contact.USERFIELD19:
-            return compareString(o1.getUserField19(), o2.getUserField19());
+            retval = compareString(o1.getUserField19(), o2.getUserField19());
+            break;
         case Contact.USERFIELD20:
-            return compareString(o1.getUserField20(), o2.getUserField20());
+            retval = compareString(o1.getUserField20(), o2.getUserField20());
+            break;
         default:
             throw new UnsupportedOperationException("Unknown sort column value " + this.orderfield);
         }
+        switch (order) {
+        case ASCENDING:
+            break;
+        case DESCENDING:
+            retval = -retval;
+            break;
+        case NO_ORDER:
+            retval = 0;
+            break;
+        }
+        return retval;
     }
 
     private int compareString(final String string1, final String string2) {

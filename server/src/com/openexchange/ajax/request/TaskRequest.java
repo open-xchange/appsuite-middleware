@@ -52,8 +52,6 @@ package com.openexchange.ajax.request;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
 import java.util.Date;
-import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -63,6 +61,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.fields.TaskFields;
@@ -82,13 +81,13 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -349,7 +348,7 @@ public class TaskRequest extends CalendarRequest {
         final int[] columnsToLoad = removeVirtualColumns(columns);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
         final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
 
@@ -369,9 +368,9 @@ public class TaskRequest extends CalendarRequest {
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             if (leftHandLimit == 0) {
-                it = taskssql.getTaskList(folderId, leftHandLimit, -1, orderBy, orderDir, internalColumns);
+                it = taskssql.getTaskList(folderId, leftHandLimit, -1, orderBy, order, internalColumns);
             } else {
-                it = taskssql.getTaskList(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir, internalColumns);
+                it = taskssql.getTaskList(folderId, leftHandLimit, rightHandLimit, orderBy, order, internalColumns);
             }
 
             while (it.hasNext()) {
@@ -443,7 +442,7 @@ public class TaskRequest extends CalendarRequest {
         }
 
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
 
         if (jsonObj.has("limit")) {
             DataParser.checkInt(jsonObj, "limit");
@@ -492,7 +491,7 @@ public class TaskRequest extends CalendarRequest {
             final TaskWriter taskWriter = new TaskWriter(timeZone);
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
-            it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
+            it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, order, internalColumns);
 
             while (it.hasNext()) {
                 final Task taskObj = it.next();

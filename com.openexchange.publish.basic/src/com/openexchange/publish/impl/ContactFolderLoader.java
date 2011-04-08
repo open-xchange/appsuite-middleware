@@ -55,6 +55,7 @@ import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
@@ -90,7 +91,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
             final int folderId = Integer.parseInt(publication.getEntityId());
             final ContactInterface contacts = factory.create(folderId, new PublicationSession(publication));
             final int numberOfContacts = contacts.getNumberOfContacts(folderId);
-            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, "ASC", null, Contact.ALL_COLUMNS);
+            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, Order.ASCENDING, null, Contact.ALL_COLUMNS);
             while(contactsInFolder.hasNext()) {
                 Contact next = contactsInFolder.next();
                 if(!next.getMarkAsDistribtuionlist()) {

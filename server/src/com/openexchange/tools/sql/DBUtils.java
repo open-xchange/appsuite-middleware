@@ -66,6 +66,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
 
 /**
  * Utilities for database resource handling.
@@ -359,5 +360,16 @@ public final class DBUtils {
             closeSQLStuff(rs);
         }
         return retval;
+    }
+
+    public static String forSQLCommand(Order order) {
+        if (order != null) {
+            switch (order) {
+            case ASCENDING: return "ASC";
+            case DESCENDING: return "DESC";
+            case NO_ORDER: return " ";
+            }
+        }
+        return " ";
     }
 }

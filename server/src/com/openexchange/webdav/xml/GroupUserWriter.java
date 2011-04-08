@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -209,7 +210,7 @@ public class GroupUserWriter extends ContactWriter {
                 searchpattern,
                 FolderObject.SYSTEM_LDAP_FOLDER_ID,
                 Contact.DISPLAY_NAME,
-                "asc",
+                Order.ASCENDING,
                 changeFields);
             writeIterator(it, false, xo, os);
         } finally {

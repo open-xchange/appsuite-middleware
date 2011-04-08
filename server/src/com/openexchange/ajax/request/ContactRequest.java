@@ -70,6 +70,7 @@ import com.openexchange.ajax.FinalContactConstants;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
@@ -104,6 +105,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -562,7 +564,7 @@ public class ContactRequest {
         final int[] columnsToLoad = removeVirtual(columns);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
         final String collation = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_COLLATION);
 
         final TimeZone timeZone;
@@ -591,7 +593,7 @@ public class ContactRequest {
                 session);
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
-            it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir, collation, internalColumns);
+            it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, order, collation, internalColumns);
 
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
@@ -692,7 +694,7 @@ public class ContactRequest {
         final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
         final TimeZone timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
         final String collation = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_COLLATION);
         
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
@@ -700,7 +702,7 @@ public class ContactRequest {
         SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
         
         ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchTerm, orderBy, orderDir, collation, internalColumns);
+        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchTerm, orderBy, order, collation, internalColumns);
         
         final JSONArray jsonResponseArray = new JSONArray();
         try {
@@ -762,7 +764,7 @@ public class ContactRequest {
         }
 
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
         final String collation = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_COLLATION);
 
         searchObj.setSurname(DataParser.parseString(jData, ContactFields.LAST_NAME));
@@ -796,7 +798,7 @@ public class ContactRequest {
         final int[] internalColumns = checkLastModified(columnsToLoad);
 
         final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-        final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDir, collation, internalColumns);
+        final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, order, collation, internalColumns);
         
         final JSONArray jsonResponseArray = new JSONArray();
         try {

@@ -70,6 +70,7 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.OverridingContactInterface;
+import com.openexchange.groupware.search.Order;
 
 
 /**
@@ -212,7 +213,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
             0,
             numberOfContacts,
             Contact.OBJECT_ID,
-            "ASC",
+            Order.ASCENDING,
             null,
             COMPARISON_COLUMNS);
         List<Contact> retval = new ArrayList<Contact>();

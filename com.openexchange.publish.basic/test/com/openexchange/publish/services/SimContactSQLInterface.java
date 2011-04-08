@@ -63,6 +63,7 @@ import com.openexchange.contact.LdapServer;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -115,12 +116,12 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * com.openexchange.groupware.contact.ContactInterface#getContactsByExtendedSearch(com.openexchange.groupware.search.ContactSearchObject
      * , int, java.lang.String, int[])
      */
-    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final String collation, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final String collation, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
         return new SearchIteratorAdapter(getFolderList(folderId).iterator());
     }
 
@@ -209,7 +210,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#searchContacts(java.lang.String, int, int, java.lang.String, int[])
      */
-    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final Order order, final int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -299,7 +300,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
 	}
 
 	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
-			SearchTerm<T> searchterm, int orderBy, String orderDir, String collation, int[] cols)
+			SearchTerm<T> searchterm, int orderBy, Order order, String collation, int[] cols)
 			throws OXException {
 		// TODO Auto-generated method stub
 		return null;

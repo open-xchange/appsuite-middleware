@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
@@ -205,7 +206,7 @@ abstract class TaskStorage {
      * @param from Iterator should only return tasks that position in the list is after this from.
      * @param until Iterator should only return tasks that position in the list is before this from.
      * @param orderBy identifier of the column that should be used for sorting. If no ordering is necessary give <code>0</code>.
-     * @param orderDir sorting direction.
+     * @param order sorting direction.
      * @param columns Columns of the tasks that should be loaded.
      * @param onlyOwn <code>true</code> if only own tasks can be seen.
      * @param userId unique identifier of the user (own tasks).
@@ -213,7 +214,7 @@ abstract class TaskStorage {
      * @return a SearchIterator for iterating over all returned tasks.
      * @throws TaskException if an error occurs while listing tasks.
      */
-    abstract TaskIterator list(Context ctx, int folderId, int from, int until, int orderBy, String orderDir, int[] columns, boolean onlyOwn, int userId, boolean noPrivate) throws TaskException;
+    abstract TaskIterator list(Context ctx, int folderId, int from, int until, int orderBy, Order order, int[] columns, boolean onlyOwn, int userId, boolean noPrivate) throws TaskException;
 
     /**
      * Searches for tasks. Currently not all search options are available.
@@ -222,7 +223,7 @@ abstract class TaskStorage {
      * @param session Session.
      * @param search search object with the search parameters.
      * @param orderBy identifier of the column that should be used for sorting. If no ordering is necessary give <code>0</code>.
-     * @param orderDir sorting direction.
+     * @param order sorting direction.
      * @param columns Attributes of the tasks that should be loaded.
      * @param all list of folders where all tasks can be seen.
      * @param own list of folders where own tasks can be seen.
@@ -230,7 +231,7 @@ abstract class TaskStorage {
      * @return an iterator for all found tasks.
      * @throws TaskException if an error occurs.
      */
-    abstract TaskIterator search(Context ctx, int userId, TaskSearchObject search, int orderBy, String orderDir, int[] columns, List<Integer> all, List<Integer> own, List<Integer> shared) throws TaskException;
+    abstract TaskIterator search(Context ctx, int userId, TaskSearchObject search, int orderBy, Order order, int[] columns, List<Integer> all, List<Integer> own, List<Integer> shared) throws TaskException;
 
     /**
      * This method only reads the task without participants and folders.

@@ -63,6 +63,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -82,7 +83,7 @@ public class ContactSearchMultiplexer {
         this.discoveryService = discoveryService;
     }
 
-    public SearchIterator<Contact> extendedSearch(ServerSession session, ContactSearchObject searchObj, int orderBy, String orderDir, String collation, int[] cols) throws AbstractOXException {
+    public SearchIterator<Contact> extendedSearch(ServerSession session, ContactSearchObject searchObj, int orderBy, Order order, String collation, int[] cols) throws AbstractOXException {
         int[] folders = searchObj.getFolders();
         int contextId = session.getContextId();
         List<SearchIterator<Contact>> searchIterators = new LinkedList<SearchIterator<Contact>>();
@@ -92,7 +93,7 @@ public class ContactSearchMultiplexer {
                 if(discoveryService.hasSpecificContactInterface(folderId, contextId)) {
                     ContactInterface contactInterface = discoveryService.newContactInterface(folderId, session);
                     searchObj.setFolders(folderId);
-                    SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, collation, cols);
+                    SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, order, collation, cols);
                     searchIterators.add(iterator);
                 } else {
                     foldersForDefaultSearch.add(I(folderId));
@@ -101,7 +102,7 @@ public class ContactSearchMultiplexer {
             if(!foldersForDefaultSearch.isEmpty()) {
                 searchObj.setFolders(foldersForDefaultSearch);
                 ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
-                SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, collation, cols);
+                SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchObj, orderBy, order, collation, cols);
                 searchIterators.add(contactsByExtendedSearch);
             }
             
@@ -110,22 +111,22 @@ public class ContactSearchMultiplexer {
             for (ContactInterfaceProviderRegistration registration : registrations) {
                 ContactInterface contactInterface = registration.newContactInterface(session);
                 searchObj.setFolders(registration.getFolderId());
-                SearchIterator<Contact> searchIterator = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, collation, cols);
+                SearchIterator<Contact> searchIterator = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, order, collation, cols);
                 searchIterators.add(searchIterator);
             }
             searchObj.clearFolders();
             ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
-            SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, collation, cols);
+            SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchObj, orderBy, order, collation, cols);
             searchIterators.add(contactsByExtendedSearch);
         
         }
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
         }
-        return new ContactMergerator(new DefaultContactComparator(orderBy, orderDir), searchIterators);
+        return new ContactMergerator(new DefaultContactComparator(orderBy, order), searchIterators);
     }
     
-    public SearchIterator<Contact> extendedSearch(ServerSession session, SearchTerm<?> searchTerm, int orderBy, String orderDir, String collation, int[] cols) throws AbstractOXException {
+    public SearchIterator<Contact> extendedSearch(ServerSession session, SearchTerm<?> searchTerm, int orderBy, Order order, String collation, int[] cols) throws AbstractOXException {
     	ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
     	conv.parse(searchTerm);
     	List<String> folders = conv.getFolders();
@@ -137,7 +138,7 @@ public class ContactSearchMultiplexer {
             	Integer folderId = Integer.parseInt(folderStr);
                 if(discoveryService.hasSpecificContactInterface(folderId, contextId)) {
                     ContactInterface contactInterface = discoveryService.newContactInterface(folderId, session);
-                    SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, collation, cols);
+                    SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchTerm, orderBy, order, collation, cols);
                     searchIterators.add(iterator);
                 } else {
                     foldersForDefaultSearch.add(folderId);
@@ -145,35 +146,35 @@ public class ContactSearchMultiplexer {
             }
             if(!foldersForDefaultSearch.isEmpty()) {
                 ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
-                SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, collation, cols);
+                SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, order, collation, cols);
                 searchIterators.add(contactsByExtendedSearch);
             }
         } else {
             List<ContactInterfaceProviderRegistration> registrations = discoveryService.getRegistrations(contextId);
             for (ContactInterfaceProviderRegistration registration : registrations) {
                 ContactInterface contactInterface = registration.newContactInterface(session);
-                SearchIterator<Contact> searchIterator = contactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, collation, cols);
+                SearchIterator<Contact> searchIterator = contactInterface.getContactsByExtendedSearch(searchTerm, orderBy, order, collation, cols);
                 searchIterators.add(searchIterator);
             }
             ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
-            SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, orderDir, collation, cols);
+            SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, order, collation, cols);
             searchIterators.add(contactsByExtendedSearch);
         
         }
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
         }
-        Comparator<Contact> comparator = getContactComparator(orderBy, orderDir, collation);
+        Comparator<Contact> comparator = getContactComparator(orderBy, order, collation);
         return new ContactMergerator(comparator, searchIterators);
     }
 
-	private Comparator<Contact> getContactComparator(int orderBy, String orderDir, String collation) {
+	private Comparator<Contact> getContactComparator(int orderBy, Order order, String collation) {
 		if(collation == null)
-			return new DefaultContactComparator(orderBy, orderDir);
+			return new DefaultContactComparator(orderBy, order);
 		
 		SuperCollator myI18nMap = SuperCollator.get(collation);
 		ContactField myField = ContactField.getByValue(orderBy);
 		
-		return new CollationContactComparator(myField, orderDir, myI18nMap.getJavaLocale());
+		return new CollationContactComparator(myField, order, myI18nMap.getJavaLocale());
 	}
 }

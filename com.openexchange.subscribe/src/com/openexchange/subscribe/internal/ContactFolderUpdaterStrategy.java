@@ -63,6 +63,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.tools.arrays.Arrays;
@@ -168,7 +169,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             0,
             numberOfContacts,
             Contact.OBJECT_ID,
-            "ASC",
+            Order.ASCENDING,
             null,
             COMPARISON_COLUMNS);
         List<Contact> retval = new ArrayList<Contact>();

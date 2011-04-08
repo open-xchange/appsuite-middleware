@@ -63,6 +63,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -93,7 +94,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
      * TODO eliminate duplicate columns
      */
     public SearchIterator<Task> getTaskList(final int folderId, final int from,
-        final int until, final int orderBy, final String orderDir,
+        final int until, final int orderBy, final Order order,
         final int[] columns) throws OXException {
         boolean onlyOwn;
         final Context ctx;
@@ -117,7 +118,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final boolean noPrivate = Tools.isFolderShared(folder, user);
         try {
             return TaskStorage.getInstance().list(ctx, folderId, from, until,
-                orderBy, orderDir, columns, onlyOwn, userId, noPrivate);
+                orderBy, order, columns, onlyOwn, userId, noPrivate);
         } catch (final TaskException e) {
             throw Tools.convert(e);
         }
@@ -341,7 +342,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         return new ArrayIterator<Task>(tasks.toArray(new Task[tasks.size()]));
     }
 
-    public SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchData, int orderBy, String orderDir, int[] columns) throws OXException {
+    public SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchData, int orderBy, Order order, int[] columns) throws OXException {
         final Context ctx;
         final User user;
         final UserConfiguration config;
@@ -350,7 +351,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
             config = Tools.getUserConfiguration(ctx, userId);
-            final Search search = new Search(ctx, user, config, searchData, orderBy, orderDir, columns);
+            final Search search = new Search(ctx, user, config, searchData, orderBy, order, columns);
             return search.perform();
         } catch (TaskException e) {
             throw Tools.convert(e);

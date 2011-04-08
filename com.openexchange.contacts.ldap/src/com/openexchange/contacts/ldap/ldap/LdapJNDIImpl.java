@@ -70,7 +70,6 @@ import javax.naming.ldap.PagedResultsControl;
 import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortControl;
 import javax.naming.ldap.SortKey;
-import com.openexchange.contacts.ldap.contacts.LdapContactInterface.Order;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterface.SortInfo;
 import com.openexchange.contacts.ldap.exceptions.LdapException;
 import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
@@ -81,6 +80,7 @@ import com.openexchange.contacts.ldap.property.FolderProperties.SearchScope;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.search.Order;
 
 
 /**
@@ -238,7 +238,7 @@ public class LdapJNDIImpl implements LdapInterface {
         } else {
             final String fieldFromColumn;
             if (null != sortField && folderprop.getSorting().equals(Sorting.server)&& null != (fieldFromColumn = getFieldFromColumn(sortField.getField(), distributionlist))) {
-                final SortKey sortKey = new SortKey(fieldFromColumn, sortField.getSort().equals(Order.asc), null);
+                final SortKey sortKey = new SortKey(fieldFromColumn, sortField.getSort().equals(Order.ASCENDING), null);
                 final SortKey[] sortKeyArray = new SortKey[] { sortKey };
                 if (0 == pagesize) {
                     return new Control[] { new SortControl(sortKeyArray, Control.CRITICAL) };

@@ -63,6 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -73,6 +74,7 @@ import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -120,7 +122,7 @@ public final class SearchAction extends AbstractUserAction {
              */
             final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
             final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
-            final String orderDirection = request.getParameter(AJAXServlet.PARAMETER_ORDER);
+            final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
             final String collation = request.getParameter(AJAXServlet.PARAMETER_COLLATION);
             final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             /*
@@ -176,13 +178,13 @@ public final class SearchAction extends AbstractUserAction {
                 final ContactSearchMultiplexer multiplexer =
                     new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
                 final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
-                it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDirection, collation, checkedCols);
+                it = multiplexer.extendedSearch(session, searchObj, orderBy, order, collation, checkedCols);
             } else {
                 // Get contact iterator with dummy search fields
                 final ContactSearchMultiplexer multiplexer =
                     new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
                 final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
-                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), "asc", collation, checkedCols);
+                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), Order.ASCENDING, collation, checkedCols);
             }
             /*
              * Collect contacts from iterator

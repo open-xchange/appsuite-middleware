@@ -79,7 +79,15 @@ public final class OrderFields {
      * @return the corresponding GUI string.
      */
     public static String write(final Order order) {
-        return WRITE_MAP.get(order);
+        final String retval;
+        switch (order) {
+        case NO_ORDER:
+            retval = null;
+            break;
+        default:
+            retval = WRITE_MAP.get(order);
+        }
+        return retval;
     }
 
     /**
@@ -89,7 +97,13 @@ public final class OrderFields {
      * can't be parsed.
      */
     public static Order parse(final String order) {
-        return PARSE_MAP.get(order);
+        final Order retval;
+        if (null == order || !PARSE_MAP.containsKey(order)) {
+            retval = Order.NO_ORDER;
+        } else {
+            retval = PARSE_MAP.get(order);
+        }
+        return retval;
     }
 
     static {

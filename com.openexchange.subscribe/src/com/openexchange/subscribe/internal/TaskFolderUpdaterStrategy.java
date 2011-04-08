@@ -57,6 +57,7 @@ import java.util.Map;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.subscribe.Subscription;
@@ -137,7 +138,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
             counter++;
         }
         
-        tasksInFolder = taskSql.getTaskList(folderId, 0, Integer.MAX_VALUE, 0, "asc", columns);
+        tasksInFolder = taskSql.getTaskList(folderId, 0, Integer.MAX_VALUE, 0, Order.ASCENDING, columns);
         while (tasksInFolder.hasNext()) {
             retval.add((Task) tasksInFolder.next());
         }
