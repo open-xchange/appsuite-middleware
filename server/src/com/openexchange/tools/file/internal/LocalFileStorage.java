@@ -604,7 +604,7 @@ public class LocalFileStorage implements FileStorage {
     protected void save(final String name, final InputStream input) throws FileStorageException {
         final File file = new File(storage, name);
         final File parentDir = file.getParentFile();
-        if (!parentDir.exists() && !mkdirs(parentDir)) {
+        if (!parentDir.exists() && !mkdirs(parentDir) && !parentDir.exists()) {
             throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, parentDir.getAbsolutePath());
         }
         FileOutputStream fos = null;
