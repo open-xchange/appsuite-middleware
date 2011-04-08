@@ -1,3 +1,7 @@
+* 2011-04-08 - choeger@open-xchange.com
+
+ - Bugfix #18880: createadmin of reseller package does not work when no masterpw set
+
 * 2011-03-31 - martin.herfurth@open-xchange.com
 
  - Bugfix #18821: [L3] "changeaccessglobal" mentioned in Release Notes but
