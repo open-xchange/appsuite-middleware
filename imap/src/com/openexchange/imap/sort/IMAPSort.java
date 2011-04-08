@@ -312,13 +312,9 @@ public final class IMAPSort {
             return null;
         }
         /*
-         * Execute command
-         */
-        final Object val = imapFolder.doCommand(new SORTProtocolCommand(descending));
-        /*
          * Cast & return
          */
-        return (long[]) val;
+        return ((long[]) imapFolder.doCommand(new SORTProtocolCommand(descending)));
     }
 
     private static final class SORTProtocolCommand implements IMAPFolder.ProtocolCommand {
