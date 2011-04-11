@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestFolderToolkit;
@@ -299,7 +300,7 @@ public class CommonAppointments {
     public List<Appointment> getAppointmentsInFolder(final int folderId, int[] columns) throws AbstractOXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
-            final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(folderId, columns, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
+            final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(folderId, columns, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, Order.ASCENDING);
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }

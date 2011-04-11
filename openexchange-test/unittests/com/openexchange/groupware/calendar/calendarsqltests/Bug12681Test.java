@@ -55,6 +55,7 @@ import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -93,7 +94,7 @@ public class Bug12681Test extends CalendarSqlTest {
                     queryStart,
                     queryEnd,
                     CalendarObject.START_DATE,
-                    "asc");
+                    Order.ASCENDING);
                 try {
                     boolean found = false;
                     while (listIterator.hasNext() && !found) {
