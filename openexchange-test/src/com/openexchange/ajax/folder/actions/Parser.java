@@ -117,7 +117,11 @@ public final class Parser {
                 if (value instanceof Integer) {
                     folder.setParentFolderID(((Integer) value).intValue());
                 } else if (value instanceof String) {
-                    folder.setObjectID(Integer.valueOf((String) value).intValue());
+                    try {
+                        folder.setParentFolderID(Integer.valueOf((String) value).intValue());
+                    } catch (NumberFormatException e) {
+                        // just ignore, mail folders have no integer as id
+                    }
                 }
             }
             break;
