@@ -65,6 +65,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -124,7 +125,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
                 COLS,
                 SUPER_START,
                 Appointment.OBJECT_ID,
-                null);
+                Order.NO_ORDER);
             assertContains(iter, cdao);
 
             iter = sqlInterface.getObjectsById(new int[][] { { cdao.getObjectID(), cdao.getParentFolderID() } }, COLS);
