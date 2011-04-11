@@ -89,6 +89,7 @@
 		<mkdir dir="${destdir}/${templatingdir}" />
 	    <copy file="templates/iPhoneTemplate.tmpl" todir="${destdir}/${templatingdir}"/>
 	    <copy file="templates/winMobileTemplate.tmpl" todir="${destdir}/${templatingdir}"/>
+		<copy file="templates/mobile.configuration.generator.properties" todir="${destdir}/${templatingdir}"/>
 	</target>
 	
 
