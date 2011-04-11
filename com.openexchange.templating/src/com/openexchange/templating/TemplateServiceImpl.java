@@ -53,10 +53,11 @@ import static com.openexchange.templating.TemplateErrorMessage.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -261,9 +262,9 @@ public class TemplateServiceImpl implements TemplateService {
     private Map<String, Set<String>> getTagMap(File templateDir) {
     	String absolutePath = templateDir.getAbsolutePath();
     	
-//		if(cachedTags.containsKey(absolutePath)){
-//    		return cachedTags.get(absolutePath);
-//		}
+		if(cachedTags.containsKey(absolutePath)){
+    		return cachedTags.get(absolutePath);
+		}
 		
     	File[] files = templateDir.listFiles(new FileFilter(){
 			public boolean accept(File pathname) {
@@ -279,8 +280,10 @@ public class TemplateServiceImpl implements TemplateService {
     	
     	for (File file : files) {
     		Properties index = new Properties();
-	    	try {
-				index.load(new FileReader(file));
+    		InputStream inStream = null;
+    		try {
+				inStream = new FileInputStream(file);
+				index.load(inStream);
 				Set<Entry<Object, Object>> entrySet = index.entrySet();
 				
 				HashMap<String, Set<String>> tagMap = new HashMap<String, Set<String>>();
@@ -296,6 +299,13 @@ public class TemplateServiceImpl implements TemplateService {
 				LOG.error(e.getMessage(), e);
 			} catch (IOException e) {
 				LOG.error(e.getMessage(), e);
+			} finally {
+				if (inStream != null) {
+					try {
+						inStream.close();
+					} catch (IOException e) {
+					}
+				}
 			}
     	}
 		return Collections.emptyMap();
