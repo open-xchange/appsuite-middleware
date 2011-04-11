@@ -54,6 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -109,6 +110,15 @@ public final class Parser {
         case FolderObject.CREATED_BY:
             if (null != value && JSONObject.NULL != value) {
                 folder.setCreatedBy(((Integer) value).intValue());
+            }
+            break;
+        case FolderChildObject.FOLDER_ID:
+            if (null != value && JSONObject.NULL != value) {
+                if (value instanceof Integer) {
+                    folder.setParentFolderID(((Integer) value).intValue());
+                } else if (value instanceof String) {
+                    folder.setObjectID(Integer.valueOf((String) value).intValue());
+                }
             }
             break;
         default:
