@@ -61,6 +61,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -129,7 +130,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         SearchIterator<Appointment> appointmentsInFolder;
         List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
         try {
-            appointmentsInFolder = calendarSql.getAppointmentsBetweenInFolder(folderId, COMPARISON_COLUMNS, startDate, endDate, 0, "ASC");
+            appointmentsInFolder = calendarSql.getAppointmentsBetweenInFolder(folderId, COMPARISON_COLUMNS, startDate, endDate, 0, Order.ASCENDING);
 
             while (appointmentsInFolder.hasNext()) {
                 retval.add((CalendarDataObject) appointmentsInFolder.next());
