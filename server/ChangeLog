@@ -1,3 +1,7 @@
+* 2011-04-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #18826: Fixed missing keep-seen right "s" when applying read-all access to an IMAP folder
+
 * 2011-04-08 - marcus.klein@open-xchange.com, martin.herfurth@open-xchange.com
 
  - Bugfix #18912: Using enumeration to pass order directory for data everywhere.

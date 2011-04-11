@@ -2412,8 +2412,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         /*
          * Handle the READ-KEEP_SEEN-to-READ problem
          */
-        if (!oldRights.contains(Rights.Right.KEEP_SEEN) && newRights.contains(Rights.Right.KEEP_SEEN)) {
-            newRights.remove(Rights.Right.KEEP_SEEN);
+        if (oldRights.contains(Rights.Right.READ) && newRights.contains(Rights.Right.READ)) {
+            /*
+             * Both allow READ access
+             */
+            if (!oldRights.contains(Rights.Right.KEEP_SEEN) && newRights.contains(Rights.Right.KEEP_SEEN)) {
+                newRights.remove(Rights.Right.KEEP_SEEN);
+            }
         }
         return newACL;
     }
