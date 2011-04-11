@@ -365,8 +365,8 @@ public final class DBUtils {
     public static String forSQLCommand(Order order) {
         if (order != null) {
             switch (order) {
-            case ASCENDING: return "ASC";
-            case DESCENDING: return "DESC";
+            case ASCENDING: return " ASC ";
+            case DESCENDING: return " DESC ";
             case NO_ORDER: return " ";
             }
         }
