@@ -277,14 +277,14 @@ public final class ImapIdlePushListener implements PushListener {
             try {
                 Thread.sleep(errordelay);
             } catch (InterruptedException e1) {
-                LOG.error("ERROR in IDLE'ing: " + e.getMessage(), e);
+                LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
             }
         } catch (MessagingException e) {
             LOG.error("ERROR in IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
             try {
                 Thread.sleep(errordelay);
             } catch (InterruptedException e1) {
-                LOG.error("ERROR in IDLE'ing: " + e.getMessage(), e);
+                LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
             }
         } finally {
             if( null != mailAccess ) {
