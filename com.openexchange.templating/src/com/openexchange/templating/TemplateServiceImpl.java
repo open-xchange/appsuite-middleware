@@ -52,13 +52,27 @@ package com.openexchange.templating;
 import static com.openexchange.templating.TemplateErrorMessage.*;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -78,6 +92,10 @@ public class TemplateServiceImpl implements TemplateService {
     public static final String PATH_PROPERTY = "com.openexchange.templating.path";
 
     public static final String USER_TEMPLATING_PROPERTY = "com.openexchange.templating.usertemplating";
+
+	private static final Map<String, Map<String,Set<String>>> cachedTags = new ConcurrentHashMap<String, Map<String,Set<String>>>();
+
+	private static final Log LOG = LogFactory.getLog(TemplateServiceImpl.class);
 
     private ConfigurationService config;
 
@@ -215,29 +233,81 @@ public class TemplateServiceImpl implements TemplateService {
         this.infostore = helper;
     }
 
-    public List<String> getBasicTemplateNames() {
+    public List<String> getBasicTemplateNames(String...filter) {
         String templatePath = config.getProperty(PATH_PROPERTY);
         File templateDir = new File(templatePath);
         if (!templateDir.isDirectory() || !templateDir.exists()) {
             return new ArrayList<String>(0);
         }
-
+        
+        Set<String> sieve = new HashSet<String>(Arrays.asList(filter));
+        
+        Map<String, Set<String>> tagMap = getTagMap(templateDir);
+        
         File[] files = templateDir.listFiles();
         if (files == null) {
             return new ArrayList<String>(0);
         }
         Set<String> names = new HashSet<String>();
         for (File file : files) {
-            if (file.isFile() && file.canRead()) {
+        	Set<String> tags = tagMap.get(file.getName());
+            if (file.isFile() && file.canRead() && file.getName().endsWith(".tmpl") && (tags == null || tags.containsAll(sieve))) {
                 names.add(file.getName());
             }
         }
         return new ArrayList<String>(names);
     }
 
-    public List<String> getTemplateNames(ServerSession session) throws TemplateException {
+    private Map<String, Set<String>> getTagMap(File templateDir) {
+    	String absolutePath = templateDir.getAbsolutePath();
+    	
+//		if(cachedTags.containsKey(absolutePath)){
+//    		return cachedTags.get(absolutePath);
+//		}
+		
+    	File[] files = templateDir.listFiles(new FileFilter(){
+			public boolean accept(File pathname) {
+				return pathname.getName().endsWith(".properties")
+				&& pathname.canRead() && pathname.isFile();
+			}
+		});
+    	if(files == null){
+    		Map<String, Set<String>> emptyMap = Collections.emptyMap();
+			cachedTags.put(absolutePath, emptyMap);
+    		return emptyMap;
+    	}
+    	
+    	for (File file : files) {
+    		Properties index = new Properties();
+	    	try {
+				index.load(new FileReader(file));
+				Set<Entry<Object, Object>> entrySet = index.entrySet();
+				
+				HashMap<String, Set<String>> tagMap = new HashMap<String, Set<String>>();
+				for (Entry<Object, Object> entry : entrySet) {
+					String filename = (String) entry.getKey();
+					String[] categoriesArr = ((String) entry.getValue()).split("\\s*,\\s*");
+					HashSet<String> categories = new HashSet<String>(Arrays.asList(categoriesArr));
+					tagMap.put(filename, categories);
+				}
+				cachedTags.put(absolutePath, tagMap);
+				return tagMap;
+			} catch (FileNotFoundException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (IOException e) {
+				LOG.error(e.getMessage(), e);
+			}
+    	}
+		return Collections.emptyMap();
+	}
+
+	public List<String> getTemplateNames(ServerSession session,
+			String... filter) throws TemplateException {
+		if(filter == null) {
+			filter = new String[0];
+		}
         Set<String> names = new HashSet<String>();
-        names.addAll(getBasicTemplateNames());
+        names.addAll(getBasicTemplateNames(filter));
         if (!isUserTemplatingEnabled(session)) {
             return new ArrayList<String>(names);
         }
@@ -247,10 +317,10 @@ public class TemplateServiceImpl implements TemplateService {
             FolderObject privateTemplateFolder = folders.getPrivateTemplateFolder(session);
 
             if (globalTemplateFolder != null) {
-                names.addAll(infostore.getNames(session, globalTemplateFolder));
+                names.addAll(infostore.getNames(session, globalTemplateFolder, filter));
             }
             if (privateTemplateFolder != null) {
-                names.addAll(infostore.getNames(session, privateTemplateFolder));
+                names.addAll(infostore.getNames(session, privateTemplateFolder, filter));
             }
 
         } catch (AbstractOXException e) {
@@ -258,6 +328,7 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
         return new ArrayList<String>(names);
-    }
+	}
+	
 
 }

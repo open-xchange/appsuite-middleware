@@ -294,11 +294,11 @@ public class OXMFPublicationServiceTest extends TestCase {
             return null;
         }
 
-        public List<String> getBasicTemplateNames() throws TemplateException {
+        public List<String> getBasicTemplateNames(String...filter) throws TemplateException {
             return new ArrayList<String>(0);
         }
 
-        public List<String> getTemplateNames(ServerSession session) throws TemplateException {
+        public List<String> getTemplateNames(ServerSession session, String...filter) throws TemplateException {
             return new ArrayList<String>(0);
         }
     }

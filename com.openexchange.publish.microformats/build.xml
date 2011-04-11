@@ -100,7 +100,8 @@
         <mkdir dir="${destdir}/${templatingdir}" />
         <copy todir="${destdir}/${templatingdir}">
             <fileset dir="templates">
-                <include name="**.tmpl"/>
+            	<include name="**.tmpl"/>
+            	<include name="**.properties"/>
             </fileset>
         </copy>
     </target>

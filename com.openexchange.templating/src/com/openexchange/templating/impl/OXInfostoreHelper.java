@@ -64,5 +64,5 @@ import com.openexchange.tools.session.ServerSession;
 public interface OXInfostoreHelper {
     public String findTemplateInFolder(ServerSession session, FolderObject folder, String name) throws AbstractOXException;
     public void storeTemplateInFolder(ServerSession session, FolderObject folder, String name, String templateText) throws AbstractOXException;
-    public List<String> getNames(ServerSession session, FolderObject folder) throws AbstractOXException;
+    public List<String> getNames(ServerSession session, FolderObject folder, String... filter) throws AbstractOXException;
 }

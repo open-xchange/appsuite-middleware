@@ -58,7 +58,10 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
@@ -207,11 +210,22 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         }
     }
 
-    public List<String> getNames(ServerSession session, FolderObject folder) throws AbstractOXException {
-        SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.FILENAME_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
+    public List<String> getNames(ServerSession session, FolderObject folder, String ... filter) throws AbstractOXException {
+    	HashSet<String> sieve = new HashSet<String>(Arrays.asList(filter));
+    	
+        SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.FILENAME_LITERAL, Metadata.CATEGORIES_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
         List<String> names = new ArrayList<String>(30);
         while(iterator.hasNext()) {
-            names.add(iterator.next().getFileName());
+            DocumentMetadata doc = iterator.next();
+            Set<String> categories = null;
+            
+            if(doc.getCategories() != null && doc.getCategories().length() > 0){
+                categories = new HashSet<String>(Arrays.asList(doc.getCategories().split("\\s*,\\s*")));
+            }
+            	
+			if(categories == null || categories.containsAll(sieve)) {
+				names.add(doc.getFileName());				
+			}
         }
         return names;
     }

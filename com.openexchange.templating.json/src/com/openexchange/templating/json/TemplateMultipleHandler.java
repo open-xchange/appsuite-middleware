@@ -49,10 +49,14 @@
 
 package com.openexchange.templating.json;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import com.openexchange.groupware.AbstractOXException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -111,30 +115,36 @@ public class TemplateMultipleHandler implements MultipleHandler {
         
         boolean onlyBasic = false;
         boolean onlyUser = false;
+        String[] filter = null;
         
         if(jsonObject.has(Param.only.name())) {
-            String only = jsonObject.getString(Param.only.name());
-            if(only.equalsIgnoreCase("basic")) {
+            Set<String> only = new HashSet<String>(Arrays.asList(jsonObject.getString(Param.only.name()).split("\\s*,\\s*")));
+            
+            
+            if(only.contains("basic")) {
                 onlyBasic = true;
-            } else if (only.equalsIgnoreCase("user")) {
+                only.remove("basic");
+            } else if (only.contains("user")) {
                 onlyUser = true;
+                only.remove("user");
             }
+            filter = only.toArray(new String[only.size()]);
         }
         
         TemplateService templates = services.getService(TemplateService.class);
         
         if(onlyBasic) {
-            return ARRAY(templates.getBasicTemplateNames());
+            return ARRAY(templates.getBasicTemplateNames(filter));
         }
         
         if(onlyUser) {
-            List<String> basicTemplateNames = templates.getBasicTemplateNames();
-            List<String> templateNames = templates.getTemplateNames(session);
+            List<String> basicTemplateNames = templates.getBasicTemplateNames(filter);
+            List<String> templateNames = templates.getTemplateNames(session, filter);
             templateNames.removeAll(basicTemplateNames);
             return ARRAY(templateNames);
         }
         
-        return ARRAY(templates.getTemplateNames(session));
+        return ARRAY(templates.getTemplateNames(session, filter));
     }
 
     private JSONArray ARRAY(List<String> templateNames) {

@@ -105,6 +105,8 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private String defaultTemplateName;
 
+	private FormElement templateChooser;
+
     public OXMFPublicationService() {
         super();
         target = buildTarget();
@@ -122,8 +124,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         form.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
         withoutInfostore.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
 
-        FormElement templateChooser = FormElement.custom("com.openexchange.templating.templateChooser",TEMPLATE, FORM_LABEL_TEMPLATE);
-        templateChooser.setOption("only", "user");
+        templateChooser = FormElement.custom("com.openexchange.templating.templateChooser",TEMPLATE, FORM_LABEL_TEMPLATE);
         form.add(templateChooser);
         
         // No templating without infostore
@@ -152,6 +153,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     public void setFolderType(String string) {
+    	templateChooser.setOption("only", "publish,"+string);
         target.setModule(string);
     }
 
