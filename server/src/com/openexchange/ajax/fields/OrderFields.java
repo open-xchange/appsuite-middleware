@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,11 +49,10 @@
 
 package com.openexchange.ajax.fields;
 
+import static com.openexchange.tools.Collections.newHashMap;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.groupware.search.Order;
 
 /**
@@ -80,7 +79,15 @@ public final class OrderFields {
      * @return the corresponding GUI string.
      */
     public static String write(final Order order) {
-        return WRITE_MAP.get(order);
+        final String retval;
+        switch (order) {
+        case NO_ORDER:
+            retval = null;
+            break;
+        default:
+            retval = WRITE_MAP.get(order);
+        }
+        return retval;
     }
 
     /**
@@ -90,15 +97,22 @@ public final class OrderFields {
      * can't be parsed.
      */
     public static Order parse(final String order) {
-        return PARSE_MAP.get(order);
+        final Order retval;
+        if (null == order || !PARSE_MAP.containsKey(order)) {
+            retval = Order.NO_ORDER;
+        } else {
+            retval = PARSE_MAP.get(order);
+        }
+        return retval;
     }
 
     static {
         WRITE_MAP = new EnumMap<Order, String>(Order.class);
         WRITE_MAP.put(Order.ASCENDING, "asc");
         WRITE_MAP.put(Order.DESCENDING, "desc");
-        final Map<String, Order> tmp = new HashMap<String, Order>();
-        for (final Order order : Order.values()) {
+        final Order[] values = Order.values();
+        final Map<String, Order> tmp = newHashMap(values.length);
+        for (final Order order : values) {
             tmp.put(WRITE_MAP.get(order), order);
         }
         PARSE_MAP = Collections.unmodifiableMap(tmp);

@@ -49,14 +49,17 @@
 
 package com.openexchange.subscribe.internal;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.subscribe.Subscription;
@@ -64,75 +67,41 @@ import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link ContactFolderUpdaterStrategy}
+ * {@link CalendarFolderUpdaterStrategy}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
+public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<CalendarDataObject> {
 
     private static final int SQL_INTERFACE = 1;
 
     private static final int SUBSCRIPTION = 2;
 
     private static final int[] COMPARISON_COLUMNS = {
-        Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.BIRTHDAY, Contact.DISPLAY_NAME, Contact.EMAIL1,
-        Contact.EMAIL2, Contact.EMAIL3 };
+        Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.UID, Appointment.NOTE, Appointment.LAST_MODIFIED, Appointment.SEQUENCE };
 
-    public int calculateSimilarityScore(Contact original, Contact candidate, Object session) throws AbstractOXException {
+    public int calculateSimilarityScore(CalendarDataObject original, CalendarDataObject candidate, Object session) throws AbstractOXException {
         int score = 0;
-        int threshhold = getThreshhold(session);
-        
-        // For the sake of simplicity we assume that equal names mean equal contacts
-        // TODO: This needs to be diversified in the form of "unique-in-context" later (if there is only one "Max Mustermann" in a folder it
-        // is unique and qualifies as identifier. If there are two "Max Mustermann" it does not.)
-        if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
+        // A score of 10 is sufficient for a match        
+        // If the UID is the same we can assume it is the same event. Please note the UID is assumed to have been saved with contextid and folder-id as prefix here
+        String candidatesUID = getPrefixForUID(original) + candidate.getUid();
+        if ((isset(original.getUid()) || isset(candidate.getUid())) && eq(original.getUid(), candidatesUID)) {
+            score += 10;
+        }
+        if ((isset(original.getTitle()) || isset(candidate.getTitle())) && eq(original.getTitle(), candidate.getTitle())) {
             score += 5;
         }
-        if ((isset(original.getSurName()) || isset(candidate.getSurName())) && eq(original.getSurName(), candidate.getSurName())) {
-            score += 5;
+        if ((isset(original.getNote()) || isset(candidate.getNote())) && eq(original.getNote(), candidate.getNote())) {
+            score += 3;
         }
-        if ((isset(original.getDisplayName()) || isset(candidate.getDisplayName())) && eq(original.getDisplayName(), candidate.getDisplayName())) {
-            score += 10;
+        if (original.getStartDate() != null && candidate.getStartDate() != null && eq(original.getStartDate(), candidate.getStartDate())) {
+            score += 3;
         }
-        // an email-address is unique so if this is identical the contact should be the same
-        if (eq(original.getEmail1(), candidate.getEmail1())) {
-            score += 10;
+        if (original.getEndDate() != null && candidate.getEndDate() != null && eq(original.getEndDate(), candidate.getEndDate())) {
+            score += 3;
         }
-        if (eq(original.getEmail2(), candidate.getEmail2())) {
-            score += 10;
-        }
-        if (eq(original.getEmail3(), candidate.getEmail3())) {
-            score += 10;
-        }
-        if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
-            score += 5;
-        }
-        
-        if( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
-            score = threshhold + 1;
-        }
-        return score;
-    }
 
-    /**
-     * @param original
-     * @param candidate
-     * @return
-     */
-    private boolean hasEqualContent(Contact original, Contact candidate) {
-        for(int fieldNumber: Contact.ALL_COLUMNS){
-            if(original.get(fieldNumber) == null){
-                if(candidate.get(fieldNumber) != null){
-                    return false;
-                }
-            } else {
-                if(candidate.get(fieldNumber) != null){
-                    if(! original.get(fieldNumber).equals(candidate.get(fieldNumber)))
-                        return false;
-                }
-            }
-        }
-        return false;
+        return score;
     }
 
     private boolean isset(String s) {
@@ -151,22 +120,25 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     }
 
-    public Collection<Contact> getData(Subscription subscription, Object session) throws AbstractOXException {
-        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
+    public Collection<CalendarDataObject> getData(Subscription subscription, Object session) throws AbstractOXException {
+        CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
 
         int folderId = subscription.getFolderIdAsInt();
-        int numberOfContacts = contacts.getNumberOfContacts(folderId);
-        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(
-            folderId,
-            0,
-            numberOfContacts,
-            Contact.OBJECT_ID,
-            Order.ASCENDING,
-            COMPARISON_COLUMNS);
-        List<Contact> retval = new ArrayList<Contact>();
-        while (contactsInFolder.hasNext()) {
-            retval.add(contactsInFolder.next());
+        // get all the appointments, from the beginning of time (1970) till the end of time
+        Date startDate = new Date(0);
+        Date endDate = new Date(Long.MAX_VALUE);
+        SearchIterator<Appointment> appointmentsInFolder;
+        List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
+        try {
+            appointmentsInFolder = calendarSql.getAppointmentsBetweenInFolder(folderId, COMPARISON_COLUMNS, startDate, endDate, 0, Order.ASCENDING);
+
+            while (appointmentsInFolder.hasNext()) {
+                retval.add((CalendarDataObject) appointmentsInFolder.next());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
         return retval;
     }
 
@@ -175,15 +147,16 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     }
 
     public boolean handles(FolderObject folder) {
-        return folder.getModule() == FolderObject.CONTACT;
+        return folder.getModule() == FolderObject.CALENDAR;
     }
 
-    public void save(Contact newElement, Object session) throws AbstractOXException {
-        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
+    public void save(CalendarDataObject newElement, Object session) throws AbstractOXException {
+        CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
-
-        contacts.insertContactObject(newElement);
+        newElement.setContext(subscription.getContext());
+        addPrefixToUID(newElement);  
+        calendarSql.insertAppointmentObject(newElement);
     }
 
     private Object getFromSession(int key, Object session) {
@@ -192,19 +165,33 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     public Object startSession(Subscription subscription) throws AbstractOXException {
         Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        userInfo.put(SQL_INTERFACE, new RdbContactSQLImpl(new SubscriptionSession(subscription)));
+        userInfo.put(SQL_INTERFACE, new CalendarSql(new SubscriptionSession(subscription)));
         userInfo.put(SUBSCRIPTION, subscription);
         return userInfo;
     }
 
-    public void update(Contact original, Contact update, Object session) throws AbstractOXException {
-        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
+    public void update(CalendarDataObject original, CalendarDataObject update, Object session) throws AbstractOXException {
+        CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
 
         update.setParentFolderID(original.getParentFolderID());
         update.setObjectID(original.getObjectID());
         update.setLastModified(original.getLastModified());
+        update.setContext(original.getContext());
+        addPrefixToUID(update);
 
-        contacts.updateContactObject(update, update.getParentFolderID(), update.getLastModified());
+        calendarSql.updateAppointmentObject(update, original.getParentFolderID(), original.getLastModified());
+    }
+    
+    private void addPrefixToUID (CalendarDataObject cdo){        
+                cdo.setUid(getPrefixForUID(cdo) + cdo.getUid());            
     }
 
+    private String getPrefixForUID (CalendarDataObject cdo){
+        if (null != cdo.getUid()){
+            if (! cdo.getUid().equals("")){
+                    return Integer.toString(cdo.getContextID() + cdo.getParentFolderID());
+            }
+        }
+        return "";        
+    }
 }

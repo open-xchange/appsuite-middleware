@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,35 +53,39 @@ import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.Arrays;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * This class contains the logic for updating tasks. It calculates what is to modify.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 class UpdateData {
@@ -105,7 +109,7 @@ class UpdateData {
      * User configuration.
      */
     private final UserConfiguration userConfig;
- 
+
     /**
      * Folder for permission checks.
      */
@@ -182,6 +186,11 @@ class UpdateData {
     private final Set<TaskParticipant> removed = new HashSet<TaskParticipant>();
 
     /**
+     * Participants that are moved to a group.
+     */
+    private final Set<InternalParticipant> changedGroup = new HashSet<InternalParticipant>();
+
+    /**
      * Folders in that the task must appear additionally.
      */
     private final Set<Folder> addedFolder = new HashSet<Folder>();
@@ -208,6 +217,7 @@ class UpdateData {
 
     /**
      * Easier constructor for live data.
+     * 
      * @param ctx Context.
      * @param user User.
      * @param userConfig User configuration.
@@ -221,6 +231,7 @@ class UpdateData {
 
     /**
      * Default constructor.
+     * 
      * @param ctx Context.
      * @param user User.
      * @param userConfig User configuration.
@@ -242,6 +253,7 @@ class UpdateData {
 
     /**
      * Proxy loading method for the task.
+     * 
      * @return the original task.
      * @throws TaskException if loading of the original tasks fails.
      */
@@ -318,6 +330,7 @@ class UpdateData {
 
     /**
      * Checks everything and prepares the data structures for an update.
+     * 
      * @throws TaskException if an error occurs
      */
     void prepare() throws TaskException {
@@ -333,6 +346,7 @@ class UpdateData {
 
     /**
      * Prepares the data structures for an update.
+     * 
      * @throws TaskException if an error occurs.
      */
     void prepareWithoutChecks() throws TaskException {
@@ -387,25 +401,25 @@ class UpdateData {
         }
         // Ensure only one folder mapping for one user.
         for (final Iterator<Folder> iter = addedFolder.iterator(); iter.hasNext();) {
-            final Folder added = iter.next();
+            final Folder testFolder = iter.next();
             for (final Folder origFolder : getOrigFolder()) {
-                if (added.getUser() == origFolder.getUser() && !removedFolder.contains(origFolder)) {
+                if (testFolder.getUser() == origFolder.getUser() && !removedFolder.contains(origFolder)) {
                     iter.remove();
                 }
             }
         }
         // Do not use #getUpdatedFolder() here because modifications may be done on added and removed folder.
-        final Set<Folder> updated = new HashSet<Folder>();
-        updated.addAll(getOrigFolder());
-        updated.addAll(addedFolder);
-        updated.removeAll(removedFolder);
+        final Set<Folder> empty = new HashSet<Folder>();
+        empty.addAll(getOrigFolder());
+        empty.addAll(addedFolder);
+        empty.removeAll(removedFolder);
         // Check if updated folders will be empty - last participant has been removed.
-        if (updated.isEmpty()) {
+        if (empty.isEmpty()) {
             // add current user folder mapping
             addedFolder.add(FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId()));
         }
         // Check if delegating user removed himself from the participant list.
-        if (getUserId() == getOrigTask().getCreatedBy() && null == FolderStorage.extractFolderOfUser(updated, getUserId()) && FolderObject.PRIVATE == destType) {
+        if (getUserId() == getOrigTask().getCreatedBy() && null == FolderStorage.extractFolderOfUser(empty, getUserId()) && FolderObject.PRIVATE == destType) {
             Folder delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId());
             if (null == delegatorFolder) {
                 delegatorFolder = new Folder(Tools.getUserTaskStandardFolder(ctx, getUserId()), getUserId());
@@ -445,6 +459,15 @@ class UpdateData {
         }
     }
 
+    private Set<InternalParticipant> addedGroupParticipants = null;
+
+    private Set<InternalParticipant> getGroupParticipants() throws TaskException {
+        if (null == addedGroupParticipants) {
+            addedGroupParticipants = TaskLogic.getGroupParticipants(ctx, changed.getParticipants());
+        }
+        return addedGroupParticipants;
+    }
+
     private boolean preparedParts;
 
     private void prepareParticipants() throws TaskException {
@@ -455,6 +478,12 @@ class UpdateData {
             // Find added participants
             added.addAll(getChangedParticipants());
             added.removeAll(getOrigParticipants());
+
+            // Find all participants that contain a group id now
+            changedGroup.addAll(getGroupParticipants());
+            changedGroup.retainAll(getOrigParticipants());
+            prepareParticipantsWithChangedGroup();
+
             // Replace added participants with the values from the removed
             // one to get folder and confirmation information.
             // Only internal participants can be selected here because of
@@ -469,6 +498,32 @@ class UpdateData {
             removed.removeAll(getChangedParticipants());
         }
         preparedParts = true;
+    }
+
+    private void prepareParticipantsWithChangedGroup() throws TaskException {
+        final Set<TaskParticipant> toCheck = new HashSet<TaskParticipant>();
+        final Set<TaskParticipant> orig = getOrigParticipants();
+        final HashMap<Integer, InternalParticipant> changedInternals = new HashMap<Integer, InternalParticipant>(getChangedParticipants().size());
+        for (final TaskParticipant changedParticipant : getChangedParticipants()) {
+            if (changedParticipant.getType() == TaskParticipant.Type.INTERNAL) {
+                final InternalParticipant cip = (InternalParticipant) changedParticipant;
+                changedInternals.put(cip.getIdentifier(), cip);
+            }
+        }
+
+        // Retain the participants with changes
+        toCheck.addAll(orig);
+        toCheck.retainAll(getChangedParticipants());
+
+        for (final TaskParticipant tp : toCheck) {
+            if (tp.getType() == TaskParticipant.Type.INTERNAL) {
+                final InternalParticipant ip = (InternalParticipant) tp;
+                final InternalParticipant cp = changedInternals.get(ip.getIdentifier());
+                if (cp != null) {
+                    changedGroup.add(cp);
+                }
+            }
+        }
     }
 
     private void generateUpdated() throws TaskException {
@@ -499,7 +554,7 @@ class UpdateData {
     }
 
     /* ---------- Getter ---------- */
-    
+
     /**
      * @return the added
      */
@@ -509,8 +564,16 @@ class UpdateData {
     }
 
     /**
+     * @return the participants who belong to group after the update.
+     */
+    Set<InternalParticipant> getChangedGroup() throws TaskException {
+        prepareParticipants();
+        return changedGroup;
+    }
+
+    /**
      * @return the addedFolder
-     * @throws TaskException 
+     * @throws TaskException
      */
     Set<Folder> getAddedFolder() throws TaskException {
         prepareFolder();
@@ -519,7 +582,7 @@ class UpdateData {
 
     /**
      * @return the modifiedFields
-     * @throws TaskException 
+     * @throws TaskException
      */
     int[] getModifiedFields() throws TaskException {
         prepareFields();
@@ -536,7 +599,7 @@ class UpdateData {
 
     /**
      * @return the removedFolder
-     * @throws TaskException 
+     * @throws TaskException
      */
     Set<Folder> getRemovedFolder() throws TaskException {
         prepareFolder();
@@ -549,7 +612,7 @@ class UpdateData {
         }
         return updated;
     }
-    
+
     /* ---------- Convenience methods ---------- */
 
     private int getFolderId() {
@@ -586,7 +649,8 @@ class UpdateData {
 
     /**
      * This method executes the prepared update.
-     * @throws TaskException 
+     * 
+     * @throws TaskException
      */
     void doUpdate() throws TaskException {
         Connection con;
@@ -597,7 +661,18 @@ class UpdateData {
         }
         try {
             con.setAutoCommit(false);
-            updateTask(ctx, con, changed, lastRead, getModifiedFields(), getAdded(), getRemoved(), getAddedFolder(), getRemovedFolder(), type);
+            updateTask(
+                ctx,
+                con,
+                changed,
+                lastRead,
+                getModifiedFields(),
+                getAdded(),
+                getRemoved(),
+                getChangedGroup(),
+                getAddedFolder(),
+                getRemovedFolder(),
+                type);
             if (ACTIVE == type && isMove()) {
                 final Task dummy = Tools.createDummyTask(getTaskId(), getUserId());
                 storage.insertTask(ctx, con, dummy, DELETED, true);
@@ -613,22 +688,22 @@ class UpdateData {
             rollback(con);
             throw e;
         } finally {
-            try {
-                con.setAutoCommit(true);
-            } catch (final SQLException e) {
-                LOG.error("Problem setting auto commit to true.", e);
-            }
+            autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
         }
     }
 
     static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws TaskException {
-        updateTask(ctx, con, task, lastRead, modified, add, remove, addFolder, removeFolder, ACTIVE);
+        updateTask(ctx, con, task, lastRead, modified, add, remove, null, addFolder, removeFolder, ACTIVE);
+    }
+
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws TaskException {
+        updateTask(ctx, con, task, lastRead, modified, add, remove, changedGroup, addFolder, removeFolder, ACTIVE);
     }
 
     /**
-     * This method execute the SQL statements on the given connection defined by
-     * the given data for the update.
+     * This method execute the SQL statements on the given connection defined by the given data for the update.
+     * 
      * @param ctx Context.
      * @param con writable database connection.
      * @param task task object with changed values.
@@ -640,7 +715,7 @@ class UpdateData {
      * @param removeFolder removed folder mappings for the participants.
      * @throws TaskException if some SQL command fails.
      */
-    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder, final StorageType type) throws TaskException {
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder, final StorageType type) throws TaskException {
         final int taskId = task.getObjectID();
         storage.updateTask(ctx, con, task, lastRead, modified, type);
         if (null != add) {
@@ -654,6 +729,9 @@ class UpdateData {
                 partStor.insertParticipants(ctx, con, taskId, remove, REMOVED);
             }
             partStor.deleteParticipants(ctx, con, taskId, remove, type, true);
+        }
+        if (null != changedGroup) {
+            partStor.updateInternal(ctx, con, taskId, changedGroup, type);
         }
         if (null != removeFolder) {
             foldStor.deleteFolder(ctx, con, taskId, removeFolder, type);
@@ -692,31 +770,86 @@ class UpdateData {
         if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE == updated.getStatus() && Arrays.contains(
             getModifiedFields(),
             Status.SINGLETON.getId())) {
-            insertNextRecurrence(session, ctx, getUserId(), userConfig, getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
+
+            final TaskSearchObject search = new TaskSearchObject();
+            search.setTitle(updated.getTitle());
+            search.setStatus(updated.getStatus());
+            search.setPriority(updated.getPriority());
+
+            try {
+                Permission.checkReadInFolder(ctx, user, userConfig, folder);
+            } catch (final TaskException e) {
+                throw new TaskException(e);
+            }
+
+            final boolean own = Permission.canReadInFolder(ctx, user, userConfig, destFolder);
+            final List<Integer> emptyList = new ArrayList<Integer>();
+            final List<Integer> listWithFolder = new ArrayList<Integer>();
+            listWithFolder.add(destFolder.getObjectID());
+
+            TaskIterator ti;
+            if (own) {
+                ti = storage.search(ctx, getUserId(), search, 0, Order.ASCENDING, new int[] {
+                    Task.PERCENT_COMPLETED, Task.CREATED_BY, Task.START_DATE }, emptyList, listWithFolder, emptyList);
+            } else {
+                ti = storage.search(ctx, getUserId(), search, 0, Order.ASCENDING, new int[] {
+                    Task.PERCENT_COMPLETED, Task.CREATED_BY, Task.START_DATE }, listWithFolder, emptyList, emptyList);
+            }
+
+            final boolean next = TaskLogic.makeRecurrence(updated);
+
+            boolean duplicateExists = false;
+            while (ti.hasNext()) {
+                try {
+                    final Task actual = ti.next();
+                    final boolean percentComplete = actual.getPercentComplete() == updated.getPercentComplete();
+                    final boolean createdBy = actual.getCreatedBy() == updated.getCreatedBy();
+                    boolean startDate;
+
+                    if (actual.getStartDate() != null) {
+                        final Long aStartDateLong = actual.getStartDate().getTime();
+                        final Long uStartDateLong = updated.getStartDate().getTime();
+                        startDate = aStartDateLong / 1000 == uStartDateLong / 1000;
+                    } else {
+                        if (updated.getStartDate() == null) {
+                            startDate = true;
+                        } else {
+                            startDate = false;
+                        }
+                    }
+                    if (percentComplete && createdBy && startDate) {
+
+                        duplicateExists = true;
+                        break;
+                    }
+                } catch (final SearchIteratorException e) {
+                    throw new TaskException(e);
+                }
+            }
+
+            if (!duplicateExists && next) {
+                insertNextRecurrence(session, ctx, getUserId(), userConfig, folder, getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
+            }
         }
     }
 
     /**
      * Inserts a new task according to the recurrence.
+     * 
      * @param task recurring task.
      * @param parts participants of the updated task.
      * @param folders folders of the updated task.
      * @throws TaskException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws TaskException, OXException {
-        final boolean next = TaskLogic.makeRecurrence(task);
-        if (next) {
-            // TODO create insert class
-            TaskLogic.checkNewTask(task, userId, userConfig, parts);
-            TaskLogic.insertTask(ctx, task, parts, folders);
-            try {
-                new EventClient(session).create(task);
-            } catch (final EventException e) {
-                throw Tools.convert(new TaskException(Code.EVENT, e));
-            } catch (final ContextException e) {
-                throw Tools.convert(new TaskException(Code.EVENT, e));
-            }
+    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws TaskException, OXException {
+        // TODO create insert class
+        TaskLogic.checkNewTask(task, userId, userConfig, parts);
+        TaskLogic.insertTask(ctx, task, parts, folders);
+        try {
+            new EventClient(session).create(task, folder);
+        } catch (final EventException e) {
+            throw Tools.convert(new TaskException(Code.EVENT, e));
         }
     }
 }

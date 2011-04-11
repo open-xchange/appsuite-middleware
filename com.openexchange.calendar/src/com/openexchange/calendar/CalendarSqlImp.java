@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,6 +65,7 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -75,7 +76,7 @@ import com.openexchange.session.Session;
  */
 public interface CalendarSqlImp {
 
-    PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, String select, Connection readcon, Date since, int orderBy, String orderDir) throws OXException, SQLException;
+    PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, String select, Connection readcon, Date since, int orderBy, Order orderDir) throws OXException, SQLException;
 
     PreparedStatement getConflicts(Context c, Date d1, Date d2, Date d3, Date d4, Connection readcon, String member_sql_in, boolean free_busy_select) throws SQLException;
 
@@ -93,11 +94,11 @@ public interface CalendarSqlImp {
 
     boolean[] getUserActiveAppointmentsRangeSQL(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, Connection readcon) throws SQLException, OXException;
 
-    PreparedStatement getPublicFolderRangeSQL(Context c, int uid, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection con, int orderBy, String orderDir) throws SQLException;
+    PreparedStatement getPublicFolderRangeSQL(Context c, int uid, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection con, int orderBy, Order orderDir) throws SQLException;
 
     String getObjectsByidSQL(int oids[][], int cid, String select);
 
-    PreparedStatement getPrivateFolderRangeSQL(Context c, int uid, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException;
+    PreparedStatement getPrivateFolderRangeSQL(Context c, int uid, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, Order orderDir) throws SQLException;
 
     PreparedStatement getPrivateFolderModifiedSinceSQL(Context c, int uid, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2) throws SQLException;
 
@@ -141,16 +142,24 @@ public interface CalendarSqlImp {
 
     boolean checkIfFolderIsEmpty(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
 
-    PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException;
+    PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, Order orderDir) throws SQLException;
 
+    PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, Order orderDir, boolean includePrivateAppointments) throws SQLException;
+    
     PreparedStatement getSharedFolderModifiedSinceSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2, boolean includePrivateFlag) throws SQLException;
 
     PreparedStatement getSharedFolderDeletedSinceSQL(Context c, int uid, int shared_folder_owner, int fid, Date d1, String select, Connection readcon) throws SQLException;
 
-    long attachmentAction(int oid, int uid, Context c, boolean action) throws OXException;
+    long attachmentAction(int folderId, int oid, int uid, Session session, Context c, int numberOfAttachments) throws OXException;
 
-    PreparedStatement getSearchQuery(String select,  int uid, int groups[], UserConfiguration uc, int orderBy, String orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo) throws SQLException, OXException;
+    PreparedStatement getSearchQuery(String select,  int uid, int groups[], UserConfiguration uc, int orderBy, Order orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo, boolean isShared) throws SQLException, OXException;
 
     PreparedStatement getActiveAppointments(Context c, int uid, Date d1, Date d2, String select, Connection readcon) throws SQLException;
+    
+    public int resolveUid(Session session, String uid) throws OXException;
+
+    int getFolder(Session session, int objectId) throws OXException;
+    
+    public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException;
 
 }

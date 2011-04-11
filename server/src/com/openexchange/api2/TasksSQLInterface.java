@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,7 @@
 package com.openexchange.api2;
 
 import java.util.Date;
-
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -70,12 +70,12 @@ public interface TasksSQLInterface {
      * @param from Start position in list
      * @param to End position in list
      * @param orderBy Column id to sort. 0 means no order by
-     * @param orderDir Order direction (asc or desc)
+     * @param order Order direction (asc or desc)
      * @param cols The columns filled to the dataobject
      * @return A SearchIterator contains Task objects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */     
-    SearchIterator<Task> getTaskList(int folderId, int from, int to, int orderBy, String orderDir, int cols[]) throws OXException;
+    SearchIterator<Task> getTaskList(int folderId, int from, int to, int orderBy, Order order, int cols[]) throws OXException;
     
     /**
      * Lists all tasks that match the given search
@@ -85,7 +85,7 @@ public interface TasksSQLInterface {
      * @return A SearchIterator contains Task
      * @throws OXException
      */
-    SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchObj, int orderBy, String orderDir, int[] cols) throws OXException;
+    SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException;
 
     /**
      * Loads one tasks by the given ID

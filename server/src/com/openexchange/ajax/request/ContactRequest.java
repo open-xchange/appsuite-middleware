@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,11 +49,10 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,6 +64,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
@@ -73,7 +73,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Types;
@@ -93,33 +93,50 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * {@link ContactRequest} - Handles AJAX requests for contact module.
+ *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class ContactRequest {
+
+    private static final Log LOG = LogFactory.getLog(ContactRequest.class);
 
     public static final String ACTION_GET_USER = "getuser";
 
     public static final String ACTION_LIST_USER = "listuser";
 
-    final ServerSession session;
+    /*-
+     * ++++++++++++++++++++++++++++++ Member section ++++++++++++++++++++++++++++++
+     */
 
-    final TimeZone timeZone;
+    private final ServerSession session;
+
+    private final TimeZone timeZone;
 
     private Date timestamp;
 
-    private static final Log LOG = LogFactory.getLog(ContactRequest.class);
-
+    /**
+     * Gets the time stamp.
+     * 
+     * @return The time stamp
+     */
     public Date getTimestamp() {
-        return timestamp;
+        return timestamp == null ? null : new Date(timestamp.getTime());
     }
 
     /**
@@ -132,7 +149,7 @@ public class ContactRequest {
 
         final String sTimeZone = session.getUser().getTimeZone();
 
-        timeZone = TimeZone.getTimeZone(sTimeZone);
+        timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
         if (LOG.isDebugEnabled()) {
             LOG.debug("use timezone string: " + sTimeZone);
             LOG.debug("use user timezone: " + timeZone);
@@ -171,19 +188,17 @@ public class ContactRequest {
         }
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
 
         final Contact contactObj = new Contact();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
-        final ContactParser contactparser = new ContactParser(session);
+        final ContactParser contactparser = new ContactParser();
         contactparser.parse(contactObj, jData);
 
         if (!contactObj.containsParentFolderID()) {
             throw new OXMandatoryFieldException("missing folder");
         }
-
-        final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             contactObj.getParentFolderID(),
@@ -205,12 +220,10 @@ public class ContactRequest {
         final Contact contactobject = new Contact();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
-        final ContactParser contactparser = new ContactParser(session);
+        final ContactParser contactparser = new ContactParser();
         contactparser.parse(contactobject, jData);
 
         contactobject.setObjectID(id);
-
-        final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             inFolder,
@@ -225,6 +238,11 @@ public class ContactRequest {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         timestamp = new Date(requestedTimestamp.getTime());
@@ -249,8 +267,6 @@ public class ContactRequest {
 
             final int[] internalColumns = checkLastModified(columnsToLoad);
 
-            final Context ctx = session.getContext();
-
             final ContactWriter contactWriter = new ContactWriter(timeZone);
 
             final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
@@ -261,7 +277,7 @@ public class ContactRequest {
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
-                contactWriter.writeArray(contactObj, columns, jsonContactArray);
+                contactWriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {
@@ -296,8 +312,6 @@ public class ContactRequest {
 
         final int objectId = DataParser.checkInt(jData, DataFields.ID);
         final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
-
-        final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             inFolder,
@@ -337,10 +351,13 @@ public class ContactRequest {
                 }
                 oldfolderId = objectIdAndFolderId[0][1];
             }
+            final TimeZone timeZone;
+            {
+                final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+                timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+            }
 
             final int[] internalColumns = checkLastModified(columnsToLoad);
-
-            final Context ctx = session.getContext();
 
             try {
                 // check if the int array has always the same folder id
@@ -356,7 +373,7 @@ public class ContactRequest {
                     while (it.hasNext()) {
                         final Contact contactObj = it.next();
                         final JSONArray jsonContactArray = new JSONArray();
-                        contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                        contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                         jsonResponseArray.put(jsonContactArray);
 
                         if (timestamp.before(contactObj.getLastModified())) {
@@ -366,8 +383,6 @@ public class ContactRequest {
                 } else {
                     // costs more performance because every object in the array
                     // is checked
-                    final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
-                        ContactInterfaceDiscoveryService.class);
                     for (int a = 0; a < objectIdAndFolderId.length; a++) {
                         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                             ContactInterfaceDiscoveryService.class).newContactInterface(objectIdAndFolderId[a][1], session);
@@ -380,7 +395,7 @@ public class ContactRequest {
                         while (it.hasNext()) {
                             final Contact contactObj = it.next();
                             final JSONArray jsonContactArray = new JSONArray();
-                            contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                            contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                             jsonResponseArray.put(jsonContactArray);
 
                             lastModified = contactObj.getLastModified();
@@ -417,18 +432,23 @@ public class ContactRequest {
         for (int a = 0; a < userIdArray.length; a++) {
             userIdArray[a] = jData.getInt(a);
         }
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final Context ctx = session.getContext();
 
         try {
             // TODO: Use discovery service?
-            final ContactInterface contactInterface = new RdbContactSQLInterface(session, ctx);
+            final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
             final ContactWriter contactwriter = new ContactWriter(timeZone);
 
             for (int a = 0; a < userIdArray.length; a++) {
                 final Contact contactObj = contactInterface.getUserById(userIdArray[a]);
                 final JSONArray jsonContactArray = new JSONArray();
-                contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {
@@ -448,10 +468,18 @@ public class ContactRequest {
         final int[] columnsToLoad = removeVirtual(columns);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
-        final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
+        int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
+        if (rightHandLimit == 0) {
+            rightHandLimit = 50000;
+        }
 
         timestamp = new Date(0);
 
@@ -462,23 +490,17 @@ public class ContactRequest {
         try {
             final int[] internalColumns = checkLastModified(columnsToLoad);
 
-            final Context ctx = session.getContext();
-
             final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
                 folderId,
                 session);
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
-            if (rightHandLimit == 0) {
-                it = contactInterface.getContactsInFolder(folderId, leftHandLimit, 50000, orderBy, orderDir, internalColumns);
-            } else {
-                it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir, internalColumns);
-            }
+            it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, order, internalColumns);
 
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
-                contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {
@@ -495,24 +517,23 @@ public class ContactRequest {
     }
 
     private int[] removeVirtual(final int[] columns) {
-        final List<Integer> helper = new ArrayList<Integer>(columns.length);
+        final TIntArrayList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
             if (col != Contact.LAST_MODIFIED_UTC) {
-                helper.add(I(col));
+                helper.add(col);
             }
         }
-        final int[] copy = new int[helper.size()];
-        for (int i = 0; i < copy.length; i++) {
-            copy[i] = helper.get(i).intValue();
-        }
-        return copy;
+        return helper.toNativeArray();
     }
 
     public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
-
-        final Context ctx = session.getContext();
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             inFolder,
@@ -524,7 +545,7 @@ public class ContactRequest {
         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
         final JSONObject jsonResponseObject = new JSONObject();
-        contactwriter.writeContact(contactObj, jsonResponseObject);
+        contactwriter.writeContact(contactObj, jsonResponseObject, session);
 
         timestamp = contactObj.getLastModified();
 
@@ -533,11 +554,16 @@ public class ContactRequest {
 
     public JSONObject actionGetUser(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final Context ctx = session.getContext();
 
         // TODO: Use discovery service?
-        final ContactInterface contactInterface = new RdbContactSQLInterface(session, ctx);
+        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
 
         timestamp = new Date(0);
 
@@ -545,7 +571,7 @@ public class ContactRequest {
         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
         final JSONObject jsonResponseObject = new JSONObject();
-        contactwriter.writeContact(contactObj, jsonResponseObject);
+        contactwriter.writeContact(contactObj, jsonResponseObject, session);
 
         timestamp = contactObj.getLastModified();
 
@@ -556,6 +582,11 @@ public class ContactRequest {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         timestamp = new Date(0);
 
@@ -584,7 +615,7 @@ public class ContactRequest {
         }
 
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
 
         searchObj.setSurname(DataParser.parseString(jData, ContactFields.LAST_NAME));
         searchObj.setDisplayName(DataParser.parseString(jData, ContactFields.DISPLAY_NAME));
@@ -593,6 +624,9 @@ public class ContactRequest {
         searchObj.setEmail1(DataParser.parseString(jData, ContactFields.EMAIL1));
         searchObj.setEmail2(DataParser.parseString(jData, ContactFields.EMAIL2));
         searchObj.setEmail3(DataParser.parseString(jData, ContactFields.EMAIL3));
+        searchObj.setDepartment(DataParser.parseString(jData, ContactFields.DEPARTMENT));
+        searchObj.setStreetBusiness(DataParser.parseString(jData, ContactFields.STREET_BUSINESS));
+        searchObj.setCityBusiness(DataParser.parseString(jData, ContactFields.CITY_BUSINESS));
         searchObj.setDynamicSearchField(DataParser.parseJSONIntArray(jData, "dynamicsearchfield"));
         searchObj.setDynamicSearchFieldValue(DataParser.parseJSONStringArray(jData, "dynamicsearchfieldvalue"));
         searchObj.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(jData, "privatepostalcoderange"));
@@ -610,8 +644,8 @@ public class ContactRequest {
 
         final int[] internalColumns = checkLastModified(columnsToLoad);
 
-        ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDir, internalColumns);
+        final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
+        final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, order, internalColumns);
         
         final JSONArray jsonResponseArray = new JSONArray();
         try {
@@ -619,7 +653,7 @@ public class ContactRequest {
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
-                contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {
@@ -667,7 +701,7 @@ public class ContactRequest {
         /*
          * Check attachments
          */
-        copyAttachments(folderId, ctx, contactObj, origObjectId, origFolderId, user, uc);
+        copyAttachments(folderId, session, ctx, contactObj, origObjectId, origFolderId, user, uc);
         /*
          * Check links
          */
@@ -744,7 +778,7 @@ public class ContactRequest {
         }
     }
 
-    private static void copyAttachments(final int folderId, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
+    private static void copyAttachments(final int folderId, Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
         /*
          * Copy attachments
          */
@@ -766,7 +800,7 @@ public class ContactRequest {
                         orig.getId(),
                         ctx,
                         user,
-                        uc), ctx, user, uc);
+                        uc), session, ctx, user, uc);
                 } while (iterator.hasNext());
                 attachmentBase.commit();
             } catch (final SearchIteratorException e) {

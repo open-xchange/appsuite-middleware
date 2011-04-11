@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,8 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -67,6 +69,17 @@ import com.openexchange.tools.iterator.SearchIterator;
 public interface AppointmentSQLInterface {
 
     /**
+     * @param include TRUE if you want to include other people's private appointments when returning data, FALSE otherwise (default case)
+     * @return
+     */
+    void setIncludePrivateAppointments(boolean include);
+    
+    /**
+     * @return TRUE if relevant methods will include other people's private appointments when returning data, FALSE otherwise (default case)
+     */
+    boolean getIncludePrivateAppointments();
+    
+    /**
      * Lists all appointment that match the given search.
      * 
      * @param folderId The folder ID
@@ -76,7 +89,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    SearchIterator<Appointment> getAppointmentsBetweenInFolder(int folderId, int cols[], Date start, Date end, int orderBy, String orderDir) throws OXException, SQLException;
+    SearchIterator<Appointment> getAppointmentsBetweenInFolder(int folderId, int cols[], Date start, Date end, int orderBy, Order order) throws OXException, SQLException;
 
     /**
      * Lists all appointment that match the given search.
@@ -90,7 +103,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException , OXPermissionException, OXFolderObjectNotFoundException
      */
-    SearchIterator<Appointment> getAppointmentsBetweenInFolder(int folderId, int cols[], Date start, Date end, int from, int to, int orderBy, String orderDir) throws OXException, SQLException;
+    SearchIterator<Appointment> getAppointmentsBetweenInFolder(int folderId, int cols[], Date start, Date end, int from, int to, int orderBy, Order orderDir) throws OXException, SQLException;
 
     /**
      * returns the days where the user has appointments
@@ -108,12 +121,10 @@ public interface AppointmentSQLInterface {
      * @param folderID The Folder ID
      * @param cols fields that will be added to the data object
      * @param since all modification >= since
-     * @param includePrivateFlag <code>true</code> to include private-flag information, meaning to exclude private appointments when
-     *            querying a shared folder; otherwise <code>false</code>
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    SearchIterator<Appointment> getModifiedAppointmentsInFolder(int fid, int[] cols, Date since, boolean includePrivateFlag) throws OXException;
+    SearchIterator<Appointment> getModifiedAppointmentsInFolder(int fid, int[] cols, Date since) throws OXException;
 
     /**
      * Lists all modified objects where the user is participant.
@@ -126,7 +137,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    SearchIterator<Appointment> getModifiedAppointmentsBetween(int userId, Date start, Date end, int[] cols, Date since, int orderBy, String orderDir) throws OXException, SQLException;
+    SearchIterator<Appointment> getModifiedAppointmentsBetween(int userId, Date start, Date end, int[] cols, Date since, int orderBy, Order orderDir) throws OXException, SQLException;
 
     /**
      * Lists all modified objects in a folder.
@@ -141,7 +152,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    SearchIterator<Appointment> getModifiedAppointmentsInFolder(int fid, Date start, Date end, int[] cols, Date since, boolean includePrivateFlag) throws OXException, SQLException;
+    SearchIterator<Appointment> getModifiedAppointmentsInFolder(int fid, Date start, Date end, int[] cols, Date since) throws OXException, SQLException;
 
     /**
      * Lists all deleted objects in a folder.
@@ -163,7 +174,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, String orderDir, int cols[]) throws OXException, SQLException;
+    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, Order orderDir, int cols[]) throws OXException, SQLException;
 
     /**
      * Lists all apointments where the titlematch the given searchpattern
@@ -176,7 +187,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<Appointment> searchAppointments(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
+    public SearchIterator<Appointment> searchAppointments(String searchpattern, int folderId, int orderBy, Order orderDir, int[] cols) throws OXException;
 
     /**
      * Loads one appointment by the given ID
@@ -289,20 +300,37 @@ public interface AppointmentSQLInterface {
      * @throws OXException
      */
     Date setUserConfirmation(int object_id, int folderId, int user_id, int confirm, String confirm_message) throws OXException;
+    
+    /**
+     * Sets the confirmation of an appointment for an external user, identified with his mail address.
+     * 
+     * @param oid
+     * @param folderId
+     * @param mail
+     * @param confirm
+     * @param message
+     * @return
+     * @throws OXException
+     */
+    public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message) throws OXException;
 
     /**
      * Method to attach or detach attachments
      * @param objectId
      * The object ID
+     * @param folderId
+     * The folder Id
      * @param userId
      * The user ID
+     * @param session
+     * The session
      * @param Context
      * The context
-     * @param action
-     * true = attach, false = detach
+     * @param numberOfAttachments
+     * Amount of attached attachments.
      * @throws OXException
      */
-    long attachmentAction(int objectId, int uid, Context c, boolean action) throws OXException;
+    long attachmentAction(int objectId, int uid, int folderId, Session session, Context c, int numberOfAttachments) throws OXException;
 
 
     /**
@@ -341,6 +369,23 @@ public interface AppointmentSQLInterface {
      * @throws OXException
      * @throws SQLException
      */
-    SearchIterator<Appointment> getAppointmentsBetween(int user_uid, Date start, Date end, int cols[], int orderBy, String orderDir) throws OXException, SQLException;
+    SearchIterator<Appointment> getAppointmentsBetween(int user_uid, Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException;
 
+    /**
+     * Resolves the given uid.
+     * 
+     * @param uid
+     * @return the object id of the corresponding object, if it exists, 0 otherwise.
+     * @throws OXException
+     */
+    public int resolveUid(String uid) throws OXException;
+    
+    /**
+     * Returns the folder in which this appointment is located for the current user.
+     * 
+     * @param objectId
+     * @return
+     * @throws OXException
+     */
+    public int getFolder(int objectId) throws OXException;
 }

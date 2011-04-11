@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 
@@ -225,7 +227,9 @@ public final class SQL {
             final Mapper<?> mapper = Mapping.getMapping(i);
             if (null == mapper) {
                 switch (i) {
+                case Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
                 case Task.PARTICIPANTS:
+                case Task.USERS:
                 case Task.ALARM:
                     break;
                 case Task.FOLDER_ID:
@@ -234,7 +238,7 @@ public final class SQL {
                     }
                     break;
                 default:
-                    throw new TaskException(Code.UNKNOWN_ATTRIBUTE, Integer.valueOf(i));
+                    throw new TaskException(Code.UNKNOWN_ATTRIBUTE, I(i));
                 }
             } else {
                 sql.append(mapper.getDBColumnName());
@@ -321,8 +325,7 @@ public final class SQL {
 
     static String getPatternWhere(final TaskSearchObject search) {
         final StringBuilder sql = new StringBuilder();
-        // This compare is correct. NO_PATTERN is null and cannot be compared
-        // with Object.equals()
+        // This compare is correct. NO_PATTERN is null and cannot be compared with Object.equals()
         if (TaskSearchObject.NO_PATTERN != search.getPattern()) {
             sql.append('(');
             sql.append(Mapping.getMapping(Task.TITLE).getDBColumnName());
@@ -351,17 +354,16 @@ public final class SQL {
 
     /**
      * @param orderBy attribute identifier that should be used for sorting.
-     * @param orderDir string defining the order direction. <code>"ASC"</code>
-     * or <code>"DESC"</code>.
+     * @param order defining the order direction.
      * @return SQL order by expression.
      */
-    static String getOrder(final int orderBy, final String orderDir) {
+    static String getOrder(final int orderBy, final Order order) {
         final StringBuilder sql = new StringBuilder();
-        if (0 != orderBy) {
+        if (0 != orderBy && !Order.NO_ORDER.equals(order)) {
             sql.append(" ORDER BY ");
             sql.append(Mapping.getMapping(orderBy).getDBColumnName());
             sql.append(' ');
-            sql.append(orderDir);
+            sql.append(forSQLCommand(order));
         }
         return sql.toString();
     }

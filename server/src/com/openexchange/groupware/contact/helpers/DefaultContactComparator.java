@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 
 
 /**
@@ -69,17 +70,16 @@ public class DefaultContactComparator implements Comparator<Contact>{
     }};
     
     private int field;
-    private boolean descending;
+    private Order order;
 
-    public DefaultContactComparator(int field, String orderDir) {
+    public DefaultContactComparator(int field, Order order) {
+        super();
         this.field = field;
-        if(orderDir != null) {
-            this.descending = orderDir.equalsIgnoreCase("DESC");
-        }
+        this.order = order;
     }
 
     public int compare(Contact o1, Contact o2) {
-        if(field <= 0) {
+        if(field <= 0 || Order.NO_ORDER.equals(order)) {
             return 0;
         }
         int rating;
@@ -90,7 +90,7 @@ public class DefaultContactComparator implements Comparator<Contact>{
             Object v2 = o2.get(field);
             rating = internalCompare(v1, v2);
         }
-        if(descending) {
+        if(Order.DESCENDING.equals(order)) {
             rating = -rating;
         }
         return  rating;

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
@@ -90,7 +91,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
             final int folderId = Integer.parseInt(publication.getEntityId());
             final ContactInterface contacts = factory.create(folderId, new PublicationSession(publication));
             final int numberOfContacts = contacts.getNumberOfContacts(folderId);
-            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, "ASC", Contact.ALL_COLUMNS);
+            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, Order.ASCENDING, Contact.ALL_COLUMNS);
             while(contactsInFolder.hasNext()) {
                 Contact next = contactsInFolder.next();
                 if(!next.getMarkAsDistribtuionlist()) {
@@ -100,6 +101,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
         } catch (final AbstractOXException e) {
             throw new PublicationException(e);
         }
+        // FIXME add sorting
         return list;
     }
 

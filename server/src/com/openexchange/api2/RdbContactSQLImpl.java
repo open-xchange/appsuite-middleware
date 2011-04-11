@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -101,6 +102,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -318,7 +320,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         "", "", "", "", "" }, exceptionId = { 7, 8, 9, 10, 12 }, msg = {
         ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG,
         ContactException.NO_PERMISSION_MSG, "An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d" })
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final Order orderMechanism, final int[] cols) throws OXException {
         int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
         cs.setFolder(folderId);
@@ -348,7 +350,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
             final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
             order.append(Contacts.mapping[realOrderField].getDBFieldName());
             order.append(' ');
-            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : forSQLCommand(orderMechanism);
             if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
                 order.append(realOrderMechanism);
             } else {
@@ -411,7 +413,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         "An error occurred during the load of folder objects by an extended search. Context %1$d User %2$d",
         "An error occurred during the load of folder objects by an extended search. Context %1$d User %2$d",
         ContactException.INIT_CONNECTION_FROM_DBPOOL })
-    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final Order order, final int[] cols) throws OXException {
         int[] extendedCols = cols;
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
@@ -460,28 +462,28 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
             }
         }
         Search.checkPatternLength(searchobject);
-        final StringBuilder order = new StringBuilder();
+        final StringBuilder sqlQrder = new StringBuilder();
         final boolean specialSort;
-        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING) {
+        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING && !Order.NO_ORDER.equals(order)) {
             specialSort = false;
-            order.append(" ORDER BY co.");
+            sqlQrder.append(" ORDER BY co.");
             final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
-            order.append(Contacts.mapping[realOrderField].getDBFieldName());
-            order.append(' ');
-            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            sqlQrder.append(Contacts.mapping[realOrderField].getDBFieldName());
+            sqlQrder.append(' ');
+            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : forSQLCommand(order);
             if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
-                order.append(realOrderMechanism);
+                sqlQrder.append(realOrderMechanism);
             } else {
-                order.append("ASC");
+                sqlQrder.append("ASC");
             }
-            order.append(' ');
+            sqlQrder.append(' ');
         } else {
             extendedCols =
                 Arrays.addUniquely(extendedCols, new int[] {
                     Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
             specialSort = true;
         }
-        cs.setOrder(order.toString());
+        cs.setOrder(sqlQrder.toString());
         cs.setContactSearchObject(searchobject);
         cs.setSelect(cs.iFgetColsString(extendedCols).toString());
         final Connection con;
@@ -578,14 +580,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         ContactException.NO_PERMISSION_MSG,
         "An error occurred during the load of folder objects by a simple search. Context %1$d Folder %2$d User %3$d",
         "An error occurred during the load of folder objects by a simple search. Context %1$d Folder %2$d User %3$d" })
-    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int order_field, final Order order, final int[] cols) throws OXException {
         boolean error = false;
-        String orderDir = orderMechanism;
+        String orderDir = forSQLCommand(order);
         int orderBy = order_field;
         if (orderBy == 0) {
             orderBy = 502;
         }
-        if (orderDir == null || orderDir.length() < 1) {
+        if (" ".equals(orderDir)) {
             orderDir = " ASC ";
         }
         Connection readcon = null;
@@ -624,10 +626,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
             final ContactSql cs = new ContactMySql(session, ctx);
             cs.setFolder(folderId);
             cs.setSearchHabit(" OR ");
-            final String order =
+            final String sqlOrder =
                 new StringBuilder(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(' ').append(
                     orderDir).append(' ').toString();
-            cs.setOrder(order);
+            cs.setOrder(sqlOrder);
 
             final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {

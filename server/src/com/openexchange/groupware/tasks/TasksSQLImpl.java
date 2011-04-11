@@ -1,0 +1,383 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.groupware.tasks;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.api2.OXException;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.event.EventException;
+import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.search.TaskSearchObject;
+import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.ArrayIterator;
+import com.openexchange.tools.iterator.SearchIterator;
+
+/**
+ * This class implements the methods needed by the tasks interface of the API version 2.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class TasksSQLImpl implements TasksSQLInterface {
+
+    private static final Log LOG = LogFactory.getLog(TasksSQLImpl.class);
+
+    private final Session session;
+
+    /**
+     * Default constructor.
+     * @param session Session.
+     */
+    public TasksSQLImpl(final Session session) {
+        super();
+        this.session = session;
+    }
+
+    /**
+     * TODO eliminate duplicate columns
+     */
+    public SearchIterator<Task> getTaskList(final int folderId, final int from,
+        final int until, final int orderBy, final Order order,
+        final int[] columns) throws OXException {
+        boolean onlyOwn;
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration configuration;
+        final FolderObject folder;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            configuration = Tools.getUserConfiguration(ctx, userId);
+            folder = Tools.getFolder(ctx, folderId);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        try {
+            onlyOwn = Permission.canReadInFolder(ctx, user, configuration, folder);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        final boolean noPrivate = Tools.isFolderShared(folder, user);
+        try {
+            return TaskStorage.getInstance().list(ctx, folderId, from, until,
+                orderBy, order, columns, onlyOwn, userId, noPrivate);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+    }
+
+    public Task getTaskById(int taskId, int folderId) throws OXException {
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration userConfig;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+            final GetTask get = new GetTask(ctx, user, userConfig, folderId, taskId, StorageType.ACTIVE);
+            return get.loadAndCheck();
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+    }
+
+    public SearchIterator<Task> getModifiedTasksInFolder(final int folderId,
+        final int[] columns, final Date since) throws OXException {
+        final Context ctx;
+        final User user;
+        final int userId = session.getUserId();
+        final UserConfiguration userConfig;
+        FolderObject folder;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+            folder = Tools.getFolder(ctx, folderId);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        boolean onlyOwn;
+        try {
+            onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        final boolean noPrivate = Tools.isFolderShared(folder, user);
+        try {
+            return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
+                StorageType.ACTIVE, columns, since, onlyOwn, userId, noPrivate);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+    }
+
+    public SearchIterator<Task> getDeletedTasksInFolder(final int folderId,
+        final int[] columns, final Date since) throws OXException {
+        final Context ctx;
+        final User user;
+        final int userId = session.getUserId();
+        final UserConfiguration userConfig;
+        FolderObject folder;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+            folder = Tools.getFolder(ctx, folderId);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        boolean onlyOwn;
+        try {
+            onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        final boolean noPrivate = Tools.isFolderShared(folder, user);
+        try {
+            return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
+                StorageType.DELETED, columns, since, onlyOwn, userId,
+                noPrivate);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+    }
+
+    public void insertTaskObject(final Task task) throws OXException {
+        final Context ctx;
+        final Set<TaskParticipant> parts;
+        final FolderObject folder;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            final int userId = session.getUserId();
+            final User user = Tools.getUser(ctx, userId);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, userId);
+            parts = TaskLogic.createParticipants(ctx, task.getParticipants());
+            TaskLogic.checkNewTask(task, userId, userConfig, parts);
+            // Check access rights
+            final int folderId = task.getParentFolderID();
+            folder = Tools.getFolder(ctx, folderId);
+            Permission.checkCreate(ctx, user, userConfig, folder);
+            if (task.getPrivateFlag() && (Tools.isFolderPublic(folder)
+                || Tools.isFolderShared(folder, user))) {
+                throw new TaskException(Code.PRIVATE_FLAG, Integer
+                    .valueOf(folderId));
+            }
+            // TODO create insert class
+            // Create folder mappings
+            Set<Folder> folders;
+            if (Tools.isFolderPublic(folder)) {
+                folders = TaskLogic.createFolderMapping(folderId, task.getCreatedBy(), InternalParticipant.EMPTY_INTERNAL);
+            } else {
+                Tools.fillStandardFolders(ctx, ParticipantStorage
+                    .extractInternal(parts));
+                int creator = userId;
+                if (Tools.isFolderShared(folder, user)) {
+                    creator = folder.getCreator();
+                }
+                folders = TaskLogic.createFolderMapping(folderId, creator,
+                    ParticipantStorage.extractInternal(parts));
+            }
+            // Insert task
+            TaskLogic.insertTask(ctx, task, parts, folders);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        if (task.containsAlarm()) {
+            Reminder.createReminder(ctx, task);
+        }
+        // Prepare for event
+        task.setUsers(TaskLogic.createUserParticipants(parts));
+        try {
+            new EventClient(session).create(task, folder);
+        } catch (final EventException e) {
+            throw Tools.convert(new TaskException(Code.EVENT, e));
+        }
+    }
+
+    public void updateTaskObject(final Task task, final int folderId,
+        final Date lastRead) throws OXException {
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration userConfig;
+        final FolderObject folder;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+            folder = Tools.getFolder(ctx, folderId);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        final UpdateData update = new UpdateData(ctx, user, userConfig, folder, task, lastRead);
+        try {
+            update.prepare();
+            // TODO join doUpdate(), updateReminder() and makeNextRecurrence() in one transaction.
+            update.doUpdate();
+            update.sentEvent(session);
+            update.updateReminder();
+            update.makeNextRecurrence(session);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+    }
+
+    public void deleteTaskObject(final int taskId, final int folderId,
+        final Date lastModified) throws OXException {
+        final FolderStorage foldStor = FolderStorage.getInstance();
+        final FolderObject folder;
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration userConfig;
+        final Task task;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+            // Check if folder exists
+            folder = Tools.getFolder(ctx, folderId);
+            // Check if folder is correct.
+            foldStor.selectFolderById(ctx, taskId, folderId, StorageType
+                .ACTIVE);
+            // Load task with participants.
+            task = GetTask.load(ctx, folderId, taskId, StorageType.ACTIVE);
+            // TODO Switch to only delete the participant from task
+            // Check delete permission
+            Permission.checkDelete(ctx, user, userConfig, folder, task);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        try {
+            // TODO create delete class
+            TaskLogic.deleteTask(session, ctx, userId, task, lastModified);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+    }
+
+    public Date setUserConfirmation(int taskId, int userId, int confirm, String message) throws OXException {
+        final Context ctx;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        final Date lastModified;
+        try {
+            ConfirmTask confirmT = new ConfirmTask(ctx, taskId, userId, confirm, message);
+            confirmT.prepare();
+            confirmT.doConfirmation();
+            lastModified = confirmT.getLastModified();
+            confirmT.sentEvent(session);
+        } catch (TaskException e) {
+            throw Tools.convert(e);
+        }
+        return lastModified;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public SearchIterator<Task> getObjectsById(final int[][] ids,
+        final int[] columns) throws OXException {
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration userConfig;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        // TODO Improve performance
+        final List<Task> tasks = new ArrayList<Task>();
+        for (final int[] objectAndFolderId : ids) {
+            final GetTask get = new GetTask(ctx, user, userConfig,
+                objectAndFolderId[1], objectAndFolderId[0], StorageType.ACTIVE);
+            try {
+                tasks.add(get.loadAndCheck());
+            } catch (final TaskException e) {
+                LOG.debug(e.getMessage(), e);
+            }
+        }
+        return new ArrayIterator<Task>(tasks.toArray(new Task[tasks.size()]));
+    }
+
+    public SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchData, int orderBy, Order order, int[] columns) throws OXException {
+        final Context ctx;
+        final User user;
+        final UserConfiguration config;
+        final int userId = session.getUserId();
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            config = Tools.getUserConfiguration(ctx, userId);
+            final Search search = new Search(ctx, user, config, searchData, orderBy, order, columns);
+            return search.perform();
+        } catch (TaskException e) {
+            throw Tools.convert(e);
+        }
+    }
+}
