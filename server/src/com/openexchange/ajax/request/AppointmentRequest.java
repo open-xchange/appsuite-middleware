@@ -374,7 +374,7 @@ public class AppointmentRequest extends CalendarRequest {
                         _appointmentFields,
                         requestedTimestamp,
                         0,
-                        null);
+                        Order.NO_ORDER);
                 } else {
                     if (start == null || end == null) {
                         it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
@@ -718,7 +718,8 @@ public class AppointmentRequest extends CalendarRequest {
 
         final List<DateOrderObject> objectList = new ArrayList<DateOrderObject>();
 
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final String orderDirString = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order orderDir = OrderFields.parse(orderDirString);
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
 
@@ -827,24 +828,15 @@ public class AppointmentRequest extends CalendarRequest {
                 final DateOrderObject[] dateOrderObjectArray = objectList.toArray(new DateOrderObject[objectList.size()]);
                 Arrays.sort(dateOrderObjectArray);
 
-                boolean asc;
-
-                if (orderDir == null) {
-                    asc = true;
-                } else {
-                    if (orderDir.equalsIgnoreCase("desc")) {
-                        asc = false;
-                    } else {
-                        asc = true;
-                    }
-                }
-
-                if (asc) {
+                switch (orderDir) {
+                case ASCENDING:
+                case NO_ORDER:
                     for (int a = 0; a < dateOrderObjectArray.length; a++) {
                         final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
                         appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
                     }
-                } else {
+                    break;
+                case DESCENDING:
                     for (int a = dateOrderObjectArray.length - 1; a >= 0; a--) {
                         final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
                         appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
@@ -1053,10 +1045,11 @@ public class AppointmentRequest extends CalendarRequest {
             orderBy = CalendarObject.START_DATE;
         }
 
-        String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
-        if (orderDir == null) {
-            orderDir = "asc";
+        String orderDirString = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        if (orderDirString == null) {
+            orderDirString = "asc";
         }
+        final Order orderDir = OrderFields.parse(orderDirString);
 
         final int limit = DataParser.checkInt(jsonObj, "limit");
 
