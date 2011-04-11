@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -209,7 +210,7 @@ public class GroupUserWriter extends ContactWriter {
                 searchpattern,
                 FolderObject.SYSTEM_LDAP_FOLDER_ID,
                 Contact.DISPLAY_NAME,
-                "asc",
+                Order.ASCENDING,
                 changeFields);
             writeIterator(it, false, xo, os);
         } finally {

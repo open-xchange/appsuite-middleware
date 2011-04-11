@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,14 +66,13 @@ import com.openexchange.contacts.ldap.exceptions.LdapException;
 import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapInterface;
-import com.openexchange.contacts.ldap.ldap.LdapJNDIImpl;
 import com.openexchange.contacts.ldap.ldap.LdapInterface.FillClosure;
+import com.openexchange.contacts.ldap.ldap.LdapJNDIImpl;
 import com.openexchange.contacts.ldap.osgi.LDAPServiceRegistry;
 import com.openexchange.contacts.ldap.property.FolderProperties;
-import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.FolderProperties.ContactTypes;
 import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
-import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
+import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
@@ -83,6 +82,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
@@ -154,11 +154,6 @@ public class LdapContactInterface implements ContactInterface {
         
     }
 
-    public enum Order {
-        asc,
-        desc;
-    }
-    
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapContactInterface.class);
     
     private static final String MAPPING_TABLE_KEYS = "CONTACT_LDAP_MAPPING_TABLE_KEYS";
@@ -243,8 +238,7 @@ public class LdapContactInterface implements ContactInterface {
         throw new LdapException(Code.DELETE_NOT_POSSIBLE);
     }
 
-    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
-        final Order valueOf = getOrder(orderDir);
+    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, Order order, final int[] cols) throws OXException {
         final Set<Integer> columns = getColumnSet(cols);
         final int folderId;
         {
@@ -296,14 +290,13 @@ public class LdapContactInterface implements ContactInterface {
             arrayList = getLDAPContacts(folderId, columns, getStringFromStringBuilder(user), getStringFromStringBuilder(distri), null, false);
         }
         
-        sorting(orderBy, orderDir, valueOf, arrayList);
+        sorting(orderBy, order, arrayList);
         return new ArrayIterator<Contact>(arrayList.toArray(new Contact[arrayList.size()]));
     }
 
 
     // The all request...
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] cols) throws OXException {
-        final Order valueOf = getOrder(orderDir);
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final Order order, final int[] cols) throws OXException {
         
         final Set<Integer> columns = getColumnSet(cols);
         if (0 == orderBy) {
@@ -352,7 +345,7 @@ public class LdapContactInterface implements ContactInterface {
         // Get only the needed parts...
         final List<Contact> subList = getSubList(from, to, arrayList);
         
-        sorting(orderBy, orderDir, valueOf, subList);
+        sorting(orderBy, order, subList);
         final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(subList.toArray(new Contact[subList.size()]));
         return searchIterator;
     }
@@ -448,7 +441,7 @@ public class LdapContactInterface implements ContactInterface {
         throw new LdapException(Code.INSERT_NOT_POSSIBLE);
     }
 
-    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final String orderDir, final int[] cols) throws OXException {
+    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final Order order, final int[] cols) throws OXException {
         LOG.info("Called searchContacts");
         return null;
     }
@@ -749,13 +742,8 @@ public class LdapContactInterface implements ContactInterface {
         
     }
 
-    private void sorting(final int orderBy, final String orderDir, final Order valueOf, final List<Contact> subList) {
-        if (null != orderDir && folderprop.getSorting().equals(Sorting.groupware)) {
-            Collections.sort(subList, new ContactComparator(orderBy));
-        } else {
-            // Default sorting
-            Collections.sort(subList, new ContactComparator(-1));
-        }
+    private void sorting(final int orderBy, final Order order, final List<Contact> subList) {
+        Collections.sort(subList, new ContactComparator(orderBy, order));
     }
 
     public void associateTwoContacts(Contact master, Contact slave) throws OXException {

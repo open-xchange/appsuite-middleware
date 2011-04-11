@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,6 +70,7 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.OverridingContactInterface;
+import com.openexchange.groupware.search.Order;
 
 
 /**
@@ -212,7 +213,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
             0,
             numberOfContacts,
             Contact.OBJECT_ID,
-            "ASC",
+            Order.ASCENDING,
             COMPARISON_COLUMNS);
         List<Contact> retval = new ArrayList<Contact>();
         while (contactsInFolder.hasNext()) {

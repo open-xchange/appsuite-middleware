@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,6 +67,7 @@ import com.openexchange.ajax.FinalContactConstants;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
@@ -100,6 +101,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -554,7 +556,7 @@ public class ContactRequest {
         final int[] columnsToLoad = removeVirtual(columns);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
         final TimeZone timeZone;
         {
             final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
@@ -581,7 +583,7 @@ public class ContactRequest {
                 session);
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
-            it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir, internalColumns);
+            it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, order, internalColumns);
 
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
@@ -702,7 +704,7 @@ public class ContactRequest {
         }
 
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
 
         searchObj.setSurname(DataParser.parseString(jData, ContactFields.LAST_NAME));
         searchObj.setDisplayName(DataParser.parseString(jData, ContactFields.DISPLAY_NAME));
@@ -732,7 +734,7 @@ public class ContactRequest {
         final int[] internalColumns = checkLastModified(columnsToLoad);
 
         final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-        final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDir, internalColumns);
+        final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, order, internalColumns);
         
         final JSONArray jsonResponseArray = new JSONArray();
         try {

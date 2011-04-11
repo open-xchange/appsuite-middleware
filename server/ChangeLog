@@ -1,3 +1,7 @@
+* 2011-04-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #18912: Using enumeration to pass order directory for data everywhere.
+
 * 2011-04-06 - martin.herfurth@open-xchange.com
 
  - Bugfix #18336: Fixed wrong end date for when removing sequence.

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,6 +62,7 @@ import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -100,17 +101,17 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.groupware.contact.ContactInterface#getContactsByExtendedSearch(com.openexchange.groupware.search.ContactSearchObject, int, java.lang.String, int[])
+     * @see com.openexchange.groupware.contact.ContactInterface#getContactsByExtendedSearch(com.openexchange.groupware.search.ContactSearchObject, int, com.openexchange.groupware.search.Order, int[])
      */
-    public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, Order order, int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.groupware.contact.ContactInterface#getContactsInFolder(int, int, int, int, java.lang.String, int[])
+     * @see com.openexchange.groupware.contact.ContactInterface#getContactsInFolder(int, int, int, int, com.openexchange.groupware.search.Order, int[])
      */
-    public SearchIterator<Contact> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsInFolder(int folderId, int from, int to, int orderBy, Order order, int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -193,9 +194,9 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.groupware.contact.ContactInterface#searchContacts(java.lang.String, int, int, java.lang.String, int[])
+     * @see com.openexchange.groupware.contact.ContactInterface#searchContacts(java.lang.String, int, int, com.openexchange.groupware.search.Order, int[])
      */
-    public SearchIterator<Contact> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<Contact> searchContacts(String searchpattern, int folderId, int orderBy, Order order, int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,6 +74,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.mapping.Status;
@@ -789,10 +790,10 @@ class UpdateData {
 
             TaskIterator ti;
             if (own) {
-                ti = storage.search(ctx, getUserId(), search, 0, "ASC", new int[] {
+                ti = storage.search(ctx, getUserId(), search, 0, Order.ASCENDING, new int[] {
                     Task.PERCENT_COMPLETED, Task.CREATED_BY, Task.START_DATE }, emptyList, listWithFolder, emptyList);
             } else {
-                ti = storage.search(ctx, getUserId(), search, 0, "ASC", new int[] {
+                ti = storage.search(ctx, getUserId(), search, 0, Order.ASCENDING, new int[] {
                     Task.PERCENT_COMPLETED, Task.CREATED_BY, Task.START_DATE }, listWithFolder, emptyList, emptyList);
             }
 

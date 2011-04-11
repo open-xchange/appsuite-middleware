@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import gnu.trove.TIntHashSet;
 import java.sql.Connection;
@@ -107,7 +108,9 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.util.UUIDs;
@@ -118,7 +121,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -288,7 +290,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws ContactException, OXConflictException, OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final Order orderMechanism, final int[] cols) throws ContactException, OXConflictException, OXException {
         int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
         cs.setFolder(folderId);
@@ -318,7 +320,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
             order.append(Contacts.mapping[realOrderField].getDBFieldName());
             order.append(' ');
-            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : forSQLCommand(orderMechanism);
             if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
                 order.append(realOrderMechanism);
             } else {
@@ -372,7 +374,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return new ArrayIterator<Contact>(contacts);
     }
 
-    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final String orderMechanism, final int[] cols) throws ContactException, OXException {
+    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final Order order, final int[] cols) throws ContactException, OXException {
         int[] extendedCols = cols;
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
@@ -423,27 +425,27 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
         Search.checkPatternLength(searchobject);
-        final StringBuilder order = new StringBuilder();
+        final StringBuilder sqlOrder = new StringBuilder();
         final boolean specialSort;
-        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING) {
+        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING && !Order.NO_ORDER.equals(order)) {
             specialSort = false;
-            order.append(" ORDER BY co.");
+            sqlOrder.append(" ORDER BY co.");
             final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
-            order.append(Contacts.mapping[realOrderField].getDBFieldName());
-            order.append(' ');
-            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : orderMechanism;
+            sqlOrder.append(Contacts.mapping[realOrderField].getDBFieldName());
+            sqlOrder.append(' ');
+            final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : forSQLCommand(order);
             if (realOrderMechanism != null && realOrderMechanism.length() > 0) {
-                order.append(realOrderMechanism);
+                sqlOrder.append(realOrderMechanism);
             } else {
-                order.append("ASC");
+                sqlOrder.append("ASC");
             }
-            order.append(' ');
+            sqlOrder.append(' ');
         } else {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
                 Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
             specialSort = true;
         }
-        cs.setOrder(order.toString());
+        cs.setOrder(sqlOrder.toString());
         cs.setContactSearchObject(searchobject);
         cs.setSelect(cs.iFgetColsString(extendedCols).toString());
         final Connection con;
@@ -532,14 +534,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
 
-    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+    public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int order_field, final Order order, final int[] cols) throws OXException {
         boolean error = false;
-        String orderDir = orderMechanism;
+        String orderDir = forSQLCommand(order);
         int orderBy = order_field;
         if (orderBy == 0) {
             orderBy = 502;
         }
-        if (orderDir == null || orderDir.length() < 1) {
+        if (" ".equals(orderDir)) {
             orderDir = " ASC ";
         }
         Connection readcon = null;
@@ -572,9 +574,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             final ContactSql cs = new ContactMySql(session, ctx);
             cs.setFolder(folderId);
             cs.setSearchHabit(" OR ");
-            final String order = new StringBuilder(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(
+            final String sqlOrder = new StringBuilder(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(
                 ' ').append(orderDir).append(' ').toString();
-            cs.setOrder(order);
+            cs.setOrder(sqlOrder);
 
             final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {

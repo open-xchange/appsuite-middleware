@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -99,13 +100,13 @@ public interface ContactInterface {
      * @param from Start position in list
      * @param to End position in list
      * @param orderBy Column id to sort. 0 if no order by is used
-     * @param orderDir Order direction (asc or desc) may be null if no special ordering is requested
+     * @param order Order direction, may be null if no special ordering is requested
      * @param cols The columns filled to the dataobject
      * @param readcon The readable Database Connection
      * @return A SearchIterator contains Task objects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<Contact> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException;
+    public SearchIterator<Contact> getContactsInFolder(int folderId, int from, int to, int orderBy, Order order, int[] cols) throws OXException;
 
     /**
      * Lists all contacts that match the given search
@@ -115,7 +116,7 @@ public interface ContactInterface {
      * @return A SearchIterator contains ContactObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException;
+    public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, Order order, int[] cols) throws OXException;
 
     /**
      * Lists all contacts where the firstname, lastname or the displayname match the given searchpattern
@@ -126,7 +127,7 @@ public interface ContactInterface {
      * @return A SearchIterator contains ContactObject
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    SearchIterator<Contact> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
+    SearchIterator<Contact> searchContacts(String searchpattern, int folderId, int orderBy, Order order, int[] cols) throws OXException;
 
     /**
      * Loads one contact by the given ID

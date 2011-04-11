@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -89,20 +90,20 @@ public class Search {
 
     private final int orderBy;
 
-    private final String orderDir;
+    private final Order order;
 
     private final int[] columns;
 
     private final List<Integer> all = new ArrayList<Integer>(), own = new ArrayList<Integer>(), shared = new ArrayList<Integer>();
 
-    public Search(Context ctx, User user, UserConfiguration config, TaskSearchObject search, int orderBy, String orderDir, int[] columns) {
+    public Search(Context ctx, User user, UserConfiguration config, TaskSearchObject search, int orderBy, Order order, int[] columns) {
         super();
         this.config = config;
         this.ctx = ctx;
         this.user = user;
         this.search = search;
         this.orderBy = orderBy;
-        this.orderDir = orderDir;
+        this.order = order;
         this.columns = columns;
     }
 
@@ -112,7 +113,7 @@ public class Search {
         if (all.size() + own.size() + shared.size() == 0) {
             return SearchIteratorAdapter.createEmptyIterator();
         }
-        return TaskStorage.getInstance().search(ctx, getUserId(), search, orderBy, orderDir, columns, all, own, shared);
+        return TaskStorage.getInstance().search(ctx, getUserId(), search, orderBy, order, columns, all, own, shared);
     }
 
     private void checkConditions() throws TaskException {

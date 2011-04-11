@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,6 +78,7 @@ import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -207,7 +208,7 @@ public class CSVContactExporter implements Exporter {
             final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
                 folderId,
                 sessObj);
-            conIter = contactInterface.getContactsInFolder(folderId, 0, contactInterface.getNumberOfContacts(folderId), 0, "ASC", cols);
+            conIter = contactInterface.getContactsInFolder(folderId, 0, contactInterface.getNumberOfContacts(folderId), 0, Order.ASCENDING, cols);
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }

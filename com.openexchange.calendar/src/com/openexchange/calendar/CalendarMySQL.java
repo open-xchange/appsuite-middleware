@@ -113,10 +113,11 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.impl.DBPool;
@@ -1107,7 +1108,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return CalendarMySQL.select;
     }
     
-    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final String orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
+    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
         final StringBuilder sb = new StringBuilder(128);
         sb.append("SELECT ");
         sb.append(columns);
@@ -1217,10 +1218,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             orderby = collection.getFieldName(Appointment.START_DATE);
         }
         sb.append("pd." + orderby);
-        if (orderDir != null) {
-            sb.append(" ");
-            sb.append(orderDir);
-        }
+        sb.append(DBUtils.forSQLCommand(orderDir));
         
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setInt(1, ctx.getContextId());

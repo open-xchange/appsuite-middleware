@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,6 +62,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ContactInterfaceFactory;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
@@ -119,7 +121,7 @@ public final class AllAction extends AbstractUserAction {
              */
             final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
             final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
-            final String orderDirection = request.getParameter(AJAXServlet.PARAMETER_ORDER);
+            final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
 
             final int leftHandLimit = parseIntParameter(AJAXServlet.LEFT_HAND_LIMIT, request);
             final int rightHandLimit = parseIntParameter(AJAXServlet.RIGHT_HAND_LIMIT, request);
@@ -167,7 +169,7 @@ public final class AllAction extends AbstractUserAction {
                             lhl,
                             rhl,
                             orderBy,
-                            orderDirection,
+                            order,
                             checkedCols);
                     try {
                         final List<Contact> contactList = new ArrayList<Contact>(128);
@@ -200,7 +202,7 @@ public final class AllAction extends AbstractUserAction {
                     Collections.sort(allUsers, Comparators.getComparator(
                         orderField,
                         session.getUser().getLocale(),
-                        "desc".equalsIgnoreCase(orderDirection)));
+                        Order.DESCENDING.equals(order)));
                     final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
                     int rhl = rightHandLimit <= 0 ? 50000 : rightHandLimit;
                     if (rhl - lhl >= allUsers.size()) {

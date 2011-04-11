@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,7 +76,7 @@ public class ContactSearchMultiplexer {
         this.discoveryService = discoveryService;
     }
 
-    public SearchIterator<Contact> extendedSearch(ServerSession session, ContactSearchObject search, int orderBy, String orderDir, int[] cols) throws AbstractOXException {
+    public SearchIterator<Contact> extendedSearch(ServerSession session, ContactSearchObject search, int orderBy, Order order, int[] cols) throws AbstractOXException {
         
         int[] folders = search.getFolders();
         int contextId = session.getContextId();
@@ -86,7 +87,7 @@ public class ContactSearchMultiplexer {
                 if(discoveryService.hasSpecificContactInterface(folderId, contextId)) {
                     ContactInterface contactInterface = discoveryService.newContactInterface(folderId, session);
                     search.setFolders(folderId);
-                    SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(search, orderBy, orderDir, cols);
+                    SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(search, orderBy, order, cols);
                     searchIterators.add(iterator);
                 } else {
                     foldersForDefaultSearch.add(I(folderId));
@@ -95,7 +96,7 @@ public class ContactSearchMultiplexer {
             if(!foldersForDefaultSearch.isEmpty()) {
                 search.setFolders(foldersForDefaultSearch);
                 ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
-                SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(search, orderBy, orderDir, cols);
+                SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(search, orderBy, order, cols);
                 searchIterators.add(contactsByExtendedSearch);
             }
             
@@ -104,18 +105,18 @@ public class ContactSearchMultiplexer {
             for (ContactInterfaceProviderRegistration registration : registrations) {
                 ContactInterface contactInterface = registration.newContactInterface(session);
                 search.setFolders(registration.getFolderId());
-                SearchIterator<Contact> searchIterator = contactInterface.getContactsByExtendedSearch(search, orderBy, orderDir, cols);
+                SearchIterator<Contact> searchIterator = contactInterface.getContactsByExtendedSearch(search, orderBy, order, cols);
                 searchIterators.add(searchIterator);
             }
             search.clearFolders();
             ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
-            SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(search, orderBy, orderDir, cols);
+            SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(search, orderBy, order, cols);
             searchIterators.add(contactsByExtendedSearch);
         
         }
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
         }
-        return new ContactMergerator(new DefaultContactComparator(orderBy, orderDir), searchIterators);
+        return new ContactMergerator(new DefaultContactComparator(orderBy, order), searchIterators);
     }
 }
