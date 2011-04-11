@@ -1233,7 +1233,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
-    public final PreparedStatement getSearchQuery(final String select, final int uid, final int groups[], final UserConfiguration uc, final int orderBy, final String orderDir, final AppointmentSearchObject searchobject, final Context c, final Connection readcon, final CalendarFolderObject cfo, boolean isShared) throws SQLException, OXException {
+    public final PreparedStatement getSearchQuery(final String select, final int uid, final int groups[], final UserConfiguration uc, final int orderBy, final Order orderDir, final AppointmentSearchObject searchobject, final Context c, final Connection readcon, final CalendarFolderObject cfo, boolean isShared) throws SQLException, OXException {
         final StringBuilder sb = new StringBuilder(128);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
@@ -1349,10 +1349,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             orderby = collection.getFieldName(Appointment.START_DATE);
         }
         sb.append(orderby);
-        if (orderDir != null) {
-            sb.append(' ');
-            sb.append(orderDir);
-        }
+        sb.append(DBUtils.forSQLCommand(orderDir));
 
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         int x = 1;

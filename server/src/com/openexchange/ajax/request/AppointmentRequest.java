@@ -1091,10 +1091,11 @@ public class AppointmentRequest extends CalendarRequest {
             orderBy = CalendarObject.START_DATE;
         }
 
-        String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
-        if (orderDir == null) {
-            orderDir = "asc";
+        String orderDirString = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        if (orderDirString == null) {
+            orderDirString = "asc";
         }
+        final Order orderDir = OrderFields.parse(orderDirString);
 
         final int limit = DataParser.checkInt(jsonObj, "limit");
 
