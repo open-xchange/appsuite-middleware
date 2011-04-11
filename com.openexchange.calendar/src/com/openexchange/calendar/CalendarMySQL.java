@@ -51,6 +51,7 @@ package com.openexchange.calendar;
 
 import static com.openexchange.groupware.EnumComponent.APPOINTMENT;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
+import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -357,11 +358,11 @@ public class CalendarMySQL implements CalendarSqlImp {
         super();
     }
 
-    public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final String orderDir) throws OXException, SQLException {
+    public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final Order orderDir) throws OXException, SQLException {
         return getAllAppointmentsForUser(c, uid, groups, uc, d1, d2, select, readcon, since, orderBy, orderDir, false);
     }
 
-    public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final String orderDir, final boolean showPrivates) throws OXException, SQLException {
+    public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final Order orderDir, final boolean showPrivates) throws OXException, SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
@@ -380,13 +381,13 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         collection.getVisibleFolderSQLInString(sb, uid, groups, c, uc, readcon);
 
-        if (collection.getFieldName(orderBy) == null || orderDir == null) {
+        if (collection.getFieldName(orderBy) == null || Order.NO_ORDER.equals(orderDir)) {
             sb.append(ORDER_BY);
         } else {
             sb.append(PDM_ORDER_BY);
             sb.append(collection.getFieldName(orderBy));
             sb.append(' ');
-            sb.append(orderDir);
+            sb.append(forSQLCommand(orderDir));
         }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         int a = 1;
@@ -729,7 +730,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
-    public final PreparedStatement getPublicFolderRangeSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final String orderDir) throws SQLException {
+    public final PreparedStatement getPublicFolderRangeSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir) throws SQLException {
         final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
         sb.append(" pd ");
@@ -743,13 +744,13 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(PD_CREATED_FROM_IS);
             sb.append(uid);
         }
-        if (collection.getFieldName(orderBy) == null || orderDir == null) {
+        if (collection.getFieldName(orderBy) == null || Order.NO_ORDER.equals(orderDir)) {
             sb.append(ORDER_BY);
         } else {
             sb.append(PDM_ORDER_BY);
             sb.append(collection.getFieldName(orderBy));
             sb.append(' ');
-            sb.append(orderDir);
+            sb.append(forSQLCommand(orderDir));
         }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -757,7 +758,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
-    public final PreparedStatement getPrivateFolderRangeSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final String orderDir) throws SQLException {
+    public final PreparedStatement getPrivateFolderRangeSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
@@ -775,13 +776,13 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(PD_CREATED_FROM_IS);
             sb.append(uid);
         }
-        if (collection.getFieldName(orderBy) == null || orderDir == null) {
+        if (collection.getFieldName(orderBy) == null || Order.NO_ORDER.equals(orderDir)) {
             sb.append(ORDER_BY);
         } else {
             sb.append(PDM_ORDER_BY);
             sb.append(collection.getFieldName(orderBy));
             sb.append(' ');
-            sb.append(orderDir);
+            sb.append(forSQLCommand(orderDir));
         }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -789,11 +790,11 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
-    public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final String orderDir) throws SQLException {
+    public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir) throws SQLException {
         return getSharedFolderRangeSQL(c, uid, shared_folder_owner, groups, fid, d1, d2, select, readall, readcon, orderBy, orderDir, false);
     }
 
-    public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final String orderDir, final boolean includePrivateAppointments) throws SQLException {
+    public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir, final boolean includePrivateAppointments) throws SQLException {
         final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
@@ -813,13 +814,13 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(PD_CREATED_FROM_IS);
             sb.append(uid);
         }
-        if (collection.getFieldName(orderBy) == null || orderDir == null) {
+        if (collection.getFieldName(orderBy) == null || Order.NO_ORDER.equals(orderDir)) {
             sb.append(ORDER_BY);
         } else {
             sb.append(PDM_ORDER_BY);
             sb.append(collection.getFieldName(orderBy));
             sb.append(' ');
-            sb.append(orderDir);
+            sb.append(forSQLCommand(orderDir));
         }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));

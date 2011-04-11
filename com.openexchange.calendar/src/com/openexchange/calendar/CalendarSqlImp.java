@@ -77,7 +77,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public interface CalendarSqlImp {
 
-    PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, String select, Connection readcon, Date since, int orderBy, String orderDir) throws OXException, SQLException;
+    PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, String select, Connection readcon, Date since, int orderBy, Order orderDir) throws OXException, SQLException;
 
     PreparedStatement getConflicts(Context c, Date d1, Date d2, Date d3, Date d4, Connection readcon, String member_sql_in, boolean free_busy_select) throws SQLException;
 
@@ -95,11 +95,11 @@ public interface CalendarSqlImp {
 
     boolean[] getUserActiveAppointmentsRangeSQL(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, Connection readcon) throws SQLException, OXException;
 
-    PreparedStatement getPublicFolderRangeSQL(Context c, int uid, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection con, int orderBy, String orderDir) throws SQLException;
+    PreparedStatement getPublicFolderRangeSQL(Context c, int uid, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection con, int orderBy, Order orderDir) throws SQLException;
 
     String getObjectsByidSQL(int oids[][], int cid, String select);
 
-    PreparedStatement getPrivateFolderRangeSQL(Context c, int uid, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException;
+    PreparedStatement getPrivateFolderRangeSQL(Context c, int uid, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, Order orderDir) throws SQLException;
 
     PreparedStatement getPrivateFolderModifiedSinceSQL(Context c, int uid, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2) throws SQLException;
 
@@ -143,9 +143,9 @@ public interface CalendarSqlImp {
 
     boolean checkIfFolderIsEmpty(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
 
-    PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException;
+    PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, Order orderDir) throws SQLException;
 
-    PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir, boolean includePrivateAppointments) throws SQLException;
+    PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, Order orderDir, boolean includePrivateAppointments) throws SQLException;
     
     PreparedStatement getSharedFolderModifiedSinceSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2, boolean includePrivateFlag) throws SQLException;
 
