@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.jsieve.exceptions;
+package com.openexchange.jsieve.export.exceptions;
 
 
 public class OXSieveHandlerInvalidCredentialsException extends Exception {
