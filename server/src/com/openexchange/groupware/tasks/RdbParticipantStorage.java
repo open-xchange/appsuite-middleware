@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -64,10 +63,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -143,7 +140,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(taskParticipant);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -181,7 +178,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -215,7 +212,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -245,7 +242,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -271,7 +268,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -318,7 +315,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(participant);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -348,7 +345,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -391,7 +388,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncatedE(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -500,7 +497,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }

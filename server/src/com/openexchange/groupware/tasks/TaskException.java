@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -146,6 +146,41 @@ public class TaskException extends AbstractOXException {
      * Error codes for task exceptions.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
     public enum Code {
         /**
          * Error while inserting task: %s.
@@ -168,9 +203,9 @@ public class TaskException extends AbstractOXException {
         UNIMPLEMENTED("This method is not implemented.",
             Category.CODE_ERROR, Detail.OTHER, 4),
         /**
-         * SQL Problem: "%s".
+         * SQL Problem.
          */
-        SQL_ERROR("SQL Problem: \"%s\".", Category.CODE_ERROR,
+        SQL_ERROR("SQL Problem.", Category.CODE_ERROR,
             Detail.OTHER, 5),
         /**
          * Folder %1$s (%2$d) is not a task folder.
@@ -399,7 +434,15 @@ public class TaskException extends AbstractOXException {
          */
         COSTS_OFF_LIMIT("The entered value for costs is not within the allowed "
             + "range. Please use a value from -130000.00 to 130000.00.",
-            Category.USER_INPUT, Detail.TRUNCATED, 50);
+            Category.USER_INPUT, Detail.TRUNCATED, 50),
+        /**
+         * In order to accomplish the search, %1$d or more characters are required.
+         */
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.USER_INPUT, Detail.OTHER, 51),
+        /**
+         * 
+         */
+        GROUP_IS_EMPTY("Group %1$d is empty. You can't add an empty group to a task.", Category.USER_INPUT, Detail.OTHER, 52);
 
         /**
          * Message of the exception.

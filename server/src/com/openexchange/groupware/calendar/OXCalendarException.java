@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,9 +59,6 @@ import com.openexchange.groupware.EnumComponent;
  */
 public class OXCalendarException extends OXException {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -33608409653330247L;
 
     /**
@@ -82,10 +79,6 @@ public class OXCalendarException extends OXException {
         super.setMessageArgs(messageArgs);
     }
 
-    /**
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-     *
-     */
     public enum Code {
         CFO_NOT_INITIALIZIED("FATAL: CalendarFolderObject not initialized!", 1, AbstractOXException.Category.CODE_ERROR),
         NOT_YET_SUPPORTED("Not yet supported!", 2, AbstractOXException.Category.CODE_ERROR),
@@ -108,7 +101,7 @@ public class OXCalendarException extends OXException {
         UPDATE_USER_SHARED_MISMATCH("Folder type \"SHARED\" is not allowed in this situation.", 10, AbstractOXException.Category.USER_INPUT),
         RECURRING_UNEXPECTED_DELETE_STATE("Unexpected state for deleting a virtual appointment (exception). uid:oid:position %d:%d:%d", 11, AbstractOXException.Category.INTERNAL_ERROR),
         ERROR_SESSIONOBJECT_IS_NULL("SessionObject not initialized", 12, AbstractOXException.Category.CODE_ERROR),
-        NO_PERMISSION("You do not have the necessary permissions", 13, AbstractOXException.Category.PERMISSION),
+        NO_PERMISSION("You do not have the necessary permissions for appointments in folder %1$d.", 13, AbstractOXException.Category.PERMISSION),
         INSERT_WITH_OBJECT_ID("Insert expected but the object id is already given. Aborting action...", 14, AbstractOXException.Category.CODE_ERROR),
         UPDATE_WITHOUT_OBJECT_ID("Update expected but no object id is given. Aborting action...", 15, AbstractOXException.Category.CODE_ERROR),
         FOLDER_DELETE_INVALID_REQUEST("Invalid request. Folder is shared!", 16, AbstractOXException.Category.CODE_ERROR),
@@ -118,7 +111,7 @@ public class OXCalendarException extends OXException {
         END_DATE_BEFORE_START_DATE("End date is before start date", 20, AbstractOXException.Category.USER_INPUT),
         UNSUPPORTED_LABEL("ERROR: Unsupported label value %d", 21, AbstractOXException.Category.USER_INPUT),
         PRIVATE_FLAG_IN_PRIVATE_FOLDER("ERROR: Private flag is only allowed inside of a private folder.", 22, AbstractOXException.Category.USER_INPUT),
-        PRIVATE_FLAG_AND_PARTICIPANTS("ERROR: Private flag and participants are not supported.", 23, AbstractOXException.Category.USER_INPUT),
+        PRIVATE_FLAG_AND_PARTICIPANTS("Error: Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional participants or remove the \"Private\" mark.", 23, AbstractOXException.Category.USER_INPUT),
         UNSUPPORTED_PRIVATE_FLAG("ERROR: Unsupported private flag value %d", 24, AbstractOXException.Category.USER_INPUT),
         UNSUPPORTED_SHOWN_AS("ERROR:: Unsupported \"shown as\"  value %d", 25, AbstractOXException.Category.USER_INPUT),
         MANDATORY_FIELD_START_DATE("Required  value \"Start Date\" was not supplied.", 26, AbstractOXException.Category.USER_INPUT),
@@ -160,7 +153,7 @@ public class OXCalendarException extends OXException {
         SEARCH_ITERATOR_NULL("SearchIterator NULL", 53, AbstractOXException.Category.CODE_ERROR),
         NON_CALENDAR_FOLDER("Folder is not of type Calendar", 54, AbstractOXException.Category.USER_INPUT),
         RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL("The required value \"interval\" is missing or wrong", 55, AbstractOXException.Category.USER_INPUT),
-        RECURRING_MISSING_OR_WRONG_VALUE_DAYS("The required  value \"days\" is missing or wrong", 56, AbstractOXException.Category.USER_INPUT),
+        RECURRING_MISSING_OR_WRONG_VALUE_DAYS("The required  value \"days\" is missing or wrong : %d", 56, AbstractOXException.Category.USER_INPUT),
         PRIVATE_MOVE_TO_PUBLIC("Moving appointment to a public folder flaged as private is not allowed!", 57, AbstractOXException.Category.USER_INPUT),
         LOAD_PERMISSION_EXCEPTION_1("You do not have the appropriate permissions to modify this object.", 58, AbstractOXException.Category.PERMISSION),
         LOAD_PERMISSION_EXCEPTION_2("Got the wrong folder identification. You do not have the appropriate permissions to modify this object.", 59, AbstractOXException.Category.PERMISSION),
@@ -263,7 +256,36 @@ public class OXCalendarException extends OXException {
         /**
          * Move of recurring appointments is not supported
          */
-        RECURRING_FOLDER_MOVE("Move of a recurring appointment to another folder is not supported.", 93, Category.USER_INPUT);
+        RECURRING_FOLDER_MOVE("Move of a recurring appointment to another folder is not supported.", 93, Category.USER_INPUT),
+        /**
+         * In order to accomplish the search, %1$d or more characters are required.
+         */
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", 94, Category.USER_INPUT),
+        /**
+         * Redundant information.
+         */
+        REDUNDANT_UNTIL_OCCURRENCES("Redundant information for Until and occurrences.", 95, Category.USER_INPUT),
+        /**
+         * Unnecessary recurrence Information for Type "no".
+         */
+        UNNECESSARY_RECURRENCE_INFORMATION_NO("Unnecessary recurrence information for recurrence type \"no recurrence\".", 96, Category.USER_INPUT),
+        /**
+         * Unnecessary recurrence information.
+         */
+        UNNECESSARY_RECURRENCE_INFORMATION("Unnecessary recurrence information (%1$s) for type %2$s", 97, Category.USER_INPUT),
+        UNABLE_TO_CALCULATE_POSITION("Unable to calculate given position. Seems to be a delete exception or outside range", 98, Category.USER_INPUT),
+        CHANGE_EXCEPTION_TO_RECURRENCE("Changing an exception into a series is not supported.", 99, Category.USER_INPUT),
+        UID_ALREDY_EXISTS("Can not insert appointment with this uid. Uid already exists.", 100, Category.USER_INPUT),
+        /** SQL Problem. */
+        SQL_ERROR("SQL Problem.", 101, Category.CODE_ERROR),
+        /** Wrong number of rows changed. Expected %1$d but was %2$d. */
+        WRONG_ROW_COUNT("Wrong number of rows changed. Expected %1$d but was %2$d.", 102, Category.CODE_ERROR),
+        /**
+         * Unable to find a participant for a specified object.
+         */
+        COULD_NOT_FIND_PARTICIPANT("Could not find participant for this object.", 103, Category.USER_INPUT),
+        /** Was not able to calculate next upcoming reminder for series appointment %2$d in context %1$d. */
+        NEXT_REMINDER_FAILED("Was not able to calculate next upcoming reminder for series appointment %2$d in context %1$d.", 104, Category.CODE_ERROR);
 
         /**
          * Message of the exception.
@@ -286,9 +308,7 @@ public class OXCalendarException extends OXException {
          * @param category category.
          * @param detailNumber detail number.
          */
-        private Code(final String message,
-                final int detailNumber,
-                final Category category)  {
+        private Code(final String message, final int detailNumber, final Category category) {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;
@@ -305,10 +325,5 @@ public class OXCalendarException extends OXException {
         public String getMessage() {
             return message;
         }
-
-
     }
-
-
-
 }

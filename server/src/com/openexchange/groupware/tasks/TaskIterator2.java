@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,20 +49,24 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-
-import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
@@ -78,66 +82,32 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class TaskIterator2 implements TaskIterator, Runnable {
 
-    /**
-     * Context.
-     */
     private final Context ctx;
 
-    /**
-     * unique identifier of the user for reminders.
-     */
     private final int userId;
 
     private final String sql;
 
     private final StatementSetter setter;
 
-    /**
-     * Folder through that the objects are requested.
-     */
     private final int folderId;
 
-    /**
-     * Wanted fields of the task.
-     */
     private final int[] taskAttributes;
 
-    /**
-     * Additional fields that cannot be read from the {@link ResultSet}.
-     */
     private final int[] additionalAttributes;
 
-    /**
-     * ACTIVE or DELETED.
-     */
     private final StorageType type;
 
-    /**
-     * Pre read tasks.
-     */
     private final PreRead<Task> preread = new PreRead<Task>();
 
-    /**
-     * Finished read tasks.
-     */
     private final Queue<Task> ready = new LinkedList<Task>();
 
     private TaskException exc;
 
-    /**
-     * Field for the thread reading the {@link ResultSet}.
-     */
     private final Thread runner;
 
-    /**
-     * For reading participants.
-     */
-    private final ParticipantStorage partStor = ParticipantStorage
-        .getInstance();
+    private final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
-    /**
-     * Warnings
-     */
     private final List<AbstractOXException> warnings;
 
     /**
@@ -163,11 +133,10 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         final List<Integer> tmp1 = new ArrayList<Integer>(attributes.length);
         final List<Integer> tmp2 = new ArrayList<Integer>(attributes.length);
         for (final int column : attributes) {
-            if (null == Mapping.getMapping(column)
-                && Task.FOLDER_ID != column) {
-                tmp2.add(Integer.valueOf(column));
+            if (null == Mapping.getMapping(column) && Task.FOLDER_ID != column) {
+                tmp2.add(I(column));
             } else {
-                tmp1.add(Integer.valueOf(column));
+                tmp1.add(I(column));
             }
         }
         this.taskAttributes = Collections.toArray(tmp1);
@@ -181,46 +150,33 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     private void modifyAdditionalAttributes(final List<Integer> additional) {
         // If participants are requested we also add users automatically. Users
         // are calculated from participants.
-        if (additional.contains(Integer.valueOf(Task.USERS))) {
-            if (!additional.contains(Integer.valueOf(Task.PARTICIPANTS))) {
-                additional.add(Integer.valueOf(Task.PARTICIPANTS));
+        if (additional.contains(I(Task.USERS))) {
+            if (!additional.contains(I(Task.PARTICIPANTS))) {
+                additional.add(I(Task.PARTICIPANTS));
             }
             // Not removed users will give SearchIteratorException in code
             // below.
-            additional.remove(Integer.valueOf(Task.USERS));
+            additional.remove(I(Task.USERS));
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void close() throws SearchIteratorException {
         try {
             runner.join();
         } catch (final InterruptedException e) {
-            throw new SearchIteratorException(new TaskException(TaskException
-                .Code.THREAD_ISSUE, e));
+            throw new SearchIteratorException(new TaskException(Code.THREAD_ISSUE, e));
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean hasNext() {
         return !ready.isEmpty() || preread.hasNext() || null != exc;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean hasSize() {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Task next() throws SearchIteratorException, OXException {
+    public Task next() throws SearchIteratorException {
         if (ready.isEmpty() && !preread.hasNext()) {
             throw new SearchIteratorException(exc);
         }
@@ -230,6 +186,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 tasks.addAll(preread.take(additionalAttributes.length > 0));
                 for (final int attribute : additionalAttributes) {
                     switch (attribute) {
+                    case Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+                        addLastModifiedOfNewestAttachment(tasks);
+                        break;
                     case Task.PARTICIPANTS:
                         try {
                             readParticipants(tasks);
@@ -259,23 +218,14 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         return ready.poll();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void addWarning(final AbstractOXException warning) {
         warnings.add(warning);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public AbstractOXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
@@ -290,11 +240,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         for (int i = 0; i < tasks.size(); i++) {
             ids[i] = tasks.get(i).getObjectID();
         }
-        final Map<Integer, Set<TaskParticipant>> parts = partStor
-            .selectParticipants(ctx, ids, type);
+        final Map<Integer, Set<TaskParticipant>> parts = partStor.selectParticipants(ctx, ids, type);
         for (final Task task : tasks) {
-            final Set<TaskParticipant> participants = parts.get(Integer
-                .valueOf(task.getObjectID()));
+            final Set<TaskParticipant> participants = parts.get(I(task.getObjectID()));
             if (null != participants) {
                 task.setParticipants(TaskLogic.createParticipants(participants));
                 task.setUsers(TaskLogic.createUserParticipants(participants));
@@ -302,16 +250,29 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    private void addLastModifiedOfNewestAttachment(List<Task> tasks) throws SearchIteratorException {
+        final int[] ids = new int[tasks.size()];
+        for (int i = 0; i < tasks.size(); i++) {
+            ids[i] = tasks.get(i).getObjectID();
+        }
+        AttachmentBase attachmentBase = Attachments.getInstance();
+        try {
+            Map<Integer, Date> dates = attachmentBase.getNewestCreationDates(ctx, Types.TASK, ids);
+            for (Task task : tasks) {
+                Date newestCreationDate = dates.get(I(task.getObjectID()));
+                if (null != newestCreationDate) {
+                    task.setLastModifiedOfNewestAttachment(newestCreationDate);
+                }
+            }
+        } catch (AttachmentException e) {
+            throw new SearchIteratorException(e);
+        }
+    }
+
     public int size() {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void run() {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -338,14 +299,14 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 }
                 preread.offer(task);
             }
-            preread.finished();
         } catch (final SQLException e) {
-            exc = new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            exc = new TaskException(Code.SQL_ERROR, e);
         } catch (final DBPoolingException e) {
             exc = new TaskException(Code.NO_CONNECTION, e);
         } catch (Throwable t) {
             exc = new TaskException(Code.THREAD_ISSUE, t);
         } finally {
+            preread.finished();
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }

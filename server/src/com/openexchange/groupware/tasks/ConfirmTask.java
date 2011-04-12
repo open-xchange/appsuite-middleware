@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,13 +49,12 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
@@ -151,7 +150,7 @@ public final class ConfirmTask {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
@@ -159,23 +158,26 @@ public final class ConfirmTask {
     }
 
     void sentEvent(final Session session) throws TaskException {
-		try {
-			final EventClient eventClient = new EventClient(session);
-			final int confirm = changedParticipant.getConfirm();
-			if (CalendarObject.ACCEPT == confirm) {
-				eventClient.accept(changedTask);
-			} else if (CalendarObject.DECLINE == confirm) {
-				eventClient.declined(changedTask);
-			} else if (CalendarObject.TENTATIVE == confirm) {
-				eventClient.tentative(changedTask);
-			}
-		} catch (final EventException e) {
-			throw new TaskException(Code.EVENT, e);
-		} catch (final OXException e) {
-			throw new TaskException(e);
-		} catch (final ContextException e) {
-			throw new TaskException(e);
-		}
+        try {
+            final EventClient eventClient = new EventClient(session);
+            switch (changedParticipant.getConfirm()) {
+            case CalendarObject.ACCEPT:
+                eventClient.accept(changedTask);
+                break;
+            case CalendarObject.DECLINE:
+                eventClient.declined(changedTask);
+                break;
+            case CalendarObject.TENTATIVE:
+                eventClient.tentative(changedTask);
+                break;
+            }
+        } catch (final EventException e) {
+            throw new TaskException(Code.EVENT, e);
+        } catch (final OXException e) {
+            throw new TaskException(e);
+        } catch (final ContextException e) {
+            throw new TaskException(e);
+        }
     }
 
     /**
@@ -205,8 +207,10 @@ public final class ConfirmTask {
      */
     private InternalParticipant getOrigParticipant() throws TaskException {
         if (null == origParticipant) {
-            origParticipant = partStor.selectInternal(ctx, taskId, userId,
-                StorageType.ACTIVE);
+            origParticipant = partStor.selectInternal(ctx, taskId, userId, StorageType.ACTIVE);
+            if (null == origParticipant) {
+                throw new TaskException(Code.PARTICIPANT_NOT_FOUND, I(userId), I(taskId));
+            }
         }
         return origParticipant;
     }
