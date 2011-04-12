@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -75,10 +76,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -432,6 +431,37 @@ public class AdminCache {
         // give database some time to react (in seconds)
         DriverManager.setLoginTimeout(120);
         return DriverManager.getConnection(url, user, password);
+    }
+
+    private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
+
+    public Connection getSimpleSQLConnectionWithoutTimeout(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
+        Class.forName(driver);
+        DriverManager.setLoginTimeout(120);
+        final int paramStart = url.indexOf('?');
+        final String newUrl;
+        final Properties props = new Properties();
+        props.put("user", user);
+        props.put("password", password);
+        if (-1 != paramStart) {
+            final Matcher matcher = pattern.matcher(url);
+            newUrl = url.substring(0, paramStart);
+            while (matcher.find()) {
+                final String name = matcher.group(1);
+                final String value = matcher.group(2);
+                if (name != null && name.length() > 0 && value != null && value.length() > 0 && !name.toLowerCase().endsWith("timeout")) {
+                    try {
+                        props.put(name, URLDecoder.decode(value, "UTF-8"));
+                    } catch (final UnsupportedEncodingException e) {
+                        // Should not happen for UTF-8.
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            }
+        } else {
+            newUrl = url;
+        }
+        return DriverManager.getConnection(newUrl, props);
     }
 
     public void closeSimpleConnection(Connection con) {
