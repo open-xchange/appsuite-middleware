@@ -96,7 +96,7 @@ public class OXUtilMySQLStorageCommon {
             sql_pass = db.getPassword();
         }
         try {
-            con = cache.getSimpleSqlConnection(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
+            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
         } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
@@ -252,7 +252,7 @@ public class OXUtilMySQLStorageCommon {
     public void deleteDatabase(Database db) throws StorageException {
         final Connection con;
         try {
-            con = cache.getSimpleSqlConnection(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
+            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
         } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
