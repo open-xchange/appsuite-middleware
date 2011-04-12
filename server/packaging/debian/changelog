@@ -1,3 +1,9 @@
+open-xchange-server (6.18.0.0-26) unstable; urgency=low
+
+  * build for public ptf 2011-04-13
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 12 Apr 2011 12:46:06 +0000
+
 open-xchange-server (6.18.0.0-25) unstable; urgency=low
 
   * build for PTF 201103271000002

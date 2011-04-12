@@ -1,3 +1,9 @@
+open-xchange-easylogin (6.18.0.0-16) unstable; urgency=low
+
+  * build for public ptf 2011-04-13
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 12 Apr 2011 12:47:03 +0000
+
 open-xchange-easylogin (6.18.0.0-15) unstable; urgency=low
 
   * second build for public ptf 2010-11-26

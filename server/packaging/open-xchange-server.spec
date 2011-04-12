@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 25
+%define		ox_release 26
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Apr 12 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18911: Whitelisting plain text mails after converting them for HTML display.
+* Fri Apr 08 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18912: Using enumeration to pass order directory for data everywhere. Not showing failing SQL statements to the end user.
 * Thu Mar 31 2011 - marcus.klein@open-xchange.com
  - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
 * Wed Mar 02 2011 - thorben.betten@open-xchange.co
