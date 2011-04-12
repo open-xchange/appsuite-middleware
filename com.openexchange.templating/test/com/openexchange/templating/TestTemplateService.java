@@ -124,7 +124,7 @@ public class TestTemplateService extends TestCase {
     }
 
     public void testLoadTemplate() throws Exception {
-        OXTemplate template = templateService.loadTemplate("test-template");
+        OXTemplate template = templateService.loadTemplate("test-template.tmpl");
         assertNotNull("OX-Template should not be null", template);
     }
 
@@ -133,12 +133,12 @@ public class TestTemplateService extends TestCase {
         oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
 
         SimBuilder infostoreBuilder = new SimBuilder();
-        infostoreBuilder.expectCall("findTemplateInFolder", session, privateTemplateFolder, "test-template").andReturn("Template Content");
+        infostoreBuilder.expectCall("findTemplateInFolder", session, privateTemplateFolder, "test-template.tmpl").andReturn("Template Content");
 
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
 
-        OXTemplate template = templateService.loadTemplate("test-template", "default-template", session);
+        OXTemplate template = templateService.loadTemplate("test-template.tmpl", "default-template", session);
 
         assertNotNull(template);
         StringWriter writer = new StringWriter();
@@ -155,12 +155,12 @@ public class TestTemplateService extends TestCase {
         oxfolderHelperBuilder.expectCall("getGlobalTemplateFolder", session).andReturn(globalTemplateFolder);
 
         SimBuilder infostoreBuilder = new SimBuilder();
-        infostoreBuilder.expectCall("findTemplateInFolder", session, globalTemplateFolder, "test-template").andReturn("Template Content");
+        infostoreBuilder.expectCall("findTemplateInFolder", session, globalTemplateFolder, "test-template.tmpl").andReturn("Template Content");
 
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
 
-        OXTemplate template = templateService.loadTemplate("test-template", "default-template", session);
+        OXTemplate template = templateService.loadTemplate("test-template.tmpl", "default-template", session);
 
         assertNotNull(template);
         StringWriter writer = new StringWriter();
@@ -183,7 +183,7 @@ public class TestTemplateService extends TestCase {
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
 
-        OXTemplate template = templateService.loadTemplate("new-template", "test-template", session);
+        OXTemplate template = templateService.loadTemplate("new-template", "test-template.tmpl", session);
 
         assertNotNull(template);
         StringWriter writer = new StringWriter();
@@ -207,7 +207,7 @@ public class TestTemplateService extends TestCase {
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
 
-        OXTemplate template = templateService.loadTemplate("new-template", "test-template", session);
+        OXTemplate template = templateService.loadTemplate("new-template", "test-template.tmpl", session);
 
         assertNotNull(template);
         StringWriter writer = new StringWriter();
@@ -228,7 +228,7 @@ public class TestTemplateService extends TestCase {
             }
         };
 
-        templateService.loadTemplate("", "test-template", session);
+        templateService.loadTemplate("", "test-template.tmpl", session);
         assertTrue(called[0]);
 
     }
@@ -245,7 +245,7 @@ public class TestTemplateService extends TestCase {
             }
         };
 
-        templateService.loadTemplate("user-template", "test-template", session);
+        templateService.loadTemplate("user-template", "test-template.tmpl", session);
         assertTrue(called[0]);
 
     }
@@ -261,7 +261,7 @@ public class TestTemplateService extends TestCase {
             }
         };
 
-        templateService.loadTemplate("user-template", "test-template", sessionWithoutInfostore);
+        templateService.loadTemplate("user-template", "test-template.tmpl", sessionWithoutInfostore);
         assertTrue(called[0]);
 
     }
@@ -269,7 +269,7 @@ public class TestTemplateService extends TestCase {
     public void testListBasicTemplates() throws TemplateException {
         List<String> names = templateService.getBasicTemplateNames();
         assertEquals(1, names.size());
-        assertEquals("test-template", names.get(0));
+        assertEquals("test-template.tmpl", names.get(0));
     }
 
     public void testListTemplates() throws TemplateException {
@@ -291,7 +291,7 @@ public class TestTemplateService extends TestCase {
         assertTrue(templateNames.contains("global2"));
         assertTrue(templateNames.contains("private1"));
         assertTrue(templateNames.contains("private2"));
-        assertTrue(templateNames.contains("test-template"));
+        assertTrue(templateNames.contains("test-template.tmpl"));
 
         assertEquals(5, templateNames.size());
 
