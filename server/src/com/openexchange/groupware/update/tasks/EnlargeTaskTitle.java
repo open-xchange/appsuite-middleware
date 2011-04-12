@@ -115,8 +115,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
                 alterTitle(con, SQL.TASK_TABLES.get(type));
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e,
-                e.getMessage());
+            throw new TaskException(TaskException.Code.SQL_ERROR, e);
         } finally {
             Database.back(contextId, true, con);
         }

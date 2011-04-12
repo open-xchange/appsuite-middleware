@@ -142,7 +142,7 @@ public final class ConfirmTask {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(ctx, con);

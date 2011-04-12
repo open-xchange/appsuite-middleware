@@ -300,7 +300,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 preread.offer(task);
             }
         } catch (final SQLException e) {
-            exc = new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            exc = new TaskException(Code.SQL_ERROR, e);
         } catch (final DBPoolingException e) {
             exc = new TaskException(Code.NO_CONNECTION, e);
         } catch (Throwable t) {

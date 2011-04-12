@@ -16,7 +16,7 @@
 
 * 2011-04-08 - marcus.klein@open-xchange.com, martin.herfurth@open-xchange.com
 
- - Bugfix #18912: Using enumeration to pass order directory for data everywhere.
+ - Bugfix #18912: Using enumeration to pass order directory for data everywhere. Not showing failing SQL statements to the end user.
 
 * 2011-04-07 - marcus.klein@open-xchange.com
 

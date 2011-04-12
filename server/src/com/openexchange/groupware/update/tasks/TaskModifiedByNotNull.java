@@ -124,8 +124,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
                 alterModifiedBy(con, del_task_table);
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e,
-                e.getMessage());
+            throw new TaskException(TaskException.Code.SQL_ERROR, e);
         } finally {
             Database.back(contextId, true, con);
         }

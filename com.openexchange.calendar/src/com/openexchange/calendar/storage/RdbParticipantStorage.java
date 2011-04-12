@@ -113,7 +113,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
 //        } catch (final DataTruncation e) {
 //            throw parseTruncatedE(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e, e.getMessage());
+            throw new OXCalendarException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -146,7 +146,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(participant);
             }
         } catch (SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e, e.getMessage());
+            throw new OXCalendarException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -180,7 +180,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 }
             }
         } catch (SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e, e.getMessage());
+            throw new OXCalendarException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(stmt);
         }

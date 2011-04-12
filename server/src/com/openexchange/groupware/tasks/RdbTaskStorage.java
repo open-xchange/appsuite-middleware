@@ -158,7 +158,7 @@ public class RdbTaskStorage extends TaskStorage {
                 throw new TaskException(Code.MODIFIED);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -302,7 +302,7 @@ public class RdbTaskStorage extends TaskStorage {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             DBPool.closeReaderSilent(ctx, con);
         }
@@ -346,7 +346,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, task, type);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -377,7 +377,7 @@ public class RdbTaskStorage extends TaskStorage {
                 exists = false;
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -412,7 +412,7 @@ public class RdbTaskStorage extends TaskStorage {
                 task.setObjectID(taskId);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -465,7 +465,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, task, type);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -557,7 +557,7 @@ public class RdbTaskStorage extends TaskStorage {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         }
         return retval;
     }

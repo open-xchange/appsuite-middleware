@@ -75,7 +75,7 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     ID_GENERATION_FAILED(ID_GENERATION_FAILED_MSG, Category.CODE_ERROR, 107),
     /** Unable to scale image down. */
     IMAGE_DOWNSCALE_FAILED(IMAGE_DOWNSCALE_FAILED_MSG, Category.CODE_ERROR, 108),
-    /** Invalid SQL Query: %s */
+    /** Invalid SQL Query. */
     SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 109),
     /** Invalid SQL Query: %s */
     AGGREGATING_CONTACTS_NOT_ENABLED(FEATURE_DISABLED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 110),

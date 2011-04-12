@@ -140,7 +140,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(taskParticipant);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -178,7 +178,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -212,7 +212,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -242,7 +242,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -268,7 +268,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -315,7 +315,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(participant);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -345,7 +345,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -388,7 +388,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncatedE(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -497,7 +497,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }

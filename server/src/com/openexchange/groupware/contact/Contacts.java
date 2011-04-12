@@ -472,7 +472,7 @@ public final class Contacts {
             throw Contacts.getTruncation(writecon, se, "prg_contacts", co);
         } catch (final SQLException se) {
             rollback(writecon);
-            throw ContactExceptionCodes.SQL_PROBLEM.create(se, getStatement(ps));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(se);
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -649,7 +649,7 @@ public final class Contacts {
                         throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(I(ctx.getContextId()), I(co.getObjectID()));
                     }
                 } catch (final SQLException e) {
-                    throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                    throw ContactExceptionCodes.SQL_PROBLEM.create(e);
                 } finally {
                     closeSQLStuff(rs, stmt);
                 }
@@ -919,7 +919,7 @@ public final class Contacts {
                         }
                     }
                 } catch (final SQLException e) {
-                    throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                    throw ContactExceptionCodes.SQL_PROBLEM.create(e);
                 } finally {
                     closeSQLStuff(rs, stmt);
                 }
@@ -1190,7 +1190,7 @@ public final class Contacts {
                 throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create( I(objectId), I(ctx.getContextId())));
             }
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -1216,7 +1216,7 @@ public final class Contacts {
                 contacts.put(contact.getInternalUserId(), contact);
             }
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -1245,7 +1245,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(del));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(del);
         }
@@ -1318,7 +1318,7 @@ public final class Contacts {
             r = new DistributionListEntryObject[cnt];
             System.arraycopy(dleos, 0, r, 0, cnt);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -1378,7 +1378,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(ps);
         }
@@ -1529,7 +1529,7 @@ public final class Contacts {
             } catch (final ContextException d) {
                 throw new ContactException(d);
             } catch (final SQLException e) {
-                throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
                 closeSQLStuff(ps);
             }
@@ -1552,7 +1552,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(ps);
         }
@@ -1634,7 +1634,7 @@ public final class Contacts {
             r = new LinkEntryObject[cnt];
             System.arraycopy(leos, 0, r, 0, cnt);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -1664,7 +1664,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(ps);
         }
@@ -1743,7 +1743,7 @@ public final class Contacts {
             } catch (final ContextException d) {
                 throw new ContactException(d);
             } catch (final SQLException e) {
-                throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
                 closeSQLStuff(ps);
             }
@@ -1811,7 +1811,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -1836,7 +1836,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(ps);
         }
@@ -1863,7 +1863,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(ps);
         }
@@ -2029,7 +2029,7 @@ public final class Contacts {
             LOG.error(e1.getMessage(), e1);
             return false;
         } catch (SQLException e) {
-            ContactException e1 = ContactExceptionCodes.SQL_PROBLEM.create(e, "");
+            ContactException e1 = ContactExceptionCodes.SQL_PROBLEM.create(e);
             LOG.error(e1.getMessage(), e1);
             return false;
         }
@@ -2144,7 +2144,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -2274,7 +2274,7 @@ public final class Contacts {
         } catch (final EventException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(so.getContextId()), I(fid));
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(read) + getStatement(del));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } catch (OXException e) {
             throw new ContactException(e);
         } finally {
@@ -2441,7 +2441,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
             closeSQLStuff(del);

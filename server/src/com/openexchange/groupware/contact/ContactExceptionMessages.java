@@ -72,7 +72,7 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String IMAGE_DOWNSCALE_FAILED_MSG = "Unable to scale image down.";
 
-    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
+    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query.";
 
     public static final String NO_CREATE_PERMISSION_MSG = "You do not have permission to create objects in this folder %1$d in context %2$d with user %3$d";
 

@@ -93,7 +93,7 @@ public class RdbTaskSearch extends TaskSearch {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(TaskException.Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }

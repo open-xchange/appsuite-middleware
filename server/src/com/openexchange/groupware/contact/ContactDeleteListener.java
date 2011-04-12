@@ -164,7 +164,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, sql);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }

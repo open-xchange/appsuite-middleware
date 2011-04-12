@@ -97,7 +97,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
                 createTable(con);
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(TaskException.Code.SQL_ERROR, e);
         } finally {
                 Database.backNoTimeout(contextId, true, con);
         }

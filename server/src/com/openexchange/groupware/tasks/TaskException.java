@@ -168,9 +168,9 @@ public class TaskException extends AbstractOXException {
         UNIMPLEMENTED("This method is not implemented.",
             Category.CODE_ERROR, Detail.OTHER, 4),
         /**
-         * SQL Problem: "%s".
+         * SQL Problem.
          */
-        SQL_ERROR("SQL Problem: \"%s\".", Category.CODE_ERROR,
+        SQL_ERROR("SQL Problem.", Category.CODE_ERROR,
             Detail.OTHER, 5),
         /**
          * Folder %1$s (%2$d) is not a task folder.
