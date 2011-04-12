@@ -206,6 +206,8 @@ public final class HTMLProcessing {
                     if (usm.isUseColorQuote()) {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }
+                    // Filter according to white-list when plain text mails contain HTML to harm users.
+                    retval = filterWhitelist(retval);
                 } else {
                     retval = htmlFormat(retval);
                 }
