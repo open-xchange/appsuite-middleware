@@ -288,7 +288,7 @@ public final class ImapIdlePushListener implements PushListener {
             }
         } finally {
             if( null != mailAccess ) {
-                mailAccess.close(true);
+                mailAccess.close(false);
             }
             running.set(false);
         }
