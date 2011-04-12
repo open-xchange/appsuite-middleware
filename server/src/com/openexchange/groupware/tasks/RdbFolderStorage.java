@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -98,7 +98,7 @@ public class RdbFolderStorage extends FolderStorage {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -122,7 +122,7 @@ public class RdbFolderStorage extends FolderStorage {
                 retval.add(new Folder(result.getInt(1), result.getInt(2)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -150,7 +150,7 @@ public class RdbFolderStorage extends FolderStorage {
                 retval = new Folder(result.getInt(1), userId);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -178,7 +178,7 @@ public class RdbFolderStorage extends FolderStorage {
                 retval = new Folder(folderId, result.getInt(1));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -205,7 +205,7 @@ public class RdbFolderStorage extends FolderStorage {
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -234,7 +234,7 @@ public class RdbFolderStorage extends FolderStorage {
                  tasks.add(Integer.valueOf(result.getInt(1)));
              }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -263,7 +263,7 @@ public class RdbFolderStorage extends FolderStorage {
                 tmp.add(folderAndTask);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
         }

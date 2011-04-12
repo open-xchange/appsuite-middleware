@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -113,7 +113,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
 //        } catch (final DataTruncation e) {
 //            throw parseTruncatedE(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e, e.getMessage());
+            throw new OXCalendarException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -146,7 +146,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(participant);
             }
         } catch (SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e, e.getMessage());
+            throw new OXCalendarException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -180,7 +180,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 }
             }
         } catch (SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e, e.getMessage());
+            throw new OXCalendarException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(stmt);
         }

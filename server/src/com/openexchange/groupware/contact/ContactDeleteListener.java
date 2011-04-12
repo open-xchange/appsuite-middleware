@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -164,7 +164,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, sql);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -300,7 +300,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 preread.offer(task);
             }
         } catch (final SQLException e) {
-            exc = new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            exc = new TaskException(Code.SQL_ERROR, e);
         } catch (final DBPoolingException e) {
             exc = new TaskException(Code.NO_CONNECTION, e);
         } catch (Throwable t) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -124,8 +124,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
                 alterModifiedBy(con, del_task_table);
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e,
-                e.getMessage());
+            throw new TaskException(TaskException.Code.SQL_ERROR, e);
         } finally {
             Database.back(contextId, true, con);
         }

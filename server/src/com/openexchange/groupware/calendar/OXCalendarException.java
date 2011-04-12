@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -276,8 +276,8 @@ public class OXCalendarException extends OXException {
         UNABLE_TO_CALCULATE_POSITION("Unable to calculate given position. Seems to be a delete exception or outside range", 98, Category.USER_INPUT),
         CHANGE_EXCEPTION_TO_RECURRENCE("Changing an exception into a series is not supported.", 99, Category.USER_INPUT),
         UID_ALREDY_EXISTS("Can not insert appointment with this uid. Uid already exists.", 100, Category.USER_INPUT),
-        /** SQL Problem: "%s". */
-        SQL_ERROR("SQL Problem: \"%s\".", 101, Category.CODE_ERROR),
+        /** SQL Problem. */
+        SQL_ERROR("SQL Problem.", 101, Category.CODE_ERROR),
         /** Wrong number of rows changed. Expected %1$d but was %2$d. */
         WRONG_ROW_COUNT("Wrong number of rows changed. Expected %1$d but was %2$d.", 102, Category.CODE_ERROR),
         /**

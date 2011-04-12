@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -168,9 +168,9 @@ public class TaskException extends AbstractOXException {
         UNIMPLEMENTED("This method is not implemented.",
             Category.CODE_ERROR, Detail.OTHER, 4),
         /**
-         * SQL Problem: "%s".
+         * SQL Problem.
          */
-        SQL_ERROR("SQL Problem: \"%s\".", Category.CODE_ERROR,
+        SQL_ERROR("SQL Problem.", Category.CODE_ERROR,
             Detail.OTHER, 5),
         /**
          * Folder %1$s (%2$d) is not a task folder.

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -150,7 +150,7 @@ public final class ConfirmTask {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+            throw new TaskException(Code.SQL_ERROR, e);
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(ctx, con);

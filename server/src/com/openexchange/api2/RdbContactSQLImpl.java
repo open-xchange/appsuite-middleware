@@ -276,7 +276,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                     retval = rs.getInt(1);
                 }
             } catch (final SQLException e) {
-                throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
                 closeSQLStuff(rs, stmt);
             }
@@ -360,7 +360,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
             contacts = tmp.toArray(new Contact[tmp.size()]);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
@@ -468,7 +468,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                     foundAddresses.add(contact.getEmail1());
                 }
             } catch (final SQLException e) {
-                throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
                 DBUtils.closeSQLStuff(result, stmt);
                 result = null;
@@ -515,7 +515,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                         }
                     }
                 } catch (final SQLException e) {
-                    throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                    throw ContactExceptionCodes.SQL_PROBLEM.create(e);
                 } finally {
                     DBUtils.closeSQLStuff(result, stmt);
                     result = null;
@@ -610,7 +610,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw new ContactException(e);
         } catch (final SQLException e) {
             error = true;
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } catch (final OXException e) {
             error = true;
             throw e;
@@ -789,7 +789,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw new ContactException(e);
         } catch (final SQLException e) {
             error = true;
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } catch (OXConflictException e) {
             error = true;
             throw e;
@@ -843,7 +843,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final SQLException e) {
             error = true;
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             if (error) {
                 closeSQLStuff(rs, stmt);
@@ -922,7 +922,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (final OXObjectNotFoundException xe) {
             throw xe;
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } catch (OXConflictException e) {
             throw e;
         } catch (OXPermissionException e) {
@@ -1005,7 +1005,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (final AbstractOXException e) {
             throw new ContactException(e);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, "");
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         }
     }
 
@@ -1146,7 +1146,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 }
             }
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } catch (AttachmentException e) {
             throw new ContactException(e);
         }
@@ -1217,7 +1217,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                     }
                 }
             } catch (final SQLException e) {
-                throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
+                throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e));
             } catch (final ContactException e) {
                 throw new SearchIteratorException(e);
             } catch (OXConflictException e) {
@@ -1262,7 +1262,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
                 return nexto;
             } catch (final SQLException e) {
-                throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
+                throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e));
             }
         }
 
