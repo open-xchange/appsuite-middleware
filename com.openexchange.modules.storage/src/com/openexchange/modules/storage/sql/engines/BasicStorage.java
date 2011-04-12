@@ -52,6 +52,7 @@ package com.openexchange.modules.storage.sql.engines;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -178,6 +179,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
     }
 
     public void update(T thing, List<? extends Attribute<T>> updatedAttributes) throws SQLException, DBPoolingException {
+        updatedAttributes = new ArrayList<Attribute<T>>(updatedAttributes);
         updatedAttributes.remove(metadata.getIdField());
         updatedAttributes.retainAll(getAttributes());
         if(updatedAttributes.isEmpty()) {
