@@ -56,6 +56,7 @@
     <property name="cachingBundle" value="com.openexchange.caching"/>
     <property name="xmlBundle" value="com.openexchange.xml"/>
     <property name="configreadBundle" value="com.openexchange.configread"/>
+    <property name="htmlBundle" value="com.openexchange.html"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
@@ -132,7 +133,7 @@
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${secretjar}"/>
-        <pathelement location="${bundlesdir}/${htmljar}"/>
+        <pathelement location="${bundlesdir}/${htmlBundle}/${htmljar}"/>
         <pathelement location="${bundlesdir}/${filestoragejar}"/>
         <pathelement location="${bundlesdir}/${txjar}"/>
     	<pathelement location="${bundlesdir}/${cryptojar}"/>

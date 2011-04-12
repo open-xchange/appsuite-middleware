@@ -29,6 +29,7 @@
     <!-- Bundle dependencies -->
     <property name="configreadBundle" value="com.openexchange.configread"/>
     <property name="templatingBundle" value="com.openexchange.templating"/>
+    <property name="htmlBundle" value="com.openexchange.html"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar" />
@@ -60,7 +61,7 @@
         <pathelement location="${bundlesdir}/${templatingBundle}/${templatingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     	<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
-        <pathelement location="${bundlesdir}/${htmljar}"/>
+        <pathelement location="${bundlesdir}/${htmlBundle}/${htmljar}"/>
         <pathelement location="${bundlesdir}/${txjar}"/>
     </path>
 

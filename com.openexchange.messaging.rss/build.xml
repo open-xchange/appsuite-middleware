@@ -25,6 +25,7 @@
 
     <!-- Bundle dependencies -->
     <property name="xmlBundle" value="com.openexchange.xml"/>
+    <property name="htmlBundle" value="com.openexchange.html"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
@@ -56,7 +57,7 @@
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${messaginggenjar}"/>
-    	<pathelement location="${bundlesdir}/${htmljar}"/>
+    	<pathelement location="${bundlesdir}/${htmlBundle}/${htmljar}"/>
     	<pathelement location="${bundlesdir}/${proxyjar}"/>
 
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>

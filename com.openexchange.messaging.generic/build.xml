@@ -24,6 +24,7 @@
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
     <property name="cachingBundle" value="com.openexchange.caching"/>
+    <property name="htmlBundle" value="com.openexchange.html"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
@@ -65,7 +66,7 @@
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
     	<pathelement location="${bundlesdir}/${secretrecovjar}"/>
-    	<pathelement location="${bundlesdir}/${htmljar}"/>
+    	<pathelement location="${bundlesdir}/${htmlBundle}/${htmljar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
