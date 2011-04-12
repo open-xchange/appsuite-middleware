@@ -153,10 +153,7 @@ public class HashingFileStorage implements FileStorage {
     public String saveNewFile(InputStream file) throws FileStorageException {
         String[] filestorePath = generateName();
         File path = new File(storage, filestorePath[0]);
-        if (!path.exists()) {
-            path.mkdirs();
-        }
-        if (!path.exists()) {
+        if (!path.exists() && !path.mkdirs() && !path.exists()) {
             throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, path.toString());
         }
 
