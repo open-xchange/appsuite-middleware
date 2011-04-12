@@ -278,13 +278,14 @@ public class TestTemplateService extends TestCase {
         oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
 
         SimBuilder infostoreBuilder = new SimBuilder();
-        infostoreBuilder.expectCall("getNames", session, globalTemplateFolder).andReturn(Arrays.asList("global1" , "global2"));
-        infostoreBuilder.expectCall("getNames", session, privateTemplateFolder).andReturn(Arrays.asList("private1" , "private2"));
+        String[] filter = new String[0];
+        infostoreBuilder.expectCall("getNames", session, globalTemplateFolder, filter).andReturn(Arrays.asList("global1" , "global2"));
+        infostoreBuilder.expectCall("getNames", session, privateTemplateFolder, filter).andReturn(Arrays.asList("private1" , "private2"));
 
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
 
-        List<String> templateNames = templateService.getTemplateNames(session);
+        List<String> templateNames = templateService.getTemplateNames(session, filter);
 
         assertTrue(templateNames.contains("global1"));
         assertTrue(templateNames.contains("global2"));
