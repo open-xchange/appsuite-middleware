@@ -1,3 +1,9 @@
+open-xchange-soap-cxf (6.18.2.0-28) unstable; urgency=low
+
+  * build for public ptf 2011-04-14
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 12 Apr 2011 13:14:44 +0000
+
 open-xchange-soap-cxf (6.18.2.0-27) unstable; urgency=low
 
   * build for public ptf 2011-04-05
