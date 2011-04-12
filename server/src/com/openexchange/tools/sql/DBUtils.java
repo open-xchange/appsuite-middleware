@@ -210,7 +210,7 @@ public final class DBUtils {
         try {
             con.setAutoCommit(false);
             stmt = con.createStatement();
-            LOG.info("Started transaction " + stmt.execute("START TRANSACTION"));
+            stmt.execute("START TRANSACTION");
         } finally {
             closeSQLStuff(stmt);
         }
