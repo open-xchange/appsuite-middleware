@@ -35,11 +35,14 @@
 	<property name="proxyjar" value="com.openexchange.proxy.jar" />
 	<property name="libidnjar" value="libidn-1.9.jar"/>
 
-	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
+    <!-- Third party libs -->
+    <fileset dir="${lib.dir}" id="3rdpartyjars">
+        <include name="*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
 
-    <!-- Third party libs  -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
+    <fileset dir="." id="metainf">
+        <include name="META-INF/**"/>
         <exclude name="CVS"/>
     </fileset>
 
@@ -52,7 +55,6 @@
     	<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
     	<pathelement location="${bundlesdir}/${proxyjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${libidnjar}"/>
-    	<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/> -->
     	<fileset refid="3rdpartyjars"/>
     </path>
 
@@ -69,32 +71,34 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}">
             <fileset dir="${output..}"/>
-        	<fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
     <!-- Install targets -->
-    <target name="install">
-        <antcall target="installJar"/>
-        <antcall target="installConfig"/>
-    </target>
+    <target name="install" depends="installJar,installConfig"/>
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
-        <mkdir dir="${destdir}/${bundlesdir}"/>
-        <copy todir="${destdir}/${bundlesdir}">
-            <fileset dir="${tmp.dir}">
-                <include name="${bundle.name}"/>
-            </fileset>
+        <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
+        <mkdir dir="${bundlesdestdir}"/>
+
+        <property name="bundledir" value="${bundlesdestdir}/${Bundle-SymbolicName}"/>
+        <mkdir dir="${bundledir}"/>
+        <copy todir="${bundledir}" file="${tmp.dir}/${bundle.name}"/>
+        <mkdir dir="${bundledir}/lib"/>
+        <copy todir="${bundledir}/lib">
+            <fileset refid="3rdpartyjars"/>
+        </copy>
+        <copy todir="${bundledir}">
+            <fileset refid="metainf"/>
         </copy>
     </target>
 
@@ -111,10 +115,8 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${composite.name}.tar.gz"
-            basedir="${dist-package}"
-            includes="${composite.name}/"
-             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <!-- dpkg-source does not like anything else -->
+        <tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip"/>
         <delete dir="${dist-package}"/>
     </target>
 
