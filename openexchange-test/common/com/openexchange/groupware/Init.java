@@ -415,6 +415,7 @@ public final class Init {
     private static void startAndInjectHTMLService() {
         if (null == ServerServiceRegistry.getInstance().getService(HTMLService.class)) {
             final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
+            com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
             Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
             final Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
             final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
