@@ -131,7 +131,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
     }
     
     public void testGetAllContactsOrderedByCollationAscending() {
-		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 		
 		for(String graphem: sinograph){
 			manager.newAction( manager.generateContact(folderID, graphem) );
@@ -147,7 +147,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
     }
     
     public void testGetAllContactsOrderedByCollationDescending() {
-		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 		
 		for(String graphem: sinograph){
 			manager.newAction( manager.generateContact(folderID, graphem) );
@@ -168,13 +168,13 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
      * Currently not testing e-mail since it is not supported yet.
      */
 	public void testGetAllContactsOrderedByCollationOrderedByWonderField() {
-		List<String> sinograph = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁"); //,"科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01"); //,"\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 
-    	List<String> lastNames = Arrays.asList( "阿", "波","次","的");
-    	List<String> displayNames = Arrays.asList( "鹅", "富");
-    	List<String> companyNames = Arrays.asList( "哥","河","洁");
-    	//List<String> email1s = Arrays.asList( "科@somewhere.invalid","了@somewhere.invalid","么@somewhere.invalid");
-    	//List<String> email2s = Arrays.asList( "呢@somewhere.invalid","哦@somewhere.invalid","批@somewhere.invalid","七@somewhere.invalid");
+    	List<String> lastNames = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684");
+    	List<String> displayNames = Arrays.asList( "\u9e45", "\u5bcc");
+    	List<String> companyNames = Arrays.asList( "\u54e5","\u6cb3","\u6d01");
+    	//List<String> email1s = Arrays.asList( "\u79d1@somewhere.invalid","\u4e86@somewhere.invalid","\u4e48@somewhere.invalid");
+    	//List<String> email2s = Arrays.asList( "\u5462@somewhere.invalid","\u54e6@somewhere.invalid","\u6279@somewhere.invalid","\u4e03@somewhere.invalid");
     	
     	List<List<String>> values = Arrays.asList(lastNames, displayNames, companyNames); //,email1s, email2s);
     	List<ContactField> fields = Arrays.asList( ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.COMPANY); //ContactField.EMAIL1, ContactField.EMAIL2 );
