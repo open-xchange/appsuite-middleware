@@ -130,7 +130,7 @@ msgstr "Spam-Ordner"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
-msgstr "Mülleimer"
+msgstr "Papierkorb"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:87
 msgid "Trash folder"

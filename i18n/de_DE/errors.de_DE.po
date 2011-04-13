@@ -1141,7 +1141,7 @@ msgstr ""
 
 msgid "Mail could not be moved to trash folder. Quota exceeded"
 msgstr ""
-"Nachricht konnte nicht in den Mülleimer verschoben werden. Quota überstiegen"
+"Nachricht konnte nicht in den Papierkorb verschoben werden. Quota überstiegen"
 
 msgid ""
 "Mail folder \"%1$s\" could not be found on mail server %2$s with login %3$s "
