@@ -248,7 +248,7 @@ public final class ImapIdlePushListener implements PushListener {
             mailAccess.connect();
             Object fstore = mailAccess.getFolderStorage();
             if( ! (fstore instanceof IMAPFolderStorage) ) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unsupported MAL implementation");
             }
             IMAPFolderStorage istore = (IMAPFolderStorage) fstore;
             IMAPStore imapStore = istore.getImapStore();

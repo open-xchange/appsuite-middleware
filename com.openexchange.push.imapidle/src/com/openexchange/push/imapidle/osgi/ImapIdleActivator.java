@@ -58,11 +58,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.push.PushManagerService;
-import com.openexchange.push.imapidle.ImapIdleDeleteListener;
 import com.openexchange.push.imapidle.ImapIdleMailAccountDeleteListener;
 import com.openexchange.push.imapidle.ImapIdlePushListener;
 import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;
@@ -180,7 +178,6 @@ public final class ImapIdleActivator extends DeferredActivator {
                 MailAccountDeleteListener.class.getName(),
                 new ImapIdleMailAccountDeleteListener(),
                 null));
-            serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new ImapIdleDeleteListener(), null));
 
             LOG.info("com.openexchange.push.imapidle bundle started");
             LOG.info(debug ? " debugging enabled" : "debugging disabled");
