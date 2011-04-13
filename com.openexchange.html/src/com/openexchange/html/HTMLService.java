@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,9 +71,10 @@ public interface HTMLService {
      * Converts found URLs inside specified content to valid links.
      * 
      * @param content The content
+     * @param links a initialized range list that gets extended with the added links.
      * @return The content with URLs turned to links
      */
-    String formatURLs(String content);
+    String formatURLs(String content, List<Range> links);
 
     /**
      * Searches for non-HTML links and convert them to valid HTML links.
