@@ -1,3 +1,7 @@
+* 2011-04-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #18421: Enabled editing the personal mail information for webmail users.
+
 * 2011-04-12 - marcus.klein@open-xchange.com
 
  - Bugfix #18911: Whitelisting plain text mails after converting them for HTML display.

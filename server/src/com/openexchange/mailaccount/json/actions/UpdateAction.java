@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount.json.actions;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -107,6 +108,11 @@ public final class UpdateAction extends AbstractMailAccountAction {
             Attribute.TRASH_FULLNAME_LITERAL,
             Attribute.TRASH_LITERAL);
 
+    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(
+        Attribute.ID_LITERAL,
+        Attribute.PERSONAL_LITERAL,
+        Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
+
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         final JSONObject jData = (JSONObject) request.getData();
 
@@ -114,7 +120,9 @@ public final class UpdateAction extends AbstractMailAccountAction {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             final Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
 
-            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
+            Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
+            notAllowed.removeAll(WEBMAIL_ALLOWED);
+            if (!session.getUserConfiguration().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
                 throw MailAccountExceptionFactory.getInstance().create(
                     MailAccountExceptionMessages.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
