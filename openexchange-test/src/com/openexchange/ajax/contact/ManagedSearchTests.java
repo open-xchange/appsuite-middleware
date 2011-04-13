@@ -65,7 +65,7 @@ import com.openexchange.groupware.search.Order;
  */
 public class ManagedSearchTests extends AbstractManagedContactTest {
 
-	public List<String> sinographs = Arrays.asList( "阿", "波","次","的","鹅","富","哥","河","洁","科","了","么","呢","哦","批","七","如","四","踢","屋","西","衣","子");
+	public List<String> sinographs = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 
 	public ManagedSearchTests(String name) {
 		super(name);
