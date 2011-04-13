@@ -49,14 +49,89 @@
 
 package com.openexchange.group;
 
+import java.io.ObjectInputStream.GetField;
+import java.util.Arrays;
 import java.util.Date;
+
+import com.openexchange.ajax.AJAXServlet;
 
 /**
  * This is the data container class for group.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Group implements Cloneable {
+	public enum Field{
+		ID(1,AJAXServlet.PARAMETER_ID, "id"),
+		LAST_MODIFIED(5,"lastModified", "lastModified"),
+		SIMPLE_NAME(700, "simpleName", "identifier"), //Confused yet?
+		FULL_NAME(701, "fullName", "displayName"),
+		MEMBERS(702, "members", null);
+		
+		private int colNumber;
+		private String ajaxName;
+		private String dbName;
+		
+		private Field(int colNumber, String ajaxName, String dbName){
+			this.setColNumber(colNumber);
+			this.setAjaxName(ajaxName);
+			this.setDbName(dbName);
+		}
 
+		public void setColNumber(int colNumber) {
+			this.colNumber = colNumber;
+		}
+
+		public int getColNumber() {
+			return colNumber;
+		}
+
+		public void setAjaxName(String ajaxName) {
+			this.ajaxName = ajaxName;
+		}
+
+		public String getAjaxName() {
+			return ajaxName;
+		}
+
+		public void setDbName(String dbName) {
+			this.dbName = dbName;
+		}
+
+		public String getDbName() {
+			return dbName;
+		}
+		
+		public static Field getByColumnNumber(int num){
+			for(Field val: values()){
+				if(val.getColNumber() == num)
+					return val;
+			}
+			return null;
+		}
+		
+		public static int[] intValues(){
+			Field[] vals = values();
+			int[] retVal = new int[vals.length];
+			for(int i = 0; i< vals.length; i++)
+				retVal[i] = vals[i].getColNumber();
+			return retVal;
+		}
+		
+	}
+	
+	public static int[] ALL_COLUMNS = new int[]{
+		Field.FULL_NAME.getColNumber(), 
+		Field.ID.getColNumber(), 
+		Field.LAST_MODIFIED.getColNumber(), 
+		Field.SIMPLE_NAME.getColNumber(), 
+		Field.MEMBERS.getColNumber()};
+	public static int[] ALL_COLUMNS_EXCEPT_MEMBERS = new int[]{
+		Field.FULL_NAME.getColNumber(), 
+		Field.ID.getColNumber(), 
+		Field.LAST_MODIFIED.getColNumber(), 
+		Field.SIMPLE_NAME.getColNumber()};
+
+	
     /**
      * Unique numeric identifier of this group.
      */
@@ -248,6 +323,19 @@ public class Group implements Cloneable {
         return lastModifiedSet;
     }
 
+    public Object get(Group.Field field){
+    	if(field == Field.FULL_NAME)
+    		return getDisplayName();
+    	if(field == Field.SIMPLE_NAME)
+    		return getSimpleName();
+    	if(field == Field.ID)
+    		return getIdentifier();
+    	if(field == Field.LAST_MODIFIED)
+    		return getLastModified();
+    	if(field == Field.MEMBERS)
+    		return getMember();
+    	return null;
+    }
     /**
      * {@inheritDoc}
      */

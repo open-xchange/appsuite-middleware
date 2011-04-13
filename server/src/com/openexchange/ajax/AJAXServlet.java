@@ -356,9 +356,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_FILTER = "filter";
     
     public static final String PARAMETER_COLLATION = "collation";
-    
-    public static final String PARAMETER_LOAD_MEMBERS = "loadMembers";
-    
+       
     /**
      * The content type if the response body contains javascript data. Set it with
      * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .

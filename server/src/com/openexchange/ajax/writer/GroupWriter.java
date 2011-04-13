@@ -50,6 +50,8 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+
+import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.group.Group;
+import com.openexchange.java.Strings;
 
 /**
  * {@link GroupWriter} - Writes a group object into a JSON.
@@ -73,6 +76,16 @@ public class GroupWriter extends DataWriter {
 		utc = getTimeZone("utc");
 	}
 
+    public void writeArray(final Group group, final JSONArray json, final List<Group.Field> fields){
+    	for(Group.Field field: fields){
+    		if(field == Group.Field.MEMBERS){
+    			json.put(Strings.join(group.getMember(),","));
+    			continue;
+    		}
+    		json.put(group.get(field));
+    	}
+    }
+    
 	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
 
         writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json);

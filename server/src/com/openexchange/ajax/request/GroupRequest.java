@@ -51,6 +51,9 @@ package com.openexchange.ajax.request;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +68,7 @@ import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.group.Group.Field;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
@@ -203,19 +207,14 @@ public class GroupRequest {
             searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
         }
         
-        boolean loadMembers = true;
-        if (jsonObj.has(AJAXServlet.PARAMETER_LOAD_MEMBERS)){ 
-        	loadMembers = DataParser.checkBoolean(jsonObj, AJAXServlet.PARAMETER_LOAD_MEMBERS);
-        }
-        
         timestamp = new Date(0);
         final JSONArray jsonResponseArray = new JSONArray();
         final GroupStorage groupStorage = GroupStorage.getInstance();
         Group[] groups = null;
         if ("*".equals(searchpattern)) {
-            groups = groupStorage.getGroups(loadMembers, session.getContext());
+            groups = groupStorage.getGroups(true, session.getContext());
         } else {
-            groups = groupStorage.searchGroups(searchpattern, loadMembers, session.getContext());
+            groups = groupStorage.searchGroups(searchpattern, true, session.getContext());
         }
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < groups.length; a++) {
@@ -232,9 +231,16 @@ public class GroupRequest {
     public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, LdapException, GroupException, AjaxException {
         timestamp = new Date(0);
         
-        boolean loadMembers = true;
-        if (jsonObj.has(AJAXServlet.PARAMETER_LOAD_MEMBERS)){ 
-        	loadMembers = DataParser.checkBoolean(jsonObj, AJAXServlet.PARAMETER_LOAD_MEMBERS);
+        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+        final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+        boolean loadMembers = false;
+        List<Field> fields = new LinkedList<Field>();
+        for(int column: columns){
+        	Field field = Group.Field.getByColumnNumber(column);
+        	if(field == Group.Field.MEMBERS){
+        		loadMembers = true;
+        	}
+        	fields.add(field);
         }
 
         
@@ -244,12 +250,12 @@ public class GroupRequest {
         groups = groupStorage.getGroups(loadMembers, session.getContext());
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < groups.length; a++) {
-            final JSONObject jsonGroupObj = new JSONObject();
-            groupWriter.writeGroup(groups[a], jsonGroupObj);
+            final JSONArray row = new JSONArray();
+            groupWriter.writeArray(groups[a], row, fields);
             if (groups[a].getLastModified().after(timestamp)) {
                 timestamp = groups[a].getLastModified();
             }
-            jsonResponseArray.put(jsonGroupObj);
+            jsonResponseArray.put(row);
         }
         return jsonResponseArray;
     }
