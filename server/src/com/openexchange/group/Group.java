@@ -49,8 +49,6 @@
 
 package com.openexchange.group;
 
-import java.io.ObjectInputStream.GetField;
-import java.util.Arrays;
 import java.util.Date;
 
 import com.openexchange.ajax.AJAXServlet;
