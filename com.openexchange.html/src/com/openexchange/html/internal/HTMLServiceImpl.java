@@ -289,18 +289,22 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(anchorTag.substring(pos)).toString();
     }
 
-    public String formatURLs(final String content) {
+    public String formatURLs(final String content, List<Range> links) {
         try {
             final Matcher m = PATTERN_URL.matcher(content);
             final StringBuilder targetBuilder = new StringBuilder(content.length());
             final StringBuilder sb = new StringBuilder(256);
             int lastMatch = 0;
             while (m.find()) {
-                targetBuilder.append(content.substring(lastMatch, m.start()));
+                int startPos = m.start();
+                targetBuilder.append(content.substring(lastMatch, startPos));
                 sb.setLength(0);
                 appendLink(m.group(), sb);
                 targetBuilder.append(sb.toString());
                 lastMatch = m.end();
+                int endPos = sb.indexOf(">");
+                links.add(new Range(startPos, startPos + endPos + 1));
+                links.add(new Range(startPos + sb.indexOf("<", endPos), startPos + sb.length()));
             }
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();

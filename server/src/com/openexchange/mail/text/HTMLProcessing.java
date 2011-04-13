@@ -56,7 +56,6 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -198,50 +197,18 @@ public final class HTMLProcessing {
             retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
-                    retval = htmlService.formatURLs(retval);
-                    retval = htmlService.htmlFormat(retval, true, getAnchorPositions(retval));
+                    List<Range> addedLinks = new ArrayList<Range>();
+                    retval = htmlService.formatURLs(retval, addedLinks);
+                    retval = htmlService.htmlFormat(retval, true, addedLinks);
                     if (usm.isUseColorQuote()) {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }
-                    // Filter according to white-list when plain text mails contain HTML to harm users.
-                    retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
-                    retval = htmlService.filterWhitelist(retval);
                 } else {
                     retval = htmlService.htmlFormat(retval);
                 }
             }
         }
         return retval;
-    }
-
-    /**
-     * The regular expression to match links inside both plain text and HTML content.
-     * <p>
-     * <b>WARNING</b>: May throw a {@link StackOverflowError} if a matched link is too large. Usages should handle this case. public static
-     * final Pattern PATTERN_HREF = Pattern.compile("<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))"
-     * , Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-     */
-
-    private static final String REGEX_ANCHOR = "<a\\s+href[^>]+>.*?</a>";
-
-    private static final Pattern PATTERN_ANCHOR = Pattern.compile(REGEX_ANCHOR);
-
-    private static List<Range> getAnchorPositions(final String content) {
-        try {
-            final Matcher m = PATTERN_ANCHOR.matcher(content);
-            if (m.find()) {
-                final List<Range> positions = new ArrayList<Range>();
-                do {
-                    positions.add(new Range(m.start(), m.end()));
-                } while (m.find());
-                return positions;
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final StackOverflowError error) {
-            LOG.error(StackOverflowError.class.getName(), error);
-        }
-        return Collections.emptyList();
     }
 
     /**

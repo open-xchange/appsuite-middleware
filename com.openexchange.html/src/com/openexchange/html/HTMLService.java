@@ -71,9 +71,10 @@ public interface HTMLService {
      * Converts found URLs inside specified content to valid links.
      * 
      * @param content The content
+     * @param links a initialized range list that gets extended with the added links.
      * @return The content with URLs turned to links
      */
-    String formatURLs(String content);
+    String formatURLs(String content, List<Range> links);
 
     /**
      * Searches for non-HTML links and convert them to valid HTML links.
