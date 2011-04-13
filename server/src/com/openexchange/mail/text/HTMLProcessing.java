@@ -192,6 +192,7 @@ public final class HTMLProcessing {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }
                     // Filter according to white-list when plain text mails contain HTML to harm users.
+                    retval = htmlService.getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset, false);
                     retval = htmlService.filterWhitelist(retval);
                 } else {
                     retval = htmlService.htmlFormat(retval);
