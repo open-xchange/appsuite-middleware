@@ -201,14 +201,12 @@ public final class HTMLProcessing {
             retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
-                    retval = formatURLs(retval);
-                    retval = htmlFormat(retval, true, getAnchorPositions(retval));
+                    List<Range> addedLinks = new ArrayList<Range>();
+                    retval = formatURLs(retval, addedLinks);
+                    retval = htmlFormat(retval, true, addedLinks);
                     if (usm.isUseColorQuote()) {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }
-                    // Filter according to white-list when plain text mails contain HTML to harm users.
-                    retval = getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset);
-                    retval = filterWhitelist(retval);
                 } else {
                     retval = htmlFormat(retval);
                 }
@@ -245,8 +243,6 @@ public final class HTMLProcessing {
      */
     public static final Pattern PATTERN_URL = Pattern.compile(REGEX_URL);
 
-    private static final Pattern PATTERN_ANCHOR = Pattern.compile(REGEX_ANCHOR);
-
     /**
      * The regular expression to match URLs and anchors inside text.
      * 
@@ -272,42 +268,6 @@ public final class HTMLProcessing {
      * </pre>
      */
     public static final Pattern PATTERN_LINK_WITH_GROUP = Pattern.compile(REGEX_ANCHOR + "|(" + REGEX_URL + ')');
-
-    private static List<Range> getHrefPositions(final String content) {
-        try {
-            final Matcher m = PATTERN_URL.matcher(content);
-            if (m.find()) {
-                final List<Range> positions = new ArrayList<Range>();
-                do {
-                    positions.add(new Range(m.start(), m.end()));
-                } while (m.find());
-                return positions;
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final StackOverflowError error) {
-            LOG.error(StackOverflowError.class.getName(), error);
-        }
-        return Collections.emptyList();
-    }
-
-    private static List<Range> getAnchorPositions(final String content) {
-        try {
-            final Matcher m = PATTERN_ANCHOR.matcher(content);
-            if (m.find()) {
-                final List<Range> positions = new ArrayList<Range>();
-                do {
-                    positions.add(new Range(m.start(), m.end()));
-                } while (m.find());
-                return positions;
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final StackOverflowError error) {
-            LOG.error(StackOverflowError.class.getName(), error);
-        }
-        return Collections.emptyList();
-    }
 
     /**
      * Searches for non-HTML links and convert them to valid HTML links.
@@ -363,7 +323,7 @@ public final class HTMLProcessing {
         return content;
     }
 
-    private static String formatURLs(final String content) {
+    private static String formatURLs(final String content, List<Range> links) {
         try {
             final Matcher m = PATTERN_URL.matcher(content);
             final MatcherReplacer mr = new MatcherReplacer(m, content);
@@ -371,6 +331,7 @@ public final class HTMLProcessing {
             final StringBuilder tmp = new StringBuilder(256);
             while (m.find()) {
                 String url = m.group();
+                int startPos = m.start();
                 tmp.setLength(0);
                 final int mlen = url.length() - 1;
                 if (mlen > 0 && ')' == url.charAt(mlen)) {
@@ -393,6 +354,9 @@ public final class HTMLProcessing {
                         tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
                             "$0\" target=\"_blank\">$0</a>").toString());
                 }
+                int endPos = sb.indexOf(">", startPos);
+                links.add(new Range(startPos, startPos + endPos + 1));
+                links.add(new Range(startPos + sb.indexOf("<", endPos), sb.length()));
             }
             mr.appendTail(sb);
             return sb.toString();
@@ -1452,21 +1416,6 @@ public final class HTMLProcessing {
             }
         }
         return sb.toString();
-    }
-
-    private static boolean ignore(final int index, final int[][] ignoreRanges) {
-        if (null == ignoreRanges) {
-            return false;
-        }
-        boolean ignore = false;
-        for (int i = 0; !ignore && i < ignoreRanges.length; i++) {
-            final int[] ignoreRange = ignoreRanges[i];
-            if (index < ignoreRange[0]) {
-                return false;
-            }
-            ignore = index < ignoreRange[1];
-        }
-        return ignore;
     }
 
     private static final String HTML_BR = "<br />";
