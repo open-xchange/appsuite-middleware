@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-03-15 15:07+0100\n"
+"PO-Revision-Date: 2011-04-13 10:01+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -1066,9 +1066,6 @@ msgstr "Ungültiger Ganzzahlenwert %1$s"
 msgid "Invalid message path: %1$s"
 msgstr "Ungültiger Nachrichten-Pfad: %1$s"
 
-msgid "Invalid method on an expunged message: %1$s"
-msgstr "Ungültige Methode für gelöschte Nachricht: %1$s"
-
 msgid "Invalid multipart content. Number of enclosed contents is 0"
 msgstr "Ungültiger Multipart-Inhalt. Anzahl der angehängten Inhalte ist 0."
 
@@ -1183,11 +1180,11 @@ msgid "Mail server indicates a bad command. Server response: %1$s"
 msgstr ""
 "Der Mailserver zeigt einen fehlerhaften Befehl an. Server-Antwort: %1$s"
 
-msgid "Mail server's quota is exceeded"
-msgstr "Die Quota des Mailserver wurde überschritten"
-
 msgid "Mail settings for user %1$s could not be found in context %2$d"
 msgstr "Keine Mail-Einstellungen für Benutzer %1$s im Kontext %2$d gefunden"
+
+msgid "Mail(s)  could not be found in folder "
+msgstr "Nachricht(en) nicht im Ordner gefunden "
 
 msgid "Mail(s) %1$s could not be found in folder %2$s"
 msgstr "Nachricht(en) %1$s nicht im Ordner %2$s gefunden"
@@ -1733,6 +1730,9 @@ msgstr ""
 msgid "Root folder must not be modified or deleted"
 msgstr "Root-Ordner kann nicht geändert oder gelöscht werden"
 
+msgid "SQL Problem."
+msgstr "SQL-Problem."
+
 msgid "SQL Problem: \"%1$s\""
 msgstr "SQL-Problem: \"%1$s\""
 
@@ -1945,6 +1945,16 @@ msgid ""
 msgstr ""
 "Der Parameter \"userSource\" muss in der Property-Datei festgelegt sein, "
 "wenn spamdb auf true gesetzt ist."
+
+msgid ""
+"The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, "
+"context=%4$s)."
+msgstr ""
+"Quota auf Mailserver %1$s überschritten mit Login %2$s (Benutzer=%3$s, "
+"Kontext=%4$s)"
+
+msgid "The quota on mail server exceeded."
+msgstr "Die Quota auf dem Mailserver wurde überschritten."
 
 msgid "The recurrence pattern is too complex. Giving up."
 msgstr "Das Serienmuster ist zu komplex. Der Vorgang wird abgebrochen."
@@ -2487,8 +2497,8 @@ msgstr ""
 
 msgid "You do not have the appropriate permissions to read this object %1$d."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objekts "
-"%1$d."
+"Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objekts %1"
+"$d."
 
 msgid ""
 "You do not have the necessary permissions for appointments in folder %1$d."
@@ -3778,6 +3788,9 @@ msgstr "-1 ID von IDGenerator erhalten"
 msgid "Unable to scale image down."
 msgstr "Bild kann nicht herunterskaliert werden"
 
+msgid "Invalid SQL Query."
+msgstr "Ungültige SQL-Anfrage."
+
 msgid ""
 "You do not have permission to create objects in this folder %1$d in context %"
 "2$d with user %3$d"
@@ -4404,3 +4417,8 @@ msgstr "Fehlendes Feld \"%1$s\" in JSON-Objekt."
 msgid "Unknown operation: %1$s."
 msgstr "Unbekannte Aktion: %1$s."
 
+#~ msgid "Invalid method on an expunged message: %1$s"
+#~ msgstr "Ungültige Methode für gelöschte Nachricht: %1$s"
+
+#~ msgid "Mail server's quota is exceeded"
+#~ msgstr "Die Quota des Mailserver wurde überschritten"
