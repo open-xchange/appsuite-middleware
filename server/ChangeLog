@@ -1,6 +1,6 @@
 * 2011-04-12 - marcus.klein@open-xchange.com
 
- - Bugfix #18911: Whitelisting plain text mails after converting them for HTML display.
+ - Bugfix #18911: Remembering added links when formatting plain text email for HTML display.
 
 * 2011-04-08 - marcus.klein@open-xchange.com
 
