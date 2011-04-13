@@ -207,6 +207,7 @@ public final class HTMLProcessing {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }
                     // Filter according to white-list when plain text mails contain HTML to harm users.
+                    retval = getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset);
                     retval = filterWhitelist(retval);
                 } else {
                     retval = htmlFormat(retval);
