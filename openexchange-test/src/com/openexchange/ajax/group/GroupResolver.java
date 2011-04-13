@@ -77,7 +77,7 @@ public class GroupResolver {
     }
     
     public Group[] resolveGroup(String pattern) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        SearchRequest req = new SearchRequest(pattern, true, false);
+        SearchRequest req = new SearchRequest(pattern, false);
         SearchResponse response = client.execute(req);
         return response.getGroups();
     }

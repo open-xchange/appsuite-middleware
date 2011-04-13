@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -120,25 +121,6 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertContainsLastModifiedUTC(arr);
     }
 
-
-    public void testSearchWithoutMembers() throws Throwable {
-        SearchResponse response = getClient().execute(new SearchRequest("*", false, true));
-        final Group[] groups = response.getGroups();
-        LOG.info("Found " + groups.length + " groups.");
-        assertTrue("Size of group array should be more than 0.",
-            groups.length > 0);
-
-        JSONArray arr = (JSONArray) response.getResponse().getData();
-        assertContainsLastModifiedUTC(arr);
-        
-        int numberOfGroupsWithoutMembers = 0;
-        for(Group grp: groups){
-        	if(grp.getMember().length == 0)
-        		numberOfGroupsWithoutMembers++;
-        }
-        assertEquals("Should only have one group with members", groups.length -1, numberOfGroupsWithoutMembers);
-    }
-    
     public void testRealSearch() throws Throwable {
         final Group[] groups = getClient().execute(new SearchRequest("*l*")).getGroups();
         LOG.info("Found " + groups.length + " groups.");
@@ -170,39 +152,40 @@ public final class FunctionTest extends AbstractAJAXSession {
     public void testAllWithMembers() throws Throwable {
     	int groupLengthBySearch = getClient().execute(new SearchRequest("*")).getGroups().length;
     	
-        AllResponse allResponse = getClient().execute(new AllRequest(true,true));
+        AllRequest allRequest = new AllRequest(Group.ALL_COLUMNS, true);
+		AllResponse allResponse = getClient().execute(allRequest);
         JSONArray data = (JSONArray) allResponse.getData();
         
         int groupLengthByAll = data.length();
         
         assertEquals(groupLengthBySearch, groupLengthByAll);
         
-        Group[] groups = allResponse.getGroups();
-        int members = 0;
-        for(Group grp: groups){
-        	members += grp.getMember().length;
+        int memberPos = 4; 
+        int memberCount = 0;
+		for(int i = 0; i < data.length(); i++){
+			JSONArray row = data.getJSONArray(i);
+			String[] members = row.getString(memberPos).split(",");
+			memberCount += members.length;
         }
-        assertTrue(members > 0);
+        assertTrue(memberCount > 0);
     }
     
 
     public void testAllWithoutMembers() throws Throwable {
     	int groupLengthBySearch = getClient().execute(new SearchRequest("*")).getGroups().length;
     	
-        AllResponse allResponse = getClient().execute(new AllRequest(false,true));
+        AllResponse allResponse = getClient().execute(new AllRequest(Group.ALL_COLUMNS_EXCEPT_MEMBERS, true));
         JSONArray data = (JSONArray) allResponse.getData();
         
         int groupLengthByAll = data.length();
         
         assertEquals(groupLengthBySearch, groupLengthByAll);
         
-        Group[] groups = allResponse.getGroups();
-        int numberOfGroupsWithoutMembers = 0;
-        for(Group grp: groups){
-        	if(grp.getMember().length == 0)
-        		numberOfGroupsWithoutMembers++;
+        int arrLen = Group.ALL_COLUMNS_EXCEPT_MEMBERS.length;
+		for(int i = 0; i < data.length(); i++){
+			JSONArray row = data.getJSONArray(i);
+			assertEquals(arrLen, row.length());
         }
-        assertEquals("Should only have one group with members", groupLengthByAll -1, numberOfGroupsWithoutMembers);
     }
     
     public void testUpdatesViaComparingWithSearch() throws Exception {

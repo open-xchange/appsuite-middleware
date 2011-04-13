@@ -64,24 +64,22 @@ public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
 
     private final boolean failOnError;
 
-	private boolean loadMembers;
 
     /**
      * @param pattern
      * @param failOnError
      */
-    public SearchRequest(final String pattern, final boolean loadMembers, final boolean failOnError) {
+    public SearchRequest(final String pattern , final boolean failOnError) {
         super();
         this.pattern = pattern;
         this.failOnError = failOnError;
-        this.loadMembers = loadMembers;
     }
 
     /**
      * @param pattern
      */
     public SearchRequest(final String pattern) {
-        this(pattern, true, true);
+        this(pattern, true);
     }
 
     /**
@@ -106,7 +104,6 @@ public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
     public Parameter[] getParameters() {
         return new Parameter[] {
         		new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH),
-        		new Parameter(AJAXServlet.PARAMETER_LOAD_MEMBERS, loadMembers),
         };
     }
 

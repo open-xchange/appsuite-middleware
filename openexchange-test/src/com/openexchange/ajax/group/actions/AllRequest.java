@@ -12,11 +12,11 @@ import com.openexchange.java.Strings;
 public class AllRequest extends AbstractGroupRequest<AllResponse>{
 
 	private boolean failOnError;
-	private boolean loadMembers;
+	private int[] columns;
 
-	public AllRequest(boolean loadMembers, boolean failOnError){
+	public AllRequest(int[] columns, boolean failOnError){
 		this.failOnError = failOnError;
-		this.loadMembers = loadMembers;
+		this.columns = columns;
 	}
 	
 	public Object getBody() throws IOException, JSONException {
@@ -31,7 +31,7 @@ public class AllRequest extends AbstractGroupRequest<AllResponse>{
 			throws IOException, JSONException {
 		return new Params(
 				AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL,
-				AJAXServlet.PARAMETER_LOAD_MEMBERS, ""+loadMembers).toArray();
+				AJAXServlet.PARAMETER_COLUMNS, Strings.join(columns, ",")).toArray();
 	}
 
 	public AbstractAJAXParser<? extends AllResponse> getParser() {
