@@ -1,3 +1,7 @@
+* 2011-04-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #18946: Improved exception message telling a user that he can not give some special permission on a folder for another user.
+
 * 2011-04-13 - marcus.klein@open-xchange.com
 
  - Bugfix #18421: Enabled editing the personal mail information for webmail users.

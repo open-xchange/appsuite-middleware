@@ -472,9 +472,9 @@ public final class OXFolderUtility {
                 if (!isApplicable(maxApplicablePerm, assignedPerm)) {
                     throw new OXFolderException(
                         OXFolderException.FolderCode.UNAPPLICABLE_FOLDER_PERM,
+                        getUserName(assignedPerm.getEntity(), ctx),
                         getFolderName(folderObj),
-                        Integer.valueOf(ctx.getContextId()),
-                        getUserName(assignedPerm.getEntity(), ctx));
+                        Integer.valueOf(ctx.getContextId()));
                 }
             }
         }

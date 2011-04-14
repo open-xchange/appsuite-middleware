@@ -458,9 +458,9 @@ public class OXFolderException extends OXException {
          */
         SHARE_FORBIDDEN("User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration", Category.USER_CONFIGURATION, 72),
         /**
-         * Defined permissions for folder %1$s in context %2$s are not applicable to user %3$s due to user configuration
+         * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s in context %3$s.
          */
-        UNAPPLICABLE_FOLDER_PERM("Defined permissions for folder %1$s in context %2$s are not applicable to user %3$s due to user configuration", Category.USER_CONFIGURATION, 73),
+        UNAPPLICABLE_FOLDER_PERM("The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s in context %3$s.", Category.USER_CONFIGURATION, 73),
         /**
          * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently
          * cannot delete its parent folder.
@@ -586,7 +586,7 @@ public class OXFolderException extends OXException {
      * @param folderCode The folder error code
      */
     public OXFolderException(final FolderCode folderCode) {
-        super(EnumComponent.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, null, EMPTY_ARGS);
+        super(EnumComponent.FOLDER, folderCode.getCategory(), folderCode.getNumber(), folderCode.getMessage(), null, EMPTY_ARGS);
     }
 
     /**
@@ -596,7 +596,7 @@ public class OXFolderException extends OXException {
      * @param messageArgs The error code's message arguments
      */
     public OXFolderException(final FolderCode folderCode, final Object... messageArgs) {
-        super(EnumComponent.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, null, messageArgs);
+        super(EnumComponent.FOLDER, folderCode.getCategory(), folderCode.getNumber(), folderCode.getMessage(), null, messageArgs);
     }
 
     /**
@@ -607,7 +607,7 @@ public class OXFolderException extends OXException {
      * @param messageArgs The error code's message arguments
      */
     public OXFolderException(final FolderCode folderCode, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, cause, messageArgs);
+        super(EnumComponent.FOLDER, folderCode.getCategory(), folderCode.getNumber(), folderCode.getMessage(), cause, messageArgs);
     }
 
     /**
@@ -618,6 +618,6 @@ public class OXFolderException extends OXException {
      * @param messageArgs The error code's message arguments
      */
     public OXFolderException(final FolderCode folderCode, final Category category, final Object... messageArgs) {
-        super(EnumComponent.FOLDER, category, folderCode.detailNumber, folderCode.message, null, messageArgs);
+        super(EnumComponent.FOLDER, category, folderCode.getNumber(), folderCode.getMessage(), null, messageArgs);
     }
 }
