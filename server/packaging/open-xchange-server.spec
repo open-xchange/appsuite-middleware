@@ -578,7 +578,7 @@ fi
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
 * Tue Apr 12 2011 - marcus.klein@open-xchange.com
- - Bugfix #18911: Whitelisting plain text mails after converting them for HTML display.
+ - Bugfix #18911: Remembering added links when formatting plain text email for HTML display.
 * Fri Apr 08 2011 - marcus.klein@open-xchange.com
  - Bugfix #18912: Using enumeration to pass order directory for data everywhere. Not showing failing SQL statements to the end user.
 * Thu Mar 31 2011 - marcus.klein@open-xchange.com
