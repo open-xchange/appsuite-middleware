@@ -329,9 +329,11 @@ public final class HTMLProcessing {
             final MatcherReplacer mr = new MatcherReplacer(m, content);
             final StringBuilder sb = new StringBuilder(content.length());
             final StringBuilder tmp = new StringBuilder(256);
+            // Adding links shift the positions compared to the original mail text. This must be added.
+            int shift = 0;
             while (m.find()) {
                 String url = m.group();
-                int startPos = m.start();
+                int startOpeningPos = m.start();
                 tmp.setLength(0);
                 final int mlen = url.length() - 1;
                 if (mlen > 0 && ')' == url.charAt(mlen)) {
@@ -354,9 +356,14 @@ public final class HTMLProcessing {
                         tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
                             "$0\" target=\"_blank\">$0</a>").toString());
                 }
-                int endPos = sb.indexOf(">", startPos);
-                links.add(new Range(startPos, startPos + endPos + 1));
-                links.add(new Range(startPos + sb.indexOf("<", endPos), sb.length()));
+                int endOpeningPos = sb.indexOf(">", startOpeningPos + shift);
+                Range range1 = new Range(startOpeningPos + shift, endOpeningPos + 1);
+                links.add(range1);
+                int startClosingPos = sb.indexOf("<", endOpeningPos);
+                Range range2 = new Range(startClosingPos, sb.length());
+                links.add(range2);
+                shift += range1.end - range1.start;
+                shift += range2.end - range2.start;
             }
             mr.appendTail(sb);
             return sb.toString();
