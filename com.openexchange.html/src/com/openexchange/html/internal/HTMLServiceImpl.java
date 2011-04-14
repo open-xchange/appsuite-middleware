@@ -305,11 +305,13 @@ public final class HTMLServiceImpl implements HTMLService {
                 targetBuilder.append(sb.toString());
                 lastMatch = m.end();
                 int endOpeningPos = sb.indexOf(">");
-                links.add(new Range(startOpeningPos + shift, startOpeningPos + endOpeningPos + 1 + shift));
+                Range range1 = new Range(startOpeningPos + shift, startOpeningPos + endOpeningPos + 1 + shift);
+                links.add(range1);
                 int startClosingPos = sb.indexOf("<", endOpeningPos);
-                links.add(new Range(startOpeningPos + startClosingPos + shift, startOpeningPos + sb.length() + shift));
-                shift += endOpeningPos + 1;
-                shift += sb.length() - startClosingPos;
+                Range range2 = new Range(startOpeningPos + startClosingPos + shift, startOpeningPos + sb.length() + shift);
+                links.add(range2);
+                shift += range1.end - range1.start;
+                shift += range2.end - range2.start;
             }
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
