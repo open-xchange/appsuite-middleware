@@ -295,16 +295,21 @@ public final class HTMLServiceImpl implements HTMLService {
             final StringBuilder targetBuilder = new StringBuilder(content.length());
             final StringBuilder sb = new StringBuilder(256);
             int lastMatch = 0;
+            // Adding links shift the positions compared to the original mail text. This must be added.
+            int shift = 0;
             while (m.find()) {
-                int startPos = m.start();
-                targetBuilder.append(content.substring(lastMatch, startPos));
+                int startOpeningPos = m.start();
+                targetBuilder.append(content.substring(lastMatch, startOpeningPos));
                 sb.setLength(0);
                 appendLink(m.group(), sb);
                 targetBuilder.append(sb.toString());
                 lastMatch = m.end();
-                int endPos = sb.indexOf(">");
-                links.add(new Range(startPos, startPos + endPos + 1));
-                links.add(new Range(startPos + sb.indexOf("<", endPos), startPos + sb.length()));
+                int endOpeningPos = sb.indexOf(">");
+                links.add(new Range(startOpeningPos + shift, startOpeningPos + endOpeningPos + 1 + shift));
+                int startClosingPos = sb.indexOf("<", endOpeningPos);
+                links.add(new Range(startOpeningPos + startClosingPos + shift, startOpeningPos + sb.length() + shift));
+                shift += endOpeningPos + 1;
+                shift += sb.length() - startClosingPos;
             }
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
