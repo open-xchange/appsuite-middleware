@@ -60,7 +60,6 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
@@ -107,7 +106,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, HTMLService.class, OAuthService.class, DatabaseService.class, SecretService.class};
+            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, HTMLService.class, OAuthService.class, SecretService.class};
     }
 
     @Override

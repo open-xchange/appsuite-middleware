@@ -50,10 +50,9 @@
 package com.openexchange.oauth.internal.groupware;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
@@ -62,8 +61,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.oauth.services.ServiceRegistry;
-import com.openexchange.server.ServiceException;
 
 /**
  * {@link OAuthCreateTableTask} - Inserts necessary tables.
@@ -72,13 +69,11 @@ import com.openexchange.server.ServiceException;
  */
 public class OAuthCreateTableTask extends UpdateTaskAdapter {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OAuthCreateTableTask.class);
+    private final DatabaseService dbService;
 
-    /**
-     * Initializes a new {@link OAuthCreateTableTask}.
-     */
-    public OAuthCreateTableTask() {
+    public OAuthCreateTableTask(DatabaseService dbService) {
         super();
+        this.dbService = dbService;
     }
 
     public String[] getDependencies() {
@@ -100,19 +95,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
     }
 
     public void perform(final PerformParameters params) throws AbstractOXException {
-        createTable("oauthAccounts", getCreate(), params.getContextId());
-        if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'OAuthCreateTableTask' successfully performed!");
-        }
-    }
-
-    private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
-        final DatabaseService dbService;
-        try {
-            dbService = ServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new UpdateException(e);
-        }
+        int contextId = params.getContextId();
         final Connection writeCon;
         try {
             writeCon = dbService.getForUpdateTask(contextId);
@@ -122,44 +105,17 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         try {
             try {
-                if (tableExists(tablename, writeCon.getMetaData())) {
+                if (tableExists(writeCon, "oauthAccounts")) {
                     return;
                 }
-                stmt = writeCon.prepareStatement(sqlCreate);
+                stmt = writeCon.prepareStatement(getCreate());
                 stmt.executeUpdate();
             } catch (final SQLException e) {
-                throw createSQLError(e);
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
         } finally {
             closeSQLStuff(null, stmt);
             dbService.backForUpdateTask(contextId, writeCon);
         }
-    }
-
-    /**
-     * The object type "TABLE"
-     */
-    private static final String[] types = { "TABLE" };
-
-    /**
-     * Check a table's existence
-     * 
-     * @param tableName The table name to check
-     * @param dbmd The database's meta data
-     * @return <code>true</code> if table exists; otherwise <code>false</code>
-     * @throws SQLException If a SQL error occurs
-     */
-    private static boolean tableExists(final String tableName, final DatabaseMetaData dbmd) throws SQLException {
-        ResultSet resultSet = null;
-        try {
-            resultSet = dbmd.getTables(null, null, tableName, types);
-            return resultSet.next();
-        } finally {
-            closeSQLStuff(resultSet, null);
-        }
-    }
-
-    private static UpdateException createSQLError(final SQLException e) {
-        return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 }

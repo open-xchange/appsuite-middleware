@@ -49,44 +49,49 @@
 
 package com.openexchange.oauth.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
+import java.util.Arrays;
+import java.util.Collection;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.database.CreateTableService;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.oauth.internal.groupware.CreateOAuthAccountTable;
-import com.openexchange.oauth.internal.groupware.OAuthDeleteListener;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask;
 
 /**
- * Registers the services necessary for the administration daemon.
+ * Is notified about the {@link DatabaseService} and registers then the {@link OAuthCreateTableTask}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LowLevelServicesActivator implements BundleActivator {
+public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer {
 
-    private final Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
-    private ServiceTracker tracker;
+    private final BundleContext context;
+    private ServiceRegistration registration;
 
-    public LowLevelServicesActivator() {
+    public UpdateTaskRegisterer(BundleContext context) {
         super();
+        this.context = context;
     }
 
-    public void start(BundleContext context) throws Exception {
-        registrations.push(context.registerService(CreateTableService.class.getName(), new CreateOAuthAccountTable(), null));
-        registrations.push(context.registerService(DeleteListener.class.getName(), new OAuthDeleteListener(), null));
-        tracker = new ServiceTracker(context, DatabaseService.class.getName(), new UpdateTaskRegisterer(context));
-        tracker.open();
+    public Object addingService(ServiceReference reference) {
+        final DatabaseService dbService = (DatabaseService) context.getService(reference);
+        registration = context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+
+            public Collection<UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)));
+            }
+        }, null);
+        return dbService;
     }
 
-    public void stop(BundleContext context) throws Exception {
-        if (null != tracker) {
-            tracker.close();
-        }
-        while (!registrations.isEmpty()) {
-            registrations.pop().unregister();
-        }
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        registration.unregister();
+        context.ungetService(reference);
     }
 }

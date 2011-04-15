@@ -66,8 +66,6 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingService;
-import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
-import com.openexchange.server.ServiceException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -77,11 +75,14 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
 
+    private final DatabaseService dbService;
+
     /**
      * Initializes a new {@link FacebookDropObsoleteAccountsTask}.
      */
-    public FacebookDropObsoleteAccountsTask() {
+    public FacebookDropObsoleteAccountsTask(DatabaseService dbService) {
         super();
+        this.dbService = dbService;
     }
 
     public String[] getDependencies() {
@@ -90,28 +91,24 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
 
     public void perform(final PerformParameters params) throws AbstractOXException {
         final int contextId = params.getContextId();
-        final DatabaseService dbService = getDatabaseService();
         final Connection writeCon;
         try {
             writeCon = dbService.getForUpdateTask(contextId);
-            writeCon.setAutoCommit(false);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
-        } catch (final SQLException e) {
-            throw createSQLError(e);
         }
         try {
+            writeCon.setAutoCommit(false);
             final List<int[]> dataList = listFacebookMessagingAccounts(writeCon);
             for (final int[] data : dataList) {
                 if (!checkData(data, writeCon)) {
                     dropAccountByData(data, writeCon);
                 }
             }
-            try {
-                writeCon.commit();
-            } catch (final SQLException e) {
-                throw createSQLError(e);
-            }
+            writeCon.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(writeCon);
+            throw createSQLError(e);
         } catch (final AbstractOXException e) {
             DBUtils.rollback(writeCon);
             throw e;
@@ -120,11 +117,6 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             dbService.backForUpdateTask(contextId, writeCon);
-        }
-
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(FacebookDropObsoleteAccountsTask.class);
-        if (log.isInfoEnabled()) {
-            log.info("UpdateTask '" + FacebookDropObsoleteAccountsTask.class.getSimpleName() + "' successfully performed!");
         }
     }
 
@@ -199,16 +191,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         }
     }
 
-    private static DatabaseService getDatabaseService() throws UpdateException {
-        try {
-            return FacebookMessagingServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new UpdateException(e);
-        }
-    }
-
     private static UpdateException createSQLError(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
-
 }

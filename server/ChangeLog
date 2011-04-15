@@ -1,3 +1,7 @@
+* 2011-04-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #18816: Properly initializing the update tasks if they are executed in administration daemon.
+
 * 2011-04-14 - marcus.klein@open-xchange.com
 
  - Bugfix #18946: Improved exception message telling a user that he can not give some special permission on a folder for another user.

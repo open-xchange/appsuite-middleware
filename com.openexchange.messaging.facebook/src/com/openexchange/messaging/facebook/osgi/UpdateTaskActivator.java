@@ -49,14 +49,10 @@
 
 package com.openexchange.messaging.facebook.osgi;
 
-import java.util.Arrays;
-import java.util.Collection;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.messaging.facebook.groupware.FacebookDropObsoleteAccountsTask;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.database.DatabaseService;
 
 /**
  * Registers the update task.
@@ -65,22 +61,18 @@ import com.openexchange.messaging.facebook.groupware.FacebookDropObsoleteAccount
  */
 public class UpdateTaskActivator implements BundleActivator {
 
-    private ServiceRegistration registration;
+    private ServiceTracker tracker;
 
     public UpdateTaskActivator() {
         super();
     }
 
     public void start(BundleContext context) throws Exception {
-        registration = context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-            public Collection<UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(((UpdateTaskV2) new FacebookDropObsoleteAccountsTask()));
-            }
-        }, null);
+        tracker = new ServiceTracker(context, DatabaseService.class.getName(), new UpdateTaskRegisterer(context));
+        tracker.open();
     }
 
     public void stop(BundleContext context) throws Exception {
-        registration.unregister();
+        tracker.close();
     }
-
 }
