@@ -77,7 +77,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         crawler.setId("com.openexchange.subscribe.crawler.gmx.com");
         crawler.setCrawlerApiVersion(618);
         //crawler.setJavascriptEnabled(true);
-        crawler.setPriority(8);       
+        crawler.setPriority(9);       
 
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
         listOfSteps.add(new LoginPageByFormActionReturningStringStep("Log into gmx.com", "https://www.gmx.com", "", "", ".*wicket\\:interface.*", "TextfieldEmail", "TextfieldPassword", 1, "", "ButtonLogin", "community=([0-9]*)&lang"));
@@ -87,7 +87,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         parameters.add(new NameValuePair("idList", ""));
         parameters.add(new NameValuePair("format", "csv_Outlook2003_eng"));
         
-        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.30.6.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
+        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.35.4.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
         
         HashMap<Integer, String> fieldMapping = new HashMap<Integer,String>();
         fieldMapping.put(0, "last_name");
@@ -129,8 +129,8 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         Workflow workflow = new Workflow(listOfSteps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        //findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        // dumpThis(crawler, crawler.getDisplayName());
+         dumpThis(crawler, crawler.getDisplayName());
     }
 }
