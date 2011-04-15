@@ -49,8 +49,6 @@
 
 package com.openexchange.frontend.uwa.json;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.frontend.uwa.UWAWidget;
@@ -58,7 +56,6 @@ import com.openexchange.frontend.uwa.UWAWidget.Field;
 import com.openexchange.modules.json.ModelWriter;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.AttributeHandler;
-import com.openexchange.modules.model.Metadata;
 
 
 /**

@@ -49,12 +49,6 @@
 
 package com.openexchange.frontend.uwa.json;
 
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidget.Field;
 import com.openexchange.modules.json.ModelParser;

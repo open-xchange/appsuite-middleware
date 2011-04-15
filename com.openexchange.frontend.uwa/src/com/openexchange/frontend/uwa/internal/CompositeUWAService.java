@@ -51,7 +51,6 @@ package com.openexchange.frontend.uwa.internal;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -66,20 +65,15 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.frontend.uwa.UWAWidget;
+import com.openexchange.frontend.uwa.UWAWidget.Field;
 import com.openexchange.frontend.uwa.UWAWidgetException;
 import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
-import com.openexchange.frontend.uwa.UWAWidgetExceptionMessages;
 import com.openexchange.frontend.uwa.UWAWidgetService;
-import com.openexchange.frontend.uwa.UWAWidget.Field;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.id.IDException;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.modules.model.Attribute;
-import com.openexchange.modules.model.AttributeHandler;
 import com.openexchange.modules.model.Tools;
 import com.openexchange.modules.storage.memory.MemoryStorage;
-import com.openexchange.modules.storage.sql.engines.Storage;
-import com.openexchange.modules.storage.sql.engines.UserScopedStorage;
 import com.openexchange.tools.id.IDMangler;
 
 /**
