@@ -60,9 +60,9 @@ import com.openexchange.ajax.AJAXServlet;
 public class Group implements Cloneable {
 	public enum Field{
 		ID(1,AJAXServlet.PARAMETER_ID, "id"),
-		LAST_MODIFIED(5,"lastModified", "lastModified"),
-		SIMPLE_NAME(700, "simpleName", "identifier"), //Confused yet?
-		FULL_NAME(701, "fullName", "displayName"),
+		LAST_MODIFIED(5,"last_modified", "lastModified"),
+		SIMPLE_NAME(700, "name", "identifier"), //Confused yet?
+		FULL_NAME(701, "display_ame", "displayName"),
 		MEMBERS(702, "members", null);
 		
 		private int colNumber;
