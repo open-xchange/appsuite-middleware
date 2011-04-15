@@ -79,8 +79,6 @@ public class FacebookConnectionTest  extends TestCase {
     @Override
     public void setUp(){
         final Activator activator = new Activator();
-//        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
-//        activator.setLinkedInMetadata(linkedInMetadata);
         facebook = new FacebookServiceImpl(new MockOAuthService(), new OAuthServiceMetaDataFacebookImpl(null));        
     }
     
