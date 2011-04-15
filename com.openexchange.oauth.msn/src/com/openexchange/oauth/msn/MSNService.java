@@ -47,38 +47,20 @@
  *
  */
 
-package com.openexchange.oauth.msn.oauth;
+package com.openexchange.oauth.msn;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.msn.MSNOAuthMetadata;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import java.util.List;
+import com.openexchange.groupware.container.Contact;
 
 
 /**
- * {@link MSNOAuthActivator}
+ * {@link MSNService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class MSNOAuthActivator extends HousekeepingActivator {
-
-    private static final Class[] NEEDED = new Class[]{ConfigurationService.class};
-    private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
-    private static final String API_SECRET = "com.openexchange.oauth.msn.apiSecret";
+public interface MSNService {
     
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return NEEDED;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        ConfigurationService config = getService(ConfigurationService.class);
-        
-        MSNOAuthMetadata authMetadata = new MSNOAuthMetadata(config.getProperty(API_KEY), config.getProperty(API_SECRET));
-        
-        registerService(OAuthServiceMetaData.class, authMetadata);
-        
-    }
-
+    public abstract List<Contact> getContacts(String password, int user, int contextId, int accountId);
+    
+    public abstract String getAccountDisplayName(String password, int user, int contextId, int accountId);
 }

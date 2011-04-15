@@ -70,23 +70,23 @@ import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
 
 /**
- * {@link MSNOAuthMetadata}
+ * {@link OAuthServiceMetaDataMSNImpl}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MSNOAuthMetadata extends AbstractOAuthServiceMetaData {
+public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
-    private static final Log LOG = LogFactory.getLog(MSNOAuthMetadata.class);
+    private static final Log LOG = LogFactory.getLog(OAuthServiceMetaDataMSNImpl.class);
 
     private static final String accessTokenGrabber = "https://consent.live.com/AccessToken.aspx";
 
     private static final Object REFRESH_TOKEN_KEY = "wrap_refresh_token";
 
-    public MSNOAuthMetadata(String apiKey, String apiSecret) {
-        setId("com.openexchange.oatuh.msn");
+    public OAuthServiceMetaDataMSNImpl(String apiKey, String apiSecret) {
+        setId("com.openexchange.oauth.msn");
         setApiKey(apiKey);
         setApiSecret(apiSecret);
-        setDisplayName("MSN");
+        setDisplayName("WindowsLive / MSN");
     }
 
     @Override

@@ -46,75 +46,76 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.subscribe.msn.osgi;
 
-import java.util.Stack;
+package com.openexchange.oauth.msn.osgi;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.msn.OAuthServiceMetaDataMSNImpl;
 import com.openexchange.oauth.msn.MSNService;
+import com.openexchange.oauth.msn.MSNServiceImpl;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.msn.MSNSubscribeService;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link MSNOAuthActivator}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ */
+public class MSNOAuthActivator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class, ContextService.class, MSNService.class};
-    
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-    
-    private OAuthServiceMetaData oAuthServiceMetaData;
-    
-    private MSNService msnService;
-    
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class };
+
+    private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
+
+    private static final String API_SECRET = "com.openexchange.oauth.msn.apiSecret";
+
+    private OAuthService oauthService;
+
+    private OAuthServiceMetaDataMSNImpl oAuthMetadata;
+
+    private static final Log LOG = LogFactory.getLog(MSNOAuthActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED;
     }
 
+    @Override
     protected void startBundle() throws Exception {
-        // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));        
-        rememberTracker(metaDataTracker);
-        openTrackers();
-        msnService = getService(MSNService.class);
-    }        
-    
-    public OAuthServiceMetaData getOAuthServiceMetaData() {
-        return oAuthServiceMetaData;
+        ConfigurationService config = getService(ConfigurationService.class);
+        oauthService = getService(OAuthService.class);
+
+        oAuthMetadata = new OAuthServiceMetaDataMSNImpl(config.getProperty(API_KEY), config.getProperty(API_SECRET));
+
+        registerService(OAuthServiceMetaData.class, oAuthMetadata);
+        LOG.info("OAuthServiceMetaData for MSN was started");
+        LOG.info("API-Key for MSN : "+config.getProperty(API_KEY)+", API-Secret for MSN : "+config.getProperty(API_SECRET));
+
+        final MSNService msnService = new MSNServiceImpl(this);
+
+        registerService(MSNService.class, msnService);
+        LOG.info("MSNService was started.");
+
     }
 
-    
-    public void setOAuthServiceMetaData(OAuthServiceMetaData authServiceMetaData) {
-        oAuthServiceMetaData = authServiceMetaData;
+    public OAuthService getOauthService() {
+        return oauthService;
     }
 
-    public void registerSubscribeService() {
-        final MSNSubscribeService msnSubscribeService = new MSNSubscribeService(this);
-        registerService(SubscribeService.class, msnSubscribeService);
-        LOG.info("MSNSubscribeService was started");
+    public void setOauthService(OAuthService oauthService) {
+        this.oauthService = oauthService;
     }
 
-    public void unregisterSubscribeService() {
-        unregisterServices();   
-        LOG.info("MSNSubscribeService was stopped");
+    public OAuthServiceMetaDataMSNImpl getOAuthMetadata() {
+        return oAuthMetadata;
     }
 
-    
-    public MSNService getMsnService() {
-        return msnService;
+    public void setOAuthMetadata(OAuthServiceMetaDataMSNImpl authMetadata) {
+        oAuthMetadata = authMetadata;
     }
-
-    
-    public void setMsnService(MSNService msnService) {
-        this.msnService = msnService;
-    }
-
 
 }

@@ -85,14 +85,14 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
         DynamicFormDescription form = new DynamicFormDescription();
 
         FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
-        oauthAccount.setOption("type", Integer.toString(activator.getOAuthServiceMetadata().getId()));
+        oauthAccount.setOption("type", activator.getOAuthServiceMetaData().getId());
         form.add(oauthAccount);
 
         source.setFormDescription(form);
     }
     
     public Collection<?> getContent(Subscription subscription) throws SubscriptionException {
-        return activator.getMSNService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+        return activator.getMsnService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -120,7 +120,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
             if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
             String displayName = null;
             if(subscription.getSecret() != null) {
-                displayName = activator.getMSNService().getAccountDisplayName(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+                displayName = activator.getMsnService().getAccountDisplayName(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
             }
             if (null != displayName && !"".equals(displayName)){
                 subscription.setDisplayName(displayName);

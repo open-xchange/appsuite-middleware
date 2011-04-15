@@ -46,75 +46,51 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.subscribe.msn.osgi;
 
-import java.util.Stack;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.oauth.OAuthService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.msn.MSNService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.msn.MSNSubscribeService;
 
-public class Activator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class, ContextService.class, MSNService.class};
-    
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-    
-    private OAuthServiceMetaData oAuthServiceMetaData;
-    
-    private MSNService msnService;
-    
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+/**
+ * {@link OAuthServiceMetaDataRegisterer}
+ *
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ */
+public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return NEEDED;
+    private BundleContext context;
+    private Activator activator;
+    
+    public OAuthServiceMetaDataRegisterer(BundleContext context, Activator activator){
+        this.context = context;
+        this.activator = activator;
     }
 
-    protected void startBundle() throws Exception {
-        // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));        
-        rememberTracker(metaDataTracker);
-        openTrackers();
-        msnService = getService(MSNService.class);
-    }        
-    
-    public OAuthServiceMetaData getOAuthServiceMetaData() {
+    public Object addingService(ServiceReference reference) {
+        OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) context.getService(reference);
+        // TODO Please use a service property or the service description to let the ServiceTracker filter the only wanted service.
+        if ("com.openexchange.oauth.msn".equals(oAuthServiceMetaData.getId())) {
+            activator.setOAuthServiceMetaData(oAuthServiceMetaData);
+            activator.registerSubscribeService();
+        }
         return oAuthServiceMetaData;
     }
 
-    
-    public void setOAuthServiceMetaData(OAuthServiceMetaData authServiceMetaData) {
-        oAuthServiceMetaData = authServiceMetaData;
+    public void modifiedService(ServiceReference arg0, Object arg1) {
+      //nothing to do here
     }
 
-    public void registerSubscribeService() {
-        final MSNSubscribeService msnSubscribeService = new MSNSubscribeService(this);
-        registerService(SubscribeService.class, msnSubscribeService);
-        LOG.info("MSNSubscribeService was started");
+    public void removedService(ServiceReference reference, Object arg1) {
+        OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) arg1;
+        if ("com.openexchange.socialplugin.linkedin".equals(oAuthServiceMetaData.getId())) {
+            activator.setOAuthServiceMetaData(null);
+            activator.unregisterSubscribeService();
+        }
+        context.ungetService(reference);
     }
-
-    public void unregisterSubscribeService() {
-        unregisterServices();   
-        LOG.info("MSNSubscribeService was stopped");
-    }
-
-    
-    public MSNService getMsnService() {
-        return msnService;
-    }
-
-    
-    public void setMsnService(MSNService msnService) {
-        this.msnService = msnService;
-    }
-
 
 }
