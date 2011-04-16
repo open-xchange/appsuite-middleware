@@ -118,7 +118,7 @@ public class MockOAuthService implements OAuthService {
             }
 
             public String getToken() {
-                String wrap_refresh_token = "JdkDTAAAHgA%241IBrKhP40HiMyRWce9eKHcV*IEspi!AzhcwhLGLkqm63nkMDGd!lak!2P0zYZTpdXXLzw9a9!UwppHAH9JgWPwuA6zrtTflYwaZhk!lPFw8Scg9cfh7oXVLSNvyRTdjanBt3vj!Tu8S2wvnB4ot3CtjnrHts2WuIxNfQqMghiOTUwTeclNWLS3QQ%24%24";
+                String wrap_refresh_token = "AC8FQAAAHgA%241ymI3WoBDHvSXSJl*oFehCMoBYGSrxdgJ*WSyVxWryf3rA92M9aAa5w5PInyCfh6L1RHgQIg00GyFKgBOO26UJXorrEKLCMpq!*wJMShMhWrXvwIwprLJLMzj*xtvHgR3hSpkArQHk7EjdHDsWZBAjDXr7RYdje0MDuZpnDDJoo8S2anpwqPdKvw%24%24&skey=v5wJPJSBpTr9Byadg/hBlISL5VCnMpX2";
                 return wrap_refresh_token;
             }
             

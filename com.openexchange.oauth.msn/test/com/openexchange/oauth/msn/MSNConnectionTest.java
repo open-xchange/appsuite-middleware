@@ -49,8 +49,12 @@
 
 package com.openexchange.oauth.msn;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
 //import junit.framework.TestCase;
 
@@ -75,6 +79,41 @@ public class MSNConnectionTest /*extends TestCase*/{
            System.out.println("first name : " + contact.getGivenName());
            System.out.println("last name : " + contact.getSurName());
        }
+    }
+    
+    public void testGetAccessTokenViaOAuthServiceMetaDataMSNImpl(){
+        final String clientID = "0000000040052F00";
+        final String clientSecret = "zCH5gYyMcZz6blXGM5M44kC6N98OQ1Uc";
+        final String callbackURL = "http://www.open-xchange.com";
+        final Scanner in = new Scanner(System.in);
+
+        String authURL = "https://consent.live.com/connect.aspx?wrap_client_id=" + clientID + "&wrap_callback=" + callbackURL + "&wrap_client_state=js_close_window&mkt=en-us&wrap_scope=WL_Profiles.View,WL_Contacts.View,Messenger.SignIn";
+        System.out.println("Authorization URL (paste this into browser) : ");
+        System.out.println(authURL);      
+
+        // Now lets try to get an access token with this wrap_verification_code ...
+        System.out.println("paste the wrap_verification_code here");
+        System.out.print(">>");
+        String wrap_verification_code = in.nextLine();
+        
+        OAuthServiceMetaDataMSNImpl metadata = new OAuthServiceMetaDataMSNImpl(clientID, clientSecret);
+        HashMap<String, Object> arguments = new HashMap<String, Object>();
+        arguments.put(OAuthConstants.ARGUMENT_PIN, wrap_verification_code);
+        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, callbackURL);
+        try {
+            metadata.getOAuthToken(arguments);
+        } catch (OAuthException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+    public void testURLLength(){
+        String longURL = "";
+        String shortURL = "";
+        
+       System.out.println("Length of long URL : " + longURL.length());
+       System.out.println("Length of short URL : " + shortURL.length());
     }
 
 }
