@@ -121,6 +121,9 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
     @Override
     public void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) {
         String verifier = parameter.get("wrap_verification_code");
+        if (null == verifier){
+            LOG.error("No wrap_verification_code present.");
+        }
         arguments.put(OAuthConstants.ARGUMENT_PIN, verifier);
         arguments.put(OAuthConstants.ARGUMENT_CALLBACK, state.get(OAuthConstants.ARGUMENT_CALLBACK));
         super.processArguments(arguments, parameter, state);
@@ -140,7 +143,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             params.append("&wrap_callback=").append(URLEncoder.encode(callback, "UTF-8"));
             params.append("&wrap_verification_code=").append(verifier);
 
-            final URL url = new URL(accessTokenGrabber);
+            final URL url = new URL(accessTokenGrabber);            
             final URLConnection connection = url.openConnection();
             connection.setConnectTimeout(2500);
             connection.setReadTimeout(2500);
