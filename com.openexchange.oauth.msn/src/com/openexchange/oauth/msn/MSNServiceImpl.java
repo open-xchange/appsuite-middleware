@@ -112,7 +112,7 @@ public class MSNServiceImpl implements MSNService {
      * @param wrap_access_token
      * @return
      */
-    private JSONObject useAccessTokenToAccessData(String wrap_access_token) {
+    private JSONObject useAccessTokenToAccessData(String wrap_access_token) {        
         JSONObject wholeResponse = new JSONObject();
         String responseString = "";
         String protectedUrl = "http://apis.live.net/V4.1/";
@@ -160,7 +160,7 @@ public class MSNServiceImpl implements MSNService {
     private List<Contact> parseIntoContacts(String wrap_access_token, JSONObject wholeResponse) {
         List<Contact> contacts = new ArrayList<Contact>();
         HttpClient client = new HttpClient();
-
+        client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
         try {
             String baseURI = "";
             if (wholeResponse.has("BaseUri")) {
