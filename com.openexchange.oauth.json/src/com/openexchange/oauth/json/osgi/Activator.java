@@ -60,12 +60,16 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.oauthaccount.AccountServlet;
 import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
+import com.openexchange.oauth.json.oauthmeta.MetaDataServlet;
+import com.openexchange.oauth.json.oauthmeta.multiple.MetaDataMultipleHandlerFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link Activator} - Activator for JSON folder interface.
@@ -77,7 +81,7 @@ public class Activator extends DeferredActivator {
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
     private List<ServiceRegistration> serviceRegistrations;
-
+    
     private List<ServiceTracker> trackers;
 
     private OSGiOAuthService oAuthService;
@@ -131,8 +135,8 @@ public class Activator extends DeferredActivator {
             /*
              * Tracker for HTTPService to register servlets
              */
-            trackers.add(new ServiceTracker(context, HttpService.class.getName(), new AccountServletRegisterer(context)));
-            trackers.add(new ServiceTracker(context, HttpService.class.getName(), new MetaDataServletRegisterer(context)));
+            trackers.add(new SessionServletRegistration(context, new AccountServlet(), "/ajax/" + AccountMultipleHandlerFactory.MODULE));
+            trackers.add(new SessionServletRegistration(context,new MetaDataServlet(), "/ajax/" + MetaDataMultipleHandlerFactory.MODULE));
             /*
              * Open trackers
              */

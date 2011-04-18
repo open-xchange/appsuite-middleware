@@ -57,6 +57,7 @@ import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 
 /**
@@ -67,7 +68,7 @@ import com.openexchange.tools.service.ServletRegistration;
 public class ConfigObjectsJSONActivator extends HousekeepingActivator {
 
     private static final Class[] CLASSES = new Class[]{HttpService.class, ConfigObjectRegistryFactory.class};
-    private ServletRegistration servletRegistration;
+    private SessionServletRegistration servletRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -81,7 +82,7 @@ public class ConfigObjectsJSONActivator extends HousekeepingActivator {
         
         registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(factory, "cobjects"));
     
-        servletRegistration = new ServletRegistration(context, new ConfigObjectServlet(), "/ajax/cobjects");
+        servletRegistration = new SessionServletRegistration(context, new ConfigObjectServlet(), "/ajax/cobjects");
         
     }
     

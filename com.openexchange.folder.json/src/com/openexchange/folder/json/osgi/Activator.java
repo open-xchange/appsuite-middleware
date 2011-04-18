@@ -63,6 +63,7 @@ import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
 import com.openexchange.folder.json.preferences.Tree;
 import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folder.json.servlet.FolderServlet;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -70,6 +71,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link Activator} - Activator for JSON folder interface.
@@ -118,7 +120,7 @@ public class Activator extends DeferredActivator {
                 context,
                 getInstance(),
                 FolderService.class)));
-            trackers.add(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
+            trackers.add(new SessionServletRegistration(context, new FolderServlet(), Constants.getServletPath()));
             trackers.add(new ServiceTracker(
                 context,
                 ContentTypeDiscoveryService.class.getName(),

@@ -61,7 +61,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
+import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * 
@@ -71,10 +73,11 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 public class MobilityProvisioningActivator extends DeferredActivator {
     
     private static transient final Log LOG = LogFactory.getLog(MobilityProvisioningActivator.class);
-
+    private final static String SERVLET_PATH = "/ajax/mobilityprovisioning";
+    
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class,HttpService.class };
 	
-	private ServletRegisterer servletRegisterer;
+	private SessionServletRegistration servletRegistration;
 	
 	private List<ServiceTracker> serviceTrackerList;
 
@@ -95,18 +98,12 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 		}
 		
 		getInstance().addService(clazz, getService(clazz));
-		if (HttpService.class.equals(clazz)) {
-			servletRegisterer.registerServlet();
-		}
 	}
 
 	@Override
 	protected void handleUnavailability(Class<?> clazz) {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Re-available service: " + clazz.getName());
-		}
-		if (HttpService.class.equals(clazz)) {
-			servletRegisterer.unregisterServlet();
 		}
 		getInstance().removeService(clazz);
 		
@@ -127,8 +124,9 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 					}
 				}
 			}
-			servletRegisterer = new ServletRegisterer();
-			servletRegisterer.registerServlet();
+			
+			this.servletRegistration = new SessionServletRegistration(context, new MobilityProvisioningServlet(), SERVLET_PATH);
+			this.servletRegistration.open();
 			
             serviceTrackerList.add(new ServiceTracker(context, ActionService.class.getName(), new ActionServiceListener(context)));
             
@@ -146,9 +144,11 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-			servletRegisterer.unregisterServlet();
-			servletRegisterer = null;
-			
+		    if(this.servletRegistration != null) {
+	            this.servletRegistration.close();
+	            this.servletRegistration = null;
+		    }
+		    
             /*
              * Close service trackers
              */

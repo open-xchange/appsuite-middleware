@@ -65,6 +65,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.user.UserService;
 import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.exception.VoipNowExceptionFactory;
@@ -73,6 +74,7 @@ import com.openexchange.voipnow.json.preferences.GUI;
 import com.openexchange.voipnow.json.preferences.VoipNowEnabled;
 import com.openexchange.voipnow.json.preferences.VoipNowFaxAddress;
 import com.openexchange.voipnow.json.services.ServiceRegistry;
+import com.openexchange.voipnow.json.servlet.VoipNowServlet;
 
 /**
  * {@link Activator} - Activator for VoipNow component.
@@ -142,7 +144,7 @@ public class Activator implements BundleActivator {
             /*
              * HTTP service tracker
              */
-            trackers.push(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
+            trackers.push(new SessionServletRegistration(context, new VoipNowServlet(), com.openexchange.voipnow.json.Constants.SERVLET_PATH));
             trackers.push(new ServiceTracker(
                 context,
                 ContactInterfaceDiscoveryService.class.getName(),

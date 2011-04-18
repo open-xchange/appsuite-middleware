@@ -57,6 +57,7 @@ import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link UWAJSONActivator}
@@ -84,7 +85,7 @@ public class UWAJSONActivator extends HousekeepingActivator {
 
         UWAWidgetServlet.FACTORY = actions;
 
-        servletRegistration = new ServletRegistration(context, new UWAWidgetServlet(), "/ajax/uwaWidgets");
+        servletRegistration = new SessionServletRegistration(context, new UWAWidgetServlet(), "/ajax/uwaWidgets");
     }
 
     @Override

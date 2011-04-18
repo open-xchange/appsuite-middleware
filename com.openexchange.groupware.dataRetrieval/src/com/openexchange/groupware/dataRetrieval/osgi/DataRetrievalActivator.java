@@ -65,6 +65,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.tools.service.ServletRegistration;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link DataRetrievalActivator}
@@ -120,7 +121,7 @@ public class DataRetrievalActivator extends DeferredActivator {
 
         AJAXActionServiceAdapterHandler actionService = new AJAXActionServiceAdapterHandler(retrievalActions, Paths.MODULE);
 
-        servletRegistration1 = new ServletRegistration(context, new RetrievalServlet(), "/ajax/" + Paths.MODULE);
+        servletRegistration1 = new SessionServletRegistration(context, new RetrievalServlet(), "/ajax/" + Paths.MODULE);
         servletRegistration2 = new ServletRegistration(context, new FileDeliveryServlet(), Paths.FILE_DELIVERY_PATH);
 
         registration1 = context.registerService(MultipleHandlerFactoryService.class.getName(), actionService, null);

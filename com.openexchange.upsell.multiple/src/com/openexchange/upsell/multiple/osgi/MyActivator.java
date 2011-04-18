@@ -59,58 +59,55 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
+import com.openexchange.upsell.multiple.impl.MyServlet;
 import com.openexchange.user.UserService;
 
 public class MyActivator extends DeferredActivator {
-	
-	private static transient final Log LOG = LogFactory.getLog(MyActivator.class);
 
-	// add services which we need in our plugins later
-	private static final Class<?>[] NEEDED_SERVICES = { UserService.class,DatabaseService.class,ContextService.class,ConfigurationService.class,HttpService.class};
-	
-	private MyServletRegisterer servletRegisterer;
-	
-	private List<ServiceTracker> serviceTrackerList;
-	
+    private static transient final Log LOG = LogFactory.getLog(MyActivator.class);
 
-	public MyActivator() {
-		super();
-		serviceTrackerList = new ArrayList<ServiceTracker>();
-	}
-	
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    // add services which we need in our plugins later
+    private static final Class<?>[] NEEDED_SERVICES = {
+        UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class };
 
-	@Override
-	protected void handleAvailability(Class<?> clazz) {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
-		}
-		
-		getServiceRegistry().addService(clazz, getService(clazz));
-		if (HttpService.class.equals(clazz)) {
-			servletRegisterer.registerServlet();
-		}
-	}
+    private List<ServiceTracker> serviceTrackerList;
 
-	@Override
-	protected void handleUnavailability(Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
-		if (HttpService.class.equals(clazz)) {
-			servletRegisterer.unregisterServlet();
-		}
-		getServiceRegistry().removeService(clazz);
-		
-	}
+    private SessionServletRegistration servletRegistration;
 
-	@Override
+    public MyActivator() {
+        super();
+        serviceTrackerList = new ArrayList<ServiceTracker>();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
+
+    @Override
+    protected void handleAvailability(Class<?> clazz) {
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+
+        getServiceRegistry().addService(clazz, getService(clazz));
+    }
+
+    @Override
+    protected void handleUnavailability(Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        getServiceRegistry().removeService(clazz);
+
+    }
+
+    @Override
 	protected void startBundle() throws Exception {
 		
 		// try to load all the needed services like config service and hostnameservice
@@ -129,9 +126,8 @@ public class MyActivator extends DeferredActivator {
 			
 			
 			// register the http info/sso servlet
-			servletRegisterer = new MyServletRegisterer();
-			servletRegisterer.registerServlet();
-			
+			servletRegistration = new SessionServletRegistration(context, new MyServlet(), getFromConfig("com.openexchange.upsell.multiple.servlet"));
+			servletRegistration.open();
             serviceTrackerList.add(new ServiceTracker(context, UpsellURLService.class.getName(), new UrlServiceInstallationServiceListener(context)));
 			
             // Open service trackers
@@ -147,10 +143,15 @@ public class MyActivator extends DeferredActivator {
 		
 	}
 
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-			
+    private String getFromConfig(String key) throws ServiceException {
+        ConfigurationService configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true);
+        return configservice.getProperty(key);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+
             /*
              * Close service trackers
              */
@@ -159,16 +160,14 @@ public class MyActivator extends DeferredActivator {
             }
             serviceTrackerList.clear();
 
-			
-			// stop info/sso servlet 
-			servletRegisterer.unregisterServlet();
-			servletRegisterer = null;
-			
-			getServiceRegistry().clearRegistry();
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
-	
+            // stop info/sso servlet
+            servletRegistration.close();
+
+            getServiceRegistry().clearRegistry();
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
+
 }

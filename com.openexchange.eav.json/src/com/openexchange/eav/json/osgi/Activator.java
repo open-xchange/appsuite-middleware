@@ -9,13 +9,14 @@ import com.openexchange.eav.json.multiple.EAVServlet;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.Whiteboard;
+import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 
 public class Activator implements BundleActivator {
 
 	private Whiteboard whiteboard;
     private ComponentRegistration componentRegistration;
-    private HTTPServletRegistration servletRegistration;
+    private SessionServletRegistration servletRegistration;
 
     public void start(BundleContext context) throws Exception {
 	    whiteboard = new Whiteboard(context);
@@ -25,12 +26,13 @@ public class Activator implements BundleActivator {
         
 	    componentRegistration = new ComponentRegistration(context, "EAVH", "com.openexchange.eav.json", EAVJsonExceptionMessage.EXCEPTIONS);
 	    
-	    servletRegistration = new HTTPServletRegistration(context, "/ajax/eav", new EAVServlet());
+	    servletRegistration = new SessionServletRegistration(context, new EAVServlet(), "/ajax/eav");
+	    servletRegistration.open();
     }
 
 	public void stop(BundleContext context) throws Exception {
         componentRegistration.unregister();
-        servletRegistration.unregister();
+        servletRegistration.close();
 	    whiteboard.close();
 	}
 

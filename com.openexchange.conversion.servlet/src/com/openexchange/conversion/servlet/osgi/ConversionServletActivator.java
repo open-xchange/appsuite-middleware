@@ -56,6 +56,7 @@ import com.openexchange.conversion.servlet.ConversionServlet;
 import com.openexchange.conversion.servlet.ConversionServletServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link ConversionServletActivator}
@@ -77,7 +78,9 @@ public final class ConversionServletActivator extends DeferredActivator {
         super();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, ConversionService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { ConversionService.class };
+
+    private SessionServletRegistration servletRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -90,22 +93,13 @@ public final class ConversionServletActivator extends DeferredActivator {
         if (!allAvailable()) {
             return;
         }
-        final HttpService httpService = getService(HttpService.class);
-        try {
-            httpService.registerServlet(ALIAS, (conversionServlet = new ConversionServlet()), null, null);
-            LOG.info(ConversionServlet.class.getName() + " successfully re-registered due to re-appearing of " + clazz.getName());
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final HttpService httpService = getService(HttpService.class);
-        if (httpService != null && conversionServlet != null) {
-            httpService.unregister(ALIAS);
-            conversionServlet = null;
-            LOG.info(ConversionServlet.class.getName() + " unregistered due to disappearing of " + clazz.getName());
+        if(servletRegistration != null) {
+            servletRegistration.close();
+            servletRegistration = null;
         }
         ConversionServletServiceRegistry.getServiceRegistry().removeService(clazz);
     }
@@ -127,12 +121,8 @@ public final class ConversionServletActivator extends DeferredActivator {
                     }
                 }
             }
-            /*
-             * Http service is available: Register servlet
-             */
-            final HttpService httpService = getService(HttpService.class);
-            httpService.registerServlet(ALIAS, (conversionServlet = new ConversionServlet()), null, null);
-            LOG.info(ConversionServlet.class.getName() + " successfully registered");
+            servletRegistration = new SessionServletRegistration(context, new ConversionServlet(), ALIAS);
+            servletRegistration.open();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

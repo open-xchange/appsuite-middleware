@@ -58,6 +58,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.servlet.SpellCheckServlet;
 import com.openexchange.spellcheck.servlet.SpellCheckServletException;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link SpellCheckServletActivator}
@@ -69,6 +70,8 @@ public final class SpellCheckServletActivator extends DeferredActivator {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpellCheckServletActivator.class);
 
     private static final String SC_SRVLT_ALIAS = "ajax/spellcheck";
+
+    private SessionServletRegistration servletRegistration;
 
     /**
      * Initializes a new {@link SpellCheckServletActivator}
@@ -84,21 +87,6 @@ public final class SpellCheckServletActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Unregister servlet on both absent HTTP service and spell check service
-         */
-        final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-        if (httpService == null) {
-            LOG.error("HTTP service is null. Spell check servlet cannot be unregistered");
-        } else {
-            /*
-             * Unregister spell check servlet
-             */
-            httpService.unregister(SC_SRVLT_ALIAS);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Spell check servlet successfully unregistered");
-            }
-        }
         getServiceRegistry().removeService(clazz);
     }
 
@@ -108,24 +96,6 @@ public final class SpellCheckServletActivator extends DeferredActivator {
          * Register servlet on both absent HTTP service and spell check service
          */
         getServiceRegistry().addService(clazz, getService(clazz));
-        final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-        if (httpService == null) {
-            LOG.error("HTTP service is null. Spell check servlet cannot be registered");
-        } else {
-            try {
-                /*
-                 * Register spell check servlet
-                 */
-                httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Spell check servlet successfully registered");
-                }
-            } catch (final ServletException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final NamespaceException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
     }
 
     /*
@@ -152,30 +122,8 @@ public final class SpellCheckServletActivator extends DeferredActivator {
             /*
              * Register spell check servlet to newly available HTTP service
              */
-            final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-            if (httpService == null) {
-                LOG.error("HTTP service is null. Spell check servlet cannot be registered");
-                return;
-            }
-            try {
-                /*
-                 * Register spell check servlet
-                 */
-                httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Spell check servlet successfully registered");
-                }
-            } catch (final ServletException e) {
-                throw new SpellCheckServletException(
-                    SpellCheckServletException.Code.SERVLET_REGISTRATION_FAILED,
-                    e,
-                    e.getMessage());
-            } catch (final NamespaceException e) {
-                throw new SpellCheckServletException(
-                    SpellCheckServletException.Code.SERVLET_REGISTRATION_FAILED,
-                    e,
-                    e.getMessage());
-            }
+            servletRegistration = new SessionServletRegistration(context, new SpellCheckServlet(), SC_SRVLT_ALIAS);
+            
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -192,17 +140,8 @@ public final class SpellCheckServletActivator extends DeferredActivator {
             /*
              * Unregister spell check servlet
              */
-            final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-            if (httpService == null) {
-                LOG.error("HTTP service is null. Spell check servlet cannot be unregistered");
-            } else {
-                /*
-                 * Unregister spell check servlet
-                 */
-                httpService.unregister(SC_SRVLT_ALIAS);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Spell check servlet successfully unregistered");
-                }
+            if(servletRegistration != null) {
+                servletRegistration.close();
             }
             /*
              * Clear service registry

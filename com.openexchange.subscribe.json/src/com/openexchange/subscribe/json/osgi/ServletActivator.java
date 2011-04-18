@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.json.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.Servlet;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
@@ -63,6 +65,7 @@ import com.openexchange.subscribe.json.SubscriptionServlet;
 import com.openexchange.subscribe.json.SubscriptionSourceMultipleFactory;
 import com.openexchange.subscribe.json.SubscriptionSourcesServlet;
 import com.openexchange.subscribe.osgi.tools.WhiteboardSubscriptionSourceDiscoveryService;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -75,9 +78,7 @@ public class ServletActivator extends DeferredActivator {
 
     private static final String SUBSCRIPTION_SOURCES_ALIAS = "ajax/subscriptionSources";
 
-    private Servlet subscriptionSources;
-
-    private Servlet subscriptions;
+    private List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
 
     private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class };
 
@@ -98,76 +99,74 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final HttpService httpService = getService(HttpService.class);
-        registerServlets(httpService);
+        // Ignore
     }
 
-    private void registerServlets(HttpService httpService) {
+    private void registerServlets() {
         try {
-            httpService.registerServlet(SUBSCRIPTION_SOURCES_ALIAS, (subscriptionSources = new SubscriptionSourcesServlet()), null, null);
-            httpService.registerServlet(SUBSCRIPTION_ALIAS, (subscriptions = new SubscriptionServlet()), null, null);
+            servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionSourcesServlet(), SUBSCRIPTION_SOURCES_ALIAS));
+            servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionServlet(), SUBSCRIPTION_ALIAS));
+            for (SessionServletRegistration reg : servletRegistrations) {
+                reg.open();
+            }
             LOG.info("Registered Servlets for Subscriptions");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    private void deregisterServlets(HttpService httpService) {
-        if (subscriptionSources != null) {
-            httpService.unregister(SUBSCRIPTION_SOURCES_ALIAS);
-            subscriptionSources = null;
-        }
-        if (subscriptions != null) {
-            httpService.unregister(SUBSCRIPTION_ALIAS);
-            subscriptions = null;
+    private void deregisterServlets() {
+        for (SessionServletRegistration reg : servletRegistrations) {
+            reg.close();
         }
         LOG.info("Deregistered Servlets for Subscriptions");
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final HttpService httpService = getService(HttpService.class);
-        deregisterServlets(httpService);
+        // Ignore
     }
 
     @Override
     protected void startBundle() throws Exception {
         discoverer = new WhiteboardSubscriptionSourceDiscoveryService(context);
-        componentRegistration = new ComponentRegistration(context, "SUBH","com.openexchange.subscribe.json", SubscriptionJSONErrorMessages.FACTORY);
-        
-        final HttpService httpService = getService(HttpService.class);
-        if (null != httpService) {
-            createMultipleHandler();
-            registerServlets(httpService);
-        }
+        componentRegistration = new ComponentRegistration(
+            context,
+            "SUBH",
+            "com.openexchange.subscribe.json",
+            SubscriptionJSONErrorMessages.FACTORY);
+
+        registerServlets();
+        createMultipleHandler();
     }
 
     private void createMultipleHandler() {
         SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
 
-        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(discoverer, subscriptionExecutionService, secretService = new WhiteboardSecretService(context));
+        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(
+            discoverer,
+            subscriptionExecutionService,
+            secretService = new WhiteboardSecretService(context));
         secretService.open();
         SubscriptionSourceMultipleFactory subscriptionSourcesFactory = new SubscriptionSourceMultipleFactory(discoverer);
-        
+
         SubscriptionServlet.setFactory(subscriptionsFactory);
         SubscriptionSourcesServlet.setFactory(subscriptionSourcesFactory);
-        
+
         subscriptionsMultipleReg = context.registerService(MultipleHandlerFactoryService.class.getName(), subscriptionsFactory, null);
-        subscriptionSourceMultipleReg = context.registerService(MultipleHandlerFactoryService.class.getName(), subscriptionSourcesFactory, null);
-        
-        
+        subscriptionSourceMultipleReg = context.registerService(
+            MultipleHandlerFactoryService.class.getName(),
+            subscriptionSourcesFactory,
+            null);
+
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        final HttpService httpService = getService(HttpService.class);
-        if (null != httpService) {
-            deregisterServlets(httpService);
-            destroyMultipleHandler();
-        }
+        deregisterServlets();
         discoverer.close();
         componentRegistration.unregister();
-        
+        destroyMultipleHandler();
     }
 
     private void destroyMultipleHandler() {

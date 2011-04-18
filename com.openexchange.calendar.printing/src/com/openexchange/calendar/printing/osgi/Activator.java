@@ -63,6 +63,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryCustomizer;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
@@ -79,7 +80,7 @@ public class Activator extends DeferredActivator {
      */
     public static final String ALIAS = "/ajax/printCalendar";
 
-    private HTTPServletRegistration registration;
+    private SessionServletRegistration registration;
 
     private ServiceRegistration preferenceItemRegistration;
 
@@ -142,12 +143,13 @@ public class Activator extends DeferredActivator {
         CPServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
         CPServlet.setCalendarTools(collectionService);
 
-        registration = new HTTPServletRegistration(context, ALIAS, new CPServlet());
+        registration = new SessionServletRegistration(context, new CPServlet(), ALIAS);
+        registration.open();
     }
 
     private void unregister() {
         if (registration != null) {
-            registration.unregister();
+            registration.close();
             registration = null;
         }
     }

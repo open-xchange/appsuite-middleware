@@ -7,6 +7,7 @@ import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.json.TemplateMultipleHandler;
 import com.openexchange.templating.json.TemplatingServlet;
 import com.openexchange.tools.service.ServletRegistration;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 public class TemplatingJSONActivator extends DeferredActivator {
 
@@ -15,7 +16,7 @@ public class TemplatingJSONActivator extends DeferredActivator {
      */
     private static final String SERVLET_PATH = "ajax/templating";
     private static final Class<?>[] NEEDED_SERVICES = new Class[]{TemplateService.class};
-    private ServletRegistration registration;
+    private SessionServletRegistration registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -48,7 +49,7 @@ public class TemplatingJSONActivator extends DeferredActivator {
             
         }, null);
         
-        registration = new ServletRegistration(context, new TemplatingServlet(), SERVLET_PATH);
+        registration = new SessionServletRegistration(context, new TemplatingServlet(), SERVLET_PATH);
     }
 
     @Override

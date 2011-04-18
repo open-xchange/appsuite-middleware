@@ -51,81 +51,42 @@ package com.openexchange.tools.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.DeferredRegistryRegistration;
+import com.openexchange.configuration.ServerConfig.Property;
 
 
 /**
- * {@link ServletRegistration}
+ * {@link SessionServletRegistration}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class ServletRegistration extends DeferredRegistryRegistration<HttpService, HttpServlet> {
+public class SessionServletRegistration extends ServletRegistration {
 
-    private static final Log LOG = LogFactory.getLog(ServletRegistration.class);
-    
-    private static final Class<?>[] NO_SERVICES = new Class<?>[0];
-    private static final Class<?>[] CONFIGURATION_SERVICE = new Class<?>[]{ConfigurationService.class};
-    
-    private String alias;
-
-    private List<String> configKeys;
-    
-    public ServletRegistration(BundleContext context, HttpServlet item, String alias, String...configKeys) {
-        this(context, item, alias, ((configKeys == null || configKeys.length == 0) ? new ArrayList<String>() : Arrays.asList(configKeys)));
+    public SessionServletRegistration(BundleContext context, HttpServlet item, String alias, String...configKeys) {
+        super(context, item, alias, addSessionConfigKeys(configKeys));
     }
 
-    public ServletRegistration(BundleContext context, HttpServlet item, String alias, List<String> configKeys) {
-        super(context, HttpService.class, item, ((configKeys == null || configKeys.isEmpty()) ? NO_SERVICES : CONFIGURATION_SERVICE));
-        this.alias = alias;
-        this.configKeys = configKeys;
-        if(alias == null) {
-            throw new IllegalArgumentException("The alias must not be null");
-        }
-        open();
+    private static List<String> addSessionConfigKeys(String[] configKeys) {
+        List<String> allKeys = new ArrayList<String>(Arrays.asList(configKeys));
+        allKeys.add(Property.IP_CHECK.getPropertyName());
+        allKeys.add(Property.COOKIE_HASH.getPropertyName());
+        return allKeys;
     }
-
+    
     @Override
-    public void register(HttpService registry, HttpServlet item) {
-        try {
-            Dictionary<String, String> initParams = new Hashtable<String, String>();
-            ConfigurationService configurationService = getService(ConfigurationService.class);
-            if (configurationService != null) {
-                for(String configKey : configKeys) {
-                    initParams.put(configKey, configurationService.getProperty(configKey));
-                }
-            }
-            customizeInitParams(initParams);
-            registry.registerServlet(alias, item, initParams, null);
-        } catch (ServletException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (NamespaceException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-
     protected void customizeInitParams(Dictionary<String, String> initParams) {
-        // Can be overridden
+        ConfigurationService configurationService = getService(ConfigurationService.class);
+        final String text = configurationService.getText(SessionServlet.SESSION_WHITELIST_FILE);
+        if(text != null) {
+            initParams.put(SessionServlet.SESSION_WHITELIST_FILE, text);    
+        }
     }
-
-    @Override
-    public void unregister(HttpService registry, HttpServlet item) {
-        registry.unregister(alias);
-    }
-
-
+    
+    
+    
 }

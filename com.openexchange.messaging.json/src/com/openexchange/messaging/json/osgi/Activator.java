@@ -50,6 +50,7 @@
 package com.openexchange.messaging.json.osgi;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -80,6 +81,7 @@ import com.openexchange.messaging.json.servlets.ServicesServlet;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 public class Activator extends DeferredActivator {
 
@@ -91,8 +93,8 @@ public class Activator extends DeferredActivator {
 
     private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
 
-    private HttpService httpService;
-
+    private List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(3);
+    
     private MessagingServiceRegistry registry;
 
     private MessagingMessageParser parser;
@@ -125,12 +127,11 @@ public class Activator extends DeferredActivator {
     }
 
     private void hide() {
-        if (null != httpService) {
-            httpService.unregister("/ajax/messaging/account");
-            httpService.unregister("/ajax/messaging/message");
-            httpService.unregister("/ajax/messaging/service");
+        for(SessionServletRegistration reg : servletRegistrations) {
+            reg.close();
         }
-
+        servletRegistrations.clear();
+        
         for (final ServiceRegistration registration : registrations) {
             registration.unregister();
         }
@@ -163,7 +164,6 @@ public class Activator extends DeferredActivator {
         try {
 
             registry = getService(MessagingServiceRegistry.class);
-            httpService = getService(HttpService.class);
             cacheService = getService(CacheService.class);
 
             if (!allAvailable()) {
@@ -174,9 +174,13 @@ public class Activator extends DeferredActivator {
             MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
             ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
 
-            httpService.registerServlet("/ajax/messaging/account", new AccountServlet(), null, null);
-            httpService.registerServlet("/ajax/messaging/message", new MessagesServlet(), null, null);
-            httpService.registerServlet("/ajax/messaging/service", new ServicesServlet(), null, null);
+            servletRegistrations.add(new SessionServletRegistration(context, new AccountServlet(), "ajax/messaging/account"));
+            servletRegistrations.add(new SessionServletRegistration(context, new MessagesServlet(), "/ajax/messaging/message"));
+            servletRegistrations.add(new SessionServletRegistration(context, new ServicesServlet(), "/ajax/messaging/service"));
+
+            for(SessionServletRegistration reg : servletRegistrations) {
+                reg.open();
+            }
 
             registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
             registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));

@@ -59,9 +59,11 @@ import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.multiple.UserMultipleHandlerFactory;
 import com.openexchange.user.json.services.ServiceRegistry;
+import com.openexchange.user.json.servlet.UserServlet;
 
 /**
  * {@link Activator} - Activator for user component.
@@ -109,7 +111,7 @@ public class Activator implements BundleActivator {
             /*
              * HTTP service tracker
              */
-            trackers.push(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
+            trackers.push(new SessionServletRegistration(context, new UserServlet(), com.openexchange.user.json.Constants.SERVLET_PATH));
             trackers.push(new ServiceTracker(
                 context,
                 ContactInterfaceDiscoveryService.class.getName(),

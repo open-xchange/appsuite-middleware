@@ -57,7 +57,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.sso.SSOConstants;
 import com.openexchange.sso.multiple.SSOMultipleHandlerFactory;
+import com.openexchange.sso.servlet.SSOServlet;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link SSOActivator} - Activator for JSON single sign-on interface.
@@ -76,7 +79,7 @@ public class SSOActivator implements BundleActivator {
          * Service trackers
          */
         trackers = new ArrayList<ServiceTracker>(1);
-        trackers.add(new ServiceTracker(context, HttpService.class.getName(), new SSOServletRegisterer(context)));
+        trackers.add(new SessionServletRegistration(context, new SSOServlet(), SSOConstants.SERVLET_PATH));
         /*
          * Open trackers
          */

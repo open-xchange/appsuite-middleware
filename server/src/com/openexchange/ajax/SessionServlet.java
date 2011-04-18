@@ -106,7 +106,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     public static final String SESSION_KEY = "sessionObject";
 
-    private static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
+    public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
     private boolean checkIP = true;
 
@@ -127,31 +127,37 @@ public abstract class SessionServlet extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-        initRanges();
+        initRanges(config);
         hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
-    private void initRanges() {
+    private void initRanges(ServletConfig config) {
         if (rangesLoaded) {
             return;
         }
         if (checkIP) {
-            final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
 
-            if (configurationService != null) {
-                rangesLoaded = true;
-                final String text = configurationService.getText(SESSION_WHITELIST_FILE);
-                if (text != null) {
-                    LOG.info("Exceptions from IP Check have been defined.");
-                    final String[] lines = text.split("\n");
-                    for (String line : lines) {
-                        line = line.replaceAll("\\s", "");
-                        if (!line.equals("") && !line.startsWith("#")) {
-                            ranges.add(IPRange.parseRange(line));
-                        }
+            String text = null;
+            text = config.getInitParameter(SESSION_WHITELIST_FILE);
+            if (text == null) {
+                // Fall back to configuration service
+                final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (configurationService != null) {
+                    text = config.getInitParameter(SESSION_WHITELIST_FILE);
+                }
+            }
+            rangesLoaded = true;
+            if (text != null) {
+                LOG.info("Exceptions from IP Check have been defined.");
+                final String[] lines = text.split("\n");
+                for (String line : lines) {
+                    line = line.replaceAll("\\s", "");
+                    if (!line.equals("") && !line.startsWith("#")) {
+                        ranges.add(IPRange.parseRange(line));
                     }
                 }
             }
+
         } else {
             rangesLoaded = true;
         }
@@ -233,9 +239,6 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private List<IPRange> getRanges() {
-        if(!rangesLoaded) {
-            initRanges();
-        }
         return ranges;
     }
 

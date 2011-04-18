@@ -49,6 +49,7 @@
 
 package com.openexchange.publish.json.osgi;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -66,6 +67,7 @@ import com.openexchange.publish.json.PublicationTargetMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationTargetServlet;
 import com.openexchange.publish.json.types.EntityMap;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 public class ServletActivator extends DeferredActivator {
 
@@ -78,10 +80,8 @@ public class ServletActivator extends DeferredActivator {
 
     private ComponentRegistration componentRegistration;
 
-    private PublicationTargetServlet targetServlet;
-
-    private PublicationServlet pubServlet;
-
+    List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
+    
     private List<ServiceRegistration> serviceRegistrations = new LinkedList<ServiceRegistration>();
     
     @Override
@@ -115,14 +115,11 @@ public class ServletActivator extends DeferredActivator {
         PublicationServlet.setFactory(publicationHandlerFactory);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
         
-        final HttpService httpService = getService(HttpService.class);
-        try {
-            httpService.registerServlet(TARGET_ALIAS, (targetServlet = new PublicationTargetServlet()), null, null);
-            LOG.info(PublicationTargetServlet.class.getName() + " successfully re-registered.");
-            httpService.registerServlet(PUB_ALIAS, (pubServlet = new PublicationServlet()), null, null);
-            LOG.info(PublicationServlet.class.getName() + " successfully re-registered.");
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+        servletRegistrations.add(new SessionServletRegistration(context, new PublicationTargetServlet(), TARGET_ALIAS));
+        servletRegistrations.add(new SessionServletRegistration(context, new PublicationServlet(), PUB_ALIAS));
+        
+        for (SessionServletRegistration reg : servletRegistrations) {
+            reg.open();
         }
     }
 
@@ -140,15 +137,11 @@ public class ServletActivator extends DeferredActivator {
         }
         serviceRegistrations.clear();
         
-        final HttpService httpService = getService(HttpService.class);
-        if (httpService != null && targetServlet != null) {
-            httpService.unregister(TARGET_ALIAS);
-            targetServlet = null;
-            LOG.info(PublicationTargetServlet.class.getName() + " unregistered.");
-            httpService.unregister(PUB_ALIAS);
-            pubServlet = null;
-            LOG.info(PublicationServlet.class.getName() + " unregistered.");
+        for (SessionServletRegistration reg : servletRegistrations) {
+            reg.close();
         }
+        servletRegistrations.clear();
+
     }
 
     @Override

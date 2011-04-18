@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.osgi;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -76,6 +77,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link FileStorageJSONActivator}
@@ -93,10 +95,10 @@ public class FileStorageJSONActivator extends DeferredActivator {
 
     private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
 
-    private HttpService httpService;
-
     private FileStorageServiceRegistry registry;
 
+    private List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(4);
+    
     // private MessagingMessageParser parser;
 
     // private MessagingMessageWriter writer;
@@ -127,12 +129,8 @@ public class FileStorageJSONActivator extends DeferredActivator {
     }
 
     private void hide() {
-        if (null != httpService) {
-            httpService.unregister("/ajax/filestorage/account");
-            httpService.unregister("/ajax/filestorage/message");
-            httpService.unregister("/ajax/filestorage/service");
-            httpService.unregister("/ajax/infostore");
-               
+        for (SessionServletRegistration reg : servletRegistrations) {
+            reg.close();
         }
 
         for (final ServiceRegistration registration : registrations) {
@@ -168,7 +166,6 @@ public class FileStorageJSONActivator extends DeferredActivator {
     private void register() throws CacheException {
 
         registry = getService(FileStorageServiceRegistry.class);
-        httpService = getService(HttpService.class);
         cacheService = getService(CacheService.class);
 
         if (!allAvailable()) {
@@ -179,15 +176,11 @@ public class FileStorageJSONActivator extends DeferredActivator {
         // MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
         // ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
 
-        try {
-            httpService.registerServlet("/ajax/filestorage/account", new AccountServlet(), null, null);
-            httpService.registerServlet("/ajax/infostore", new FileServlet(), null, null);
-            // httpService.registerServlet("/ajax/filestorage/message", new MessagesServlet(), null, null);
-            // httpService.registerServlet("/ajax/filestorage/service", new ServicesServlet(), null, null);
-        } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+        servletRegistrations.add(new SessionServletRegistration(context, new AccountServlet(), "ajax/filestorage/account"));
+        servletRegistrations.add(new SessionServletRegistration(context, new FileServlet(), "ajax/infostore"));
+
+        for (SessionServletRegistration reg : servletRegistrations) {
+            reg.open();
         }
 
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));

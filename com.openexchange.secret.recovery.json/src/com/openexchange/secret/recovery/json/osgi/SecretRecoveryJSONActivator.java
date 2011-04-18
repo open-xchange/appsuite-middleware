@@ -64,13 +64,16 @@ import com.openexchange.secret.recovery.json.SecretRecoveryServlet;
 import com.openexchange.secret.recovery.json.preferences.Enabled;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.Whiteboard;
+import com.openexchange.tools.service.SessionServletRegistration;
 
 public class SecretRecoveryJSONActivator extends DeferredActivator{
     private static final Log LOG = LogFactory.getLog(SecretRecoveryJSONActivator.class);
     
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class, HttpService.class};
+    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class};
     private ServiceRegistration registration;
     private ServiceRegistration enabledReg;
+
+    private SessionServletRegistration servletRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -100,9 +103,8 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
             SecretRecoveryServlet.migrator = migrator;
             SecretRecoveryServlet.secretService = secretService;
             
-            final HttpService httpService = getService(HttpService.class);
-            
-            httpService.registerServlet("ajax/recovery/secret", new SecretRecoveryServlet(), null, null);
+            servletRegistration = new SessionServletRegistration(context, new SecretRecoveryServlet(), "ajax/recovery/secret");
+            servletRegistration.open();
             
             registration = context.registerService(MultipleHandlerFactoryService.class.getName(), new MultipleHandlerFactoryService() {
 
@@ -125,11 +127,10 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
 
     @Override
     protected void stopBundle() throws Exception {
-        final HttpService httpService = getService(HttpService.class);
-        if(httpService == null) {
-            return; // No need to unregister, if the service is gone already.
+        if (servletRegistration != null) {
+            servletRegistration.close();
+            servletRegistration = null;
         }
-        httpService.unregister("ajax/recovery/secret");
         if(registration != null) {
             registration.unregister();
         }

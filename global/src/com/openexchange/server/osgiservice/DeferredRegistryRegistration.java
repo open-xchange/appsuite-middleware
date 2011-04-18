@@ -49,22 +49,71 @@
 
 package com.openexchange.server.osgiservice;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link DeferredRegistryRegistration}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class DeferredRegistryRegistration<R,P> extends ServiceTracker {
+public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker {
+
+
+    private static final Log LOG = LogFactory.getLog(DeferredRegistryRegistration.class);
+     
+    private R registry;
+
+    private Class<R> registryClass;
 
     private final P item;
 
-    public DeferredRegistryRegistration(final BundleContext context, final Class<R> registryClass, final P item) {
-        super(context, registryClass.getName(), null);
+    private List<Class<?>> expectedServices;
+
+    private Map<Class<?>, PriorityQueue<ServiceEntry>> serviceMap = new ConcurrentHashMap<Class<?>, PriorityQueue<ServiceEntry>>();
+
+    public DeferredRegistryRegistration(final BundleContext context, final Class<R> registryClass, final P item, Class<?>... additionalServices) {
+        super(context, buildFilter(context, registryClass, additionalServices), null);
+        this.registryClass = registryClass;
         this.item = item;
+        this.expectedServices = new ArrayList<Class<?>>(1 + ((additionalServices == null) ? 0 : additionalServices.length));
+        expectedServices.add(registryClass);
+        if (additionalServices != null) {
+            for (Class<?> serviceClass : additionalServices) {
+                expectedServices.add(serviceClass);
+            }
+        }
+    }
+
+    private static Filter buildFilter(BundleContext context, Class<?> registryClass, Class<?>[] additionalServices) {
+        try {
+            if (additionalServices == null || additionalServices.length == 0) {
+                return context.createFilter("("+Constants.OBJECTCLASS+"="+registryClass.getName()+")");
+
+            }
+            StringBuilder builder = new StringBuilder("(| (").append(Constants.OBJECTCLASS).append('=').append(registryClass.getName()).append(')');
+            for (Class<?> klass : additionalServices) {
+                builder.append('(').append(Constants.OBJECTCLASS).append('=').append(klass.getName()).append(')');
+            }
+            builder.append(')');
+            return context.createFilter(builder.toString());
+        } catch (InvalidSyntaxException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        }
     }
 
     public abstract void register(R registry, P item);
@@ -77,14 +126,102 @@ public abstract class DeferredRegistryRegistration<R,P> extends ServiceTracker {
 
     @Override
     public Object addingService(final ServiceReference reference) {
-        final R registry = (R) context.getService(reference);
-        register(registry, item);
-        return registry;
+        Object service = remember(reference);
+        if (isComplete()) {
+            register(registry, item);
+        }
+        return service;
+    }
+
+    private Object remember(ServiceReference reference) {
+        Object service = super.addingService(reference);
+        for (Class<?> klass : expectedServices) {
+            if (klass.isInstance(service)) {
+                PriorityQueue<ServiceEntry> priorityQueue = serviceMap.get(klass);
+                if (priorityQueue == null) {
+                    priorityQueue = new PriorityQueue<ServiceEntry>();
+                    PriorityQueue<ServiceEntry> otherQueue = serviceMap.put(klass, priorityQueue);
+                    if(otherQueue != null) {
+                        priorityQueue = otherQueue;
+                    }
+                }
+                priorityQueue.add(new ServiceEntry(reference, service));
+            }
+        }
+        if (registryClass.isInstance(service)) {
+            registry = (R) service;
+        }
+        return service;
     }
 
     @Override
     public void removedService(final ServiceReference reference, final Object service) {
-        unregister((R) service, item);
-        context.ungetService(reference);
+        forget(service);
+        if (!isComplete()) {
+            unregister(registry, item);
+        }
+        if (service == registry) {
+            registry = null;
+        }
+    }
+
+    private void forget(Object service) {
+        for (Class<?> klass : expectedServices) {
+            if (klass.isInstance(service)) {
+                PriorityQueue<ServiceEntry> priorityQueue = serviceMap.get(klass);
+                if (priorityQueue != null) {
+                    Iterator<ServiceEntry> iterator = priorityQueue.iterator();
+                    while (iterator.hasNext()) {
+                        ServiceEntry next = iterator.next();
+                        if (next.service == service) {
+                            iterator.remove();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isComplete() {
+        for (Class<?> klass : expectedServices) {
+            PriorityQueue<ServiceEntry> priorityQueue = serviceMap.get(klass);
+            if (priorityQueue == null || priorityQueue.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public <I> I getService(Class<I> klass) {
+        PriorityQueue<ServiceEntry> priorityQueue = serviceMap.get(klass);
+        if (priorityQueue == null || priorityQueue.isEmpty()) {
+            return null;
+        }
+        return (I) priorityQueue.peek().service;
+    }
+
+    private final class ServiceEntry implements Comparable<ServiceEntry> {
+
+        public ServiceReference ref;
+
+        public Object service;
+
+        public ServiceEntry(ServiceReference ref, Object service) {
+            this.ref = ref;
+            this.service = service;
+        }
+
+        public int compareTo(ServiceEntry o) {
+            return getPriority() - o.getPriority();
+        }
+
+        private int getPriority() {
+            Object property = ref.getProperty(Constants.SERVICE_RANKING);
+            if (property == null) {
+                return 0;
+            }
+            return Autoboxing.a2i(property);
+        }
+
     }
 }
