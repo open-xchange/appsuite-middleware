@@ -58,10 +58,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.database.DBPoolingException;
@@ -80,23 +78,22 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * ConflictHandler
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class ConflictHandler {
-    
+
     private final CalendarDataObject cdao;
     private final Session so;
     private boolean create = true;
     private int current_results;
-    
+
     public static final int MAX_CONFLICT_RESULTS = 999;
-    
+
     public static final CalendarDataObject NO_CONFLICTS[] = new CalendarDataObject[0];
-    
+
     private static final Log LOG = LogFactory.getLog(ConflictHandler.class);
     private CalendarDataObject edao;
     private CalendarCollection recColl;
@@ -108,7 +105,7 @@ public class ConflictHandler {
         this.create = create;
         this.recColl = new CalendarCollection();
     }
-    
+
     public CalendarDataObject[] getConflicts() throws OXException {
         final Context ctx = Tools.getContext(so);
         if (cdao.getShownAs() == CalendarDataObject.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
@@ -159,28 +156,24 @@ public class ConflictHandler {
         }
         if (request_participants) {
             return resolveParticipantsRecurring();
-        } else {
-            /*
-             * Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)}
-             * for series appointments.
-             */
-    		final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
-    		final Date resultStart = new Date(results.getRecurringResult(0).getStart());
-    		final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
-    	    final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);
-    	    // Results must be sorted afterwards because already existing series
-    	    // appointments are returned in time reverse order by FreeBusyResults.
-    	    // Because of 999 maximum number of conflicts the returned array may
-    	    // contain a lot of appointments far in the future.
-    	    Arrays.sort(resultConflicts, new Comparator<CalendarDataObject>() {
-                public int compare(final CalendarDataObject cdao1, final CalendarDataObject cdao2) {
-                    return cdao1.getStartDate().compareTo(cdao2.getStartDate());
-                }
-    	    });
-            return resultConflicts;
         }
+        // Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)} for series appointments.
+        final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
+        final Date resultStart = new Date(results.getRecurringResult(0).getStart());
+        final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
+        final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);
+        // Results must be sorted afterwards because already existing series
+        // appointments are returned in time reverse order by FreeBusyResults.
+        // Because of 999 maximum number of conflicts the returned array may
+        // contain a lot of appointments far in the future.
+        Arrays.sort(resultConflicts, new Comparator<CalendarDataObject>() {
+            public int compare(final CalendarDataObject cdao1, final CalendarDataObject cdao2) {
+                return cdao1.getStartDate().compareTo(cdao2.getStartDate());
+            }
+        });
+        return resultConflicts;
 	}
-    
+
     private CalendarDataObject[] resolveParticipantsRecurring() throws OXException {
         long limit = CalendarConfig.getSeriesConflictLimit() ? System.currentTimeMillis() + Constants.MILLI_YEAR : 0;
         RecurringResultsInterface rresults = recColl.calculateRecurring(cdao, 0, limit , 0);
@@ -191,10 +184,10 @@ public class ConflictHandler {
                 return conflicts;
             }
         }
-        
+
         return NO_CONFLICTS;
     }
-    
+
     private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
         final String sql_in = recColl.getSQLInStringForParticipants(getConflictUsers());
         if (sql_in == null) {
@@ -210,7 +203,7 @@ public class ConflictHandler {
         final Context ctx = Tools.getContext(so);
         final User user = Tools.getUser(so, ctx);
         try {
-            readcon = DBPool.pickup(ctx);            
+            readcon = DBPool.pickup(ctx);
             final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
             long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
             if (whole_day_end <= whole_day_start) {
@@ -280,7 +273,7 @@ public class ConflictHandler {
             }
         }
     }
-    
+
     boolean shouldConflict(CalendarDataObject cdao, CalendarDataObject conflictDao) {
         if (create) {
             return true;
@@ -315,10 +308,10 @@ public class ConflictHandler {
                 break;
             }
         }
-        
+
         return relevantUsers;
     }
-    
+
     private CalendarDataObject[] resolveResourceConflicts(final Date start, final Date end) throws OXException {
         final String sql_in = recColl.getSQLInStringForResources(cdao.getParticipants());
         if (sql_in == null) {
@@ -353,7 +346,7 @@ public class ConflictHandler {
                     if (li == null) {
                         li = new ArrayList<CalendarDataObject>();
                     }
-                    
+
                     if (!(!create && cdao.getObjectID() == conflict_dao.getObjectID())) { // Same id should never conflict if we are running an update
                         if (!cdao.containsRecurrencePosition()) {
                             if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
@@ -513,7 +506,7 @@ public class ConflictHandler {
             }
         }
     }
-    
+
     private final boolean containsResources() {
         return cdao.containsResources();
     }
