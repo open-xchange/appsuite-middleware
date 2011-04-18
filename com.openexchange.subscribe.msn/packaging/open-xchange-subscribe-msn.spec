@@ -1,10 +1,10 @@
 
 # norootforbuild
 
-Name:           open-xchange-subscribe-linkedin
+Name:           open-xchange-subscribe-msn
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-linkedin >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-msn >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -41,15 +41,15 @@ BuildRequires:  open-xchange-xerces-sun
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        LinkedIn via OAuth for Open-Xchange Server 6
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-linkedin >= @OXVERSION@
+Summary:        MSN via OAuth for Open-Xchange Server 6
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-oauth >= @OXVERSION@ open-xchange-oauth-msn >= @OXVERSION@
 
 %if 0%{?sles_version} >= 10
 Requires:   open-xchange-xerces-ibm
