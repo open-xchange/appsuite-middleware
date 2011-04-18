@@ -73,23 +73,6 @@ public final class MailAccessCache {
 
     private static volatile MailAccessCache singleton;
 
-    /*
-     * Field members
-     */
-    private TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> timeoutMap;
-
-    private int defaultIdleSeconds;
-
-    /**
-     * Prevent instantiation.
-     * 
-     * @throws MailException If initialization fails
-     */
-    private MailAccessCache() throws MailException {
-        super();
-        initCache();
-    }
-
     /**
      * Gets the singleton instance.
      * 
@@ -120,6 +103,23 @@ public final class MailAccessCache {
                 }
             }
         }
+    }
+
+    /*
+     * Field members
+     */
+    private TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> timeoutMap;
+
+    private int defaultIdleSeconds;
+
+    /**
+     * Prevent instantiation.
+     * 
+     * @throws MailException If initialization fails
+     */
+    private MailAccessCache() throws MailException {
+        super();
+        initCache();
     }
 
     /**
