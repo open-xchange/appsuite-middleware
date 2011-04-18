@@ -411,7 +411,7 @@ public class AJPv13TaskWatcher {
 
         private void keepAliveSendAvailableData(final String remoteAddress, final BlockableBufferedOutputStream out, final byte[] remainingData) throws IOException, AJPv13Exception {
             AJPv13Request.writeChunked(remainingData, out);
-            if (info) {
+            if (log.isDebugEnabled()) {
                 log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
                     "\" to initiate a KEEP-ALIVE poll."));
             }
@@ -419,7 +419,7 @@ public class AJPv13TaskWatcher {
 
         private void keepAliveSendEmptyBody(final String remoteAddress, final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
             AJPv13Request.writeEmpty(out);
-            if (info) {
+            if (log.isDebugEnabled()) {
                 log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(
                     remoteAddress).append("\" to initiate a KEEP-ALIVE poll."));
             }
@@ -430,7 +430,7 @@ public class AJPv13TaskWatcher {
             try {
                 out.write(AJPv13Response.getGetBodyChunkBytes(0));
                 out.flush();
-                if (info) {
+                if (log.isDebugEnabled()) {
                     log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
                         "\" to initiate a KEEP-ALIVE poll."));
                 }
@@ -440,7 +440,7 @@ public class AJPv13TaskWatcher {
                 final int bodyRequestDataLength = ajpConnection.readInitialBytes(true, false);
                 if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
                     log.warn("AJP KEEP-ALIVE: Got a non-empty data chunk from web server although an empty one was requested");
-                } else if (info) {
+                } else if (log.isDebugEnabled()) {
                     log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
                         "\" initiated by former KEEP-ALIVE poll."));
                 }
