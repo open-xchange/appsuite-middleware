@@ -62,7 +62,7 @@ public class Group implements Cloneable {
 		ID(1,AJAXServlet.PARAMETER_ID, "id"),
 		LAST_MODIFIED(5,"last_modified", "lastModified"),
 		SIMPLE_NAME(700, "name", "identifier"), //Confused yet?
-		FULL_NAME(701, "display_ame", "displayName"),
+		FULL_NAME(701, "display_name", "displayName"),
 		MEMBERS(702, "members", null);
 		
 		private int colNumber;
