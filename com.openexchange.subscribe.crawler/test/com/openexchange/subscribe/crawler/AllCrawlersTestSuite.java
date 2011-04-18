@@ -70,7 +70,6 @@ public class AllCrawlersTestSuite{
         testSuite.addTestSuite(YahooComTest.class);
         testSuite.addTestSuite(GMXComTest.class);
         testSuite.addTestSuite(TOnlineDETEst.class);
-        testSuite.addTestSuite(MSNTest.class);
         testSuite.addTestSuite(XINGTest.class);
         return testSuite;
     }
