@@ -1,3 +1,7 @@
+* 2011-04-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #18837: Calculating conflicts for series that start in the past but last into the future.
+
 * 2011-04-15 - marcus.klein@open-xchange.com
 
  - Bugfix #18816: Properly initializing the update tasks if they are executed in administration daemon.

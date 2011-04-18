@@ -115,8 +115,10 @@ public class ConflictHandler {
                 LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
             }
             return NO_CONFLICTS;
-        } else if (cdao.containsEndDate() && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
-            return NO_CONFLICTS; // Past apps should never conflict
+        } else if (cdao.isSingle() && cdao.containsEndDate() && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
+            return NO_CONFLICTS; // Past single apps should never conflict
+        } else if (cdao.isSequence() && recColl.checkMillisInThePast(recColl.getMaxUntilDate(cdao).getTime())) {
+            return NO_CONFLICTS; // Past series apps should never conflict
         } else if (!create && !cdao.containsShownAs() && (cdao.getShownAs() == CalendarDataObject.FREE)) {
             //if (cdao.getShownAs() == CalendarDataObject.FREE) {
             return NO_CONFLICTS; // According to bug #5267
