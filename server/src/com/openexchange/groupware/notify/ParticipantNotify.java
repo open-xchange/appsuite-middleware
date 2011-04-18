@@ -862,7 +862,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                      */
                     final String message = getAppointmentCreateTemplate(p, canRead, cal, session);
                     String textMessage = new StringTemplate(message).render(p.getLocale(), clone);
-                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
+                    if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
+                        msg.message = textMessage;
+                    } else {
+                        msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
+                    }
                 } else {
                     msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(
                         title).toString();
