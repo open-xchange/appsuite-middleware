@@ -52,7 +52,6 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -63,7 +62,7 @@ import com.openexchange.subscribe.msn.MSNSubscribeService;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class, ContextService.class, MSNService.class};
+    private static final Class[] NEEDED = new Class[] { OAuthService.class, ContextService.class, MSNService.class};
     
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
     
