@@ -246,7 +246,7 @@ public class CalendarDataObject extends Appointment {
      */
     public final boolean isSequence(final boolean what) {
         if (what) {
-            return ((containsRecurrenceString() && getRecurrence() != null)|| (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0));
+            return ((containsRecurrenceString() && getRecurrence() != null) || (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0));
         }
         return (containsRecurrenceID() && containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0);
     }
