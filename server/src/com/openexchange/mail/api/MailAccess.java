@@ -130,6 +130,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * Gets the session associated with this {@link MailAccess} instance.
+     * 
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
+
+    /**
      * Adds given warnings.
      * 
      * @param warnings The warnings to add
