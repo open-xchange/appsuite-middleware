@@ -140,8 +140,10 @@ public class Activator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         try {
             // stop hostname service
-            hostname_registration.unregister();
-            hostnameservice = null;
+            if (hostname_registration != null) {
+                hostname_registration.unregister();
+                hostnameservice = null;
+            }
 
             deactivateCaching();
 
