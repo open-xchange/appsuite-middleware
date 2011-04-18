@@ -90,7 +90,7 @@ public class Called implements Expectation {
             args = new Object[0];
         }
         
-        assertEquals("Argument list size is not equal. Wrong method called?", getArgumentLength(), args.length);
+        assertEquals("Argument list size is not equal. Wrong method called? Method: "+methodName, getArgumentLength(), args.length);
         
         int index = 0;
         for (Object object : args) {
