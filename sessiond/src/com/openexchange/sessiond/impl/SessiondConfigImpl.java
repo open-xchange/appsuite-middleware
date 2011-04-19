@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.sessiond.SessiondProperty.SESSIOND_AUTOLOGIN;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigTools;
@@ -71,6 +72,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private long sessionShortLifeTime = 60l * 60l * 1000l;
     private long randomTokenTimeout = 60l * 1000l;
     private long longLifeTime = 7l * 24l * 60l * 60l * 1000l;
+    private boolean autoLogin = false;
 
     public SessiondConfigImpl(final ConfigurationService conf) {
         maxSession = parseProperty(conf, "com.openexchange.sessiond.maxSession", maxSession);
@@ -96,6 +98,9 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
         tmp = conf.getProperty("com.openexchange.sessiond.sessionLongLifeTime", "1W");
         longLifeTime = ConfigTools.parseTimespan(tmp);
+
+        tmp = conf.getProperty(SESSIOND_AUTOLOGIN.getPropertyName(), SESSIOND_AUTOLOGIN.getDefaultValue());
+        autoLogin = Boolean.parseBoolean(tmp);
     }
 
     public long getSessionContainerTimeout() {
@@ -128,6 +133,10 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     public long getNumberOfLongTermSessionContainers() {
         return (longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME;
+    }
+
+    public boolean isAutoLogin() {
+        return autoLogin;
     }
 
     public static int parseProperty(ConfigurationService prop, String name, int value) {

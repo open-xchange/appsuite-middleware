@@ -49,6 +49,8 @@
 
 package com.openexchange.login;
 
+import com.openexchange.sessiond.SessiondProperty;
+
 /**
  * {@link ConfigurationProperty}
  *
@@ -87,7 +89,7 @@ public enum ConfigurationProperty {
     /**
      * Whether autologin is allowed or not.
      */
-    SESSIOND_AUTOLOGIN("com.openexchange.sessiond.autologin", Boolean.FALSE.toString()),
+    SESSIOND_AUTOLOGIN(SessiondProperty.SESSIOND_AUTOLOGIN.getPropertyName(), SessiondProperty.SESSIOND_AUTOLOGIN.getDefaultValue()),
     NO_IP_CHECK_RANGE("com.openexchange.noIPCheckRange", null);
 
     private final String propertyName;

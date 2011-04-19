@@ -1,3 +1,7 @@
+* 2011-04-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #18993: Not putting sessions into the long term session container anymore if auto login feature is disabled.
+
 * 2011-04-18 - marcus.klein@open-xchange.com
 
  - Bugfix #18837: Calculating conflicts for series that start in the past but last into the future.

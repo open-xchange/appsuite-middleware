@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,34 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond;
 
 /**
- * SessionConfig
+ * {@link SessiondProperty}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface SessiondConfigInterface {
-
-    long getSessionContainerTimeout();
-
-    long getLongTermSessionContainerTimeout();
-
-    long getNumberOfSessionContainers();
-
-    int getMaxSessions();
-
-    int getMaxSessionsPerUser();
-
-    long getLifeTime();
-
-    long getRandomTokenTimeout();
-
-    long getNumberOfLongTermSessionContainers();
-
-    /**
-     * @return <code>true</code> if autologin is enabled.
+public enum SessiondProperty {
+    
+    /** 
+     * Whether autologin is allowed or not.
      */
-    boolean isAutoLogin();
+    SESSIOND_AUTOLOGIN("com.openexchange.sessiond.autologin", Boolean.FALSE.toString());
+
+    private final String propertyName;
+
+    private final String defaultValue;
+
+    private SessiondProperty(final String propertyName, final String defaultValue) {
+        this.propertyName = propertyName;
+        this.defaultValue = defaultValue;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 }

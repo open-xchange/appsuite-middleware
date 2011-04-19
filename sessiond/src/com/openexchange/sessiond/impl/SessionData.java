@@ -84,6 +84,7 @@ final class SessionData {
 
     private final int maxSessions;
     private final long randomTokenTimeout;
+    private final boolean autoLogin;
 
     private final LinkedList<SessionContainer> sessionList;
     private final Map<String, String> randoms;
@@ -93,10 +94,11 @@ final class SessionData {
     private final LinkedList<Map<String, SessionControl>> longTermList;
     private final Lock longTermLock = new ReentrantLock();
 
-    SessionData(long containerCount, int maxSessions, long randomTokenTimeout, long longTermContainerCount) {
+    SessionData(long containerCount, int maxSessions, long randomTokenTimeout, long longTermContainerCount, boolean autoLogin) {
         super();
         this.maxSessions = maxSessions;
         this.randomTokenTimeout = randomTokenTimeout;
+        this.autoLogin = autoLogin;
 
         sessionList = new LinkedList<SessionContainer>();
         randoms = new ConcurrentHashMap<String, String>();
@@ -141,14 +143,16 @@ final class SessionData {
             sessionList.addFirst(new SessionContainer());
             final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);
             retval.addAll(sessionList.removeLast().getSessionControls());
-            longTermLock.lock();
-            try {
-                Map<String, SessionControl> first = longTermList.getFirst();
-                for (SessionControl control : retval) {
-                    first.put(control.getSession().getSessionID(), control);
+            if (autoLogin) {
+                longTermLock.lock();
+                try {
+                    Map<String, SessionControl> first = longTermList.getFirst();
+                    for (SessionControl control : retval) {
+                        first.put(control.getSession().getSessionID(), control);
+                    }
+                } finally {
+                    longTermLock.unlock();
                 }
-            } finally {
-                longTermLock.unlock();
             }
             return retval;
         } finally {

@@ -120,14 +120,14 @@ public final class SessionHandler {
             config.getNumberOfSessionContainers(),
             config.getMaxSessions(),
             config.getRandomTokenTimeout(),
-            config.getNumberOfLongTermSessionContainers());
+            config.getNumberOfLongTermSessionContainers(),
+            config.isAutoLogin());
         if (initialized.compareAndSet(false, true)) {
             try {
                 sessionIdGenerator = SessionIdGenerator.getInstance();
             } catch (final SessiondException exc) {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
-
             noLimit = (newConfig.getMaxSessions() == 0);
         }
     }
@@ -482,10 +482,12 @@ public final class SessionHandler {
             new ShortSessionContainerRotator(),
             config.getSessionContainerTimeout(),
             config.getSessionContainerTimeout());
-        longSessionContainerRotator = service.scheduleWithFixedDelay(
-            new LongSessionContainerRotator(),
-            config.getLongTermSessionContainerTimeout(),
-            config.getLongTermSessionContainerTimeout());
+        if (config.isAutoLogin()) {
+            longSessionContainerRotator = service.scheduleWithFixedDelay(
+                new LongSessionContainerRotator(),
+                config.getLongTermSessionContainerTimeout(),
+                config.getLongTermSessionContainerTimeout());
+        }
     }
 
     public static void removeTimerService() {
