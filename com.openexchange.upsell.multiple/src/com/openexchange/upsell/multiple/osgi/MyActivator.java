@@ -161,7 +161,9 @@ public class MyActivator extends DeferredActivator {
             serviceTrackerList.clear();
 
             // stop info/sso servlet
-            servletRegistration.close();
+            if(servletRegistration != null) {
+                servletRegistration.close();
+            }
 
             getServiceRegistry().clearRegistry();
         } catch (final Throwable t) {
