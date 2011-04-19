@@ -378,7 +378,8 @@ public final class ServerConfig {
         COOKIE_HTTP_ONLY("com.openexchange.cookie.httpOnly", Boolean.TRUE.toString()),
         COOKIE_HASH_FIELDS("com.openexchange.cookie.hash.fields", ""),
         COOKIE_HASH("com.openexchange.cookie.hash", "calculate"),
-        COOKIE_FORCE_HTTPS("com.openexchange.cookie.forceHTTPS", Boolean.FALSE.toString());
+        COOKIE_FORCE_HTTPS("com.openexchange.cookie.forceHTTPS", Boolean.FALSE.toString()),
+        FORCE_HTTPS("com.openexchange.forceHTTPS", Boolean.FALSE.toString());
 
         private final String propertyName;
 
