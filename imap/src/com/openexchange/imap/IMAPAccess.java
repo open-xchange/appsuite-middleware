@@ -668,7 +668,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * 
      * @return The IMAP session
      */
-    public javax.mail.Session getSession() {
+    public javax.mail.Session getMailSession() {
         return imapSession;
     }
 

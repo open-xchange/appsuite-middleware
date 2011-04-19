@@ -1641,7 +1641,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage composedMail) throws MailException {
         try {
-            final MimeMessage mimeMessage = new MimeMessage(imapAccess.getSession());
+            final MimeMessage mimeMessage = new MimeMessage(imapAccess.getMailSession());
             /*
              * Fill message
              */
