@@ -67,7 +67,7 @@ public interface FileStorageServiceRegistry {
      * 
      * @param id The file storage service identifier
      * @return The file storage service associated with specified identifier
-     * @throws MessagingException If no file storage service is associated with specified identifier
+     * @throws FileStorageException If no file storage service is associated with specified identifier
      */
     public FileStorageService getFileStorageService(String id) throws FileStorageException;
 
@@ -83,7 +83,7 @@ public interface FileStorageServiceRegistry {
      * Gets all file storage services kept in this registry.
      * 
      * @return All file storage services kept in this registry
-     * @throws MessagingException If file storage services cannot be returned
+     * @throws FileStorageException If file storage services cannot be returned
      */
     public List<FileStorageService> getAllServices() throws FileStorageException;
 }
