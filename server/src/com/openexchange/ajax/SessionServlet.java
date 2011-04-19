@@ -57,6 +57,8 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -108,14 +110,18 @@ public abstract class SessionServlet extends AJAXServlet {
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
-    private boolean checkIP = true;
+    private static boolean checkIP = true;
 
-    private CookieHashSource hashSource;
+    private static CookieHashSource hashSource;
 
-    private final List<IPRange> ranges = new CopyOnWriteArrayList<IPRange>();
+    private static final List<IPRange> ranges = new CopyOnWriteArrayList<IPRange>();
 
-    private boolean rangesLoaded;
+    private static boolean rangesLoaded;
+    
+    private static boolean initialized = false;
 
+    private static final Lock RANGE_LOCK = new ReentrantLock();
+    
     /**
      * Initializes a new {@link SessionServlet}.
      */
@@ -126,9 +132,12 @@ public abstract class SessionServlet extends AJAXServlet {
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
-        checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        if (!initialized) {
+            checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+            hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
+            initialized = true;
+        }
         initRanges(config);
-        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
     private void initRanges(ServletConfig config) {
@@ -146,17 +155,26 @@ public abstract class SessionServlet extends AJAXServlet {
                     text = config.getInitParameter(SESSION_WHITELIST_FILE);
                 } else {
                     LOG.error("Can't load IP Check whitelist file. Please check that the servlet activator is in order");
+                    return;
                 }
             }
             rangesLoaded = true;
             if (text != null) {
                 LOG.info("Exceptions from IP Check have been defined.");
-                final String[] lines = text.split("\n");
-                for (String line : lines) {
-                    line = line.replaceAll("\\s", "");
-                    if (!line.equals("") && !line.startsWith("#")) {
-                        ranges.add(IPRange.parseRange(line));
+                try {
+                    // Serialize range parsing. This might happen more than once, but shouldn't matter, since the list
+                    // is accessed exclusively, so it winds up correct.
+                    RANGE_LOCK.lock();
+                    ranges.clear();
+                    final String[] lines = text.split("\n");
+                    for (String line : lines) {
+                        line = line.replaceAll("\\s", "");
+                        if (!line.equals("") && !line.startsWith("#")) {
+                            ranges.add(IPRange.parseRange(line));
+                        }
                     }
+                } finally {
+                    RANGE_LOCK.unlock();
                 }
             }
 
