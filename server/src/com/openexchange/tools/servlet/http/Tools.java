@@ -61,6 +61,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.helper.BrowserDetector;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.encoding.Helper;
 
@@ -304,5 +307,22 @@ public final class Tools {
          * @return <code>true</code> if specified cookie name matches; otherwise <code>false</code>
          */
         boolean matches(String cookieName);
+    }
+    
+    /**
+     * Tries to determine the best protocol used for accessing this server instance. If the configuration property com.openexchange.forceHTTPS is set to true, this will always be https://, otherwise
+     * the request will be used to determine the protocol. https:// if it was a secure request, http:// otherwise
+     * @param req The HttpServletRequest used to contact this server
+     * @return "http://" or "https://" depending on what was deemed more appropriate
+     */
+    public static String getProtocol(HttpServletRequest req) {
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (configurationService != null) {
+            boolean force = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
+            if (force) {
+                return "https://";
+            }
+        }
+        return (req.isSecure()) ? "http://" : "https://";
     }
 }
