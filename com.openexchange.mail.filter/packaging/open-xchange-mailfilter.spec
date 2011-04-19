@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -138,6 +138,8 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
+* Mon Apr 11 2011 - dennis.sieben@open-xchange.com
+ - Bugfix #18918 - OXSieveHandlerInvalidCredentialsException must be moved to the export package
 * Tue Mar 01 2011 - marcus.klein@open-xchange.com
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Wed Dec 08 2010 - dennis.sieben@open-xchange.com

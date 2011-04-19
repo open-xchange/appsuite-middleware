@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -769,12 +769,47 @@ fi
 %doc doc/examples
 
 %changelog
+* Mon Apr 18 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18837: Calculating conflicts for series that start in the past but last into the future.
+* Fri Apr 15 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18816: Properly initializing the update tasks if they are executed in administration daemon.
+* Thu Apr 14 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18946: Improved exception message telling a user that he can not give some special permission on a folder for another user.
+* Wed Apr 13 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18421: Enabled editing the personal mail information for webmail users.
+* Tue Apr 12 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18911: Remembering added links when formatting plain text email for HTML display.
+* Mon Apr 11 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18826: Fixed missing keep-seen right "s" when applying read-all access to an IMAP folder
+* Mon Apr 11 2011 - choeger@open-xchange.com
+ - Bugfix #18914: [L3] Autostart symlinks in /etc/rc.d missing on Debian Squeeze
+* Mon Apr 11 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #18875: Template selection now can be filtered by categories.
+* Fri Apr 08 2011 - marcus.klein@open-xchange.com, martin.herfurth@open-xchange.com
+ - Bugfix #18912: Using enumeration to pass order directory for data everywhere. Not showing failing SQL statements to the end user.
+* Thu Apr 07 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18787: Throwing a more meaningful error if quota is exceeded
+ - Bugfix #15227: Introduced new locale-sensitive error code
+ - Bugfix #18890: Introduced entity-to-ACL mapping for MDaemon IMAP server
+* Thu Apr 07 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18804: User contacts are not mixed up anymore if a part of them is already cached.
+* Wed Apr 06 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18851: Proper display of non-ascii characters even though "Content-Transfer-Encoding: 7bit" is set
+ - Bugfix #18870: Ignoring the \HasNoChildren flag and fall-back to a reliable subfolder check (through a LIST command)
+* Wed Apr 06 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #18865: Lazily load ipcheck whitelist on first access.
+ - Bugfix #18618: Make account label translatable.
 * Tue Apr 05 2011 - marcus.klein@open-xchange.com
  - Bugfix #18775: Improved mechanism to find correct user for an IMAP ACL.
+ - Bugfix #18613: Interpreting an empty msgstr in PO files as not translated string.
 * Tue Apr 05 2011 - thorben.betten@open-xchange.com
  - Bugfix #18856: Proper composal of plain-text part
  - Bugfix #18806: Suppress JavaMail debug logging
  - Bugfix #18852: Fixed selecting referenced message on forward operation
+ - Bugfix #18842: Assume INBOX exists regardless of IMAP server's LIST response
+ - Bugfix #18807: Fixed possible NPE
+ - Bugfix #18797: Allow root level subfolders if Cyrus' "altNamespace" feature is enabled
+ - Bugfix #18840: Proper error message if a javax.mail.MessageRemovedException occurs
 * Mon Apr 04 2011 - marcus.klein@open-xchange.com
  - Bugfix #18806: Removed debug output into console log file.
  - Bugfix #18781: Improved an exception message.

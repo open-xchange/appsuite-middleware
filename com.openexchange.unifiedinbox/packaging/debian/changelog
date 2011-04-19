@@ -1,3 +1,9 @@
+open-xchange-unifiedinbox (6.20.0.0-7) unstable; urgency=low
+
+  * build for public ptf 2011-04-21
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 19 Apr 2011 14:22:56 +0000
+
 open-xchange-unifiedinbox (6.20.0.0-6) unstable; urgency=low
 
   * another build for public ptf 2011-04-04 (2011-04-13)

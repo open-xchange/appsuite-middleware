@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -135,6 +135,8 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/contacts-ldap/*/*.example
 
 %changelog
+* Thu Apr 07 2011 - dennis.sieben@open-xchange.com
+ - Bugfix #18894 - Contacts-ldap sometimes sends (null=*) filters to the ldap server
 * Tue Mar 01 2011 - marcus.klein@open-xchange.com
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 * Tue Sep 07 2010 - dennis.sieben@open-xchange.com
