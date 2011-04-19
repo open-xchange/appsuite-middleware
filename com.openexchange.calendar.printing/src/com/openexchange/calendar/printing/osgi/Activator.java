@@ -64,7 +64,6 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryCustomizer;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.service.SessionServletRegistration;
-import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
 /**
