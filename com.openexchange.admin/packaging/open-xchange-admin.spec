@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -403,11 +403,15 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Apr 08 2011 - choeger@open-xchange.com
+ - Bugfix #18880: createadmin of reseller package does not work when no masterpw set
 * Thu Mar 31 2011 - marcus.klein@open-xchange.com
  - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
 * Thu Mar 31 2011 - martin.herfurth@open-xchange.com
  - Bugfix #18821: [L3] "changeaccessglobal" mentioned in Release Notes but
    isn't available on system
+* Thu Mar 31 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18788: Using database connection without timeout to create new schemas.
 * Wed Mar 16 2011 - marcus.klein@open-xchange.com
  - Bugfix #18666: CLT listuser is now capable to work with IPv6 IMAP and SMTP backends.
 * Tue Mar 15 2011 - marcus.klein@open-xchange.com
