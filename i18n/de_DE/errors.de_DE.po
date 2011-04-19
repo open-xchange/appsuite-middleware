@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-04-13 10:01+0200\n"
+"PO-Revision-Date: 2011-04-19 11:18+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -215,6 +215,9 @@ msgstr "Keine von %1$s referenzierte hochgeladene Datei gefunden"
 
 msgid "Another group with same identifier name exists: %1$d."
 msgstr "Gruppe mit gleichem ID-Namen ist bereits vorhanden: %1$d."
+
+msgid "Append messages failed."
+msgstr "Das Ablegen der E-Mails ist fehlgeschlagen."
 
 msgid "Appointment's owner must not be removed from participants"
 msgstr ""
@@ -1045,6 +1048,9 @@ msgstr "Ungültiger Cookie-Header-Wert %1$s"
 msgid "Invalid cookie."
 msgstr "Ungültiges Cookie"
 
+msgid "Invalid destination folder. Don't know where to append the mails."
+msgstr "Ungültiger Zielordner. Ablageort für E-Mails nicht bekannt."
+
 msgid "Invalid email address %1$s"
 msgstr "Ungültige E-Mail-Adresse %1$s"
 
@@ -1352,6 +1358,11 @@ msgid "Move of a recurring appointment to another folder is not supported."
 msgstr ""
 "Ein wiederkehrender Termin kann nicht in einen anderen Ordner verschoben "
 "werden."
+
+msgid "Move operation aborted. Source and destination folder are equal."
+msgstr ""
+"Der Verschiebe-Vorgang wurde abgebrochen. Der Quell- und Ziel-Ordner sind "
+"identisch."
 
 msgid "Moving appointment to a public folder flaged as private is not allowed!"
 msgstr ""
@@ -1693,6 +1704,9 @@ msgstr "Erinnerungs-ID fehlt."
 msgid "Remove on cache failed"
 msgstr "Entfernen aus Cache fehlgeschlagen"
 
+msgid "Request aborted due to timeout of %1$s %2$s."
+msgstr "Anfrage abgebrochen aufgrund Zeitüberschreitung von %1$s %2$s."
+
 msgid ""
 "Request rejected because its size (%1$s) exceeds the maximum configured size "
 "of %2$s"
@@ -1942,9 +1956,10 @@ msgstr ""
 msgid ""
 "The permissions for the user %1$s are limited. It is not possible to grant "
 "this user the wanted permissions for the folder %2$s in context %3$s."
-msgstr "Der Benutzer %1$s verfügt lediglich über eingeschränkte Benutzerberechtigungen"
-"Dem Benutzer können die gewünschten Berechtigungen für den Ordner %2$s im Kontext %3$s"
-"nicht erteilt werden."
+msgstr ""
+"Der Benutzer %1$s verfügt lediglich über eingeschränkte "
+"BenutzerberechtigungenDem Benutzer können die gewünschten Berechtigungen für "
+"den Ordner %2$s im Kontext %3$snicht erteilt werden."
 
 msgid ""
 "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, "
@@ -2127,6 +2142,34 @@ msgstr ""
 "Unerwarteter Status zum Löschen eines virtuellen Termins (Ausnahme). "
 "Benutzer-ID:Objekt-ID:Position %d:%d:%d"
 
+msgid "Unified INBOX does not support draft messages."
+msgstr "Die Unified Inbox unterstützt keine Nachrichtenentwürfe."
+
+msgid "Unified INBOX does not support mail folder creation"
+msgstr "Die Unified Inbox unterstützt das Anlegen von Mail-Ordnern nicht"
+
+msgid "Unified INBOX does not support to clear INBOX folder."
+msgstr ""
+"Die Unified Inbox unterstützt das Leeren des Posteingangsordners nicht."
+
+msgid "Unified INBOX does not support to copy messages."
+msgstr "Die Unified Inbox unterstützt das Kopieren von Nachrichten nicht."
+
+msgid "Unified INBOX does not support to create folders."
+msgstr "Die Unified Inbox unterstützt das Anlegen von Ordnern nicht."
+
+msgid "Unified INBOX does not support to delete folders."
+msgstr "Die Unified Inbox unterstützt das Löschen von Ordnern nicht."
+
+msgid "Unified INBOX does not support to move folders."
+msgstr "Die Unified Inbox unterstützt das Verschieben von Ordnern nicht."
+
+msgid "Unified INBOX does not support to move messages."
+msgstr "Die Unified Inbox unterstützt das Verschieben von Nachrichten nicht."
+
+msgid "Unified INBOX does not support to update folders."
+msgstr "Die Unified Inbox unterstützt das Aktualisieren von Ordnern nicht."
+
 msgid "Unknown AJAX action: %s."
 msgstr "Unbekannte AJAX-Aktion: %s."
 
@@ -2147,6 +2190,9 @@ msgstr "Unbekannte Aktion: %1$s"
 
 msgid "Unknown color label: %1$s"
 msgstr "Unbekanntes Farb-Label: %1$s"
+
+msgid "Unknown default folder fullname: %1$s."
+msgstr "Unbekannter kompletter Ordner-Standardname: %1$s."
 
 msgid "Unknown delete event type: %1$d"
 msgstr "Unbekannter Lösch-Event-Typ: %1$d"
