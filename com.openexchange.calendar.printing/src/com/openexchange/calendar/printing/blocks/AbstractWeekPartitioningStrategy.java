@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
-import com.openexchange.calendar.printing.CPType;
 
 /**
  * This abstract class is the super class for all partitioning strategies that use weeks. Weeks are special, because a view on a month might

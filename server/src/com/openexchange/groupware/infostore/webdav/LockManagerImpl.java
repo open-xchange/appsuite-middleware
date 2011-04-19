@@ -69,7 +69,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.tx.TransactionException;
 
 public abstract class LockManagerImpl<T extends Lock> extends DBService implements LockManager{
 

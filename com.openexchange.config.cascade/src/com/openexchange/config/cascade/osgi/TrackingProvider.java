@@ -55,13 +55,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
-import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 
 

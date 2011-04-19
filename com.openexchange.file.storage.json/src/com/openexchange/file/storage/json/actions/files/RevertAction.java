@@ -55,7 +55,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;

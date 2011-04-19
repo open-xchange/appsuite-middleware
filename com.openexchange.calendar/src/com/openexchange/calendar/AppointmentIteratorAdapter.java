@@ -49,12 +49,10 @@
 
 package com.openexchange.calendar;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * This is a delegating iterator for converting the {@link SearchIterator} specialized for {@link CalendarDataObject}s into a

@@ -49,11 +49,7 @@
 
 package com.openexchange.config.cascade.context.matching;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.groupware.contexts.Context;
 
 
 /**

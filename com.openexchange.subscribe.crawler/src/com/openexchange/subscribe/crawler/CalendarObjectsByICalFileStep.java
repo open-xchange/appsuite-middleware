@@ -60,7 +60,6 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**

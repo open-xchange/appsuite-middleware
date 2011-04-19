@@ -73,7 +73,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tx.TransactionException;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 

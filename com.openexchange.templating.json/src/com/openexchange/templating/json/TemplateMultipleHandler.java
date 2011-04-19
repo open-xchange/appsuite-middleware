@@ -61,7 +61,6 @@ import com.openexchange.groupware.AbstractOXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.TemplateException;

@@ -51,14 +51,13 @@ package com.openexchange.subscribe.internal;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
+import junit.framework.TestCase;
 import com.openexchange.api2.SimContactSQLImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import junit.framework.TestCase;
 
 
 /**

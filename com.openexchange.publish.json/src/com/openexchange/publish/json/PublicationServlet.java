@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.MultipleAdapterServlet;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.session.ServerSession;
 

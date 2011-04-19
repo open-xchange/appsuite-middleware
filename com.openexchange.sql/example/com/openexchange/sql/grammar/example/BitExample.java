@@ -49,14 +49,11 @@
 
 package com.openexchange.sql.grammar.example;
 
-import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
-import com.openexchange.sql.grammar.BitLSHIFT;
 import com.openexchange.sql.grammar.BitOR;
 import com.openexchange.sql.grammar.Column;
-import com.openexchange.sql.grammar.Constant;
 import com.openexchange.sql.grammar.INVERT;
 import com.openexchange.sql.grammar.Table;
 import com.openexchange.sql.grammar.UPDATE;

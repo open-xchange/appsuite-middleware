@@ -51,12 +51,10 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Results;
 

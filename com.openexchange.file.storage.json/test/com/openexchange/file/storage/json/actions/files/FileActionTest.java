@@ -50,15 +50,8 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.json.FileTest;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.json.JSONAssertion;
-import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.iterator.SearchIterator;
-import junit.framework.TestCase;
 
 
 /**

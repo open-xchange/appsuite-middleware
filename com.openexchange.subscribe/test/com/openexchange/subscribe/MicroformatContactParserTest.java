@@ -1,9 +1,9 @@
 package com.openexchange.subscribe;
 
-import java.util.Collection;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.subscribe.parser.MicroformatContactParser;
+//import java.util.Collection;
+//import com.openexchange.groupware.container.Contact;
+//import com.openexchange.groupware.contexts.SimContext;
+//import com.openexchange.subscribe.parser.MicroformatContactParser;
 import junit.framework.TestCase;
 
 

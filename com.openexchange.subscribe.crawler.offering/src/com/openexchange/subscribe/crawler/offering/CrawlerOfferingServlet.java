@@ -50,8 +50,6 @@
 package com.openexchange.subscribe.crawler.offering;
 
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,8 +65,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;

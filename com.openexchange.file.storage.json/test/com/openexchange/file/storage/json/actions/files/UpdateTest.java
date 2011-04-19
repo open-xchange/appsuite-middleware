@@ -54,7 +54,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.groupware.AbstractOXException;
 
 

@@ -52,7 +52,6 @@ package com.openexchange.database.provider;
 import java.sql.Connection;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tx.TransactionException;
 
 public interface DBProvider {
 

@@ -49,9 +49,6 @@
 
 package com.openexchange.config;
 
-import static com.openexchange.java.Autoboxing.L;
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**

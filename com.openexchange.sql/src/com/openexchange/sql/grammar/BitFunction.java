@@ -49,7 +49,6 @@
 
 package com.openexchange.sql.grammar;
 
-import com.openexchange.sql.builder.IStatementBuilder;
 
 /**
  * {@link BitFunction}

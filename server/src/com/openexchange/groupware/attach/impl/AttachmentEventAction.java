@@ -69,7 +69,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tx.AbstractUndoable;
-import com.openexchange.tx.TransactionException;
 import com.openexchange.tx.UndoableAction;
 
 public abstract class AttachmentEventAction extends AbstractUndoable implements

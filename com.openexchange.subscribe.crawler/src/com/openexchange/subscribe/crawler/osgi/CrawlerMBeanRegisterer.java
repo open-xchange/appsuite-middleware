@@ -64,7 +64,6 @@ import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBean;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBeanImpl;
-import com.openexchange.timer.TimerService;
 
 
 /**

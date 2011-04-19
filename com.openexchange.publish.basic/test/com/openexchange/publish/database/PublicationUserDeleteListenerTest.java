@@ -64,7 +64,6 @@ import com.openexchange.publish.sql.AbstractPublicationSQLStorageTest;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
-import com.openexchange.tx.TransactionException;
 
 /**
  * {@link PublicationUserDeleteListenerTest}

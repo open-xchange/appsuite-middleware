@@ -52,7 +52,6 @@ package com.gargoylesoftware.htmlunit;
 import java.util.Calendar;
 import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.cookie.CookieSpec;
 import org.apache.commons.httpclient.cookie.CookieSpecBase;
 import org.apache.commons.httpclient.cookie.MalformedCookieException;
 import org.apache.commons.logging.Log;

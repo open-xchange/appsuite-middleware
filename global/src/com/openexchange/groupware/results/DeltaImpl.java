@@ -52,7 +52,6 @@ package com.openexchange.groupware.results;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 public class DeltaImpl<T> implements Delta<T> {
 

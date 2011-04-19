@@ -81,7 +81,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * CachedCalendarIterator

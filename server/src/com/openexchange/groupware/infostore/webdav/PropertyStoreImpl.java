@@ -67,7 +67,6 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.tx.TransactionException;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class PropertyStoreImpl extends DBService implements PropertyStore {

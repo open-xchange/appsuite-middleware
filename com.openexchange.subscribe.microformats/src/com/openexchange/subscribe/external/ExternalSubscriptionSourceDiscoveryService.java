@@ -65,7 +65,6 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceCollector;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.external.parser.ListingParser;
-import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;

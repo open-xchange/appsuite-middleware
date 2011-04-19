@@ -54,7 +54,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import junit.framework.TestCase;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.subscribe.SubscriptionException;

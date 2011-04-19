@@ -62,7 +62,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.CompositeSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoveryService;
 
 
 /**

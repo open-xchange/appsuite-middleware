@@ -50,15 +50,11 @@
 package com.openexchange.file.storage.json;
 
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.json.JSONAssertion;
 import static com.openexchange.json.JSONAssertion.assertValidates;

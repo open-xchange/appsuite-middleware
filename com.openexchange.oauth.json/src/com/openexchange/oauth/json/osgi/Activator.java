@@ -65,7 +65,6 @@ import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerF
 import com.openexchange.oauth.json.oauthmeta.MetaDataServlet;
 import com.openexchange.oauth.json.oauthmeta.multiple.MetaDataMultipleHandlerFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
-import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;

@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import java.io.InputStream;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;

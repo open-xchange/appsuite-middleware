@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json;
 
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,12 +59,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileFieldHandler;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
-import java.util.List;
 
 /**
  * {@link FileMetadataWriter}

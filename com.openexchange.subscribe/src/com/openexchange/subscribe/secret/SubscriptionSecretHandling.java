@@ -52,7 +52,6 @@ package com.openexchange.subscribe.secret;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.subscribe.SubscribeService;

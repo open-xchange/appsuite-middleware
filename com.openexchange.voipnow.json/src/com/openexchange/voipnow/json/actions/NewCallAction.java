@@ -49,7 +49,6 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import static com.openexchange.voipnow.json.actions.AbstractVoipNowHTTPAction.closeResponse;
 import static com.openexchange.voipnow.json.actions.ActionUtility.urlEncode;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

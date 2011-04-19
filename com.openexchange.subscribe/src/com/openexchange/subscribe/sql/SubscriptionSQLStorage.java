@@ -83,7 +83,6 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
-import com.openexchange.tx.TransactionException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

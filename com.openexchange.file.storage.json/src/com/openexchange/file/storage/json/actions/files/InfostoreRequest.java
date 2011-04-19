@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;

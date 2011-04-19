@@ -53,7 +53,6 @@ import java.sql.SQLException;
 import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.tx.TransactionException;
 
 public abstract class AttachmentListQueryAction extends AbstractAttachmentAction {
 

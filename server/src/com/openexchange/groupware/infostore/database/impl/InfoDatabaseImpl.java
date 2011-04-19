@@ -71,7 +71,6 @@ import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
-import com.openexchange.tx.TransactionException;
 
 public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 

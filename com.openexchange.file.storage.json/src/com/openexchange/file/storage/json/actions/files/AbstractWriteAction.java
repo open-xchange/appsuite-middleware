@@ -51,7 +51,6 @@ package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tx.TransactionException;
 
 /**
  * {@link AbstractWriteAction}

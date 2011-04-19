@@ -87,7 +87,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections;

@@ -51,7 +51,6 @@ package com.openexchange.subscribe;
 
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 
 

@@ -4,10 +4,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import com.openexchange.subscribe.parser.MicroformatAppointmentParser;
-import com.openexchange.subscribe.parser.MicroformatAppointmentSAXHandler;
 import junit.framework.TestCase;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.subscribe.parser.MicroformatAppointmentParser;
 
 
 public class MicroformatAppointmentParserTest extends TestCase {

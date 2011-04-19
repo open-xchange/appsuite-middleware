@@ -56,13 +56,12 @@ import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 
 /**

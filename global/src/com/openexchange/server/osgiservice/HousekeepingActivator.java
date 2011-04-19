@@ -50,7 +50,6 @@
 package com.openexchange.server.osgiservice;
 
 import java.util.Dictionary;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.Filter;

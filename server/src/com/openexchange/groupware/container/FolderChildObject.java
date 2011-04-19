@@ -51,7 +51,6 @@ package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Set;
-import com.openexchange.java.Autoboxing;
 
 /**
  * DataObject

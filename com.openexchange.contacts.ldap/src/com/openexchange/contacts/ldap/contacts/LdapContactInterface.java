@@ -73,7 +73,6 @@ import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.FolderProperties.ContactTypes;
 import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
-import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;

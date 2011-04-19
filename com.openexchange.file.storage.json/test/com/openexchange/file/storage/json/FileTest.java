@@ -50,11 +50,9 @@
 package com.openexchange.file.storage.json;
 
 import junit.framework.TestCase;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
 import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FileTest}

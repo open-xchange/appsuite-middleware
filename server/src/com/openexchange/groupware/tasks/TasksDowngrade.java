@@ -67,7 +67,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**

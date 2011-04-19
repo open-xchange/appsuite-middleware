@@ -62,7 +62,6 @@ import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.tx.TransactionException;
 
 
 /**

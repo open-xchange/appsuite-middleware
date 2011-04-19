@@ -50,10 +50,8 @@
 package com.openexchange.config;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import com.openexchange.config.cascade.ConfigProviderService;
 
 /**
  * {@link ConfigurationService}

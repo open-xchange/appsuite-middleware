@@ -50,7 +50,6 @@
 package com.openexchange.smtp.dataobjects;
 
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;

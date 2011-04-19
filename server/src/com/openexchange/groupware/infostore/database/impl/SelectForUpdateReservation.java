@@ -65,7 +65,6 @@ import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tx.TransactionException;
 
 /**
  * {@link SelectForUpdateReservation}

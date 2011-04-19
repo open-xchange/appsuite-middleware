@@ -64,7 +64,6 @@ import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
-import com.openexchange.tx.TransactionException;
 
 /**
  * {@link SubscriptionUserDeleteListenerTest}

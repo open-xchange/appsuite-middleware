@@ -49,10 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import java.util.Date;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;

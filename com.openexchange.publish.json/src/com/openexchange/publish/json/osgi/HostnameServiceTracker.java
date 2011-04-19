@@ -50,10 +50,8 @@
 package com.openexchange.publish.json.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.publish.json.Hostname;
 

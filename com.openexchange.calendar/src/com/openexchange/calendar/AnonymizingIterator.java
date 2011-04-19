@@ -49,12 +49,10 @@
 
 package com.openexchange.calendar;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * Goes through the results of another SearchIterator and anonymizes every appointment that is private, unless it belongs to the user given.

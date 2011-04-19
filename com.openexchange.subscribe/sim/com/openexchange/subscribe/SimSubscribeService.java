@@ -53,9 +53,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.User;
 
 /**

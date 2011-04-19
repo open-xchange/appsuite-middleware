@@ -55,7 +55,6 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.tx.TransactionException;
 
 public class DeleteAttachmentAction extends AttachmentListQueryAction {
 

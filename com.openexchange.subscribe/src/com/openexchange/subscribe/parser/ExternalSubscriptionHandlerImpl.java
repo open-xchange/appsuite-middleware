@@ -49,16 +49,16 @@
 
 package com.openexchange.subscribe.parser;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.SAXException;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.session.Session;
+//import java.io.IOException;
+//import java.util.Arrays;
+//import java.util.List;
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
+//import org.xml.sax.SAXException;
+//import com.openexchange.api2.OXException;
+//import com.openexchange.groupware.container.Contact;
+//import com.openexchange.groupware.contexts.impl.ContextException;
+//import com.openexchange.session.Session;
 
 /**
  * {@link ExternalSubscriptionHandlerImpl}

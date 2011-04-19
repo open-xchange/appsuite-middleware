@@ -49,13 +49,10 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.commons.httpclient.NameValuePair;
 import org.ho.yaml.Yaml;
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.openexchange.subscribe.crawler.internal.Step;
 
 

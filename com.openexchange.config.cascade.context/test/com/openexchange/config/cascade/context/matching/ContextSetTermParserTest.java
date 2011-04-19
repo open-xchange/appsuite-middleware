@@ -51,7 +51,6 @@ package com.openexchange.config.cascade.context.matching;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import com.openexchange.groupware.contexts.SimContext;
 import junit.framework.TestCase;
 
 /**

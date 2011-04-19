@@ -85,7 +85,6 @@ import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.sql.tools.SQLTools;
-import com.openexchange.tx.TransactionException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

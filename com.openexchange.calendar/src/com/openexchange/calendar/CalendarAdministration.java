@@ -85,7 +85,6 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**

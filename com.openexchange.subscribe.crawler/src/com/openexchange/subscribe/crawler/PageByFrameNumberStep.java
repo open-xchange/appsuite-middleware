@@ -49,16 +49,11 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.FrameWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 

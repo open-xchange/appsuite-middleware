@@ -51,15 +51,12 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.results.Results;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 

@@ -53,7 +53,6 @@ import java.util.List;
 import org.ho.yaml.Yaml;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.crawler.internal.Step;
-import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
  * This Class holds all information that defines a crawler and is the starting point to create one.

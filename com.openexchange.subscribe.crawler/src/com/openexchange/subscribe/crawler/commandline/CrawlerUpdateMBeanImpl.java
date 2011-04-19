@@ -56,7 +56,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.subscribe.crawler.osgi.Activator;
-import com.openexchange.subscribe.crawler.osgi.CrawlerMBeanRegisterer;
 
 
 /**

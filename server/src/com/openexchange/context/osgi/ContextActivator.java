@@ -51,8 +51,6 @@ package com.openexchange.context.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import com.openexchange.context.internal.ContextExceptionFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -62,7 +60,6 @@ import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**

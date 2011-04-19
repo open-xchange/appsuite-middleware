@@ -53,7 +53,6 @@ import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
-import com.openexchange.tx.TransactionException;
 
 public class CreateAttachmentAction extends AttachmentListQueryAction {
 

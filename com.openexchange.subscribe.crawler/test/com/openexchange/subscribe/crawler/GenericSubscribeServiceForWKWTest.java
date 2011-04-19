@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;

@@ -94,7 +94,6 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.dataobjects.MIMERawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;

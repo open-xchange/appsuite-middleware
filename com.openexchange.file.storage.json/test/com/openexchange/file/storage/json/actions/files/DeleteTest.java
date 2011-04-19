@@ -51,13 +51,9 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.results.Results;
 
 
 /**

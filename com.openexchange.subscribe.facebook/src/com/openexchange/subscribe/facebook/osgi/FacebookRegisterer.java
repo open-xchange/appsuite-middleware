@@ -61,7 +61,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
-import com.openexchange.oauth.facebook.OAuthServiceMetaDataFacebookImpl;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.facebook.FacebookSubscribeService;
 import com.openexchange.subscribe.facebook.groupware.FacebookSubscriptionsOAuthAccountDeleteListener;
