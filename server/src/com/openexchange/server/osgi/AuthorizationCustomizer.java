@@ -58,36 +58,25 @@ import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
 
 /**
+ * Puts a found {@link AuthorizationService} into the according registry {@link Authorization}.
+ *
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  */
 public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(AuthorizationCustomizer.class);
 
-    /**
-     * Reference to the bundle context.
-     */
     private final BundleContext context;
 
-    /**
-     * Default constructor.
-     * @param context the bundle context.
-     */
     public AuthorizationCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object addingService(final ServiceReference reference) {
         final AuthorizationService auth = (AuthorizationService) context.getService(reference);
         if (null == Authorization.getService()) {
             Authorization.setService(auth);
-            context.ungetService(reference);
             return auth;
         }
         context.ungetService(reference);
@@ -95,20 +84,15 @@ public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void removedService(final ServiceReference reference, final Object service) {
-        if( Authorization.dropService((AuthorizationService) service) ) {
+        if (Authorization.dropService((AuthorizationService) service)) {
             LOG.error("Removed authorization service was not active!");
+        } else {
+            context.ungetService(reference);
         }
-        context.ungetService(reference);
     }
 }
