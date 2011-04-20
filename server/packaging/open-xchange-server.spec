@@ -149,12 +149,28 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
-   # SoftwareChange_Request-647
+   # SoftwareChange_Request-705
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/server.properties
-   if ! ox_exists_property com.openexchange.cookie.forceHTTPS $pfile; then
-      ox_set_property com.openexchange.cookie.forceHTTPS false $pfile
+   if ox_exists_property com.openexchange.cookie.forceHTTPS $pfile; then
+      oval=$(ox_read_property com.openexchange.cookie.forceHTTPS $pfile)
+      ox_remove_property com.openexchange.cookie.forceHTTPS $pfile
    fi
+   if ! ox_exists_property com.openexchange.forceHTTPS $pfile; then
+      if [ -n "$oval" ]; then
+	  val=$oval
+      else
+	  val=false
+      fi
+      ox_set_property com.openexchange.forceHTTPS $val $pfile
+   fi
+
+   # SoftwareChange_Request-647 (obsoleted by 705)
+   # -----------------------------------------------------------------------
+   #pfile=/opt/open-xchange/etc/groupware/server.properties
+   #if ! ox_exists_property com.openexchange.cookie.forceHTTPS $pfile; then
+   #   ox_set_property com.openexchange.cookie.forceHTTPS false $pfile
+   #fi
 
    # SoftwareChange_Request-618
    # -----------------------------------------------------------------------
