@@ -769,8 +769,15 @@ fi
 %doc doc/examples
 
 %changelog
+* Wed Apr 20 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18997: Added an update task that fixes the wrong definitions for table oauthAccounts.
+ - Bugfix #18868: Added timeout to apache balancer member configuration to not inherit this from the global apache timeout.
+* Tue Apr 19 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18993: Not putting sessions into the long term session container anymore if auto login feature is disabled.
 * Mon Apr 18 2011 - marcus.klein@open-xchange.com
  - Bugfix #18837: Calculating conflicts for series that start in the past but last into the future.
+* Mon Apr 18 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #18896: IMIP generation respects parameter for internal participants on update.
 * Fri Apr 15 2011 - marcus.klein@open-xchange.com
  - Bugfix #18816: Properly initializing the update tasks if they are executed in administration daemon.
 * Thu Apr 14 2011 - marcus.klein@open-xchange.com
