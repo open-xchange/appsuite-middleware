@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,11 +49,14 @@
 
 package com.openexchange.oauth.internal.groupware;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.tableExists;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.AbstractOXException;
@@ -61,23 +64,25 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link OAuthCreateTableTask} - Inserts necessary tables.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link OAuthCreateTableTask} must be executed a second time because it was released with a wrong definition for the table.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class OAuthCreateTableTask extends UpdateTaskAdapter {
+public final class OAuthCreateTableTask2 extends UpdateTaskAdapter {
 
     private final DatabaseService dbService;
 
-    public OAuthCreateTableTask(DatabaseService dbService) {
+    public OAuthCreateTableTask2(DatabaseService dbService) {
         super();
         this.dbService = dbService;
     }
 
     public String[] getDependencies() {
-        return new String[] {};
+        return new String[] { OAuthCreateTableTask.class.getName() };
     }
 
     public void perform(final PerformParameters params) throws AbstractOXException {
@@ -90,17 +95,21 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
         }
         PreparedStatement stmt = null;
         try {
-            try {
-                if (tableExists(writeCon, "oauthAccounts")) {
-                    return;
-                }
-                stmt = writeCon.prepareStatement(CreateOAuthAccountTable.CREATE_TABLE_STATEMENT);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            startTransaction(writeCon);
+            List<Column> toChange = new ArrayList<Column>();
+            if (Tools.isVARCHAR(writeCon, "oauthAccounts", "accessToken")) {
+                toChange.add(new Column("accessToken", "TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL"));
             }
+            if (Tools.isVARCHAR(writeCon, "oauthAccounts", "accessSecret")) {
+                toChange.add(new Column("accessSecret", "TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL"));
+            }
+            Tools.modifyColumns(writeCon, "oauthAccounts", toChange);
+            writeCon.commit();
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(null, stmt);
+            autocommit(writeCon);
+            closeSQLStuff(stmt);
             dbService.backForUpdateTask(contextId, writeCon);
         }
     }

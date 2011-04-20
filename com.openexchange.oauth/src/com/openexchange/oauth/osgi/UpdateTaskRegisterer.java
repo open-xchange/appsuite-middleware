@@ -59,6 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask;
+import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask2;
 
 /**
  * Is notified about the {@link DatabaseService} and registers then the {@link OAuthCreateTableTask}.
@@ -80,7 +81,7 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer {
         registration = context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
 
             public Collection<UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)));
+                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)), new OAuthCreateTableTask2(dbService));
             }
         }, null);
         return dbService;

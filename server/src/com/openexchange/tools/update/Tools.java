@@ -61,6 +61,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -631,6 +632,10 @@ public final class Tools {
         if (!notExisting.isEmpty()) {
             addColumns(con, tableName, notExisting.toArray(new Column[notExisting.size()]));
         }
+    }
+
+    public static void modifyColumns(Connection con, String tableName, Collection<Column> columns) throws SQLException {
+        modifyColumns(con, tableName, columns.toArray(new Column[columns.size()]));
     }
 
     public static void modifyColumns(Connection con, String tableName, Column... cols) throws SQLException {

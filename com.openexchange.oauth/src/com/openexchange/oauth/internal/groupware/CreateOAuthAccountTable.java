@@ -58,12 +58,18 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
 
-    /*
-     * CREATE TABLE oauthAccounts (cid INT4 unsigned NOT NULL, user INT4 unsigned NOT NULL, id INT4 unsigned NOT NULL, displayName
-     * VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, accessToken TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci
-     * NOT NULL, accessSecret TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, serviceId VARCHAR(128) CHARACTER SET utf8
-     * COLLATE utf8_unicode_ci NOT NULL, PRIMARY KEY (cid, id) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-     */
+    public static final String CREATE_TABLE_STATEMENT =
+        "CREATE TABLE oauthAccounts (" +
+        "cid INT4 UNSIGNED NOT NULL," + 
+        "user INT4 UNSIGNED NOT NULL," + 
+        "id INT4 UNSIGNED NOT NULL," + 
+        "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        "accessToken TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        "accessSecret TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        "PRIMARY KEY (cid, id)," + 
+        "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     public CreateOAuthAccountTable() {
         super();
@@ -86,6 +92,6 @@ public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
 
     private static final String[] createdTables = { "oauthAccounts" };
 
-    private static final String[] createStatements = { "CREATE TABLE oauthAccounts (" + "cid INT4 UNSIGNED NOT NULL," + "user INT4 UNSIGNED NOT NULL," + "id INT4 UNSIGNED NOT NULL," + "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "accessToken TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "accessSecret TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + "PRIMARY KEY (cid, id)," + "INDEX (cid, user)," + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+    private static final String[] createStatements = { CREATE_TABLE_STATEMENT };
 
 }
