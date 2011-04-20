@@ -113,7 +113,7 @@ public class Activator implements BundleActivator {
 
     public void registerServices() {
         if (null != oauthService && null != configurationService) {            
-            final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl();
+            final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
             final ServiceRegistration serviceRegistration = bundleContext.registerService(
                 OAuthServiceMetaData.class.getName(),
                 linkedInMetaDataService,
@@ -152,4 +152,11 @@ public class Activator implements BundleActivator {
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
+
+    
+    public ConfigurationService getConfigurationService() {
+        return configurationService;
+    }
+    
+    
 }

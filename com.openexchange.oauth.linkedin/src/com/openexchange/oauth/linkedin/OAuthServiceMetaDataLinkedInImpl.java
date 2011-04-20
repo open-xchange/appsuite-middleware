@@ -50,6 +50,7 @@
 package com.openexchange.oauth.linkedin;
 
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.linkedin.osgi.Activator;
 
 
 /**
@@ -59,8 +60,11 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
  */
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData{    
     
-    public OAuthServiceMetaDataLinkedInImpl(){
+    private Activator activator;
+    
+    public OAuthServiceMetaDataLinkedInImpl(Activator activator){
         super();
+        this.activator = activator;
     }
     
     @Override
@@ -75,12 +79,12 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     
     @Override
     public String getAPIKey() {
-        return "Ra7yTqolxUk_6UVpIAIsbv6kwLpIZCdNeUYxAA1n2Lnf05Dkr7D41dw-ivK-z4vA";
+        return activator.getConfigurationService().getProperty("com.openexchange.socialplugin.linkedin.apikey");
     }
 
     @Override
     public String getAPISecret() {
-        return "vEPBnxJvXvqf9NsBby0kZ1hcgQCM7JBO7iCjlw4KIDhw_7lwPIln7zIvtP3dbL-i";
+        return activator.getConfigurationService().getProperty("com.openexchange.socialplugin.linkedin.apisecret");
     }
 
     public boolean needsRequestToken() {

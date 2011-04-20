@@ -100,7 +100,7 @@ public class LinkedInServiceImpl implements LinkedInService{
      * @see com.openexchange.oauth.linkedin.LinkedInService#getContacts(int, int, int)
      */
     public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
-        OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl();
+        OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(activator);
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey()).apiSecret(
             linkedInMetaData.getAPISecret()).build();
