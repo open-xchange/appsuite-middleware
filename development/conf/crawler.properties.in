@@ -4,10 +4,10 @@
 com.openexchange.subscribe.crawler.path=@oxgroupwaresysconfdir@/crawlers/
 
 # Points to the remote URL containing updates to the workflow definitions
-com.openexchange.subscribe.crawler.updatepath=http://software.open-xchange.com/OX6/6.16/crawler-updates/files/
+com.openexchange.subscribe.crawler.updatepath=http://software.open-xchange.com/OX6/6.18/crawler-updates/files/
 
 # Points to the remove URL for updates to workflow definitions
-com.openexchange.subscribe.crawler.updatedfile=http://software.open-xchange.com/OX6/6.16/crawler-updates/updates.html
+com.openexchange.subscribe.crawler.updatedfile=http://software.open-xchange.com/OX6/6.18/crawler-updates/updates.html
 
 # The time interval in which to check for updates. Defaults to 86400000, which means daily.
 com.openexchange.subscribe.crawler.updateinterval=86400000
