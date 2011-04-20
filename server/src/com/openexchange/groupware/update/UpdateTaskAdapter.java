@@ -79,7 +79,9 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
     }
 
     public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
+        @SuppressWarnings("deprecation")
+        int priority = UpdateTask.UpdateTaskPriority.NORMAL.priority;
+        return priority;
     }
 
     public TaskAttributes getAttributes() {
