@@ -1,6 +1,7 @@
 * 2011-04-20 - marcus.klein@open-xchange.com
 
  - Bugfix #18997: Added an update task that fixes the wrong definitions for table oauthAccounts.
+ - Bugfix #18868: Added timeout to apache balancer member configuration to not inherit this from the global apache timeout.
 
 * 2011-04-19 - marcus.klein@open-xchange.com
 
