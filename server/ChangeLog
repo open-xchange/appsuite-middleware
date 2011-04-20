@@ -7,6 +7,10 @@
 
  - Bugfix #18993: Not putting sessions into the long term session container anymore if auto login feature is disabled.
 
+* 2011-04-18 - martin.herfurth@open-xchange.com
+
+ - Bugfix #18896: IMIP generation respects parameter for internal participants on update.
+
 * 2011-04-18 - marcus.klein@open-xchange.com
 
  - Bugfix #18837: Calculating conflicts for series that start in the past but last into the future.
