@@ -66,6 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * This class implements the servlet for authenticating the user at the
@@ -103,12 +104,7 @@ public class ConfigJump extends SessionServlet {
         try {
             final Context ctx = ContextStorage.getInstance().getContext(
                 sessionObj.getContextId());
-            final String protocol;
-            if (req.isSecure()) {
-                protocol = "https";
-            } else {
-                protocol = "http";
-            }
+            final String protocol = Tools.getProtocol(req);
             final URL url = com.openexchange.configjump.client.ConfigJump.getLink(new Replacements() {
                 public int getContextId() {
                     return sessionObj.getContextId();

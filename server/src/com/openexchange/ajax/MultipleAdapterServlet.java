@@ -115,7 +115,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             if (action == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
             }
-            final Object response = handler.performRequest(action, request, getSessionObject(req), req.isSecure());
+            final Object response = handler.performRequest(action, request, getSessionObject(req), Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
             writeResponseSafely(response, timestamp, handler.getWarnings(), resp);
         } catch (final AbstractOXException x) {

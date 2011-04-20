@@ -4210,7 +4210,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
                 uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
                 uploadEvent.setParameter(UPLOAD_PARAM_HOSTNAME, req.getServerName());
-                uploadEvent.setParameter(UPLOAD_PARAM_PROTOCOL, req.isSecure() ? "https" : "http");
+                uploadEvent.setParameter(UPLOAD_PARAM_PROTOCOL, Tools.getProtocol(req));
                 uploadEvent.setParameter(UPLOAD_PARAM_GID, groupId);
                 uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
                 fireUploadEvent(uploadEvent, listeners);

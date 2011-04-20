@@ -237,7 +237,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, UploadException {
         final AJAXRequestData retval = new AJAXRequestData();
-        retval.setSecure(req.isSecure());
+        retval.setSecure(Tools.considerSecure(req));
         {
             final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
             if (null == hostnameService) {

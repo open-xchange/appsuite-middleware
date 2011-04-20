@@ -74,6 +74,7 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link CrawlerOfferingServlet}
@@ -264,7 +265,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
     }
 
     private String getProtocol(HttpServletRequest req) {
-        return req.isSecure() ? "https://" : "http://";
+        return Tools.getProtocol(req);
     }
 
     private boolean auth(HttpServletRequest req) {

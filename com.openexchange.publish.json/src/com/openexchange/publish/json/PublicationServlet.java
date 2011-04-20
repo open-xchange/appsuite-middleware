@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.MultipleAdapterServlet;
 import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -94,7 +95,7 @@ public class PublicationServlet extends MultipleAdapterServlet {
     }
     
     protected String getServerURL(HttpServletRequest req) {
-        String protocol = req.isSecure() ? "https://" : "http://";
+        String protocol = Tools.getProtocol(req);
         return protocol + req.getServerName();
     }
 

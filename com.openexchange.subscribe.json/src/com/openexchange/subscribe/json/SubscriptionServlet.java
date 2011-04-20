@@ -95,7 +95,7 @@ public class SubscriptionServlet extends MultipleAdapterServlet {
     }
 
     private String getServerURL(HttpServletRequest req) {
-        String protocol = req.isSecure() ? "https://" : "http://";
+        String protocol = com.openexchange.tools.servlet.http.Tools.getProtocol(req);
         return protocol + req.getServerName();
     }
     

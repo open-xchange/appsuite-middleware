@@ -316,13 +316,17 @@ public final class Tools {
      * @return "http://" or "https://" depending on what was deemed more appropriate
      */
     public static String getProtocol(HttpServletRequest req) {
+        return (considerSecure(req)) ? "https://" : "http://";
+    }
+    
+    public static boolean considerSecure(HttpServletRequest req) {
         ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (configurationService != null) {
             boolean force = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
             if (force) {
-                return "https://";
+                return true;
             }
         }
-        return (req.isSecure()) ? "http://" : "https://";
+        return (req.isSecure()) ? false : true;
     }
 }

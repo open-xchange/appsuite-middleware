@@ -211,7 +211,7 @@ public class Multiple extends SessionServlet {
                 writeMailRequest(req);
                 jsonWriter.object();
                 try {
-                    final Object tmp = multipleHandler.performRequest(action, jsonObj, session, req.isSecure());
+                    final Object tmp = multipleHandler.performRequest(action, jsonObj, session, Tools.considerSecure(req));
                     jsonWriter.key(ResponseFields.DATA);
                     jsonWriter.value(tmp);
                     final Date timestamp = multipleHandler.getTimestamp();
