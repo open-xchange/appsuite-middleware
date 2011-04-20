@@ -327,6 +327,6 @@ public final class Tools {
                 return true;
             }
         }
-        return (req.isSecure()) ? false : true;
+        return req.isSecure();
     }
 }
