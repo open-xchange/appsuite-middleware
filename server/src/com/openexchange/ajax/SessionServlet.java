@@ -154,7 +154,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 if (configurationService != null) {
                     text = config.getInitParameter(SESSION_WHITELIST_FILE);
                 } else {
-                    LOG.error("Can't load IP Check whitelist file. Please check that the servlet activator is in order");
+                    //LOG.error("Can't load IP Check whitelist file. Please check that the servlet activator is in order");
                     return;
                 }
             }
