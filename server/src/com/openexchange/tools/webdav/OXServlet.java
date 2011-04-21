@@ -50,6 +50,8 @@
 package com.openexchange.tools.webdav;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -59,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.JDOMException;
+import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -252,16 +255,49 @@ public abstract class OXServlet extends WebDavServlet {
              */
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Wrong client IP address.");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Request to server denied for session: " + session.getSessionID() + ". in WebDAV XML interface. Client login IP changed from " + session.getLocalIp() + " to " + address + ".");
                 }
                 addUnauthorizedHeader(req, resp);
+                removeSession(session.getSessionID());
+                removeCookie(req, resp, COOKIE_SESSIONID);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return false;
             }
         }
         req.setAttribute(SESSION, session);
         return true;
+    }
+
+    private static void removeCookie(HttpServletRequest req, HttpServletResponse resp, String...cookiesToRemove) {
+        final Cookie[] cookies = req.getCookies();
+        if (cookies == null) {
+            return;
+        }
+        final List<String> cookieNames = Arrays.asList(cookiesToRemove);
+        for (final Cookie cookie : cookies) {
+            final String name = cookie.getName();
+
+            for (final String string : cookieNames) {
+                if (name.startsWith(string)) {
+                    final Cookie respCookie = new Cookie(name, cookie.getValue());
+                    respCookie.setPath("/");
+                    respCookie.setMaxAge(0); // delete
+                    resp.addCookie(respCookie);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param sessionID
+     */
+    private static void removeSession(String sessionID) {
+        try {
+            ServerServiceRegistry.getInstance().getService(SessiondService.class, true).removeSession(sessionID);
+        } catch (ServiceException e) {
+            // Ignore. Probably we're just about to shut down.
+        }
     }
 
     /**
