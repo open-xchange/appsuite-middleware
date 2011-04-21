@@ -50,6 +50,7 @@
 package com.openexchange.config.internal;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,7 +58,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
 
 /**
@@ -80,6 +85,8 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     private static final String TRUE = "true";
 
     private ConfigurationService configService;
+    
+    private static final Log LOG = LogFactory.getLog(ConfigProviderService.class);
     
     private ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
 
@@ -136,10 +143,17 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     private void initMetadata(ConfigurationService config) {
         Map<String, Object> yamlInFolder = config.getYamlInFolder(META);
         for(Object o : yamlInFolder.values()) {
+            if (! checkMap(o)) {
+                continue;
+            }
             Map<String, Object> metadataDef = (Map<String, Object>) o;
             for(Map.Entry<String, Object> entry : metadataDef.entrySet()) {
                 String propertyName = entry.getKey();
-                Map<String, Object> metadata = (Map<String, Object>) entry.getValue();
+                Object value2 = entry.getValue();
+                if (! checkMap(value2)) {
+                    continue;
+                }
+                Map<String, Object> metadata = (Map<String, Object>) value2;
                 ServerProperty basicProperty = get(propertyName, -1, -1);
                 for(Map.Entry<String, Object> metadataProp : metadata.entrySet()) {
                     if(metadataProp.getValue() != null) {
@@ -155,6 +169,20 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
                 basicProperty.setDefined(value != null);    
             }
         }
+    }
+
+    private boolean checkMap(Object o) {
+        if (! Map.class.isInstance(o)) {
+            StringBuilder b = new StringBuilder("One of the .yml files in the meta configuration directory is improperly formatted\n");
+            b.append("Please make sure they are formatted in this fashion:\n");
+            b.append("ui/somepath:\n");
+            b.append("\tprotected: false\n\n");
+            b.append("ui/someOtherpath:\n");
+            b.append("\tprotected: false\n\n");
+            LOG.error(b.toString(), new IllegalArgumentException("Invalid .yml file"));
+            return false;
+        }
+        return true;
     }
 
 }

@@ -95,7 +95,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     private int ctxId;
 
-    public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws ConfigCascadeException {
+    public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws ConfigCascadeException, UWAWidgetException {
         userScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
         contextScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
         positions = new PositionSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
@@ -104,7 +104,7 @@ public class CompositeUWAService implements UWAWidgetService {
         String filename = view.get("com.openexchange.frontend.uwa.widgetFile", String.class);
         Map<String, Map<String, Object>> configValues = null;
         if (filename != null) {
-            configValues = (Map<String, Map<String, Object>>) config.getYaml(filename);
+            configValues = ensureType(config.getYaml(filename));
         } else {
             configValues = Collections.emptyMap();
         }
@@ -115,6 +115,22 @@ public class CompositeUWAService implements UWAWidgetService {
         this.ctxId = ctxId;
     }
     
+
+    private Map<String, Map<String, Object>> ensureType(Object yaml) throws UWAWidgetException {
+        if (Map.class.isInstance(yaml)) {
+            for(Map.Entry<Object, Object> entry : ((Map<Object, Object>) yaml).entrySet()) {
+                Object key = entry.getKey();
+                Object value = entry.getValue();
+                if(!Map.class.isInstance(value)) {
+                    throw UWAWidgetExceptionCodes.INVALID_CONFIGURATION.create();
+                }
+            }
+        } else {
+            throw UWAWidgetExceptionCodes.INVALID_CONFIGURATION.create();
+        }
+        return (Map<String, Map<String, Object>>) yaml;
+    }
+
 
     private static final Set<Field> POSITION_FIELDS = EnumSet.of(Field.ADJ);
 
