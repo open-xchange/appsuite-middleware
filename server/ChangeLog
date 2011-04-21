@@ -1,3 +1,7 @@
+* 2011-04-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #19018: Added missing import for javax.xml.transform.stream to server bundle.
+
 * 2011-04-21 - choeger@open-xchange.com
 
  - Bugfix #19010: NullPointerException in IMAP Idle bundle
