@@ -154,6 +154,10 @@ public final class ImapIdlePushListener implements PushListener {
 
     private MailService mailService;
     
+    private IMAPFolder inbox;
+    
+    private boolean shutdown;
+    
     /**
      * Initializes a new {@link ImapIdlePushListener}.
      * 
@@ -168,6 +172,8 @@ public final class ImapIdlePushListener implements PushListener {
         mailAccess = null;
         mailService = null;
         errordelay = 1000;
+        inbox = null;
+        shutdown = false;
     }
 
     
@@ -221,6 +227,20 @@ public final class ImapIdlePushListener implements PushListener {
      * Closes this listener.
      */
     public void close() {
+        if( DEBUG_ENABLED ) {
+            LOG.info("stopping IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+        }
+        shutdown = true;
+        if( null != inbox ) {
+            if( inbox.isOpen() ) {
+                try {
+                    inbox.close(false);
+                } catch (MessagingException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+            inbox = null;
+        }
         if( null != imapIdleFuture ) {
             imapIdleFuture.cancel(true);
             imapIdleFuture = null;
@@ -232,7 +252,10 @@ public final class ImapIdlePushListener implements PushListener {
      * 
      * @throws PushException If check for new mails fails
      */
-    public void checkNewMail() throws PushException {
+    public boolean checkNewMail() throws PushException {
+        if( shutdown ) {
+            return false;
+        }
         if (!running.compareAndSet(false, true)) {
             /*
              * Still in process...
@@ -241,7 +264,7 @@ public final class ImapIdlePushListener implements PushListener {
                 LOG.info(new StringBuilder(64).append("Listener still in process for user ").append(userId).append(" in context ").append(
                     contextId).append(". Return immediately.").toString());
             }
-            return;
+            return true;
         }
         try {
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
@@ -252,7 +275,7 @@ public final class ImapIdlePushListener implements PushListener {
             }
             IMAPFolderStorage istore = (IMAPFolderStorage) fstore;
             IMAPStore imapStore = istore.getImapStore();
-            IMAPFolder inbox = (IMAPFolder) imapStore.getFolder(folder);
+            inbox = (IMAPFolder) imapStore.getFolder(folder);
             if( ! inbox.isOpen() ) {
                 inbox.open(IMAPFolder.READ_WRITE);
             }
@@ -292,6 +315,7 @@ public final class ImapIdlePushListener implements PushListener {
             }
             running.set(false);
         }
+        return true;
     }
 
     public void notifyNewMail() throws PushException {

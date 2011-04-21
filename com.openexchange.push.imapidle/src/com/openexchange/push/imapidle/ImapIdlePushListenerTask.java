@@ -69,9 +69,7 @@ public final class ImapIdlePushListenerTask implements Runnable {
 
     public void run() {
         try {
-            while(true) {
-                listener.checkNewMail();
-            }
+            while(listener.checkNewMail()) { }
         } catch (final PushException e) {
             LOG.error(e.getMessage(), e);
         }
