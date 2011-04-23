@@ -194,10 +194,7 @@ public class Protocol implements Component, Serializable {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Protocol)) {
             return false;
         }
         final Protocol other = (Protocol) obj;
