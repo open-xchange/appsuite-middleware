@@ -98,6 +98,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     protected boolean cacheable;
 
+    protected MailProvider provider;
+
     private transient MailConfig mailConfig;
 
     private Properties mailProperties;
@@ -136,6 +138,26 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public Session getSession() {
         return session;
+    }
+
+    /**
+     * Sets the associated {@link MailProvider} instance.
+     * 
+     * @param provider The mail provider
+     * @return This instance with mail provider applied
+     */
+    protected MailAccess<F, M> setProvider(final MailProvider provider) {
+        this.provider = provider;
+        return this;
+    }
+
+    /**
+     * Gets the associated {@link MailProvider} instance.
+     * 
+     * @return The mail provider
+     */
+    public MailProvider getProvider() {
+        return provider;
     }
 
     /**
@@ -256,7 +278,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         /*
          * Return new connection
          */
-        return MailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
+        final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
+        return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
 
     /**
