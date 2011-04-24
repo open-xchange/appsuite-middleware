@@ -54,6 +54,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -85,6 +89,124 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static final long serialVersionUID = -2580495494392812083L;
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccess.class);
+
+    private static final class Key {
+
+        private final int user;
+
+        private final int cid;
+
+        private final int accountId;
+
+        private final int hash;
+
+        public Key(final int user, final int cid, final int accountId) {
+            super();
+            this.user = user;
+            this.cid = cid;
+            this.accountId = accountId;
+            this.hash = hashCode0();
+        }
+
+        private int hashCode0() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + accountId;
+            result = prime * result + cid;
+            result = prime * result + user;
+            return result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (accountId != other.accountId) {
+                return false;
+            }
+            if (cid != other.cid) {
+                return false;
+            }
+            if (user != other.user) {
+                return false;
+            }
+            return true;
+        }
+
+    } // End of class Key
+
+    private static final Object PRESENT = new Object();
+
+    private static final ConcurrentMap<Key, BlockingQueue<Object>> COUNTER_MAP = new ConcurrentHashMap<MailAccess.Key, BlockingQueue<Object>>();
+
+    private static Key getUserKey(final int user, final int accountId, final int cid) {
+        return new Key(user, cid, accountId);
+    }
+
+    /**
+     * Signal a closed {@link MailAccess} instance.
+     * 
+     * @param mailAccess The mail access which has been closed
+     */
+    private static void signalClosed(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        if (MailAccount.DEFAULT_ID != mailAccess.accountId) {
+            final Session session = mailAccess.getSession();
+            final BlockingQueue<Object> queue = COUNTER_MAP.get(getUserKey(session.getUserId(), mailAccess.getAccountId(), session.getContextId()));
+            if (null != queue) {
+                /*
+                 * Dequeue
+                 */
+                queue.poll();
+            }
+        }
+    }
+
+    /**
+     * Signals that specified {@link MailAccess} which shall be connected.
+     * 
+     * @param mailAccess The mail access
+     * @throws MailException If protocol specifies capacity bounds and waiting for space is interrupted
+     */
+    private static void signalConnectAttempt(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
+        if (MailAccount.DEFAULT_ID != mailAccess.accountId) {
+            final Session session = mailAccess.getSession();
+            final Key key = getUserKey(session.getUserId(), mailAccess.getAccountId(), session.getContextId());
+            BlockingQueue<Object> queue = COUNTER_MAP.get(key);
+            if (null == queue) {
+                final int max = mailAccess.getProvider().getProtocol().getMaxCount();
+                if (max > 0) {
+                    final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
+                    queue = COUNTER_MAP.putIfAbsent(key, nq);
+                    if (null == queue) {
+                        queue = nq;
+                    }
+                }
+            }
+            /*
+             * (Blocking) Enqueue
+             */
+            if (null != queue) {
+                try {
+                    queue.put(PRESENT);
+                } catch (InterruptedException e) {
+                    throw new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
+                }
+            }
+        }
+    }
 
     /*-
      * ############### MEMBERS ###############
@@ -508,6 +630,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
         } else {
             checkFieldsBeforeConnect(getMailConfig());
+            signalConnectAttempt(this);
             delegateConnectInternal();
             if (checkDefaultFolder) {
                 checkDefaultFolderOnConnect();
@@ -595,7 +718,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             /*
              * Close mail connection
              */
-            delegateCloseInternal();
+            try {
+                delegateCloseInternal();
+            } finally {
+                signalClosed(this);
+            }
         } finally {
             /*
              * Remove from watcher no matter if cached or closed
