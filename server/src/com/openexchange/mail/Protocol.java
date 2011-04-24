@@ -198,9 +198,11 @@ public class Protocol implements Component, Serializable {
      * Sets the max count.
      * 
      * @param maxCount The max count
+     * @return This protocol with new max count applied
      */
-    public void setMaxCount(int maxCount) {
-        this.maxCount = maxCount;
+    public Protocol setMaxCount(final int maxCount) {
+        this.maxCount = maxCount <= 0 ? -1 : maxCount;
+        return this;
     }
 
     /**
