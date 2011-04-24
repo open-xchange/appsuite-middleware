@@ -221,7 +221,7 @@ public final class MailAccessCache {
         }
     }
 
-    private Key getUserKey(final int user, final int accountId, final int cid) {
+    private static Key getUserKey(final int user, final int accountId, final int cid) {
         return new Key(user, cid, accountId);
     }
 
