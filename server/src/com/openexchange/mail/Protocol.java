@@ -127,6 +127,8 @@ public class Protocol implements Component, Serializable {
 
     private String abbr;
 
+    private int maxCount;
+
     /**
      * Initializes a new {@link Protocol}
      * 
@@ -138,6 +140,7 @@ public class Protocol implements Component, Serializable {
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
+        maxCount = -1;
         this.name = name.toLowerCase(Locale.ENGLISH);
         aliases = null;
         hashCode = 31 * 1 + (name.hashCode());
@@ -155,6 +158,7 @@ public class Protocol implements Component, Serializable {
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
+        maxCount = -1;
         this.name = name.toLowerCase(Locale.ENGLISH);
         if (secureName == null) {
             aliases = null;
@@ -176,6 +180,7 @@ public class Protocol implements Component, Serializable {
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
+        maxCount = -1;
         this.name = name.toLowerCase(Locale.ENGLISH);
         if (null == aliases) {
             this.aliases = null;
@@ -187,6 +192,24 @@ public class Protocol implements Component, Serializable {
             }
         }
         hashCode = 31 * 1 + (name.hashCode());
+    }
+
+    /**
+     * Sets the max count.
+     * 
+     * @param maxCount The max count
+     */
+    public void setMaxCount(int maxCount) {
+        this.maxCount = maxCount;
+    }
+
+    /**
+     * Gets the max count.
+     * 
+     * @return The max count
+     */
+    public int getMaxCount() {
+        return maxCount;
     }
 
     @Override
