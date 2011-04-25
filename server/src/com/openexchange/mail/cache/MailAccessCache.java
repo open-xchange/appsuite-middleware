@@ -167,7 +167,12 @@ public final class MailAccessCache {
      * @return An active instance of {@link MailAccess} or <code>null</code>
      */
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
-        return timeoutMap.remove(getUserKey(session.getUserId(), accountId, session.getContextId()));
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = timeoutMap.remove(getUserKey(session.getUserId(), accountId, session.getContextId()));
+        if (null == mailAccess) {
+            return null;
+        }
+        mailAccess.setCached(false);
+        return mailAccess;
     }
 
     /**
@@ -183,7 +188,11 @@ public final class MailAccessCache {
         if (idleTime <= 0) {
             idleTime = defaultIdleSeconds;
         }
-        return (null == timeoutMap.putIfAbsent(getUserKey(session.getUserId(), accountId, session.getContextId()), mailAccess, idleTime));
+        if (null == timeoutMap.putIfAbsent(getUserKey(session.getUserId(), accountId, session.getContextId()), mailAccess, idleTime)) {
+            mailAccess.setCached(true);
+            return true;
+        }
+        return false;
     }
 
     /**

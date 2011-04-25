@@ -163,8 +163,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private static void signalClosed(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         if (MailAccount.DEFAULT_ID != mailAccess.accountId) {
-            final Session session = mailAccess.getSession();
-            final BlockingQueue<Object> queue = COUNTER_MAP.get(getUserKey(session.getUserId(), mailAccess.getAccountId(), session.getContextId()));
+            final Session session = mailAccess.session;
+            final BlockingQueue<Object> queue = COUNTER_MAP.get(getUserKey(session.getUserId(), mailAccess.accountId, session.getContextId()));
             if (null != queue) {
                 /*
                  * Dequeue
@@ -175,37 +175,50 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Signals that specified {@link MailAccess} which shall be connected.
+     * Signals that specified {@link MailAccess} which shall be connected. Waiting if capacity bounds specified for a closed {@link MailAccess} instance.
      * 
-     * @param mailAccess The mail access
+     * @param accountId The account ID
+     * @param session The session
+     * @param provider The mail provider
+     * @return <code>true</code> if an immediate enqueue was possible; otherwise <code>false</code> for a blocking enqueue.
      * @throws MailException If protocol specifies capacity bounds and waiting for space is interrupted
      */
-    private static void signalConnectAttempt(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
-        if (MailAccount.DEFAULT_ID != mailAccess.accountId) {
-            final Session session = mailAccess.getSession();
-            final Key key = getUserKey(session.getUserId(), mailAccess.getAccountId(), session.getContextId());
-            BlockingQueue<Object> queue = COUNTER_MAP.get(key);
-            if (null == queue) {
-                final int max = mailAccess.getProvider().getProtocol().getMaxCount();
-                if (max > 0) {
-                    final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
-                    queue = COUNTER_MAP.putIfAbsent(key, nq);
-                    if (null == queue) {
-                        queue = nq;
-                    }
-                }
-            }
+    private static boolean signalConnectAttempt(final int accountId, final Session session, final MailProvider provider) throws MailException {
+        if (MailAccount.DEFAULT_ID == accountId) {
             /*
-             * (Blocking) Enqueue
+             * No capacity restrictions for primary account.
              */
-            if (null != queue) {
-                try {
-                    queue.put(PRESENT);
-                } catch (InterruptedException e) {
-                    throw new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
+            return true;
+        }
+        final Key key = getUserKey(session.getUserId(), accountId, session.getContextId());
+        BlockingQueue<Object> queue = COUNTER_MAP.get(key);
+        if (null == queue) {
+            final int max = provider.getProtocol().getMaxCount();
+            if (max > 0) {
+                final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
+                queue = COUNTER_MAP.putIfAbsent(key, nq);
+                if (null == queue) {
+                    queue = nq;
                 }
             }
         }
+        if ((null == queue) || queue.offer(PRESENT)) {
+            /*
+             * No capacity restrictions or space was immediately available
+             */
+            return true;
+        }
+        /*-
+         * Wasn't possible to immediately add to queue:
+         * 
+         * Perform blocking enqueue (waiting if necessary for space to become available).
+         */
+        try {
+            queue.put(PRESENT);
+        } catch (final InterruptedException e) {
+            throw new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
+        }
+        return false;
     }
 
     /*-
@@ -219,6 +232,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected final Collection<MailException> warnings;
 
     protected boolean cacheable;
+
+    /**
+     * Indicates if {@link MailAccess} is currently held in {@link MailAccessCache}.
+     */
+    protected boolean cached;
 
     protected MailProvider provider;
 
@@ -398,10 +416,23 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             checkAdminLogin(session, accountId);
         }
         /*
-         * Return new connection
+         * Return new MailAccess instance
          */
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
-        return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
+        if (signalConnectAttempt(accountId, session, mailProvider)) {
+            /*
+             * Immediate enqueue performed
+             */
+            return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
+        }
+        /*-
+         * Blocking enqueue performed:
+         * 
+         * Re-check cache
+         */
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+            MailAccessCache.getInstance().removeMailAccess(session, accountId);
+        return null == mailAccess ? mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider) : mailAccess;
     }
 
     /**
@@ -630,7 +661,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
         } else {
             checkFieldsBeforeConnect(getMailConfig());
-            signalConnectAttempt(this);
             delegateConnectInternal();
             if (checkDefaultFolder) {
                 checkDefaultFolderOnConnect();
@@ -685,6 +715,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public final void close(final boolean put2Cache) {
         if (!isConnectedUnsafe()) {
+            signalClosed(this);
             return;
         }
         boolean put = put2Cache;
@@ -710,6 +741,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     /*
                      * Successfully cached: return
                      */
+                    signalClosed(this);
                     return;
                 }
             } catch (final MailException e) {
@@ -718,9 +750,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             /*
              * Close mail connection
              */
-            try {
-                delegateCloseInternal();
-            } finally {
+            delegateCloseInternal();
+            if (!cached) {
+                /*
+                 * Not closed by MailAccessCache
+                 */
                 signalClosed(this);
             }
         } finally {
@@ -857,6 +891,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public void setCacheable(final boolean cacheable) {
         this.cacheable = cacheable;
+    }
+
+    /**
+     * Indicates if this mail access is currently cached in {@link MailAccessCache}.
+     * 
+     * @return <code>true</code> if this mail access is cached; otherwise <code>false</code>
+     */
+    public boolean isCached() {
+        return cached;
+    }
+
+    /**
+     * Sets whether this mail access is currently cached or not.
+     * 
+     * @param cacheable <code>true</code> if this mail access is cached; otherwise <code>false</code>
+     */
+    public void setCached(final boolean cached) {
+        this.cached = cached;
     }
 
     /**
