@@ -96,7 +96,7 @@ public final class ProviderUtility {
                 public int getSSLPort() {
                     return defaultPort;
                 }});
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw MailAccountExceptionMessages.URI_PARSE_FAILED.create(e, serverUrl);
         }
         return new InetSocketAddress(uri.getHost(), uri.getPort());

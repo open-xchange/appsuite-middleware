@@ -809,7 +809,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     private QuotedInternetAddress(final InternetAddress src) throws AddressException {
         this();
-        this.address = toACE(src.getAddress());
+        address = toACE(src.getAddress());
         try {
             setPersonal(getPersonal(), null);
         } catch (final UnsupportedEncodingException e) {
@@ -913,8 +913,8 @@ public final class QuotedInternetAddress extends InternetAddress {
          */
         final QuotedInternetAddress internetAddress = (QuotedInternetAddress) a[0];
         this.address = internetAddress.address;
-        this.personal = internetAddress.personal;
-        this.encodedPersonal = internetAddress.encodedPersonal;
+        personal = internetAddress.personal;
+        encodedPersonal = internetAddress.encodedPersonal;
     }
 
     /**

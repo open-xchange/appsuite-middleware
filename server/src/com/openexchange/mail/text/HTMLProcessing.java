@@ -197,7 +197,7 @@ public final class HTMLProcessing {
             retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
-                    List<Range> addedLinks = new ArrayList<Range>();
+                    final List<Range> addedLinks = new ArrayList<Range>();
                     retval = htmlService.formatURLs(retval, addedLinks);
                     retval = htmlService.htmlFormat(retval, true, addedLinks);
                     if (usm.isUseColorQuote()) {

@@ -71,7 +71,7 @@ final class LoginResultImpl implements LoginResult {
         super();
     }
 
-    public LoginResultImpl(Session session, Context context, User user) {
+    public LoginResultImpl(final Session session, final Context context, final User user) {
         super();
         this.session = session;
         this.context = context;
@@ -82,7 +82,7 @@ final class LoginResultImpl implements LoginResult {
         return request;
     }
 
-    void setRequest(LoginRequest request) {
+    void setRequest(final LoginRequest request) {
         this.request = request;
     }
 
@@ -90,7 +90,7 @@ final class LoginResultImpl implements LoginResult {
         return context;
     }
 
-    public void setContext(Context context) {
+    public void setContext(final Context context) {
         this.context = context;
     }
 
@@ -98,7 +98,7 @@ final class LoginResultImpl implements LoginResult {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
 
@@ -106,7 +106,7 @@ final class LoginResultImpl implements LoginResult {
         return session;
     }
 
-    public void setSession(Session session) {
+    public void setSession(final Session session) {
         this.session = session;
     }
 }

@@ -227,14 +227,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         try {
             if (session instanceof ServerSession) {
                 final ServerSession serverSession = (ServerSession) session;
-                this.ctx = serverSession.getContext();
-                this.usm = serverSession.getUserSettingMail();
+                ctx = serverSession.getContext();
+                usm = serverSession.getUserSettingMail();
                 if (!serverSession.getUserConfiguration().hasWebMail()) {
                     throw new MailException(MailException.Code.NO_MAIL_ACCESS);
                 }
-                this.user = serverSession.getUser();
+                user = serverSession.getUser();
             } else {
-                this.ctx = ContextStorage.getInstance().getContext(session.getContextId());
+                ctx = ContextStorage.getInstance().getContext(session.getContextId());
                 usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
                 try {
                     if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
@@ -248,7 +248,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             throw new MailException(e);
         }
         this.session = session;
-        this.contextId = session.getContextId();
+        contextId = session.getContextId();
     }
 
     private User getUser() {

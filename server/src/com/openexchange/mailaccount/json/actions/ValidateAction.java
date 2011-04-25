@@ -206,7 +206,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             final URI uri;
             try {
                 uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 throw new MailException(Code.URI_PARSE_FAILED, e, mailServerURL);
             }
             mailConfig.setServer(uri.getHost());
@@ -258,7 +258,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         final URI uri;
         try {
             uri = URIParser.parse(transportServerURL, URIDefaults.SMTP);
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new MailException(Code.URI_PARSE_FAILED, e, transportServerURL);
         }
         transportConfig.setServer(URITools.getHost(uri));

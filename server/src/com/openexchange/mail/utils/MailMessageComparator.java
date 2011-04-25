@@ -116,7 +116,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
      */
     public MailMessageComparator(final MailSortField sortField, final boolean descendingDirection, final Locale locale) {
         super();
-        this.descendingDir = descendingDirection;
+        descendingDir = descendingDirection;
         if (MailSortField.COLOR_LABEL.equals(sortField) && !MailProperties.getInstance().isUserFlagsEnabled()) {
             fieldComparer = DUMMY_COMPARER;
         } else {
@@ -251,21 +251,21 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             return new LocalizedFieldComparer(locale) {
 
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                    return compareAddrs(msg1.getFrom(), msg2.getFrom(), this.locale, collator);
+                    return compareAddrs(msg1.getFrom(), msg2.getFrom(), locale, collator);
                 }
             };
         case TO:
             return new LocalizedFieldComparer(locale) {
 
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                    return compareAddrs(msg1.getTo(), msg2.getTo(), this.locale, collator);
+                    return compareAddrs(msg1.getTo(), msg2.getTo(), locale, collator);
                 }
             };
         case CC:
             return new LocalizedFieldComparer(locale) {
 
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                    return compareAddrs(msg1.getCc(), msg2.getCc(), this.locale, collator);
+                    return compareAddrs(msg1.getCc(), msg2.getCc(), locale, collator);
                 }
             };
         case SUBJECT:

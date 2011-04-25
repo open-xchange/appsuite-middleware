@@ -108,7 +108,7 @@ public final class ImageServlet extends HttpServlet {
     }
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }

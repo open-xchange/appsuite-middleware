@@ -81,7 +81,7 @@ public final class MailAccessTimeoutListener2 implements TimeoutListener<MailAcc
     public void onTimeout(final MailAccess<?, ?> mailAccess) {
         mailAccess.close(false);
         if (set.isEmpty()) {
-            TimeoutConcurrentSet<MailAccess<?, ?>> remove = map.remove(key);
+            final TimeoutConcurrentSet<MailAccess<?, ?>> remove = map.remove(key);
             if (!remove.isEmpty()) {
                 remove.timeoutAll();
                 remove.dispose();

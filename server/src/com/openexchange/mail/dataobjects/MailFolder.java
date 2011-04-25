@@ -200,16 +200,16 @@ public class MailFolder implements Serializable, Cloneable {
         try {
             final MailFolder clone = (MailFolder) super.clone();
             {
-                final MailPermission thisOwnPerm = this.ownPermission;
+                final MailPermission thisOwnPerm = ownPermission;
                 if (thisOwnPerm != null) {
                     clone.ownPermission = (MailPermission) thisOwnPerm.clone();
                 }
             }
             {
-                final List<MailPermission> thisPerms = this.permissions;
+                final List<MailPermission> thisPerms = permissions;
                 if (thisPerms != null) {
                     final List<MailPermission> l = new ArrayList<MailPermission>(thisPerms.size());
-                    for (MailPermission mailPermission : thisPerms) {
+                    for (final MailPermission mailPermission : thisPerms) {
                         l.add((MailPermission) mailPermission.clone());
                     }
                     clone.permissions = l;

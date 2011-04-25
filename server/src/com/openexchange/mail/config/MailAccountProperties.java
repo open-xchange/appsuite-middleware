@@ -75,7 +75,7 @@ public class MailAccountProperties implements IMailProperties {
         if (null == mailAccount) {
             throw new IllegalArgumentException("mail account is null.");
         }
-        this.properties = mailAccount.getProperties();
+        properties = mailAccount.getProperties();
     }
 
     public int getAttachDisplaySize() {

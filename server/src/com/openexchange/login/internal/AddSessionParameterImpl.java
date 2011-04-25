@@ -67,7 +67,7 @@ final class AddSessionParameterImpl implements AddSessionParameter {
 
     private final Context ctx;
 
-    AddSessionParameterImpl(String username, LoginRequest request, User user, Context ctx) {
+    AddSessionParameterImpl(final String username, final LoginRequest request, final User user, final Context ctx) {
         this.username = username;
         this.request = request;
         this.user = user;

@@ -70,7 +70,7 @@ final class SessionBoundImagesCleaner implements Runnable {
 	 */
 	SessionBoundImagesCleaner(final ConcurrentMap<String, ConcurrentMap<String, ImageData>> session2imageMaps) {
 		super();
-		this.toIterate = session2imageMaps;
+		toIterate = session2imageMaps;
 	}
 
 	public void run() {

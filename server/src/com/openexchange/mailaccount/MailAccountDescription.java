@@ -404,10 +404,10 @@ public final class MailAccountDescription implements Serializable {
         if (isEmpty(mailServer)) {
             return null;
         }
-        String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
+        final String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
         try {
             return mailServerUrl = URITools.generateURI(protocol, mailServer, mailPort).toString();
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             final StringBuilder sb = new StringBuilder(32);
             sb.append(mailProtocol);
@@ -431,7 +431,7 @@ public final class MailAccountDescription implements Serializable {
         }
         try {
             setMailServer(URIParser.parse(mailServerURL, URIDefaults.IMAP));
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
             // instead now.
@@ -457,12 +457,12 @@ public final class MailAccountDescription implements Serializable {
         }
     }
 
-    public void setMailServer(URI mailServer) {
+    public void setMailServer(final URI mailServer) {
         if (null == mailServer) {
             // Parse like old parser to prevent problems.
             setMailServer("");
         } else {
-            String protocol = mailServer.getScheme();
+            final String protocol = mailServer.getScheme();
             if (protocol.endsWith("s")) {
                 setMailSecure(true);
                 setMailProtocol(protocol.substring(0, protocol.length() - 1));
@@ -487,7 +487,7 @@ public final class MailAccountDescription implements Serializable {
         }
         try {
             setTransportServer(URIParser.parse(transportServerURL, URIDefaults.SMTP));
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
             // instead now.
@@ -513,12 +513,12 @@ public final class MailAccountDescription implements Serializable {
         }
     }
 
-    public void setTransportServer(URI transportServer) {
+    public void setTransportServer(final URI transportServer) {
         if (null == transportServer) {
             // Parse like old parser to prevent problems.
             setTransportServer(""); 
         } else {
-            String protocol = transportServer.getScheme();
+            final String protocol = transportServer.getScheme();
             if (protocol.endsWith("s")) {
                 setTransportSecure(true);
                 setTransportProtocol(protocol.substring(0, protocol.length() - 1));
@@ -538,10 +538,10 @@ public final class MailAccountDescription implements Serializable {
         if (isEmpty(transportServer)) {
             return null;
         }
-        String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
+        final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
             return transportUrl = URITools.generateURI(protocol, transportServer, transportPort).toString();
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // Old implementation is not capable of handling IPv6 addresses.
             final StringBuilder sb = new StringBuilder(32);

@@ -185,7 +185,7 @@ public final class MailPath implements Cloneable, Serializable {
         super();
         this.accountId = accountId;
         this.folder = folder;
-        this.mailID = uid;
+        mailID = uid;
         str = getMailPath(accountId, folder, mailID);
     }
 
@@ -302,9 +302,9 @@ public final class MailPath implements Cloneable, Serializable {
             throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
         }
         final FullnameArgument fa = prepareMailFolderParam(mailPathStr.substring(0, pos));
-        this.accountId = fa.getAccountId();
-        this.folder = fa.getFullname();
-        this.mailID = mailPathStr.substring(pos + 1);
+        accountId = fa.getAccountId();
+        folder = fa.getFullname();
+        mailID = mailPathStr.substring(pos + 1);
         str = mailPathStr;
         return this;
     }

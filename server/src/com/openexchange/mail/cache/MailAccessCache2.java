@@ -282,7 +282,7 @@ public final class MailAccessCache2 {
             this.user = user;
             this.cid = cid;
             this.accountId = accountId;
-            this.hash = hashCode0();
+            hash = hashCode0();
         }
 
         private int hashCode0() {

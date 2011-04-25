@@ -303,7 +303,7 @@ public final class CompositeMailMessage extends MailMessage {
     }
 
     @Override
-    public boolean hasHeaders(String... names) {
+    public boolean hasHeaders(final String... names) {
         return delegate.hasHeaders(names);
     }
 
@@ -328,7 +328,7 @@ public final class CompositeMailMessage extends MailMessage {
     }
 
     @Override
-    public void setRecentCount(int recentCount) {
+    public void setRecentCount(final int recentCount) {
         delegate.setRecentCount(recentCount);
     }
 

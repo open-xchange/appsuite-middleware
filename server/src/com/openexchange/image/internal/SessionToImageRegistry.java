@@ -146,7 +146,7 @@ public class SessionToImageRegistry {
         
         if (imageIds != null) {
             for (final String imageId : imageIds) {
-                boolean removed = imageIds2sessionIds.remove(imageId) == null;
+                final boolean removed = imageIds2sessionIds.remove(imageId) == null;
                 error |= removed;
                 
                 if (removed) {

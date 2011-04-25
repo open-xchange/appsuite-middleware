@@ -120,7 +120,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
             final MailAccountDescription accountDescription = new MailAccountDescription();
             final Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
 
-            Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
+            final Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
             notAllowed.removeAll(WEBMAIL_ALLOWED);
             if (!session.getUserConfiguration().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
                 throw MailAccountExceptionFactory.getInstance().create(

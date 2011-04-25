@@ -165,7 +165,7 @@ public final class PooledEvent implements Delayed {
     }
 
     public int compareTo(final Delayed o) {
-        final long thisStamp = this.stamp;
+        final long thisStamp = stamp;
         final long otherStamp = ((PooledEvent) o).stamp;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
     }

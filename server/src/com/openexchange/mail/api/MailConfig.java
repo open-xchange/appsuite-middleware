@@ -438,12 +438,12 @@ public abstract class MailConfig {
                     }
                 }
                 // Prefer the default mail account. 
-                Set<Integer> notDefaultAccount = new HashSet<Integer>();
+                final Set<Integer> notDefaultAccount = new HashSet<Integer>();
                 if (userIds.size() > 1) {
-                    Iterator<Integer> iter = userIds.iterator();
+                    final Iterator<Integer> iter = userIds.iterator();
                     while (iter.hasNext()) {
-                        int userId = i(iter.next());
-                        for (MailAccount candidate : accounts) {
+                        final int userId = i(iter.next());
+                        for (final MailAccount candidate : accounts) {
                             if (candidate.getUserId() == userId && !candidate.isDefaultAccount()) {
                                 notDefaultAccount.add(I(userId));
                             }

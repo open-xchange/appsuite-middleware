@@ -74,6 +74,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.ServiceException.Code;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -82,7 +83,6 @@ import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
-import com.openexchange.mail.config.MailProperties;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
@@ -155,7 +155,7 @@ public final class LoginPerformer {
         } catch (final SessiondException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
-        } catch (AuthorizationException e) {
+        } catch (final AuthorizationException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
         }
@@ -396,10 +396,10 @@ public final class LoginPerformer {
         LOG.info(sb.toString());
     }
 
-    public Session lookupSession(String sessionId) throws LoginException {
+    public Session lookupSession(final String sessionId) throws LoginException {
         try {
             return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
-        } catch (ServiceException x) {
+        } catch (final ServiceException x) {
             throw new LoginException(x);
         }
     }

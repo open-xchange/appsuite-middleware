@@ -458,10 +458,10 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (isEmpty(mailServer)) {
             return null;
         }
-        String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
+        final String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
         try {
             return mailServerUrl = URITools.generateURI(protocol, mailServer, mailPort).toString();
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // Old implementation is not capable of handling IPv6 addresses.
             final StringBuilder sb = new StringBuilder(32);
@@ -482,17 +482,17 @@ public abstract class AbstractMailAccount implements MailAccount {
     public void parseMailServerURL(final String mailServerURL) throws MailAccountException {
         try {
             setMailServer(URIParser.parse(mailServerURL, URIDefaults.IMAP));
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, mailServerURL);
         }
     }
 
-    public void setMailServer(URI mailServer) {
+    public void setMailServer(final URI mailServer) {
         if (null == mailServer) {
             // Parse like old parser to prevent problems.
             setMailServer("");
         } else {
-            String protocol = mailServer.getScheme();
+            final String protocol = mailServer.getScheme();
             if (protocol.endsWith("s")) {
                 setMailSecure(true);
                 setMailProtocol(protocol.substring(0, protocol.length() - 1));
@@ -518,7 +518,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         }
         try {
             setTransportServer(URIParser.parse(transportServerURL, URIDefaults.SMTP));
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             if ("smtp://:25".equals(transportServerURL)) {
                 // Workaround for ugly value in database.
                 setTransportServer((URI) null);
@@ -528,12 +528,12 @@ public abstract class AbstractMailAccount implements MailAccount {
         }
     }
 
-    public void setTransportServer(URI transportServer) {
+    public void setTransportServer(final URI transportServer) {
         if (null == transportServer) {
             // Parse like old parser to prevent problems.
             setTransportServer("");
         } else {
-            String protocol = transportServer.getScheme();
+            final String protocol = transportServer.getScheme();
             if (protocol.endsWith("s")) {
                 setTransportSecure(true);
                 setTransportProtocol(protocol.substring(0, protocol.length() - 1));
@@ -553,10 +553,10 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (isEmpty(transportServer)) {
             return null;
         }
-        String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
+        final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
             return transportServerUrl = URITools.generateURI(protocol, transportServer, transportPort).toString();
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // Old implementation is not capable of handling IPv6 addresses.
             final StringBuilder sb = new StringBuilder(32);
