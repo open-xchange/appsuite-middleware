@@ -69,6 +69,9 @@ import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -150,6 +153,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     private static final Object PRESENT = new Object();
 
+    private static final BlockingQueue<Object> NO_RESTRICTION = new ArrayBlockingQueue<Object>(1);
+
     private static final ConcurrentMap<Key, BlockingQueue<Object>> COUNTER_MAP = new ConcurrentHashMap<MailAccess.Key, BlockingQueue<Object>>();
 
     private static Key getUserKey(final int user, final int accountId, final int cid) {
@@ -190,19 +195,33 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              */
             return true;
         }
-        final Key key = getUserKey(session.getUserId(), accountId, session.getContextId());
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        final Key key = getUserKey(userId, accountId, contextId);
         BlockingQueue<Object> queue = COUNTER_MAP.get(key);
         if (null == queue) {
-            final int max = provider.getProtocol().getMaxCount();
-            if (max > 0) {
-                final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
-                queue = COUNTER_MAP.putIfAbsent(key, nq);
-                if (null == queue) {
-                    queue = nq;
+            try {
+                final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+                final int max = provider.getProtocol().getMaxCount(mass.getMailAccount(accountId, userId, contextId).getMailServer());
+                if (max > 0) {
+                    final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
+                    queue = COUNTER_MAP.putIfAbsent(key, nq);
+                    if (null == queue) {
+                        queue = nq;
+                    }
+                } else {
+                    queue = COUNTER_MAP.putIfAbsent(key, NO_RESTRICTION);
+                    if (null == queue) {
+                        queue = NO_RESTRICTION;
+                    }
                 }
+            } catch (final ServiceException e) {
+                throw new MailException(e);
+            } catch (final MailAccountException e) {
+                throw new MailException(e);
             }
         }
-        if ((null == queue) || queue.offer(PRESENT)) {
+        if ((null == queue) || (NO_RESTRICTION.equals(queue)) || queue.offer(PRESENT)) {
             /*
              * No capacity restrictions or space was immediately available
              */

@@ -127,8 +127,6 @@ public class Protocol implements Component, Serializable {
 
     private String abbr;
 
-    private int maxCount;
-
     /**
      * Initializes a new {@link Protocol}
      * 
@@ -140,7 +138,6 @@ public class Protocol implements Component, Serializable {
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
-        maxCount = -1;
         this.name = name.toLowerCase(Locale.ENGLISH);
         aliases = null;
         hashCode = 31 * 1 + (name.hashCode());
@@ -158,7 +155,6 @@ public class Protocol implements Component, Serializable {
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
-        maxCount = -1;
         this.name = name.toLowerCase(Locale.ENGLISH);
         if (secureName == null) {
             aliases = null;
@@ -180,7 +176,6 @@ public class Protocol implements Component, Serializable {
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
-        maxCount = -1;
         this.name = name.toLowerCase(Locale.ENGLISH);
         if (null == aliases) {
             this.aliases = null;
@@ -195,23 +190,14 @@ public class Protocol implements Component, Serializable {
     }
 
     /**
-     * Sets the max count.
+     * Gets the max. number of concurrent mail accesses for specified mail system host.
      * 
-     * @param maxCount The max count
-     * @return This protocol with new max count applied
+     * @param host The mail system's host name
+     * @return The max count or a value equal to or less than zero for no restrictions
+     * @throws MailException If max-count setting could not be returned for specified host name
      */
-    public Protocol setMaxCount(final int maxCount) {
-        this.maxCount = maxCount <= 0 ? -1 : maxCount;
-        return this;
-    }
-
-    /**
-     * Gets the max count.
-     * 
-     * @return The max count
-     */
-    public int getMaxCount() {
-        return maxCount;
+    public int getMaxCount(final String host) throws MailException {
+        return -1;
     }
 
     @Override
