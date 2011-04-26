@@ -638,13 +638,16 @@ public final class MIMEStructureHandler implements StructureHandler {
                         hdrObject.put(name, ja);
                     }
                     for (final InternetAddress internetAddress : internetAddresses) {
-                        final JSONObject addressJsonObject = new JSONObject();
-                        final String personal = internetAddress.getPersonal();
-                        if (null != personal) {
-                            addressJsonObject.put("personal", personal);
+                        final String address = QuotedInternetAddress.toIDN(internetAddress.getAddress());
+                        if (!isEmpty(address)) {
+                            final JSONObject addressJsonObject = new JSONObject();
+                            final String personal = internetAddress.getPersonal();
+                            if (null != personal) {
+                                addressJsonObject.put("personal", personal);
+                            }
+                            addressJsonObject.put("address", address);
+                            ja.put(addressJsonObject);
                         }
-                        addressJsonObject.put("address", QuotedInternetAddress.toIDN(internetAddress.getAddress()));
-                        ja.put(addressJsonObject);
                     }
                 } else if (PARAMETERIZED_HEADERS.contains(headerName)) {
                     final JSONObject parameterJsonObject = generateParameterizedHeader(entry.getValue(), headerName);
@@ -866,6 +869,18 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static interface InputStreamProvider {
 
         InputStream getInputStream() throws IOException;
+    }
+
+    private static boolean isEmpty(final String s) {
+        if (null == s) {
+            return true;
+        }
+        final char[] chars = s.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
     }
 
 }
