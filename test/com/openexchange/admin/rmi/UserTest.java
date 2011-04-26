@@ -357,6 +357,34 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data");
         }
     }
+    
+    // Bug 18866
+    @Test
+    public void testPublicFolderEditableRoundtrip() throws Exception {
+     // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        access.setPublicFolderEditable(true);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,usr,access,cred);
+        // now load user from server and check if data is correct, else fail
+        UserModuleAccess moduleAccess = oxu.getModuleAccess(ctx, createduser, cred);
+        
+        assertTrue("Did not survive roundtrip", moduleAccess.isPublicFolderEditable());
+        
+        moduleAccess.setPublicFolderEditable(false);
+        
+        oxu.changeModuleAccess(ctx, usr, moduleAccess, cred);
+        
+        moduleAccess = oxu.getModuleAccess(ctx, createduser, cred);
+        
+        assertFalse("Did not survive roundtrip", moduleAccess.isPublicFolderEditable());
+        
+    }
 
 
     @Test
