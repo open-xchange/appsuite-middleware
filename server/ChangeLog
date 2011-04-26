@@ -1,3 +1,7 @@
+* 2011-04-26 - tobias.prinz@open-xchange.com
+
+ - Bugfix #19046: ICal appointment series with a start date that is not part of the series (e.g. weekly series on Wednesday, starts Monday) now have a separate starting appointment.
+ 
 * 2011-04-21 - francisco.laguna@open-xchange.com
 
  - Bugfix #18866: Allow regular users to be granted administrative access to the three root public folders.

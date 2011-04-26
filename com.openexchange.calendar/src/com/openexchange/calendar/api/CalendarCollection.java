@@ -2796,6 +2796,10 @@ public final class CalendarCollection implements CalendarCollectionService {
         cdao.removeInterval();
         cdao.removeUntil();
         cdao.removeOccurrence();
+        cdao.removeDays();
+        cdao.removeDayInMonth();
+        cdao.removeMonth();
+        cdao.removeRecurrenceCount();
     }
     
     /* (non-Javadoc)
