@@ -75,6 +75,7 @@ public final class ICalTestSuite {
 		tests.addTestSuite(Bug12470Test.class);
 		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
 		tests.addTestSuite(ICalSeriesTests.class);
+		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
 		return tests;
 	}
 }
