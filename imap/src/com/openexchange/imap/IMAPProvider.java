@@ -67,7 +67,7 @@ public final class IMAPProvider extends MailProvider {
     /**
      * IMAP protocol.
      */
-    public static final Protocol PROTOCOL_IMAP = new Protocol("imap", "imaps");
+    public static final Protocol PROTOCOL_IMAP = IMAPProtocol.getInstance();
 
     private static final IMAPProvider instance = new IMAPProvider();
 

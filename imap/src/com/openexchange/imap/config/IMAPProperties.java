@@ -57,8 +57,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
@@ -255,6 +257,56 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 blockSize = 1000;
                 logBuilder.append("\tBlock Size: Invalid value \"").append(blockSizeStr).append("\". Setting to fallback: ").append(
                     blockSize).append('\n');
+            }
+        }
+
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.maxNumExternalConnections").trim();
+            if (null != tmp) {
+                tmp = tmp.trim();
+                if (0 == tmp.length()) {
+                    IMAPProtocol.getInstance().setOverallMaxCount(-1);
+                    logBuilder.append("\tMax. Number of External Connections: ").append("No restrictions").append('\n');
+                } else if (tmp.indexOf(':') > 0) {
+                    // Expect a comma-separated list
+                    final String[] sa = tmp.split(" *, *");
+                    if (sa.length > 0) {
+                        try {
+                            final IMAPProtocol imapProtocol = IMAPProtocol.getInstance();
+                            imapProtocol.initMaxCountMap();
+                            final StringBuilder sb = new StringBuilder(128).append("\tMax. Number of External Connections: ");
+                            boolean first = true;
+                            for (final String desc : sa) {
+                                final int pos = desc.indexOf(':');
+                                if (pos > 0) {
+                                    imapProtocol.putIfAbsent(desc.substring(0, pos), Integer.parseInt(desc.substring(pos + 1)));
+                                    if (first) {
+                                        first = false;
+                                    } else {
+                                        sb.append(", ");
+                                    }
+                                    sb.append(desc);
+                                }
+                            }
+                            logBuilder.append(sb).append('\n');
+                        } catch (final NumberFormatException e) {
+                            IMAPProtocol.getInstance().setOverallMaxCount(-1);
+                            logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append("\". Setting to fallback: No restrictions").append('\n');
+                        } catch (final MailException e) {
+                            IMAPProtocol.getInstance().setOverallMaxCount(-1);
+                            logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append("\". Setting to fallback: No restrictions").append('\n');
+                        }
+                    }
+                } else {
+                    // Expect a single integer value
+                    try {
+                        IMAPProtocol.getInstance().setOverallMaxCount(Integer.parseInt(tmp));
+                        logBuilder.append("\tMax. Number of External Connections: ").append(tmp).append(" (applied to all external IMAP accounts)").append('\n');
+                    } catch (final NumberFormatException e) {
+                        IMAPProtocol.getInstance().setOverallMaxCount(-1);
+                        logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append("\". Setting to fallback: No restrictions").append('\n');
+                    }
+                }
             }
         }
 
