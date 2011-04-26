@@ -1,3 +1,7 @@
+* 2011-04-21 - francisco.laguna@open-xchange.com
+
+ - Bugfix #18866: Allow regular users to be granted administrative access to the three root public folders.
+
 * 2011-04-21 - marcus.klein@open-xchange.com
 
  - Bugfix #19018: Added missing import for javax.xml.transform.stream to server bundle.
