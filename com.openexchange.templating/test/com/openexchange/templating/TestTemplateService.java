@@ -59,6 +59,7 @@ import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.sim.SimBuilder;
+import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.templating.impl.OXFolderHelper;
 import com.openexchange.templating.impl.OXInfostoreHelper;
 import com.openexchange.tools.session.ServerSession;
@@ -126,6 +127,7 @@ public class TestTemplateService extends TestCase {
     public void testLoadTemplate() throws Exception {
         OXTemplate template = templateService.loadTemplate("test-template.tmpl");
         assertNotNull("OX-Template should not be null", template);
+        assertEquals(TemplateLevel.SERVER, template.getLevel());
     }
 
     public void testLoadTemplateFromPrivateTemplateFolder() throws Exception {
@@ -141,6 +143,7 @@ public class TestTemplateService extends TestCase {
         OXTemplate template = templateService.loadTemplate("test-template.tmpl", "default-template", session);
 
         assertNotNull(template);
+        assertEquals(TemplateLevel.USER, template.getLevel());
         StringWriter writer = new StringWriter();
         template.process(new HashMap<Object, Object>(), writer);
         assertEquals("Template Content", writer.toString());
@@ -161,8 +164,8 @@ public class TestTemplateService extends TestCase {
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
 
         OXTemplate template = templateService.loadTemplate("test-template.tmpl", "default-template", session);
-
         assertNotNull(template);
+        assertEquals(TemplateLevel.USER, template.getLevel());
         StringWriter writer = new StringWriter();
         template.process(new HashMap<Object, Object>(), writer);
         assertEquals("Template Content", writer.toString());
@@ -184,8 +187,9 @@ public class TestTemplateService extends TestCase {
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
 
         OXTemplate template = templateService.loadTemplate("new-template", "test-template.tmpl", session);
-
+        
         assertNotNull(template);
+        assertEquals(TemplateLevel.USER, template.getLevel());
         StringWriter writer = new StringWriter();
         template.process(new HashMap<Object, Object>(), writer);
         assertTrue(writer.toString().contains("Test Content In File"));
@@ -210,9 +214,30 @@ public class TestTemplateService extends TestCase {
         OXTemplate template = templateService.loadTemplate("new-template", "test-template.tmpl", session);
 
         assertNotNull(template);
+        assertEquals(TemplateLevel.USER, template.getLevel());
         StringWriter writer = new StringWriter();
         template.process(new HashMap<Object, Object>(), writer);
         assertTrue(writer.toString().contains("Test Content In File"));
+
+        oxfolderHelperBuilder.assertAllWereCalled();
+        infostoreBuilder.assertAllWereCalled();
+    }
+    
+    public void testGrabBasicTemplateAndDontRecreateIt() throws Exception {
+        SimBuilder oxfolderHelperBuilder = new SimBuilder();
+        oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(null);
+        oxfolderHelperBuilder.expectCall("getGlobalTemplateFolder", session).andReturn(globalTemplateFolder);
+
+        SimBuilder infostoreBuilder = new SimBuilder();
+        infostoreBuilder.expectCall("findTemplateInFolder", session, globalTemplateFolder, "test-template").andReturn(null);
+
+        templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
+        templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
+
+        OXTemplate template = templateService.loadTemplate("test-template", "test-template.tmpl", session);
+
+        assertNotNull(template);
+        assertEquals(TemplateLevel.SERVER, template.getLevel());
 
         oxfolderHelperBuilder.assertAllWereCalled();
         infostoreBuilder.assertAllWereCalled();

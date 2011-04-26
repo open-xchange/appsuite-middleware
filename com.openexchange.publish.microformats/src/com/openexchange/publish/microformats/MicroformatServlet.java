@@ -82,6 +82,7 @@ import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.user.UserService;
 
 /**
@@ -222,7 +223,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             StringWriter htmlWriter = new StringWriter();
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
-            if(isUsingWhitelisting()){
+            if(isUsingWhitelisting(template.getLevel())){
             	html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
             	html = htmlService.filterWhitelist(html, "microformatWhitelist");
             }
@@ -236,9 +237,21 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         }
     }
 
-    private boolean isUsingWhitelisting() {
-    	boolean retVal = configService.getBoolProperty(USE_WHITELISTING_PROPERTY_NAME, false); 
-		return retVal;
+    private boolean isUsingWhitelisting(TemplateLevel templateLevel) {
+    	String globalWhitelisting = configService.getProperty(USE_WHITELISTING_PROPERTY_NAME, "false"); 
+    	
+    	if (Boolean.parseBoolean(globalWhitelisting)) {
+    	    return true;
+    	}
+    	
+    	String[] strings = globalWhitelisting.split("\\s*,\\s*");
+    	for (String string : strings) {
+            if (templateLevel.name().toLowerCase().equals(string.toLowerCase())) {
+                return true;
+            }
+        }
+    	
+    	return false;
 	}
 
 	private Contact getContact(final PublicationSession publicationSession, final Context context) throws OXException {

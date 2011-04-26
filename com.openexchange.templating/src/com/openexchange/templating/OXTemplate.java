@@ -59,5 +59,11 @@ import java.io.Writer;
  *
  */
 public interface OXTemplate {
+    
+    public enum TemplateLevel {
+        SERVER, USER;
+    }
+    
     public void process(Object rootObject, Writer writer) throws TemplateException;
+    public TemplateLevel getLevel();
 }

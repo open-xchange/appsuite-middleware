@@ -77,6 +77,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.templating.impl.OXFolderHelper;
 import com.openexchange.templating.impl.OXInfostoreHelper;
 import com.openexchange.tools.session.ServerSession;
@@ -115,6 +116,7 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
         OXTemplateImpl retval = new OXTemplateImpl();
+        retval.setLevel(TemplateLevel.SERVER);
         retval.setTemplate(loadTemplate(templatePath, templateName));
         return retval;
 
@@ -159,10 +161,11 @@ public class TemplateServiceImpl implements TemplateService {
             if (templateText != null) {
                 OXTemplateImpl template = new OXTemplateImpl();
                 template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
+                template.setLevel(TemplateLevel.USER);
                 return template;
             }
 
-            if (templateText == null && !global) {
+            if (!global) {
                 folder = folders.getGlobalTemplateFolder(session);
                 global = true;
 
@@ -170,6 +173,15 @@ public class TemplateServiceImpl implements TemplateService {
             }
 
             if (templateText == null) {
+                
+                if (existsInFilesystem(templateName)) {
+                    templateText = loadFromFileSystem(templateName);
+                    OXTemplateImpl template = new OXTemplateImpl();
+                    template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
+                    template.setLevel(TemplateLevel.SERVER);
+                    return template;
+                }
+                
                 templateText = loadFromFileSystem(defaultTemplateName);
                 if (privateFolder == null) {
                     folder = folders.createPrivateTemplateFolder(session);
@@ -179,6 +191,7 @@ public class TemplateServiceImpl implements TemplateService {
             }
             OXTemplateImpl template = new OXTemplateImpl();
             template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
+            template.setLevel(TemplateLevel.USER);
             return template;
         } catch (AbstractOXException e) {
             throw new TemplateException(e);
@@ -193,6 +206,14 @@ public class TemplateServiceImpl implements TemplateService {
 
     private boolean isEmpty(String templateName) {
         return templateName == null || "".equals(templateName);
+    }
+    
+    protected boolean existsInFilesystem(String templateName) {
+        File templateFile = getTemplateFile(templateName);
+        if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
+            return false;
+        }
+        return true;
     }
 
     protected String loadFromFileSystem(String defaultTemplateName) throws TemplateException {

@@ -51,6 +51,7 @@ package com.openexchange.templating;
 
 import java.io.IOException;
 import java.io.Writer;
+import com.openexchange.templating.OXTemplate.TemplateLevel;
 import freemarker.template.Template;
 
 /**
@@ -59,6 +60,7 @@ import freemarker.template.Template;
 public class OXTemplateImpl implements OXTemplate{
 
     private Template template;
+    private TemplateLevel level = TemplateLevel.USER;
    
     public Template getTemplate() {
         return template;
@@ -76,6 +78,14 @@ public class OXTemplateImpl implements OXTemplate{
         } catch (IOException e) {
             throw TemplateErrorMessage.IOException.create(e);
         }
+    }
+
+    public TemplateLevel getLevel() {
+        return level;
+    }
+    
+    public void setLevel(TemplateLevel level) {
+        this.level = level;
     }
 
 }
