@@ -141,29 +141,21 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public boolean isPublicFolderEditable(final int cid, final int userId, final Connection readCon) throws OXException {
-        final int admin;
-        try {
-            admin = getContextAdminID(cid, readCon);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
-        }
-        if (admin != userId) {
-            return false;
-        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt =
                 readCon.prepareStatement("SELECT admin_flag FROM oxfolder_permissions WHERE cid = ? AND permission_id = ? AND fuid IN " + StringCollection.getSqlInString(CHANGEABLE_PUBLIC_FOLDERS));
             stmt.setInt(1, cid);
-            stmt.setInt(2, admin);
+            stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             boolean editable = true;
+            boolean foundPermissions = false;
             while (editable && rs.next()) {
                 editable &= (rs.getInt(1) > 0);
+                foundPermissions = true;
             }
-            return editable;
+            return editable && foundPermissions;
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -190,9 +182,6 @@ public final class OXFolderAdminHelper {
             LOG.error(e.getMessage(), e);
             return;
         }
-        if (userId != admin) {
-            return;
-        }
         for (final int id : CHANGEABLE_PUBLIC_FOLDERS) {
             try {
                 /*
@@ -212,7 +201,7 @@ public final class OXFolderAdminHelper {
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, id);
-                stmt.setInt(pos++, admin);
+                stmt.setInt(pos++, userId);
                 rs = stmt.executeQuery();
                 final boolean update = rs.next();
                 final int system;
@@ -237,7 +226,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, id);
-                    stmt.setInt(pos++, admin);
+                    stmt.setInt(pos++, userId);
                     stmt.setInt(pos++, system);
                     stmt.executeUpdate();
                 } else {
@@ -246,7 +235,7 @@ public final class OXFolderAdminHelper {
                     pos = 1;
                     stmt.setInt(pos++, cid); // cid
                     stmt.setInt(pos++, id); // fuid
-                    stmt.setInt(pos++, admin); // permission_id
+                    stmt.setInt(pos++, userId); // permission_id
                     stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS); // fp
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
