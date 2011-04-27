@@ -139,6 +139,13 @@ public final class HttpDateFormatRegistry {
         return defaultDateFormat;
     }
 
+    /**
+     * Appends specified max-age attribute to given string builder dependent on given user agent.
+     * 
+     * @param maxAgeSecs The max-age seconds
+     * @param userAgent The user agent
+     * @param composer The string builder to append to
+     */
     public void appendCookieMaxAge(final int maxAgeSecs, final String userAgent, final StringBuilder composer) {
         if (null == userAgent) {
             appendNetscapeCookieMaxAge(maxAgeSecs, composer);
