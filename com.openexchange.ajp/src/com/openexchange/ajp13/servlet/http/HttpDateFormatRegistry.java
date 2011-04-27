@@ -114,7 +114,9 @@ public final class HttpDateFormatRegistry {
             headerDateFormat.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
             defaultDateFormat = headerDateFormat;
         }
-
+        /*
+         * Taken from org.apache.commons.httpclient.cookie.NetscapeDraftSpec
+         */
         netscapeDateFormat = new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss z", Locale.US);
         netscapeDateFormat.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
     }
