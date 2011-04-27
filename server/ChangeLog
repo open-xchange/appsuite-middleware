@@ -1,3 +1,7 @@
+* 2011-04-27 - steffen.templin@open-xchange.com
+
+ - Bugfix #19028: RSS messages now contain unique ids and urls to their origin.
+
 * 2011-04-26 - thorben.betten@open-xchange.com
 
  - Bugfix #18981: Ignoring empty addresses occurring in RFC822 address header

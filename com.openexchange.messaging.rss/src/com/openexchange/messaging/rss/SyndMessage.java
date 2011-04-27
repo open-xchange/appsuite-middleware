@@ -96,15 +96,16 @@ public class SyndMessage implements MessagingMessage {
     private final String sessionId;
     private boolean b_picUrl;
     private String picUrl;
+    private String id;
      
     public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder, final Session session) throws MessagingException {
         entry = syndEntry;
         this.folder = folder;
         this.feed = feed;
         this.sessionId = session.getSessionID();
+        this.id = createId(entry.getLink(), entry.getTitle(), entry.getPublishedDate());
         
         addStringHeader(KnownHeader.SUBJECT, syndEntry.getTitle());
-        //addStringHeader(KnownHeader.FROM, syndEntry.getAuthor());
         final List<SyndContent> contents = syndEntry.getContents();
         // For now we'll only use the first content element
         
@@ -116,6 +117,23 @@ public class SyndMessage implements MessagingMessage {
         } else if (entry.getTitle() != null) {
             setContent(entry.getTitleEx(), sessionId);
         }
+    }
+    
+    private String createId(final String link, final String title, final Date publishedDate) {
+        final StringBuilder sb = new StringBuilder();
+        if (link != null) {
+            sb.append(link);
+        }
+        
+        if (title != null) {
+            sb.append(title);
+        }
+        
+        if (publishedDate != null) {
+            sb.append(publishedDate.getTime());
+        }
+        
+        return "" + sb.toString().hashCode();
     }
 
     private void setContent(final SyndContent content, final String sessionId) throws MessagingException {
@@ -188,12 +206,7 @@ public class SyndMessage implements MessagingMessage {
     }
 
     public String getId() {
-        if (entry.getPublishedDate() != null) {
-            return entry.getLink() + "/" + entry.getPublishedDate().getTime();
-        } else {
-            return entry.getLink();
-        }
-        
+        return id;        
     }
 
     public long getReceivedDate() {
@@ -305,6 +318,10 @@ public class SyndMessage implements MessagingMessage {
             }
         }
         return null;
+    }
+
+    public String getUrl() throws MessagingException {
+        return entry.getLink();
     }
 
 }

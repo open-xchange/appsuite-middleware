@@ -216,4 +216,14 @@ public interface MessagingMessage extends MessagingPart, MessagingContent, Seria
      */
     public String getPicture();
     
+    /**
+     * Gets the URL associated with this message, if possible.
+     * <p>
+     * This is useful for RSS messages as they contain links to their origin messages or feeds.
+     * 
+     * @return Gets the URL associated with this message.
+     * @throws MessagingException If no URL can be returned.
+     */
+    public String getUrl() throws MessagingException;
+    
 }

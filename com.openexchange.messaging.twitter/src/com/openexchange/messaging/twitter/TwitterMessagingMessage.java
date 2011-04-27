@@ -227,4 +227,8 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         return picture;
     }
 
+    public String getUrl() throws MessagingException {
+        return null;
+    }
+
 }

@@ -96,6 +96,8 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
 
     private String picture;
 
+    private String url;
+
     public int getColorLabel() {
         return colorLabel;
     }
@@ -252,6 +254,14 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
     
     public void setPicture(final String picture) {
         this.picture = picture;
+    }
+    
+    public void setUrl(final String url) {
+        this.url = url;
+    }
+    
+    public String getUrl() throws MessagingException {
+      return url;  
     }
 
     public void setContentReference(final String string) {

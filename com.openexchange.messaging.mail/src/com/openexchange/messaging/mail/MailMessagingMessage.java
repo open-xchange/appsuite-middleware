@@ -195,4 +195,8 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         this.picture = picture;
     }
 
+    public String getUrl() throws MessagingException {
+        return null;
+    }
+
 }

@@ -323,5 +323,9 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.picture = picture;
     }
 
+    public String getUrl() throws MessagingException {
+        return null;
+    }
+
 
 }

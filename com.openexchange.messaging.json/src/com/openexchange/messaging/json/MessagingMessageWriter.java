@@ -263,6 +263,10 @@ public class MessagingMessageWriter {
         if(message.getPicture() != null) {
             messageJSON.put("picture", message.getPicture());
         }
+        
+        if(message.getUrl() != null) {
+            messageJSON.putOpt("url", message.getUrl());
+        }
         return messageJSON;
     }
 

@@ -238,4 +238,8 @@ public final class TwitterRetweetMessage implements MessagingMessage {
         return null;
     }
 
+    public String getUrl() throws MessagingException {
+        return null;
+    }
+
 }

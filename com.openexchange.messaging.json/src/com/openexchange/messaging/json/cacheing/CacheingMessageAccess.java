@@ -62,6 +62,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
@@ -124,12 +125,18 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
     }
 
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
-        final MessagingMessage msg = get(folder, id);
+        MessagingMessage msg = get(folder, id);
         if (msg != null) {
             return msg;
+        } else {
+            msg = delegate.getMessage(folder, id, peek);
         }
-
-        return remember(delegate.getMessage(folder, id, peek));
+        
+        if (msg == null) {
+            throw MessagingExceptionCodes.MESSAGE_NOT_FOUND.create(id, folder);
+        } else {
+            return remember(msg);
+        }        
     }
 
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
