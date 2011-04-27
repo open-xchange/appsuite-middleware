@@ -53,6 +53,7 @@ import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -62,6 +63,12 @@ import com.openexchange.tools.TimeZoneUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpDateFormatRegistry {
+    
+    public static void main(String[] args) {
+        DateFormat dateFormat = HttpDateFormatRegistry.getInstance().getDefaultDateFormat();
+        
+        System.out.println(dateFormat.format(new Date()));
+    }
 
     private static final HttpDateFormatRegistry singleton = new HttpDateFormatRegistry();
 
@@ -76,48 +83,83 @@ public final class HttpDateFormatRegistry {
 
     private final DateFormat defaultDateFormat;
 
+    private final DateFormat netscapeDateFormat;
+
     /**
      * Initializes a new {@link HttpDateFormatRegistry}.
      */
     private HttpDateFormatRegistry() {
         super();
-        final SimpleDateFormat headerDateFormat = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
-        final DateFormatSymbols dfs = headerDateFormat.getDateFormatSymbols();
-        final String[] shortWeekdays = new String[8];
-        shortWeekdays[Calendar.SUNDAY] = "Sun";
-        shortWeekdays[Calendar.MONDAY] = "Mon";
-        shortWeekdays[Calendar.TUESDAY] = "Tue";
-        shortWeekdays[Calendar.WEDNESDAY] = "Wed";
-        shortWeekdays[Calendar.THURSDAY] = "Thu";
-        shortWeekdays[Calendar.FRIDAY] = "Fri";
-        shortWeekdays[Calendar.SATURDAY] = "Sat";
-        dfs.setShortWeekdays(shortWeekdays);
-        final String[] shortMonths = new String[12];
-        shortMonths[Calendar.JANUARY] = "Jan";
-        shortMonths[Calendar.FEBRUARY] = "Feb";
-        shortMonths[Calendar.MARCH] = "Mar";
-        shortMonths[Calendar.APRIL] = "April";
-        shortMonths[Calendar.MAY] = "May";
-        shortMonths[Calendar.JUNE] = "June";
-        shortMonths[Calendar.JULY] = "July";
-        shortMonths[Calendar.AUGUST] = "Aug";
-        shortMonths[Calendar.SEPTEMBER] = "Sep";
-        shortMonths[Calendar.OCTOBER] = "Oct";
-        shortMonths[Calendar.NOVEMBER] = "Nov";
-        shortMonths[Calendar.DECEMBER] = "Dec";
-        dfs.setShortMonths(shortMonths);
-        headerDateFormat.setDateFormatSymbols(dfs);
-        headerDateFormat.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
-        defaultDateFormat = headerDateFormat;
+        {
+            final SimpleDateFormat headerDateFormat = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
+            final DateFormatSymbols dfs = headerDateFormat.getDateFormatSymbols();
+            final String[] shortWeekdays = new String[8];
+            shortWeekdays[Calendar.SUNDAY] = "Sun";
+            shortWeekdays[Calendar.MONDAY] = "Mon";
+            shortWeekdays[Calendar.TUESDAY] = "Tue";
+            shortWeekdays[Calendar.WEDNESDAY] = "Wed";
+            shortWeekdays[Calendar.THURSDAY] = "Thu";
+            shortWeekdays[Calendar.FRIDAY] = "Fri";
+            shortWeekdays[Calendar.SATURDAY] = "Sat";
+            dfs.setShortWeekdays(shortWeekdays);
+            final String[] shortMonths = new String[12];
+            shortMonths[Calendar.JANUARY] = "Jan";
+            shortMonths[Calendar.FEBRUARY] = "Feb";
+            shortMonths[Calendar.MARCH] = "Mar";
+            shortMonths[Calendar.APRIL] = "April";
+            shortMonths[Calendar.MAY] = "May";
+            shortMonths[Calendar.JUNE] = "June";
+            shortMonths[Calendar.JULY] = "July";
+            shortMonths[Calendar.AUGUST] = "Aug";
+            shortMonths[Calendar.SEPTEMBER] = "Sep";
+            shortMonths[Calendar.OCTOBER] = "Oct";
+            shortMonths[Calendar.NOVEMBER] = "Nov";
+            shortMonths[Calendar.DECEMBER] = "Dec";
+            dfs.setShortMonths(shortMonths);
+            headerDateFormat.setDateFormatSymbols(dfs);
+            headerDateFormat.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
+            defaultDateFormat = headerDateFormat;
+        }
+
+        {
+            final SimpleDateFormat headerDateFormat = new SimpleDateFormat("EEE',' dd-MMMM-yyyy HH:mm:ss z", Locale.ENGLISH);
+            final DateFormatSymbols dfs = headerDateFormat.getDateFormatSymbols();
+            final String[] shortWeekdays = new String[8];
+            shortWeekdays[Calendar.SUNDAY] = "Sun";
+            shortWeekdays[Calendar.MONDAY] = "Mon";
+            shortWeekdays[Calendar.TUESDAY] = "Tue";
+            shortWeekdays[Calendar.WEDNESDAY] = "Wed";
+            shortWeekdays[Calendar.THURSDAY] = "Thu";
+            shortWeekdays[Calendar.FRIDAY] = "Fri";
+            shortWeekdays[Calendar.SATURDAY] = "Sat";
+            dfs.setShortWeekdays(shortWeekdays);
+            final String[] shortMonths = new String[12];
+            shortMonths[Calendar.JANUARY] = "Jan";
+            shortMonths[Calendar.FEBRUARY] = "Feb";
+            shortMonths[Calendar.MARCH] = "Mar";
+            shortMonths[Calendar.APRIL] = "April";
+            shortMonths[Calendar.MAY] = "May";
+            shortMonths[Calendar.JUNE] = "June";
+            shortMonths[Calendar.JULY] = "July";
+            shortMonths[Calendar.AUGUST] = "Aug";
+            shortMonths[Calendar.SEPTEMBER] = "Sep";
+            shortMonths[Calendar.OCTOBER] = "Oct";
+            shortMonths[Calendar.NOVEMBER] = "Nov";
+            shortMonths[Calendar.DECEMBER] = "Dec";
+            dfs.setShortMonths(shortMonths);
+            headerDateFormat.setDateFormatSymbols(dfs);
+            headerDateFormat.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
+            netscapeDateFormat = headerDateFormat;
+        }
     }
 
     /**
-     * Gets the default date format: <code>"EEE',' dd MMMM yyyy HH:mm:ss z"</code>
+     * Gets the default date format as specified in RFC 822: <code>"EEE',' dd MMMM yyyy HH:mm:ss z"</code>
      * <p>
      * <b>Note</b>: Don't forget to exclusively lock returned {@link DateFormat} instance:
      * 
      * <pre>
-     * DateFormat df = HttpDateFormatRegistry.getInstance().detectCookieDateFormat(userAgent);
+     * DateFormat df = HttpDateFormatRegistry.getInstance().getDefaultDateFormat();
      * synchronized (df) {
      *     // Use the DateFormat instance...
      * }
@@ -129,29 +171,40 @@ public final class HttpDateFormatRegistry {
         return defaultDateFormat;
     }
 
-    /**
-     * Detects the appropriate {@link DateFormat} instance for specified <code>User-Agent</code> value.
-     * <p>
-     * <b>Note</b>: Don't forget to exclusively lock returned {@link DateFormat} instance:
-     * 
-     * <pre>
-     * DateFormat df = HttpDateFormatRegistry.getInstance().detectCookieDateFormat(userAgent);
-     * synchronized (df) {
-     *     // Use the DateFormat instance...
-     * }
-     * </pre>
-     * 
-     * @param userAgent The user agent
-     * @return The appropriate {@link DateFormat} or {@link #getDefaultDateFormat()} if passed user agent is <code>null</code>
-     */
-    public DateFormat detectCookieDateFormat(final String userAgent) {
+    public void appendCookieMaxAge(final int maxAgeSecs, final String userAgent, final StringBuilder composer) {
         if (null == userAgent) {
-            return defaultDateFormat;
+            appendNetscapeCookieMaxAge(maxAgeSecs, composer);
         }
         /*
-         * TODO: Perform browser-sensitive detection here...
+         * TODO: Invoke appendNetscapeCookieMaxAge() or appendRFC2109CookieMaxAge() dependent on user agent
          */
-        return defaultDateFormat;
+        appendNetscapeCookieMaxAge(maxAgeSecs, composer);
+    }
+
+    /**
+     * Appends expiry according to Netscape specification.
+     * 
+     * @param maxAgeSecs The max-age seconds
+     * @param composer The composing string builder
+     */
+    private void appendNetscapeCookieMaxAge(final int maxAgeSecs, final StringBuilder composer) {
+        synchronized (netscapeDateFormat) {
+            /*
+             * expires=Sat, 01-Jan-2000 00:00:00 GMT
+             */
+            composer.append("; expires=").append(
+                netscapeDateFormat.format((maxAgeSecs == 0 ? new Date(10000L) /*10sec after 01/01/1970*/: new Date(System.currentTimeMillis() + (maxAgeSecs * 1000L)))));
+        }
+    }
+
+    /**
+     * Appends expiry according to RFC 2109/RFC 2165.
+     * 
+     * @param maxAgeSecs The max-age seconds
+     * @param composer The composing string builder
+     */
+    private void appendRFC2109CookieMaxAge(final int maxAgeSecs, final StringBuilder composer) {
+        composer.append("; max-age=").append(maxAgeSecs);
     }
 
 }

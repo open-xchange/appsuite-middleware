@@ -311,13 +311,13 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         final int cookiesSize = cookies.size();
         final String[] list = new String[cookiesSize];
         if (cookiesSize > 0) {
-            final DateFormat dateFormat = HttpDateFormatRegistry.getInstance().detectCookieDateFormat(request.getHeader("User-Agent"));
+            final String userAgent = request.getHeader("User-Agent");
             final Iterator<Cookie> iter = cookies.iterator();
             final StringBuilder composer = new StringBuilder(32);
-            list[0] = getFormattedCookie(iter.next(), dateFormat, composer, httpOnly);
+            list[0] = getFormattedCookie(iter.next(), userAgent, composer, httpOnly);
             for (int i = 1; i < cookiesSize; i++) {
                 composer.setLength(0);
-                list[i] = getFormattedCookie(iter.next(), dateFormat, composer, httpOnly);
+                list[i] = getFormattedCookie(iter.next(), userAgent, composer, httpOnly);
             }
         }
         retval[0] = list;
@@ -333,19 +333,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      * @param composer A string builder used for composing
      * @return A string representing the HTTP header format
      */
-    private static final String getFormattedCookie(final Cookie cookie, final DateFormat dateFormat, final StringBuilder composer, final boolean httpOnly) {
+    private static final String getFormattedCookie(final Cookie cookie, final String userAgent, final StringBuilder composer, final boolean httpOnly) {
         composer.append(cookie.getName()).append('=');
         composer.append(cookie.getValue());
         final int maxAge = cookie.getMaxAge();
         if (maxAge >= 0) {
-            synchronized (dateFormat) {
-                /*
-                 * expires=Sat, 01-Jan-2000 00:00:00 GMT
-                 */
-                composer.append(COOKIE_PARAMS[0]).append(
-                    dateFormat.format((maxAge == 0 ? new Date(10000L) /*10sec after 01/01/1970*/: new Date(System.currentTimeMillis() + (maxAge * 1000L)))));
-            }
-            // composer.append("; max-age=").append(cookie.getMaxAge());
+            HttpDateFormatRegistry.getInstance().appendCookieMaxAge(maxAge, userAgent, composer);
         }
         if (cookie.getVersion() > 0) {
             composer.append(COOKIE_PARAMS[1]).append(cookie.getVersion());
