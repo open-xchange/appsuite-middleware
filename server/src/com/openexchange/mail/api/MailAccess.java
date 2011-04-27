@@ -53,7 +53,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -159,6 +162,21 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     private static Key getUserKey(final int user, final int accountId, final int cid) {
         return new Key(user, cid, accountId);
+    }
+
+    /**
+     * Clears the counter map.
+     */
+    public static void clearCounterMap() {
+        final Set<Entry<Key, BlockingQueue<Object>>> entrySet = COUNTER_MAP.entrySet();
+        for (final Iterator<Entry<Key, BlockingQueue<Object>>> iterator = entrySet.iterator(); iterator.hasNext();) {
+            final Entry<Key, BlockingQueue<Object>> entry = iterator.next();
+            iterator.remove();
+            final BlockingQueue<Object> queue = entry.getValue();
+            while (queue.poll() != null) {
+                ;
+            }
+        }
     }
 
     /**

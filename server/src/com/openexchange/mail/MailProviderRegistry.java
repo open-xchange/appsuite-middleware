@@ -56,6 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.mail.api.AllMailProvider;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
@@ -282,6 +283,7 @@ public final class MailProviderRegistry {
                 /*
                  * Perform shutdown
                  */
+                MailAccess.clearCounterMap();
                 try {
                     all.setDeprecated(true);
                     all.shutDown();
@@ -304,6 +306,7 @@ public final class MailProviderRegistry {
         /*
          * Perform shutdown
          */
+        MailAccess.clearCounterMap();
         try {
             removed.setDeprecated(true);
             removed.shutDown();
@@ -331,6 +334,7 @@ public final class MailProviderRegistry {
                 /*
                  * Perform shutdown
                  */
+                MailAccess.clearCounterMap();
                 all.setDeprecated(true);
                 all.shutDown();
                 allProvider.set(null);
@@ -343,6 +347,7 @@ public final class MailProviderRegistry {
             final Map.Entry<Protocol, MailProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocol)) {
                 iter.remove();
+                MailAccess.clearCounterMap();
                 entry.getValue().setDeprecated(true);
                 entry.getValue().shutDown();
                 return entry.getValue();
