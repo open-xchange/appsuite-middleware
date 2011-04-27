@@ -2,7 +2,7 @@
 crawlerApiVersion: 618
 displayName: gmx.com
 id: com.openexchange.subscribe.crawler.gmx.com
-priority: 7
+priority: 10
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
@@ -31,41 +31,41 @@ workflowString: |
           name: format
           value: csv_Outlook2003_eng
       specialParameterName: accountId
-      url: "https://www.gmx.com/callgate-6.25.5.0/coms8/ImportExportService/exportContacts"
+      url: "https://www.gmx.com/callgate-6.36.6.0/coms8/ImportExportService/exportContacts"
     - !com.openexchange.subscribe.crawler.ContactsByCsvFileStep
       description: Map csv fields to Contact-Fields
       fields: 
-        "15": cellular_telephone2
-        "30": city_other
-        "8": company
-        "23": postal_code_business
-        "31": postal_code_other
-        "16": telephone_other1
-        "7": department
-        "22": city_business
-        "32": country_other
-        "9": email1
-        "33": note
-        "21": street_business
-        "6": position
-        "1": title
-        "29": street_other
-        "14": cellular_telephone1
-        "24": country_business
-        "19": fax_other
-        "26": city_home
-        "11": email3
-        "18": fax_business
-        "12": telephone_business1
-        "27": postal_code_home
-        "17": fax_home
-        "2": first_name
-        "13": telephone_home1
-        "28": country_home
-        "20": url
-        "25": street_home
-        "10": email2
-        "5": birthday
         "0": last_name
+        "1": title
+        "2": first_name
+        "5": birthday
+        "6": position
+        "7": department
+        "8": company
+        "9": email1
+        "10": email2
+        "11": email3
+        "12": telephone_business1
+        "13": telephone_home1
+        "14": cellular_telephone1
+        "15": cellular_telephone2
+        "17": fax_home
+        "16": telephone_other1
+        "19": fax_other
+        "18": fax_business
+        "21": street_business
+        "20": url
+        "23": postal_code_business
+        "22": city_business
+        "25": street_home
+        "24": country_business
+        "27": postal_code_home
+        "26": city_home
+        "29": street_other
+        "28": country_home
+        "31": postal_code_other
+        "30": city_other
+        "32": country_other
+        "33": note
       ignoreFirstLine: true
   

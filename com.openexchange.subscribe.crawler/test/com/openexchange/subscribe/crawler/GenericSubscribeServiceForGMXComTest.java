@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,7 +77,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         crawler.setId("com.openexchange.subscribe.crawler.gmx.com");
         crawler.setCrawlerApiVersion(618);
         //crawler.setJavascriptEnabled(true);
-        crawler.setPriority(7);       
+        crawler.setPriority(10);       
 
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
         listOfSteps.add(new LoginPageByFormActionReturningStringStep("Log into gmx.com", "https://www.gmx.com", "", "", ".*wicket\\:interface.*", "TextfieldEmail", "TextfieldPassword", 1, "", "ButtonLogin", "community=([0-9]*)&lang"));
@@ -87,7 +87,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         parameters.add(new NameValuePair("idList", ""));
         parameters.add(new NameValuePair("format", "csv_Outlook2003_eng"));
         
-        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.25.5.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
+        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.36.6.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
         
         HashMap<Integer, String> fieldMapping = new HashMap<Integer,String>();
         fieldMapping.put(0, "last_name");
