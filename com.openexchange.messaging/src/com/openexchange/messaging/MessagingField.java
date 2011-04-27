@@ -168,7 +168,12 @@ public enum MessagingField {
      * To fully pre-fill mail incl. headers and peeked body (\Seen flag is left unchanged)<br>
      * <b>[high cost]</b>
      */
-    FULL("full");
+    FULL("full"),
+    /**
+     * URL<br>
+     * <b>[low cost]</b>
+     */
+    URL("url");
 
     private final String name;
 
@@ -263,6 +268,7 @@ public enum MessagingField {
         case BODY : return switcher.body(args);
         case HEADERS : return switcher.headers(args);
         case FULL : return switcher.full(args);
+        case URL : return switcher.url(args);
         }
         throw new IllegalArgumentException("Don't know how to handle "+this);
     }

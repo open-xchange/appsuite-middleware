@@ -77,4 +77,5 @@ public interface MessagingMessageSwitcher {
     public Object headers(Object...args) throws MessagingException;
     public Object full(Object...args) throws MessagingException;
     public Object picture(Object...args) throws MessagingException;
+    public Object url(final Object... args) throws MessagingException;
 }

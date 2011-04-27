@@ -147,5 +147,9 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     public Object picture(final Object... args) {
         return ((MessagingMessage)args[0]).getPicture();
     }
+    
+    public Object url(final Object... args) throws MessagingException {
+        return ((MessagingMessage)args[0]).getUrl();
+    }
 
 }
