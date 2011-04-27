@@ -177,12 +177,21 @@ public class AJAXClient {
     public UserValues getValues() {
         return values;
     }
-
-    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) throws AjaxException, IOException, JSONException {
+    
+    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request, final int sleep) throws AjaxException, IOException, JSONException {
         if (hostname != null && protocol != null) {
             // TODO: Maybe assume http as default protocol
-            return Executor.execute(getSession(), request, getProtocol(), getHostname());
+            if (sleep != -1) {
+                return Executor.execute(getSession(), request, getProtocol(), getHostname(), sleep);
+            } else {
+                return Executor.execute(getSession(), request, getProtocol(), getHostname());
+            }
         }
+        
         return Executor.execute(this, request);
+    }
+
+    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) throws AjaxException, IOException, JSONException {
+        return execute(request, -1);
     }
 }

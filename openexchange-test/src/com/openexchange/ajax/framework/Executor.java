@@ -115,7 +115,7 @@ public class Executor extends Assert {
     }
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXClient client, final AJAXRequest<T> request, final String protocol, final String hostname) throws AjaxException, IOException, JSONException {
-        return execute(client.getSession(), request, protocol, hostname);
+        return execute(client.getSession(), request, protocol, hostname, getSleep());
     }
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
@@ -123,18 +123,25 @@ public class Executor extends Assert {
         JSONException {
         return execute(session, request,
             AJAXConfig.getProperty(Property.PROTOCOL),
-            AJAXConfig.getProperty(Property.HOSTNAME));
+            AJAXConfig.getProperty(Property.HOSTNAME), getSleep());
     }
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
         final AJAXRequest<T> request, final String hostname) throws AjaxException,
         IOException, JSONException {
         return execute(session, request, AJAXConfig
-            .getProperty(Property.PROTOCOL), hostname);
+            .getProperty(Property.PROTOCOL), hostname, getSleep());
     }
+    
+    public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
+        final String protocol, final String hostname) throws AjaxException, IOException,
+        JSONException {
+        return execute(session, request, protocol, hostname, getSleep());
+    }
+    
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
-            final String protocol, final String hostname) throws AjaxException, IOException,
+            final String protocol, final String hostname, final int sleep) throws AjaxException, IOException,
             JSONException {
 
         final String urlString = protocol + "://" + hostname + request.getServletPath();
@@ -176,7 +183,7 @@ public class Executor extends Assert {
         syncCookies(httpClient, session.getConversation());
 
         try {
-			Thread.sleep(getSleep());
+			Thread.sleep(sleep);
 		} catch (InterruptedException e) {
 			System.out.println("InterruptedException while sleeping between test requests. Does that help?");
 			e.printStackTrace();

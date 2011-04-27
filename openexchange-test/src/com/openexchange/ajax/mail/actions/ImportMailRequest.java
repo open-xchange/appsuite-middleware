@@ -107,6 +107,7 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
         final List<Parameter> list = new LinkedList<Parameter>();
         list.add(new URLParameter(Mail.PARAMETER_ACTION, Mail.ACTION_IMPORT));
         list.add(new URLParameter(Mail.PARAMETER_FOLDERID, folder));
+        list.add(new URLParameter("force", "true"));
         if (flags >= 0) {
             list.add(new URLParameter(Mail.PARAMETER_FLAGS, flags));
         }
