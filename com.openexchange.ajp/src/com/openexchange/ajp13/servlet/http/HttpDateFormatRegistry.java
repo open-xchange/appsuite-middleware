@@ -164,7 +164,7 @@ public final class HttpDateFormatRegistry {
     }
 
     /**
-     * Appends expiry according to RFC 2109/RFC 2165.
+     * Appends expiry according to RFC 2109/RFC 2965.
      * 
      * @param maxAgeSecs The max-age seconds
      * @param composer The composing string builder
