@@ -49,18 +49,14 @@
 
 package com.openexchange.ajp13.servlet.http;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntObjectHashMap;
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
@@ -70,11 +66,11 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.servlet.ServletResponseWrapper;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.server.impl.Version;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
-import com.openexchange.ajp13.servlet.ServletResponseWrapper;
 import com.openexchange.session.Session;
 
 /**
@@ -91,7 +87,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     private static final TIntObjectHashMap<String> STATUS_DESC;
 
-    private static final SimpleDateFormat HEADER_DATE_FORMAT;
+    private static final DateFormat HEADER_DATE_FORMAT = HttpDateFormatRegistry.getInstance().getDefaultDateFormat();
 
     static {
         STATUS_MSGS = new TIntObjectHashMap<String>(46);
@@ -145,36 +141,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         STATUS_DESC.put(
             503,
             "The server is temporarily unable to service your request due to" + " maintenance downtime or capacity problems. Please try again later.");
-        /*
-         * Date Format
-         */
-        HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
-        final DateFormatSymbols dfs = HEADER_DATE_FORMAT.getDateFormatSymbols();
-        final String[] shortWeekdays = new String[8];
-        shortWeekdays[Calendar.SUNDAY] = "Sun";
-        shortWeekdays[Calendar.MONDAY] = "Mon";
-        shortWeekdays[Calendar.TUESDAY] = "Tue";
-        shortWeekdays[Calendar.WEDNESDAY] = "Wed";
-        shortWeekdays[Calendar.THURSDAY] = "Thu";
-        shortWeekdays[Calendar.FRIDAY] = "Fri";
-        shortWeekdays[Calendar.SATURDAY] = "Sat";
-        dfs.setShortWeekdays(shortWeekdays);
-        final String[] shortMonths = new String[12];
-        shortMonths[Calendar.JANUARY] = "Jan";
-        shortMonths[Calendar.FEBRUARY] = "Feb";
-        shortMonths[Calendar.MARCH] = "Mar";
-        shortMonths[Calendar.APRIL] = "April";
-        shortMonths[Calendar.MAY] = "May";
-        shortMonths[Calendar.JUNE] = "June";
-        shortMonths[Calendar.JULY] = "July";
-        shortMonths[Calendar.AUGUST] = "Aug";
-        shortMonths[Calendar.SEPTEMBER] = "Sep";
-        shortMonths[Calendar.OCTOBER] = "Oct";
-        shortMonths[Calendar.NOVEMBER] = "Nov";
-        shortMonths[Calendar.DECEMBER] = "Dec";
-        dfs.setShortMonths(shortMonths);
-        HEADER_DATE_FORMAT.setDateFormatSymbols(dfs);
-        HEADER_DATE_FORMAT.setTimeZone(getTimeZone("GMT"));
     }
 
     private final Set<Cookie> cookies;
@@ -345,12 +311,13 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         final int cookiesSize = cookies.size();
         final String[] list = new String[cookiesSize];
         if (cookiesSize > 0) {
+            final DateFormat dateFormat = HttpDateFormatRegistry.getInstance().detectCookieDateFormat(request.getHeader("User-Agent"));
             final Iterator<Cookie> iter = cookies.iterator();
             final StringBuilder composer = new StringBuilder(32);
-            list[0] = getFormattedCookie(iter.next(), composer, httpOnly);
+            list[0] = getFormattedCookie(iter.next(), dateFormat, composer, httpOnly);
             for (int i = 1; i < cookiesSize; i++) {
                 composer.setLength(0);
-                list[i] = getFormattedCookie(iter.next(), composer, httpOnly);
+                list[i] = getFormattedCookie(iter.next(), dateFormat, composer, httpOnly);
             }
         }
         retval[0] = list;
@@ -366,17 +333,17 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      * @param composer A string builder used for composing
      * @return A string representing the HTTP header format
      */
-    private static final String getFormattedCookie(final Cookie cookie, final StringBuilder composer, final boolean httpOnly) {
+    private static final String getFormattedCookie(final Cookie cookie, final DateFormat dateFormat, final StringBuilder composer, final boolean httpOnly) {
         composer.append(cookie.getName()).append('=');
         composer.append(cookie.getValue());
         final int maxAge = cookie.getMaxAge();
         if (maxAge >= 0) {
-            synchronized (HEADER_DATE_FORMAT) {
+            synchronized (dateFormat) {
                 /*
                  * expires=Sat, 01-Jan-2000 00:00:00 GMT
                  */
                 composer.append(COOKIE_PARAMS[0]).append(
-                    HEADER_DATE_FORMAT.format((maxAge == 0 ? new Date(10000L) /*10sec after 01/01/1970*/: new Date(System.currentTimeMillis() + (maxAge * 1000L)))));
+                    dateFormat.format((maxAge == 0 ? new Date(10000L) /*10sec after 01/01/1970*/: new Date(System.currentTimeMillis() + (maxAge * 1000L)))));
             }
             // composer.append("; max-age=").append(cookie.getMaxAge());
         }
