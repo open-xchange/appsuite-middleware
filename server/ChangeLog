@@ -6,6 +6,7 @@
 * 2011-04-26 - thorben.betten@open-xchange.com
 
  - Bugfix #18981: Ignoring empty addresses occurring in RFC822 address header
+ - Bugfix #18974: Introduced possibility to restrict number of concurrent connections to a subscribed/external IMAP account
 
 * 2011-04-26 - tobias.prinz@open-xchange.com
 
