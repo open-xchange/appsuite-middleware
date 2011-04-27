@@ -63,12 +63,6 @@ import com.openexchange.tools.TimeZoneUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpDateFormatRegistry {
-    
-    public static void main(String[] args) {
-        DateFormat dateFormat = HttpDateFormatRegistry.getInstance().getDefaultDateFormat();
-        
-        System.out.println(dateFormat.format(new Date()));
-    }
 
     private static final HttpDateFormatRegistry singleton = new HttpDateFormatRegistry();
 
@@ -121,36 +115,8 @@ public final class HttpDateFormatRegistry {
             defaultDateFormat = headerDateFormat;
         }
 
-        {
-            final SimpleDateFormat headerDateFormat = new SimpleDateFormat("EEE',' dd-MMMM-yyyy HH:mm:ss z", Locale.ENGLISH);
-            final DateFormatSymbols dfs = headerDateFormat.getDateFormatSymbols();
-            final String[] shortWeekdays = new String[8];
-            shortWeekdays[Calendar.SUNDAY] = "Sun";
-            shortWeekdays[Calendar.MONDAY] = "Mon";
-            shortWeekdays[Calendar.TUESDAY] = "Tue";
-            shortWeekdays[Calendar.WEDNESDAY] = "Wed";
-            shortWeekdays[Calendar.THURSDAY] = "Thu";
-            shortWeekdays[Calendar.FRIDAY] = "Fri";
-            shortWeekdays[Calendar.SATURDAY] = "Sat";
-            dfs.setShortWeekdays(shortWeekdays);
-            final String[] shortMonths = new String[12];
-            shortMonths[Calendar.JANUARY] = "Jan";
-            shortMonths[Calendar.FEBRUARY] = "Feb";
-            shortMonths[Calendar.MARCH] = "Mar";
-            shortMonths[Calendar.APRIL] = "April";
-            shortMonths[Calendar.MAY] = "May";
-            shortMonths[Calendar.JUNE] = "June";
-            shortMonths[Calendar.JULY] = "July";
-            shortMonths[Calendar.AUGUST] = "Aug";
-            shortMonths[Calendar.SEPTEMBER] = "Sep";
-            shortMonths[Calendar.OCTOBER] = "Oct";
-            shortMonths[Calendar.NOVEMBER] = "Nov";
-            shortMonths[Calendar.DECEMBER] = "Dec";
-            dfs.setShortMonths(shortMonths);
-            headerDateFormat.setDateFormatSymbols(dfs);
-            headerDateFormat.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
-            netscapeDateFormat = headerDateFormat;
-        }
+        netscapeDateFormat = new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss z", Locale.US);
+        netscapeDateFormat.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
     }
 
     /**
@@ -182,7 +148,7 @@ public final class HttpDateFormatRegistry {
     }
 
     /**
-     * Appends expiry according to Netscape specification.
+     * Appends expiry according to Netscape specification; e.g. <code>"expires=Thu, 26-Apr-2012 18:35:06 GMT"</code>.
      * 
      * @param maxAgeSecs The max-age seconds
      * @param composer The composing string builder
