@@ -1,6 +1,7 @@
 * 2011-04-27 - steffen.templin@open-xchange.com
 
  - Bugfix #19028: RSS messages now contain unique ids and urls to their origin.
+ - Bugfix #18469: Fixed NPE for mailfilter request with missing session parameter.
 
 * 2011-04-26 - thorben.betten@open-xchange.com
 

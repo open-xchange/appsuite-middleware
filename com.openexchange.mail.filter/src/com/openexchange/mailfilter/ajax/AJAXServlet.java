@@ -114,10 +114,14 @@ public abstract class AJAXServlet extends HttpServlet {
         final Response response = new Response();
         try {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
+            if (sessionId == null) {
+                throw new OXMailfilterException(OXMailfilterException.Code.MISSING_PARAMETER, "session");
+            }
+            
             final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null == service) {
                 throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
-            }
+            }            
             final Session session = service.getSession(sessionId);
             if (null == session) {
                 throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
