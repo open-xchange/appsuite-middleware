@@ -166,9 +166,9 @@ public class Workflow {
         webClient.setJavaScriptEnabled(enableJavascript);
         webClient.setTimeout(60000);
         webClient.setAjaxController(new NicelyResynchronizingAjaxController());
-        /*if (useThreadedRefreshHandler) {
+        if (useThreadedRefreshHandler) {
             webClient.setRefreshHandler(new ThreadedRefreshHandler());
-        }*/
+        }
         try {
 
             Step previousStep = null;
