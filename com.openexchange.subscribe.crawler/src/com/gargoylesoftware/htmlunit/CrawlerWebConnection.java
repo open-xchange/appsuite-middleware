@@ -412,7 +412,6 @@ public class CrawlerWebConnection extends HttpWebConnection {
             
             // set an alternate ConnectionManager
             if (multiThreadedHttpConnectionManager){
-            	System.out.println("***** Gotcha!");
             	httpClient_.setHttpConnectionManager(new MultiThreadedHttpConnectionManager());
             }
 
