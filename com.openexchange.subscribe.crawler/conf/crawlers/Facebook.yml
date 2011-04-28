@@ -1,14 +1,14 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
 displayName: Facebook
 id: com.openexchange.subscribe.crawler.facebook
-priority: 11
+priority: 12
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.FacebookAPIStep
-      actionOfLoginForm: "https://login.facebook.com/login.php?login_attempt=1"
+      actionOfLoginForm: "https://www.facebook.com/login.php?login_attempt=1"
       apiKey: d36ebc9e274a89e3bd0c239cea4acb48
-      birthdayPattern: "([0-9]{1,2})\\s([^\\s]*)(\\s)*([0-9]{4})*"
+      birthdayPattern: "([^0-9\\s]*).([0-9]{2})..([0-9]{4})"
       linkAvailableAfterLogin: "(http://www.facebook.com/notifications.php)"
       nameOfPasswordField: pass
       nameOfUserField: email

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -121,16 +121,11 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                 linkAvailableAfterLogin,
                 1,
                 "http://www.facebook.com");
-            step.execute(webClient);
-            // grant access to the application (needed only the first time someone uses the subscription)
-            HtmlPage page = step.getOutput();
-            PageByNamedHtmlElementStep step2 = new PageByNamedHtmlElementStep("", 0, "grant_clicked");
-            step2.setInput(page);
-            step2.execute(webClient);            
+            step.execute(webClient);         
             webClient.closeAllWindows();
 
             // fetch session key
-            final String session = client.auth_getSession(token);
+            final String session = (String) client.auth_getSession(token);
 
             // keep track of the logged in user id
             final Long userId = client.users_getLoggedInUser();
@@ -172,37 +167,37 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                                 // set the year to the current year in case it is not available
                                 int year = calendar.get(Calendar.YEAR);
                                 // set the day
-                                day = Integer.valueOf(matcher.group(1));
+                                day = Integer.valueOf(matcher.group(2));
                                 // set the month
-                                if (matcher.group(2).equals("January")) {
+                                if (matcher.group(1).equals("January")) {
                                     month = Calendar.JANUARY;
-                                } else if (matcher.group(2).equals("February")) {
+                                } else if (matcher.group(1).equals("February")) {
                                     month = Calendar.FEBRUARY;
-                                } else if (matcher.group(2).equals("March")) {
+                                } else if (matcher.group(1).equals("March")) {
                                     month = Calendar.MARCH;
-                                } else if (matcher.group(2).equals("April")) {
+                                } else if (matcher.group(1).equals("April")) {
                                     month = Calendar.APRIL;
-                                } else if (matcher.group(2).equals("May")) {
+                                } else if (matcher.group(1).equals("May")) {
                                     month = Calendar.MAY;
-                                } else if (matcher.group(2).equals("June")) {
+                                } else if (matcher.group(1).equals("June")) {
                                     month = Calendar.JUNE;
-                                } else if (matcher.group(2).equals("July")) {
+                                } else if (matcher.group(1).equals("July")) {
                                     month = Calendar.JULY;
-                                } else if (matcher.group(2).equals("August")) {
+                                } else if (matcher.group(1).equals("August")) {
                                     month = Calendar.AUGUST;
-                                } else if (matcher.group(2).equals("September")) {
+                                } else if (matcher.group(1).equals("September")) {
                                     month = Calendar.SEPTEMBER;
-                                } else if (matcher.group(2).equals("October")) {
+                                } else if (matcher.group(1).equals("October")) {
                                     month = Calendar.OCTOBER;
-                                } else if (matcher.group(2).equals("November")) {
+                                } else if (matcher.group(1).equals("November")) {
                                     month = Calendar.NOVEMBER;
-                                } else if (matcher.group(2).equals("December")) {
+                                } else if (matcher.group(1).equals("December")) {
                                     month = Calendar.DECEMBER;
                                 }
 
                                 // set the year
-                                if (matcher.groupCount() == 4 && !matcher.group(4).equals("")) {
-                                    year = Integer.valueOf(matcher.group(4));
+                                if (matcher.groupCount() == 3 && !matcher.group(3).equals("")) {
+                                    year = Integer.valueOf(matcher.group(3));
                                 }
 
                                 calendar.set(year, month, day);

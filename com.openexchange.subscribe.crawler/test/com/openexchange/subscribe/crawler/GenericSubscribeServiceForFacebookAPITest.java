@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -69,17 +69,17 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
-        crawler.setPriority(11);
+        crawler.setPriority(12);
         
         List<Step> steps = new LinkedList<Step>();
         FacebookAPIStep facebookAPIStep = new FacebookAPIStep();
-        facebookAPIStep.setActionOfLoginForm("https://login.facebook.com/login.php?login_attempt=1");
+        facebookAPIStep.setActionOfLoginForm("https://www.facebook.com/login.php?login_attempt=1");
         facebookAPIStep.setNameOfUserField("email");
         facebookAPIStep.setNameOfPasswordField("pass");
         facebookAPIStep.setLinkAvailableAfterLogin("(http://www.facebook.com/notifications.php)");
         facebookAPIStep.setApiKey("d36ebc9e274a89e3bd0c239cea4acb48");
         facebookAPIStep.setSecret("903e8006dbad9204bb74c26eb3ca2310");
-        facebookAPIStep.setBirthdayPattern("([0-9]{1,2})\\s([^\\s]*)(\\s)*([0-9]{4})*");
+        facebookAPIStep.setBirthdayPattern("([^0-9\\s]*).([0-9]{2})..([0-9]{4})");
         steps.add(facebookAPIStep);
 
         Workflow workflow = new Workflow(steps);
