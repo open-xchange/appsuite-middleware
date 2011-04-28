@@ -199,10 +199,16 @@ public final class BodyTerm extends SearchTerm<String> {
                 }
             }
         }
+        final ContentType contentType = mailPart.getContentType();
+        if (!contentType.startsWith("text/")) {
+            /*
+             * No textual content
+             */
+            return null;
+        }
         /*
          * Try to extract textual content out of current part's body
          */
-        final ContentType contentType = mailPart.getContentType();
         String charset = contentType.getCharsetParameter();
         if (!CharsetDetector.isValid(charset)) {
             charset = CharsetDetector.detectCharset(mailPart.getInputStream());
