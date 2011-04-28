@@ -51,6 +51,7 @@ package com.openexchange.imap.search;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import gnu.trove.TIntArrayList;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -96,98 +97,132 @@ public final class IMAPSearch {
      */
     public static int[] searchMessages(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm, final IMAPConfig imapConfig) throws MessagingException, MailException {
         final int msgCount = imapFolder.getMessageCount();
-        /*
-         * Perform an IMAP-based search if IMAP search is enabled through config or number of messages to search in exceeds limit.
-         */
+        final MailFields mailFields = new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm));
         final boolean hasSearchCapability;
         {
             final IMAPCapabilities imapCapabilities = (IMAPCapabilities) imapConfig.getCapabilities();
             hasSearchCapability = imapCapabilities.hasIMAP4() || imapCapabilities.hasIMAP4rev1();
         }
-        if (imapConfig.isImapSearch() || (hasSearchCapability && (msgCount >= MailProperties.getInstance().getMailFetchLimit()))) {
-            try {
-                final int[] matchSeqNums;
-                if (searchTerm.containsWildcard()) {
-                    /*
-                     * Try to pre-select with non-wildcard part
-                     */
-                    final Message[] msgs = issueNonWildcardSearch(searchTerm.getNonWildcardJavaMailSearchTerm(), imapFolder);
-                    final SmartIntArray sia = new SmartIntArray(msgs.length);
-                    for (int i = 0; i < msgs.length; i++) {
-                        if (searchTerm.matches(msgs[i])) {
-                            sia.append(msgs[i].getMessageNumber());
-                        }
-                    }
-                    matchSeqNums = sia.toArray();
-                } else {
-                    final Message[] msgs = issueNonWildcardSearch(searchTerm.getJavaMailSearchTerm(), imapFolder);
-                    if ((msgs.length < 50) && !searchTerm.isAscii()) {
-                        /*
-                         * Search with respect to umlauts in pre-selected messages
-                         */
-                        return searchWithUmlautSupport(searchTerm, msgs);
-                    }
-                    matchSeqNums = new int[msgs.length];
-                    for (int i = 0; i < msgs.length; i++) {
-                        matchSeqNums[i] = msgs[i].getMessageNumber();
-                    }
-                }
-                return matchSeqNums;
-            } catch (final FolderClosedException e) {
+        if (mailFields.contains(MailField.BODY) || mailFields.contains(MailField.FULL)) {
+            if (hasSearchCapability && (msgCount >= MailProperties.getInstance().getMailFetchLimit())) {
                 /*
-                 * Caused by a protocol error such as a socket error. No retry in this case.
+                 * Too many messages in IMAP folder. Fall-back to IMAP-bases search and accept a non-type-sensitive search
                  */
-                throw e;
-            } catch (final StoreClosedException e) {
-                /*
-                 * Caused by a protocol error such as a socket error. No retry in this case.
-                 */
-                throw e;
-            } catch (final MessagingException e) {
-                if (e.getNextException() instanceof ProtocolException) {
-                    final ProtocolException protocolException = (ProtocolException) e.getNextException();
-                    final Response response = protocolException.getResponse();
-                    if (response != null && response.isBYE()) {
-                        /*
-                         * The BYE response is always untagged, and indicates that the server is about to close the connection.
-                         */
-                        throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
-                    }
-                    final Throwable cause = protocolException.getCause();
-                    if (cause instanceof StoreClosedException) {
-                        /*
-                         * Connection is down. No retry.
-                         */
-                        throw ((StoreClosedException) cause);
-                    } else if (cause instanceof FolderClosedException) {
-                        /*
-                         * Connection is down. No retry.
-                         */
-                        throw ((FolderClosedException) cause);
-                    }
-                }
-                if (LOG.isWarnEnabled()) {
-                    final IMAPException imapException = IMAPException.create(IMAPException.Code.IMAP_SEARCH_FAILED, e, e.getMessage());
-                    LOG.warn(imapException.getMessage(), imapException);
+                final int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
+                if (null != seqNums) {
+                    return seqNums;
                 }
             }
+            /*
+             * Manual search needed in case of body search since IMAP's SEARCH command does not perform type-sensitive search; e.g.
+             * extract plain-text out of HTML content.
+             */
+            final Message[] allMsgs = imapFolder.getMessages();
+            final TIntArrayList list = new TIntArrayList(msgCount);
+            for (int i = 0; i < allMsgs.length; i++) {
+                if (searchTerm.matches(allMsgs[i])) {
+                    list.add(allMsgs[i].getMessageNumber());
+                }
+            }
+            return list.toNativeArray();
         }
-        final MailField[] searchFields = new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm)).toArray();
+        /*
+         * Perform an IMAP-based search if IMAP search is enabled through configuration or number of messages to search in exceeds limit.
+         */
+        if (imapConfig.isImapSearch() || (hasSearchCapability && (msgCount >= MailProperties.getInstance().getMailFetchLimit()))) {
+            final int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
+            if (null != seqNums) {
+                return seqNums;
+            }
+        }
         final Message[] allMsgs;
-        {
+        if (mailFields.contains(MailField.BODY) || mailFields.contains(MailField.FULL)) {
+            allMsgs = imapFolder.getMessages();
+        } else {
+            mailFields.add(MailField.CONTENT_TYPE); // Possibly checked by search term
             final long start = System.currentTimeMillis();
             allMsgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), getFetchProfile(
-                searchFields,
+                mailFields.toArray(),
                 imapConfig.getIMAPProperties().isFastFetch()), msgCount).doCommand();
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         }
-        final SmartIntArray sia = new SmartIntArray(allMsgs.length >> 1);
+        final TIntArrayList list = new TIntArrayList(msgCount);
         for (int i = 0; i < allMsgs.length; i++) {
             if (searchTerm.matches(allMsgs[i])) {
-                sia.append(allMsgs[i].getMessageNumber());
+                list.add(allMsgs[i].getMessageNumber());
             }
         }
-        return sia.toArray();
+        return list.toNativeArray();
+    }
+
+    private static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws MailException, FolderClosedException, StoreClosedException {
+        try {
+            final int[] matchSeqNums;
+            if (searchTerm.containsWildcard()) {
+                /*
+                 * Try to pre-select with non-wildcard part
+                 */
+                final Message[] msgs = issueNonWildcardSearch(searchTerm.getNonWildcardJavaMailSearchTerm(), imapFolder);
+                final SmartIntArray sia = new SmartIntArray(msgs.length);
+                for (int i = 0; i < msgs.length; i++) {
+                    if (searchTerm.matches(msgs[i])) {
+                        sia.append(msgs[i].getMessageNumber());
+                    }
+                }
+                matchSeqNums = sia.toArray();
+            } else {
+                final Message[] msgs = issueNonWildcardSearch(searchTerm.getJavaMailSearchTerm(), imapFolder);
+                if ((msgs.length < 50) && !searchTerm.isAscii()) {
+                    /*
+                     * Search with respect to umlauts in pre-selected messages
+                     */
+                    return searchWithUmlautSupport(searchTerm, msgs);
+                }
+                matchSeqNums = new int[msgs.length];
+                for (int i = 0; i < msgs.length; i++) {
+                    matchSeqNums[i] = msgs[i].getMessageNumber();
+                }
+            }
+            return matchSeqNums;
+        } catch (final FolderClosedException e) {
+            /*
+             * Caused by a protocol error such as a socket error. No retry in this case.
+             */
+            throw e;
+        } catch (final StoreClosedException e) {
+            /*
+             * Caused by a protocol error such as a socket error. No retry in this case.
+             */
+            throw e;
+        } catch (final MessagingException e) {
+            if (e.getNextException() instanceof ProtocolException) {
+                final ProtocolException protocolException = (ProtocolException) e.getNextException();
+                final Response response = protocolException.getResponse();
+                if (response != null && response.isBYE()) {
+                    /*
+                     * The BYE response is always untagged, and indicates that the server is about to close the connection.
+                     */
+                    throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
+                }
+                final Throwable cause = protocolException.getCause();
+                if (cause instanceof StoreClosedException) {
+                    /*
+                     * Connection is down. No retry.
+                     */
+                    throw ((StoreClosedException) cause);
+                } else if (cause instanceof FolderClosedException) {
+                    /*
+                     * Connection is down. No retry.
+                     */
+                    throw ((FolderClosedException) cause);
+                }
+            }
+            if (LOG.isWarnEnabled()) {
+                final IMAPException imapException = IMAPException.create(IMAPException.Code.IMAP_SEARCH_FAILED, e, e.getMessage());
+                LOG.warn(imapException.getMessage(), imapException);
+            }
+            return null;
+        }
     }
 
     /**

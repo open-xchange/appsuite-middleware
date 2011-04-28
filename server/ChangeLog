@@ -1,3 +1,7 @@
+* 2011-04-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #19065: Fixed body search for IMAP
+
 * 2011-04-27 - thorben.betten@open-xchange.com
 
  - Bugfix #19038: Using Netscape's date format for "expires" attribute: Wdy, DD-Mon-YY HH:MM:SS GMT
