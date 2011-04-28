@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -108,6 +108,8 @@ public class CrawlerWebConnection extends HttpWebConnection {
     private boolean switchUserAgent;
     private final String mobileUserAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16";
     private final String normalUserAgent = BrowserVersion.FIREFOX_3.getUserAgent();
+    
+    private boolean multiThreadedHttpConnectionManager = false;
 
     /**
      * Initializes a new {@link CrawlerWebConnection}.
@@ -407,6 +409,12 @@ public class CrawlerWebConnection extends HttpWebConnection {
 
             httpClient_.getHttpConnectionManager().getParams().setSoTimeout(getTimeout());
             httpClient_.getHttpConnectionManager().getParams().setConnectionTimeout(getTimeout());
+            
+            // set an alternate ConnectionManager
+            if (multiThreadedHttpConnectionManager){
+            	System.out.println("***** Gotcha!");
+            	httpClient_.setHttpConnectionManager(new MultiThreadedHttpConnectionManager());
+            }
 
             if (virtualHost_ != null) {
                 httpClient_.getParams().setVirtualHost(virtualHost_);
@@ -589,5 +597,15 @@ public class CrawlerWebConnection extends HttpWebConnection {
         if (this.switchUserAgent) {this.switchUserAgent = false;}
         else {this.switchUserAgent = true;}
     }
+
+	public boolean isMultiThreadedHttpConnectionManager() {
+		return multiThreadedHttpConnectionManager;
+	}
+
+	public void setMultiThreadedHttpConnectionManager(
+			boolean multiThreadedHttpConnectionManager) {
+		this.multiThreadedHttpConnectionManager = multiThreadedHttpConnectionManager;
+	}
+    
     
 }

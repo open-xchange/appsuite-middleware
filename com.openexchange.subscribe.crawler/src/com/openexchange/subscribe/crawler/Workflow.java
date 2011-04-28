@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -102,6 +102,8 @@ public class Workflow {
     private boolean mobileUserAgent = false;
     
     private boolean quirkyCookieQuotes;
+    
+    private boolean multiThreadedHttpConnectionManager = false;
 
     public Workflow() {
 
@@ -153,6 +155,7 @@ public class Workflow {
         // ... and to javascript as well
         webClient.setThrowExceptionOnScriptError(false);
         if (quirkyCookieQuotes) {crawlerConnection.setQuirkyCookieQuotes(true);}
+        if (multiThreadedHttpConnectionManager) {crawlerConnection.setMultiThreadedHttpConnectionManager(true);}
         CookiePolicy.registerCookieSpec("crawler-special", CrawlerCookieSpec.class);
         CookiePolicy.registerCookieSpec("crawler-special-qq", CrawlerCookieSpecWithQuirkyQuotes.class);
         webClient.setCookieManager(new CrawlerCookieManager());
@@ -316,4 +319,14 @@ public class Workflow {
         }
     }
 
+	public boolean isMultiThreadedHttpConnectionManager() {
+		return multiThreadedHttpConnectionManager;
+	}
+
+	public void setMultiThreadedHttpConnectionManager(
+			boolean multiThreadedHttpConnectionManager) {
+		this.multiThreadedHttpConnectionManager = multiThreadedHttpConnectionManager;
+	}
+
+    
 }

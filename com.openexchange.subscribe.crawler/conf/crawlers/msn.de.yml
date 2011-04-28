@@ -4,11 +4,13 @@ displayName: msn.de
 id: com.openexchange.subscribe.crawler.msn.de
 javascriptEnabled: true
 mobileUserAgentEnabled: true
-priority: 2
+multiThreadedHttpConnectionManager: true
+priority: 3
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   enableJavascript: true
   mobileUserAgent: true
+  multiThreadedHttpConnectionManager: true
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
       actionOfLoginForm: login.aspx

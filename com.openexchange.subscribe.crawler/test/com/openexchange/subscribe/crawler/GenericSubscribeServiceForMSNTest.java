@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.ho.yaml.Yaml;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import com.openexchange.subscribe.crawler.internal.Step;
@@ -76,7 +75,8 @@ public class GenericSubscribeServiceForMSNTest extends GenericSubscribeServiceTe
         crawler.setCrawlerApiVersion(618);
         crawler.setMobileUserAgentEnabled(true);
         crawler.setJavascriptEnabled(true);
-        crawler.setPriority(2);
+        crawler.setMultiThreadedHttpConnectionManager(true);
+        crawler.setPriority(3);
         
         List<Step> steps = new LinkedList<Step>();        
         
