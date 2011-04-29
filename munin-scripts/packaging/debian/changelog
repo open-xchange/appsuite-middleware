@@ -1,3 +1,9 @@
+open-xchange-munin-scripts (0.1-5) unstable; urgency=low
+
+  * New build
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Fri, 29 Apr 2011 20:36:29 +0000
+
 open-xchange-munin-scripts (0.1-4) unstable; urgency=low
 
   * new build including latest changes

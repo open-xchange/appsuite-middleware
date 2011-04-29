@@ -59,6 +59,11 @@ exit 0
 
 
 %changelog
+* Fri Apr 29 2011 - wolfgang.rosenauer@open-xchange.com
+ - RPM %post script calls munin-node-configure with explicit libdir path
+ - Improved RPM requirements
+* Wed Jan 19 2011 - steffen.templin@open-xchange.com
+ - Added munin plugin for all other threadpool stats.
 * Mon Jan 17 2011 - steffen.templin@open-xchange.com
  - Added munin plugin for threadpool task stats.
 * Tue Nov 23 2010 - marcus.klein@open-xchange.com
