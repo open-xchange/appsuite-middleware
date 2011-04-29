@@ -4,14 +4,15 @@
 Name:           open-xchange-munin-scripts
 BuildArch:	noarch
 Version:	0.1
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Munin scripts
-Requires:	open-xchange-common perl munin-node
+Requires:	open-xchange-common 
+Requires(post): munin-node
 #
 
 %description
@@ -39,7 +40,7 @@ from <http://munin.projects.linpro.no/> to a live installation.
 
 %post
 TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`
-munin-node-configure --shell > $TMPFILE || rm -f $TMPFILE
+munin-node-configure --libdir /usr/share/munin/plugins/ --shell > $TMPFILE || rm -f $TMPFILE
 if [ -f $TMPFILE ] ; then
   sh < $TMPFILE
 fi
