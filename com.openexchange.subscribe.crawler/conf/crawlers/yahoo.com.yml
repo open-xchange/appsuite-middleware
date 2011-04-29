@@ -2,7 +2,7 @@
 crawlerApiVersion: 616
 displayName: yahoo.com
 id: com.openexchange.subscribe.crawler.yahoocom
-priority: 6
+priority: 8
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
@@ -10,11 +10,11 @@ workflowString: |
       actionOfLoginForm: "https://login.yahoo.com/config/login?"
       baseUrl: ""
       description: Log in
-      linkAvailableAfterLogin: "(http\\:\\/\\/address\\.yahoo\\.com\\/)"
+      linkAvailableAfterLogin: "(.*contact_list.*)"
       nameOfPasswordField: passwd
       nameOfUserField: login
       numberOfForm: 1
-      pageTitleAfterLogin: "(http\\:\\/\\/address\\.yahoo\\.com\\/)"
+      pageTitleAfterLogin: "(.*contact_list.*)"
       password: ""
       url: "http://address.yahoo.com/index.php"
       username: ""
@@ -115,5 +115,4 @@ workflowString: |
             regex: "()([0-9]{4})(<)"
             type: 1
             typeOfInfo: birthday_year
-  useThreadedRefreshHandler: true
   

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,7 +75,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         crawler.setDisplayName("yahoo.com");
         crawler.setId("com.openexchange.subscribe.crawler.yahoocom");
         crawler.setCrawlerApiVersion(616);
-        crawler.setPriority(6);
+        crawler.setPriority(8);
         List<Step> steps = new LinkedList<Step>();
         
         String crapBefore = "[^0-9\\+\\(\\)]*";
@@ -88,7 +88,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
             "https://login.yahoo.com/config/login?",
             "login",
             "passwd",
-            "(http\\:\\/\\/address\\.yahoo\\.com\\/)",
+            "(.*contact_list.*)",
             1,
             ""));
         steps.add(new PageByUrlStep("We are not automatically redirected so we have to click a link", "http://address.yahoo.com/"));
@@ -124,7 +124,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep("Get each contacts details", sequence, "", ""));
 
         Workflow workflow = new Workflow(steps);
-        workflow.setUseThreadedRefreshHandler(true);
+        //workflow.setUseThreadedRefreshHandler(true);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
