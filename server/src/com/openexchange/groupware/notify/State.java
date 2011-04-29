@@ -57,6 +57,7 @@ import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -169,7 +170,8 @@ public interface State {
 
 	/**
 	 * Tries to find out whether anything else but irrelevant fields (for notification purposes) have changed
+	 * @param session 
 	 * @return true if only the alarm settings or nothing was changed, false otherwise.
 	 */
-    public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj);
+    public boolean onlyIrrelevantFieldsChanged(Session session, CalendarObject oldObj, CalendarObject newObj);
 }

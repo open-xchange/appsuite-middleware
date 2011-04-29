@@ -77,6 +77,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -261,9 +262,39 @@ public class AppointmentState extends LinkableState {
         I(Appointment.SEQUENCE)
     ));
 
-    public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
+    public boolean onlyIrrelevantFieldsChanged(Session session, CalendarObject oldObj, CalendarObject newObj) {
         Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);
+        magicLogging(session, oldObj, newObj, differingFields);
         return differingFields.isEmpty();
+    }
+    
+    /**
+     * Magic logging for calendar changes made by robert colombara.
+     * Should only be deployed on internal development environment.
+     * 
+     * TODO: REMOVE!!!
+     * 
+     * @param session
+     * @param oldObj
+     * @param newObj
+     * @param differingFields
+     */
+    private void magicLogging(Session session, CalendarObject oldObj, CalendarObject newObj, Set<Integer> differingFields) {
+        if (differingFields.isEmpty())
+            return;
+        
+        if (session.getContextId() == 1 && session.getUserId() == 3) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Magic Logging");
+            for (int i : differingFields) {
+                sb.append("\n\n");
+                sb.append(i + ":\n");
+                sb.append(oldObj.get(i) == null ? "NULL" : oldObj.get(i));
+                sb.append("\n");
+                sb.append(newObj.get(i) == null ? "NULL" : oldObj.get(i));
+            }
+            LOGGER.info(sb.toString());
+        }
     }
 }

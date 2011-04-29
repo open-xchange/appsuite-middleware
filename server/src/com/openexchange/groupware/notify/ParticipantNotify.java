@@ -433,7 +433,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      */
     private void sendNotification(final CalendarObject oldObj, final CalendarObject newObj, final Session session, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader, final boolean isUpdate) {
 
-        if (onlyIrrelevantFieldsChanged(oldObj, newObj, state)) {
+        if (onlyIrrelevantFieldsChanged(session, oldObj, newObj, state)) {
             return;
         }
 
@@ -583,11 +583,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private boolean onlyIrrelevantFieldsChanged(final CalendarObject oldObj, final CalendarObject newObj, final State state) {
+    private boolean onlyIrrelevantFieldsChanged(Session session, final CalendarObject oldObj, final CalendarObject newObj, final State state) {
         if (oldObj == null || newObj == null) {
             return false;
         }
-        return state.onlyIrrelevantFieldsChanged(oldObj, newObj);
+        return state.onlyIrrelevantFieldsChanged(session, oldObj, newObj);
     }
 
     private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession session, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
