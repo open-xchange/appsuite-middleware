@@ -446,10 +446,77 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             registry.triggerOnAfterDeletion(id, properties, user, cid, con);
             dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
+            final String className = e.getClass().getName();
+            if ((null != className) && className.endsWith("MySQLIntegrityConstraintViolationException")) {
+                try {
+                    final String msg = e.getMessage();
+                    final int start = msg.indexOf('`') + 1;
+                    if (start > 0) {
+                        String tableName = msg.substring(start, msg.indexOf('`', start));
+                        final int pos = tableName.indexOf('/') + 1;
+                        if (pos > 0) {
+                            tableName = tableName.substring(pos);
+                        }
+                        if (dropReferenced(id, user, cid, tableName, con)) {
+                            deleteMailAccount(id, properties, user, cid, deletePrimary, con);
+                            return;
+                        }
+                    }
+                } catch (final RuntimeException re) {
+                    LOG.debug(re.getMessage(), re);
+                }
+            }
+            /*
+             * Indicate SQL error
+             */
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
+    }
+
+    private static boolean dropReferenced(final int id, final int user, final int cid, final String tableName, final Connection con) throws MailAccountException {
+        final boolean transactional;
+        try {
+            transactional = !con.getAutoCommit();
+            if (transactional) {
+                rollback(con);
+                con.setAutoCommit(true);
+            }
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        }
+        /*
+         * Delete referenced
+         */
+        final String sql = new StringBuilder(64).append("DELETE FROM ").append(tableName).append(" WHERE cid = ? AND id = ? and user = ?").toString();
+        PreparedStatement stmt = null;
+        boolean retval = false;
+        try {
+            stmt = con.prepareStatement(sql);
+            stmt.setLong(1, cid);
+            stmt.setLong(2, id);
+            stmt.setLong(3, user);
+            stmt.executeUpdate();
+            retval = true;
+        } catch (final SQLException e) {
+            LOG.warn("Couldn't delete referenced entries with: " + sql, e);
+        } catch (final Exception e) {
+            LOG.warn("Couldn't delete referenced entries with: " + sql, e);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+        /*
+         * Restore transaction state
+         */
+        try {
+            if (transactional) {
+                con.setAutoCommit(false);
+            }
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        }
+        return retval;
     }
 
     public MailAccount getDefaultMailAccount(final int user, final int cid, final Connection con) throws MailAccountException {
