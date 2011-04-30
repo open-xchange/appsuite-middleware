@@ -1,3 +1,8 @@
+* 2011-04-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #19083: Reduced execution of avoidable POP3 commands while importing POP3 messages to backing storage to avoid possibly exceeding
+                  provider restrictions regarding number of executed POP3 comm
+
 * 2011-04-28 - thorben.betten@open-xchange.com
 
  - Bugfix #19065: Fixed body search for IMAP
