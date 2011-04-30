@@ -510,45 +510,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 if (0 == inbox.getMessageCount()) {
                     // Nothing to synchronize
                 } else {
-                    final Message[] all = inbox.getMessages();
-                    if (containsWarnings) {
-                        addAllMessagesToStorage(inbox, all);
-                        /*
-                         * Mark messages as \Deleted
-                         */
-                        for (int i = 0; i < all.length; i++) {
-                            all[i].setFlags(FLAGS_DELETED, true);
-                        }
-                        doExpunge = true;
-                    } else {
-                        // Initiate UIDL fetch
-                        final long start = System.currentTimeMillis();
-                        inbox.fetch(all, FETCH_PROFILE_UID);
-                        MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                        // Get UIDL from each message
-                        final String[] uidlsFromPOP3 = new String[all.length];
-                        for (int i = 0; i < all.length; i++) {
-                            uidlsFromPOP3[i] = inbox.getUID(all[i]);
-                        }
-                        /*
-                         * Create collections
-                         */
-                        final List<String> storageUIDLs = Arrays.asList(getStorageIDs());
-                        final List<String> actualUIDLs = Arrays.asList(uidlsFromPOP3);
-                        // TODO: Shall we determine & delete removed UIDLs from storage, too?
-                        /*-
-                         * 
-                        final Set<String> removedUIDLs = new HashSet<String>(storageUIDLs);
-                        removedUIDLs.removeAll(actualUIDLs);
-                        deleteMessagesFromTables(removedUIDLs, user, cid);
-                         */
-
-                        // Determine & insert new UIDLs
-                        final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
-                        newUIDLs.removeAll(storageUIDLs);
-                        addMessagesToStorage(newUIDLs, inbox, all, uidlsFromPOP3);
-
-                        if (expunge) {
+                    synchronized (inbox) {
+                        final Message[] all = inbox.getMessages();
+                        if (containsWarnings) {
+                            addAllMessagesToStorage(inbox, all);
                             /*
                              * Mark messages as \Deleted
                              */
@@ -557,16 +522,53 @@ public class MailAccountPOP3Storage implements POP3Storage {
                             }
                             doExpunge = true;
                         } else {
-                            if (Boolean.parseBoolean(properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH))) {
-                                final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
+                            // Initiate UIDL fetch
+                            final long start = System.currentTimeMillis();
+                            inbox.fetch(all, FETCH_PROFILE_UID);
+                            MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                            // Get UIDL from each message
+                            final String[] uidlsFromPOP3 = new String[all.length];
+                            for (int i = 0; i < all.length; i++) {
+                                uidlsFromPOP3[i] = inbox.getUID(all[i]);
+                            }
+                            /*
+                             * Create collections
+                             */
+                            final List<String> storageUIDLs = Arrays.asList(getStorageIDs());
+                            final List<String> actualUIDLs = Arrays.asList(uidlsFromPOP3);
+                            // TODO: Shall we determine & delete removed UIDLs from storage, too?
+                            /*-
+                             * 
+                            final Set<String> removedUIDLs = new HashSet<String>(storageUIDLs);
+                            removedUIDLs.removeAll(actualUIDLs);
+                            deleteMessagesFromTables(removedUIDLs, user, cid);
+                             */
+
+                            // Determine & insert new UIDLs
+                            final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
+                            newUIDLs.removeAll(storageUIDLs);
+                            addMessagesToStorage(newUIDLs, inbox, all, uidlsFromPOP3);
+
+                            if (expunge) {
+                                /*
+                                 * Mark messages as \Deleted
+                                 */
                                 for (int i = 0; i < all.length; i++) {
-                                    final Message message = all[i];
-                                    final String uidl = uidlsFromPOP3[i];
-                                    if (trashedUIDLs.contains(uidl)) {
-                                        message.setFlags(FLAGS_DELETED, true);
-                                    }
+                                    all[i].setFlags(FLAGS_DELETED, true);
                                 }
                                 doExpunge = true;
+                            } else {
+                                if (Boolean.parseBoolean(properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH))) {
+                                    final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
+                                    for (int i = 0; i < all.length; i++) {
+                                        final Message message = all[i];
+                                        final String uidl = uidlsFromPOP3[i];
+                                        if (trashedUIDLs.contains(uidl)) {
+                                            message.setFlags(FLAGS_DELETED, true);
+                                        }
+                                    }
+                                    doExpunge = true;
+                                }
                             }
                         }
                     }
@@ -623,34 +625,32 @@ public class MailAccountPOP3Storage implements POP3Storage {
     private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] all, final String[] uidlsFromPOP3) throws MessagingException, MailException {
         final Message[] msgs;
         final Map<Integer, String> seqnum2uidl;
-        synchronized (inbox) {
-            /*
-             * Ensure INBOX is open
-             */
-            if (!inbox.isOpen()) {
-                inbox.open(POP3Folder.READ_WRITE);
-            }
-            /*
-             * Filter new ones
-             */
-            final List<Message> toFetch = new ArrayList<Message>(newUIDLs.size());
-            seqnum2uidl = new HashMap<Integer, String>(newUIDLs.size());
-            for (int i = 0; i < all.length; i++) {
-                final Message message = all[i];
-                final String uidl = uidlsFromPOP3[i];
-                if (newUIDLs.contains(uidl)) {
-                    toFetch.add(message);
-                    seqnum2uidl.put(Integer.valueOf(message.getMessageNumber()), uidl);
-                }
-            }
-            /*
-             * Fetch ENVELOPE for new messages
-             */
-            msgs = toFetch.toArray(new Message[toFetch.size()]);
-            final long start = System.currentTimeMillis();
-            inbox.fetch(msgs, FETCH_PROFILE_ENVELOPE);
-            MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+        /*
+         * Ensure INBOX is open
+         */
+        if (!inbox.isOpen()) {
+            inbox.open(POP3Folder.READ_WRITE);
         }
+        /*
+         * Filter new ones
+         */
+        final List<Message> toFetch = new ArrayList<Message>(newUIDLs.size());
+        seqnum2uidl = new HashMap<Integer, String>(newUIDLs.size());
+        for (int i = 0; i < all.length; i++) {
+            final Message message = all[i];
+            final String uidl = uidlsFromPOP3[i];
+            if (newUIDLs.contains(uidl)) {
+                toFetch.add(message);
+                seqnum2uidl.put(Integer.valueOf(message.getMessageNumber()), uidl);
+            }
+        }
+        /*
+         * Fetch ENVELOPE for new messages
+         */
+        msgs = toFetch.toArray(new Message[toFetch.size()]);
+        final long start = System.currentTimeMillis();
+        inbox.fetch(msgs, FETCH_PROFILE_ENVELOPE);
+        MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         /*
          * Append them to storage
          */
