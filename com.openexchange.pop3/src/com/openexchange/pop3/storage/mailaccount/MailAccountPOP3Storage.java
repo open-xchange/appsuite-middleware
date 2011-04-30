@@ -72,6 +72,7 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import javax.mail.search.SearchTerm;
 import com.openexchange.mail.MailException;
@@ -680,12 +681,21 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     }
 
+    private static final FetchProfile FETCH_PROFILE_UID_AND_ENVELOPE = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(FetchProfile.Item.ENVELOPE);
+            add(UIDFolder.FetchProfileItem.UID);
+        }
+    };
+
     private void addAllMessagesToStorage(final POP3Folder inbox, final Message[] all) throws MessagingException, MailException {
         /*
          * Fetch ENVELOPE for new messages
          */
         final long start = System.currentTimeMillis();
-        inbox.fetch(all, FETCH_PROFILE_ENVELOPE);
+        inbox.fetch(all, FETCH_PROFILE_UID_AND_ENVELOPE);
         MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         /*
          * Append them to storage
