@@ -74,6 +74,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
@@ -449,18 +451,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final String className = e.getClass().getName();
             if ((null != className) && className.endsWith("MySQLIntegrityConstraintViolationException")) {
                 try {
-                    final String msg = e.getMessage();
-                    final int start = msg.indexOf('`') + 1;
-                    if (start > 0) {
-                        String tableName = msg.substring(start, msg.indexOf('`', start));
-                        final int pos = tableName.indexOf('/') + 1;
-                        if (pos > 0) {
-                            tableName = tableName.substring(pos);
-                        }
-                        if (dropReferenced(id, user, cid, tableName, con)) {
-                            deleteMailAccount(id, properties, user, cid, deletePrimary, con);
-                            return;
-                        }
+                    if (handleConstraintViolationException(e, id, user, cid, con)) {
+                        /*
+                         * Retry & return
+                         */
+                        deleteMailAccount(id, properties, user, cid, deletePrimary, con);
+                        return;
                     }
                 } catch (final RuntimeException re) {
                     LOG.debug(re.getMessage(), re);
@@ -473,6 +469,50 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } finally {
             closeSQLStuff(stmt);
         }
+    }
+
+    private static final Pattern PATTERN_CONSTRAINT_VIOLATION;
+
+    static {
+        /*
+         * Specify regex quotes
+         */
+        final String quote1 = Pattern.quote("Cannot delete or update a parent row: a foreign key constraint fails (`");
+        final String quote2 = Pattern.quote("`, CONSTRAINT `");
+        final String quote3 = Pattern.quote("` FOREIGN KEY (");
+        final String quote4 = Pattern.quote(") REFERENCES `user_mail_account` (`cid`, `user`, `id`))");
+        /*
+         * Compose pattern
+         */
+        PATTERN_CONSTRAINT_VIOLATION = Pattern.compile(quote1 + "([^`]+)" + quote2 + "[^`]+" + quote3 + "([^)]+)" + quote4);
+    }
+
+    private static boolean handleConstraintViolationException(final SQLException e, final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+        final Matcher m = PATTERN_CONSTRAINT_VIOLATION.matcher(e.getMessage());
+        if (!m.matches()) {
+            return false;
+        }
+        /*
+         * Check rows
+         */
+        final String[] rows = m.group(2).replaceAll(Pattern.quote("`"), "").split(" *, *");
+        if (rows.length != 3) {
+            return false;
+        }
+        final Set<String> set = new HashSet<String>(Arrays.asList(rows));
+        set.removeAll(Arrays.asList("cid", "user", "id"));
+        if (!set.isEmpty()) {
+            return false;
+        }
+        /*
+         * Get table name
+         */
+        String tableName = m.group(1);
+        final int pos = tableName.indexOf('/') + 1;
+        if (pos > 0) {
+            tableName = tableName.substring(pos);
+        }
+        return dropReferenced(id, user, cid, tableName, con);
     }
 
     private static boolean dropReferenced(final int id, final int user, final int cid, final String tableName, final Connection con) throws MailAccountException {
