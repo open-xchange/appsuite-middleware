@@ -484,7 +484,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         /*
          * Compose pattern
          */
-        PATTERN_CONSTRAINT_VIOLATION = Pattern.compile(quote1 + "([^`]+)" + quote2 + "[^`]+" + quote3 + "([^)]+)" + quote4);
+        PATTERN_CONSTRAINT_VIOLATION = Pattern.compile(quote1 + "([^`]+)" + quote2 + "[^`]+" + quote3 + "([^)]+)" + quote4, Pattern.CASE_INSENSITIVE);
     }
 
     private static boolean handleConstraintViolationException(final SQLException e, final int id, final int user, final int cid, final Connection con) throws MailAccountException {
