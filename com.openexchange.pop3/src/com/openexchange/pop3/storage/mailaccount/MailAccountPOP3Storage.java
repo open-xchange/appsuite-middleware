@@ -547,7 +547,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
                             // Determine & insert new UIDLs
                             final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
                             newUIDLs.removeAll(storageUIDLs);
-                            addMessagesToStorage(newUIDLs, inbox, all, uidlsFromPOP3);
+                            if (!newUIDLs.isEmpty()) {
+                                addMessagesToStorage(newUIDLs, inbox, all, uidlsFromPOP3);
+                            }
 
                             if (expunge) {
                                 /*
