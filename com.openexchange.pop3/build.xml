@@ -27,6 +27,7 @@
     <property name="commonBundle" value="com.openexchange.common"/>
     <property name="cachingBundle" value="com.openexchange.caching"/>
     <property name="configreadBundle" value="com.openexchange.configread"/>
+	<property name="activationBundle" value="javax.activation"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
@@ -39,6 +40,7 @@
     <property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
+	<property name="activationjar" value="activation-1.1.1.jar"/>
 
     <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -58,6 +60,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
+    	<pathelement location="${bundlesdir}/${activationBundle}/lib/${activationjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
