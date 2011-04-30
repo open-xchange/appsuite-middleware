@@ -86,7 +86,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccountException;
@@ -477,6 +476,14 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
+    private static final FetchProfile FETCH_PROFILE_UID = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(UIDFolder.FetchProfileItem.UID);
+        }
+    };
+
     public void syncMessages(final boolean expunge, final POP3StorageConnectCounter connectCounter) throws MailException {
         POP3Store pop3Store = null;
         try {
@@ -516,7 +523,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     } else {
                         // Initiate UIDL fetch
                         final long start = System.currentTimeMillis();
-                        inbox.fetch(all, MIMEStorageUtility.getUIDFetchProfile());
+                        inbox.fetch(all, FETCH_PROFILE_UID);
                         MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         // Get UIDL from each message
                         final String[] uidlsFromPOP3 = new String[all.length];
