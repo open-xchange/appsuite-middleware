@@ -553,7 +553,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                                 final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
                                 for (int i = 0; i < all.length; i++) {
                                     final Message message = all[i];
-                                    final String uidl = inbox.getUID(message);
+                                    final String uidl = uidlsFromPOP3[i];
                                     if (trashedUIDLs.contains(uidl)) {
                                         message.setFlags(FLAGS_DELETED, true);
                                     }
