@@ -538,7 +538,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         // Determine & insert new UIDLs
                         final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
                         newUIDLs.removeAll(storageUIDLs);
-                        addMessagesToStorage(newUIDLs, inbox, all);
+                        addMessagesToStorage(newUIDLs, inbox, all, uidlsFromPOP3);
 
                         if (expunge) {
                             /*
@@ -612,7 +612,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] all) throws MessagingException, MailException {
+    private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] all, final String[] uidlsFromPOP3) throws MessagingException, MailException {
         final Message[] msgs;
         final Map<Integer, String> seqnum2uidl;
         synchronized (inbox) {
@@ -629,7 +629,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             seqnum2uidl = new HashMap<Integer, String>(newUIDLs.size());
             for (int i = 0; i < all.length; i++) {
                 final Message message = all[i];
-                final String uidl = inbox.getUID(message);
+                final String uidl = uidlsFromPOP3[i];
                 if (newUIDLs.contains(uidl)) {
                     toFetch.add(message);
                     seqnum2uidl.put(Integer.valueOf(message.getMessageNumber()), uidl);
