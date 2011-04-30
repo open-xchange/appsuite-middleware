@@ -1835,24 +1835,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
-            synchronized (f) {
-                if (imapConfig.isSupportsACLs() && isSelectable(f)) {
-                    try {
-                        if (!imapConfig.getACLExtension().canLookUp(RightsCache.getCachedRights(f, true, session, accountId))) {
-                            throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, fullname);
-                        }
-                    } catch (final MessagingException e) {
-                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullname);
+            if (imapConfig.isSupportsACLs() && isSelectable(f)) {
+                try {
+                    if (!imapConfig.getACLExtension().canLookUp(RightsCache.getCachedRights(f, true, session, accountId))) {
+                        throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, fullname);
                     }
+                } catch (final MessagingException e) {
+                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullname);
                 }
-                final List<MailFolder> list = new ArrayList<MailFolder>();
-                final String defaultFolder = imapStore.getDefaultFolder().getFullName();
-                while (!f.getFullName().equals(defaultFolder)) {
-                    list.add(IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx));
-                    f = (IMAPFolder) f.getParent();
-                }
-                return list.toArray(new MailFolder[list.size()]);
             }
+            final List<MailFolder> list = new ArrayList<MailFolder>();
+            final String defaultFolder = "";
+            String fn;
+            while (!(fn = f.getFullName()).equals(defaultFolder)) {
+                list.add(FolderCache.getCachedFolder(fn, this));;
+                f = (IMAPFolder) f.getParent();
+            }
+            return list.toArray(new MailFolder[list.size()]);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
