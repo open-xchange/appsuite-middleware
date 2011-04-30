@@ -2,7 +2,7 @@
 
  - Bugfix #19083: Reduced execution of avoidable POP3 commands while importing POP3 messages to backing storage to avoid possibly exceeding
                   provider restrictions regarding number of executed POP3 command
- - Bugfix #18784: Trying to recover from an integrity constraint violation while deleting an external IMAP account
+ - Bugfix #18784: Trying to recover from a MySQL integrity constraint violation while deleting an external IMAP account
 
 * 2011-04-28 - thorben.betten@open-xchange.com
 
