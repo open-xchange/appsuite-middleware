@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 /**
- * {@link UnsynchronizedStringWriter} - A unsynchronized {@link java.io.StringWriter}.
+ * {@link UnsynchronizedStringWriter} - An unsynchronized {@link java.io.StringWriter}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
