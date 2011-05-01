@@ -72,7 +72,8 @@ public class UnsynchronizedStringWriter extends StringWriter {
     /**
      * Create a new string writer, using the specified initial string-buffer size.
      * 
-     * @param initialSize an int specifying the initial size of the buffer.
+     * @param initialSize A non-negative <code>int</code> specifying the initial size of the buffer.
+     * @throws IllegalArgumentException If initial size is negative
      */
     public UnsynchronizedStringWriter(final int initialSize) {
         if (initialSize < 0) {
@@ -86,6 +87,7 @@ public class UnsynchronizedStringWriter extends StringWriter {
      * Create a new string writer, using the specified string builder.
      * 
      * @param buf The string builder to use
+     * @throws IllegalArgumentException If given string builder is <code>null</code>
      */
     public UnsynchronizedStringWriter(final StringBuilder buf) {
         if (null == buf) {
