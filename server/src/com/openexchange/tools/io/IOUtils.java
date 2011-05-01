@@ -117,12 +117,13 @@ public final class IOUtils {
      * @param out some output stream
      * @throws IOException if some problem occurs.
      */
-    public static void transfer(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[4096];
+    public static void transfer(final InputStream in, final OutputStream out) throws IOException {
+        final byte[] buffer = new byte[4096];
         int length = -1;
         while ((length = in.read(buffer)) != -1) {
             out.write(buffer, 0, length);
         }
         out.flush();
     }
+
 }
