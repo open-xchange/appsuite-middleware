@@ -111,6 +111,7 @@ public class UnsynchronizedStringWriter extends StringWriter {
      * @param cbuf Array of characters
      * @param off Offset from which to start writing characters
      * @param len Number of characters to write
+     * @throws IndexOutOfBoundsException If invalid offset or length is specified
      */
     @Override
     public void write(final char cbuf[], final int off, final int len) {
