@@ -1,3 +1,7 @@
+* 2011-05-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #19030: Changed wording
+
 * 2011-04-30 - thorben.betten@open-xchange.com
 
  - Bugfix #19083: Reduced execution of avoidable POP3 commands while importing POP3 messages to backing storage to avoid possibly exceeding
