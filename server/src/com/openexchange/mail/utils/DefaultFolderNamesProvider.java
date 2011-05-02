@@ -61,7 +61,6 @@ import static com.openexchange.mail.utils.StorageUtility.INDEX_DRAFTS;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SENT;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_TRASH;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -264,8 +263,7 @@ public final class DefaultFolderNamesProvider {
     }
 
     private static String extractFullname(final String fullnameParameter) {
-        final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fullnameParameter);
-        return null == fa ? null : fa.getFullname();
+        return null == fullnameParameter ? null : MailFolderUtility.prepareMailFolderParam(fullnameParameter).getFullname();
     }
 
     /**
