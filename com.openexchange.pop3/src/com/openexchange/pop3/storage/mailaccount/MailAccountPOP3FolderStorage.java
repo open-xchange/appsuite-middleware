@@ -239,7 +239,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                         isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                 }
                 // INBOX
-                setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(getRealFullname("INBOX"), storage.getSeparator(), 0));
+                setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(getRealFullname("INBOX"), storage.getSeparator()));
                 // Other
                 for (int i = 0; i < defaultFolderNames.length; i++) {
                     final String realFullname;
@@ -253,8 +253,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                         if (spamHandler.isCreateConfirmedHam()) {
                             setDefaultMailFolder(i, checkDefaultFolder(
                                 realFullname,
-                                storage.getSeparator(),
-                                spamHandler.isUnsubscribeSpamFolders() ? 0 : -1));
+                                storage.getSeparator()));
                         } else if (LOG.isDebugEnabled()) {
                             LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedHam()=false");
                         }
@@ -262,13 +261,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                         if (spamHandler.isCreateConfirmedSpam()) {
                             setDefaultMailFolder(i, checkDefaultFolder(
                                 realFullname,
-                                storage.getSeparator(),
-                                spamHandler.isUnsubscribeSpamFolders() ? 0 : -1));
+                                storage.getSeparator()));
                         } else if (LOG.isDebugEnabled()) {
                             LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                         }
                     } else {
-                        setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator(), 0));
+                        setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator()));
                     }
                 }
                 setDefaultFoldersChecked(true, mailSessionCache);
@@ -276,13 +274,17 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         }
     }
 
-    private String checkDefaultFolder(final String realFullname, final char separator, final int subscribe) throws MailException {
+    private String checkDefaultFolder(final String realFullname, final char separator) throws MailException {
         /*
          * Check default folder
          */
         final String fn;
         if (delegatee.exists(realFullname)) {
             fn = realFullname;
+            /*
+             * Ensure folder is unsubscribed in primary account
+             */
+            unsubscribe(fn);
         } else {
             final MailFolderDescription description = new MailFolderDescription();
             {
@@ -292,7 +294,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
             }
             description.setSeparator(separator);
             description.setExists(false);
-            description.setSubscribed(subscribe > 0);
+            description.setSubscribed(false);
             {
                 final MailPermission mp = new DefaultMailPermission();
                 mp.setEntity(session.getUserId());
@@ -300,6 +302,9 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
             }
             fn = delegatee.createFolder(description);
         }
+        /*
+         * Return
+         */
         return stripPathFromFullname(path, fn);
     }
 
@@ -367,13 +372,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         toCreate.setParentFullname(getRealFullname(toCreate.getParentFullname()));
         toCreate.setSubscribed(false);
         final String realFullname = delegatee.createFolder(toCreate);
-        /*
-         * Be sure newly created folder is unsubscribed
-         */
-        final MailFolderDescription tmp = new MailFolderDescription();
-        tmp.setFullname(realFullname);
-        tmp.setSubscribed(false);
-        delegatee.updateFolder(realFullname, tmp);
+        unsubscribe(realFullname);
         return stripPathFromFullname(path, realFullname);
     }
 
@@ -512,6 +511,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     public MailFolder getFolder(final String fullname) throws MailException {
         final String realFullname = getRealFullname(fullname);
         final MailFolder mailFolder = delegatee.getFolder(realFullname);
+        unsubscribe(mailFolder.getFullname());
         prepareMailFolder(mailFolder);
         return mailFolder;
     }
@@ -559,8 +559,9 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
         final String parentRealFullname = getRealFullname(parentFullname);
         final MailFolder[] subfolders = delegatee.getSubfolders(parentRealFullname, true);
-        for (int i = 0; i < subfolders.length; i++) {
-            prepareMailFolder(subfolders[i]);
+        for (final MailFolder mailFolder : subfolders) {
+            unsubscribe(mailFolder.getFullname());
+            prepareMailFolder(mailFolder);
         }
         return subfolders;
     }
@@ -609,7 +610,22 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     }
 
     public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws MailException {
-        return stripPathFromFullname(path, delegatee.updateFolder(getRealFullname(fullname), toUpdate));
+        final String realFullname = getRealFullname(fullname);
+        toUpdate.setFullname(realFullname);
+        if (toUpdate.containsParentFullname()) {
+            final String realParentFullname = getRealFullname(toUpdate.getParentFullname());
+            toUpdate.setParentFullname(realParentFullname);
+        }
+        if (toUpdate.containsSubscribed()) {
+            /*
+             * POP3 does not support subscription; unsubscribe in backing primary account
+             */
+            toUpdate.setSubscribed(false);
+        }
+        if (!toUpdate.containsExists()) {
+            toUpdate.setExists(true); // Obviously
+        }
+        return stripPathFromFullname(path, delegatee.updateFolder(realFullname, toUpdate));
     }
 
     private void prepareMailFolder(final MailFolder mailFolder) throws MailException {
@@ -650,4 +666,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         }
         return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }
+
+    private void unsubscribe(final String realFullName) throws MailException {
+        final MailFolderDescription description = new MailFolderDescription();
+        description.setFullname(realFullName);
+        description.setSubscribed(false);
+        delegatee.updateFolder(realFullName, description);
+    }
+
 }
