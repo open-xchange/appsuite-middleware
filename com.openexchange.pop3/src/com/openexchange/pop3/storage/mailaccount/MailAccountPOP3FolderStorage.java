@@ -88,7 +88,7 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 
 /**
- * {@link MailAccountPOP3FolderStorage} - TODO Short description of this class' purpose.
+ * {@link MailAccountPOP3FolderStorage} - The folder storage for (primary) mail account POP3 storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
