@@ -265,7 +265,7 @@ public class AppointmentState extends LinkableState {
     public boolean onlyIrrelevantFieldsChanged(Session session, CalendarObject oldObj, CalendarObject newObj) {
         Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);
-        magicLogging(session, oldObj, newObj, differingFields);
+        //magicLogging(session, oldObj, newObj, differingFields);
         return differingFields.isEmpty();
     }
     
