@@ -51,9 +51,7 @@ package com.openexchange.tools.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -80,15 +78,15 @@ public class ServletRegistration extends DeferredRegistryRegistration<HttpServic
     private static final Class<?>[] NO_SERVICES = new Class<?>[0];
     private static final Class<?>[] CONFIGURATION_SERVICE = new Class<?>[]{ConfigurationService.class};
     
-    private String alias;
+    private final String alias;
 
-    private List<String> configKeys;
+    private final List<String> configKeys;
     
-    public ServletRegistration(BundleContext context, HttpServlet item, String alias, String...configKeys) {
+    public ServletRegistration(final BundleContext context, final HttpServlet item, final String alias, final String...configKeys) {
         this(context, item, alias, ((configKeys == null || configKeys.length == 0) ? new ArrayList<String>() : Arrays.asList(configKeys)));
     }
 
-    public ServletRegistration(BundleContext context, HttpServlet item, String alias, List<String> configKeys) {
+    public ServletRegistration(final BundleContext context, final HttpServlet item, final String alias, final List<String> configKeys) {
         super(context, HttpService.class, item, ((configKeys == null || configKeys.isEmpty()) ? NO_SERVICES : CONFIGURATION_SERVICE));
         this.alias = alias;
         this.configKeys = configKeys;
@@ -99,31 +97,42 @@ public class ServletRegistration extends DeferredRegistryRegistration<HttpServic
     }
 
     @Override
-    public void register(HttpService registry, HttpServlet item) {
+    public void register(final HttpService registry, final HttpServlet item) {
         try {
-            Dictionary<String, String> initParams = new Hashtable<String, String>();
-            ConfigurationService configurationService = getService(ConfigurationService.class);
+            final Dictionary<String, String> initParams = new Hashtable<String, String>();
+            final ConfigurationService configurationService = getService(ConfigurationService.class);
             if (configurationService != null) {
-                for(String configKey : configKeys) {
-                    initParams.put(configKey, configurationService.getProperty(configKey));
+                for(final String configKey : configKeys) {
+                    final String property = configurationService.getProperty(configKey);
+                    if (null == property) {
+                        /*
+                         * Missing initialization parameter
+                         */
+                        throw new IllegalStateException(new StringBuilder("Missing initialization parameter \"").append(configKey).append(
+                            "\". Aborting registration of servlet \"").append(item.getClass().getName()).append(
+                            "\" into the URI namespace \"").append(alias).append("\".").toString());
+                    }
+                    initParams.put(configKey, property);
                 }
             }
             customizeInitParams(initParams);
             registry.registerServlet(alias, item, initParams, null);
-        } catch (ServletException e) {
+        } catch (final ServletException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NamespaceException e) {
+        } catch (final NamespaceException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final IllegalStateException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
 
-    protected void customizeInitParams(Dictionary<String, String> initParams) {
+    protected void customizeInitParams(final Dictionary<String, String> initParams) {
         // Can be overridden
     }
 
     @Override
-    public void unregister(HttpService registry, HttpServlet item) {
+    public void unregister(final HttpService registry, final HttpServlet item) {
         registry.unregister(alias);
     }
 

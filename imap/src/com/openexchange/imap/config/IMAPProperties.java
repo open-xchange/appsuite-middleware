@@ -261,7 +261,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            String tmp = configuration.getProperty("com.openexchange.imap.maxNumExternalConnections").trim();
+            String tmp = configuration.getProperty("com.openexchange.imap.maxNumExternalConnections");
             if (null != tmp) {
                 tmp = tmp.trim();
                 if (0 == tmp.length()) {
