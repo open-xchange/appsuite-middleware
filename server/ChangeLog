@@ -1,3 +1,7 @@
+* 2011-05-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #19124: Fixed NPE on IMAP bundle start
+
 * 2011-05-02 - thorben.betten@open-xchange.com
 
  - Bugfix #19030: Changed wording
