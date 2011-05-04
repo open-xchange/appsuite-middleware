@@ -52,6 +52,8 @@ package com.openexchange.mailaccount.json.actions;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -59,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailException.Code;
 import com.openexchange.mail.MailProviderRegistry;
@@ -140,10 +143,12 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
                 final String tmp = request.getParameter("tree");
                 tree = Boolean.parseBoolean(tmp);
             }
+            // List for possible warnings
+            final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(2);
             if (tree) {
-                return new AJAXRequestResult(actionValidateTree(accountDescription, session));
+                return new AJAXRequestResult(actionValidateTree(accountDescription, session, warnings)).addWarnings(warnings);
             }
-            return new AJAXRequestResult(actionValidateBoolean(accountDescription, session));
+            return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, warnings)).addWarnings(warnings);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         } catch (final GeneralSecurityException e) {
@@ -154,8 +159,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
     }
     
-    private static JSONObject actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session) throws OXException, MailException, JSONException {
-        if (!actionValidateBoolean(accountDescription, session).booleanValue()) {
+    private static JSONObject actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws OXException, MailException, JSONException {
+        if (!actionValidateBoolean(accountDescription, session, warnings).booleanValue()) {
             // TODO: How to indicate error if folder tree requested?
             return null;
         }
@@ -164,10 +169,10 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return actionValidateTree0(mailAccess, session);
     }
 
-    private static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session) throws OXException {
+    private static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws OXException {
         try {
             // Validate mail server
-            boolean validated = checkMailServerURL(accountDescription, session);
+            boolean validated = checkMailServerURL(accountDescription, session, warnings);
             // Failed?
             if (!validated) {
                 return Boolean.FALSE;
@@ -175,7 +180,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             // Now check transport server URL, if a transport server is present
             final String transportServer = accountDescription.getTransportServer();
             if (null != transportServer && transportServer.length() > 0) {
-                validated = checkTransportServerURL(accountDescription, session);
+                validated = checkTransportServerURL(accountDescription, session, warnings);
             }
             return Boolean.valueOf(validated);
         } catch (final AbstractOXException e) {
@@ -220,7 +225,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
     }
 
-    private static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session) throws MailException {
+    private static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws MailException {
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
         if (null == mailAccess) {
@@ -230,7 +235,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return mailAccess.ping();
     }
 
-    private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session) throws MailException {
+    private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws MailException {
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
@@ -274,6 +279,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             if (DEBUG) {
                 LOG.debug("Validating transport account failed.", e);
             }
+            e.setCategory(Category.WARNING);
+            warnings.add(e);
             validated = false;
         } finally {
             if (close) {
