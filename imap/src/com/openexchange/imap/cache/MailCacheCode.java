@@ -80,7 +80,12 @@ public enum MailCacheCode {
 	/**
 	 * Folders
 	 */
-	FOLDERS(6);
+	FOLDERS(6),
+	/**
+	 * LIST/LSUB collection
+	 */
+	LIST_LSUB(7),
+	;
 
 	private final int code;
 
