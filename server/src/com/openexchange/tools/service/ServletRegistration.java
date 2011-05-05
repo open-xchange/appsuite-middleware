@@ -81,6 +81,8 @@ public class ServletRegistration extends DeferredRegistryRegistration<HttpServic
     private final String alias;
 
     private final List<String> configKeys;
+
+    private boolean registered;
     
     public ServletRegistration(final BundleContext context, final HttpServlet item, final String alias, final String...configKeys) {
         this(context, item, alias, ((configKeys == null || configKeys.length == 0) ? new ArrayList<String>() : Arrays.asList(configKeys)));
@@ -117,6 +119,7 @@ public class ServletRegistration extends DeferredRegistryRegistration<HttpServic
             }
             customizeInitParams(initParams);
             registry.registerServlet(alias, item, initParams, null);
+            registered = true;
         } catch (final ServletException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NamespaceException e) {
@@ -132,8 +135,11 @@ public class ServletRegistration extends DeferredRegistryRegistration<HttpServic
     }
 
     @Override
-    public void unregister(final HttpService registry, final HttpServlet item) {
-        registry.unregister(alias);
+    public void unregister(HttpService registry, HttpServlet item) {
+        if (registered && registry != null) {
+            registry.unregister(alias);
+        }
+        registered = false;
     }
 
 

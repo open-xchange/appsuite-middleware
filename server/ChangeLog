@@ -1,3 +1,7 @@
+* 2011-05-05 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19146: Fix NPE on shutdown.
+
 * 2011-05-05 - marcus.klein@open-xchange.com
 
  - Bugfix #19119: Corrected drive letter parameter for OXUpdater installer.
