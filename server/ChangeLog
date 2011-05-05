@@ -1,3 +1,7 @@
+* 2011-05-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #19119: Corrected drive letter parameter for OXUpdater installer.
+
 * 2011-05-04 - thorben.betten@open-xchange.com
 
  - Bugfix #19124: Fixed NPE on IMAP bundle start
