@@ -49,34 +49,48 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
+import com.openexchange.ajax.importexport.actions.ICalExportRequest;
+import com.openexchange.ajax.importexport.actions.ICalExportResponse;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * Test suite for iCal tests.
+ * {@link Bug19089Test}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public final class ICalTestSuite {
+public class Bug19089Test extends ManagedAppointmentTest {
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		tests.addTestSuite(Bug12414Test.class);
-		tests.addTestSuite(Bug12470Test.class);
-		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
-		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
-		tests.addTestSuite(Bug19089Test.class);
-		return tests;
-	}
+    private Appointment appointment;
+
+    private String tzid = "Europe/Berlin";
+
+    public Bug19089Test(String name) {
+        super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        appointment = new Appointment();
+        appointment.setStartDate(D("01.04.2011 08:00"));
+        appointment.setEndDate(D("01.04.2011 09:00"));
+        appointment.setTimezone(tzid);
+        appointment.setTitle("Test Bug 19089");
+        appointment.setParentFolderID(folder.getObjectID());
+        appointment.setIgnoreConflicts(true);
+
+        calendarManager.insert(appointment);
+    }
+
+    public void testBug19089() throws Exception {
+        ICalExportRequest request = new ICalExportRequest(folder.getObjectID());
+        ICalExportResponse response = getClient().execute(request);
+        String ical = (String) response.getData();
+        System.out.println(ical);
+        assertTrue("Export should contain a VTIMEZONE Object", ical.contains("BEGIN:VTIMEZONE"));
+    }
+
 }
