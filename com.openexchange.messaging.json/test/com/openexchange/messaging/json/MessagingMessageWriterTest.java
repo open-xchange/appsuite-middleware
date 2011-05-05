@@ -96,13 +96,14 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setId("message123");
         message.setFolder("niceFolder17");
         message.setPicture("http://www.somesite.invalid/somepic.png");
+        message.setUrl("http://www.somesite.invalid/messageid");
 
         final JSONObject messageJSON = new MessagingMessageWriter().write(message, "com.openexchange.test2://account/folder/subfolder", null, null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(2).hasKey("flags").withValue(12).hasKey(
             "receivedDate").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f�nf").inAnyOrder().hasKey(
             "size").withValue(13).hasKey("threadLevel").withValue(15).hasKey("id").withValue("message123").hasKey("folder").withValue(
-            "com.openexchange.test2://account/folder/subfolder/niceFolder17").hasKey("picture").withValue("http://www.somesite.invalid/somepic.png");
+            "com.openexchange.test2://account/folder/subfolder/niceFolder17").hasKey("picture").withValue("http://www.somesite.invalid/somepic.png").hasKey("url").withValue("http://www.somesite.invalid/messageid");
 
         assertValidates(assertion, messageJSON);
     }
@@ -303,7 +304,7 @@ public class MessagingMessageWriterTest extends TestCase {
         // Test with one header equivalent field and all non-header fields
         final MessagingField[] fields = new MessagingField[] {
             MessagingField.ID, MessagingField.FOLDER_ID, MessagingField.SUBJECT, MessagingField.SIZE, MessagingField.RECEIVED_DATE,
-            MessagingField.FLAGS, MessagingField.THREAD_LEVEL, MessagingField.COLOR_LABEL, MessagingField.BODY, MessagingField.PICTURE};
+            MessagingField.FLAGS, MessagingField.THREAD_LEVEL, MessagingField.COLOR_LABEL, MessagingField.BODY, MessagingField.PICTURE, MessagingField.URL};
 
         
         //TODO AccountName ? What is that?
@@ -317,6 +318,7 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setColorLabel(13);
         message.setContent("Supercontent!");
         message.setPicture("pic");
+        message.setUrl("http://url.tld");
         
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         headers.put("Subject", header("Subject", "the subject"));
@@ -324,7 +326,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", null, null);
 
-        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!", "pic").inStrictOrder();
+        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!", "pic", "http://url.tld").inStrictOrder();
 
         assertValidates(assertion, fieldsJSON);
     }
