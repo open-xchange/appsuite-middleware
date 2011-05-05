@@ -265,7 +265,7 @@ public class AppointmentState extends LinkableState {
     public boolean onlyIrrelevantFieldsChanged(Session session, CalendarObject oldObj, CalendarObject newObj) {
         Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);
-        //magicLogging(session, oldObj, newObj, differingFields);
+        magicLogging(session, oldObj, newObj, differingFields);
         return differingFields.isEmpty();
     }
     
@@ -284,7 +284,7 @@ public class AppointmentState extends LinkableState {
         if (differingFields.isEmpty())
             return;
         
-        if (session.getContextId() == 1 && session.getUserId() == 3) {
+        if (session.getContextId() == 1 && (session.getUserId() == 3 || session.getUserId() == 82)) {
             StringBuilder sb = new StringBuilder();
             sb.append("Magic Logging");
             for (int i : differingFields) {
