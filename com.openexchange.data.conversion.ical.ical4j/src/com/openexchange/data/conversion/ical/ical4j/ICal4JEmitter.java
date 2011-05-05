@@ -54,9 +54,15 @@ import java.io.OutputStream;
 import java.util.List;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.ValidationException;
+import net.fortuna.ical4j.model.component.Observance;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.Method;
@@ -70,8 +76,10 @@ import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.ITipContainer;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
@@ -87,6 +95,7 @@ public class ICal4JEmitter implements ICalEmitter {
         for(final Appointment appointment : appointmentObjects) {
             final VEvent event = createEvent(i++, appointment, ctx, errors, warnings);
             calendar.getComponents().add(event);
+            addVTimeZone(calendar, appointment);
         }
         return calendar.toString();
     }
@@ -96,6 +105,7 @@ public class ICal4JEmitter implements ICalEmitter {
         initCalendar(calendar);
         final VEvent event = createEvent(0, appointment, ctx, errors, warnings);
         calendar.getComponents().add(event);
+        addVTimeZone(calendar, appointment);
         return calendar.toString();
     }
 
@@ -194,7 +204,22 @@ public class ICal4JEmitter implements ICalEmitter {
         
         final VEvent event = createEvent(getAndIncreaseIndex(session), appointment,ctx, errors, warnings, iTip);
         calendar.getComponents().add(event);
+        addVTimeZone(calendar, appointment);
         return new ICal4jItem(event);
+    }
+    
+    private void addVTimeZone(Calendar calendar, Appointment appointment) {
+        if (appointment.getTimezone() != null && !appointment.getTimezone().trim().equals("")) {
+            String tzid = appointment.getTimezone().trim();
+            for (Object o : calendar.getComponents(Component.VTIMEZONE)) {
+                Component vtzComponent = (Component) o;
+                if (vtzComponent.getProperty(Property.TZID).getValue().equalsIgnoreCase(tzid)) {
+                    return;
+                }
+            }
+            VTimeZone vTimeZone = EmitterTools.getTimeZoneRegistry().getTimeZone(tzid).getVTimeZone();
+            calendar.getComponents().add(vTimeZone);
+        }
     }
 
     public ICalItem writeAppointment(final ICalSession session,

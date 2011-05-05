@@ -173,4 +173,8 @@ public final class EmitterTools {
     public static void setCalendarCollection(final CalendarCollectionService calendarCollection) {
         EmitterTools.calendarCollection = calendarCollection;
     }
+    
+    public static TimeZoneRegistry getTimeZoneRegistry() {
+        return timeZoneRegistry;
+    }
 }
