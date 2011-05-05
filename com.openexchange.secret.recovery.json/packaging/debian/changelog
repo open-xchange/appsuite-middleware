@@ -1,3 +1,9 @@
+open-xchange-secret-recovery-json (6.18.2.0-29) unstable; urgency=low
+
+  * Public PTF 2011-04-14
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Thu, 05 May 2011 15:34:41 +0000
+
 open-xchange-secret-recovery-json (6.18.2.0-28) unstable; urgency=low
 
   * build for public ptf 2011-04-14
