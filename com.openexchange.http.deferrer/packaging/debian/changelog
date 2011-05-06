@@ -1,0 +1,5 @@
+open-xchange-messaging-json (6.20.0.0-0) unstable; urgency=low
+
+  * Initial release.
+
+ -- Francisco Laguna <francisco.laguna@open-xchange.com>  Sat, 07 Jan 2011 00:01:15 +0200
