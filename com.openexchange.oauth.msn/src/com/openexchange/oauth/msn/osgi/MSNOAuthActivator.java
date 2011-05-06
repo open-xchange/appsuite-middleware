@@ -52,6 +52,7 @@ package com.openexchange.oauth.msn.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.msn.OAuthServiceMetaDataMSNImpl;
@@ -67,7 +68,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public class MSNOAuthActivator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class };
+    private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class };
 
     private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
 
@@ -89,7 +90,7 @@ public class MSNOAuthActivator extends HousekeepingActivator {
         ConfigurationService config = getService(ConfigurationService.class);
         oauthService = getService(OAuthService.class);
 
-        oAuthMetadata = new OAuthServiceMetaDataMSNImpl(config.getProperty(API_KEY), config.getProperty(API_SECRET));
+        oAuthMetadata = new OAuthServiceMetaDataMSNImpl(config.getProperty(API_KEY), config.getProperty(API_SECRET), getService(DeferringURLService.class));
 
         registerService(OAuthServiceMetaData.class, oAuthMetadata);
         LOG.info("OAuthServiceMetaData for MSN was started");

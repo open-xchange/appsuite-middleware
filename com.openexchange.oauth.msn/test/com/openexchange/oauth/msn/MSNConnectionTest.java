@@ -69,7 +69,7 @@ public class MSNConnectionTest /*extends TestCase*/{
        String apiKey = "000000004C03D925";
        String apiSecret = "dFxbH5WdWnt3cdjqWeKaoyqm1lrNiD28";
        MSNOAuthActivator activator = new MSNOAuthActivator();
-       activator.setOAuthMetadata(new OAuthServiceMetaDataMSNImpl(apiKey, apiSecret));
+       activator.setOAuthMetadata(new OAuthServiceMetaDataMSNImpl(apiKey, apiSecret, null));
        activator.setOauthService(new MockOAuthService());
        MSNServiceImpl service = new MSNServiceImpl(activator);
        List<Contact> contacts = service.getContacts("", 0, 0, 0);
@@ -96,7 +96,7 @@ public class MSNConnectionTest /*extends TestCase*/{
         System.out.print(">>");
         String wrap_verification_code = in.nextLine();
         
-        OAuthServiceMetaDataMSNImpl metadata = new OAuthServiceMetaDataMSNImpl(clientID, clientSecret);
+        OAuthServiceMetaDataMSNImpl metadata = new OAuthServiceMetaDataMSNImpl(clientID, clientSecret, null);
         HashMap<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, wrap_verification_code);
         arguments.put(OAuthConstants.ARGUMENT_CALLBACK, callbackURL);

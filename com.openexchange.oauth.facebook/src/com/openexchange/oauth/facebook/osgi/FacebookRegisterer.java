@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
@@ -82,6 +83,8 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
     private ConfigurationService configurationService;
     private OAuthService oAuthService;
 
+    private DeferringURLService deferrer;
+
     public FacebookRegisterer(BundleContext context) {
         super();
         this.context = context;
@@ -98,7 +101,10 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
             if (obj instanceof OAuthService) {
                 oAuthService = (OAuthService) obj;
             }
-            needsRegistration = null != configurationService && null != oAuthService && registration == null;
+            if (obj instanceof DeferringURLService) {
+                deferrer = (DeferringURLService) obj;
+            }
+            needsRegistration = null != configurationService && null != oAuthService && deferrer != null && registration == null;
         } finally {
             lock.unlock();
         }
@@ -106,7 +112,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
             LOG.info("Registering Facebook MetaData service.");
             LOG.info("Parameter com.openexchange.facebook.apiKey : " + configurationService.getProperty("com.openexchange.facebook.apiKey"));
             LOG.info("Parameter com.openexchange.facebook.secretKey :" + configurationService.getProperty("com.openexchange.facebook.secretKey"));
-            OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(configurationService);
+            OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(configurationService, deferrer);
             registration = context.registerService(OAuthServiceMetaData.class.getName(),
                 facebookMetaDataService, null);
             LOG.info("Registering Facebook service.");

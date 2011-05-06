@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
@@ -75,14 +76,16 @@ import com.openexchange.oauth.OAuthToken;
 public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData {    
     
     private ConfigurationService configurationService;
+    private DeferringURLService deferrer;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataFacebookImpl}.
      * @param configurationService
      */
-    public OAuthServiceMetaDataFacebookImpl(ConfigurationService configurationService) {
+    public OAuthServiceMetaDataFacebookImpl(ConfigurationService configurationService, DeferringURLService deferrer) {
         super();
         this.configurationService=configurationService;        
+        this.deferrer = deferrer;
     }
 
     @Override
@@ -112,6 +115,14 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public String getScope() {
         return "offline_access,publish_stream,read_stream,status_update,friends_birthday,friends_work_history,friends_about_me,friends_hometown";
     }
+    
+    @Override
+    public String modifyCallbackURL(String callbackUrl) {
+        if (deferrer == null) {
+            return callbackUrl;
+        }
+        return deferrer.getDeferredURL(callbackUrl);
+    }
 
     public String processAuthorizationURL(final String authUrl) {
         final String removeMe = "response_type=token&";
@@ -124,7 +135,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) {
         final String code = parameter.get("code");
         arguments.put(OAuthConstants.ARGUMENT_PIN, code);
-        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, state.get(OAuthConstants.ARGUMENT_CALLBACK));
+        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL((String)state.get(OAuthConstants.ARGUMENT_CALLBACK)));
     }
 
     @Override

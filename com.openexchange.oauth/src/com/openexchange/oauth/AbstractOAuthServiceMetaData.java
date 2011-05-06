@@ -148,4 +148,8 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }
+    
+    public String modifyCallbackURL(String callbackUrl) {
+        return callbackUrl;
+    }
 }

@@ -213,7 +213,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OAuthException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl) throws OAuthException {
         try {
             final OAuthServiceMetaData metaData = registry.getService(serviceMetaData);
             /*
@@ -222,6 +222,10 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             OAuthInteraction interaction = metaData.initOAuth(callbackUrl);
             if (interaction != null)  {
                 return interaction;
+            }
+            String modifiedUrl = metaData.modifyCallbackURL(callbackUrl);
+            if (modifiedUrl != null) {
+                callbackUrl = modifiedUrl;
             }
             final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
             final Token scribeToken;

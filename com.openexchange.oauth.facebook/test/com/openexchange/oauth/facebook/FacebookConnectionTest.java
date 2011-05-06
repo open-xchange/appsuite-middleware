@@ -79,7 +79,7 @@ public class FacebookConnectionTest  extends TestCase {
     @Override
     public void setUp(){
         final Activator activator = new Activator();
-        facebook = new FacebookServiceImpl(new MockOAuthService(), new OAuthServiceMetaDataFacebookImpl(null));        
+        facebook = new FacebookServiceImpl(new MockOAuthService(), new OAuthServiceMetaDataFacebookImpl(null, null));        
     }
     
     private static final String NETWORK_NAME = "Facebook";

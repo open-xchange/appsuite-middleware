@@ -60,6 +60,7 @@ import java.net.URLEncoder;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
@@ -82,16 +83,22 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
     private static final Object REFRESH_TOKEN_KEY = "wrap_refresh_token";
 
-    public OAuthServiceMetaDataMSNImpl(String apiKey, String apiSecret) {
+    private DeferringURLService deferrer;
+
+    public OAuthServiceMetaDataMSNImpl(String apiKey, String apiSecret, DeferringURLService deferrer) {
         setId("com.openexchange.oauth.msn");
         setApiKey(apiKey);
         setApiSecret(apiSecret);
         setDisplayName("WindowsLive / MSN");
+        this.deferrer = deferrer;
     }
 
     @Override
     public OAuthInteraction initOAuth(String callbackUrl) throws OAuthException {
         try {
+            if (deferrer != null) {
+                callbackUrl = deferrer.getDeferredURL(callbackUrl);
+            }
             final String authUrl = new StringBuilder("https://consent.live.com/connect.aspx?wrap_client_id=").append(getAPIKey()).append(
                 "&wrap_callback=").append(URLEncoder.encode(callbackUrl, "UTF-8")).append(
                 "&wrap_client_state=js_close_window&mkt=en-us&wrap_scope=WL_Profiles.View,WL_Contacts.View,Messenger.SignIn").toString();

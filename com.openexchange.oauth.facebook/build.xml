@@ -34,7 +34,8 @@
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="configreadjar" value="com.openexchange.configread.jar"/>
     <property name="oauthjar" value="com.openexchange.oauth.jar" />
-	
+	<property name="deferjar" value="com.openexchange.http.deferrer.jar" />
+
     <property name="jsonjar" value="json.jar"/>
 
     <!-- Third party libs -->
@@ -51,6 +52,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
         <pathelement location="${bundlesdir}/${oauthjar}"/>
+        <pathelement location="${bundlesdir}/${deferjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     	
     	<fileset refid="3rdpartyjars"/>

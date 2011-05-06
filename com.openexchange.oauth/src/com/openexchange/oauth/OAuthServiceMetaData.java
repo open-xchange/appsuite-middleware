@@ -136,5 +136,12 @@ public interface OAuthServiceMetaData {
      * @return
      */
     OAuthInteraction initOAuth(String callbackUrl) throws OAuthException;
+
+    /**
+     * Gives the strategy the opportunity to modify a callback URL.
+     * @param callbackUrl
+     * @return the modified callback URL
+     */
+    String modifyCallbackURL(String callbackUrl);
     
 }
