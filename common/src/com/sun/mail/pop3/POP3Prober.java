@@ -68,6 +68,8 @@ public final class POP3Prober {
 
     private final List<Exception> warnings;
 
+    private final int total;
+
     /**
      * Initializes a new {@link POP3Prober}.
      * 
@@ -78,8 +80,27 @@ public final class POP3Prober {
      */
     public POP3Prober(final POP3Store pop3Store, final POP3Folder pop3Folder) throws IOException, MessagingException {
         super();
-        protocol = (0 == pop3Folder.getMessageCount() ? null : pop3Store.getPort(pop3Folder));
+        total = pop3Folder.getMessageCount();
+        protocol = (0 == total ? null : pop3Store.getPort(pop3Folder));
         warnings = new ArrayList<Exception>(2);
+    }
+
+    /**
+     * Gets the UIDLs of contained messages.
+     * 
+     * @return The UIDLs
+     */
+    public String[] getUIDLs() {
+        try {
+            final String[] uids = new String[total];
+            if (!protocol.uidl(uids)) {
+                return null;
+            }
+            return uids;
+        } catch (final IOException e) {
+            warnings.add(e);
+            return null;
+        }
     }
 
     /**
