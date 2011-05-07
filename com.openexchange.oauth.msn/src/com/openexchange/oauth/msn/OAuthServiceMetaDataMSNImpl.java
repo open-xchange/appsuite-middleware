@@ -132,7 +132,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             LOG.error("No wrap_verification_code present.");
         }
         arguments.put(OAuthConstants.ARGUMENT_PIN, verifier);
-        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, state.get(OAuthConstants.ARGUMENT_CALLBACK));
+        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, deferrer.getDeferredURL((String) state.get(OAuthConstants.ARGUMENT_CALLBACK)));
         super.processArguments(arguments, parameter, state);
     }
 
