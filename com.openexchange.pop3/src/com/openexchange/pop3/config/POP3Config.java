@@ -77,7 +77,7 @@ public final class POP3Config extends MailConfig {
 
     private boolean secure;
 
-    private IMailProperties mailProperties;
+    private IPOP3Properties mailProperties;
 
     private InetAddress pop3ServerAddress;
 
@@ -197,6 +197,11 @@ public final class POP3Config extends MailConfig {
 
     @Override
     public void setMailProperties(final IMailProperties mailProperties) {
-        this.mailProperties = mailProperties;
+        this.mailProperties = (IPOP3Properties) mailProperties;
     }
+
+    public IPOP3Properties getPOP3Properties() {
+        return mailProperties;
+    }
+
 }

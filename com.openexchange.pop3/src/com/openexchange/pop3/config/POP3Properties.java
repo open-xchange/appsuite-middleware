@@ -92,6 +92,8 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
 
     private int pop3TemporaryDown;
 
+    private int pop3BlockSize;
+
     private String pop3AuthEnc;
 
     private String spamHandlerName;
@@ -148,6 +150,24 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         }
 
         {
+            final String tmp = configuration.getProperty("com.openexchange.pop3.pop3BlockSize", "100").trim();
+            try {
+                pop3BlockSize = Integer.parseInt(tmp);
+                if (pop3BlockSize <= 0) {
+                    pop3BlockSize = 100;
+                    logBuilder.append("\tPOP3 Block Size: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
+                        pop3BlockSize).append('\n');
+                } else {
+                    logBuilder.append("\tPOP3 Block Size: ").append(pop3BlockSize).append('\n');
+                }
+            } catch (final NumberFormatException e) {
+                pop3BlockSize = 100;
+                logBuilder.append("\tPOP3 Block Size: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
+                    pop3BlockSize).append('\n');
+            }
+        }
+
+        {
             final String tmp = configuration.getProperty("com.openexchange.pop3.pop3ConnectionIdleTime", "300000").trim();
             try {
                 pop3ConnectionIdleTime = Integer.parseInt(tmp);
@@ -187,6 +207,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         pop3TemporaryDown = 0;
         pop3AuthEnc = null;
         spamHandlerName = null;
+        pop3BlockSize = 100;
     }
 
     public String getPOP3AuthEnc() {
@@ -207,6 +228,10 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
 
     public int getPOP3Timeout() {
         return pop3Timeout;
+    }
+
+    public int getPOP3BlockSize() {
+        return pop3BlockSize;
     }
 
     /**

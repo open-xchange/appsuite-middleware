@@ -1,3 +1,7 @@
+* 2011-05-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #19156: Introduced batch-wise processing of a POP3 account's messages
+
 * 2011-05-07 - francisco.laguna@open-xchange.com
 
  - Bugfix #19088: Add possibility to use a deferrer step in multidomain setups even when API keys are configured to use a single domain.

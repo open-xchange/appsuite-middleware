@@ -52,6 +52,7 @@ package com.openexchange.pop3.storage.mailaccount;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,6 +65,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import javax.mail.Address;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -106,6 +108,7 @@ import com.openexchange.pop3.storage.mailaccount.util.Utility;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
+import com.sun.mail.pop3.POP3Message;
 import com.sun.mail.pop3.POP3Store;
 
 /**
@@ -150,11 +153,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
         {
             String tmp = properties.getProperty(POP3StoragePropertyNames.PROPERTY_PATH);
             if (null == tmp) {
-                final POP3Exception e =
-                    new POP3Exception(
-                        POP3Exception.Code.MISSING_PATH,
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()));
+                final POP3Exception e = new POP3Exception(
+                    POP3Exception.Code.MISSING_PATH,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
                 LOG.warn("Path is null. Error: " + e.getMessage(), e);
                 // Try to compose path
                 tmp = composeUniquePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
@@ -183,8 +185,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
             final int pos = trashFullname.lastIndexOf(sep);
             final String accountName;
             try {
-                final MailAccountStorageService storageService =
-                    POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
+                    MailAccountStorageService.class,
+                    true);
                 accountName = stripSpecials(storageService.getMailAccount(pop3AccountId, user, cid).getName());
             } catch (final ServiceException e) {
                 throw new MailException(e);
@@ -427,8 +430,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public IMailMessageStorage getMessageStorage() throws MailException {
         if (null == messageStorage) {
-            messageStorage =
-                new MailAccountPOP3MessageStorage(defaultMailAccess.getMessageStorage(), this, pop3AccountId, pop3Access.getSession());
+            messageStorage = new MailAccountPOP3MessageStorage(
+                defaultMailAccess.getMessageStorage(),
+                this,
+                pop3AccountId,
+                pop3Access.getSession());
         }
         return messageStorage;
     }
@@ -487,13 +493,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
     public void syncMessages(final boolean expunge, final POP3StorageConnectCounter connectCounter) throws MailException {
         POP3Store pop3Store = null;
         try {
-            final POP3StoreResult result =
-                POP3StoreConnector.getPOP3Store(
-                    pop3Access.getPOP3Config(),
-                    pop3Access.getMailProperties(),
-                    false,
-                    pop3Access.getSession(),
-                    !expunge);
+            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(
+                pop3Access.getPOP3Config(),
+                pop3Access.getMailProperties(),
+                false,
+                pop3Access.getSession(),
+                !expunge);
             pop3Store = result.getPop3Store();
             final boolean containsWarnings = result.containsWarnings();
             if (containsWarnings) {
@@ -504,75 +509,82 @@ public class MailAccountPOP3Storage implements POP3Storage {
              */
             connectCounter.incrementCounter();
             final POP3Folder inbox = (POP3Folder) pop3Store.getFolder("INBOX");
-            inbox.open(POP3Folder.READ_WRITE);
             boolean doExpunge = false;
+            /*
+             * Get message count
+             */
+            final int messageCount;
+            final String[] uidlsFromPOP3;
+            inbox.open(POP3Folder.READ_WRITE);
             try {
-                if (0 == inbox.getMessageCount()) {
-                    // Nothing to synchronize
-                } else {
-                    synchronized (inbox) {
+                synchronized (inbox) {
+                    messageCount = inbox.getMessageCount();
+                    /*
+                     * Empty?
+                     */
+                    if (0 == messageCount) {
+                        // Nothing to synchronize
+                        return;
+                    }
+                    final Vector<POP3Message> messageCache = getMessageCache(inbox);
+                    {
+                        /*
+                         * The current UIDLs
+                         */
                         final Message[] all = inbox.getMessages();
-                        if (containsWarnings) {
-                            addAllMessagesToStorage(inbox, all);
-                            /*
-                             * Mark messages as \Deleted
-                             */
-                            for (int i = 0; i < all.length; i++) {
-                                all[i].setFlags(FLAGS_DELETED, true);
+                        final long startMillis = System.currentTimeMillis();
+                        inbox.fetch(all, FETCH_PROFILE_UID);
+                        MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - startMillis);
+                        uidlsFromPOP3 = new String[all.length];
+                        for (int i = 0; i < all.length; i++) {
+                            uidlsFromPOP3[i] = inbox.getUID(all[i]);
+                        }
+                        messageCache.clear();
+                        messageCache.setSize(messageCount);
+                    }
+                    /*
+                     * Create sequence-number to UIDL map
+                     */
+                    final Map<Integer, String> seqnum2uidl = new HashMap<Integer, String>(uidlsFromPOP3.length);
+                    for (int i = 0; i < uidlsFromPOP3.length; i++) {
+                        seqnum2uidl.put(Integer.valueOf(i + 1), uidlsFromPOP3[i]);
+                    }
+                    /*
+                     * Block-wise processing
+                     */
+                    final int blockSize = pop3Access.getPOP3Config().getPOP3Properties().getPOP3BlockSize();
+                    final int bz = blockSize > messageCount ? messageCount : blockSize;
+                    int start = 1;
+                    while (start <= messageCount) {
+                        final int num = add2Storage(inbox, start, bz, containsWarnings, messageCount, seqnum2uidl);
+                        start += num;
+                        messageCache.clear();
+                        messageCache.setSize(messageCount);
+                    }
+                    /*
+                     * Expunge if necessary
+                     */
+                    final boolean dwt = Boolean.parseBoolean(properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH));
+                    if (containsWarnings || expunge || dwt) {
+                        /*
+                         * Expunge all messages
+                         */
+                        final Message[] messages = inbox.getMessages();
+                        if (dwt) {
+                            final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
+                            for (int i = 0; i < messages.length; i++) {
+                                final Message message = messages[i];
+                                final String uidl = uidlsFromPOP3[i];
+                                if (trashedUIDLs.contains(uidl)) {
+                                    message.setFlags(FLAGS_DELETED, true);
+                                }
                             }
-                            doExpunge = true;
                         } else {
-                            // Initiate UIDL fetch
-                            final long start = System.currentTimeMillis();
-                            inbox.fetch(all, FETCH_PROFILE_UID);
-                            MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                            // Get UIDL from each message
-                            final String[] uidlsFromPOP3 = new String[all.length];
-                            for (int i = 0; i < all.length; i++) {
-                                uidlsFromPOP3[i] = inbox.getUID(all[i]);
-                            }
-                            /*
-                             * Create collections
-                             */
-                            final List<String> storageUIDLs = Arrays.asList(getStorageIDs());
-                            final List<String> actualUIDLs = Arrays.asList(uidlsFromPOP3);
-                            // TODO: Shall we determine & delete removed UIDLs from storage, too?
-                            /*-
-                             * 
-                            final Set<String> removedUIDLs = new HashSet<String>(storageUIDLs);
-                            removedUIDLs.removeAll(actualUIDLs);
-                            deleteMessagesFromTables(removedUIDLs, user, cid);
-                             */
-
-                            // Determine & insert new UIDLs
-                            final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
-                            newUIDLs.removeAll(storageUIDLs);
-                            if (!newUIDLs.isEmpty()) {
-                                addMessagesToStorage(newUIDLs, inbox, all, uidlsFromPOP3);
-                            }
-
-                            if (expunge) {
-                                /*
-                                 * Mark messages as \Deleted
-                                 */
-                                for (int i = 0; i < all.length; i++) {
-                                    all[i].setFlags(FLAGS_DELETED, true);
-                                }
-                                doExpunge = true;
-                            } else {
-                                if (Boolean.parseBoolean(properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH))) {
-                                    final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
-                                    for (int i = 0; i < all.length; i++) {
-                                        final Message message = all[i];
-                                        final String uidl = uidlsFromPOP3[i];
-                                        if (trashedUIDLs.contains(uidl)) {
-                                            message.setFlags(FLAGS_DELETED, true);
-                                        }
-                                    }
-                                    doExpunge = true;
-                                }
+                            for (int i = 0; i < messages.length; i++) {
+                                messages[i].setFlags(FLAGS_DELETED, true);
                             }
                         }
+                        doExpunge = true;
                     }
                 }
             } finally {
@@ -582,21 +594,24 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     }
                 } catch (final Exception e) {
                     final POP3Config pop3Config = pop3Access.getPOP3Config();
-                    if (doExpunge) {
-                        LOG.warn("POP3 mailbox " + pop3Config.getServer() + " could not be expunged for login " + pop3Config.getLogin(), e);
-                    } else {
-                        LOG.debug("POP3 mailbox " + pop3Config.getServer() + " could not be closed for login " + pop3Config.getLogin(), e);
-                    }
+                    LOG.warn(
+                        "POP3 mailbox " + pop3Config.getServer() + " could not be expunged/closed for login " + pop3Config.getLogin(),
+                        e);
                 }
+                // Trashed UIDLs not needed anymore
                 if (doExpunge) {
-                    // Trashed UIDLs not needed anymore
                     getTrashContainer().clear();
                 }
             }
         } catch (final MessagingException e) {
-            final MailException e1 = MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession());
-            LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
-            warnings.add(e1);
+            final Exception nested = e.getNextException();
+            if (nested instanceof IOException) {
+                LOG.warn("Connect to POP3 account failed: " + nested.getMessage(), nested);
+                warnings.add(new MailException(MailException.Code.IO_ERROR, nested, nested.getMessage()));
+            } else {
+                LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+                warnings.add(MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession()));
+            }
         } catch (final MailException e) {
             if (MIMEMailException.Code.LOGIN_FAILED.getNumber() == e.getDetailNumber() || MIMEMailException.Code.INVALID_CREDENTIALS.getNumber() == e.getDetailNumber()) {
                 throw e;
@@ -616,6 +631,57 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     }
 
+    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final Map<Integer, String> seqnum2uidl) throws MessagingException, MailException {
+        final int retval; // The number of messages added to storage
+        final int end;  // The ending sequence number (inclusive)
+        {
+            final int startIndex = start - 1;
+            final int remaining = messageCount - startIndex;
+            if (remaining >= len) {
+                end = startIndex + len;
+                retval = len;
+            } else {
+                end = messageCount;
+                retval = remaining;
+            }
+        }
+        /*-
+         * From JavaDoc for javax.mail.Folder.getMessages():
+         * 
+         * Folder implementations are expected to provide light-weight Message objects, which get filled on demand.
+         */
+        final Message[] messages = inbox.getMessages(start, end);
+        if (containsWarnings) {
+            addAllMessagesToStorage(inbox, messages);
+        } else {
+            final List<String> storageUIDLs = Arrays.asList(getStorageIDs());
+            // Get UIDL for each message
+            final String[] uidlsFromPOP3 = new String[messages.length];
+            for (int i = 0; i < messages.length; i++) {
+                uidlsFromPOP3[i] = seqnum2uidl.get(Integer.valueOf(messages[i].getMessageNumber()));
+            }
+            /*
+             * Create collection
+             */
+            final List<String> actualUIDLs = Arrays.asList(uidlsFromPOP3);
+            // TODO: Shall we determine & delete removed UIDLs from storage, too?
+            /*-
+             * 
+            final Set<String> removedUIDLs = new HashSet<String>(storageUIDLs);
+            removedUIDLs.removeAll(actualUIDLs);
+            deleteMessagesFromTables(removedUIDLs, user, cid);
+             */
+
+            // Determine & insert new UIDLs
+            final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
+            newUIDLs.removeAll(storageUIDLs);
+            if (!newUIDLs.isEmpty()) {
+                addMessagesToStorage(newUIDLs, inbox, messages, uidlsFromPOP3);
+            }
+        }
+        return retval;
+    }
+
     private static final FetchProfile FETCH_PROFILE_ENVELOPE = new FetchProfile() {
 
         // Unnamed block
@@ -624,7 +690,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] all, final String[] uidlsFromPOP3) throws MessagingException, MailException {
+    private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] messages, final String[] uidlsFromPOP3) throws MessagingException, MailException {
         final Message[] msgs;
         final Map<Integer, String> seqnum2uidl;
         /*
@@ -638,8 +704,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
          */
         final List<Message> toFetch = new ArrayList<Message>(newUIDLs.size());
         seqnum2uidl = new HashMap<Integer, String>(newUIDLs.size());
-        for (int i = 0; i < all.length; i++) {
-            final Message message = all[i];
+        for (int i = 0; i < messages.length; i++) {
+            final Message message = messages[i];
             final String uidl = uidlsFromPOP3[i];
             if (newUIDLs.contains(uidl)) {
                 toFetch.add(message);
@@ -665,29 +731,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             mm.setMailId(seqnum2uidl.get(Integer.valueOf(message.getMessageNumber())));
             toAppend.add(mm);
         }
-        /*
-         * First try batch append operation
-         */
-        final MailAccountPOP3MessageStorage pop3MessageStorage = (MailAccountPOP3MessageStorage) getMessageStorage();
-        try {
-            pop3MessageStorage.appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
-        } catch (final MailException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Batch append operation to POP3 storage failed: " + e.getMessage(), e);
-            }
-            /*
-             * Retry one-by-one. Handling each mail message.
-             */
-            final MailMessage[] arr = new MailMessage[1];
-            for (final MailMessage mailMessage : toAppend) {
-                try {
-                    arr[0] = mailMessage;
-                    pop3MessageStorage.appendPOP3Messages(arr);
-                } catch (final MailException inner) {
-                    LOG.warn("POP3 message could not be appended to POP3 storage: " + inner.getMessage(), inner);
-                }
-            }
-        }
+        doBatchAppendWithFallback(toAppend);
     }
 
     private static final FetchProfile FETCH_PROFILE_UID_AND_ENVELOPE = new FetchProfile() {
@@ -701,7 +745,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private void addAllMessagesToStorage(final POP3Folder inbox, final Message[] all) throws MessagingException, MailException {
         /*
-         * Fetch ENVELOPE for new messages
+         * Fetch UID & ENVELOPE
          */
         final long start = System.currentTimeMillis();
         inbox.fetch(all, FETCH_PROFILE_UID_AND_ENVELOPE);
@@ -713,6 +757,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
         for (int i = 0; i < all.length; i++) {
             toAppend.add(MIMEMessageConverter.convertMessage((MimeMessage) all[i]));
         }
+        doBatchAppendWithFallback(toAppend);
+    }
+
+    private void doBatchAppendWithFallback(final List<MailMessage> toAppend) throws MailException {
         /*
          * First try batch append operation
          */
@@ -761,6 +809,49 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private String getRealFullname(final String fullname) throws MailException {
         return Utility.prependPath2Fullname(path, getSeparator(), fullname);
+    }
+
+    private static Message[] subarray(final Message[] messages, final int fromIndex, final int toIndex) {
+        if (fromIndex < 0) {
+            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
+        }
+        if (toIndex > messages.length) {
+            throw new IndexOutOfBoundsException("toIndex = " + toIndex);
+        }
+        if (fromIndex > toIndex) {
+            throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
+        }
+        final int len = toIndex - fromIndex;
+        final Message[] subarray = new Message[len];
+        System.arraycopy(messages, fromIndex, subarray, 0, len);
+        return subarray;
+    }
+
+    private static Message[] subarray(final Message[] messages, final int fromIndex) {
+        if (fromIndex < 0) {
+            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
+        }
+        final int len = messages.length - fromIndex;
+        final Message[] subarray = new Message[len];
+        System.arraycopy(messages, fromIndex, subarray, 0, len);
+        return subarray;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Vector<POP3Message> getMessageCache(final POP3Folder inbox) throws MailException {
+        try {
+            final Field messageCacheField = POP3Folder.class.getDeclaredField("message_cache");
+            messageCacheField.setAccessible(true);
+            return (Vector<POP3Message>) messageCacheField.get(inbox);
+        } catch (final SecurityException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } catch (final IllegalArgumentException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } catch (final NoSuchFieldException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } catch (final IllegalAccessException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        }
     }
 
     private static final class NoFolderMimeMessage extends MimeMessage {

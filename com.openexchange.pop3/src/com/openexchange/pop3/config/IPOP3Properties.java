@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.pop3.config;
 
 import com.openexchange.mail.api.IMailProperties;
@@ -93,5 +92,12 @@ public interface IPOP3Properties extends IMailProperties {
      * @return The POP3 timeout in milliseconds
      */
     public int getPOP3Timeout();
+
+    /**
+     * Gets the number of messages which are allowed to be fetched at once.
+     * 
+     * @return The block size
+     */
+    public int getPOP3BlockSize();
 
 }
