@@ -632,7 +632,7 @@ public class MIMEMailException extends MailException {
             /*
              * Default case
              */
-            return new MIMEMailException(Code.MESSAGING_ERROR, e, e.getMessage());
+            return new MIMEMailException(Code.MESSAGING_ERROR, nextException, nextException.getMessage());
         } catch (final Throwable t) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(t.getMessage(), t);
