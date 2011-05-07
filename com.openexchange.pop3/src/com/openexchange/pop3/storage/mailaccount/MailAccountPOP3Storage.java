@@ -552,11 +552,14 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     /*
                      * Block-wise processing
                      */
-                    final int blockSize = pop3Access.getPOP3Config().getPOP3Properties().getPOP3BlockSize();
-                    final int bz = blockSize > messageCount ? messageCount : blockSize;
+                    final int blockSize;
+                    {
+                        final int configuredBlockSize = pop3Access.getPOP3Config().getPOP3Properties().getPOP3BlockSize();
+                        blockSize = configuredBlockSize > messageCount ? messageCount : configuredBlockSize;
+                    }
                     int start = 1;
                     while (start <= messageCount) {
-                        final int num = add2Storage(inbox, start, bz, containsWarnings, messageCount, seqnum2uidl);
+                        final int num = add2Storage(inbox, start, blockSize, containsWarnings, messageCount, seqnum2uidl);
                         start += num;
                         messageCache.clear();
                         messageCache.setSize(messageCount);
