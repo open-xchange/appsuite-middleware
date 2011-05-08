@@ -655,18 +655,14 @@ public class MailAccountPOP3Storage implements POP3Storage {
          */
         final Message[] messages = inbox.getMessages(start, end);
         if (containsWarnings) {
-            addAllMessagesToStorage(inbox, messages);
+            doBatchAppendWithFallback(inbox, messages, seqnum2uidl);
         } else {
             final List<String> storageUIDLs = Arrays.asList(getStorageIDs());
             // Get UIDL for each message
-            final String[] uidlsFromPOP3 = new String[messages.length];
+            final Set<String> newUIDLs = new HashSet<String>(messages.length);
             for (int i = 0; i < messages.length; i++) {
-                uidlsFromPOP3[i] = seqnum2uidl.get(Integer.valueOf(messages[i].getMessageNumber()));
+                newUIDLs.add(seqnum2uidl.get(Integer.valueOf(messages[i].getMessageNumber())));
             }
-            /*
-             * Create collection
-             */
-            final List<String> actualUIDLs = Arrays.asList(uidlsFromPOP3);
             // TODO: Shall we determine & delete removed UIDLs from storage, too?
             /*-
              * 
@@ -676,10 +672,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
              */
 
             // Determine & insert new UIDLs
-            final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
             newUIDLs.removeAll(storageUIDLs);
             if (!newUIDLs.isEmpty()) {
-                addMessagesToStorage(newUIDLs, inbox, messages, uidlsFromPOP3);
+                addMessagesToStorage(newUIDLs, inbox, messages, seqnum2uidl);
             }
         }
         return retval;
@@ -693,9 +688,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] messages, final String[] uidlsFromPOP3) throws MessagingException, MailException {
+    private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] messages, final Map<Integer, String> seqnum2uidl) throws MessagingException, MailException {
         final Message[] msgs;
-        final Map<Integer, String> seqnum2uidl;
         /*
          * Ensure INBOX is open
          */
@@ -706,19 +700,33 @@ public class MailAccountPOP3Storage implements POP3Storage {
          * Filter new ones
          */
         final List<Message> toFetch = new ArrayList<Message>(newUIDLs.size());
-        seqnum2uidl = new HashMap<Integer, String>(newUIDLs.size());
         for (int i = 0; i < messages.length; i++) {
             final Message message = messages[i];
-            final String uidl = uidlsFromPOP3[i];
+            final String uidl = seqnum2uidl.get(Integer.valueOf(message.getMessageNumber()));
             if (newUIDLs.contains(uidl)) {
                 toFetch.add(message);
-                seqnum2uidl.put(Integer.valueOf(message.getMessageNumber()), uidl);
             }
         }
         /*
          * Fetch ENVELOPE for new messages
          */
         msgs = toFetch.toArray(new Message[toFetch.size()]);
+        doBatchAppendWithFallback(inbox, msgs, seqnum2uidl);
+    }
+
+    private static final FetchProfile FETCH_PROFILE_UID_AND_ENVELOPE = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(FetchProfile.Item.ENVELOPE);
+            add(UIDFolder.FetchProfileItem.UID);
+        }
+    };
+
+    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final Map<Integer, String> seqnum2uidl) throws MessagingException, MailException {
+        /*
+         * Fetch ENVELOPE for new messages
+         */
         final long start = System.currentTimeMillis();
         inbox.fetch(msgs, FETCH_PROFILE_ENVELOPE);
         MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -734,36 +742,6 @@ public class MailAccountPOP3Storage implements POP3Storage {
             mm.setMailId(seqnum2uidl.get(Integer.valueOf(message.getMessageNumber())));
             toAppend.add(mm);
         }
-        doBatchAppendWithFallback(toAppend);
-    }
-
-    private static final FetchProfile FETCH_PROFILE_UID_AND_ENVELOPE = new FetchProfile() {
-
-        // Unnamed block
-        {
-            add(FetchProfile.Item.ENVELOPE);
-            add(UIDFolder.FetchProfileItem.UID);
-        }
-    };
-
-    private void addAllMessagesToStorage(final POP3Folder inbox, final Message[] all) throws MessagingException, MailException {
-        /*
-         * Fetch UID & ENVELOPE
-         */
-        final long start = System.currentTimeMillis();
-        inbox.fetch(all, FETCH_PROFILE_UID_AND_ENVELOPE);
-        MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-        /*
-         * Append them to storage
-         */
-        final List<MailMessage> toAppend = new ArrayList<MailMessage>(all.length);
-        for (int i = 0; i < all.length; i++) {
-            toAppend.add(MIMEMessageConverter.convertMessage((MimeMessage) all[i]));
-        }
-        doBatchAppendWithFallback(toAppend);
-    }
-
-    private void doBatchAppendWithFallback(final List<MailMessage> toAppend) throws MailException {
         /*
          * First try batch append operation
          */
