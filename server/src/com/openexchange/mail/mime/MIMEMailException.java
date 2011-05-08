@@ -292,7 +292,16 @@ public class MIMEMailException extends MailException {
         /**
          * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
          */
-        PROCESSING_ERROR_EXT("Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.", Category.CODE_ERROR, PROCESSING_ERROR.detailNumber);
+        PROCESSING_ERROR_EXT("Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.", Category.CODE_ERROR, PROCESSING_ERROR.detailNumber),
+        /**
+         * An I/O error occurred: %1$s
+         */
+        IO_ERROR(MailException.Code.IO_ERROR),
+        /**
+         * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
+         */
+        IO_ERROR_EXT(MailException.Code.IO_ERROR, "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for login %3$s (user=%4$s, context=%5$s)."),
+        ;
         
         private final String message;
 
@@ -304,6 +313,18 @@ public class MIMEMailException extends MailException {
             this.message = message;
             this.detailNumber = detailNumber;
             this.category = category;
+        }
+
+        private Code(final MailException.Code code, final String message) {
+            this.message = message;
+            this.detailNumber = code.getNumber();
+            this.category = code.getCategory();
+        }
+
+        private Code(final MailException.Code code) {
+            this.message = code.getMessage();
+            this.detailNumber = code.getNumber();
+            this.category = code.getCategory();
         }
 
         public Category getCategory() {
@@ -626,6 +647,18 @@ public class MIMEMailException extends MailException {
                         nextException.getMessage());
                 }
                 return new MIMEMailException(Code.PROCESSING_ERROR, e, nextException.getMessage());
+            } else if (nextException instanceof java.io.IOException) {
+                if (null != mailConfig && null != session) {
+                    return new MIMEMailException(
+                        Code.IO_ERROR_EXT,
+                        e,
+                        nextException.getMessage(),
+                        mailConfig.getServer(),
+                        mailConfig.getLogin(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()));
+                }
+                return new MIMEMailException(Code.IO_ERROR, nextException, nextException.getMessage());
             } else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
                 return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
             }
