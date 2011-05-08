@@ -636,7 +636,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final Map<Integer, String> seqnum2uidl) throws MessagingException, MailException {
         final int retval; // The number of messages added to storage
-        final int end;  // The ending sequence number (inclusive)
+        final int end; // The ending sequence number (inclusive)
         {
             final int startIndex = start - 1;
             final int remaining = messageCount - startIndex;
@@ -648,34 +648,51 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 retval = remaining;
             }
         }
+        /*
+         * Check for possible warnings. If so append messages to storage without filtering new messages.
+         */
+        if (containsWarnings) {
+            /*
+             * Append messages to storage
+             */
+            doBatchAppendWithFallback(inbox, inbox.getMessages(start, end), seqnum2uidl);
+            return retval;
+        }
         /*-
          * From JavaDoc for javax.mail.Folder.getMessages():
          * 
          * Folder implementations are expected to provide light-weight Message objects, which get filled on demand.
          */
         final Message[] messages = inbox.getMessages(start, end);
-        if (containsWarnings) {
-            doBatchAppendWithFallback(inbox, messages, seqnum2uidl);
-        } else {
-            final List<String> storageUIDLs = Arrays.asList(getStorageIDs());
-            // Get UIDL for each message
-            final Set<String> newUIDLs = new HashSet<String>(messages.length);
-            for (int i = 0; i < messages.length; i++) {
-                newUIDLs.add(seqnum2uidl.get(Integer.valueOf(messages[i].getMessageNumber())));
+        final Set<String> storageUIDLs = new HashSet<String>(Arrays.asList(getStorageIDs()));
+        /*
+         * Gather new messages
+         */
+        final List<Message> toFetch = new ArrayList<Message>(messages.length);
+        for (int i = 0; i < messages.length; i++) {
+            final Message message = messages[i];
+            final String uidl = seqnum2uidl.get(Integer.valueOf(message.getMessageNumber()));
+            if (!storageUIDLs.contains(uidl)) {
+                /*
+                 * Unknown UIDL...
+                 */
+                toFetch.add(message);
             }
-            // TODO: Shall we determine & delete removed UIDLs from storage, too?
-            /*-
-             * 
-            final Set<String> removedUIDLs = new HashSet<String>(storageUIDLs);
-            removedUIDLs.removeAll(actualUIDLs);
-            deleteMessagesFromTables(removedUIDLs, user, cid);
+        }
+        /*
+         * Append new messages to storage
+         */
+        if (!toFetch.isEmpty()) {
+            /*
+             * Ensure INBOX is open
              */
-
-            // Determine & insert new UIDLs
-            newUIDLs.removeAll(storageUIDLs);
-            if (!newUIDLs.isEmpty()) {
-                addMessagesToStorage(newUIDLs, inbox, messages, seqnum2uidl);
+            if (!inbox.isOpen()) {
+                inbox.open(POP3Folder.READ_WRITE);
             }
+            /*
+             * Do batch-append
+             */
+            doBatchAppendWithFallback(inbox, toFetch.toArray(new Message[toFetch.size()]), seqnum2uidl);
         }
         return retval;
     }
@@ -685,41 +702,6 @@ public class MailAccountPOP3Storage implements POP3Storage {
         // Unnamed block
         {
             add(FetchProfile.Item.ENVELOPE);
-        }
-    };
-
-    private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] messages, final Map<Integer, String> seqnum2uidl) throws MessagingException, MailException {
-        final Message[] msgs;
-        /*
-         * Ensure INBOX is open
-         */
-        if (!inbox.isOpen()) {
-            inbox.open(POP3Folder.READ_WRITE);
-        }
-        /*
-         * Filter new ones
-         */
-        final List<Message> toFetch = new ArrayList<Message>(newUIDLs.size());
-        for (int i = 0; i < messages.length; i++) {
-            final Message message = messages[i];
-            final String uidl = seqnum2uidl.get(Integer.valueOf(message.getMessageNumber()));
-            if (newUIDLs.contains(uidl)) {
-                toFetch.add(message);
-            }
-        }
-        /*
-         * Fetch ENVELOPE for new messages
-         */
-        msgs = toFetch.toArray(new Message[toFetch.size()]);
-        doBatchAppendWithFallback(inbox, msgs, seqnum2uidl);
-    }
-
-    private static final FetchProfile FETCH_PROFILE_UID_AND_ENVELOPE = new FetchProfile() {
-
-        // Unnamed block
-        {
-            add(FetchProfile.Item.ENVELOPE);
-            add(UIDFolder.FetchProfileItem.UID);
         }
     };
 
