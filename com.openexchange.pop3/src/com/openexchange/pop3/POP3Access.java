@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -103,7 +103,63 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
 
-    private static final ConcurrentMap<InetSocketAddress, Future<Object>> SYNCHRONIZER_MAP = new ConcurrentHashMap<InetSocketAddress, Future<Object>>();
+    private static final ConcurrentMap<LoginKey, Future<Object>> SYNCHRONIZER_MAP = new ConcurrentHashMap<LoginKey, Future<Object>>();
+
+    private static final class LoginKey {
+
+        public static LoginKey N(final InetSocketAddress server, final String login) {
+            return new LoginKey(server, login);
+        }
+
+        private final InetSocketAddress server;
+
+        private final String login;
+
+        private final int hash;
+
+        private LoginKey(final InetSocketAddress server, final String login) {
+            super();
+            this.server = server;
+            this.login = login;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((login == null) ? 0 : login.hashCode());
+            result = prime * result + ((server == null) ? 0 : server.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof LoginKey)) {
+                return false;
+            }
+            final LoginKey other = (LoginKey) obj;
+            if (login == null) {
+                if (other.login != null) {
+                    return false;
+                }
+            } else if (!login.equals(other.login)) {
+                return false;
+            }
+            if (server == null) {
+                if (other.server != null) {
+                    return false;
+                }
+            } else if (!server.equals(other.server)) {
+                return false;
+            }
+            return true;
+        }
+
+    }
 
     /*-
      * Members
@@ -160,14 +216,16 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             // At least this property must be kept in database
             String providerName = POP3StorageUtil.getPOP3StorageProviderName(pop3Access.accountId, user, cid);
             if (null == providerName) {
-                final POP3Exception e = new POP3Exception(
-                    POP3Exception.Code.MISSING_POP3_STORAGE_NAME,
-                    Integer.valueOf(user),
-                    Integer.valueOf(cid));
+                final POP3Exception e =
+                    new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
                 LOG.warn("Using fallback storage \"mailaccount\". Error: " + e.getMessage(), e);
                 providerName = MailAccountPOP3StorageProvider.NAME;
-                // Add to properties
-                POP3StorageUtil.setPOP3StorageProviderName(pop3Access.accountId, user, cid, providerName);
+                /*
+                 * Add to properties if marker is absent
+                 */
+                if (!"validate".equals(session.getParameter("mail-account.request"))) {
+                    POP3StorageUtil.setPOP3StorageProviderName(pop3Access.accountId, user, cid, providerName);
+                }
             }
             final POP3StorageProvider provider = POP3StorageProviderRegistry.getInstance().getPOP3StorageProvider(providerName);
             if (null == provider) {
@@ -202,8 +260,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private void reset() {
         super.resetFields();
-        pop3Storage = null;
-        pop3StorageProperties = null;
+        // pop3Storage = null;
+        // pop3StorageProperties = null;
         folderStorage = null;
         messageStorage = null;
         logicTools = null;
@@ -217,6 +275,15 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      */
     public Session getSession() {
         return session;
+    }
+
+    /**
+     * Gets the POP3 storage.
+     * 
+     * @return The POP3 storage
+     */
+    public POP3Storage getPOP3Storage() {
+        return pop3Storage;
     }
 
     /**
@@ -275,7 +342,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 } catch (final MailException e) {
                     LOG.error("Error while closing POP3 storage.", e);
                 }
-                pop3Storage = null;
             }
         } finally {
             /*
@@ -309,7 +375,13 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     public MailFolder getRootFolder() throws MailException {
         pop3Storage.connect();
+        addWarnings(pop3Storage.getWarnings());
         return pop3Storage.getFolderStorage().getRootFolder();
+    }
+
+    @Override
+    public int getUnreadMessagesCount(final String fullname) throws MailException {
+        return pop3Storage.getUnreadMessagesCount(fullname);
     }
 
     @Override
@@ -317,7 +389,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
         try {
-            final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session);
+            final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, false).getPop3Store();
             /*
              * Close quietly
              */
@@ -338,39 +410,42 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     protected void connectInternal() throws MailException {
         // Connect the storage
         pop3Storage.connect();
+        addWarnings(pop3Storage.getWarnings());
         connected = true;
         /*
          * Ensure exclusive connect through future since a POP3 account may only be connected to one client at the same time
          */
-        final InetSocketAddress server;
+        final LoginKey key;
         try {
-            server = new InetSocketAddress(InetAddress.getByName(getPOP3Config().getServer()), getPOP3Config().getPort());
+            final POP3Config config = getPOP3Config();
+            key = LoginKey.N(new InetSocketAddress(InetAddress.getByName(config.getServer()), config.getPort()), config.getLogin());
         } catch (final UnknownHostException e) {
             throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
         }
-        Future<Object> f = SYNCHRONIZER_MAP.get(server);
+        Future<Object> f = SYNCHRONIZER_MAP.get(key);
         boolean removeFromMap = false;
         if (null == f) {
-            final FutureTask<Object> ft = new FutureTask<Object>(new POP3SyncMessagesCallable(
-                this,
-                pop3Storage,
-                pop3StorageProperties,
-                getFolderStorage(),
-                new POP3StorageConnectCounter() {
+            final FutureTask<Object> ft =
+                new FutureTask<Object>(new POP3SyncMessagesCallable(
+                    this,
+                    pop3Storage,
+                    pop3StorageProperties,
+                    getFolderStorage(),
+                    new POP3StorageConnectCounter() {
 
-                    public void decrementCounter() {
-                        MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
-                        MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-                        POP3Access.decrementCounter();
-                    }
+                        public void decrementCounter() {
+                            MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
+                            MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
+                            POP3Access.decrementCounter();
+                        }
 
-                    public void incrementCounter() {
-                        MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
-                        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-                        POP3Access.incrementCounter();
-                    }
-                }));
-            f = SYNCHRONIZER_MAP.putIfAbsent(server, ft);
+                        public void incrementCounter() {
+                            MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
+                            MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
+                            POP3Access.incrementCounter();
+                        }
+                    }));
+            f = SYNCHRONIZER_MAP.putIfAbsent(key, ft);
             if (f == null) {
                 /*
                  * Yap, this thread's future task was put to map
@@ -385,6 +460,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
          */
         try {
             f.get();
+            addWarnings(pop3Storage.getWarnings());
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
@@ -408,7 +484,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 /*
                  * And remove from map
                  */
-                SYNCHRONIZER_MAP.remove(server);
+                SYNCHRONIZER_MAP.remove(key);
             }
         }
     }
@@ -477,9 +553,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     protected IMailProperties createNewMailProperties() throws MailException {
         try {
-            final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final ServiceException e) {
             throw new POP3Exception(e);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,7 +77,7 @@ public final class POP3Config extends MailConfig {
 
     private boolean secure;
 
-    private IMailProperties mailProperties;
+    private IPOP3Properties mailProperties;
 
     private InetAddress pop3ServerAddress;
 
@@ -197,6 +197,10 @@ public final class POP3Config extends MailConfig {
 
     @Override
     public void setMailProperties(final IMailProperties mailProperties) {
-        this.mailProperties = mailProperties;
+        this.mailProperties = (IPOP3Properties) mailProperties;
+    }
+
+    public IPOP3Properties getPOP3Properties() {
+        return mailProperties;
     }
 }

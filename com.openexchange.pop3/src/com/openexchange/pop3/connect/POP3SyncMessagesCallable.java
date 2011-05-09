@@ -59,7 +59,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageConnectCounter;
@@ -123,7 +122,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                         InetAddress.getByName(server),
                         port,
                         pop3Config.isSecure(),
-                        (IPOP3Properties) pop3Config.getMailProperties(),
+                        pop3Config.getPOP3Properties(),
                         pop3Config.getLogin());
                 /*
                  * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in
@@ -166,7 +165,8 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                     LOG.debug("\n\tSynchronization successfully performed for POP3 account: " + server);
                 }
             } catch (final MailException e) {
-                LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+                throw e;
+                //LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             }
         }
         return null;

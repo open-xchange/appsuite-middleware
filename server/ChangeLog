@@ -1,3 +1,7 @@
+* 2011-05-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #19156: Introduced batch-wise processing of a POP3 account's messages.
+
 * 2011-04-12 - marcus.klein@open-xchange.com
 
  - Bugfix #18911: Remembering added links when formatting plain text email for HTML display.

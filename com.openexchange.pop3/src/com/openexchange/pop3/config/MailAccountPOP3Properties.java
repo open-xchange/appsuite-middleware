@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -95,10 +95,29 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("POP3 Connection Idle Time: Invalid value.", e);
             return POP3Properties.getInstance().getPOP3ConnectionIdleTime();
+        }
+    }
+
+    public int getPOP3BlockSize() {
+        final String tmp = properties.get("com.openexchange.pop3.pop3BlockSize");
+        if (null == tmp) {
+            return POP3Properties.getInstance().getPOP3BlockSize();
+        }
+
+        try {
+            final int blockSize = Integer.parseInt(tmp.trim());
+            if (blockSize <= 0) {
+                LOG.error("POP3 Block Size: Invalid value.");
+                return POP3Properties.getInstance().getPOP3BlockSize();
+            }
+            return blockSize;
+        } catch (final NumberFormatException e) {
+            LOG.error("POP3 Block Size: Invalid value.", e);
+            return POP3Properties.getInstance().getPOP3BlockSize();
         }
     }
 
@@ -109,7 +128,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("POP3 Connection Timeout: Invalid value.", e);
             return POP3Properties.getInstance().getPOP3ConnectionTimeout();
@@ -123,7 +142,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("POP3 Temporary Down: Invalid value.", e);
             return POP3Properties.getInstance().getPOP3TemporaryDown();
@@ -137,7 +156,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
 
         try {
-            return Integer.parseInt(tmp);
+            return Integer.parseInt(tmp.trim());
         } catch (final NumberFormatException e) {
             LOG.error("POP3 Timeout: Invalid value.", e);
             return POP3Properties.getInstance().getPOP3Timeout();
