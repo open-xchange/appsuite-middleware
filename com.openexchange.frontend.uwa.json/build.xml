@@ -30,7 +30,7 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
-    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar"/>
 
@@ -42,6 +42,7 @@
 	<property name="uwajar" value="com.openexchange.frontend.uwa.jar" />
 	<property name="mmodeljar" value="com.openexchange.modules.model.jar" />
 	<property name="mjsonjar" value="com.openexchange.modules.json.jar" />
+	<property name="cascadejar" value="com.openexchange.config.cascade.jar"/>
 	
     <!-- Classpath -->
     <path id="project.classpath">
@@ -60,6 +61,7 @@
 
     	<pathelement location="${bundlesdir}/${mmodeljar}"/>
        	<pathelement location="${bundlesdir}/${mjsonjar}"/>
+       	<pathelement location="${bundlesdir}/${cascadejar}"/>
 	</path>
 
     <!-- Compile -->

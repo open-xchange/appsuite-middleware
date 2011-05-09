@@ -1,3 +1,7 @@
+* 2011-05-09 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19169: Switch for UWA Widgets.
+
 * 2011-05-07 - thorben.betten@open-xchange.com
 
  - Bugfix #19156: Introduced batch-wise processing of a POP3 account's messages
