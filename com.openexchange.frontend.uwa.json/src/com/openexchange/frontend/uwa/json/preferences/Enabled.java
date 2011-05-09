@@ -47,58 +47,69 @@
  *
  */
 
-package com.openexchange.frontend.uwa.json.osgi;
+package com.openexchange.frontend.uwa.json.preferences;
 
-import org.osgi.service.http.HttpService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
-import com.openexchange.frontend.uwa.json.actions.UWAActions;
-import com.openexchange.frontend.uwa.json.preferences.Enabled;
-import com.openexchange.frontend.uwa.json.servlet.UWAWidgetServlet;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.tools.service.ServletRegistration;
-import com.openexchange.tools.service.SessionServletRegistration;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.session.Session;
 
 /**
- * {@link UWAJSONActivator}
+ * {@link Enabled}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UWAJSONActivator extends HousekeepingActivator {
+public class Enabled implements PreferencesItemService {
 
-    private ServletRegistration servletRegistration;
-
-    private static final Class[] CLASSES = new Class[] { UWAWidgetServiceFactory.class, HttpService.class, ConfigViewFactory.class };
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        UWAWidgetServiceFactory widgets = getService(UWAWidgetServiceFactory.class);
-
-        final UWAActions actions = new UWAActions(widgets);
-
-        registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(actions, "uwaWidgets"));
-
-        UWAWidgetServlet.FACTORY = actions;
-
-        servletRegistration = new SessionServletRegistration(context, new UWAWidgetServlet(), "/ajax/uwaWidgets");
+    static final String UWA_ENABLED = "com.openexchange.frontend.uwa.enabled";
     
-        registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
+    ConfigViewFactory configViews;
+
+    public Enabled(ConfigViewFactory configViews) {
+        this.configViews = configViews;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        if (servletRegistration != null) {
-            servletRegistration.close();
-        }
-        super.stopBundle();
+    public String[] getPath() {
+        return new String[] { "modules", "uwaWidgets", "enabled" };
+    }
+
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            /**
+             * {@inheritDoc}
+             */
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                try {
+                    ConfigView view = configViews.getView(user.getId(), ctx.getContextId());
+                    ComposedConfigProperty<Boolean> property = view.property(UWA_ENABLED, boolean.class);
+                    if (property.isDefined()) {
+                        setting.setSingleValue(property.get());
+                    } else {
+                        setting.setSingleValue(true);
+                    }
+                } catch (ConfigCascadeException e) {
+                    throw new SettingException(e);
+                }
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
+
     }
 
 }

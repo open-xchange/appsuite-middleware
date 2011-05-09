@@ -4,7 +4,7 @@
 Name:           open-xchange-frontend-uwa-json
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@  open-xchange-server >= @OXVERSION@ open-xchange-frontend-uwa >= @OXVERSION@ open-xchange-modules-model >= @OXVERSION@ open-xchange-modules-json >= @OXVERSION@ 
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@  open-xchange-server >= @OXVERSION@ open-xchange-frontend-uwa >= @OXVERSION@ open-xchange-modules-model >= @OXVERSION@ open-xchange-modules-json >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@ 
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange File Storage JSON Bundle
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@  open-xchange-server >= @OXVERSION@ open-xchange-frontend-uwa >= @OXVERSION@ open-xchange-modules-model >= @OXVERSION@ open-xchange-modules-json >= @OXVERSION@ 
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@  open-xchange-server >= @OXVERSION@ open-xchange-frontend-uwa >= @OXVERSION@ open-xchange-modules-model >= @OXVERSION@ open-xchange-modules-json >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@ 
 #
 
 %description
