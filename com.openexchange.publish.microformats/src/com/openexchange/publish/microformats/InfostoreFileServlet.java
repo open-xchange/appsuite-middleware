@@ -199,8 +199,11 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
         resp.setHeader("Content-Disposition", "attachment; filename=\""
              + Helper.encodeFilename(document.getFileName(), "UTF-8", isIE(req)) + "\"");
+        String fileMIMEType = document.getFileMIMEType();
+        if (fileMIMEType != null) {
+            resp.setContentType(fileMIMEType);
+        }
     }
-
     private static final boolean isIE(final HttpServletRequest req) {
         final String userAgent = req.getHeader("User-Agent");
         return null != userAgent && userAgent.contains("MSIE");
