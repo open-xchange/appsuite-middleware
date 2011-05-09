@@ -1,6 +1,7 @@
 * 2011-05-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #19169: Switch for UWA Widgets.
+ - Bugfix #19024: Avoid NPEs when trying to download file that doesn't exist.
 
 * 2011-05-07 - thorben.betten@open-xchange.com
 

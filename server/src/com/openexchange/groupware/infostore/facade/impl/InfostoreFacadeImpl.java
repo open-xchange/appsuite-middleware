@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.TLongObjectHashMap;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -253,7 +254,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw new InfostoreException(e);
         }
         try {
-            return fs.getFile(dm.getFilestoreLocation());
+            if (dm.getFilestoreLocation() != null) {
+                return fs.getFile(dm.getFilestoreLocation());
+            } else {
+                return new ByteArrayInputStream(new byte[0]);
+            }
         } catch (final FileStorageException e) {
             throw new InfostoreException(e);
         }
