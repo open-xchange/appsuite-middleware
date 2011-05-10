@@ -1,3 +1,9 @@
+open-xchange-soap-cxf (6.20.0.0-9) unstable; urgency=low
+
+  * another build for PTF 2011050310000419
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 10 May 2011 07:30:27 +0000
+
 open-xchange-soap-cxf (6.20.0.0-8) unstable; urgency=low
 
   * Build for PTF 2011050310000419
