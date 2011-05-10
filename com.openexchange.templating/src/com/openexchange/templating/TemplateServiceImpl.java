@@ -299,6 +299,7 @@ public class TemplateServiceImpl implements TemplateService {
     		return emptyMap;
     	}
     	
+        HashMap<String, Set<String>> tagMap = new HashMap<String, Set<String>>();
     	for (File file : files) {
     		Properties index = new Properties();
     		InputStream inStream = null;
@@ -307,15 +308,12 @@ public class TemplateServiceImpl implements TemplateService {
 				index.load(inStream);
 				Set<Entry<Object, Object>> entrySet = index.entrySet();
 				
-				HashMap<String, Set<String>> tagMap = new HashMap<String, Set<String>>();
 				for (Entry<Object, Object> entry : entrySet) {
 					String filename = (String) entry.getKey();
 					String[] categoriesArr = ((String) entry.getValue()).split("\\s*,\\s*");
 					HashSet<String> categories = new HashSet<String>(Arrays.asList(categoriesArr));
 					tagMap.put(filename, categories);
 				}
-				cachedTags.put(absolutePath, tagMap);
-				return tagMap;
 			} catch (FileNotFoundException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (IOException e) {
@@ -329,7 +327,9 @@ public class TemplateServiceImpl implements TemplateService {
 				}
 			}
     	}
-		return Collections.emptyMap();
+        cachedTags.put(absolutePath, tagMap);
+        return tagMap;
+
 	}
 
 	public List<String> getTemplateNames(ServerSession session,

@@ -1,5 +1,9 @@
 * 2011-05-09 - francisco.laguna@open-xchange.com
 
+ - Bugfix #18875: Consider more than one .properties file in the templates directory.
+
+* 2011-05-09 - francisco.laguna@open-xchange.com
+
  - Bugfix #19169: Switch for UWA Widgets.
  - Bugfix #19024: Avoid NPEs when trying to download file that doesn't exist.
 
