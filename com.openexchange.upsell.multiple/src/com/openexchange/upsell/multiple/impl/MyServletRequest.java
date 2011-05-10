@@ -170,7 +170,7 @@ public final class MyServletRequest  {
 		String request_src_hostname = http_request.getServerName();
 		
 		if(action.equalsIgnoreCase(ACTION_GET_CONFIGURED_METHOD)){
-			// return configur¯ed upsell method
+			// return configurï¿½ed upsell method
 			retval = actionGetUpsellMethod(jsonObject);
 		}else if(action.equalsIgnoreCase(ACTION_GET_STATIC_REDIRECT_URL_METHOD)){
 			// return static redirect URL containing all needed parameters
@@ -531,9 +531,9 @@ public final class MyServletRequest  {
 		bla.put(UpsellURLParametersMap.MAP_ATTR_MAIL,this.user.getMail()); // users email addy
 		bla.put(UpsellURLParametersMap.MAP_ATTR_LOGIN,this.sessionObj.getLogin()); // users full login from UI mask
 		bla.put(UpsellURLParametersMap.MAP_ATTR_IMAP_LOGIN,this.user.getImapLogin()); // imap login 
-		bla.put(UpsellURLParametersMap.MAP_ATTR_CID,""+ctx.getContextId()); // context id
-		bla.put(UpsellURLParametersMap.MAP_ATTR_USERID,""+this.sessionObj.getUserId()); // user id 
-		bla.put(UpsellURLParametersMap.MAP_ATTR_LANGUAGE,""+this.user.getPreferredLanguage()); // user id 
+		bla.put(UpsellURLParametersMap.MAP_ATTR_CID,String.valueOf(ctx.getContextId())); // context id
+		bla.put(UpsellURLParametersMap.MAP_ATTR_USERID,String.valueOf(this.sessionObj.getUserId())); // user id 
+		bla.put(UpsellURLParametersMap.MAP_ATTR_LANGUAGE,this.user.getPreferredLanguage()); // language 
 		
 		if(jsondata!=null && jsondata.has("purchase_type")){
 			bla.put(UpsellURLParametersMap.MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
