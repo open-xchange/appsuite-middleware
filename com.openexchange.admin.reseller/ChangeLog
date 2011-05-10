@@ -1,6 +1,8 @@
 * 2011-05-10 - choeger@open-xchange.com
 
  - Bugfix #19102: reseller bundle: unable to change restrictions on commandline
+ - Bugfix #19135: Reseller Plugin: Exception occurred while trying to invoke service
+   method createModuleAccessByName
 
 * 2011-04-07 - choeger@open-xchange.com
 

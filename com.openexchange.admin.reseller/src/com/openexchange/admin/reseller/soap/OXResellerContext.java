@@ -167,9 +167,9 @@ public class OXResellerContext extends OXSOAPRMIMapper {
         if( access == null && access_combination_name == null ) {
             res = ((OXContextInterface)rmistub).create(cin, admin_user, auth);
         } else if( access != null ) {
-            res = ((OXContextInterface)rmistub).create(ctx, admin_user, access, auth);
+            res = ((OXContextInterface)rmistub).create(cin, admin_user, access, auth);
         } else if( access_combination_name != null ) {
-            res = ((OXContextInterface)rmistub).create(ctx, admin_user, access_combination_name, auth);
+            res = ((OXContextInterface)rmistub).create(cin, admin_user, access_combination_name, auth);
         }
         return new ResellerContext(res);
     }
