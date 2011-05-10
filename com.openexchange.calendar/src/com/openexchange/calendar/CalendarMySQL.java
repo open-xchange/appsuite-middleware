@@ -1113,6 +1113,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         final StringBuilder sb = new StringBuilder(128);
         sb.append("SELECT ");
         sb.append(columns);
+        sb.append(", pdm.pfid");
         sb.append(" FROM prg_dates pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ? AND pdm.cid = ? WHERE ");
         
         if (searchObj.hasFolders()) {
@@ -1813,28 +1814,33 @@ public class CalendarMySQL implements CalendarSqlImp {
             query.append(sqlin);
             query.append(" ORDER BY object_id ASC");
             rs = stmt.executeQuery(query.toString());
-            final Map<Integer, CalendarDataObject> map;
+            final Map<Integer, List<CalendarDataObject>> map;
             {
                 final int size = list.size();
-                map = new HashMap<Integer, CalendarDataObject>(size);
+                map = new HashMap<Integer, List<CalendarDataObject>>(size);
                 for (int i = 0; i < size; i++) {
                     final CalendarDataObject cdo = list.get(i);
-                    map.put(Integer.valueOf(cdo.getObjectID()), cdo);
+                    if (!map.containsKey(cdo.getObjectID())) {
+                        map.put(cdo.getObjectID(), new ArrayList<CalendarDataObject>());
+                    }
+                    map.get(cdo.getObjectID()).add(cdo);
                 }
             }
             int last_oid = -1;
             Participants participants = null;
-            CalendarDataObject cdao = null;
+            List<CalendarDataObject> cdaos = null;
             Participant participant = null;
             while (rs.next()) {
                 final int oid = rs.getInt(1);
                 if (last_oid != oid) {
-                    if (participants != null && cdao != null) {
-                        cdao.setParticipants(participants.getList());
+                    if (participants != null && cdaos != null) {
+                        for (CalendarDataObject cdao : cdaos) {
+                            cdao.setParticipants(participants.getList());
+                        }
                     }
                     participants = new Participants();
                     last_oid = oid;
-                    cdao = map.get(Integer.valueOf(oid));
+                    cdaos = map.get(oid);
                 }
                 final int id = rs.getInt(2);
                 final int type = rs.getInt(3);
@@ -1844,7 +1850,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                     participant = new GroupParticipant(id);
                 } else if (type == Participant.RESOURCE) {
                     participant = new ResourceParticipant(id);
-                    cdao.setContainsResources(true);
+                    for (CalendarDataObject cdao : cdaos) {
+                        cdao.setContainsResources(true);
+                    }
                 } else if (type == Participant.RESOURCEGROUP) {
                     participant = new ResourceGroupParticipant(id);
                 } else if (type == Participant.EXTERNAL_USER) {
@@ -1882,8 +1890,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                     participants.add(participant);
                 }
             }
-            if (cdao != null && cdao.getObjectID() == last_oid) {
-                cdao.setParticipants(participants.getList());
+            if (cdaos != null && cdaos.get(0).getObjectID() == last_oid) {
+                for (CalendarDataObject cdao : cdaos) {
+                    cdao.setParticipants(participants.getList());
+                }
             }
         } finally {
             collection.closeResultSet(rs);
@@ -1965,33 +1975,36 @@ public class CalendarMySQL implements CalendarSqlImp {
             query.append(sqlin);
             query.append(" ORDER BY object_id");
             rs = stmt.executeQuery(query.toString());
-            final Map<Integer, CalendarDataObject> map;
-            {
-                final int size = list.size();
-                map = new HashMap<Integer, CalendarDataObject>(size);
-                for (int i = 0; i < size; i++) {
-                    final CalendarDataObject cdo = list.get(i);
-                    map.put(Integer.valueOf(cdo.getObjectID()), cdo);
+            Map<Integer, List<CalendarDataObject>> map;
+            int size = list.size();
+            map = new HashMap<Integer, List<CalendarDataObject>>(size);
+            for (int i = 0; i < size; i++) {
+                CalendarDataObject cdo = list.get(i);
+                if (!map.containsKey(cdo.getObjectID())) {
+                    map.put(cdo.getObjectID(), new ArrayList<CalendarDataObject>());
                 }
+                map.get(cdo.getObjectID()).add(cdo);
             }
             String temp = null;
             int last_oid = -1;
             UserParticipant up = null;
             Participants participants = null;
-            CalendarDataObject cdao = null;
+            List<CalendarDataObject> cdaos = null;
 
             while (rs.next()) {
                 final int oid = rs.getInt(1);
                 if (last_oid != oid) {
                     if (participants != null) {
                         participants.add(up);
-                        if (cdao != null) {
-                            cdao.setUsers(participants.getUsers());
+                        if (cdaos != null) {
+                            for (CalendarDataObject cdao : cdaos) {
+                                cdao.setUsers(participants.getUsers());
+                            }
                         }
                     }
                     participants = new Participants();
                     last_oid = oid;
-                    cdao = map.get(Integer.valueOf(oid));
+                    cdaos = map.get(oid);
                 }
                 final int tuid = rs.getInt(2);
                 up = new UserParticipant(tuid);
@@ -2004,33 +2017,35 @@ public class CalendarMySQL implements CalendarSqlImp {
 
                 if (!rs.wasNull()) {
                     if (pfid < 1) {
-                        LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipantsSQLIn oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdao.getObjectID()) }));
+                        LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipantsSQLIn oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdaos.get(0).getObjectID()) }));
                     }
-                    if (cdao.getFolderType() == FolderObject.PRIVATE) {
-                        if (uid == tuid) {
-                            cdao.setGlobalFolderID(pfid);
-                            cdao.setPrivateFolderID(pfid);
-                        }
-                        up.setPersonalFolderId(pfid);
-                    } else if (cdao.getFolderType() == FolderObject.SHARED) {
-                        if (cdao.getSharedFolderOwner() == 0) {
-                            throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
-                        }
-                        if (cdao.getSharedFolderOwner() == tuid) {
-                            cdao.setGlobalFolderID(pfid);
-                            cdao.setPrivateFolderID(pfid);
+                    for (CalendarDataObject cdao : cdaos) {
+                        if (cdao.getFolderType() == FolderObject.PRIVATE) {
+                            if (uid == tuid) {
+                                cdao.setGlobalFolderID(pfid);
+                                cdao.setPrivateFolderID(pfid);
+                            }
                             up.setPersonalFolderId(pfid);
+                        } else if (cdao.getFolderType() == FolderObject.SHARED) {
+                            if (cdao.getSharedFolderOwner() == 0) {
+                                throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                            }
+                            if (cdao.getSharedFolderOwner() == tuid) {
+                                cdao.setGlobalFolderID(pfid);
+                                cdao.setPrivateFolderID(pfid);
+                                up.setPersonalFolderId(pfid);
+                            } else {
+                                up.setPersonalFolderId(pfid);
+                            }
+                        } else if (uid == tuid) {
+                            if (!cdao.containsParentFolderID()) {
+                                cdao.setGlobalFolderID(pfid);
+                            }
+                            cdao.setPrivateFolderID(pfid);
                         } else {
-                            up.setPersonalFolderId(pfid);
-                        }
-                    } else if (uid == tuid) {
-                        if (!cdao.containsParentFolderID()) {
-                            cdao.setGlobalFolderID(pfid);
-                        }
-                        cdao.setPrivateFolderID(pfid);
-                    } else {
-                        if (visibleFolders == null || visibleFolders.getSharedFolderList().contains(pfid)) {
-                            cdao.setActionFolder(pfid);
+                            if (visibleFolders == null || visibleFolders.getSharedFolderList().contains(pfid)) {
+                                cdao.setActionFolder(pfid);
+                            }
                         }
                     }
                 }
@@ -2039,15 +2054,19 @@ public class CalendarMySQL implements CalendarSqlImp {
                 if (!rs.wasNull()) {
                     up.setAlarmMinutes(alarm);
                     if (up.getIdentifier() == uid && up.getAlarmMinutes() >= 0) {
-                        cdao.setAlarm(up.getAlarmMinutes());
+                        for (CalendarDataObject cdao : cdaos) {
+                            cdao.setAlarm(up.getAlarmMinutes());
+                        }
                     }
                 }
                 if (participants != null) {
                     participants.add(up);
                 }
             }
-            if (cdao != null && cdao.getObjectID() == last_oid) {
-                cdao.setUsers(participants.getUsers());
+            if (cdaos != null && cdaos.get(0).getObjectID() == last_oid) {
+                for (CalendarDataObject cdao : cdaos) {
+                    cdao.setUsers(participants.getUsers());
+                }
             }
         } finally {
             collection.closeResultSet(rs);

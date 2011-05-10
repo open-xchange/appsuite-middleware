@@ -1,3 +1,7 @@
+* 2011-05-10 - martin.herfurth@open-xchange.com
+
+ - Bugfix #18558: Appointments which are visible thorugh several folders contain correct folder id.
+ 
 * 2011-05-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #18875: Consider more than one .properties file in the templates directory.

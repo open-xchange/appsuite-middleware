@@ -814,7 +814,15 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                                 cdao.setUsers(users.getUsers());
                                                 cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
                                             } else {
-                                                cdao.setFillFolderID();
+                                                try {
+                                                cdao.setGlobalFolderID(co_rs.getInt("pdm.pfid"));
+                                                } catch (SQLException sqle) {
+                                                    if (sqle.getSQLState().equals("S0022")) { // Not found TODO: add this column to other search statements.
+                                                        cdao.setFillFolderID();
+                                                    } else {
+                                                        throw sqle;
+                                                    }
+                                                }
                                             }
                                         }
                                     } else {
