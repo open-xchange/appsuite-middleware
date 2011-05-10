@@ -1,3 +1,7 @@
+* 2011-05-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #19149: Fixed exception if no sort order is given.
+
 * 2011-04-07 - dennis.sieben@open-xchange.com
 
  - Bugfix #18894 - Contacts-ldap sometimes sends (null=*) filters to the ldap server

@@ -70,6 +70,7 @@ import com.openexchange.contacts.ldap.ldap.LdapJNDIImpl;
 import com.openexchange.contacts.ldap.ldap.LdapInterface.FillClosure;
 import com.openexchange.contacts.ldap.osgi.LDAPServiceRegistry;
 import com.openexchange.contacts.ldap.property.FolderProperties;
+import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.FolderProperties.ContactTypes;
 import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
@@ -744,7 +745,12 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     private void sorting(final int orderBy, final Order order, final List<Contact> subList) {
-        Collections.sort(subList, new ContactComparator(orderBy, order));
+        if (Order.NO_ORDER != order && folderprop.getSorting().equals(Sorting.groupware)) {
+            Collections.sort(subList, new ContactComparator(orderBy, order));
+        } else {
+            // Default sorting
+            Collections.sort(subList, new ContactComparator(-1, order));
+        }
     }
 
     public void associateTwoContacts(Contact master, Contact slave) throws OXException {
