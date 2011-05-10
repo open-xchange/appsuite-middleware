@@ -50,6 +50,7 @@ package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -240,6 +241,20 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         assertEquals("getData returned wrong data",adm.getDisplayname(), dbadm.getDisplayname());
     }
     
+    @Test
+    public void testGetDataBug19102() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, PoolException, SQLException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
+        final ResellerAdmin adm = TestAdminUser();
+
+        // add some restrictions to adm
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN, "2"));
+        adm.setRestrictions(res);
+        final ResellerAdmin dbadm = oxresell.getData(adm, creds);
+        // and check whether they are still there after getData call
+        assertNull("there must be no restrictions set",dbadm.getRestrictions());
+    }
+
     @Test
     public void testGetDataWithRestrictions() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, PoolException, SQLException, OXResellerException {
         final Credentials creds = DummyMasterCredentials();

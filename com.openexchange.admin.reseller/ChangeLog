@@ -1,3 +1,7 @@
+* 2011-05-10 - choeger@open-xchange.com
+
+ - Bugfix #19102: reseller bundle: unable to change restrictions on commandline
+
 * 2011-04-07 - choeger@open-xchange.com
 
  - Bugfix #18881: listcontext for masteradmin does not work when reseller plugin installed

@@ -400,7 +400,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             final ArrayList<ResellerAdmin> ret = new ArrayList<ResellerAdmin>();
             con = cache.getConnectionForConfigDB();
             for (final ResellerAdmin adm : admins) {
-                ResellerAdmin newadm = (ResellerAdmin) adm.clone();
+                ResellerAdmin newadm = new ResellerAdmin(adm.getId(), adm.getName());
                 String query = "SELECT * FROM subadmin WHERE ";
                 boolean hasId = false;
                 if (adm.getId() != null) {
@@ -444,9 +444,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e.getMessage());
-        } catch (final CloneNotSupportedException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
