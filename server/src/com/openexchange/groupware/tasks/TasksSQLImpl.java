@@ -312,9 +312,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         return lastModified;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public SearchIterator<Task> getObjectsById(final int[][] ids,
         final int[] columns) throws OXException {
         final Context ctx;
