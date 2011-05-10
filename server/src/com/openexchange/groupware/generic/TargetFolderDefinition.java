@@ -47,87 +47,81 @@
  *
  */
 
-package com.openexchange.subscribe.internal;
+package com.openexchange.groupware.generic;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * {@link SimFolderUpdaterStrategy}
+ * {@link TargetFolderDefinition}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
+public class TargetFolderDefinition {
 
-    private Set<String> dataSet;
+    protected String folderId;
+
+    protected Context context;
     
-    private Set<String> savedElements = new HashSet<String>();
-    private Map<String, String> updatedElements = new HashMap<String, String>();
+    protected int userId;
     
-    public boolean handles(FolderObject folder) {
-        return true;
-    }
-
-    public void setDataSet(String...data) {
-        dataSet = new HashSet<String>(Arrays.asList(data));
-    }
-
-    public boolean wasUpdated(String orig, String update) {
-        if(!updatedElements.containsKey(orig)) {
-            return false;
-        }
-        return updatedElements.get(orig).equals(update);
-    }
-
-    public boolean wasCreated(String string) {
-        return savedElements.contains(string);
-    }
-
-    public int calculateSimilarityScore(String original, String candidate, Object session) throws AbstractOXException {
-        int counter = 0;
-        for (int i = 0, size = Math.min(original.length(), candidate.length()); i < size; i++) {
-            int cO = original.charAt(i);
-            int cC = candidate.charAt(i);
-            if(cO == cC) {
-                counter++;
-            } else {
-                return counter;
-            }
-        }
-        return counter;
-    }
-
-    public void closeSession(Object session) throws AbstractOXException {
+    public TargetFolderDefinition() {
         
     }
+    
+    public TargetFolderDefinition(String folderId, int userId, Context context) {
+        this.folderId = folderId;
+        this.userId = userId;
+        this.context = context;
+    }
+    
 
-    public Collection<String> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
-        return dataSet;
+    public String getFolderId() {
+        return folderId;
     }
 
-    public int getThreshold(Object session) throws AbstractOXException {
-        return 3;
+    public int getFolderIdAsInt() throws AbstractOXException {
+        int retval = -1;
+        try {
+            retval = Integer.parseInt(folderId);
+        } catch (NumberFormatException e) {
+            throw new AjaxException(AjaxException.Code.InvalidParameterValue, folderId);
+        }
+        return retval;
     }
 
-    public void save(String newElement, Object session) throws AbstractOXException {
-        savedElements.add(newElement);
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
     }
 
-    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
-        return null;
+    public void setFolderId(int folderId) {
+        setFolderId(String.valueOf(folderId));
+    }
+    
+    public boolean containsFolderId() {
+        return getFolderId() != null;
+    }
+    
+    public Context getContext() {
+        return context;
     }
 
-    public void update(String original, String update, Object session) throws AbstractOXException {
-        updatedElements.put(original, update);
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public boolean containsUserId() {
+        return getUserId() > 0;
     }
 
 }

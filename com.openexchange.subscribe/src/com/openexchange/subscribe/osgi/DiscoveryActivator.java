@@ -67,13 +67,14 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.FolderUpdaterService;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -110,6 +111,8 @@ public class DiscoveryActivator implements BundleActivator {
 
     private Whiteboard whiteboard;
 
+    private ServiceRegistration folderUpdaterRegistryRegistration;
+
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
         collector = new OSGiSubscriptionSourceCollector(context);
@@ -145,7 +148,10 @@ public class DiscoveryActivator implements BundleActivator {
 
         final SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
         executionRegistration = context.registerService(SubscriptionExecutionService.class.getName(), executor, null);
-
+        
+        folderUpdaterRegistryRegistration = context.registerService(FolderUpdaterRegistry.class.getName(), executor, null);
+        
+        
         final DBProvider provider = whiteboard.getService(DBProvider.class);
         genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
         final SubscriptionSQLStorage storage = new SubscriptionSQLStorage(provider, genconfStorage, discoveryCollector);
@@ -182,6 +188,8 @@ public class DiscoveryActivator implements BundleActivator {
         discoveryRegistration = null;
         executionRegistration.unregister();
         executionRegistration = null;
+        folderUpdaterRegistryRegistration.unregister();
+        folderUpdaterRegistryRegistration = null;
     }
 
 }

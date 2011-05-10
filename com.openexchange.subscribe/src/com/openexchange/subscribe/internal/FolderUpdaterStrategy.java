@@ -52,7 +52,7 @@ package com.openexchange.subscribe.internal;
 import java.util.Collection;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.Subscription;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 
 
 /**
@@ -65,9 +65,9 @@ public interface FolderUpdaterStrategy<T> {
 
     boolean handles(FolderObject folder);
 
-    Object startSession(Subscription subscription) throws AbstractOXException;
+    Object startSession(TargetFolderDefinition target) throws AbstractOXException;
 
-    Collection<T> getData(Subscription subscription, Object session) throws AbstractOXException;
+    Collection<T> getData(TargetFolderDefinition target, Object session) throws AbstractOXException;
 
     void update(T original, T update, Object session) throws AbstractOXException;
 

@@ -63,9 +63,10 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSession;
+import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -79,7 +80,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     private static final int SQL_INTERFACE = 1;
 
-    private static final int SUBSCRIPTION = 2;
+    private static final int TARGET = 2;
 
     private static final int[] COMPARISON_COLUMNS = {
         Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.BIRTHDAY, Contact.DISPLAY_NAME, Contact.EMAIL1,
@@ -159,10 +160,10 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     }
 
-    public Collection<Contact> getData(Subscription subscription, Object session) throws AbstractOXException {
+    public Collection<Contact> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
         OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
 
-        int folderId = subscription.getFolderIdAsInt();
+        int folderId = target.getFolderIdAsInt();
         int numberOfContacts = contacts.getNumberOfContacts(folderId);
         SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(
             folderId,
@@ -189,8 +190,8 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     public void save(Contact newElement, Object session) throws AbstractOXException {
         OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
-        Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
-        newElement.setParentFolderID(subscription.getFolderIdAsInt());
+        TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
+        newElement.setParentFolderID(target.getFolderIdAsInt());
 
         // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
         newElement.setUserField20(UUID.randomUUID().toString());
@@ -202,10 +203,10 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return ((Map<Integer, Object>) session).get(key);
     }
 
-    public Object startSession(Subscription subscription) throws AbstractOXException {
+    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
         Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        userInfo.put(SQL_INTERFACE, new RdbContactSQLImpl(new SubscriptionSession(subscription)));
-        userInfo.put(SUBSCRIPTION, subscription);
+        userInfo.put(SQL_INTERFACE, new RdbContactSQLImpl(new TargetFolderSession(target)));
+        userInfo.put(TARGET, target);
         return userInfo;
     }
 

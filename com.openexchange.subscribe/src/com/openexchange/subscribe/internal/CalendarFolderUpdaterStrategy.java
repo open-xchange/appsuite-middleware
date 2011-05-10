@@ -61,9 +61,10 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSession;
+import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -75,7 +76,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
 
     private static final int SQL_INTERFACE = 1;
 
-    private static final int SUBSCRIPTION = 2;
+    private static final int TARGET = 2;
 
     private static final int[] COMPARISON_COLUMNS = {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.UID, Appointment.NOTE, Appointment.LAST_MODIFIED, Appointment.SEQUENCE };
@@ -120,10 +121,10 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
 
     }
 
-    public Collection<CalendarDataObject> getData(Subscription subscription, Object session) throws AbstractOXException {
+    public Collection<CalendarDataObject> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
         CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
 
-        int folderId = subscription.getFolderIdAsInt();
+        int folderId = target.getFolderIdAsInt();
         // get all the appointments, from the beginning of time (1970) till the end of time
         Date startDate = new Date(0);
         Date endDate = new Date(Long.MAX_VALUE);
@@ -152,9 +153,9 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
 
     public void save(CalendarDataObject newElement, Object session) throws AbstractOXException {
         CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
-        Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
-        newElement.setParentFolderID(subscription.getFolderIdAsInt());
-        newElement.setContext(subscription.getContext());
+        TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
+        newElement.setParentFolderID(target.getFolderIdAsInt());
+        newElement.setContext(target.getContext());
         addPrefixToUID(newElement);  
         calendarSql.insertAppointmentObject(newElement);
     }
@@ -163,10 +164,10 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         return ((Map<Integer, Object>) session).get(key);
     }
 
-    public Object startSession(Subscription subscription) throws AbstractOXException {
+    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
         Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        userInfo.put(SQL_INTERFACE, new CalendarSql(new SubscriptionSession(subscription)));
-        userInfo.put(SUBSCRIPTION, subscription);
+        userInfo.put(SQL_INTERFACE, new CalendarSql(new TargetFolderSession(target)));
+        userInfo.put(TARGET, target);
         return userInfo;
     }
 

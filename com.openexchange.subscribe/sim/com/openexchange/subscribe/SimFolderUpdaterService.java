@@ -52,6 +52,8 @@ package com.openexchange.subscribe;
 import java.util.Collection;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 
 
 /**
@@ -62,7 +64,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class SimFolderUpdaterService implements FolderUpdaterService {
 
-    private Subscription subscription;
+    private TargetFolderDefinition target;
     private Collection data;
     private FolderObject folder;
     private boolean handles;
@@ -73,21 +75,18 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
         return handles;
     }
 
-    public void save(Collection data, Subscription subscription) throws OXException {
+    public void save(Collection data, TargetFolderDefinition target) throws OXException {
         this.data = data;
-        this.subscription = subscription;
+        this.target = target;
     }
-
     
-    public Subscription getSubscription() {
-        return subscription;
+    public void setTarget(TargetFolderDefinition target) {
+        this.target = target;
     }
-
     
-    public void setSubscription(Subscription subscription) {
-        this.subscription = subscription;
+    public TargetFolderDefinition getTarget() {
+        return target;
     }
-
     
     public Collection getData() {
         return data;

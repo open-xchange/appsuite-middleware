@@ -53,20 +53,15 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Subscription {
-
+public class Subscription extends TargetFolderDefinition {
+    
     private int id;
-
-    private String folderId;
-
-    private Context context;
-
-    private int userId;
-
+    
     private long lastUpdate;
 
     private SubscriptionSource source;
@@ -78,53 +73,6 @@ public class Subscription {
     private Boolean enabled;
     
     private String secret;
-
-    
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public int getFolderIdAsInt() throws SubscriptionException {
-        int retval = -1;
-        try {
-            retval = Integer.parseInt(folderId);
-        } catch (NumberFormatException e) {
-            throw SubscriptionErrorMessage.ParsingError.create(e);
-        }
-        return retval;
-    }
-
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-
-    public void setFolderId(int folderId) {
-        setFolderId(String.valueOf(folderId));
-    }
-    
-    public boolean containsFolderId() {
-        return getFolderId() != null;
-    }
-    
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public boolean containsUserId() {
-        return getUserId() > 0;
-    }
     
     public long getLastUpdate() {
         return lastUpdate;

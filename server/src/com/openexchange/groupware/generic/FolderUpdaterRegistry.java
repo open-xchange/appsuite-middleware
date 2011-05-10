@@ -47,97 +47,20 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.groupware.generic;
 
-import com.openexchange.session.Session;
+import com.openexchange.groupware.AbstractOXException;
 
+/**
+ * {@link FolderUpdaterRegistry}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public interface FolderUpdaterRegistry {
 
-public class SubscriptionSession implements Session {
-    private final Subscription subscription;
-    public SubscriptionSession(final Subscription subscription){
-        this.subscription = subscription;
-    }
-    
-    //IMPLEMENTED:
-    public int getContextId() {
-        return subscription.getContext().getContextId();
-    }
-    
-    public int getUserId() {
-        return subscription.getUserId();
-    }
-    
-    //NOT IMPLEMENTED AT ALL:
-    public String getLocalIp() {
-        throw new UnsupportedOperationException();
-    }
+    /**
+     * @param subscription
+     */
+    FolderUpdaterService getFolderUpdater(TargetFolderDefinition target) throws AbstractOXException;
 
-    public String getLogin() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getLoginName() {
-        throw new UnsupportedOperationException();
-    }
-
-    public Object getParameter(final String name) {
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean containsParameter(final String name) {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getPassword() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getSecret() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getSessionID() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getUserlogin() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void removeRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setParameter(final String name, final Object value) {
-        throw new UnsupportedOperationException();        
-    }
-
-    public String getAuthId() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getHash() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void setLocalIp(String ip) {
-        // Nothing to do here.
-    }
-
-    public void setHash(String hash) {
-        // TODO Auto-generated method stub
-    }
-
-    public String getClient() {
-        return null;
-    }
-
-    public void setClient(String client) {
-        // Nothing to do.
-    }
 }

@@ -66,8 +66,9 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionHandler;
-import com.openexchange.subscribe.SubscriptionSession;
+import com.openexchange.subscribe.TargetFolderSession;
 
 
 public class MicroformatContactParser extends ContactHandler implements SubscriptionHandler {
@@ -119,7 +120,7 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
             
             parse( website );
             
-            storeContacts(new SubscriptionSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
+            storeContacts(new TargetFolderSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
             
         } catch (IOException e) {
             // TODO Auto-generated catch block

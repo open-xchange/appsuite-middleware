@@ -47,87 +47,24 @@
  *
  */
 
-package com.openexchange.subscribe.internal;
+package com.openexchange.groupware.generic;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.generic.TargetFolderDefinition;
 
 
 /**
- * {@link SimFolderUpdaterStrategy}
+ * {@link FolderUpdaterService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
-
-    private Set<String> dataSet;
+public interface FolderUpdaterService<T> {
+    public boolean handles(FolderObject folder);
     
-    private Set<String> savedElements = new HashSet<String>();
-    private Map<String, String> updatedElements = new HashMap<String, String>();
-    
-    public boolean handles(FolderObject folder) {
-        return true;
-    }
+    public boolean usesMultipleStrategy();
 
-    public void setDataSet(String...data) {
-        dataSet = new HashSet<String>(Arrays.asList(data));
-    }
-
-    public boolean wasUpdated(String orig, String update) {
-        if(!updatedElements.containsKey(orig)) {
-            return false;
-        }
-        return updatedElements.get(orig).equals(update);
-    }
-
-    public boolean wasCreated(String string) {
-        return savedElements.contains(string);
-    }
-
-    public int calculateSimilarityScore(String original, String candidate, Object session) throws AbstractOXException {
-        int counter = 0;
-        for (int i = 0, size = Math.min(original.length(), candidate.length()); i < size; i++) {
-            int cO = original.charAt(i);
-            int cC = candidate.charAt(i);
-            if(cO == cC) {
-                counter++;
-            } else {
-                return counter;
-            }
-        }
-        return counter;
-    }
-
-    public void closeSession(Object session) throws AbstractOXException {
-        
-    }
-
-    public Collection<String> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
-        return dataSet;
-    }
-
-    public int getThreshold(Object session) throws AbstractOXException {
-        return 3;
-    }
-
-    public void save(String newElement, Object session) throws AbstractOXException {
-        savedElements.add(newElement);
-    }
-
-    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
-        return null;
-    }
-
-    public void update(String original, String update, Object session) throws AbstractOXException {
-        updatedElements.put(original, update);
-    }
-
+    public void save(Collection<T> data, TargetFolderDefinition target) throws OXException, AbstractOXException;
 }

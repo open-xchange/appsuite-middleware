@@ -51,16 +51,19 @@ package com.openexchange.subscribe.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.context.SimContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.subscribe.FolderUpdaterService;
+import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.subscribe.SimFolderUpdaterService;
 import com.openexchange.subscribe.SimSubscribeService;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSession;
+import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.SubscriptionSource;
 import junit.framework.TestCase;
 
@@ -107,7 +110,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         simFolderUpdaterService.setHandles(true);
         executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService), new SimContextService()) {
             @Override
-            protected FolderObject getFolder(SubscriptionSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
+            protected FolderObject getFolder(TargetFolderSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
                 return null;
             }
         };
@@ -157,7 +160,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         simFolderUpdaterService2.setUsesMultipleStrategy(false);
         executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService, (FolderUpdaterService)simFolderUpdaterService2), new SimContextService()) {
             @Override
-            protected FolderObject getFolder(SubscriptionSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
+            protected FolderObject getFolder(TargetFolderSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
                 return null;
             }
         };
@@ -178,7 +181,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         simFolderUpdaterService2.setUsesMultipleStrategy(true);
         executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService, (FolderUpdaterService)simFolderUpdaterService2), new SimContextService()) {
             @Override
-            protected FolderObject getFolder(SubscriptionSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
+            protected FolderObject getFolder(TargetFolderSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
                 return null;
             }
         };
@@ -196,7 +199,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         subscribeService.setSubscriptions(subscriptions);        
         executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService), new SimContextService()) {
             @Override
-            protected FolderObject getFolder(SubscriptionSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
+            protected FolderObject getFolder(TargetFolderSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
                 return null;
             }
         };

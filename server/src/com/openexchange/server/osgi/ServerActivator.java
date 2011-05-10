@@ -114,6 +114,7 @@ import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
 import com.openexchange.folder.internal.FolderServiceImpl;
+import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
@@ -132,6 +133,7 @@ import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServ
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -255,7 +257,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class
+            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class
         };
 
     private final List<ServiceRegistration> registrationList;

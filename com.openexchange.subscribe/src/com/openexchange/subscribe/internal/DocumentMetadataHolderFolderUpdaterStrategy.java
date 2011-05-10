@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
@@ -66,7 +67,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.SubscriptionSession;
+import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 import com.openexchange.subscribe.helpers.HTTPToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -123,11 +124,11 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
     }
 
-    public Collection<DocumentMetadataHolder> getData(Subscription subscription, Object session) throws AbstractOXException {
+    public Collection<DocumentMetadataHolder> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
         List<DocumentMetadataHolder> list = new ArrayList<DocumentMetadataHolder>();
         InfostoreSession sess = (InfostoreSession) session;
         
-        SearchIterator<DocumentMetadata> documents = infostore.getDocuments(subscription.getFolderIdAsInt(), subscription.getContext(), sess.user, sess.userConfig).results();
+        SearchIterator<DocumentMetadata> documents = infostore.getDocuments(target.getFolderIdAsInt(), target.getContext(), sess.user, sess.userConfig).results();
         try {
             while(documents.hasNext()) {
                 list.add(new DocumentMetadataHolder(null, documents.next()));
@@ -181,8 +182,8 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         return null;
     }
 
-    public Object startSession(Subscription subscription) throws AbstractOXException {
-        return new InfostoreSession(subscription);
+    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
+        return new InfostoreSession(target);
     }
 
     public void update(DocumentMetadataHolder original, DocumentMetadataHolder update, Object session) throws AbstractOXException {
@@ -218,12 +219,13 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         public UserConfiguration userConfig;    
         public ServerSession serverSession;
         
-        public InfostoreSession(Subscription subscription) throws UserConfigurationException, UserException, SubscriptionException {
-            user = users.getUser(subscription.getUserId(), subscription.getContext());
-            userConfig = userConfigs.getUserConfiguration(subscription.getUserId(), subscription.getContext());
+        public InfostoreSession(TargetFolderDefinition target) throws UserConfigurationException, UserException, AbstractOXException {
+            user = users.getUser(target.getUserId(), target.getContext());
+            userConfig = userConfigs.getUserConfiguration(target.getUserId(), target.getContext());
        
-            serverSession = new ServerSessionAdapter(new SubscriptionSession(subscription), subscription.getContext(), user);
-            folderId = subscription.getFolderIdAsInt();
+            serverSession = new ServerSessionAdapter(new TargetFolderSession(target), target.getContext(), user);
+            folderId = target.getFolderIdAsInt();
+            
         }
     }
 

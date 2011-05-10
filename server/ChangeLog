@@ -1,6 +1,7 @@
 * 2011-05-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #18875: Consider more than one .properties file in the templates directory.
+ - Bugfix #19069: Merge contacts on CSV import.
 
 * 2011-05-09 - francisco.laguna@open-xchange.com
 

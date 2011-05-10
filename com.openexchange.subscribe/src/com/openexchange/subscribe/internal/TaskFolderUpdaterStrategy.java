@@ -57,11 +57,12 @@ import java.util.Map;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSession;
+import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -73,7 +74,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
 
     private static final int SQL_INTERFACE = 1;
 
-    private static final int SUBSCRIPTION = 2;
+    private static final int TARGET = 2;
 
     private static final int[] COMPARISON_COLUMNS = {
         Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE, Task.START_DATE, Task.END_DATE, Task.UID, Task.NOTE, Task.LAST_MODIFIED, Task.SEQUENCE };
@@ -116,10 +117,10 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
 
     }
 
-    public Collection<Task> getData(Subscription subscription, Object session) throws AbstractOXException {
+    public Collection<Task> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
         TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
 
-        int folderId = subscription.getFolderIdAsInt();
+        int folderId = target.getFolderIdAsInt();
         SearchIterator<Task> tasksInFolder;
         List<Task> retval = new ArrayList<Task>();
         int[] columns = Task.ALL_COLUMNS;
@@ -156,8 +157,8 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
 
     public void save(Task newElement, Object session) throws AbstractOXException {
         TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
-        Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
-        newElement.setParentFolderID(subscription.getFolderIdAsInt());
+        TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
+        newElement.setParentFolderID(target.getFolderIdAsInt());
         taskSql.insertTaskObject(newElement);
     }
 
@@ -165,10 +166,10 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         return ((Map<Integer, Object>) session).get(key);
     }
 
-    public Object startSession(Subscription subscription) throws AbstractOXException {
+    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
         Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        userInfo.put(SQL_INTERFACE, new TasksSQLImpl(new SubscriptionSession(subscription)));
-        userInfo.put(SUBSCRIPTION, subscription);
+        userInfo.put(SQL_INTERFACE, new TasksSQLImpl(new TargetFolderSession(target)));
+        userInfo.put(TARGET, target);
         return userInfo;
     }
 

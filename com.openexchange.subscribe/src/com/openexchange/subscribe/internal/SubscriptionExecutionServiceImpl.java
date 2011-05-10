@@ -59,11 +59,13 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.subscribe.FolderUpdaterService;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.SubscriptionSession;
+import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -74,7 +76,7 @@ import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURC
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService {
+public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
 
 	private static final Log LOG = LogFactory.getLog(SubscriptionExecutionServiceImpl.class);
 
@@ -114,10 +116,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     /**
      * @param subscription
      */
-    protected FolderUpdaterService getFolderUpdater(Subscription subscription) throws AbstractOXException {        
-        FolderObject folder = getFolder(new SubscriptionSession(subscription), subscription.getContext().getContextId(), subscription.getFolderIdAsInt());
+    public FolderUpdaterService getFolderUpdater(TargetFolderDefinition target) throws AbstractOXException {        
+        FolderObject folder = getFolder(new TargetFolderSession(target), target.getContext().getContextId(), target.getFolderIdAsInt());
 //             
-        boolean moreThanOneSubscriptionOnThisFolder = isThereMoreThanOneSubscriptionOnThisFolder(subscription.getContext(), subscription.getFolderId(), null); 
+        boolean moreThanOneSubscriptionOnThisFolder = isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null); 
         for (FolderUpdaterService updater : folderUpdaters) {
             if (updater.handles(folder)) {
                 // if there are 2 or more subscriptions on the folder: use the multiple-variant of the strategy if it exists
@@ -133,7 +135,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         return null;
     }
 
-    protected FolderObject getFolder(SubscriptionSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
+    protected FolderObject getFolder(TargetFolderSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
         OXFolderAccess ofa = new OXFolderAccess(contextService.getContext(contextId));
         return ofa.getFolderObject(folderId);
     }

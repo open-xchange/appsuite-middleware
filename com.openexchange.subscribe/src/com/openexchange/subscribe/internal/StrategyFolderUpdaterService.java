@@ -54,7 +54,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.FolderUpdaterService;
+import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.subscribe.Subscription;
 
 
@@ -86,10 +87,10 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
         return strategy.handles(folder);
     }
 
-    public void save(Collection<T> data, Subscription subscription) throws AbstractOXException {
-        Object session = strategy.startSession(subscription);
+    public void save(Collection<T> data, TargetFolderDefinition target) throws AbstractOXException {
+        Object session = strategy.startSession(target);
         
-        Collection<T> dataInFolder = strategy.getData(subscription, session);
+        Collection<T> dataInFolder = strategy.getData(target, session);
         
         for(T element : data) {
             try {
