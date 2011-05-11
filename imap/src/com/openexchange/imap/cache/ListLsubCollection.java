@@ -126,7 +126,7 @@ final class ListLsubCollection {
             iterator.next().deprecated();
         }
         lsubMap.clear();
-        stamp = Long.MIN_VALUE;
+        stamp = 0;
     }
 
     /**

@@ -463,7 +463,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            if (Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+            if (true || Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
             }
