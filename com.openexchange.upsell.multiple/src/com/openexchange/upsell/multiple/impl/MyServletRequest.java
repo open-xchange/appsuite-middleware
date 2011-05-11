@@ -458,26 +458,24 @@ public final class MyServletRequest  {
 		return STATIC_URL_RAW;
 	}
 	
-	private String parseText(String raw_text, JSONObject json,boolean url_encode_it) throws JSONException, URIException, UnsupportedEncodingException{
-		Map<UpsellURLParametersMap, String> bla = getParameterMap(json);
-		Set a = bla.keySet();
-		Iterator itr = a.iterator();
-		
-		// loop through all params and replace
-		while (itr.hasNext()) {
-			
-			UpsellURLParametersMap map_key = (UpsellURLParametersMap) itr.next();
-			String map_val = bla.get(map_key).toString();
-			if(url_encode_it){
-				map_val = URLEncoder.encode(map_val,"UTF-8");
-			}
-			// replace the placeholder with values
-			raw_text = raw_text.replaceAll(map_key.propertyName, map_val);
-			
-		}
-		
-		return raw_text;
-	}
+    private String parseText(String raw_text, JSONObject json, boolean url_encode_it) throws JSONException, URIException, UnsupportedEncodingException {
+        Map<UpsellURLParametersMap, String> bla = getParameterMap(json);
+
+        // loop through all params and replace
+        for (final Map.Entry<UpsellURLParametersMap, String> entry : bla.entrySet()) {
+            final UpsellURLParametersMap map_key = entry.getKey();
+            String map_val = entry.getValue();
+            if (null != map_val) {
+                if (url_encode_it) {
+                    map_val = URLEncoder.encode(map_val, "UTF-8");
+                }
+                // replace the placeholder with values
+                raw_text = raw_text.replaceAll(map_key.propertyName, map_val);
+            }
+        }
+
+        return raw_text;
+    }
 	
 	private void sendUpsellEmail(String to, String from,String text,String subject) throws MyServletException{
 		try {		
