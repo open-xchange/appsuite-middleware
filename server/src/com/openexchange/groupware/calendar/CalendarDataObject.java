@@ -60,9 +60,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class CalendarDataObject extends Appointment {
-    
-    private static CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-
+   
     private String rec_string;
 
     private Context context;
@@ -83,12 +81,16 @@ public class CalendarDataObject extends Appointment {
     private boolean fillConfirmations;
     private boolean fillLastModifiedOfNewestAttachment;
 
+    private CalendarCollectionService getCalendarCollectionService(){
+    	return ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+    }
+    
     @Override
     public final void setUntil(final Date until) {
         if (until != null) {
             final long mod = until.getTime() % Constants.MILLI_DAY;
             if (mod != 0) {
-                if (calColl.exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
+                if (getCalendarCollectionService().exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
                     until.setTime((((until.getTime() - mod) + Constants.MILLI_DAY)));
                 } else {
                     until.setTime(until.getTime() - mod);
@@ -192,7 +194,7 @@ public class CalendarDataObject extends Appointment {
 
     public final void setDelExceptions(final String delete_execptions) {
         if (delete_execptions != null) {
-            super.setDeleteExceptions(calColl.convertString2Dates(delete_execptions));
+            super.setDeleteExceptions(getCalendarCollectionService().convertString2Dates(delete_execptions));
         } else {
             setDeleteExceptions(null);
         }
@@ -200,14 +202,14 @@ public class CalendarDataObject extends Appointment {
 
     public final String getDelExceptions() {
         if (containsDeleteExceptions()) {
-            return calColl.convertDates2String(getDeleteException());
+            return getCalendarCollectionService().convertDates2String(getDeleteException());
         }
         return null;
     }
 
     public final void setExceptions(final String change_exceptions) {
         if (change_exceptions != null) {
-            super.setChangeExceptions(calColl.convertString2Dates(change_exceptions));
+            super.setChangeExceptions(getCalendarCollectionService().convertString2Dates(change_exceptions));
         } else {
             setChangeExceptions(null);
         }
@@ -215,14 +217,14 @@ public class CalendarDataObject extends Appointment {
 
     public final String getExceptions() {
         if (containsChangeExceptions()) {
-            return calColl.convertDates2String(getChangeException());
+            return getCalendarCollectionService().convertDates2String(getChangeException());
         }
         return null;
     }
 
     public final boolean calculateRecurrence() throws OXException {
         if (isSequence()) {
-            return calColl.fillDAO(this);
+            return getCalendarCollectionService().fillDAO(this);
         }
         return false;
     }
@@ -233,7 +235,7 @@ public class CalendarDataObject extends Appointment {
             /*
              * Determine max. end date
              */
-            return calColl.getMaxUntilDate(this);
+            return getCalendarCollectionService().getMaxUntilDate(this);
         }
         return super.getUntil();
     }
