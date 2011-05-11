@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -64,6 +65,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
+import com.openexchange.imap.cache.ListLsubCache;
+import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
@@ -290,20 +293,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Obtain IMAP folder
              */
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullname);
-            final boolean exists = "INBOX".equals(fullname) || imapFolder.exists();
+            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullname, accountId, imapFolder, session);
+            final boolean exists = "INBOX".equals(fullname) || (listEntry.exists());
             final IMAPConfig imapConfig = getIMAPConfig();
             if (!exists) {
                 throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
             }
-            String[] attrs;
-            try {
-                attrs = imapFolder.getAttributes();
-            } catch (final NullPointerException e) {
-                /*
-                 * No attributes available.
-                 */
-                attrs = null;
-            }
+            final Set<String> attrs = listEntry.getAttributes();
             if (null != attrs) {
                 for (final String attribute : attrs) {
                     if ("\\NonExistent".equalsIgnoreCase(attribute)) {
@@ -315,7 +311,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Selectable?
              */
-            if ((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0) {
+            if (listEntry.canOpen()) {
                 /*
                  * Check read access
                  */
@@ -404,8 +400,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void connectInternal() throws MailException {
-        if ((imapStore != null) && imapStore.isConnected()) {
-            connected = true;
+        if (connected) {
             return;
         }
         final IMAPConfig config = getIMAPConfig();
@@ -616,7 +611,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public IMAPFolderStorage getFolderStorage() throws MailException {
-        connected = ((imapStore != null) && imapStore.isConnected());
+        //connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
@@ -628,7 +623,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public IMAPMessageStorage getMessageStorage() throws MailException {
-        connected = ((imapStore != null) && imapStore.isConnected());
+        //connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
@@ -640,7 +635,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public MailLogicTools getLogicTools() throws MailException {
-        connected = ((imapStore != null) && imapStore.isConnected());
+        //connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
@@ -652,10 +647,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isConnected() {
+        /*-
+         * 
         if (!connected) {
             return false;
         }
         return (connected = ((imapStore != null) && imapStore.isConnected()));
+        */
+        return connected;
     }
 
     @Override

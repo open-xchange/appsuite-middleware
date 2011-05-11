@@ -59,6 +59,8 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.cache.ListLsubCache;
+import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
@@ -103,6 +105,8 @@ public final class IMAPDefaultFolderChecker {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPDefaultFolderChecker.class);
 
+    private static final String INBOX = "INBOX";
+
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final int FOLDER_TYPE = (IMAPFolder.HOLDS_MESSAGES | IMAPFolder.HOLDS_FOLDERS);
@@ -146,7 +150,7 @@ public final class IMAPDefaultFolderChecker {
      */
     public boolean isDefaultFolder(final String folderFullName) throws MailException {
         boolean isDefaultFolder = false;
-        isDefaultFolder = (folderFullName.equalsIgnoreCase("INBOX"));
+        isDefaultFolder = (folderFullName.equalsIgnoreCase(INBOX));
         for (int index = 0; (index < 6) && !isDefaultFolder; index++) {
             if (folderFullName.equalsIgnoreCase(getDefaultFolder(index))) {
                 return true;
@@ -169,7 +173,7 @@ public final class IMAPDefaultFolderChecker {
             checkDefaultFolders();
         }
         if (StorageUtility.INDEX_INBOX == index) {
-            return "INBOX";
+            return INBOX;
         }
         final String retval = getDefaultMailFolder(index, mailSessionCache);
         if (retval != null) {
@@ -217,10 +221,13 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Get INBOX folder
                      */
+                    final ListLsubEntry inboxListEntry;
+                    final ListLsubEntry inboxLsubEntry;
                     final IMAPFolder inboxFolder;
                     {
-                        final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder("INBOX");
-                        if (tmp.exists()) {
+                        final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
+                        ListLsubEntry[] entries = ListLsubCache.getCachedEntries(INBOX, accountId, tmp, session);
+                        if (null != entries[0]) {
                             inboxFolder = tmp;
                         } else {
                             /*
@@ -232,10 +239,14 @@ public final class IMAPDefaultFolderChecker {
                             } catch (final MessagingException e) {
                                 IMAPCommandsCollection.createFolder(tmp, sep, IMAPFolder.HOLDS_MESSAGES);
                             }
-                            inboxFolder = (IMAPFolder) imapStore.getFolder("INBOX");
+                            ListLsubCache.clearCache(accountId, session);
+                            inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+                            entries = ListLsubCache.getCachedEntries(INBOX, accountId, inboxFolder, session);
                         }
+                        inboxListEntry = entries[0];
+                        inboxLsubEntry = entries[1];
                     }
-                    if (!inboxFolder.isSubscribed()) {
+                    if (!inboxLsubEntry.exists()) {
                         /*
                          * Subscribe INBOX folder
                          */
@@ -247,7 +258,7 @@ public final class IMAPDefaultFolderChecker {
                     final String prefix;
                     final char sep;
                     {
-                        final String[] sa = getDefaultFolderPrefix(inboxFolder, mailSessionCache);
+                        final String[] sa = getDefaultFolderPrefix(inboxFolder, inboxListEntry, mailSessionCache);
                         prefix = sa[0];
                         sep = sa[1].charAt(0);
                     }
@@ -420,12 +431,12 @@ public final class IMAPDefaultFolderChecker {
         });
     }
 
-    private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final MailSessionCache mailSessionCache) throws MessagingException, IMAPException {
+    private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final ListLsubEntry inboxListEntry, final MailSessionCache mailSessionCache) throws MessagingException, IMAPException {
         /*
          * Check for NAMESPACE capability
          */
         final char sep;
-        final String inboxfullName = inboxFolder.getFullName();
+        final String inboxfullName = INBOX;
         final StringBuilder prefix = new StringBuilder(16);
         if (imapConfig.getImapCapabilities().hasNamespace()) {
             /*
@@ -459,14 +470,17 @@ public final class IMAPDefaultFolderChecker {
             /*
              * Examine INBOX folder since NAMESPACE capability is not supported
              */
-            sep = inboxFolder.getSeparator();
+            sep = inboxListEntry.getSeparator();
             setSeparator(sep, mailSessionCache);
-            final boolean inboxInferiors = inferiors(inboxFolder);
+            final boolean inboxInferiors = inboxListEntry.hasInferiors();
             /*
              * Examine root folder if subfolders allowed
              */
-            final boolean rootInferiors =
-                RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue();
+            final boolean rootInferiors = RootSubfolderCache.canCreateSubfolders(
+                (DefaultFolder) imapStore.getDefaultFolder(),
+                true,
+                session,
+                accountId).booleanValue();
             /*
              * Determine where to create default folders and store as a prefix for folder fullname
              */
@@ -487,7 +501,7 @@ public final class IMAPDefaultFolderChecker {
                 }
             } else {
                 // Cannot occur: No folders are allowed to be created, neither below INBOX nor below root folder
-                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, "INBOX");
+                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, INBOX);
             }
         }
         return new String[] { prefix.toString(), String.valueOf(sep) };
@@ -514,7 +528,7 @@ public final class IMAPDefaultFolderChecker {
     /**
      * Internally used by {@link IMAPDefaultFolderChecker}.
      */
-    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname) throws MessagingException, IMAPException {
+    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname) throws MessagingException, MailException {
         /*
          * Check default folder
          */
@@ -522,15 +536,54 @@ public final class IMAPDefaultFolderChecker {
         final boolean checkSubscribed = true;
         final long st = System.currentTimeMillis();
         final String fullname = tmp.append(prefix).append(name).toString();
-        Folder f = imapStore.getFolder(fullname);
+        {
+            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullname, accountId, imapStore, session);
+            if (entry.exists()) {
+                if (checkSubscribed) {
+                    final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
+                    if (1 == subscribe) {
+                        if (!entry.isSubscribed()) {
+                            try {
+                                f.setSubscribed(true);
+                                ListLsubCache.clearCache(accountId, session);
+                            } catch (final MethodNotSupportedException e) {
+                                LOG.error(e.getMessage(), e);
+                            } catch (final MessagingException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        }
+                    } else if (0 == subscribe) {
+                        if (entry.isSubscribed()) {
+                            try {
+                                f.setSubscribed(false);
+                                ListLsubCache.clearCache(accountId, session);
+                            } catch (final MethodNotSupportedException e) {
+                                LOG.error(e.getMessage(), e);
+                            } catch (final MessagingException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                }
+                if (DEBUG) {
+                    tmp.setLength(0);
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug(tmp.append("Default folder \"").append(fullname).append("\" successfully checked for IMAP account ").append(
+                        accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());
+                }
+                return fullname;
+            }
+        }
+        IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
         tmp.setLength(0);
-        if (!f.exists()) {
+        {
             if (isFullname) {
                 /*
                  * OK, a fullname was passed. Try to create obviously non-existing IMAP folder.
                  */
                 try {
-                    IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                    IMAPCommandsCollection.createFolder(f, sep, type);
+                    ListLsubCache.clearCache(accountId, session);
                     return null;
                 } catch (final MessagingException e) {
                     LOG.warn(new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
@@ -568,7 +621,8 @@ public final class IMAPDefaultFolderChecker {
                      * Zero or more than one candidate found. Try to create IMAP folder
                      */
                     try {
-                        IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                        IMAPCommandsCollection.createFolder(f, sep, type);
+                        ListLsubCache.clearCache(accountId, session);
                     } catch (final MessagingException e) {
                         LOG.warn(new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
                             "\" failed.").toString(), e);
@@ -577,7 +631,8 @@ public final class IMAPDefaultFolderChecker {
                     if (MailAccount.DEFAULT_ID == accountId) {
                         // Must not edit default mail account. Try to create IMAP folder
                         try {
-                            IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                            IMAPCommandsCollection.createFolder(f, sep, type);
+                            ListLsubCache.clearCache(accountId, session);
                         } catch (final MessagingException e) {
                             LOG.warn(
                                 new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
@@ -636,8 +691,9 @@ public final class IMAPDefaultFolderChecker {
                         } catch (final MailAccountException e) {
                             throw new IMAPException(e);
                         }
-                        f = imapStore.getFolder(tmp.append(prefix).append(candidate).toString());
+                        final String fn = tmp.append(prefix).append(candidate).toString();
                         tmp.setLength(0);
+                        f = (IMAPFolder) imapStore.getFolder(fn);
                     }
                 }
             }
@@ -700,17 +756,6 @@ public final class IMAPDefaultFolderChecker {
      */
     private void setSeparator(final char separator, final MailSessionCache mailSessionCache) {
         mailSessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), Character.valueOf(separator));
-    }
-
-    /**
-     * Checks if inferiors (subfolders) are allowed by specified folder; meaning to check if it is capable to hold folders.
-     * 
-     * @param folder The folder to check
-     * @return <code>true</code> if inferiors (subfolders) are allowed by specified folder; otherwise <code>false</code>
-     * @throws MessagingException If a messaging error occurs
-     */
-    private static boolean inferiors(final IMAPFolder folder) throws MessagingException {
-        return ((folder.getType() & IMAPFolder.HOLDS_FOLDERS) > 0);
     }
 
     private static abstract class AbstractCallable extends AbstractTask<Object> {

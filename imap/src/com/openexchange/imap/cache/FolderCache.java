@@ -269,7 +269,7 @@ public final class FolderCache {
             } else {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
             }
-            if (!"INBOX".equals(fullName) && !f.exists()) {
+            if (!"INBOX".equals(fullName) && (null == ListLsubCache.getCachedLISTEntry(fullName, folderStorage.getAccountId(), f, session))) {
                 f = folderStorage.checkForNamespaceFolder(fullName);
                 if (null == f) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
