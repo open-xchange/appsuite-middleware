@@ -1671,7 +1671,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         int appendix = 1;
                         final StringBuilder sb = new StringBuilder();
                         IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(
-                            getSeparator(deleteMe)).append(name).toString());
+                            getSeparator(trashFolder)).append(name).toString());
                         while (newFolder.exists()) {
                             /*
                              * A folder of the same name already exists. Append appropriate appendix to folder name and check existence
