@@ -52,6 +52,7 @@ package com.openexchange.imap.cache;
 import java.util.List;
 import java.util.Set;
 import javax.mail.Folder;
+import com.sun.mail.imap.ACL;
 
 /**
  * A LIST/LSUB entry.
@@ -151,6 +152,13 @@ public interface ListLsubEntry {
      * @see Folder#HOLDS_MESSAGES
      */
     int getType();
+
+    /**
+     * Gets the ACL list.
+     * 
+     * @return The ACL list or <code>null</code> if undetermined
+     */
+    List<ACL> getACLs();
 
     /**
      * Gets the number of messages as returned by <i>STATUS</i> command.

@@ -221,13 +221,12 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Get INBOX folder
                      */
-                    final ListLsubEntry inboxListEntry;
-                    final ListLsubEntry inboxLsubEntry;
+                    ListLsubEntry inboxListEntry;
                     final IMAPFolder inboxFolder;
                     {
                         final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
-                        ListLsubEntry[] entries = ListLsubCache.getCachedEntries(INBOX, accountId, tmp, session);
-                        if (null != entries[0]) {
+                        ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session);
+                        if (entry.exists()) {
                             inboxFolder = tmp;
                         } else {
                             /*
@@ -241,16 +240,17 @@ public final class IMAPDefaultFolderChecker {
                             }
                             ListLsubCache.clearCache(accountId, session);
                             inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-                            entries = ListLsubCache.getCachedEntries(INBOX, accountId, inboxFolder, session);
+                            entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
                         }
-                        inboxListEntry = entries[0];
-                        inboxLsubEntry = entries[1];
+                        inboxListEntry = entry;
                     }
-                    if (!inboxLsubEntry.exists()) {
+                    if (!inboxListEntry.isSubscribed()) {
                         /*
                          * Subscribe INBOX folder
                          */
                         inboxFolder.setSubscribed(true);
+                        ListLsubCache.clearCache(accountId, session);
+                        inboxListEntry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
                     }
                     /*
                      * Get prefix for default folder names, NOT fullnames!

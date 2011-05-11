@@ -102,9 +102,11 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.ENVELOPE;
@@ -482,6 +484,78 @@ public final class IMAPCommandsCollection {
                 protocol.notifyResponseHandlers(r);
                 protocol.handleResult(response);
                 return new int[] { total, recent, unseen };
+            }
+        });
+    }
+
+    /**
+     * Gets ACL list from denoted IMAP folder.
+     * 
+     * @param fullName The full name of the folder whose STATUS shall be returned
+     * @param imapFolder An IMAP folder providing connected {@link IMAPProtocol protocol}
+     * @param checkCapabilities Whether to check for needed capability
+     * @return The ACL list
+     * @throws MessagingException If determining counts fails
+     */
+    @SuppressWarnings("unchecked")
+    public static List<ACL> getAcl(final String fullName, final IMAPFolder imapFolder, final boolean checkCapabilities) throws MessagingException {
+        return (List<ACL>) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                if (!protocol.hasCapability("ACL")) {
+                    throw new com.sun.mail.iap.BadCommandException("ACL not supported");
+                }
+                /*
+                 * Encode the mbox as per RFC2060
+                 */
+                final String mbox = BASE64MailboxEncoder.encode(fullName);
+                /*
+                 * Arguments...
+                 */
+                final Argument args = new Argument(); 
+                args.writeString(mbox);
+                /*
+                 * Execute
+                 */
+                final Response[] r = protocol.command("GETACL", args);
+                final Response response = r[r.length-1];
+                /*
+                 * Grab all ACL responses
+                 */
+                final List<ACL> list;
+                if (response.isOK()) {
+                    list = new ArrayList<ACL>(r.length);
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals("ACL")) {
+                            /*
+                             * Read name of mailbox and throw away
+                             */
+                            ir.readAtomString();
+                            String name = null;
+                            while ((name = ir.readAtomString()) != null) {
+                                final String rights = ir.readAtomString();
+                                if (rights == null) {
+                                    break;
+                                }
+                                final ACL acl = new ACL(name, new Rights(rights));
+                                list.add(acl);
+                            }
+                            r[i] = null;
+                        }
+                    }
+                } else {
+                    list = Collections.emptyList();
+                }
+                /*
+                 * Dispatch remaining untagged responses
+                 */
+                protocol.notifyResponseHandlers(r);
+                protocol.handleResult(response);
+                return list;
             }
         });
     }

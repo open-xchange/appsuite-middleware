@@ -68,6 +68,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
@@ -93,11 +94,11 @@ final class ListLsubCollection {
      * @param imapFolder The IMAP folder
      * @throws MailException If initialization fails
      */
-    protected ListLsubCollection(final IMAPFolder imapFolder) throws MailException {
+    protected ListLsubCollection(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubCollection.ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubCollection.ListLsubEntryImpl>();
-        init(imapFolder);
+        init(imapFolder, doStatus, doGetAcl);
     }
 
     /**
@@ -106,11 +107,11 @@ final class ListLsubCollection {
      * @param imapStore The IMAP store
      * @throws MailException If initialization fails
      */
-    protected ListLsubCollection(final IMAPStore imapStore) throws MailException {
+    protected ListLsubCollection(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubCollection.ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubCollection.ListLsubEntryImpl>();
-        init(imapStore);
+        init(imapStore, doStatus, doGetAcl);
     }
 
     /**
@@ -138,10 +139,10 @@ final class ListLsubCollection {
      * @param imapStore The IMAP store
      * @throws MailException If re-initialization fails
      */
-    public void reinit(final IMAPStore imapStore) throws MailException {
+    public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
         listMap.clear();
         lsubMap.clear();
-        init(imapStore);
+        init(imapStore, doStatus, doGetAcl);
     }
 
     /**
@@ -150,21 +151,21 @@ final class ListLsubCollection {
      * @param imapFolder The IMAP folder
      * @throws MailException If re-initialization fails
      */
-    public void reinit(final IMAPFolder imapFolder) throws MailException {
+    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         listMap.clear();
         lsubMap.clear();
-        init(imapFolder);
+        init(imapFolder, doStatus, doGetAcl);
     }
 
-    private void init(final IMAPStore imapStore) throws MailException {
+    private void init(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
         try {
-            init((IMAPFolder) imapStore.getFolder("INBOX"));
+            init((IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
     }
 
-    private void init(final IMAPFolder imapFolder) throws MailException {
+    private void init(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         try {
             /*
              * Perform LIST "" ""
@@ -199,27 +200,53 @@ final class ListLsubCollection {
                 }
 
             });
-            /*
-             * Gather STATUS for each entry
-             */
-            for (final Iterator<ListLsubEntryImpl> iter = listMap.values().iterator(); iter.hasNext();) {
-                final ListLsubEntryImpl listEntry = iter.next();
-                if (listEntry.canOpen()) {
-                    try {
-                        final String fullName = listEntry.getFullName();
-                        final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
-                        if (null != status) {
-                            listEntry.setStatus(status);
+            if (doStatus) {
+                /*
+                 * Gather STATUS for each entry
+                 */
+                for (final Iterator<ListLsubEntryImpl> iter = listMap.values().iterator(); iter.hasNext();) {
+                    final ListLsubEntryImpl listEntry = iter.next();
+                    if (listEntry.canOpen()) {
+                        try {
+                            final String fullName = listEntry.getFullName();
+                            final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
+                            if (null != status) {
+                                listEntry.setStatus(status);
+                                final ListLsubEntryImpl lsubEntry = lsubMap.get(fullName);
+                                if (null != lsubEntry) {
+                                    lsubEntry.setStatus(status);
+                                }
+                            }
+                        } catch (final Exception e) {
+                            // Swallow failed STATUS command
+                            org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
+                                "STATUS command failed for " + imapFolder.getStore().toString(),
+                                e);
+                        }
+                    }
+                }
+            }
+            if (doGetAcl && ((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
+                /*
+                 * Perform GETACL command for each entry
+                 */
+                for (final Iterator<ListLsubEntryImpl> iter = listMap.values().iterator(); iter.hasNext();) {
+                    final ListLsubEntryImpl listEntry = iter.next();
+                    if (listEntry.canOpen()) {
+                        try {
+                            final String fullName = listEntry.getFullName();
+                            final List<ACL> aclList = IMAPCommandsCollection.getAcl(fullName, imapFolder, false);
+                            listEntry.setAcls(aclList);
                             final ListLsubEntryImpl lsubEntry = lsubMap.get(fullName);
                             if (null != lsubEntry) {
-                                lsubEntry.setStatus(status);
+                                lsubEntry.setAcls(aclList);
                             }
+                        } catch (final Exception e) {
+                            // Swallow failed ACL command
+                            org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
+                                "ACL command failed for " + imapFolder.getStore().toString(),
+                                e);
                         }
-                    } catch (final Exception e) {
-                        // Swallow failed STATUS command
-                        org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
-                            "STATUS command failed for " + imapFolder.getStore().toString(),
-                            e);
                     }
                 }
             }
@@ -583,6 +610,11 @@ final class ListLsubCollection {
             return -1;
         }
 
+        public List<ACL> getACLs() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
     }
 
     /**
@@ -611,6 +643,8 @@ final class ListLsubCollection {
         private final int type;
 
         private final ConcurrentMap<String, ListLsubEntryImpl> lsubMap;
+
+        private List<ACL> acls;
 
         ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
@@ -727,6 +761,14 @@ final class ListLsubCollection {
 
         public int getUnreadMessageCount() {
             return null == status ? -1 : status[2];
+        }
+
+        void setAcls(final List<ACL> acls) {
+            this.acls = acls;
+        }
+
+        public List<ACL> getACLs() {
+            return acls == null ? null : new ArrayList<ACL>(acls);
         }
 
     } // End of class ListLsubEntryImpl

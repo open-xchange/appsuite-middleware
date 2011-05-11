@@ -417,9 +417,17 @@ public final class IMAPFolderConverter {
                  * Set message counts for total, new, unread, and deleted
                  */
                 if (selectable && imapConfig.getACLExtension().canRead(ownRights)) {
-                    mailFolder.setMessageCount(listEntry.getMessageCount());
-                    mailFolder.setNewMessageCount(listEntry.getNewMessageCount());
-                    mailFolder.setUnreadMessageCount(listEntry.getUnreadMessageCount());
+                    final int messageCount = listEntry.getMessageCount();
+                    if (messageCount < 0) {
+                        final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
+                        mailFolder.setMessageCount(status[0]);
+                        mailFolder.setNewMessageCount(status[1]);
+                        mailFolder.setUnreadMessageCount(status[2]);
+                    } else {
+                        mailFolder.setMessageCount(messageCount);
+                        mailFolder.setNewMessageCount(listEntry.getNewMessageCount());
+                        mailFolder.setUnreadMessageCount(listEntry.getUnreadMessageCount());
+                    }
                     mailFolder.setDeletedMessageCount(-1/* imapFolder.getDeletedMessageCount() */);
                 } else {
                     mailFolder.setMessageCount(-1);
@@ -574,7 +582,8 @@ public final class IMAPFolderConverter {
     private static void applyACL2Permissions(final IMAPFolder imapFolder, final ListLsubEntry listEntry, final Session session, final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights, final Context ctx) throws MailException {
         final ACL[] acls;
         try {
-            acls = imapFolder.getACL();
+            final List<ACL> list = listEntry.getACLs();
+            acls = null == list ? imapFolder.getACL() : list.toArray(new ACL[list.size()]);
         } catch (final MessagingException e) {
             if (!ownRights.contains(Rights.Right.ADMINISTER)) {
                 if (LOG.isWarnEnabled()) {

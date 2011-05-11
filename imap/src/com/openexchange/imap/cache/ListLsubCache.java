@@ -74,6 +74,10 @@ public final class ListLsubCache {
 
     private static final String INBOX = "INBOX";
 
+    private static final boolean DO_STATUS = true;
+
+    private static final boolean DO_GETACL = true;
+
     /**
      * No instance
      */
@@ -155,7 +159,7 @@ public final class ListLsubCache {
      * @param accountId The account ID
      * @param imapFolder The IMAP
      * @param session The session
-     * @return The cached LSUB entry or <code>null</code> if no such IMAP folder exists
+     * @return The cached LSUB entry
      * @throws MailException If loading the entry fails
      */
     public static ListLsubEntry getCachedLSUBEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
@@ -165,7 +169,7 @@ public final class ListLsubCache {
              * Check collection's stamp
              */
             if ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT) {
-                collection.reinit(imapFolder);
+                collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
             }
             /*
              * Return
@@ -182,7 +186,7 @@ public final class ListLsubCache {
      * @param accountId The account ID
      * @param imapStore The IMAP store
      * @param session The session
-     * @return The cached LIST entry or <code>null</code> if no such IMAP folder exists
+     * @return The cached LIST entry
      * @throws MailException If loading the entry fails
      */
     public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final IMAPStore imapStore, final Session session) throws MailException {
@@ -194,7 +198,7 @@ public final class ListLsubCache {
                  * Check collection's stamp
                  */
                 if ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT) {
-                    collection.reinit(imapFolder);
+                    collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
                 }
                 /*
                  * Return
@@ -214,7 +218,7 @@ public final class ListLsubCache {
      * @param accountId The account ID
      * @param imapFolder The IMAP
      * @param session The session
-     * @return The cached LIST entry or <code>null</code> if no such IMAP folder exists
+     * @return The cached LIST entry
      * @throws MailException If loading the entry fails
      */
     public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
@@ -224,7 +228,7 @@ public final class ListLsubCache {
              * Check collection's stamp
              */
             if ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT) {
-                collection.reinit(imapFolder);
+                collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
             }
             /*
              * Return
@@ -251,7 +255,7 @@ public final class ListLsubCache {
              * Check collection's stamp
              */
             if ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT) {
-                collection.reinit(imapFolder);
+                collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
             }
             /*
              * Return
@@ -278,7 +282,7 @@ public final class ListLsubCache {
                     mailCache.get(entry);
                     collection = entry.getValue();
                     if (null == collection) {
-                        final ListLsubCollection newCol = new ListLsubCollection(imapFolder);
+                        final ListLsubCollection newCol = new ListLsubCollection(imapFolder, DO_STATUS, DO_GETACL);
                         entry.setValue(newCol);
                         mailCache.put(entry);
                         collection = newCol;
@@ -290,7 +294,7 @@ public final class ListLsubCache {
                     mailCache.get(entry);
                     collection = entry.getValue();
                     if (null == collection) {
-                        final ListLsubCollection newCol = new ListLsubCollection(imapFolder);
+                        final ListLsubCollection newCol = new ListLsubCollection(imapFolder, DO_STATUS, DO_GETACL);
                         entry.setValue(newCol);
                         mailCache.put(entry);
                         collection = newCol;
