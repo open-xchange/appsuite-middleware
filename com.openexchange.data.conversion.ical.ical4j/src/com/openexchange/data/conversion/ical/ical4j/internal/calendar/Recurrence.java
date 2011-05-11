@@ -277,7 +277,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             cObj.setRecurrenceCount(recurrenceCount);
             setOccurrenceIfNeededRecoveryFIXME(cObj, recurrenceCount);
         } else if (null != rrule.getUntil()) {
-            cObj.setUntil(ParserTools.recalculate(new Date(rrule.getUntil().getTime()), timeZone));
+            cObj.setUntil(ParserTools.recalculateMidnight(new Date(rrule.getUntil().getTime()), TimeZone.getTimeZone("UTC"))); // OX always has 00:00 UTC same say as until value
         }
     }
 

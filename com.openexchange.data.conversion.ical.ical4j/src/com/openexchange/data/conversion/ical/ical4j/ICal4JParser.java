@@ -115,7 +115,11 @@ public class ICal4JParser implements ICalParser {
         CompatibilityHints.setHintEnabled(
                 CompatibilityHints.KEY_OUTLOOK_COMPATIBILITY, true);
         CompatibilityHints.setHintEnabled(
-                        CompatibilityHints.KEY_NOTES_COMPATIBILITY, true);
+                CompatibilityHints.KEY_NOTES_COMPATIBILITY, true);
+        CompatibilityHints.setHintEnabled(
+        		CompatibilityHints.KEY_RELAXED_PARSING, true);
+        CompatibilityHints.setHintEnabled(
+              	CompatibilityHints.KEY_RELAXED_VALIDATION, true);
 
     }
 
@@ -150,6 +154,8 @@ public class ICal4JParser implements ICalParser {
             
         } catch (final UnsupportedEncodingException e) {
             // IGNORE
+        } catch (ConversionError e){
+        	errors.add(e);
         }
 
 
@@ -316,7 +322,7 @@ public class ICal4JParser implements ICalParser {
             	workaroundFor16367(
             	workaroundFor17492(
             	workaroundFor17963(
-            					removeAnnoyingWhitespaces(chunk.toString()
+            	removeAnnoyingWhitespaces(chunk.toString()
                 ))))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader); 

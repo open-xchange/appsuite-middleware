@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -83,15 +84,7 @@ public final class ParserTools {
      * the time will be 00:00 UTC
      */
     public static Date parseDateConsideringDateType(final CalendarComponent component, final DateProperty property, final TimeZone timeZone) {
-        final boolean isDateTime = isDateTime(component, property);
-        final TimeZone UTC = TimeZone.getTimeZone("UTC");
-        final Date value;
-        if (isDateTime) {
-            value = parseDate(component, property, timeZone);
-        } else {
-            value = parseDate(component, property, UTC);
-        }
-        return value;
+        return parseDate(component, property, timeZone);
     }
     
     /**
@@ -147,6 +140,25 @@ public final class ParserTools {
             inDefault.get(java.util.Calendar.HOUR_OF_DAY),
             inDefault.get(java.util.Calendar.MINUTE),
             inDefault.get(java.util.Calendar.SECOND));
+        inTimeZone.set(java.util.Calendar.MILLISECOND, 0);
+        return inTimeZone.getTime();
+    }
+    
+    /**
+     * Transforms date from the default timezone to midnight in the given timezone.
+     */
+    public static Date recalculateMidnight(final Date date, final TimeZone timeZone) {
+
+        final java.util.Calendar inDefault = new GregorianCalendar();
+        inDefault.setTime(date);
+
+        final java.util.Calendar inTimeZone = new GregorianCalendar();
+        inTimeZone.setTimeZone(timeZone);
+        inTimeZone.set(
+            inDefault.get(java.util.Calendar.YEAR),
+            inDefault.get(java.util.Calendar.MONTH),
+            inDefault.get(java.util.Calendar.DATE),
+            0,0,0);
         inTimeZone.set(java.util.Calendar.MILLISECOND, 0);
         return inTimeZone.getTime();
     }
