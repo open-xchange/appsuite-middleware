@@ -96,8 +96,8 @@ final class ListLsubCollection {
      */
     protected ListLsubCollection(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         super();
-        listMap = new ConcurrentHashMap<String, ListLsubCollection.ListLsubEntryImpl>();
-        lsubMap = new ConcurrentHashMap<String, ListLsubCollection.ListLsubEntryImpl>();
+        listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
+        lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         init(imapFolder, doStatus, doGetAcl);
     }
 
@@ -109,8 +109,8 @@ final class ListLsubCollection {
      */
     protected ListLsubCollection(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
         super();
-        listMap = new ConcurrentHashMap<String, ListLsubCollection.ListLsubEntryImpl>();
-        lsubMap = new ConcurrentHashMap<String, ListLsubCollection.ListLsubEntryImpl>();
+        listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
+        lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         init(imapStore, doStatus, doGetAcl);
     }
 
@@ -118,7 +118,13 @@ final class ListLsubCollection {
      * Clears this collection and resets its time stamp to force re-initialization.
      */
     public void clear() {
+        for (final Iterator<ListLsubEntryImpl> iterator = listMap.values().iterator(); iterator.hasNext();) {
+            iterator.next().deprecated();
+        }
         listMap.clear();
+        for (final Iterator<ListLsubEntryImpl> iterator = lsubMap.values().iterator(); iterator.hasNext();) {
+            iterator.next().deprecated();
+        }
         lsubMap.clear();
         stamp = Long.MIN_VALUE;
     }
@@ -129,8 +135,14 @@ final class ListLsubCollection {
      * @param fullName The full name
      */
     public void remove(final String fullName) {
-        listMap.remove(fullName);
-        lsubMap.remove(fullName);
+        ListLsubEntryImpl entry = listMap.remove(fullName);
+        if (null != entry) {
+            entry.deprecated();
+        }
+        entry = lsubMap.remove(fullName);
+        if (null != entry) {
+            entry.deprecated();
+        }
     }
 
     /**
@@ -140,8 +152,7 @@ final class ListLsubCollection {
      * @throws MailException If re-initialization fails
      */
     public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
-        listMap.clear();
-        lsubMap.clear();
+        clear();
         init(imapStore, doStatus, doGetAcl);
     }
 
@@ -152,8 +163,7 @@ final class ListLsubCollection {
      * @throws MailException If re-initialization fails
      */
     public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
-        listMap.clear();
-        lsubMap.clear();
+        clear();
         init(imapFolder, doStatus, doGetAcl);
     }
 
@@ -611,7 +621,6 @@ final class ListLsubCollection {
         }
 
         public List<ACL> getACLs() {
-            // TODO Auto-generated method stub
             return null;
         }
 
@@ -646,8 +655,11 @@ final class ListLsubCollection {
 
         private List<ACL> acls;
 
+        private boolean deprecated;
+
         ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
+            this.deprecated = false;
             this.fullName = fullName;
             this.attributes = attributes;
             this.separator = separator;
@@ -665,7 +677,21 @@ final class ListLsubCollection {
             this.lsubMap = lsubMap;
         }
 
+        /**
+         * Marks this entry as deprecated.
+         */
+        void deprecated() {
+            deprecated = true;
+        }
+
+        private void checkDeprecated() {
+            if (deprecated) {
+                throw new IllegalStateException("LIST/LSUB entry is deprecated.");
+            }
+        }
+
         public String getName() {
+            checkDeprecated();
             return fullName.substring(fullName.lastIndexOf(separator) + 1);
         }
 
@@ -679,6 +705,7 @@ final class ListLsubCollection {
         }
 
         public ListLsubEntry getParent() {
+            checkDeprecated();
             return parent;
         }
 
@@ -698,42 +725,52 @@ final class ListLsubCollection {
         }
 
         public List<ListLsubEntry> getChildren() {
+            checkDeprecated();
             return null == children ? Collections.<ListLsubEntry> emptyList() : Collections.unmodifiableList(children);
         }
 
         public String getFullName() {
+            checkDeprecated();
             return fullName;
         }
 
         public Set<String> getAttributes() {
+            checkDeprecated();
             return attributes;
         }
 
         public char getSeparator() {
+            checkDeprecated();
             return separator;
         }
 
         public ChangeState getChangeState() {
+            checkDeprecated();
             return changeState;
         }
 
         public boolean hasInferiors() {
+            checkDeprecated();
             return hasInferiors;
         }
 
         public boolean canOpen() {
+            checkDeprecated();
             return canOpen;
         }
 
         public int getType() {
+            checkDeprecated();
             return type;
         }
 
         public boolean exists() {
+            checkDeprecated();
             return true;
         }
 
         public boolean isSubscribed() {
+            checkDeprecated();
             return null == lsubMap ? true : lsubMap.containsKey(fullName);
         }
 
@@ -752,22 +789,31 @@ final class ListLsubCollection {
         }
 
         public int getMessageCount() {
+            checkDeprecated();
             return null == status ? -1 : status[0];
         }
 
         public int getNewMessageCount() {
+            checkDeprecated();
             return null == status ? -1 : status[1];
         }
 
         public int getUnreadMessageCount() {
+            checkDeprecated();
             return null == status ? -1 : status[2];
         }
 
+        /**
+         * Sets the ACLs.
+         * 
+         * @param acls The ACL list
+         */
         void setAcls(final List<ACL> acls) {
             this.acls = acls;
         }
 
         public List<ACL> getACLs() {
+            checkDeprecated();
             return acls == null ? null : new ArrayList<ACL>(acls);
         }
 

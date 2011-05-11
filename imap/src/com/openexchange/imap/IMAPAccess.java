@@ -61,6 +61,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import javax.mail.event.FolderEvent;
+import javax.mail.event.FolderListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.acl.ACLExtension;
@@ -513,6 +515,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             connected = true;
             /*
+             * Add folder listener
+             */
+            imapStore.addFolderListener(new ListLsubCacheFolderListener(accountId, session));
+            /*
              * Add server's capabilities
              */
             config.initializeCapabilities(imapStore, session);
@@ -778,6 +784,30 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected boolean checkMailServerPort() {
         return true;
     }
+
+    private static final class ListLsubCacheFolderListener implements FolderListener {
+
+        private final int accountId;
+
+        private final Session session;
+
+        ListLsubCacheFolderListener(final int accountId, final Session session) {
+            this.accountId = accountId;
+            this.session = session;
+        }
+
+        public void folderRenamed(final FolderEvent e) {
+            ListLsubCache.clearCache(accountId, session);
+        }
+
+        public void folderDeleted(final FolderEvent e) {
+            ListLsubCache.clearCache(accountId, session);
+        }
+
+        public void folderCreated(final FolderEvent e) {
+            ListLsubCache.clearCache(accountId, session);
+        }
+    } // End of ListLsubCacheFolderListener
 
     private static final class StampAndError {
 

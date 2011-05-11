@@ -192,6 +192,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);
+            } catch (final RuntimeException e) {
+                throw handleRuntimeException(e);
             }
         }
         return mailAccount;
@@ -206,6 +208,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw new MailException(e);
             } catch (final UserException e) {
                 throw new MailException(e);
+            } catch (final RuntimeException e) {
+                throw handleRuntimeException(e);
             }
         }
         return locale;
@@ -284,6 +288,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return messages;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -299,6 +305,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
             }
             return fetchValidSeqNums(seqNums, fetchProfile, isRev1, body, true);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -402,6 +410,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return setAccountInfo(mail);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -564,6 +574,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -700,6 +712,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return flatList.toArray(new MailMessage[flatList.size()]);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -751,6 +765,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return mails;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -794,6 +810,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -911,6 +929,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 Arrays.toString(uids),
                 imapFolder.getFullName(),
                 e.getMessage());
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1076,6 +1096,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return result;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1289,6 +1311,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1408,6 +1432,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1526,6 +1552,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1590,6 +1618,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             resetIMAPFolder();
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1653,6 +1683,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             resetIMAPFolder();
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1715,6 +1747,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IOException e) {
             throw IMAPException.create(IMAPException.Code.IO_ERROR, imapConfig, session, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1742,6 +1776,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return getMessagesLong(folder, uids, fields);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 

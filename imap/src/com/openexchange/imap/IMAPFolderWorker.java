@@ -60,6 +60,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
+import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
@@ -147,13 +148,13 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     /**
-     * Reports a modification of the IMAP folder denoted by specified fullname. If stored IMAP folder's fullname equals specified fullname,
-     * it is closed quietly.
+     * Reports a modification of the IMAP folder denoted by specified full name. If stored IMAP folder's full name equals specified full
+     * name, it is closed quietly.
      * 
-     * @param modifiedFullname The fullname of the folder which has been modified
+     * @param modifiedFullName The full name of the folder which has been modified
      */
-    public void notifyIMAPFolderModification(final String modifiedFullname) {
-        if ((null == imapFolder) || !modifiedFullname.equals(imapFolder.getFullName())) {
+    public void notifyIMAPFolderModification(final String modifiedFullName) {
+        if ((null == imapFolder) || !modifiedFullName.equals(imapFolder.getFullName())) {
             /*
              * Modified folder did not affect remembered IMAP folder
              */
@@ -168,13 +169,13 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     /**
-     * Reports a modification of the IMAP folders denoted by specified set of fullnames. If stored IMAP folder's fullname is contained in
-     * set of fullnames, it is closed quietly.
+     * Reports a modification of the IMAP folders denoted by specified set of full names. If stored IMAP folder's full name is contained in
+     * set of full names, it is closed quietly.
      * 
-     * @param modifiedFullnames The fullnames of the folders which have been modified
+     * @param modifiedFullNames The full names of the folders which have been modified
      */
-    public void notifyIMAPFolderModification(final Set<String> modifiedFullnames) {
-        if ((null == imapFolder) || !modifiedFullnames.contains(imapFolder.getFullName())) {
+    public void notifyIMAPFolderModification(final Set<String> modifiedFullNames) {
+        if ((null == imapFolder) || !modifiedFullNames.contains(imapFolder.getFullName())) {
             /*
              * Modified folders did not affect remembered IMAP folder
              */
@@ -229,7 +230,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /**
      * Sets and opens (only if exists) the folder in a safe manner, checks if selectable and for right {@link Right#READ}
      * 
-     * @param fullname The folder fullname
+     * @param fullname The folder full name
      * @param desiredMode The desired opening mode (either {@link Folder#READ_ONLY} or {@link Folder#READ_WRITE})
      * @return The properly opened IMAP folder
      * @throws MessagingException If a messaging error occurs
@@ -243,7 +244,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * Sets and opens (only if exists) the folder in a safe manner, checks if selectable and for right {@link Right#READ}
      * 
      * @param imapFolder The IMAP folder to check against
-     * @param fullname The folder fullname
+     * @param fullname The folder full name
      * @param desiredMode The desired opening mode (either {@link Folder#READ_ONLY} or {@link Folder#READ_WRITE})
      * @return The properly opened IMAP folder
      * @throws MessagingException If a messaging error occurs
@@ -332,34 +333,54 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 }
             }
         }
-        final IMAPFolder retval =
-            (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullname));
+        final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullname));
         /*
          * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
          */
         synchronized (retval) {
             final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullname, accountId, retval, session);
             if (!isDefaultFolder && !STR_INBOX.equals(fullname) && (!listEntry.exists())) {
-                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                throw IMAPException.create(
+                    IMAPException.Code.FOLDER_NOT_FOUND,
+                    imapConfig,
+                    session,
+                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
             }
             if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
                 throw IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, imapConfig, session, Integer.valueOf(desiredMode));
             }
             final boolean selectable = listEntry.canOpen();
             if (!selectable) { // NoSelect
-                throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                throw IMAPException.create(
+                    IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
+                    imapConfig,
+                    session,
+                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
             }
             try {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
-                    throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                    throw IMAPException.create(
+                        IMAPException.Code.NO_FOLDER_OPEN,
+                        imapConfig,
+                        session,
+                        isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
                 }
             } catch (final MessagingException e) {
-                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                throw IMAPException.create(
+                    IMAPException.Code.NO_ACCESS,
+                    imapConfig,
+                    session,
+                    e,
+                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
             }
             if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
                 MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
                 STR_FALSE)) && IMAPCommandsCollection.isReadOnly(retval)) {
-                throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                throw IMAPException.create(
+                    IMAPException.Code.READ_ONLY_FOLDER,
+                    imapConfig,
+                    session,
+                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
             }
             retval.open(desiredMode);
         }
@@ -367,13 +388,16 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     /**
-     * Checks if specified IMAP folder is allowed for being selected through SELECT command.
+     * Handles specified {@link RuntimeException} instance.
      * 
-     * @param imapFolder The IMAP folder to check
-     * @return <code>true</code> if specified IMAP folder is allowed for being selected through SELECT command; otherwise <code>false</code>
-     * @throws MessagingException If IMAP folder's type cannot be determined
+     * @param e The runtime exception to handle
+     * @return An appropriate {@link MailException}
      */
-    private static final boolean isSelectable(final IMAPFolder imapFolder) throws MessagingException {
-        return (imapFolder.getType() & Folder.HOLDS_MESSAGES) == Folder.HOLDS_MESSAGES;
+    protected static MailException handleRuntimeException(final RuntimeException e) {
+        if (e instanceof ListLsubRuntimeException) {
+            return new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
+        }
+        return new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
     }
+
 }

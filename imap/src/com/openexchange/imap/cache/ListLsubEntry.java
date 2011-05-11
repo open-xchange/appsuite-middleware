@@ -67,6 +67,7 @@ public interface ListLsubEntry {
      * Indicates whether associated IMAP folder is subscribed.
      * 
      * @return <code>true</code> if associated IMAP folder is subscribed; otherwise <code>false</code>
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     boolean isSubscribed();
 
@@ -81,6 +82,7 @@ public interface ListLsubEntry {
      * Gets this LIST/LSUB entry's parent or <code>null</code> if no parent exists.
      * 
      * @return The parent or <code>null</code> for no parent
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     ListLsubEntry getParent();
 
@@ -88,6 +90,7 @@ public interface ListLsubEntry {
      * Gets the children of this LIST/LSUB entry.
      * 
      * @return The children
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     List<ListLsubEntry> getChildren();
 
@@ -95,6 +98,7 @@ public interface ListLsubEntry {
      * Gets the full name
      * 
      * @return The full name
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     String getFullName();
 
@@ -102,6 +106,7 @@ public interface ListLsubEntry {
      * Gets the attributes
      * 
      * @return The attributes
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     Set<String> getAttributes();
 
@@ -109,6 +114,7 @@ public interface ListLsubEntry {
      * Gets the separator
      * 
      * @return The separator
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     char getSeparator();
 
@@ -116,6 +122,7 @@ public interface ListLsubEntry {
      * Gets the name.
      * 
      * @return The name
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     String getName();
 
@@ -123,6 +130,7 @@ public interface ListLsubEntry {
      * Gets the change state
      * 
      * @return The change state
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     ListLsubEntry.ChangeState getChangeState();
 
@@ -132,6 +140,7 @@ public interface ListLsubEntry {
      * {@link Folder#HOLDS_FOLDERS}
      * 
      * @return The has-inferiors flag
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     boolean hasInferiors();
 
@@ -141,6 +150,7 @@ public interface ListLsubEntry {
      * {@link Folder#HOLDS_MESSAGES}
      * 
      * @return The can-open flag
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     boolean canOpen();
 
@@ -150,6 +160,7 @@ public interface ListLsubEntry {
      * @return The type
      * @see Folder#HOLDS_FOLDERS
      * @see Folder#HOLDS_MESSAGES
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     int getType();
 
@@ -157,6 +168,7 @@ public interface ListLsubEntry {
      * Gets the ACL list.
      * 
      * @return The ACL list or <code>null</code> if undetermined
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     List<ACL> getACLs();
 
@@ -164,6 +176,7 @@ public interface ListLsubEntry {
      * Gets the number of messages as returned by <i>STATUS</i> command.
      * 
      * @return The number of messages or <code>-1</code> if undetermined
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     int getMessageCount();
 
@@ -171,6 +184,7 @@ public interface ListLsubEntry {
      * Gets the number of new messages as returned by <i>STATUS</i> command.
      * 
      * @return The number of new messages or <code>-1</code> if undetermined
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     int getNewMessageCount();
 
@@ -178,6 +192,7 @@ public interface ListLsubEntry {
      * Gets the number of unread messages as returned by <i>STATUS</i> command.
      * 
      * @return The number of unread messages or <code>-1</code> if undetermined
+     * @throws ListLsubRuntimeException If entry is deprecated
      */
     int getUnreadMessageCount();
 

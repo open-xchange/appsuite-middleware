@@ -77,6 +77,7 @@ import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.FolderCache;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
+import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
@@ -217,7 +218,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      */
     public void clearCache() {
         FolderCache.removeCachedFolders(session, accountId);
-        //ListLsubCache.clearCache(accountId, session);
+        // ListLsubCache.clearCache(accountId, session);
     }
 
     /**
@@ -227,7 +228,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      */
     public void removeFromCache(final String modifiedFullname) {
         FolderCache.removeCachedFolder(modifiedFullname, session, accountId);
-        //ListLsubCache.removeCachedEntry(modifiedFullname, accountId, session);
+        // ListLsubCache.removeCachedEntry(modifiedFullname, accountId, session);
     }
 
     /**
@@ -342,6 +343,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -367,6 +370,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -392,6 +397,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -407,6 +414,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return (checkForNamespaceFolder(fullName) != null);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -415,7 +424,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return FolderCache.getCachedFolder(fullName, this);
     }
 
-    private static final String PATTERN_ALL = "%";
+    // private static final String PATTERN_ALL = "%";
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws MailException {
@@ -529,6 +538,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return EMPTY_PATH;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -969,6 +980,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
             throw new IMAPException(e);
+        } catch (final RuntimeException e) {
+            if (createMe != null && created) {
+                try {
+                    if (doesExist(createMe)) {
+                        createMe.delete(true);
+                    }
+                } catch (final Throwable e2) {
+                    LOG.error(
+                        new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
+                            "\" could not be deleted"),
+                        e2);
+                }
+            }
+            throw handleRuntimeException(e);
         } catch (final Exception e) {
             if (createMe != null && created) {
                 try {
@@ -1158,6 +1183,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw e;
         } catch (final MailException e) {
             throw e;
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         } finally {
             ListLsubCache.clearCache(accountId, session);
         }
@@ -1459,6 +1486,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw e;
         } catch (final MailException e) {
             throw e;
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         } finally {
             ListLsubCache.clearCache(accountId, session);
         }
@@ -1590,6 +1619,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw e;
         } catch (final AbstractOXException e) {
             throw new IMAPException(e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         } finally {
             ListLsubCache.clearCache(accountId, session);
         }
@@ -1649,8 +1680,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              * again.
                              */
                             sb.setLength(0);
-                            newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(
-                                getSeparator(deleteMe)).append(name).append('_').append(++appendix).toString());
+                            newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(getSeparator(deleteMe)).append(
+                                name).append('_').append(++appendix).toString());
                         }
                         synchronized (newFolder) {
                             try {
@@ -1669,6 +1700,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         } finally {
             ListLsubCache.clearCache(accountId, session);
         }
@@ -1883,6 +1916,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final AbstractOXException e) {
             throw new IMAPException(e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -1926,6 +1961,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return list.toArray(new MailFolder[list.size()]);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -2058,6 +2095,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
         }
     }
 
@@ -2589,6 +2628,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private String getNameOf(final IMAPFolder imapFolder) throws MailException {
         final String fullName = imapFolder.getFullName();
         return fullName.substring(fullName.lastIndexOf(getSeparator(imapFolder)) + 1);
+    }
+
+    private static MailException handleRuntimeException(final RuntimeException e) {
+        if (e instanceof ListLsubRuntimeException) {
+            return new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
+        }
+        return new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
     }
 
 }

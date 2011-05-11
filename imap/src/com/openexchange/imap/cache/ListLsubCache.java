@@ -317,6 +317,12 @@ public final class ListLsubCache {
     public static List<ListLsubEntry> getListChildren(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
+            /*
+             * Check collection's stamp
+             */
+            if ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT) {
+                collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
+            }
             return collection.getListChildren(fullName);
         }
     }
@@ -331,6 +337,12 @@ public final class ListLsubCache {
     public static List<ListLsubEntry> getLsubChildren(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
+            /*
+             * Check collection's stamp
+             */
+            if ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT) {
+                collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
+            }
             return collection.getLsubChildren(fullName);
         }
     }
@@ -345,6 +357,12 @@ public final class ListLsubCache {
     public static boolean hasAnySubscribedSubfolder(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
+            /*
+             * Check collection's stamp
+             */
+            if ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT) {
+                collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
+            }
             return collection.hasAnySubscribedSubfolder(fullName);
         }
     }
