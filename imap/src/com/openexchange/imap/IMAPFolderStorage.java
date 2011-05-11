@@ -1678,7 +1678,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              * again.
                              */
                             sb.setLength(0);
-                            newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(getSeparator(deleteMe)).append(
+                            newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(getSeparator(trashFolder)).append(
                                 name).append('_').append(++appendix).toString());
                         }
                         synchronized (newFolder) {
