@@ -1,3 +1,7 @@
+* 2011-05-11 - tobias.prinz@open-xchange.com
+
+ - Updated ical4j from v1.0-beta to 1.0-release
+
 * 2011-05-11 - thorben.betten@open-xchange.com
 
  - TA7041 of US6383: Reduced the number of LIST and LSUB commands on IMAP server.
