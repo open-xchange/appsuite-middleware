@@ -188,7 +188,7 @@ public class ICalEmitterTest extends TestCase {
 
         ICalFile ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=DAILY;INTERVAL=2;COUNT=3");
+        assertProperty(ical, "RRULE", "FREQ=DAILY;COUNT=3;INTERVAL=2");
 
         // WEEKLY
 
@@ -203,7 +203,7 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=WEEKLY;INTERVAL=2;COUNT=3;BYDAY=MO,WE,FR");
+        assertProperty(ical, "RRULE", "FREQ=WEEKLY;COUNT=3;INTERVAL=2;BYDAY=MO,WE,FR");
 
         // MONTHLY
 
@@ -215,7 +215,7 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYMONTHDAY=23");
+        assertProperty(ical, "RRULE", "FREQ=MONTHLY;COUNT=3;INTERVAL=2;BYMONTHDAY=23");
 
 
         // Second form : the 2nd monday and tuesday every 2 months
@@ -229,7 +229,7 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYSETPOS=3");
+        assertProperty(ical, "RRULE", "FREQ=MONTHLY;COUNT=3;INTERVAL=2;BYDAY=MO,TU;BYSETPOS=3");
 
 
         // Second form : the last tuesday every 2 months
@@ -239,7 +239,7 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYSETPOS=-1");
+        assertProperty(ical, "RRULE", "FREQ=MONTHLY;COUNT=3;INTERVAL=2;BYDAY=TU;BYSETPOS=-1");
 
         appointment.removeDays();
 
@@ -252,7 +252,7 @@ public class ICalEmitterTest extends TestCase {
         appointment.setDayInMonth(23);
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;COUNT=3;BYMONTH=3;BYMONTHDAY=23");
+        assertProperty(ical, "RRULE", "FREQ=YEARLY;COUNT=3;INTERVAL=2;BYMONTH=3;BYMONTHDAY=23");
 
         // Second form: 2nd monday and wednesday in april every 2 years
         appointment.setMonth(3);
@@ -264,7 +264,7 @@ public class ICalEmitterTest extends TestCase {
         appointment.setDays(days);
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;COUNT=3;BYMONTH=4;BYDAY=MO,WE;BYSETPOS=2");
+        assertProperty(ical, "RRULE", "FREQ=YEARLY;COUNT=3;INTERVAL=2;BYMONTH=4;BYDAY=MO,WE;BYSETPOS=2");
 
         // UNTIL
 
@@ -274,7 +274,7 @@ public class ICalEmitterTest extends TestCase {
         appointment.setUntil(D("23/04/1989 00:00"));
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=DAILY;INTERVAL=2;UNTIL=19890423");
+        assertProperty(ical, "RRULE", "FREQ=DAILY;UNTIL=19890423;INTERVAL=2");
 
         // Ignore RRULE for Exceptions
         appointment = getDefault();
@@ -567,7 +567,7 @@ public class ICalEmitterTest extends TestCase {
         
         ICalFile ical = serialize(app);
         String dtend = ical.getValue("DTEND");
-        assertEquals("Recurrence rule should be 'daily, for four days, every day'.", "FREQ=DAILY;INTERVAL=1;COUNT=4", ical.getValue("RRULE"));
+        assertEquals("Recurrence rule should be 'daily, for four days, every day'.", "FREQ=DAILY;COUNT=4;INTERVAL=1", ical.getValue("RRULE"));
         assertTrue("Reccurence rule should point to the next day, not the end of the recurences", dtend.startsWith(new SimpleDateFormat("yyyyMMdd").format(end)));
     }
     

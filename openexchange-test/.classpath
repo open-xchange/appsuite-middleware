@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="lib" path="lib/httpmime-4.1.jar"/>
 	<classpathentry kind="src" path="common"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="unittests"/>
@@ -62,11 +63,11 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.html"/>
 	<classpathentry kind="lib" path="lib/js.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tx"/>
-	<classpathentry kind="lib" path="/com.openexchange.data.conversion.ical.ical4j/lib/ical4j-1.0-beta4.jar" sourcepath="/com.openexchange.data.conversion.ical.ical4j/lib/ical4j-1.0-beta4-src.zip"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.1.jar" sourcepath="lib/src/httpcomponents-client-4.1-src.zip"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.1.jar" sourcepath="lib/src/httpcomponents-client-4.1-src.zip"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.ajp"/>
+	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
