@@ -63,7 +63,7 @@ import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.ResourceList;
+import net.fortuna.ical4j.model.TextList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.parameter.CuType;
 import net.fortuna.ical4j.model.parameter.PartStat;
@@ -136,7 +136,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
     private void setResources(final int index, final T component,
         final List<ResourceParticipant> resources, final Context ctx) throws ConversionError {
-        final ResourceList list = new ResourceList();
+        final TextList list = new TextList();
         for (final ResourceParticipant res : resources) {
             String displayName = res.getDisplayName();
             if (null == displayName) {

@@ -53,6 +53,7 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
+import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.util.TimeZones;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,7 +100,7 @@ public final class EmitterTools {
         net.fortuna.ical4j.model.TimeZone ical4jTimezone = timeZoneRegistry.getTimeZone(tzid);
         if(ical4jTimezone == null)
         	return toDateTime(date);
-
+        VTimeZone vTimeZone = ical4jTimezone.getVTimeZone();
         final DateTime retval = new DateTime(false);
         retval.setTimeZone(ical4jTimezone);
         retval.setTime(date.getTime());

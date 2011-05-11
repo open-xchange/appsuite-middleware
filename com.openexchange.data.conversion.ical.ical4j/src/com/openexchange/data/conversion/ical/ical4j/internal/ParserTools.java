@@ -152,11 +152,7 @@ public final class ParserTools {
     }
 
     public static Date toDate(final DateProperty dateProperty, final TimeZone tz) {
-        Date date = new Date(dateProperty.getDate().getTime());
-        if (ParserTools.inDefaultTimeZone(dateProperty, tz)) {
-            date = ParserTools.recalculate(date, tz);
-        }
-        return date;
+        return new Date(dateProperty.getDate().getTime());
     }
 
     public static Date recalculateAsNeeded(final net.fortuna.ical4j.model.Date icaldate, final Property property, final TimeZone tz) {

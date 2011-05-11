@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="src5"/>
+	<classpathentry kind="src" path="src6"/>
 	<classpathentry kind="src" path="sim"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ical4j-1.0-beta4.jar" sourcepath="lib/ical4j-1.0-beta4-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/xSocket-2.7.1.jar" sourcepath="lib/xSocket-2.7.1-sources.jar"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
+	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

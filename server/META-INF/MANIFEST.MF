@@ -246,5 +246,6 @@ Export-Package: com.openexchange.ajax,
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: .,
  lib/commons-lang-2.3.jar,
- lib/ical4j-1.0-beta4.jar,
+ lib/backport-util-concurrent-3.1.jar,
+ lib/ical4j-1.0.jar,
  lib/xSocket-2.7.1.jar
