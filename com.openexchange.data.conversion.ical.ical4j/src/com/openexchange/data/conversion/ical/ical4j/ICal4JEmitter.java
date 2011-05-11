@@ -59,6 +59,7 @@ import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.Observance;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -217,8 +218,11 @@ public class ICal4JEmitter implements ICalEmitter {
                     return;
                 }
             }
-            VTimeZone vTimeZone = EmitterTools.getTimeZoneRegistry().getTimeZone(tzid).getVTimeZone();
-            calendar.getComponents().add(vTimeZone);
+            TimeZone timeZone = EmitterTools.getTimeZoneRegistry().getTimeZone(tzid);
+            if (null != timeZone) {
+                VTimeZone vTimeZone = timeZone.getVTimeZone();
+                calendar.getComponents().add(vTimeZone);
+            }
         }
     }
 
