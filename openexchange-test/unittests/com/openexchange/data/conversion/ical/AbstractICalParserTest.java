@@ -167,7 +167,10 @@ public abstract class AbstractICalParserTest extends TestCase {
 
     // single appointment
     protected CalendarDataObject parseAppointment(final String icalText, final TimeZone defaultTZ) throws ConversionError {
-    	return parseAppointments(icalText, defaultTZ).get(0);
+    	List<CalendarDataObject> appointments = parseAppointments(icalText, defaultTZ);
+    	if(appointments.size() == 0)
+    		return null;
+    	return appointments.get(0);
     }
 
     protected CalendarDataObject parseAppointment(final String icalText) throws ConversionError {

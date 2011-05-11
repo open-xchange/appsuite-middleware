@@ -1107,13 +1107,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
     }
 
     public void testShouldThrowErrorOnNonICalFile() throws ConversionError {
-        final String noIcalText = "I am not an iCal file.";
-        try {
-            parseAppointment(noIcalText);
-            fail("Excpected Exception");
-        } catch (ConversionError e) {
-            assertEquals("This does not look like an iCal file. Please check the file.", e.getOrigMessage());
-        }
+        assertErrorWhenParsingAppointment("I am not an iCal file.", "This does not look like an iCal file. Please check the file.");
     }
 
     
@@ -1141,7 +1135,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     public void testAppShouldIncludeErrorForUnknownDayInRRule() throws ConversionError {
         final String icalText =  fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=WU,NI;BYSETPOS=3");
-        assertErrorWhenParsingAppointment(icalText, "Unknown day: WU");    
+        assertErrorWhenParsingAppointment(icalText, "Parsing error parsing ical: Error at line 6:Invalid day: WU");    
     }
 
     public void testAppShouldWarnOnUnhandleableFields() throws ConversionError {
