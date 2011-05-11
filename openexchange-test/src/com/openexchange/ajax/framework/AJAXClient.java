@@ -110,6 +110,7 @@ public class AJAXClient {
         User1(Property.LOGIN, Property.PASSWORD),
         User2(Property.SECONDUSER, Property.PASSWORD),
         User3(Property.THIRDLOGIN, Property.PASSWORD),
+        User4(Property.FOURTHLOGIN, Property.PASSWORD),
         OXAdmin(Property.OXADMIN, Property.PASSWORD);
 
         private Property login;
