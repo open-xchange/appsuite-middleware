@@ -121,6 +121,9 @@ import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.internal.ContactExceptionFactory;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.importexport.internal.ImportExportExceptionFactory;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
@@ -155,6 +158,11 @@ import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
+import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
+import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
+import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
+import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.QueueProvider;
@@ -337,6 +345,7 @@ public final class Init {
         startAndInjectConverterService();
         startAndInjectXMLServices();
         startAndInjectImportExportServices();
+        startAndInjectSubscribeServices();
     }
 
     public static void startAndInjectConfigBundle() {
@@ -466,6 +475,15 @@ public final class Init {
         if (null == registry.getExceptionsForComponent(EnumComponent.IMPORT_EXPORT)) {
             registry.registerComponent(EnumComponent.IMPORT_EXPORT, "com.openexchange.groupware.importexport", ImportExportExceptionFactory.getInstance());
         }
+    }
+
+    private static void startAndInjectSubscribeServices() {
+        final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(2);
+        folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
+        folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
+        ContextService contextService = (ContextService) services.get(ContextService.class);
+        FolderUpdaterRegistry registry = new SubscriptionExecutionServiceImpl(new SimSubscriptionSourceDiscoveryService(), folderUpdaters, contextService);
+        ServerServiceRegistry.getInstance().addService(FolderUpdaterRegistry.class, registry);
     }
 
     public static void startAndInjectI18NBundle() throws FileNotFoundException {
