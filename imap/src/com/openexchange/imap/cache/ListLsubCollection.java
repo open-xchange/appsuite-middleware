@@ -388,7 +388,7 @@ final class ListLsubCollection {
                  */
                 for (final String fn : fullNames) {
                     final ListLsubEntryImpl listEntry = listMap.get(fn);
-                    if (listEntry.canOpen()) {
+                    if (null != listEntry && listEntry.canOpen()) {
                         try {
                             final int[] status = IMAPCommandsCollection.getStatus(fn, imapFolder);
                             if (null != status) {
@@ -413,7 +413,7 @@ final class ListLsubCollection {
                  */
                 for (final String fn : fullNames) {
                     final ListLsubEntryImpl listEntry = listMap.get(fn);
-                    if (listEntry.canOpen()) {
+                    if (null != listEntry && listEntry.canOpen()) {
                         try {
                             final List<ACL> aclList = IMAPCommandsCollection.getAcl(fn, imapFolder, false);
                             listEntry.setAcls(aclList);
