@@ -62,6 +62,9 @@ public enum Tree {
     /** A string containing GUI-specific settings (currently, it is a huge JSON object). */
     GUI("/gui"),
 
+    /** GUI-specific settings stored by config-cascade */
+    UI("/ui"),
+
     /** [inside GUI] "infostore/split" or "infostore/list" */
     InfostoreView("/gui/infostore/view"),
 
