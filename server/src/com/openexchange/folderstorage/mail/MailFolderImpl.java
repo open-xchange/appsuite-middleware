@@ -399,7 +399,7 @@ public final class MailFolderImpl extends AbstractFolder {
             mailAccess.connect(false);
         } catch (final MailException e) {
             if (DEBUG) {
-                LOG.debug("Obtaining/connecting MauilAccess instance failed. Cannot return up-to-date total counter.", e);
+                LOG.debug("Obtaining/connecting MailAccess instance failed. Cannot return up-to-date total counter.", e);
             }
             return super.getTotal();
         }
