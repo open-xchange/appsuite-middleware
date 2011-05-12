@@ -852,7 +852,7 @@ final class ListLsubCollection {
 
         private void checkDeprecated() {
             if (deprecated) {
-                throw new IllegalStateException("LIST/LSUB entry is deprecated.");
+                throw new ListLsubRuntimeException("LIST/LSUB entry is deprecated.");
             }
         }
 
