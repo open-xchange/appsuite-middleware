@@ -136,12 +136,19 @@ final class ListLsubCollection {
      */
     public void remove(final String fullName) {
         ListLsubEntryImpl entry = listMap.remove(fullName);
-        if (null != entry) {
-            entry.deprecated();
+        if (null == entry) {
+            return;
+        }
+        entry.deprecated();
+        for (final ListLsubEntry child : entry.getChildren()) {
+            remove(child.getFullName());
         }
         entry = lsubMap.remove(fullName);
         if (null != entry) {
             entry.deprecated();
+            for (final ListLsubEntry child : entry.getChildren()) {
+                remove(child.getFullName());
+            }
         }
     }
 
