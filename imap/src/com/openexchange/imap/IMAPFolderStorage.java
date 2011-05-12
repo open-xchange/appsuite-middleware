@@ -2378,7 +2378,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          * Remove cache entries
          */
         FolderCache.removeCachedFolder(moveFullname, session, accountId);
-        ListLsubCache.clearCache(accountId, session);
+        // ListLsubCache.clearCache(accountId, session);
         RightsCache.removeCachedRights(toMove, session, accountId);
         UserFlagsCache.removeUserFlags(toMove, session, accountId);
         IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, moveFullname);

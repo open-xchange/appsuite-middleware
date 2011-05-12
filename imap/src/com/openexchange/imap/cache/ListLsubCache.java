@@ -169,8 +169,16 @@ public final class ListLsubCache {
             /*
              * Return
              */
-            final ListLsubEntry lsubEntry = collection.getLsub(fullName);
-            return null == lsubEntry ? ListLsubCollection.emptyEntryFor(fullName) : lsubEntry;
+            ListLsubEntry entry = collection.getLsub(fullName);
+            if (null != entry) {
+                return entry;
+            }
+            /*
+             * Update & re-check
+             */
+            collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
+            entry = collection.getLsub(fullName);
+            return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
         }
     }
 
@@ -193,8 +201,16 @@ public final class ListLsubCache {
                 /*
                  * Return
                  */
-                final ListLsubEntry listEntry = collection.getList(fullName);
-                return null == listEntry ? ListLsubCollection.emptyEntryFor(fullName) : listEntry;
+                ListLsubEntry entry = collection.getList(fullName);
+                if (null != entry) {
+                    return entry;
+                }
+                /*
+                 * Update & re-check
+                 */
+                collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
+                entry = collection.getList(fullName);
+                return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
@@ -218,8 +234,16 @@ public final class ListLsubCache {
             /*
              * Return
              */
-            final ListLsubEntry listEntry = collection.getList(fullName);
-            return null == listEntry ? ListLsubCollection.emptyEntryFor(fullName) : listEntry;
+            ListLsubEntry entry = collection.getList(fullName);
+            if (null != entry) {
+                return entry;
+            }
+            /*
+             * Update & re-check
+             */
+            collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
+            entry = collection.getList(fullName);
+            return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
         }
     }
 
@@ -249,7 +273,14 @@ public final class ListLsubCache {
             /*
              * Return
              */
-            final ListLsubEntry listEntry = collection.getList(fullName);
+            ListLsubEntry listEntry = collection.getList(fullName);
+            if (null == listEntry) {
+                /*
+                 * Update & re-check
+                 */
+                collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
+                listEntry = collection.getList(fullName);
+            }
             final ListLsubEntry lsubEntry = collection.getLsub(fullName);
             final ListLsubEntry emptyEntryFor = ListLsubCollection.emptyEntryFor(fullName);
             return new ListLsubEntry[] { listEntry == null ? emptyEntryFor : listEntry, lsubEntry == null ? emptyEntryFor : lsubEntry };

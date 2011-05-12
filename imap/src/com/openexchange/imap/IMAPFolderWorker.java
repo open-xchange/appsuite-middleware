@@ -393,8 +393,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param e The runtime exception to handle
      * @return An appropriate {@link MailException}
      */
-    protected static MailException handleRuntimeException(final RuntimeException e) {
+    protected MailException handleRuntimeException(final RuntimeException e) {
         if (e instanceof ListLsubRuntimeException) {
+            ListLsubCache.clearCache(accountId, session);
             return new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
         }
         return new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
