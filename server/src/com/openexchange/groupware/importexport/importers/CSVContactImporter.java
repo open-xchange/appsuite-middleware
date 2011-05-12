@@ -223,6 +223,7 @@ public class CSVContactImporter extends AbstractImporter {
         for(ImportIntention intention : intentions) {
             if (intention.contact != null) {
                 ImportResult result = new ImportResult();
+                result.setFolder(folder);
                 result.setObjectId(Integer.toString(intention.contact.getObjectID()));
                 result.setDate(intention.contact.getLastModified());
                 results.add(result);
