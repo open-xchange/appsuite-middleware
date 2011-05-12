@@ -67,6 +67,7 @@ import com.openexchange.messaging.facebook.FacebookMessagingResource;
 import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthException;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
@@ -163,6 +164,7 @@ public final class FacebookOAuthAccess {
             facebookOAuthService.signRequest(facebookAccessToken, request);
             final Response response = request.send();
             final JSONObject object = new JSONObject(response.getBody());
+            checkForErrors(object);
             facebookUserId = object.getString("id");
             facebookUserName = object.getString("name");
         } catch (final OAuthException e) {
@@ -172,6 +174,18 @@ public final class FacebookOAuthAccess {
         } catch (final JSONException e) {
             throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private void checkForErrors(JSONObject object) throws FacebookMessagingException, JSONException{
+        if (object.has("error")) {
+            JSONObject error = object.getJSONObject("error");
+            if ("OAuthException".equals(error.opt("type"))) {
+                throw new FacebookMessagingException(OAuthExceptionCodes.TOKEN_EXPIRED.create());
+            } else {
+                throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
+            }
+        }
+        
     }
 
     /**
