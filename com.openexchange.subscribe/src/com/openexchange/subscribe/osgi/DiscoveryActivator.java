@@ -136,7 +136,7 @@ public class DiscoveryActivator implements BundleActivator {
         componentRegistration =
             new ComponentRegistration(context, "SUB", "com.openexchange.subscribe", SubscriptionErrorMessage.EXCEPTIONS);
 
-        final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(1);
+        final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
         folderUpdaters.add(new StrategyFolderUpdaterService<CalendarDataObject>(new CalendarFolderUpdaterStrategy()));
