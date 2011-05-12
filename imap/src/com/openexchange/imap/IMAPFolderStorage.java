@@ -1493,12 +1493,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public String updateFolder(final String fullName, final MailFolderDescription toUpdate) throws MailException {
+        boolean changed = false;
         try {
             if (DEFAULT_FOLDER_ID.equals(fullName)) {
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
             IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullName);
-            if (!doesExist(updateMe, false)) {
+            if (!doesExist(updateMe, true)) {
                 updateMe = checkForNamespaceFolder(fullName);
                 if (null == updateMe) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
@@ -1570,6 +1571,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 for (int i = 0; i < removedACLs.length; i++) {
                                     if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
                                         updateMe.removeACL(removedACLs[i].getName());
+                                        changed = true;
                                     }
                                 }
                             }
@@ -1579,6 +1581,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             final Map<String, ACL> om = acl2map(oldACLs);
                             for (int i = 0; i < newACLs.length; i++) {
                                 updateMe.addACL(validate(newACLs[i], om));
+                                changed = true;
                             }
                             /*
                              * Since the ACLs have changed remove cached rights
@@ -1606,8 +1609,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                     final boolean subscribe = toUpdate.isSubscribed();
-                    updateMe.setSubscribed(subscribe);
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), subscribe);
+                    if (updateMe.isSubscribed() != subscribe) {
+                        updateMe.setSubscribed(subscribe);
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), subscribe);
+                        changed = true;
+                    }
                 }
                 return updateMe.getFullName();
             }
@@ -1620,7 +1626,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
-            ListLsubCache.clearCache(accountId, session);
+            if (changed) {
+                ListLsubCache.clearCache(accountId, session);
+            }
         }
     }
 
