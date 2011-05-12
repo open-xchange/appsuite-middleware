@@ -50,8 +50,10 @@
 package com.openexchange.publish.site;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -60,6 +62,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -82,7 +86,7 @@ import static com.openexchange.publish.site.SitePublicationService.*;
 
 /**
  * {@link SiteServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SiteServlet extends HttpServlet {
@@ -96,10 +100,9 @@ public class SiteServlet extends HttpServlet {
     private static final String USE_WHITELISTING_PROPERTY_NAME = "com.openexchange.publish.microformats.usesWhitelisting";
 
     protected static final Pattern SPLIT = Pattern.compile("/");
-    
+
     protected static ContextService contexts = null;
 
-    
     public static void setContextService(final ContextService service) {
         contexts = service;
     }
@@ -109,16 +112,15 @@ public class SiteServlet extends HttpServlet {
     public static void setFileAccess(final IDBasedFileAccessFactory fileAccess) {
         files = fileAccess;
     }
-    
-    
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Map<String, Object> args = getPublicationArguments(req);
-           
+
             final SitePublicationService publisher = SitePublicationService.getInstance();
-      
-            final Context ctx = contexts.getContext(Integer.parseInt((String)args.get(CONTEXTID)));
+
+            final Context ctx = contexts.getContext(Integer.parseInt((String) args.get(CONTEXTID)));
             final Publication publication = publisher.getPublication(ctx, (String) args.get(SECRET));
             if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -126,21 +128,21 @@ public class SiteServlet extends HttpServlet {
 
                 return;
             }
-            
+
             List<String> subpath = (List<String>) args.get(SITE);
-             
+
             if (subpath.isEmpty()) {
                 subpath.add("index.html");
             }
-            
+
             IDBasedFileAccess fileAccess = files.createAccess(new PublicationSession(publication));
             File file = resolve(ctx, fileAccess, subpath, publication.getEntityId());
-            
+
             if (file == null) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            
+
             if (file.getFileName() != null) {
                 sendFile(file, resp, fileAccess);
             } else {
@@ -153,10 +155,73 @@ public class SiteServlet extends HttpServlet {
         }
     }
 
-    // TODO: Put
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            final Map<String, Object> args = getPublicationArguments(req);
+
+            final SitePublicationService publisher = SitePublicationService.getInstance();
+
+            final Context ctx = contexts.getContext(Integer.parseInt((String) args.get(CONTEXTID)));
+            final Publication publication = publisher.getPublication(ctx, (String) args.get(SECRET));
+            if (publication == null || !publication.isEnabled()) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.getWriter().println("Don't know site " + args.get(SITE));
+
+                return;
+            }
+
+            List<String> subpath = (List<String>) args.get(SITE);
+
+            if (subpath.isEmpty()) {
+                subpath.add("index.html");
+            }
+
+            IDBasedFileAccess fileAccess = files.createAccess(new PublicationSession(publication));
+            File file = resolve(ctx, fileAccess, subpath, publication.getEntityId());
+
+            if (file == null) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+
+            if (file.getFileName() != null) {
+                updateFile(file, req, fileAccess);
+                resp.getWriter().write("{data: true}");
+            } else {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+
+        } catch (final Throwable t) {
+            resp.getWriter().println("An exception occurred: ");
+            t.printStackTrace(resp.getWriter());
+        }
+    }
+
     // TODO: Whitelisting
-    
-    
+
+    private void updateFile(File file, HttpServletRequest req, IDBasedFileAccess fileAccess) throws IOException, FileStorageException {
+        BufferedReader r = null;
+        try {
+            ServletInputStream inputStream = req.getInputStream();
+            r = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder b = new StringBuilder();
+            String l = null;
+            while((l = r.readLine()) != null) {
+                b.append(l).append("\n");
+            }
+            file.setDescription(b.toString());
+            
+            fileAccess.saveFileMetadata(file, file.getSequenceNumber());
+        } finally {
+            if (r != null) {
+                r.close();
+            }
+        }
+        
+    }
+
     private void sendDescription(File file, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/plain");
         resp.getWriter().print(file.getDescription());
@@ -164,15 +229,15 @@ public class SiteServlet extends HttpServlet {
 
     private void sendFile(File file, HttpServletResponse resp, IDBasedFileAccess files) throws FileStorageException, IOException {
         resp.setContentType(file.getFileMIMEType());
-        resp.setContentLength((int)file.getFileSize());
-        
+        resp.setContentLength((int) file.getFileSize());
+
         InputStream document = null;
-        
+
         try {
             document = new BufferedInputStream(files.getDocument(file.getId(), file.getVersion()));
             ServletOutputStream outputStream = resp.getOutputStream();
             int d = 0;
-            while((d = document.read()) != -1) {
+            while ((d = document.read()) != -1) {
                 outputStream.write(d);
             }
         } finally {
@@ -182,16 +247,14 @@ public class SiteServlet extends HttpServlet {
         }
     }
 
-
-
-    private File resolve( Context ctx, IDBasedFileAccess files, List<String> subpath, String entityId) throws Exception {
+    private File resolve(Context ctx, IDBasedFileAccess files, List<String> subpath, String entityId) throws Exception {
         if (entityId == null) {
             return null;
         }
         String currentElement = subpath.get(0);
-        
+
         boolean needFile = subpath.size() == 1;
-        
+
         if (needFile) {
             return getFileWithName(files, entityId, currentElement);
         } else {
@@ -208,7 +271,6 @@ public class SiteServlet extends HttpServlet {
         }
         return null;
     }
-
 
     private File getFileWithName(IDBasedFileAccess files, String entityId, String filename) throws AbstractOXException {
         TimedResult<File> documents = files.getDocuments(entityId);
@@ -228,7 +290,6 @@ public class SiteServlet extends HttpServlet {
         return null;
     }
 
-
     private Map<String, Object> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
         final String[] path = SPLIT.split(req.getPathInfo(), 0);
         final List<String> normalized = new ArrayList<String>(path.length);
@@ -245,7 +306,6 @@ public class SiteServlet extends HttpServlet {
         return args;
     }
 
-    
     protected boolean checkProtected(final Publication publication, final Map<String, Object> args, final HttpServletResponse resp) throws IOException {
         final Map<String, Object> configuration = publication.getConfiguration();
         final String secret = (String) configuration.get(SECRET);
@@ -256,17 +316,17 @@ public class SiteServlet extends HttpServlet {
         }
         return true;
     }
-    
+
     protected Collection<String> decode(final List<String> subList, final HttpServletRequest req) throws UnsupportedEncodingException {
         final String encoding = req.getCharacterEncoding() == null ? "UTF-8" : req.getCharacterEncoding();
         final List<String> decoded = new ArrayList<String>();
-        for(final String component : subList) {
+        for (final String component : subList) {
             final String decodedComponent = decode(component, encoding);
             decoded.add(decodedComponent);
         }
         return decoded;
     }
-    
+
     private String decode(final String string, final String encoding) throws UnsupportedEncodingException {
         final String[] chunks = string.split("\\+");
         final StringBuilder decoded = new StringBuilder(string.length());
@@ -274,11 +334,11 @@ public class SiteServlet extends HttpServlet {
         for (int i = 0; i < chunks.length; i++) {
             final String chunk = chunks[i];
             decoded.append(URLDecoder.decode(chunk, encoding));
-            if(i != chunks.length - 1 || endsWithPlus) {
+            if (i != chunks.length - 1 || endsWithPlus) {
                 decoded.append('+');
             }
         }
-        
+
         return decoded.toString();
     }
 

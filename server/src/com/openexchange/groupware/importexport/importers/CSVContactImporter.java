@@ -226,6 +226,9 @@ public class CSVContactImporter extends AbstractImporter {
                 result.setFolder(folder);
                 result.setObjectId(Integer.toString(intention.contact.getObjectID()));
                 result.setDate(intention.contact.getLastModified());
+                if (intention.result != null) {
+                    result.setException(intention.result.getException());
+                }
                 results.add(result);
             } else if (intention.result != null) {
                 results.add(intention.result);
@@ -300,6 +303,9 @@ public class CSVContactImporter extends AbstractImporter {
 //                }
 //                result.setObjectId(Integer.toString(contactObj.getObjectID()));
 //                result.setDate(contactObj.getLastModified());
+                if (result.getException() != null) {
+                    return new ImportIntention(result, contactObj);
+                } 
                 return new ImportIntention(contactObj);
             } else {
                 result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
@@ -408,6 +414,11 @@ public class CSVContactImporter extends AbstractImporter {
         
         public ImportIntention(ImportResult result) {
             this.result = result;
+        }
+        
+        public ImportIntention(ImportResult result, Contact contact) {
+            this.result = result;
+            this.contact = contact;
         }
     }
 
