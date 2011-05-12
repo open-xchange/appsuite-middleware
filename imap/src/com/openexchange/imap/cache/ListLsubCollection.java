@@ -322,7 +322,7 @@ final class ListLsubCollection {
                         listLsubEntry.setParent(rootEntry);
                         rootEntry.replaceChild(listLsubEntry, oldEntry);
                     }
-                    map.put(fullName, listLsubEntry);
+                    map.put(fn, listLsubEntry);
                     r[i] = null;
                 }
             }
