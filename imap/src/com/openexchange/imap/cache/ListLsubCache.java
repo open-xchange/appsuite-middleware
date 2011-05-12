@@ -165,7 +165,10 @@ public final class ListLsubCache {
     public static ListLsubEntry getCachedLSUBEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
-            checkTimeStamp(imapFolder, collection);
+            if (checkTimeStamp(imapFolder, collection)) {
+                final ListLsubEntry entry = collection.getLsub(fullName);
+                return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
+            }
             /*
              * Return
              */
@@ -197,7 +200,10 @@ public final class ListLsubCache {
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
             synchronized (collection) {
-                checkTimeStamp(imapFolder, collection);
+                if (checkTimeStamp(imapFolder, collection)) {
+                    final ListLsubEntry entry = collection.getList(fullName);
+                    return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
+                }
                 /*
                  * Return
                  */
@@ -230,7 +236,10 @@ public final class ListLsubCache {
     public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
-            checkTimeStamp(imapFolder, collection);
+            if (checkTimeStamp(imapFolder, collection)) {
+                final ListLsubEntry entry = collection.getList(fullName);
+                return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
+            }
             /*
              * Return
              */
@@ -247,13 +256,15 @@ public final class ListLsubCache {
         }
     }
 
-    private static void checkTimeStamp(final IMAPFolder imapFolder, final ListLsubCollection collection) throws MailException {
+    private static boolean checkTimeStamp(final IMAPFolder imapFolder, final ListLsubCollection collection) throws MailException {
         /*
          * Check collection's stamp
          */
         if ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT) {
             collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -269,7 +280,12 @@ public final class ListLsubCache {
     public static ListLsubEntry[] getCachedEntries(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
-            checkTimeStamp(imapFolder, collection);
+            if (checkTimeStamp(imapFolder, collection)) {
+                final ListLsubEntry listEntry = collection.getLsub(fullName);
+                final ListLsubEntry lsubEntry = collection.getLsub(fullName);
+                final ListLsubEntry emptyEntryFor = ListLsubCollection.emptyEntryFor(fullName);
+                return new ListLsubEntry[] { listEntry == null ? emptyEntryFor : listEntry, lsubEntry == null ? emptyEntryFor : lsubEntry };
+            }
             /*
              * Return
              */
