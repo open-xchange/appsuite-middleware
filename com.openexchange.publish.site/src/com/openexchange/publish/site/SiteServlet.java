@@ -70,6 +70,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -143,7 +144,7 @@ public class SiteServlet extends HttpServlet {
                 return;
             }
 
-            if (file.getFileName() != null) {
+            if (file.getFileName() != null && !file.getFileName().equals("")) {
                 sendFile(file, resp, fileAccess);
             } else {
                 sendDescription(file, resp);
@@ -185,7 +186,7 @@ public class SiteServlet extends HttpServlet {
                 return;
             }
 
-            if (file.getFileName() != null) {
+            if (file.getFileName() == null || "".equals(file.getFileName())) {
                 updateFile(file, req, fileAccess);
                 resp.getWriter().write("{data: true}");
             } else {
@@ -203,6 +204,9 @@ public class SiteServlet extends HttpServlet {
 
     private void updateFile(File file, HttpServletRequest req, IDBasedFileAccess fileAccess) throws IOException, FileStorageException {
         BufferedReader r = null;
+        File f = new DefaultFile();
+        f.setId(file.getId());
+        f.setFolderId(file.getFolderId());
         try {
             ServletInputStream inputStream = req.getInputStream();
             r = new BufferedReader(new InputStreamReader(inputStream));
@@ -211,9 +215,9 @@ public class SiteServlet extends HttpServlet {
             while((l = r.readLine()) != null) {
                 b.append(l).append("\n");
             }
-            file.setDescription(b.toString());
+            f.setDescription(b.toString());
             
-            fileAccess.saveFileMetadata(file, file.getSequenceNumber());
+            fileAccess.saveFileMetadata(f, file.getSequenceNumber());
         } finally {
             if (r != null) {
                 r.close();
