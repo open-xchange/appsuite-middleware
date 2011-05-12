@@ -1916,6 +1916,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw new IMAPException(e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        } finally {
+            ListLsubCache.clearCache(accountId, session);
         }
     }
 
@@ -2176,12 +2178,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          * Remove cache entries
          */
         FolderCache.removeCachedFolder(fullName, session, accountId);
-        ListLsubCache.clearCache(accountId, session);
+        // ListLsubCache.clearCache(accountId, session);
         RightsCache.removeCachedRights(deleteMe, session, accountId);
         UserFlagsCache.removeUserFlags(deleteMe, session, accountId);
     }
 
-    private boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws AbstractOXException, MessagingException {
+    private boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws AbstractOXException {
         /*
          * Ensure that owner still holds full rights
          */
@@ -2205,7 +2207,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private void getSubscriptionStatus(final Map<String, Boolean> m, final IMAPFolder f, final String oldFullName, final String newFullName) throws MessagingException, MailException {
-        if (inferiors(f)) {
+        if ((f.getType() & Folder.HOLDS_FOLDERS) > 0) {
             final Folder[] folders = f.list();
             for (int i = 0; i < folders.length; i++) {
                 getSubscriptionStatus(m, (IMAPFolder) folders[i], oldFullName, newFullName);
@@ -2215,7 +2217,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private void applySubscriptionStatus(final IMAPFolder f, final Map<String, Boolean> m) throws MessagingException, MailException {
-        if (inferiors(f)) {
+        if ((f.getType() & Folder.HOLDS_FOLDERS) > 0) {
             final Folder[] folders = f.list();
             for (int i = 0; i < folders.length; i++) {
                 applySubscriptionStatus((IMAPFolder) folders[i], m);
@@ -2317,7 +2319,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          * Apply original subscription status
          */
         newFolder.setSubscribed(toMove.isSubscribed());
-        ListLsubCache.clearCache(accountId, session);
         if (imapConfig.isSupportsACLs()) {
             /*
              * Copy ACLs
@@ -2627,8 +2628,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return fullName.substring(fullName.lastIndexOf(getSeparator(imapFolder)) + 1);
     }
 
-    private static MailException handleRuntimeException(final RuntimeException e) {
+    private MailException handleRuntimeException(final RuntimeException e) {
         if (e instanceof ListLsubRuntimeException) {
+            ListLsubCache.clearCache(accountId, session);
             return new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
         }
         return new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
