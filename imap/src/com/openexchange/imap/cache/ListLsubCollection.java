@@ -93,6 +93,8 @@ final class ListLsubCollection {
      * Initializes a new {@link ListLsubCollection}.
      * 
      * @param imapFolder The IMAP folder
+     * @param doStatus Whether STATUS command shall be performed
+     * @param doGetAcl Whether ACL command shall be performed
      * @throws MailException If initialization fails
      */
     protected ListLsubCollection(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
@@ -106,6 +108,8 @@ final class ListLsubCollection {
      * Initializes a new {@link ListLsubCollection}.
      * 
      * @param imapStore The IMAP store
+     * @param doStatus Whether STATUS command shall be performed
+     * @param doGetAcl Whether ACL command shall be performed
      * @throws MailException If initialization fails
      */
     protected ListLsubCollection(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
@@ -157,6 +161,8 @@ final class ListLsubCollection {
      * Re-initializes this collection.
      * 
      * @param imapStore The IMAP store
+     * @param doStatus Whether STATUS command shall be performed
+     * @param doGetAcl Whether ACL command shall be performed
      * @throws MailException If re-initialization fails
      */
     public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
@@ -168,6 +174,8 @@ final class ListLsubCollection {
      * Re-initializes this collection.
      * 
      * @param imapFolder The IMAP folder
+     * @param doStatus Whether STATUS command shall be performed
+     * @param doGetAcl Whether ACL command shall be performed
      * @throws MailException If re-initialization fails
      */
     public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
@@ -326,6 +334,15 @@ final class ListLsubCollection {
         protocol.handleResult(response);
     }
 
+    /**
+     * Updates a sub-tree starting at specified full name.
+     * 
+     * @param fullName The full name of the starting folder node
+     * @param imapStore The connected IMAP store
+     * @param doStatus Whether STATUS command shall be performed
+     * @param doGetAcl Whether ACL command shall be performed
+     * @throws MailException If update fails
+     */
     public void update(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
         try {
             update(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
@@ -334,6 +351,15 @@ final class ListLsubCollection {
         }
     }
 
+    /**
+     * Updates a sub-tree starting at specified full name.
+     * 
+     * @param fullName The full name of the starting folder node
+     * @param imapFolder An IMAP folder providing connected protocol
+     * @param doStatus Whether STATUS command shall be performed
+     * @param doGetAcl Whether ACL command shall be performed
+     * @throws MailException If update fails
+     */
     public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         try {
             /*
