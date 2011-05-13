@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2011-04-13 09:58+0200\n"
+"PO-Revision-Date: 2011-05-13 14:46+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: American English <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -191,11 +191,14 @@ msgstr "Unified Mail aktiviert"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
+#: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.site/src/com/openexchange/publish/site/FormStrings.java:63
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
 msgid "URL"
 msgstr "URL"
 
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
+#: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.site/src/com/openexchange/publish/site/FormStrings.java:61
+#: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.site/src/com/openexchange/publish/site/FormStrings.java:67
 msgid "Site"
 msgstr "Site"
 
@@ -251,6 +254,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
 msgid "Publish Infostore Document"
 msgstr "InfoStore-Dokument veröffentlichen"
+
+#: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.site/src/com/openexchange/publish/site/FormStrings.java:65
+msgid "Display Name"
+msgstr "Angezeigter Name"
 
 #. The name for the INBOX folder
 #. The internationalized name for the INBOX mail folder
