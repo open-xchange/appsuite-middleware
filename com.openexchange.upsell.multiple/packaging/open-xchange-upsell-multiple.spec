@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 9
+%define         ox_release 10
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -88,5 +88,7 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 %config(noreplace) /opt/open-xchange/etc/groupware/upsell_mail_subject_ox_enduser.tmpl
 %config(noreplace) /opt/open-xchange/etc/groupware/upsell_mail_subject_ox_enduser.tmpl_de_DE
 %changelog
+* Wed May 11 2011 - dennis.sieben@open-xchange.com
+  - Bugfix #19191 - NPE in upsell multiple if method is set to direct
 * Wed Sep 22 2010 - manuel@open-xchange.com
 Initial

@@ -1,3 +1,9 @@
+open-xchange-settings-extensions (6.20.0.0-10) unstable; urgency=low
+
+  * build for public ptf 2011-05-18
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 May 2011 14:38:53 +0000
+
 open-xchange-settings-extensions (6.20.0.0-9) unstable; urgency=low
 
   * another build for PTF 2011050310000419

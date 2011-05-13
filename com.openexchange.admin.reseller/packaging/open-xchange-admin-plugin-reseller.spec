@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -119,6 +119,10 @@ mv doc javadoc
 /opt/open-xchange/bundles/com.openexchange.axis2/services/*
 
 %changelog
+* Tue May 10 2011 - choeger@open-xchange.com
+ - Bugfix #19102: reseller bundle: unable to change restrictions on commandline
+ - Bugfix #19135: Reseller Plugin: Exception occurred while trying to invoke service
+   method createModuleAccessByName
 * Thu Apr 07 2011 - dennis.sieben@open-xchange.com
  - Bugfix #18883 - changecontext does not work when reseller package is installed
 * Thu Apr 07 2011 - choeger@open-xchange.com
