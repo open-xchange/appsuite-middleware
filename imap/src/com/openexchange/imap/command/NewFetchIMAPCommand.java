@@ -184,7 +184,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private final String fullname;
 
-    //private final int recentCount;
+    private final int recentCount;
 
     /**
      * Initializes a new {@link NewFetchIMAPCommand}.
@@ -198,8 +198,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
      * @throws MessagingException
      */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder) throws MessagingException {
-        this(imapFolder, separator, isRev1, arr, fp, isSequential, keepOrder, false);
+    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder) throws MessagingException {
+        this(imapFolder, isRev1, arr, fp, isSequential, keepOrder, false);
     }
 
     /**
@@ -215,7 +215,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
      * @throws MessagingException
      */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
+    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
         super(imapFolder);
         if (imapFolder.getMessageCount() == 0) {
             returnDefaultValue = true;
@@ -223,11 +223,11 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (loadBody) {
             throw new MessagingException("Loading body not supported.");
         }
-        this.separator = separator;
+        separator = imapFolder.getSeparator();
         command = getFetchCommand(isRev1, fp, loadBody);
         set(arr, isSequential, keepOrder);
         fullname = imapFolder.getFullName();
-        //recentCount = imapFolder.getNewMessageCount();
+        recentCount = imapFolder.getNewMessageCount();
     }
 
     /**
@@ -347,8 +347,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param fetchLen - the total message count
      * @throws MessagingException If a messaging error occurs
      */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final FetchProfile fp, final int fetchLen) throws MessagingException {
-        this(imapFolder, separator, isRev1, fp, fetchLen, false);
+    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen) throws MessagingException {
+        this(imapFolder, isRev1, fp, fetchLen, false);
     }
 
     /**
@@ -363,7 +363,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final FetchProfile fp, final int fetchLen, final boolean loadBody) throws MessagingException {
+    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen, final boolean loadBody) throws MessagingException {
         super(imapFolder);
         if (imapFolder.getMessageCount() == 0) {
             returnDefaultValue = true;
@@ -371,7 +371,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (loadBody) {
             throw new MessagingException("Loading body not supported.");
         }
-        this.separator = separator;
+        separator = imapFolder.getSeparator();
         if (0 == fetchLen) {
             returnDefaultValue = true;
         }
@@ -382,7 +382,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         retval = new MailMessage[length];
         index = 0;
         fullname = imapFolder.getFullName();
-        //recentCount = imapFolder.getNewMessageCount();
+        recentCount = imapFolder.getNewMessageCount();
     }
 
     @Override

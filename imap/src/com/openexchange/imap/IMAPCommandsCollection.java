@@ -102,11 +102,9 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
-import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.ENVELOPE;
@@ -411,18 +409,6 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If determining counts fails
      */
     public static int[] getStatus(final IMAPFolder imapFolder) throws MessagingException {
-        return getStatus(imapFolder.getFullName(), imapFolder);
-    }
-
-    /**
-     * Gets total, recent, and unseen counts from given IMAP folder
-     * 
-     * @param fullName The full name of the folder whose STATUS shall be returned
-     * @param imapFolder An IMAP folder providing connected {@link IMAPProtocol protocol}
-     * @return The total, recent, and unseen counts wrapped in an <code>int</code> array
-     * @throws MessagingException If determining counts fails
-     */
-    public static int[] getStatus(final String fullName, final IMAPFolder imapFolder) throws MessagingException {
         return (int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
@@ -436,7 +422,7 @@ public final class IMAPCommandsCollection {
                  * Encode the mbox as per RFC2060
                  */
                 final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
                 /*
                  * Item arguments
                  */
@@ -489,78 +475,6 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Gets ACL list from denoted IMAP folder.
-     * 
-     * @param fullName The full name of the folder whose STATUS shall be returned
-     * @param imapFolder An IMAP folder providing connected {@link IMAPProtocol protocol}
-     * @param checkCapabilities Whether to check for needed capability
-     * @return The ACL list
-     * @throws MessagingException If determining counts fails
-     */
-    @SuppressWarnings("unchecked")
-    public static List<ACL> getAcl(final String fullName, final IMAPFolder imapFolder, final boolean checkCapabilities) throws MessagingException {
-        return (List<ACL>) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                if (!protocol.hasCapability("ACL")) {
-                    throw new com.sun.mail.iap.BadCommandException("ACL not supported");
-                }
-                /*
-                 * Encode the mbox as per RFC2060
-                 */
-                final String mbox = BASE64MailboxEncoder.encode(fullName);
-                /*
-                 * Arguments...
-                 */
-                final Argument args = new Argument(); 
-                args.writeString(mbox);
-                /*
-                 * Execute
-                 */
-                final Response[] r = protocol.command("GETACL", args);
-                final Response response = r[r.length-1];
-                /*
-                 * Grab all ACL responses
-                 */
-                final List<ACL> list;
-                if (response.isOK()) {
-                    list = new ArrayList<ACL>(r.length);
-                    for (int i = 0, len = r.length; i < len; i++) {
-                        if (!(r[i] instanceof IMAPResponse)) {
-                            continue;
-                        }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
-                        if (ir.keyEquals("ACL")) {
-                            /*
-                             * Read name of mailbox and throw away
-                             */
-                            ir.readAtomString();
-                            String name = null;
-                            while ((name = ir.readAtomString()) != null) {
-                                final String rights = ir.readAtomString();
-                                if (rights == null) {
-                                    break;
-                                }
-                                final ACL acl = new ACL(name, new Rights(rights));
-                                list.add(acl);
-                            }
-                            r[i] = null;
-                        }
-                    }
-                } else {
-                    list = Collections.emptyList();
-                }
-                /*
-                 * Dispatch remaining untagged responses
-                 */
-                protocol.notifyResponseHandlers(r);
-                protocol.handleResult(response);
-                return list;
-            }
-        });
-    }
-
-    /**
      * Gets total message count from given IMAP folder
      * 
      * @param imapFolder The IMAP folder
@@ -607,7 +521,7 @@ public final class IMAPCommandsCollection {
                         }
                         final IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals("STATUS")) {
-                            final int status = parseStatusResponse(ir, "UNSEEN")[0];
+                            final int status = parseStatusResponse(ir, "UNSEEN");
                             if (status != -1) {
                                 unread = status;
                             }
@@ -672,7 +586,7 @@ public final class IMAPCommandsCollection {
                         }
                         final IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals("STATUS")) {
-                            final int status = parseStatusResponse(ir, "MESSAGES")[0];
+                            final int status = parseStatusResponse(ir, "MESSAGES");
                             if (status != -1) {
                                 total = status;
                             }
@@ -688,68 +602,6 @@ public final class IMAPCommandsCollection {
                 return Integer.valueOf(total);
             }
         })).intValue();
-    }
-
-    /**
-     * Gets total/unread message count from given IMAP folder
-     * 
-     * @param imapFolder The IMAP folder
-     * @return The total/unread message count
-     * @throws MessagingException If determining counts fails
-     */
-    public static int[] getTotalAndUnread(final IMAPFolder imapFolder) throws MessagingException {
-        return ((int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
-                    /*
-                     * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
-                     */
-                    throw new com.sun.mail.iap.BadCommandException("STATUS not supported");
-                }
-                /*
-                 * Encode the mbox as per RFC2060
-                 */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
-                /*
-                 * Item arguments
-                 */
-                final Argument itemArgs = new Argument();
-                final String[] items = { "MESSAGES", "UNSEEN"};
-                for (int i = 0, len = items.length; i < len; i++) {
-                    itemArgs.writeAtom(items[i]);
-                }
-                args.writeArgument(itemArgs);
-                /*
-                 * Perform command
-                 */
-                final Response[] r = protocol.command("STATUS", args);
-                final Response response = r[r.length - 1];
-                /*
-                 * Look for STATUS responses
-                 */
-                int[] ret = null;
-                if (response.isOK()) {
-                    for (int i = 0, len = r.length; i < len; i++) {
-                        if (!(r[i] instanceof IMAPResponse)) {
-                            continue;
-                        }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
-                        if (ir.keyEquals("STATUS")) {
-                            ret = parseStatusResponse(ir, "MESSAGES", "UNSEEN");
-                            r[i] = null;
-                        }
-                    }
-                }
-                /*
-                 * Dispatch remaining untagged responses
-                 */
-                protocol.notifyResponseHandlers(r);
-                protocol.handleResult(response);
-                return ret;
-            }
-        }));
     }
 
     /**
@@ -797,14 +649,11 @@ public final class IMAPCommandsCollection {
      * .
      * 
      * @param statusResponse The <code>&quot;STATUS&quot;</code> IMAP response to parse.
-     * @param counterTypes The counter types; either <code>MESSAGES</code>, <code>RECENT</code> or <code>UNSEEN</code>
+     * @param counterType The counter type; either <code>MESSAGES</code>, <code>RECENT</code> or <code>UNSEEN</code>
      * @return The  number of total messages
      * @throws ParsingException If parsing STATUS response fails
      */
-    static int[] parseStatusResponse(final Response statusResponse, final String... counterTypes) throws ParsingException {
-        if (null == counterTypes || counterTypes.length == 0) {
-            return new int[0];
-        }
+    static int parseStatusResponse(final Response statusResponse, final String counterType) throws ParsingException {
         /*
          * Read until opening parenthesis or EOF
          */
@@ -819,25 +668,14 @@ public final class IMAPCommandsCollection {
         /*
          * Parse parenthesized list
          */
-        final int[] arr = new int[counterTypes.length];
-        Arrays.fill(arr, -1);
+        int total = -1;
         do {
             final String attr = statusResponse.readAtom();
-            final int pos = find(attr, counterTypes);
-            if (pos >= 0) {
-                arr[pos] = statusResponse.readNumber();
+            if (attr.equalsIgnoreCase(counterType)) {
+                total = statusResponse.readNumber();
             }
         } while (statusResponse.readByte() != ')');
-        return arr;
-    }
-
-    private static int find(final String elem, final String[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i].equals(elem)) {
-                return i;
-            }
-        }
-        return -1;
+        return total;
     }
 
     /**
