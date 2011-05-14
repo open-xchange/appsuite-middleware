@@ -527,27 +527,25 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         return;
                     }
                     final Vector<POP3Message> messageCache = getMessageCache(inbox);
+                    final Map<Integer, String> seqnum2uidl;
                     {
                         /*
                          * The current UIDLs
                          */
                         final Message[] all = inbox.getMessages();
+                        seqnum2uidl = new HashMap<Integer, String>(all.length);
                         final long startMillis = System.currentTimeMillis();
                         inbox.fetch(all, FETCH_PROFILE_UID);
                         MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - startMillis);
                         uidlsFromPOP3 = new String[all.length];
                         for (int i = 0; i < all.length; i++) {
-                            uidlsFromPOP3[i] = inbox.getUID(all[i]);
+                            final Message message = all[i];
+                            final String uidl = inbox.getUID(message);
+                            uidlsFromPOP3[i] = uidl;
+                            seqnum2uidl.put(Integer.valueOf(message.getMessageNumber()), uidl);
                         }
                         messageCache.clear();
                         messageCache.setSize(messageCount);
-                    }
-                    /*
-                     * Create sequence-number to UIDL map
-                     */
-                    final Map<Integer, String> seqnum2uidl = new HashMap<Integer, String>(uidlsFromPOP3.length);
-                    for (int i = 0; i < uidlsFromPOP3.length; i++) {
-                        seqnum2uidl.put(Integer.valueOf(i + 1), uidlsFromPOP3[i]);
                     }
                     /*
                      * Block-wise processing
