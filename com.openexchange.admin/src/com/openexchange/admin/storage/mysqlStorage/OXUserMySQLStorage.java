@@ -732,7 +732,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error(e.getMessage(), e);
             rollback(con);
             throw new StorageException(e.toString());
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             log.error(e.getMessage(), e);
             rollback(con);
             throw new StorageException(e.toString());
@@ -782,7 +782,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             try {
                 account.setMailServer(URIParser.parse(imapServer, URIDefaults.IMAP));
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 log.error("Problem storing the primary mail account.", e);
                 throw new StorageException(e.toString());
             }
@@ -828,7 +828,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             try {
                 account.setTransportServer(URIParser.parse(smtpServer, URIDefaults.SMTP));
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 log.error("Problem storing the primary mail account.", e);
                 throw new StorageException(e.toString());
             }
@@ -1176,6 +1176,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (usrdata.getGui_spam_filter_enabled() != null && usrdata.getGui_spam_filter_enabled()) {
                     flags |= UserSettingMail.INT_SPAM_ENABLED;
                 }
+
+                /*
+                 * Check if HTML content is allowed to be displayed by default
+                 */
+                if (Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true"))) {
+                    flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
+                }
+
                 stmt.setInt(8, flags);
                 stmt.setString(9, std_mail_folder_confirmed_spam);
                 stmt.setString(10, std_mail_folder_confirmed_ham);
@@ -1244,7 +1252,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final InvocationTargetException e) {
             log.error("InvocationTarget Error", e);
             throw new StorageException(e);
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             log.error("InvocationTarget Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
@@ -1291,7 +1299,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             account.setMailServer(URIParser.parse(imapServer, URIDefaults.IMAP));
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
@@ -1317,7 +1325,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             account.setTransportServer(URIParser.parse(smtpServer, URIDefaults.SMTP));
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
