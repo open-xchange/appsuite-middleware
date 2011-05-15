@@ -1049,6 +1049,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
                 removeSessionData(renameMe);
                 /*
+                 * Unsubscribe sub-tree
+                 */
+                unsubscribeFolder(renameMe);
+                /*
                  * Rename
                  */
                 boolean success = false;
@@ -1341,6 +1345,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         subscriptionStatus = null;
                     }
                     removeSessionData(moveMe);
+                    /*
+                     * Unsubscribe sub-tree
+                     */
+                    unsubscribeFolder(moveMe);
                     /*
                      * Rename
                      */
@@ -2103,6 +2111,16 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         }
         m.put(f.getFullName().replaceFirst(oldFullName, quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
+    }
+
+    private void unsubscribeFolder(final IMAPFolder f) throws MessagingException {
+        if ((f.getType() & Folder.HOLDS_FOLDERS) > 0) {
+            final Folder[] folders = f.list();
+            for (int i = 0; i < folders.length; i++) {
+                unsubscribeFolder((IMAPFolder) folders[i]);
+            }
+        }
+        f.setSubscribed(false);
     }
 
     private static void applySubscriptionStatus(final IMAPFolder f, final Map<String, Boolean> m) throws MessagingException {

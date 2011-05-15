@@ -1,6 +1,7 @@
 * 2011-05-15 - thorben.betten@open-xchange.com
 
  - Bugfix #19175: Fixed access to POP3Folder's Protocol instance
+ - Bugfix #19167: Perform an unsubscribe before renaming a folder
 
 * 2011-05-12 - francisco.laguna@open-xchange.com
 
