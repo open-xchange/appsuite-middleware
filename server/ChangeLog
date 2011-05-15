@@ -3,6 +3,7 @@
  - Bugfix #19175: Fixed access to POP3Folder's Protocol instance
  - Bugfix #19167: Perform an unsubscribe before renaming a folder
  - Bugfix #18742: Lowered log level to WARNING if a requested mail could not be found
+ - Bugfix #19185: Fixed IllegalStateException on shut-down
 
 * 2011-05-12 - francisco.laguna@open-xchange.com
 
