@@ -1180,7 +1180,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 /*
                  * Check if HTML content is allowed to be displayed by default
                  */
-                if (Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true"))) {
+                if (Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
                     flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
                 }
 
