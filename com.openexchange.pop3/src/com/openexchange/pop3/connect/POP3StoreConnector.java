@@ -94,17 +94,17 @@ public final class POP3StoreConnector {
     private static final PrintStream EMPTY_PRINTER = new PrintStream(new OutputStream() {
 
         @Override
-        public void write(int b) throws IOException {
+        public void write(final int b) throws IOException {
             // Do nothing
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(final byte[] b, final int off, final int len) throws IOException {
             // Do nothing
         }
 
         @Override
-        public void write(byte[] b) throws IOException {
+        public void write(final byte[] b) throws IOException {
             // Do nothing
         }
 
@@ -394,8 +394,8 @@ public final class POP3StoreConnector {
             /*
              * Check for needed capabilities
              */
-            final boolean hasTop = (capabilities.indexOf("TOP") >= 0);
-            final boolean hasUidl = (capabilities.indexOf("UIDL") >= 0);
+            final boolean hasTop = (false && capabilities.indexOf("TOP") >= 0);
+            final boolean hasUidl = (false && capabilities.indexOf("UIDL") >= 0);
             if (!hasTop || !hasUidl) {
                 final POP3Folder inbox = (POP3Folder) pop3Store.getFolder("INBOX");
                 inbox.open(POP3Folder.READ_ONLY);
@@ -454,8 +454,6 @@ public final class POP3StoreConnector {
                             }
                         }
                     }
-                } catch (final IOException e) {
-                    throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
                 } finally {
                     inbox.close(false);
                 }
