@@ -170,9 +170,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public static void clearCounterMap() {
         final Set<Entry<Key, BlockingQueue<Object>>> entrySet = COUNTER_MAP.entrySet();
         for (final Iterator<Entry<Key, BlockingQueue<Object>>> iterator = entrySet.iterator(); iterator.hasNext();) {
-            final Entry<Key, BlockingQueue<Object>> entry = iterator.next();
+            final BlockingQueue<Object> queue = iterator.next().getValue();
             iterator.remove();
-            final BlockingQueue<Object> queue = entry.getValue();
             while (queue.poll() != null) {
                 ;
             }
