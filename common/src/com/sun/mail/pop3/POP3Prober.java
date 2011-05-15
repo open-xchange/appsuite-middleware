@@ -75,13 +75,12 @@ public final class POP3Prober {
      * 
      * @param pop3Store The connected POP3 store
      * @param pop3Folder The POP3 folder to check with
-     * @throws IOException If initialization fails
      * @throws MessagingException If initialization fails
      */
-    public POP3Prober(final POP3Store pop3Store, final POP3Folder pop3Folder) throws IOException, MessagingException {
+    public POP3Prober(final POP3Store pop3Store, final POP3Folder pop3Folder) throws MessagingException {
         super();
         total = pop3Folder.getMessageCount();
-        protocol = (0 == total ? null : pop3Store.getPort(pop3Folder));
+        protocol = (0 == total ? null : pop3Folder.getProtocol());
         warnings = new ArrayList<Exception>(2);
     }
 

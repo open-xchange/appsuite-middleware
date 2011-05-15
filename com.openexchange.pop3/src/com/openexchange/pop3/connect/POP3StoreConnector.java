@@ -394,8 +394,8 @@ public final class POP3StoreConnector {
             /*
              * Check for needed capabilities
              */
-            final boolean hasTop = (false && capabilities.indexOf("TOP") >= 0);
-            final boolean hasUidl = (false && capabilities.indexOf("UIDL") >= 0);
+            final boolean hasTop = (capabilities.indexOf("TOP") >= 0);
+            final boolean hasUidl = (capabilities.indexOf("UIDL") >= 0);
             if (!hasTop || !hasUidl) {
                 final POP3Folder inbox = (POP3Folder) pop3Store.getFolder("INBOX");
                 inbox.open(POP3Folder.READ_ONLY);
