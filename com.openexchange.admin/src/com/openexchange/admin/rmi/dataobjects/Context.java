@@ -315,7 +315,12 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         this.filestore_nameset = true;
     }
 
-    public final String toString() {
+    /*
+     * DO NOT make this final because others might want to extend this
+     * (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#toString()
+     */
+    public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
         for (final Field f : this.getClass().getDeclaredFields()) {
