@@ -593,6 +593,10 @@ public final class MailMessageParser {
                         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
                         bodyPart.setSize(decompressedBytes.length);
                         parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                        /*
+                         * Stop to further process TNEF attachment
+                         */
+                        return;
                     }
                 }
                 /*
