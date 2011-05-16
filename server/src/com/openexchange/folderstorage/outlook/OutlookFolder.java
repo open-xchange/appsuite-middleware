@@ -83,6 +83,7 @@ public final class OutlookFolder implements Folder {
     private Permission[] permissions;
 
     private String[] subfolders;
+    private boolean b_subfolders;
 
     private Boolean subscribed;
 
@@ -217,7 +218,7 @@ public final class OutlookFolder implements Folder {
     }
 
     public String[] getSubfolderIDs() {
-        return subfolders;
+        return b_subfolders ? subfolders : realFolder.getSubfolderIDs();
     }
 
     public String getTreeID() {
@@ -251,6 +252,7 @@ public final class OutlookFolder implements Folder {
 
     public void setSubfolderIDs(final String[] subfolderIds) {
         subfolders = subfolderIds;
+        b_subfolders = true;
     }
 
     public void setTreeID(final String id) {
