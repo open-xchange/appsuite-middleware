@@ -63,6 +63,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -135,6 +137,11 @@ public class LocalFileStorage implements FileStorage {
     }
     
     private static final Log LOG = LogFactory.getLog(LocalFileStorage.class);
+    
+    /**
+     * This lock is used to avoid threads from creating a filestore dir simultaneously.
+     */
+    private static final Lock LOCK = new ReentrantLock();
 
     /**
      * Constructor with more detailed parameters. This file storage can store entries ^ depth files.
@@ -146,9 +153,18 @@ public class LocalFileStorage implements FileStorage {
     public LocalFileStorage(final URI uri) throws FileStorageException {
         super();
         storage = new File(uri);
-        if (!storage.exists() && !mkdirs(storage)) {
-            throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
+        
+        if (!storage.exists()) {
+            try {
+                LOCK.lock();
+                if (!storage.exists() && !mkdirs(storage)) {
+                    throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
+                }
+            } finally {
+                LOCK.unlock();
+            }            
         }
+        
         lock(LOCK_TIMEOUT);
         try {
             if (!exists(STATEFILENAME)) {
@@ -604,9 +620,18 @@ public class LocalFileStorage implements FileStorage {
     protected void save(final String name, final InputStream input) throws FileStorageException {
         final File file = new File(storage, name);
         final File parentDir = file.getParentFile();
-        if (!parentDir.exists() && !mkdirs(parentDir) && !parentDir.exists()) {
-            throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, parentDir.getAbsolutePath());
+        
+        if (!parentDir.exists()) {
+            try {
+                LOCK.lock();
+                if (!parentDir.exists() && !mkdirs(parentDir)) {
+                    throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, parentDir.getAbsolutePath());
+                }
+            } finally {
+                LOCK.unlock();
+            }            
         }
+        
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
