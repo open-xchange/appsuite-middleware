@@ -340,7 +340,7 @@ public final class IMAPException extends MIMEMailException {
 
     }
 
-    private static enum IMAPCode {
+    public static enum IMAPCode {
 
         /**
          * Missing parameter in mail connection: %1$s
