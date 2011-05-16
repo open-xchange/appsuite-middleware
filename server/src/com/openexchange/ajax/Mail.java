@@ -114,7 +114,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
@@ -159,8 +158,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.openexchange.mail.structure.parser.MIMEStructure2ComposedMailParser;
+import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -1495,34 +1493,6 @@ public class Mail extends PermissionServlet implements UploadListener {
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         }
         return displayMode;
-    }
-
-    private static void triggerContactCollector(final ServerSession session, final Set<InternetAddress> addrs) {
-        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
-        if (null != ccs) {
-            // Strip by aliases
-            try {
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final UserSettingMail usm = session.getUserSettingMail();
-                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
-                }
-                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-                validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new QuotedInternetAddress(alias));
-                }
-                addrs.removeAll(validAddrs);
-            } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
-
-            }
-            if (!addrs.isEmpty()) {
-                // Add addresses
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
-            }
-        }
     }
 
     private static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
@@ -3380,10 +3350,20 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
+    public void actionPutTransportMail(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mailInterface) throws JSONException {
+        ResponseWriter.write(
+            actionPutTransportMail(
+                session,
+                jsonObj.getString(ResponseFields.DATA),
+                ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
+                mailInterface),
+            writer);
+    }
+
     private final void actionPutTransportMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             ResponseWriter.write(
-                actionPutTransportMail(getSessionObject(req), getBody(req), req, null),
+                actionPutTransportMail(getSessionObject(req), getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
                 resp.getWriter());
         } catch (final JSONException e) {
             final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
@@ -3399,45 +3379,25 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private final Response actionPutTransportMail(final ServerSession session, final String body, final HttpServletRequest req, final MailServletInterface mailIntefaceArg) {
+    private final Response actionPutTransportMail(final ServerSession session, final String body, final ParamContainer paramContainer, final MailServletInterface mailIntefaceArg) {
         final Response response = new Response();
         JSONValue responseData = null;
         try {
-            /*
-             * Parse recipients
-             */
             final InternetAddress[] recipients;
             {
-                final String recipientsStr = req.getParameter("recipients");
-                recipients = null == recipientsStr ? null : MIMEMessageUtility.parseAddressList(recipientsStr, false);
-            }
-            ComposeType composeType;
-            {
-                final String ct = req.getParameter("composeType");
-                composeType = null == ct ? ComposeType.NEW : ComposeType.getType(Integer.parseInt(ct.trim()));
-                if (null == composeType) {
-                    composeType = ComposeType.NEW;
-                }
-            }
-            List<MailPath> msgrefs = Collections.emptyList();
-            {
-                final String str = req.getParameter("msgrefs");
-                if (null != str) {
-                    final String[] arr = str.split(" *, *");
-                    msgrefs = new ArrayList<MailPath>(arr.length);
-                    for (int i = 0; i < arr.length; i++) {
-                        msgrefs.add(new MailPath(arr[i]));
-                    }
-                }
+                final String recipientsStr = paramContainer.getStringParam("recipients");
+                recipients = null == recipientsStr ? null : QuotedInternetAddress.parseHeader(recipientsStr, false);
             }
             /*
-             * Parse body to a JSON object
+             * Parse structured JSON mail object
              */
-            final JSONObject jsonMessage = new JSONObject(body);
+            final ComposedMailMessage composedMail = MIMEStructureParser.parseStructure(new JSONObject(body), session);
+            if (recipients != null && recipients.length > 0) {
+                composedMail.addRecipients(recipients);
+            }
             /*
              * Transport mail
              */
-            MIMEStructure2ComposedMailParser parser = null;
             MailServletInterface mailInterface = mailIntefaceArg;
             boolean closeMailInterface = false;
             try {
@@ -3446,13 +3406,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                     closeMailInterface = true;
                 }
                 /*
-                 * Determine account by "From" address header
+                 * Determine account
                  */
                 int accountId;
                 try {
-                    final String from = jsonMessage.getJSONObject("headers").getJSONArray("from").getJSONObject(0).getString("address");
-                    final InternetAddress fromAddr = new QuotedInternetAddress(from);
-                    accountId = resolveFrom2Account(session, fromAddr, true, true);
+                    final InternetAddress[] fromAddrs = composedMail.getFrom();
+                    accountId = resolveFrom2Account(session, fromAddrs != null && fromAddrs.length > 0 ? fromAddrs[0] : null, true, true);
                 } catch (final MailException e) {
                     if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
                         // Re-throw
@@ -3463,22 +3422,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                     accountId = MailAccount.DEFAULT_ID;
                 }
                 /*
-                 * Parse structured JSON mail object
+                 * Transport mail
                  */
-                parser = new MIMEStructure2ComposedMailParser(accountId, session, req.isSecure() ? "https" : "http", req.getServerName());
-                final ComposedMailMessage[] parsedMessages = parser.parseMessage(jsonMessage);
-                if (null != recipients) {
-                    for (final ComposedMailMessage composedMail : parsedMessages) {
-                        composedMail.addRecipients(recipients);
-                    }
-                }
-                /*
-                 * Transport mail(s)
-                 */
-                final String id = mailInterface.sendMessage(parsedMessages[0], composeType, accountId);
-                for (int i = 1; i < parsedMessages.length; i++) {
-                    mailInterface.sendMessage(parsedMessages[i], composeType, accountId);
-                }
+                final String id = mailInterface.sendMessage(composedMail, ComposeType.NEW, accountId);
                 final int pos = id.lastIndexOf(MailPath.SEPERATOR);
                 if (-1 == pos) {
                     throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, id);
@@ -3497,13 +3443,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
                         contextId,
                         userId).booleanValue()) {
-                        if (null == recipients) {
-                            for (final ComposedMailMessage composedMail : parsedMessages) {
-                                triggerContactCollector(session, composedMail);
-                            }
-                        } else {
-                            triggerContactCollector(session, new HashSet<InternetAddress>(Arrays.asList(recipients)));
-                        }
+                        triggerContactCollector(session, composedMail);
                     }
                 } catch (final SettingException e) {
                     LOG.warn("Contact collector could not be triggered.", e);
@@ -3511,14 +3451,6 @@ public class Mail extends PermissionServlet implements UploadListener {
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
-                }
-                if (null != parser) {
-                    final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-                    if (null != mfm) {
-                        for (final ManagedFile mf : parser.getManagedFiles()) {
-                            mfm.removeByID(mf.getID());
-                        }
-                    }
                 }
             }
         } catch (final MailException e) {
