@@ -142,7 +142,7 @@ final class ListLsubCollection {
     }
 
     /**
-     * Checks if this collection is marked as deprecatded.
+     * Checks if this collection is marked as deprecated.
      * 
      * @return <code>true</code> if deprecated; otherwise <code>false</code>
      */
@@ -157,7 +157,7 @@ final class ListLsubCollection {
         deprecated.set(true);
         stamp = 0;
         if (DEBUG) {
-            LOG.debug("Cleared LST/LSUB cache.");
+            LOG.debug("Cleared LIST/LSUB cache.");
         }
     }
 

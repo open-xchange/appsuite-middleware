@@ -333,7 +333,7 @@ public final class MessageUtility {
             if ("No content".equals(e.getMessage())) {
                 /*-
                  * Special JavaMail I/O error to indicate no content available from IMAP server.
-                 * Return the empty string in this case.
+                 * Return an empty array in this case.
                  */
                 return new byte[0];
             }
