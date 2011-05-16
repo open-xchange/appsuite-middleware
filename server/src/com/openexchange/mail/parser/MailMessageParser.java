@@ -70,6 +70,7 @@ import javax.mail.internet.MimeUtility;
 import net.fortuna.ical4j.model.Property;
 import net.freeutils.tnef.Attachment;
 import net.freeutils.tnef.Attr;
+import net.freeutils.tnef.CompressedRTFInputStream;
 import net.freeutils.tnef.MAPIProp;
 import net.freeutils.tnef.MAPIProps;
 import net.freeutils.tnef.RawInputStream;
@@ -187,6 +188,8 @@ public final class MailMessageParser {
 
     private InlineDetector inlineDetector;
 
+    private String subject;
+
     private final List<AbstractOXException> warnings;
 
     /**
@@ -226,6 +229,7 @@ public final class MailMessageParser {
     public MailMessageParser reset() {
         stop = false;
         multipartDetected = false;
+        subject = null;
         return this;
     }
 
@@ -571,32 +575,39 @@ public final class MailMessageParser {
                     bodyPart.setSize(value.length());
                     parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                 }
-                final MAPIProps mapiProps = message.getMAPIProps();
-                if (mapiProps != null) {
-                    final RawInputStream ris = (RawInputStream) mapiProps.getPropValue(MAPIProp.PR_RTF_COMPRESSED);
-                    if (ris != null) {
-                        final TNEFBodyPart bodyPart = new TNEFBodyPart();
-                        /*
-                         * Decompress RTF body
-                         */
-                        final byte[] decompressedBytes = TNEFUtils.decompressRTF(ris.toByteArray());
-                        final String contentTypeStr;
-                        {
-                            // final String charset = CharsetDetector.detectCharset(new
-                            // UnsynchronizedByteArrayInputStream(decompressedBytes));
-                            contentTypeStr = "application/rtf";
+                /*
+                 * Check for possible RTF content
+                 */
+                {
+                    final MAPIProps mapiProps = message.getMAPIProps();
+                    if (mapiProps != null) {
+                        final RawInputStream ris = (RawInputStream) mapiProps.getPropValue(MAPIProp.PR_RTF_COMPRESSED);
+                        if (ris != null) {
+                            final TNEFBodyPart bodyPart = new TNEFBodyPart();
+                            /*
+                             * De-compress RTF body
+                             */
+                            final byte[] decompressedBytes = CompressedRTFInputStream.decompressRTF(ris.toByteArray());
+                            final String contentTypeStr;
+                            {
+                                // final String charset = CharsetDetector.detectCharset(new
+                                // UnsynchronizedByteArrayInputStream(decompressedBytes));
+                                contentTypeStr = "application/rtf";
+                            }
+                            /*
+                             * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
+                             */
+                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+                            bodyPart.setSize(decompressedBytes.length);
+                            final MailPart convertedPart = MIMEMessageConverter.convertPart(bodyPart);
+                            convertedPart.setFileName(new StringBuilder(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
+                            parseMailContent(convertedPart, handler, prefix, partCount++);
+                            /*
+                             * Stop to further process TNEF attachment
+                             */
+                            return;
                         }
-                        /*
-                         * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
-                         */
-                        bodyPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
-                        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
-                        bodyPart.setSize(decompressedBytes.length);
-                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
-                        /*
-                         * Stop to further process TNEF attachment
-                         */
-                        return;
                     }
                 }
                 /*
@@ -749,7 +760,11 @@ public final class MailMessageParser {
         /*
          * SUBJECT
          */
-        handler.handleSubject(MIMEMessageUtility.decodeMultiEncodedHeader(mail.getSubject()));
+        {
+            final String subj = MIMEMessageUtility.decodeMultiEncodedHeader(mail.getSubject());
+            subject = subj;
+            handler.handleSubject(subj);
+        }
         /*
          * SENT DATE
          */
