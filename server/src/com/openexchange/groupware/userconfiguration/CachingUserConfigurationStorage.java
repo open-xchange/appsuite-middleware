@@ -142,7 +142,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
      * 
      * @throws UserConfigurationException If an error occurs
      */
-    private void initCache() throws UserConfigurationException {
+    void initCache() throws UserConfigurationException {
         if (cache != null) {
             return;
         }
@@ -150,6 +150,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
         } catch (final CacheException e) {
             throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+        } catch (final RuntimeException rte) {
+            /*
+             * Swallow
+             */
+            LOG.warn("A runtime error occurred.", rte);
         }
     }
 
@@ -158,7 +163,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
      * 
      * @throws UserConfigurationException If an error occurs
      */
-    private void releaseCache() throws UserConfigurationException {
+    void releaseCache() throws UserConfigurationException {
         if (cache == null) {
             return;
         }
@@ -170,6 +175,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             }
         } catch (final CacheException e) {
             throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+        } catch (final RuntimeException rte) {
+            /*
+             * Swallow
+             */
+            LOG.warn("A runtime error occurred.", rte);
         }
         cache = null;
     }
@@ -190,6 +200,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 }
             } catch (final CacheException e) {
                 throw new UserConfigurationException(UserConfigurationCode.CACHE_PUT_ERROR, e, e.getMessage());
+            } catch (final RuntimeException rte) {
+                return getFallback().getUserConfiguration(userId, groups, ctx);
             } finally {
                 cacheWriteLock.unlock();
             }
@@ -198,7 +210,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException {
+    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws UserConfigurationException {
         if (cache == null) {
             return getFallback().getUserConfiguration(ctx, users);
         }
@@ -219,6 +231,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 cache.put(getKey(userConfig.getUserId(), ctx), userConfig);
             } catch (final CacheException e) {
                 throw new UserConfigurationException(e);
+            } catch (final RuntimeException rte) {
+                return getFallback().getUserConfiguration(ctx, users);
             } finally {
                 cacheWriteLock.unlock();
             }
@@ -237,6 +251,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cache.clear();
         } catch (final CacheException e) {
             throw new UserConfigurationException(UserConfigurationCode.CACHE_CLEAR_ERROR, e, e.getMessage());
+        } catch (final RuntimeException rte) {
+            /*
+             * Swallow
+             */
+            LOG.warn("A runtime error occurred.", rte);
         } finally {
             cacheWriteLock.unlock();
         }
@@ -252,6 +271,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cache.remove(getKey(userId, ctx));
         } catch (final CacheException e) {
             throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException rte) {
+            /*
+             * Swallow
+             */
+            LOG.warn("A runtime error occurred.", rte);
         } finally {
             cacheWriteLock.unlock();
         }
@@ -265,6 +289,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cache.remove(getKey(userId, ctx));
         } catch (final CacheException e) {
             throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException rte) {
+            /*
+             * Swallow
+             */
+            LOG.warn("A runtime error occurred.", rte);
         } finally {
             cacheWriteLock.unlock();
         }
