@@ -1,3 +1,8 @@
+* 2011-05-16 - dennis.sieben@open-xchange.com
+
+ - Bugfix #19253 - com.openexchange.admin.reseller.console.extensionimpl.ContextConsoleChangeImpl
+                   ignores RMI_HOSTNAME environment
+
 * 2011-05-10 - choeger@open-xchange.com
 
  - Bugfix #19102: reseller bundle: unable to change restrictions on commandline

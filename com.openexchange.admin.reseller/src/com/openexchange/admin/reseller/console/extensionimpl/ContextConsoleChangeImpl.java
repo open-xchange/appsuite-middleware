@@ -54,6 +54,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleChangeInterface;
@@ -72,7 +73,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 
-public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
+public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements ContextConsoleChangeInterface {
     
     protected CLIOption addRestrictionsOption = null;
     protected CLIOption editRestrictionsOption = null;
@@ -94,7 +95,7 @@ public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
             final HashSet<Restriction> editRes = ResellerAbstraction.getRestrictionsToEdit(parser, this.editRestrictionsOption);
             final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
             
-            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup("rmi://localhost:1099/" + OXContextInterface.RMI_NAME);
+            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
             final Context data = oxctx.getData(ctx, auth);
             final HashSet<Restriction> dbres;
             final OXContextExtensionImpl dbctxext = (OXContextExtensionImpl) data.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
