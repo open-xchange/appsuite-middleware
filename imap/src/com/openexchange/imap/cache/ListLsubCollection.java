@@ -142,7 +142,7 @@ final class ListLsubCollection {
     }
 
     /**
-     * Checks if this collection is marked as deprecated.
+     * Checks if this collection is marked as deprecatded.
      * 
      * @return <code>true</code> if deprecated; otherwise <code>false</code>
      */
