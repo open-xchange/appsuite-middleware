@@ -150,11 +150,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
         } catch (final CacheException e) {
             throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
-        } catch (final RuntimeException rte) {
-            /*
-             * Swallow
-             */
-            LOG.warn("A runtime error occurred.", rte);
+        } catch (final RuntimeException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         }
     }
 
@@ -175,13 +172,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             }
         } catch (final CacheException e) {
             throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
-        } catch (final RuntimeException rte) {
-            /*
-             * Swallow
-             */
-            LOG.warn("A runtime error occurred.", rte);
+        } catch (final RuntimeException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+        } finally {
+            cache = null;
         }
-        cache = null;
     }
 
     @Override
