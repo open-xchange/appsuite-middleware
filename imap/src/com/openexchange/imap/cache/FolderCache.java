@@ -263,14 +263,17 @@ public final class FolderCache {
         final IMAPConfig imapConfig = folderStorage.getImapConfig();
         try {
             final IMAPStore imapStore = folderStorage.getImapStore();
+            final String imapFullName;
             IMAPFolder f;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName) || 0 == fullName.length()) {
                 f = (IMAPFolder) imapStore.getDefaultFolder();
+                imapFullName = "";
             } else {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
+                imapFullName = fullName;
             }
-            if (!"INBOX".equals(fullName) && !f.exists()) {
-                f = folderStorage.checkForNamespaceFolder(fullName);
+            if (!"INBOX".equals(imapFullName) && !ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session).exists()) {
+                f = folderStorage.checkForNamespaceFolder(imapFullName);
                 if (null == f) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
