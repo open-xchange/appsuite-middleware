@@ -142,7 +142,7 @@ final class ListLsubCollection {
     }
 
     /**
-     * Checks if this collection is marked as deprecatded.
+     * Checks if this collection is marked as deprecated.
      * 
      * @return <code>true</code> if deprecated; otherwise <code>false</code>
      */
@@ -220,6 +220,7 @@ final class ListLsubCollection {
         try {
             // listMap.clear();
             // lsubMap.clear();
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
             /*
              * Perform LIST "" ""
              */
@@ -303,6 +304,23 @@ final class ListLsubCollection {
                     }
                 }
             }
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                final StringBuilder sb = new StringBuilder(128);
+                sb.append("LIST/LSUB cache");
+                if (doStatus || doGetAcl) {
+                    sb.append(" (");
+                    if (doStatus) {
+                        sb.append(" including STATUS");
+                    }
+                    if (doGetAcl) {
+                        sb.append(" including GETACL");
+                    }
+                    sb.append(')');
+                }
+                sb.append(" built in ").append(dur).append("msec.");
+                LOG.debug(sb.toString());
+            }
             /*
              * Set time stamp
              */
@@ -345,6 +363,7 @@ final class ListLsubCollection {
             return;
         }
         try {
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
             /*
              * Perform LIST "<full-name>" "*"
              */
@@ -412,6 +431,23 @@ final class ListLsubCollection {
                         }
                     }
                 }
+            }
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                final StringBuilder sb = new StringBuilder(128);
+                sb.append("LIST/LSUB cache");
+                if (doStatus || doGetAcl) {
+                    sb.append(" (");
+                    if (doStatus) {
+                        sb.append(" including STATUS");
+                    }
+                    if (doGetAcl) {
+                        sb.append(" including GETACL");
+                    }
+                    sb.append(')');
+                }
+                sb.append(" updated in ").append(dur).append("msec.");
+                LOG.debug(sb.toString());
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
