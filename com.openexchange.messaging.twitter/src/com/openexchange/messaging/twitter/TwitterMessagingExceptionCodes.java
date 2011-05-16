@@ -66,7 +66,7 @@ public enum TwitterMessagingExceptionCodes implements OXErrorMessage {
      */
     UNEXPECTED_ERROR(TwitterMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
     /**
-     * Invalid Twitter messaging account. Please delete & re-create your Twitter messaging account.
+     * Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.
      */
     INVALID_ACCOUNT(TwitterMessagingExceptionMessages.INVALID_ACCOUNT_MSG, Category.CODE_ERROR, 2),
     
