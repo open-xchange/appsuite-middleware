@@ -874,13 +874,32 @@ public final class MailMessageParser {
                     try {
                         return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
                     } catch (final UnsupportedEncodingException e) {
+                        if (WARN_ENABLED) {
+                            LOG.warn("Unsupported encoding: " + e.getMessage(), e);
+                        }
                         return new String(bytes, "US-ASCII");
                     }
                 }
                 /*
-                 * Return ASCII string
+                 * Determine proper character set
                  */
-                return new String(bytes, "US-ASCII");
+                String charset = contentType.getCharsetParameter();
+                if (!CharsetDetector.isValid(charset)) {
+                    StringBuilder sb = null;
+                    if (null != charset) {
+                        sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(charset).append("\".");
+                        mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
+                    }
+                    charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+                    if (WARN_ENABLED && null != sb) {
+                        sb.append(" Using auto-detected encoding: \"").append(charset).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                }
+                /*
+                 * Return textual content
+                 */
+                return new String(bytes, charset);
             } catch (final MailException e) {
                 // getRawInputStream() failed
                 if (LOG.isDebugEnabled()) {
