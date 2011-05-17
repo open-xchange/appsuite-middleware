@@ -1,3 +1,7 @@
+* 2011-05-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #19259: Checking for possible null elements before sorting list
+
 * 2011-05-17 - dennis.sieben@open-xchange.com
 
  - Bugfix #18656: Corrected order of headers and message when transfering a message to spamassassin for learning.

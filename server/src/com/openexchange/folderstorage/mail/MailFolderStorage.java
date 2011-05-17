@@ -794,7 +794,7 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect(true);
 
-            final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
+            List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
             /*
              * Filter against possible POP3 storage folders
              */
@@ -854,6 +854,7 @@ public final class MailFolderStorage implements FolderStorage {
                  * Sort them
                  */
                 final Locale locale = storageParameters.getUser().getLocale();
+                children = stripNullElementsFrom(children);
                 Collections.sort(children, new MailFolderComparator(names, locale));
                 /*
                  * i18n INBOX name
@@ -1351,6 +1352,19 @@ public final class MailFolderStorage implements FolderStorage {
                 storageParameters.addWarning(mailException);
             }
         }
+    }
+
+    private static <E> List<E> stripNullElementsFrom(final List<E> list) {
+        if (null == list || list.isEmpty()) {
+            return list;
+        }
+        final List<E> ret = new ArrayList<E>(list.size());
+        for (final E element : list) {
+            if (null != element) {
+                ret.add(element);
+            }
+        }
+        return ret;
     }
 
 }
