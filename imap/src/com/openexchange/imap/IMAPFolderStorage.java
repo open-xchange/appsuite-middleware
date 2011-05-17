@@ -228,7 +228,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      */
     public void removeFromCache(final String modifiedFullname) {
         FolderCache.removeCachedFolder(modifiedFullname, session, accountId);
-        // ListLsubCache.removeCachedEntry(modifiedFullname, accountId, session);
+        ListLsubCache.removeCachedEntry(modifiedFullname, accountId, session);
     }
 
     /**
