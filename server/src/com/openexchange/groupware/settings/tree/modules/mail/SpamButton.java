@@ -62,40 +62,28 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 
 /**
+ * Tells the UI if the spam button should be shown or not.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SpamButton implements PreferencesItemService {
 
-    /**
-     * Default constructor.
-     */
     public SpamButton() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { "modules", "mail", "spambutton" };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
             }
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                final UserSettingMail settings = UserSettingMailStorage
-                    .getInstance().getUserSettingMail(session.getUserId(), ctx);
-                setting.setSingleValue(Boolean.valueOf(settings
-				    .isSpamEnabled()));
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
+                final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+                setting.setSingleValue(Boolean.valueOf(settings.isSpamEnabled()));
             }
         };
     }
