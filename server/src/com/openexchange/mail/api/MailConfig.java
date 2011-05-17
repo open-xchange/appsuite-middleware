@@ -290,6 +290,7 @@ public abstract class MailConfig {
             throw new MailException(e);
         }
         mailConfig.accountId = accountId;
+        mailConfig.session = session;
         fillLoginAndPassword(mailConfig, session, UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
@@ -397,8 +398,9 @@ public abstract class MailConfig {
      * @throws AbstractOXException If resolving user by specified pattern fails
      */
     public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws AbstractOXException {
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+            MailAccountStorageService.class,
+            true);
         if (isDefaultAccount) {
             switch (MailProperties.getInstance().getLoginSource()) {
             case USER_IMAPLOGIN:
@@ -437,7 +439,7 @@ public abstract class MailConfig {
                         }
                     }
                 }
-                // Prefer the default mail account. 
+                // Prefer the default mail account.
                 final Set<Integer> notDefaultAccount = new HashSet<Integer>();
                 if (userIds.size() > 1) {
                     final Iterator<Integer> iter = userIds.iterator();
@@ -543,7 +545,7 @@ public abstract class MailConfig {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         // Assign login
         final String slogin = session.getLoginName();
-        if(  proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
+        if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
             mailConfig.login = slogin;
         } else {
             mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
@@ -590,6 +592,8 @@ public abstract class MailConfig {
      */
 
     protected int accountId;
+
+    protected Session session;
 
     protected String login;
 
@@ -646,6 +650,15 @@ public abstract class MailConfig {
      */
     public int getAccountId() {
         return accountId;
+    }
+
+    /**
+     * Gets the session.
+     * 
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
     }
 
     /**
@@ -713,6 +726,15 @@ public abstract class MailConfig {
      */
     public void setAccountId(final int accountId) {
         this.accountId = accountId;
+    }
+
+    /**
+     * Sets the session
+     * 
+     * @param session The session
+     */
+    public void setSession(final Session session) {
+        this.session = session;
     }
 
     /**
