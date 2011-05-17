@@ -125,11 +125,10 @@ public final class MBoxEnabledCache {
      */
     public static boolean isMBoxEnabled(final IMAPConfig imapConfig, final IMAPFolder imapFolder, final String prefix) throws MessagingException, MailException {
         final ConcurrentMap<InetSocketAddress, Future<Boolean>> map = MAP;
-        final InetSocketAddress imapServer = imapConfig.getImapServerSocketAddress();
-        Future<Boolean> f = map.get(imapServer);
+        Future<Boolean> f = map.get(imapConfig.getImapServerSocketAddress());
         if (null == f) {
             final SettableFutureTask<Boolean> ft = new SettableFutureTask<Boolean>(new MBoxEnabledCallable(imapFolder, prefix));
-            f = map.putIfAbsent(imapServer, ft);
+            f = map.putIfAbsent(imapConfig.getImapServerSocketAddress(), ft);
             if (null == f) {
                 f = ft;
                 final Boolean consideredAsMBox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession());
