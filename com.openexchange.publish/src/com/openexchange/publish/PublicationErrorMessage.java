@@ -49,41 +49,40 @@
 
 package com.openexchange.publish;
 
+import static com.openexchange.publish.PublicationExceptionMessages.*;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
-
 
 /**
  * {@link PublicationErrorMessage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public enum PublicationErrorMessage implements OXErrorMessage {
 
     /**
      * A SQL Error occurred.
      */
-    SQLException(Category.CODE_ERROR, 1, "Please try again later.", "A SQL Error occurred."),
+    SQLException(Category.CODE_ERROR, 1, "Please try again later.", SQL_EXCEPTION_MSG),
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s."),
+    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", PARSE_EXCEPTION_MSG),
     /**
      * Could not load publications of type %1$s
      */
-    NoLoaderFound(Category.CODE_ERROR, 3, "Only publish supported document types", "Could not load publications of type %1$s"),
+    NoLoaderFound(Category.CODE_ERROR, 3, "Only publish supported document types", NO_LOADER_FOUND_MSG),
     /**
      * Can not save a given ID.
      */
-    IDGiven(Category.CODE_ERROR, 4, "Do not set a ID when saving a publication", "Unable to save a given ID."),
+    IDGiven(Category.CODE_ERROR, 4, "Do not set a ID when saving a publication", ID_GIVEN_MSG),
     /**
      * Cannot find the publication site (according ID and Context).
      */
-    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Cannot find the publication site."),
-    UniquenessConstraintViolation(Category.USER_INPUT, 6, "Choose a different value", "%s has already been taken (Field: %s)"),
-    AccessDenied(Category.PERMISSION, 7, "Try again when you have the correct permissions", "You do not have the permissions to undertake the chosen action (%s)");
-    
+    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", PUBLICATION_NOT_FOUND_MSG),
+    UniquenessConstraintViolation(Category.USER_INPUT, 6, "Choose a different value", UNIQUENESS_CONSTRAINT_VIOLATION),
+    AccessDenied(Category.PERMISSION, 7, "Try again when you have the correct permissions", ACCESS_DENIED_MSG);
+
     private Category category;
     private int errorCode;
     private String help;
@@ -121,6 +120,4 @@ public enum PublicationErrorMessage implements OXErrorMessage {
     public PublicationException create(final Object...args) {
         return EXCEPTIONS.create(this,args);
     }
-
-
 }
