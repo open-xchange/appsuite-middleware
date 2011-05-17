@@ -1040,7 +1040,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                              * There is no virtual child, thus real subfolders are equal to virtual ones
                              */
                             outlookFolder.setSubfolderIDs(realSubfolderIDs);
-                            //outlookFolder.setSubscribedSubfolders(true);
                         }
                     }
                 }
