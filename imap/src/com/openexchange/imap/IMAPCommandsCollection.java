@@ -253,7 +253,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final String mboxName = prepareStringArgument(new StringBuilder("proberootlevel").append(
+                final String mboxName = prepareStringArgument(new StringBuilder("probe").append(
                     String.valueOf(System.currentTimeMillis())).toString());
                 /*
                  * Perform command: CREATE
