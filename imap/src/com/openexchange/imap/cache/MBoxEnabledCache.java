@@ -131,11 +131,11 @@ public final class MBoxEnabledCache {
             f = map.putIfAbsent(imapConfig.getImapServerSocketAddress(), ft);
             if (null == f) {
                 f = ft;
-                final Boolean consideredAsMBox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession());
-                if (null == consideredAsMBox) {
+                final Boolean mbox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession());
+                if (null == mbox) {
                     ft.run();
                 } else {
-                    ft.set(consideredAsMBox);
+                    ft.set(mbox);
                 }
             }
         }

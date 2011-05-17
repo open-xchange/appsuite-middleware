@@ -106,7 +106,10 @@ public final class ListLsubCache {
     /**
      * Checks if associated mailbox is considered as MBox format.
      * 
-     * @return {@link Boolean#TRUE} for MBox format, {@link Boolean#FALSE} for no MBOX format or <code>null</code> for undetermined
+     * @param accountId The account ID
+     * @param imapFolder The IMAP folder
+     * @param session The session
+     * @return {@link Boolean#TRUE} for MBox format, {@link Boolean#FALSE} for no MBOX format or <code>null</code> if undetermined
      * @throws MailException if a mail error occurs
      */
     public static Boolean consideredAsMBox(final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
