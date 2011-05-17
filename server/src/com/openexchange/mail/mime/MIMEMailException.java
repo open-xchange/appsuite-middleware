@@ -690,6 +690,9 @@ public class MIMEMailException extends MailException {
     private static final Pattern PATTERN_TAG = Pattern.compile("A[0-9]+ (.+)");
 
     private static String skipTag(final String serverResponse) {
+        if (null == serverResponse) {
+            return null;
+        }
         final Matcher m = PATTERN_TAG.matcher(serverResponse);
         if (m.matches()) {
             return m.group(1);
