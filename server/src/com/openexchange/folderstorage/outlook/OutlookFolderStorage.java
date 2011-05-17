@@ -1029,7 +1029,13 @@ public final class OutlookFolderStorage implements FolderStorage {
                          */
                         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession());
                         final MemoryTree memoryTree = memoryTable.getTree(tree, userId, contextId);
-                        if (!memoryTree.containsParent(folderId)) {
+                        if (memoryTree.containsParent(folderId)) {
+                            /*
+                             * There's a virtual child
+                             */
+                            outlookFolder.setSubfolderIDs(null);
+                            outlookFolder.setSubscribedSubfolders(true);
+                        } else {
                             /*
                              * There is no virtual child, thus real subfolders are equal to virtual ones
                              */
