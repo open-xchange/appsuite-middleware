@@ -394,7 +394,7 @@ public class MIMEMailException extends MailException {
      * @return An appropriate instance of {@link MIMEMailException}
      */
     public static MIMEMailException handleMessagingException(final MessagingException e, final MailConfig mailConfig) {
-        return handleMessagingException(e, mailConfig, null);
+        return handleMessagingException(e, mailConfig, mailConfig.getSession());
     }
 
     private static final String STR_EMPTY = "";

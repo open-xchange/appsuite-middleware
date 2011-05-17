@@ -61,6 +61,7 @@ import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
@@ -120,10 +121,9 @@ public final class MBoxEnabledCache {
      * @param imapFolder The IMAP folder to test with
      * @param prefix The full name prefix to use
      * @return <code>true</code> if MBox feature is enabled; otherwise <code>false</code>
-     * @throws MessagingException If a messaging error occurs
      * @throws MailException If a mail error occurs
      */
-    public static boolean isMBoxEnabled(final IMAPConfig imapConfig, final IMAPFolder imapFolder, final String prefix) throws MessagingException, MailException {
+    public static boolean isMBoxEnabled(final IMAPConfig imapConfig, final IMAPFolder imapFolder, final String prefix) throws MailException {
         final ConcurrentMap<InetSocketAddress, Future<Boolean>> map = MAP;
         Future<Boolean> f = map.get(imapConfig.getImapServerSocketAddress());
         if (null == f) {
@@ -144,16 +144,16 @@ public final class MBoxEnabledCache {
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-            throw new MessagingException(e.getMessage());
+            throw new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
         } catch (final CancellationException e) {
-            throw new MessagingException(e.getMessage());
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof MessagingException) {
-                throw ((MessagingException) cause);
+                throw MIMEMailException.handleMessagingException((MessagingException) cause, imapConfig);
             }
             if (cause instanceof RuntimeException) {
-                throw new MessagingException(e.getMessage());
+                throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
             }
             if (cause instanceof Error) {
                 throw (Error) cause;
