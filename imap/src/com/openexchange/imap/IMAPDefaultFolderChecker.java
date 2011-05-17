@@ -267,7 +267,7 @@ public final class IMAPDefaultFolderChecker {
                      */
                     final int type;
                     final boolean mboxEnabled =
-                        MBoxEnabledCache.isMBoxEnabled(imapConfig.getImapServerSocketAddress(), inboxFolder, prefix);
+                        MBoxEnabledCache.isMBoxEnabled(imapConfig, inboxFolder, prefix);
                     if (mboxEnabled) {
                         type = IMAPFolder.HOLDS_MESSAGES;
                     } else {

@@ -59,6 +59,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.MailException;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
@@ -114,21 +116,28 @@ public final class MBoxEnabledCache {
     /**
      * Checks if MBox feature is enabled for given IMAP server.
      * 
-     * @param imapServer The IMAP server's address
+     * @param imapConfig The IMAP configuration
      * @param imapFolder The IMAP folder to test with
-     * @param prefix The fullname prefix to use
+     * @param prefix The full name prefix to use
      * @return <code>true</code> if MBox feature is enabled; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
+     * @throws MailException If a mail error occurs
      */
-    public static boolean isMBoxEnabled(final InetSocketAddress imapServer, final IMAPFolder imapFolder, final String prefix) throws MessagingException {
+    public static boolean isMBoxEnabled(final IMAPConfig imapConfig, final IMAPFolder imapFolder, final String prefix) throws MessagingException, MailException {
         final ConcurrentMap<InetSocketAddress, Future<Boolean>> map = MAP;
+        final InetSocketAddress imapServer = imapConfig.getImapServerSocketAddress();
         Future<Boolean> f = map.get(imapServer);
         if (null == f) {
-            final FutureTask<Boolean> ft = new FutureTask<Boolean>(new MBoxEnabledCallable(imapFolder, prefix));
+            final SettableFutureTask<Boolean> ft = new SettableFutureTask<Boolean>(new MBoxEnabledCallable(imapFolder, prefix));
             f = map.putIfAbsent(imapServer, ft);
             if (null == f) {
                 f = ft;
-                ft.run();
+                final Boolean consideredAsMBox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession());
+                if (null == consideredAsMBox) {
+                    ft.run();
+                } else {
+                    ft.set(consideredAsMBox);
+                }
             }
         }
         try {
@@ -172,6 +181,19 @@ public final class MBoxEnabledCache {
             return Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(imapFolder, FOLDER_TYPE, prefix));
         }
 
+    }
+
+    private static final class SettableFutureTask<V> extends FutureTask<V> {
+
+        public SettableFutureTask(final Callable<V> callable) {
+            super(callable);
+        }
+
+        @Override
+        public void set(final V v) {
+            super.set(v);
+        }
+        
     }
 
 }

@@ -791,7 +791,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  */
                 final char separator = parentEntry.getSeparator();
                 final boolean mboxEnabled = MBoxEnabledCache.isMBoxEnabled(
-                    imapConfig.getImapServerSocketAddress(),
+                    imapConfig,
                     parent,
                     new StringBuilder(parent.getFullName()).append(separator).toString());
                 if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
@@ -1099,7 +1099,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                      * Check for MBox
                      */
                     mboxEnabled = MBoxEnabledCache.isMBoxEnabled(
-                        imapConfig.getImapServerSocketAddress(),
+                        imapConfig,
                         par,
                         new StringBuilder(par.getFullName()).append(separator).toString());
                 }
@@ -1342,7 +1342,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             }
                         }
                         final boolean mboxEnabled = MBoxEnabledCache.isMBoxEnabled(
-                            imapConfig.getImapServerSocketAddress(),
+                            imapConfig,
                             destFolder,
                             new StringBuilder(destFolder.getFullName()).append(separator).toString());
                         if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
@@ -1402,7 +1402,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                          * Check for MBox
                          */
                         mboxEnabled = MBoxEnabledCache.isMBoxEnabled(
-                            imapConfig.getImapServerSocketAddress(),
+                            imapConfig,
                             par,
                             new StringBuilder(par.getFullName()).append(separator).toString());
                     }

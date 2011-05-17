@@ -101,6 +101,8 @@ final class ListLsubCollection {
 
     private final AtomicBoolean deprecated;
 
+    private Boolean mbox;
+
     private long stamp;
 
     /**
@@ -139,6 +141,15 @@ final class ListLsubCollection {
         if (deprecated.get()) {
             throw new ListLsubRuntimeException("LIST/LSUB cache is deprecated.");
         }
+    }
+
+    /**
+     * Checks if associated mailbox is considered as MBox format.
+     * 
+     * @return {@link Boolean#TRUE} for MBox format, {@link Boolean#FALSE} for no MBOX format or <code>null</code> for undetermined
+     */
+    public Boolean consideredAsMBox() {
+        return mbox;
     }
 
     /**
@@ -494,6 +505,9 @@ final class ListLsubCollection {
                 final IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals(command)) {
                     ListLsubEntryImpl listLsubEntry = parseListResponse(ir, lsub ? null : lsubMap);
+                    if (listLsubEntry.hasInferiors() && listLsubEntry.canOpen()) {
+                        mbox = Boolean.FALSE;
+                    }
                     final String fullName = listLsubEntry.getFullName();
                     if (lsub && !listMap.containsKey(fullName)) {
                         /*
