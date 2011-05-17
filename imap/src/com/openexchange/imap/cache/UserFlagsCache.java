@@ -68,6 +68,10 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public final class UserFlagsCache {
 
+    private static final boolean CHECK_ONCE = true;
+
+    private static final String INBOX = "INBOX";
+
     /**
      * No instance
      */
@@ -86,7 +90,7 @@ public final class UserFlagsCache {
      * @throws MessagingException If <code>SELECT</code> command fails
      */
     public static boolean supportsUserFlags(final IMAPFolder f, final boolean load, final Session session, final int accountId) throws MessagingException {
-        final UserFlagCacheEntry entry = new UserFlagCacheEntry(f.getFullName());
+        final UserFlagCacheEntry entry = new UserFlagCacheEntry(CHECK_ONCE ? INBOX : f.getFullName());
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {

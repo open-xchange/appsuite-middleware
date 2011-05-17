@@ -585,7 +585,7 @@ final class ListLsubCollection {
                 final StringBuilder sb = new StringBuilder(1024);
                 sb.append((lsub ? "LSUB" : "LIST") + " cache contains after (re-)initialization:\n");
                 for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append(entry.getValue()).append('\n');
+                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
                 }
                 LOG.debug(sb.toString());
             }
@@ -691,7 +691,7 @@ final class ListLsubCollection {
                 final StringBuilder sb = new StringBuilder(1024);
                 sb.append((lsub ? "LSUB" : "LIST") + " cache contains after update:\n");
                 for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append(entry.getValue()).append('\n');
+                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
                 }
                 LOG.debug(sb.toString());
             }
@@ -929,7 +929,7 @@ final class ListLsubCollection {
         /*
          * Return
          */
-        return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, lsubMap);
+        return new ListLsubEntryImpl(String.valueOf(separator).equals(name) ? ROOT_FULL_NAME : name, attributes, separator, changeState, hasInferiors, canOpen, lsubMap);
     }
 
     /**

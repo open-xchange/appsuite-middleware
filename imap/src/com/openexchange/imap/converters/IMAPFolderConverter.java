@@ -217,6 +217,8 @@ public final class IMAPFolderConverter {
 
     // private static final ConcurrentMap<Key, Object> M = new ConcurrentHashMap<Key, Object>();
 
+    private static final boolean DO_STATUS = false;
+
     /**
      * Creates a folder data object from given IMAP folder.
      * 
@@ -233,6 +235,7 @@ public final class IMAPFolderConverter {
                 if (imapFolder instanceof DefaultFolder) {
                     return convertRootFolder((DefaultFolder) imapFolder, session, imapConfig);
                 }
+                final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 // Convert non-root folder
                 final IMAPMailFolder mailFolder = new IMAPMailFolder();
                 mailFolder.setRootFolder(false);
@@ -412,17 +415,23 @@ public final class IMAPFolderConverter {
                  * Set message counts for total, new, unread, and deleted
                  */
                 if (selectable && imapConfig.getACLExtension().canRead(ownRights)) {
-                    final int messageCount = listEntry.getMessageCount();
-                    if (messageCount < 0) {
-                        final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
-                        mailFolder.setMessageCount(status[0]);
-                        mailFolder.setNewMessageCount(status[1]);
-                        mailFolder.setUnreadMessageCount(status[2]);
-                        listEntry.rememberCounts(status[0], status[1], status[2]);
+                    if (DO_STATUS) {
+                        final int messageCount = listEntry.getMessageCount();
+                        if (messageCount < 0) {
+                            final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
+                            mailFolder.setMessageCount(status[0]);
+                            mailFolder.setNewMessageCount(status[1]);
+                            mailFolder.setUnreadMessageCount(status[2]);
+                            listEntry.rememberCounts(status[0], status[1], status[2]);
+                        } else {
+                            mailFolder.setMessageCount(messageCount);
+                            mailFolder.setNewMessageCount(listEntry.getNewMessageCount());
+                            mailFolder.setUnreadMessageCount(listEntry.getUnreadMessageCount());
+                        }
                     } else {
-                        mailFolder.setMessageCount(messageCount);
-                        mailFolder.setNewMessageCount(listEntry.getNewMessageCount());
-                        mailFolder.setUnreadMessageCount(listEntry.getUnreadMessageCount());
+                        mailFolder.setMessageCount(-1);
+                        mailFolder.setNewMessageCount(-1);
+                        mailFolder.setUnreadMessageCount(-1);
                     }
                     mailFolder.setDeletedMessageCount(-1/* imapFolder.getDeletedMessageCount() */);
                 } else {
@@ -455,6 +464,10 @@ public final class IMAPFolderConverter {
                     mailFolder.setSupportsUserFlags(true);
                 } else {
                     mailFolder.setSupportsUserFlags(false);
+                }
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("IMAP folder converted in " + dur + "msec.");
                 }
                 return mailFolder;
             }
