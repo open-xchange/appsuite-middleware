@@ -771,7 +771,9 @@ public final class IMAPException extends MIMEMailException {
          * No rename access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_RENAME_ACCESS_EXT("No rename access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_RENAME_ACCESS),
-        /** Unable to parse IMAP server URI "%1$s". */
+        /**
+         * Unable to parse IMAP server URI "%1$s".
+         */
         URI_PARSE_FAILED("Unable to parse IMAP server URI \"%1$s\".", Category.SETUP_ERROR, 2055),
         ;
 
