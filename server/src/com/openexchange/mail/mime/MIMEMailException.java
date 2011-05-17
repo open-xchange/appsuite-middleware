@@ -53,6 +53,8 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.Address;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
@@ -301,6 +303,14 @@ public class MIMEMailException extends MailException {
          * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
          */
         IO_ERROR_EXT(MailException.Code.IO_ERROR, "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for login %3$s (user=%4$s, context=%5$s)."),
+        /**
+         * Error processing mail server response. The administrator has been informed. Error message: %1$s
+         */
+        PROCESSING_ERROR_WE("Error processing mail server response. The administrator has been informed. Error message: %1$s", Category.CODE_ERROR, PROCESSING_ERROR.detailNumber),
+        /**
+         * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error message: %5$s
+         */
+        PROCESSING_ERROR_WE_EXT("Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error message: %5$s", Category.CODE_ERROR, PROCESSING_ERROR_WE.detailNumber),
         ;
         
         private final String message;
@@ -614,15 +624,15 @@ public class MIMEMailException extends MailException {
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
-                        Code.PROCESSING_ERROR_EXT,
+                        Code.PROCESSING_ERROR_WE_EXT,
                         e,
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        nextException.getMessage());
+                        skipTag(nextException.getMessage()));
                 }
-                return new MIMEMailException(Code.PROCESSING_ERROR, e, nextException.getMessage());
+                return new MIMEMailException(Code.PROCESSING_ERROR_WE, e, skipTag(nextException.getMessage()));
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
@@ -676,4 +686,15 @@ public class MIMEMailException extends MailException {
             return new MIMEMailException(Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
+
+    private static final Pattern PATTERN_TAG = Pattern.compile("A[0-9]+ (.+)");
+
+    private static String skipTag(final String serverResponse) {
+        final Matcher m = PATTERN_TAG.matcher(serverResponse);
+        if (m.matches()) {
+            return m.group(1);
+        }
+        return serverResponse;
+    }
+
 }
