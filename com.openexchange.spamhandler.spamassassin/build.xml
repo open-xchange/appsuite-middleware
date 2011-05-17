@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.spamhandler.spamassassin" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -11,9 +12,9 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
+    <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-	<property name="composite.name" value="open-xchange-spamhandler-spamassassin-${version}" />
+    <property name="composite.name" value="open-xchange-spamhandler-spamassassin-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -23,26 +24,19 @@
     <property name="configreadBundle" value="com.openexchange.configread"/>
 
     <!-- JAR names for classpath -->
-    <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar" />
-    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-	<property name="globaljar" value="com.openexchange.global.jar" />
-	<property name="serverjar" value="com.openexchange.server.jar" />
-	<property name="configjar" value="com.openexchange.configread.jar"/>
-
-    <!-- Third party libs -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
-        <exclude name="CVS"/>
-    </fileset>
+    <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+    <property name="globaljar" value="com.openexchange.global.jar"/>
+    <property name="serverjar" value="com.openexchange.server.jar"/>
+    <property name="configjar" value="com.openexchange.configread.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-		<pathelement location="${bundlesdir}/${globaljar}"/>
-    	<pathelement location="${bundlesdir}/${configreadBundle}/${configjar}"/>
-		<pathelement location="${bundlesdir}/${serverjar}"/>
-        <fileset refid="3rdpartyjars"/>
+        <pathelement location="${bundlesdir}/${globaljar}"/>
+        <pathelement location="${bundlesdir}/${configreadBundle}/${configjar}"/>
+        <pathelement location="${bundlesdir}/${serverjar}"/>
     </path>
 
     <!-- Compile -->
@@ -53,15 +47,13 @@
 
     <target name="compile" depends="prepare">
         <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-            <classpath refid="project.classpath" />
+            <classpath refid="project.classpath"/>
         </javac>
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
-            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
@@ -69,16 +61,11 @@
     <target name="install" depends="installJar,installConfig"/>
 
     <target name="installConfig">
-    	<copy overwrite="true" todir="${destdir}/${prefix}/etc/groupware">
-    		<fileset dir="conf">
-    			<include name="**"/>
-    		</fileset>
-    	</copy>
-<!--        <chmod perm="640">
-            <fileset dir="${destdir}/${prefix}/etc/groupware">
+        <copy overwrite="true" todir="${destdir}/${prefix}/etc/groupware">
+            <fileset dir="conf">
                 <include name="**"/>
             </fileset>
-        </chmod>-->
+        </copy>
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
@@ -92,10 +79,10 @@
         </copy>
     </target>
 
-	<!-- Dist -->
-	<target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -106,10 +93,10 @@
             </fileset>
         </copy>
         <tar destfile="../${composite.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+            basedir="${dist-package}"
+            includes="${composite.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">

@@ -1,3 +1,7 @@
+* 2011-05-17 - dennis.sieben@open-xchange.com
+
+ - Bugfix #18656: Corrected order of headers and message when transfering a message to spamassassin for learning.
+
 * 2011-05-17 - marcus.klein@open-xchange.com
 
  - Bugfix #18953: Checking for folder visible permissions on shared tasks folders. This solves a problem when a user is downgraded to PIM.
