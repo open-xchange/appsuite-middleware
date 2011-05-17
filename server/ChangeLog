@@ -1,3 +1,7 @@
+* 2011-05-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #18953: Checking for folder visible permissions on shared tasks folders. This solves a problem when a user is downgraded to PIM.
+
 * 2011-05-16 - marcus.klein@open-xchange.com
 
  - Bugfix #19235: Improved some exception message to make it more understandable for end users.

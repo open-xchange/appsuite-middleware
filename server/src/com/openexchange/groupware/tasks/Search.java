@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -64,7 +65,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -135,45 +135,50 @@ public class Search {
     }
 
     private void prepareFolder() throws TaskException, OXException {
-        Iterable<FolderObject> folders;
+        SearchIterator<FolderObject> folders;
         if (search.hasFolders()) {
             folders = loadFolder(ctx, search.getFolders());
         } else {
             try {
-                folders = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                folders = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
                     getUserId(),
                     user.getGroups(),
                     config.getAccessibleModules(),
                     FolderObject.TASK,
-                    ctx)).asQueue();
+                    ctx);
             } catch (SearchIteratorException e) {
                 throw new OXException(e);
             }
         }
-        for (final FolderObject folder : folders) {
-            if (Permission.canOnlySeeFolder(ctx, user, config, folder)) {
-                continue;
+        try {
+            while (folders.hasNext()) {
+                final FolderObject folder = folders.next();
+                if (!Permission.isFolderVisible(ctx, user, config, folder) || Permission.canOnlySeeFolder(ctx, user, config, folder)) {
+                    continue;
+                }
+                Permission.checkReadInFolder(ctx, user, config, folder);
+                if (folder.isShared(getUserId())) {
+                    shared.add(Integer.valueOf(folder.getObjectID()));
+                } else if (Permission.canReadInFolder(ctx, user, config, folder)) {
+                    own.add(Integer.valueOf(folder.getObjectID()));
+                } else {
+                    all.add(Integer.valueOf(folder.getObjectID()));
+                }
             }
-            Permission.checkReadInFolder(ctx, user, config, folder);
-            if (folder.isShared(getUserId())) {
-                shared.add(Integer.valueOf(folder.getObjectID()));
-            } else if (Permission.canReadInFolder(ctx, user, config, folder)) {
-                own.add(Integer.valueOf(folder.getObjectID()));
-            } else {
-                all.add(Integer.valueOf(folder.getObjectID()));
-            }
+        } catch (AbstractOXException e) {
+            throw new OXException(e);
         }
         if (LOG.isTraceEnabled()) {
             LOG.trace("Search tasks, all: " + all + ", own: " + own + ", shared: " + shared);
         }
     }
 
-    private static Iterable<FolderObject> loadFolder(Context ctx, int[] folderIds) throws TaskException {
+    private static SearchIterator<FolderObject> loadFolder(Context ctx, int[] folderIds) throws TaskException {
         final List<FolderObject> retval = new ArrayList<FolderObject>(folderIds.length);
         for (int folderId : folderIds) {
             retval.add(Tools.getFolder(ctx, folderId));
         }
-        return retval;
+        return new SearchIteratorAdapter<FolderObject>(retval.iterator());
     }
 
     private int getUserId() {
