@@ -1,3 +1,7 @@
+* 2011-05-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #19281: Fixed a NullPointerException when testing transport connection.
+
 * 2011-05-17 - thorben.betten@open-xchange.com
 
  - Bugfix #19259: Checking for possible null elements before sorting list

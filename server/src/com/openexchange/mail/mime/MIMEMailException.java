@@ -383,7 +383,7 @@ public class MIMEMailException extends MailException {
      * @return An appropriate instance of {@link MIMEMailException}
      */
     public static MIMEMailException handleMessagingException(final MessagingException e) {
-        return handleMessagingException(e, null);
+        return handleMessagingException(e, null, null);
     }
 
     /**
