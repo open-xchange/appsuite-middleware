@@ -261,9 +261,9 @@ public final class MessageUtility {
     private static final int STRBLD_SIZE = 32768; // 32K
 
     /**
-     * The unknown character: <code>'�'</code>
+     * The unknown character: <code>'\ufffd'</code>
      */
-    public static final char UNKNOWN = '�';
+    public static final char UNKNOWN = '\ufffd';
 
     /**
      * Reads a string from given input stream using direct buffering.
