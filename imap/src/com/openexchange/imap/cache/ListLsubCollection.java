@@ -777,8 +777,8 @@ final class ListLsubCollection {
                         ChangeState.UNDEFINED,
                         true,
                         false,
-                        lsub ? null : lsubMap);
-                    parent.setNamespace(isNamespace(parentFullName));
+                        Boolean.TRUE,
+                        lsub ? null : lsubMap).setNamespace(isNamespace(parentFullName));
                     map.put(parentFullName, parent);
                     if (add) {
                         set.add(parentFullName);
@@ -925,23 +925,27 @@ final class ListLsubCollection {
         ChangeState changeState = ChangeState.UNDEFINED;
         boolean canOpen = true;
         boolean hasInferiors = true;
+        Boolean hasChildren = null;
         if (s != null) {
             /*
              * Non-empty attribute list
              */
             attributes = new HashSet<String>(s.length);
             for (int i = 0; i < s.length; i++) {
-                final String attr = s[i].toLowerCase(Locale.US);
-                if ("\\marked".equals(attr)) {
-                    changeState = ChangeState.CHANGED;
-                } else if ("\\unmarked".equals(attr)) {
-                    changeState = ChangeState.UNCHANGED;
-                } else if ("\\noselect".equals(attr)) {
-                    canOpen = false;
-                } else if (attr.equals("\\noinferiors")) {
-                    hasInferiors = false;
-                }
-                attributes.add(attr);
+                attributes.add(s[i].toLowerCase(Locale.US));
+            }
+            if (attributes.contains("\\marked")) {
+                changeState = ChangeState.CHANGED;
+            } else if (attributes.contains("\\unmarked")) {
+                changeState = ChangeState.UNCHANGED;
+            } else if (attributes.contains("\\noselect")) {
+                canOpen = false;
+            } else if (attributes.contains("\\noinferiors")) {
+                hasInferiors = false;
+            } else if (attributes.contains("\\haschildren")) {
+                hasChildren = Boolean.TRUE;
+            } else if (attributes.contains("\\hasnochildren")) {
+                hasChildren = Boolean.FALSE;
             }
         } else {
             attributes = Collections.emptySet();
@@ -970,7 +974,7 @@ final class ListLsubCollection {
         /*
          * Return
          */
-        return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, lsubMap).setNamespace(isNamespace(name));
+        return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));
     }
 
     /**
@@ -1068,6 +1072,10 @@ final class ListLsubCollection {
             return false;
         }
 
+        public boolean hasChildren() {
+            return false;
+        }
+
     }
 
     /**
@@ -1101,7 +1109,9 @@ final class ListLsubCollection {
 
         private List<ACL> acls;
 
-        ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
+        private Boolean hasChildren;
+
+        ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
             this.fullName = String.valueOf(separator).equals(fullName) ? ROOT_FULL_NAME : fullName;
             this.attributes = attributes;
@@ -1109,6 +1119,7 @@ final class ListLsubCollection {
             this.changeState = changeState;
             this.hasInferiors = hasInferiors;
             this.canOpen = canOpen;
+            this.hasChildren = hasChildren;
             int type = 0;
             if (hasInferiors) {
                 type |= Folder.HOLDS_FOLDERS;
@@ -1130,6 +1141,8 @@ final class ListLsubCollection {
             hasInferiors = newEntry.hasInferiors;
             separator = newEntry.separator;
             type = newEntry.type;
+            namespace = newEntry.namespace;
+            hasChildren = newEntry.hasChildren;
         }
 
         void clearChildren() {
@@ -1361,6 +1374,10 @@ final class ListLsubCollection {
 
         public boolean isNamespace() {
             return namespace;
+        }
+
+        public boolean hasChildren() {
+            return null == hasChildren ? (null != children && !children.isEmpty()) : hasChildren.booleanValue();
         }
 
     } // End of class ListLsubEntryImpl

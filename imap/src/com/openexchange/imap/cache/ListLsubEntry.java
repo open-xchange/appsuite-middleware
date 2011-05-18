@@ -152,6 +152,13 @@ public interface ListLsubEntry {
     boolean isNamespace();
 
     /**
+     * Indicates whether this entry has children.
+     * 
+     * @return <code>true</code> if children exist; otherwise <code>false</code>
+     */
+    boolean hasChildren();
+
+    /**
      * Gets the folder's type.
      * 
      * @return The type
