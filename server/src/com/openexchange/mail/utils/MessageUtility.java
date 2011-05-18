@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
+import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
@@ -259,6 +261,11 @@ public final class MessageUtility {
     private static final int STRBLD_SIZE = 32768; // 32K
 
     /**
+     * The unknown character: <code>'�'</code>
+     */
+    public static final char UNKNOWN = '�';
+
+    /**
      * Reads a string from given input stream using direct buffering.
      * 
      * @param inStream The input stream
@@ -270,6 +277,24 @@ public final class MessageUtility {
         if (null == inStream) {
             return STR_EMPTY;
         }
+        if (!isBig5(charset)) {
+            return readStream0(inStream, charset);
+        }
+        /*
+         * Special treatment for possible BIG5 encoded stream
+         */
+        final byte[] bytes = getBytesFrom(inStream);
+        final String retval = new String(bytes, "big5");
+        if (retval.indexOf(UNKNOWN) < 0) {
+            return retval;
+        }
+        /*
+         * Expect the charset to be Big5-HKSCS
+         */
+        return new String(bytes, "Big5-HKSCS");
+    }
+
+    private static String readStream0(final InputStream inStream, final String charset) throws IOException {
         final InputStreamReader isr;
         try {
             isr = new InputStreamReader(inStream, charset);
@@ -305,6 +330,24 @@ public final class MessageUtility {
                 LOG.error(e.getMessage(), e);
             }
         }
+    }
+
+    private static final Pattern PATTERN_BIG5 = Pattern.compile("[-_]+");
+
+    private static final String BIG5 = "big5";
+
+    /**
+     * Checks if specified charset name can be considered as BIG5.
+     * 
+     * @param charset The charset name to check
+     * @return <code>true</code> if charset name can be considered as BIG5; otherwise <code>false</code>
+     */
+    public static boolean isBig5(final String charset) {
+        final String lc = charset.toLowerCase(Locale.US);
+        if (!lc.startsWith("big", 0)) {
+            return false;
+        }
+        return BIG5.equals(PATTERN_BIG5.matcher(lc).replaceAll(""));
     }
 
     /**

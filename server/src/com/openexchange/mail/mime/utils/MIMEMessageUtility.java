@@ -94,6 +94,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
@@ -573,7 +574,23 @@ public final class MIMEMessageUtility {
             do {
                 try {
                     sb.append(hdrVal.substring(lastMatch, m.start()));
-                    sb.append(MimeUtility.decodeWord(m.group()));
+                    /*
+                     * Decode encoded-word
+                     */
+                    final String charset = m.group(1);
+                    if (MessageUtility.isBig5(charset)) {
+                        final String encodedWord = m.group();
+                        String decodeWord = MimeUtility.decodeWord(encodedWord);
+                        if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+                            decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "Big5-HKSCS"));
+                        }
+                        sb.append(decodeWord);
+                    } else {
+                        sb.append(MimeUtility.decodeWord(m.group()));
+                    }
+                    /*
+                     * Remember last match position
+                     */
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
                     if (LOG.isDebugEnabled()) {
