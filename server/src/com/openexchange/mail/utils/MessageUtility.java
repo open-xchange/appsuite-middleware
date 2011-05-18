@@ -284,6 +284,9 @@ public final class MessageUtility {
          * Special treatment for possible BIG5 encoded stream
          */
         final byte[] bytes = getBytesFrom(inStream);
+        if (bytes.length == 0) {
+            return STR_EMPTY;
+        }
         final String retval = new String(bytes, "big5");
         if (retval.indexOf(UNKNOWN) < 0) {
             return retval;
