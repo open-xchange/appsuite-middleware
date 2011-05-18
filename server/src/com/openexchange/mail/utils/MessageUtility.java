@@ -261,7 +261,7 @@ public final class MessageUtility {
     private static final int STRBLD_SIZE = 32768; // 32K
 
     /**
-     * The unknown character: <code>'\ufffd'</code>
+     * The unknown character: <code>'\ufffd '</code>
      */
     public static final char UNKNOWN = '\ufffd';
 
