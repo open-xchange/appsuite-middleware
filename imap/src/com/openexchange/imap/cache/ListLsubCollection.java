@@ -101,6 +101,10 @@ final class ListLsubCollection {
 
     private final AtomicBoolean deprecated;
 
+    private final String[] shared;
+
+    private final String[] user;
+
     private Boolean mbox;
 
     private long stamp;
@@ -109,15 +113,19 @@ final class ListLsubCollection {
      * Initializes a new {@link ListLsubCollection}.
      * 
      * @param imapFolder The IMAP folder
+     * @param shared The shared namespaces
+     * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
      * @throws MailException If initialization fails
      */
-    protected ListLsubCollection(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MailException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         deprecated = new AtomicBoolean();
+        this.shared = shared == null ? new String[0] : shared;
+        this.user = user == null ? new String[0] : user;
         init(imapFolder, doStatus, doGetAcl);
     }
 
@@ -125,15 +133,19 @@ final class ListLsubCollection {
      * Initializes a new {@link ListLsubCollection}.
      * 
      * @param imapStore The IMAP store
+     * @param shared The shared namespaces
+     * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
      * @throws MailException If initialization fails
      */
-    protected ListLsubCollection(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    protected ListLsubCollection(final IMAPStore imapStore, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MailException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         deprecated = new AtomicBoolean();
+        this.shared = shared == null ? new String[0] : shared;
+        this.user = user == null ? new String[0] : user;
         init(imapStore, doStatus, doGetAcl);
     }
 
@@ -141,6 +153,20 @@ final class ListLsubCollection {
         if (deprecated.get()) {
             throw new ListLsubRuntimeException("LIST/LSUB cache is deprecated.");
         }
+    }
+
+    boolean isNamespace(final String fullName) {
+        for (final String sharedNamespace : shared) {
+            if (fullName.startsWith(sharedNamespace)) {
+                return true;
+            }
+        }
+        for (final String userNamespace : user) {
+            if (fullName.startsWith(userNamespace)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -752,6 +778,7 @@ final class ListLsubCollection {
                         true,
                         false,
                         lsub ? null : lsubMap);
+                    parent.setNamespace(isNamespace(parentFullName));
                     map.put(parentFullName, parent);
                     if (add) {
                         set.add(parentFullName);
@@ -886,7 +913,7 @@ final class ListLsubCollection {
         return lsubMap.get(fullName);
     }
 
-    private static ListLsubEntryImpl parseListResponse(final IMAPResponse listResponse, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
+    private ListLsubEntryImpl parseListResponse(final IMAPResponse listResponse, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
         /*
          * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
          */
@@ -943,7 +970,7 @@ final class ListLsubCollection {
         /*
          * Return
          */
-        return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, lsubMap);
+        return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, lsubMap).setNamespace(isNamespace(name));
     }
 
     /**
@@ -1037,6 +1064,10 @@ final class ListLsubCollection {
             // Nothing to do
         }
 
+        public boolean isNamespace() {
+            return false;
+        }
+
     }
 
     /**
@@ -1061,6 +1092,8 @@ final class ListLsubCollection {
         private boolean hasInferiors;
 
         private boolean canOpen;
+
+        private boolean namespace;
 
         private int type;
 
@@ -1290,6 +1323,15 @@ final class ListLsubCollection {
             } else {
                 sb.append('"').append(parent.getFullName()).append('"');
             }
+            sb.append(", attributes=(");
+            if (null != attributes && !attributes.isEmpty()) {
+                final Iterator<String> iterator = new TreeSet<String>(attributes).iterator();
+                sb.append('"').append(iterator.next()).append('"');
+                for (int i = 1, size = attributes.size(); i < size; i++) {
+                    sb.append(", \"").append(iterator.next()).append('"');
+                }
+            }
+            sb.append(')');
             sb.append(", children=(");
             if (null != children && !children.isEmpty()) {
                 final Iterator<ListLsubEntryImpl> iterator = new TreeSet<ListLsubEntryImpl>(children).iterator();
@@ -1305,6 +1347,20 @@ final class ListLsubCollection {
         public int compareTo(final ListLsubEntryImpl anotherEntry) {
             final String anotherFullName = anotherEntry.fullName;
             return fullName == null ? (anotherFullName == null ? 0 : -1) : fullName.compareToIgnoreCase(anotherFullName);
+        }
+
+        /**
+         * Sets the namespace flag
+         * 
+         * @param namespace The namespace flag
+         */
+        ListLsubEntryImpl setNamespace(final boolean namespace) {
+            this.namespace = namespace;
+            return this;
+        }
+
+        public boolean isNamespace() {
+            return namespace;
         }
 
     } // End of class ListLsubEntryImpl

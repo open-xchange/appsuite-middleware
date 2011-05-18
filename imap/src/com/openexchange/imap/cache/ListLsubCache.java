@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.cache;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
@@ -189,7 +191,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry entry = collection.getLsub(fullName);
-            if (null != entry) {
+            if (null != entry && (entry.canOpen() || entry.isNamespace())) {
                 return entry;
             }
             /*
@@ -224,7 +226,7 @@ public final class ListLsubCache {
                  * Return
                  */
                 ListLsubEntry entry = collection.getList(fullName);
-                if (null != entry) {
+                if (null != entry && (entry.canOpen() || entry.isNamespace())) {
                     return entry;
                 }
                 /*
@@ -260,7 +262,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry entry = collection.getList(fullName);
-            if (null != entry) {
+            if (null != entry && (entry.canOpen() || entry.isNamespace())) {
                 return entry;
             }
             /*
@@ -306,7 +308,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry listEntry = collection.getList(fullName);
-            if (null == listEntry) {
+            if (null == listEntry || (!listEntry.canOpen() && !listEntry.isNamespace())) {
                 /*
                  * Update & re-check
                  */
@@ -334,7 +336,21 @@ public final class ListLsubCache {
                     mailCache.get(entry);
                     collection = entry.getValue();
                     if (null == collection) {
-                        final ListLsubCollection newCol = new ListLsubCollection(imapFolder, DO_STATUS, DO_GETACL);
+                        final String[] shared;
+                        final String[] user;
+                        try {
+                            final IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
+                            if (imapStore.hasCapability("NAMESPACE")) {
+                                shared = check(NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId));
+                                user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
+                            } else {
+                                shared = new String[0];
+                                user = new String[0];
+                            }
+                        } catch (final MessagingException e) {
+                            throw MIMEMailException.handleMessagingException(e);
+                        }
+                        final ListLsubCollection newCol = new ListLsubCollection(imapFolder, shared, user, DO_STATUS, DO_GETACL);
                         entry.setValue(newCol);
                         mailCache.put(entry);
                         collection = newCol;
@@ -346,7 +362,21 @@ public final class ListLsubCache {
                     mailCache.get(entry);
                     collection = entry.getValue();
                     if (null == collection) {
-                        final ListLsubCollection newCol = new ListLsubCollection(imapFolder, DO_STATUS, DO_GETACL);
+                        final String[] shared;
+                        final String[] user;
+                        try {
+                            final IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
+                            if (imapStore.hasCapability("NAMESPACE")) {
+                                shared = check(NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId));
+                                user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
+                            } else {
+                                shared = new String[0];
+                                user = new String[0];
+                            }
+                        } catch (final MessagingException e) {
+                            throw MIMEMailException.handleMessagingException(e);
+                        }
+                        final ListLsubCollection newCol = new ListLsubCollection(imapFolder, shared, user, DO_STATUS, DO_GETACL);
                         entry.setValue(newCol);
                         mailCache.put(entry);
                         collection = newCol;
@@ -357,6 +387,29 @@ public final class ListLsubCache {
             }
         }
         return collection;
+    }
+
+    private static String[] check(final String[] array) {
+        final List<String> list = new ArrayList<String>(array.length);
+        for (int i = 0; i < array.length; i++) {
+            final String s = array[i];
+            if (!isEmpty(s)) {
+                list.add(s);
+            }
+        }
+        return list.toArray(new String[list.size()]);
+    }
+
+    private static boolean isEmpty(final String s) {
+        if (null == s) {
+            return true;
+        }
+        final char[] chars = s.toCharArray();
+        boolean whitespace = true;
+        for (int i = 0; whitespace && i < chars.length; i++) {
+            whitespace = Character.isWhitespace(chars[i]);
+        }
+        return whitespace;
     }
 
     /**

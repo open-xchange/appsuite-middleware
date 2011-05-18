@@ -145,6 +145,13 @@ public interface ListLsubEntry {
     boolean canOpen();
 
     /**
+     * Indicates whether this entry denotes a namespace folder.
+     * 
+     * @return <code>true</code> for namespace folder; otherwise <code>false</code>
+     */
+    boolean isNamespace();
+
+    /**
      * Gets the folder's type.
      * 
      * @return The type
