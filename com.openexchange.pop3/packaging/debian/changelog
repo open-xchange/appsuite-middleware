@@ -1,3 +1,9 @@
+open-xchange-pop3 (6.18.0.0-18) unstable; urgency=low
+
+  * another build for PTF 2011042610000182
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 18 May 2011 09:31:10 +0000
+
 open-xchange-pop3 (6.18.0.0-17) unstable; urgency=low
 
   * build for PTF 2011042610000182

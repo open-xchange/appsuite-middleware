@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 27
+%define		ox_release 28
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed May 18 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19259: Checking for possible null elements before sorting list
 * Mon May 09 2011 - thorben.betten@open-xchange.com
  - Bugfix #19156: Introduced batch-wise processing of a POP3 account's messages.
 * Tue Apr 12 2011 - marcus.klein@open-xchange.com
