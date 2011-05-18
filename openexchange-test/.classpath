@@ -69,5 +69,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.ajp"/>
 	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.folder.json"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
