@@ -943,7 +943,7 @@ final class ListLsubCollection {
         /*
          * Return
          */
-        return new ListLsubEntryImpl(String.valueOf(separator).equals(name) ? ROOT_FULL_NAME : name, attributes, separator, changeState, hasInferiors, canOpen, lsubMap);
+        return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, lsubMap);
     }
 
     /**
@@ -1070,7 +1070,7 @@ final class ListLsubCollection {
 
         ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
-            this.fullName = fullName;
+            this.fullName = String.valueOf(separator).equals(fullName) ? ROOT_FULL_NAME : fullName;
             this.attributes = attributes;
             this.separator = separator;
             this.changeState = changeState;
