@@ -830,6 +830,7 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * Sort them
                  */
+                stripNullElementsFrom(children);
                 Collections.sort(children, new MailFolderComparator(names, storageParameters.getUser().getLocale()));
             }
 
@@ -1250,4 +1251,13 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    private static <E> void stripNullElementsFrom(final List<E> list) {
+    	Iterator<E> iter = list.iterator();
+    	while (iter.hasNext()) {
+    		E element = iter.next();
+    		if (null == element) {
+    			iter.remove();
+    		}
+    	}
+    }
 }

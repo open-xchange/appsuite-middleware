@@ -1,3 +1,7 @@
+* 2011-05-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #19259: Checking for possible null elements before sorting list
+
 * 2011-05-09 - thorben.betten@open-xchange.com
 
  - Bugfix #19156: Introduced batch-wise processing of a POP3 account's messages.
