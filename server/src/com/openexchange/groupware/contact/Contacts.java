@@ -161,7 +161,7 @@ public final class Contacts {
         }
     }
 
-    private static byte[] scaleContactImage(final byte[] img, final String mime) throws OXConflictException, ContactException {
+    private static byte[] scaleContactImage(final byte[] img, final String mime) throws ContactException {
         if (null == mime) {
             throw ContactExceptionCodes.MIME_TYPE_NOT_DEFINED.create();
         }
@@ -193,7 +193,7 @@ public final class Contacts {
             check = false;
         }
         if (!check) {
-            throw new OXConflictException(ContactExceptionCodes.IMAGE_SCALE_PROBLEM.create(myMime, I(img.length), L(max_size)));
+            throw ContactExceptionCodes.IMAGE_SCALE_PROBLEM.create(myMime, I(img.length), L(max_size));
         }
         BufferedImage bi = null;
         try {
@@ -774,6 +774,8 @@ public final class Contacts {
                     if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                         try {
                             co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
+                        } catch (ContactException e) {
+                            throw e;
                         } catch (final Exception e) {
                             throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
                         }
@@ -1013,8 +1015,6 @@ public final class Contacts {
                     if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                         try {
                             contact.setImage1(scaleContactImage(contact.getImage1(), contact.getImageContentType()));
-                        } catch (OXConflictException e) {
-                            throw e;
                         } catch (ContactException e) {
                             throw e;
                         } catch (final Exception e) {

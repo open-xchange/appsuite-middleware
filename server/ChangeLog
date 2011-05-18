@@ -1,6 +1,7 @@
 * 2011-05-18 - marcus.klein@open-xchange.com
 
  - Bugfix #19281: Fixed a NullPointerException when testing transport connection.
+ - Bugfix #19127: Not hiding image too large exception behind a broken picture exception anymore.
 
 * 2011-05-17 - thorben.betten@open-xchange.com
 
