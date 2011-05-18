@@ -2117,8 +2117,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Update caches
                  */
-                JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), sentFullname, session);
-
+                final JSONMessageCache messageCache = JSONMessageCache.getInstance();
+                if (messageCache != null) {
+                    messageCache.removeFolder(mailAccess.getAccountId(), sentFullname, session);
+                }
                 MailMessageCache.getInstance().removeFolderMessages(
                     mailAccess.getAccountId(),
                     sentFullname,
@@ -2157,7 +2159,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (mailAccess.getAccountId() == pathAccount) {
             mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_FORWARDED, true);
             try {
-                JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), fullname, session);
+                final JSONMessageCache messageCache = JSONMessageCache.getInstance();
+                if (messageCache != null) {
+                    messageCache.removeFolder(mailAccess.getAccountId(), fullname, session);
+                }
                 if (MailMessageCache.getInstance().containsFolderMessages(
                     mailAccess.getAccountId(),
                     fullname,
@@ -2184,7 +2189,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             try {
                 otherAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_FORWARDED, true);
                 try {
-                    JSONMessageCache.getInstance().removeFolder(otherAccess.getAccountId(), fullname, session);
+                    final JSONMessageCache messageCache = JSONMessageCache.getInstance();
+                    if (messageCache != null) {
+                        messageCache.removeFolder(otherAccess.getAccountId(), fullname, session);
+                    }
                     if (MailMessageCache.getInstance().containsFolderMessages(
                         otherAccess.getAccountId(),
                         fullname,
@@ -2222,7 +2230,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (mailAccess.getAccountId() == pathAccount) {
                 mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
                 try {
-                    JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), path.getFolder(), session);
+                    final JSONMessageCache messageCache = JSONMessageCache.getInstance();
+                    if (messageCache != null) {
+                        messageCache.removeFolder(mailAccess.getAccountId(), path.getFolder(), session);
+                    }
                     if (MailMessageCache.getInstance().containsFolderMessages(
                         mailAccess.getAccountId(),
                         path.getFolder(),
@@ -2249,7 +2260,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 try {
                     otherAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
                     try {
-                        JSONMessageCache.getInstance().removeFolder(otherAccess.getAccountId(), path.getFolder(), session);
+                        final JSONMessageCache messageCache = JSONMessageCache.getInstance();
+                        if (messageCache != null) {
+                            messageCache.removeFolder(otherAccess.getAccountId(), path.getFolder(), session);
+                        }
                         if (MailMessageCache.getInstance().containsFolderMessages(
                             otherAccess.getAccountId(),
                             path.getFolder(),
