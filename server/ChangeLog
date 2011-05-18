@@ -13,7 +13,7 @@
 
 * 2011-05-17 - dennis.sieben@open-xchange.com
 
- - Bugfix #18656: Corrected order of headers and message when transfering a message to spamassassin for learning.
+ - Bugfix #18656: Corrected order of headers and message when transferring a message to spamassassin for learning.
 
 * 2011-05-17 - marcus.klein@open-xchange.com
 
