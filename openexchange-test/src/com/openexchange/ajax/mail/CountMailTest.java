@@ -2,12 +2,13 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.mail.actions.CountRequest;
-import com.openexchange.ajax.mail.actions.CountResponse;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.folder.json.FolderField;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -21,7 +22,7 @@ public class CountMailTest extends AbstractMailTest {
 
     protected String folder;
 
-    public CountMailTest(String name) throws ConfigurationException, AjaxException, IOException, SAXException, JSONException {
+    public CountMailTest(final String name) throws ConfigurationException, AjaxException, IOException, SAXException, JSONException {
         super(name);
         this.client = new AJAXClient(User.User2);
     }
@@ -52,9 +53,11 @@ public class CountMailTest extends AbstractMailTest {
     }
 
 
-    protected int count(String folder) throws AjaxException, IOException, SAXException, JSONException {
-        CountResponse response = client.execute( new CountRequest(folder) );
-        return response.getCount();
+    protected int count(final String folder) throws AjaxException, IOException, JSONException {
+        final JSONObject data =
+            (JSONObject) client.execute(
+                new com.openexchange.ajax.folder.actions.GetRequest(API.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
+        return data.getInt(FolderField.TOTAL.getName());
     }
 
 }
