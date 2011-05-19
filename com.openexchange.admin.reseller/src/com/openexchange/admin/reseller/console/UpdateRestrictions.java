@@ -46,61 +46,54 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.reseller.rmi;
 
-import java.util.HashSet;
-import java.util.Map;
-import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+package com.openexchange.admin.reseller.console;
 
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.reseller.rmi.OXResellerInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-public class OXResellerTools {
+/**
+ * @author choeger
+ */
+public class UpdateRestrictions extends ResellerAbstraction {
 
-    public interface ClosureInterface {
-        boolean checkAgainstCorrespondingRestrictions(final String string);
+    protected final void setOptions(final AdminParser parser) {
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+        setCSVOutputOption(parser);
     }
 
-    public static boolean isTrue(final String val) {
-        if( val.toLowerCase().equals("true") ) {
-            return true;
-        } else {
-            return false;
+    /**
+     * 
+     */
+    public UpdateRestrictions() {
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(final String[] args) {
+        final UpdateRestrictions update = new UpdateRestrictions();
+        update.start(args);
+    }
+
+    public void start(final String[] args) {
+        final AdminParser parser = new AdminParser("updaterestrictions");
+
+        setOptions(parser);
+
+        // parse the command line
+        try {
+            parser.ownparse(args);
+
+            final Credentials auth = credentialsparsing(parser);
+
+            final OXResellerInterface rsi = getResellerInterface();
+
+            rsi.updateDatabaseRestrictions(auth);
+        } catch (final Exception e) {
+            printErrors(null, null, e, parser);
+            sysexit(1);
         }
     }
-    
-    public static HashSet<Restriction> array2HashSet(final Restriction[] rarr) {
-        if( rarr != null ) {
-            HashSet<Restriction> ret = new HashSet<Restriction>();
-            for(final Restriction r : rarr) {
-                ret.add(r);
-            }
-            return ret;
-        }
-        return null;
-    }
-
-    public static void checkRestrictions(final HashSet<Restriction> restrictions, final Map<String, Restriction> validRestrictions, String name, final ClosureInterface interf) throws InvalidDataException {
-        // The duplicate check is not needed any more because the HashSet prevents duplicates through the equals method
-        // of the restriction object which only deals with the name
-        for (final Restriction r :  restrictions) {
-            final String rname = r.getName();
-            final String rval = r.getValue();
-            if (null == rname) {
-                throw new InvalidDataException("Restriction name must be set");
-            }
-            if (interf.checkAgainstCorrespondingRestrictions(rname)) {
-                throw new InvalidDataException("Restriction " + rname + " cannot be applied to " + name);
-            }
-            if (null == rval) {
-                throw new InvalidDataException("Restriction value must be set");
-            }
-            final Restriction restriction = validRestrictions.get(rname);
-            if (null == restriction) {
-                throw new InvalidDataException("No restriction named " + rname + " found in database");
-            } else {
-                r.setId(restriction.getId());
-            }
-        }
-    }
-
 }

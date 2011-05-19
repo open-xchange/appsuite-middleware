@@ -52,7 +52,6 @@ package com.openexchange.admin.reseller.console;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -188,7 +187,7 @@ public class List extends ResellerAbstraction {
         } else {
             admin_data.add(null); // displayname
         }
-        final HashSet<Restriction> restrictions = admin.getRestrictions();
+        final Restriction[] restrictions = admin.getRestrictions();
         if (null != restrictions) {
             admin_data.add(ResellerAbstraction.getObjectsAsString(restrictions)); // restrictions
         } else {

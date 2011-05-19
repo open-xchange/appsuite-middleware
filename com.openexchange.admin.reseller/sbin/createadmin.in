@@ -93,6 +93,9 @@ case "$BNAME" in
     "updatemoduleaccessrestrictions")
     ACTION="UpdateModuleAccessRestrictions"
     ;;
+    "updaterestrictions")
+    ACTION="UpdateRestrictions"
+    ;;
 esac
 
 JAVAMAIN="com.openexchange.admin.reseller.console.${ACTION}"

@@ -221,7 +221,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected static void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm, final CLIOption option) throws InvalidDataException {
         HashSet<Restriction> res = parseRestrictions(parser, option);
         if( res.size() > 0 ) {
-            adm.setRestrictions(res);
+            adm.setRestrictions(res.toArray(new Restriction[res.size()]));
         }
     }
 
@@ -346,9 +346,9 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
      * @param objects
      * @return
      */
-    public static String getObjectsAsString(final HashSet<Restriction> objects) {
+    public static String getObjectsAsString(final Restriction[] objects) {
         final StringBuilder sb = new StringBuilder();
-        if (null != objects && objects.size() > 0) {
+        if (null != objects && objects.length > 0) {
             for (final Restriction id : objects) {
                 sb.append(id.getName());
                 sb.append("=");

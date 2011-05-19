@@ -54,7 +54,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.HashSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -131,9 +130,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         final Credentials creds = DummyMasterCredentials();
 
         ResellerAdmin adm = FooAdminUser();
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxContextRestriction());
-        adm.setRestrictions(res);
+        adm.setRestrictions(new Restriction[]{ MaxContextRestriction() });
         oxresell.create(adm, creds);
 
         Context ctx1 = createContext(ResellerFooCredentials());
@@ -161,9 +158,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         final Credentials creds = DummyMasterCredentials();
 
         ResellerAdmin adm = FooAdminUser();
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxOverallUserRestriction(2));
-        adm.setRestrictions(res);
+        adm.setRestrictions(new Restriction[]{MaxOverallUserRestriction(2)});
         oxresell.create(adm, creds);
 
         Context ctx1 = null;
@@ -187,9 +182,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         final Credentials creds = DummyMasterCredentials();
 
         ResellerAdmin adm = FooAdminUser();
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxOverallUserRestriction(2));
-        adm.setRestrictions(res);
+        adm.setRestrictions(new Restriction[]{MaxOverallUserRestriction(2)});
         oxresell.create(adm, creds);
 
         Context ctx1 = createContext(ResellerFooCredentials());

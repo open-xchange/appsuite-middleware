@@ -52,6 +52,7 @@ package com.openexchange.admin.reseller.console;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
+import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -102,10 +103,10 @@ public class Change extends ResellerAbstraction {
             final HashSet<String> removeRes = getRestrictionsToRemove(parser, this.removeRestrictionsOption);
             final HashSet<Restriction> editRes = getRestrictionsToEdit(parser, this.editRestrictionsOption);
             final ResellerAdmin dbadm = rsi.getData(adm, auth);
-            final HashSet<Restriction> dbres = dbadm.getRestrictions();
-            final HashSet<Restriction> retRestrictions = handleAddEditRemoveRestrictions(dbres, adm.getRestrictions(), removeRes, editRes);
+            final HashSet<Restriction> dbres = OXResellerTools.array2HashSet(dbadm.getRestrictions());
+            final HashSet<Restriction> retRestrictions = handleAddEditRemoveRestrictions(dbres, OXResellerTools.array2HashSet(adm.getRestrictions()), removeRes, editRes);
             if (null != retRestrictions) {
-                adm.setRestrictions(retRestrictions);
+                adm.setRestrictions(retRestrictions.toArray(new Restriction[retRestrictions.size()]));
             }
             rsi.change(adm, auth);
             displayChangedMessage(successtext, null, parser);

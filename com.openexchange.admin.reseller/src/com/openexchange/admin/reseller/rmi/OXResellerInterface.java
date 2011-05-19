@@ -170,7 +170,7 @@ public interface OXResellerInterface extends Remote {
      * @throws StorageException
      * @throws OXResellerException
      */
-    public HashSet<Restriction> getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
+    public Restriction[] getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
      * Retrieve a list of all restrictions applied to given {@link Context}
@@ -184,7 +184,7 @@ public interface OXResellerInterface extends Remote {
      * @throws StorageException
      * @throws InvalidCredentialsException
      */
-    public HashSet<Restriction> getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException;
+    public Restriction[] getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException;
 
     /**
      * Initialize the database with all currently possible restrictions.
@@ -221,4 +221,16 @@ public interface OXResellerInterface extends Remote {
      * @throws OXResellerException
      */
     public void updateDatabaseModuleAccessRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
+    
+    /**
+     * Update list of restrictions. This is going to add new restrictions that might ship with
+     * a newer version of the reseller plugin.
+     * 
+     * @param creds {@link Credentials} of the master admin
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws OXResellerException
+     */
+    public void updateDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
 }
