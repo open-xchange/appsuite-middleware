@@ -53,6 +53,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.HashSet;
 import java.util.Stack;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -110,7 +111,9 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         final Credentials creds = DummyMasterCredentials();
 
         ResellerAdmin adm = FooAdminUser();
-        adm.setRestrictions(new Restriction[]{MaxOverallUserRestriction(6)});
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(MaxOverallUserRestriction(6));
+        adm.setRestrictions(res);
         oxresell.create(adm, creds);
 
         Stack<Context> ctxstack = new Stack<Context>();
@@ -149,8 +152,10 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         oxresell.create(adm, DummyMasterCredentials());
 
         Context ctx = createContext(creds);
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(MaxUserPerContextRestriction());
         try {
-            ctx.addExtension(new OXContextExtensionImpl(new Restriction[]{MaxUserPerContextRestriction()}));
+            ctx.addExtension(new OXContextExtensionImpl(res));
         } catch (final DuplicateExtensionException e1) {
             // Because the context is newly created this exception cannot occur
             e1.printStackTrace();
@@ -189,11 +194,11 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         oxresell.create(adm, DummyMasterCredentials());
 
         Context ctx = createContext(creds);
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"webmail_plus","2"));
+        res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"premium","2"));
         try {
-            ctx.addExtension(new OXContextExtensionImpl(new Restriction[]{
-                new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"webmail_plus","2"),
-                new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"premium","2")
-            }));
+            ctx.addExtension(new OXContextExtensionImpl(res));
         } catch (DuplicateExtensionException e1) {
             // Because the context is newly created this exception cannot occur
             e1.printStackTrace();

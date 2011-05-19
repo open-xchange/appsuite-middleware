@@ -104,19 +104,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (!cache.isMasterAdmin(auth)) {
             checkOwnerShipAndSetSid(ctx, auth);
         }
-        final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
-        if (null != firstExtensionByName) {
-            final Restriction[] restrictions = firstExtensionByName.getRestriction();
-            try {
-                checkRestrictionsPerContext(OXResellerTools.array2HashSet(restrictions), this.oxresell);
-            } catch (final StorageException e) {
-                throw new PluginException(e);
-            } catch (final InvalidDataException e) {
-                throw new PluginException(e);
-            } catch (final OXResellerException e) {
-                throw new PluginException(e.getMessage());
-            }
-        }
         applyRestrictionsPerContext(ctx);
         try {
             oxresell.writeCustomId(ctx);
@@ -210,19 +197,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public Context preCreate(final Context ctx, final User admin_user, final Credentials auth) throws PluginException {
-        final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
-        if (null != firstExtensionByName) {
-            final Restriction[] restrictions = firstExtensionByName.getRestriction();
-            try {
-                checkRestrictionsPerContext(OXResellerTools.array2HashSet(restrictions), this.oxresell);
-            } catch (final StorageException e) {
-                throw new PluginException(e);
-            } catch (final InvalidDataException e) {
-                throw new PluginException(e);
-            } catch (final OXResellerException e) {
-                throw new PluginException(e.getMessage());
-            }
-        }
         return ctx;
     }
 
@@ -415,11 +389,16 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         // Handle the extension...
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         if (null != firstExtensionByName) {
-            final Restriction[] restrictions = firstExtensionByName.getRestriction();
+            final HashSet<Restriction> restrictions = firstExtensionByName.getRestriction();
             try {
+                checkRestrictionsPerContext(restrictions, this.oxresell);
                 this.oxresell.applyRestrictionsToContext(restrictions, ctx);
             } catch (final StorageException e) {
                 throw new PluginException(e);
+            } catch (final InvalidDataException e) {
+                throw new PluginException(e);
+            } catch (final OXResellerException e) {
+                throw new PluginException(e.getMessage());
             }
         }
     }

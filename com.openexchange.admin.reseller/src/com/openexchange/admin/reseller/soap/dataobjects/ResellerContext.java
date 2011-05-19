@@ -49,7 +49,7 @@
 
 package com.openexchange.admin.reseller.soap.dataobjects;
 
-import java.util.Arrays;
+import java.util.HashSet;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
@@ -57,15 +57,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 
 
 public class ResellerContext extends Context {
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "ResellerContext [errortext=" + errortext + ", owner=" + owner + ", customid=" + customid + ", restriction=" + Arrays.toString(restriction) + ", restrictionset=" + restrictionset + ", ownerset=" + ownerset + ", sid=" + sid + ", sidset=" + sidset + ", customidset=" + customidset + "]";
-    }
-
 
     /**
      * 
@@ -78,7 +69,7 @@ public class ResellerContext extends Context {
     
     private String customid;
     
-    private Restriction[] restriction;
+    private HashSet<Restriction> restriction;
     
     private boolean restrictionset;
     
@@ -171,12 +162,12 @@ public class ResellerContext extends Context {
     }
 
     
-    public final Restriction[] getRestriction() {
+    public final HashSet<Restriction> getRestriction() {
         return restriction;
     }
 
     
-    public final void setRestriction(Restriction[] restriction) {
+    public final void setRestriction(HashSet<Restriction> restriction) {
         this.restrictionset = true;
         this.restriction = restriction;
     }

@@ -49,6 +49,7 @@
 package com.openexchange.admin.reseller.console.extensionimpl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleListInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
@@ -106,7 +107,7 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
         } else {
             retval.add(null);
         }
-        final Restriction[] restriction = extension.getRestriction();
+        final HashSet<Restriction> restriction = extension.getRestriction();
         if (extension.isRestrictionset() && null != restriction) {
             retval.add(ResellerAbstraction.getObjectsAsString(restriction));
         } else {

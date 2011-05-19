@@ -1,5 +1,0 @@
-To be implemented:
-
-- subadmin with Subadmin.CanCreateSubadmin=true must also see contexts
-  created by owned subadmins
-- Subadmin.MaxSubadmin limit must include subadmins of subadmins

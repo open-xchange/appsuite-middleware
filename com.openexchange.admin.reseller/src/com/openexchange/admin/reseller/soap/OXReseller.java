@@ -51,6 +51,7 @@ package com.openexchange.admin.reseller.soap;
 
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
+import java.util.HashSet;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -124,7 +125,7 @@ public class OXReseller extends OXSOAPRMIMapper implements OXResellerInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#getAvailableRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public Restriction[] getAvailableRestrictions(Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
+    public HashSet<Restriction> getAvailableRestrictions(Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
         reconnect();
         try {
             return ((OXResellerInterface)rmistub).getAvailableRestrictions(creds);
@@ -163,7 +164,7 @@ public class OXReseller extends OXSOAPRMIMapper implements OXResellerInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#getRestrictionsFromContext(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public Restriction[] getRestrictionsFromContext(Context ctx, Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException {
+    public HashSet<Restriction> getRestrictionsFromContext(Context ctx, Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException {
         reconnect();
         try {
             return ((OXResellerInterface)rmistub).getRestrictionsFromContext(ctx, creds);
@@ -221,17 +222,6 @@ public class OXReseller extends OXSOAPRMIMapper implements OXResellerInterface {
         reconnect();
         try {
             ((OXResellerInterface)rmistub).updateDatabaseModuleAccessRestrictions(creds);
-            return;
-        } catch (ConnectException e) {
-            reconnect(true);
-        }
-        throw new RemoteException(RMI_CONNECT_ERROR);
-    }
-
-    public void updateDatabaseRestrictions(Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
-        reconnect();
-        try {
-            ((OXResellerInterface)rmistub).updateDatabaseRestrictions(creds);
             return;
         } catch (ConnectException e) {
             reconnect(true);

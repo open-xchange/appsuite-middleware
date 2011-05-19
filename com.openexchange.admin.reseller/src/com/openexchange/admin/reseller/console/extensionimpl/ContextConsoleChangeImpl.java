@@ -54,13 +54,11 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleChangeInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
-import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
@@ -74,7 +72,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 
-public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements ContextConsoleChangeInterface {
+public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
     
     protected CLIOption addRestrictionsOption = null;
     protected CLIOption editRestrictionsOption = null;
@@ -96,16 +94,16 @@ public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements
             final HashSet<Restriction> editRes = ResellerAbstraction.getRestrictionsToEdit(parser, this.editRestrictionsOption);
             final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
             
-            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
+            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup("rmi://localhost:1099/" + OXContextInterface.RMI_NAME);
             final Context data = oxctx.getData(ctx, auth);
-            final Restriction[] dbres;
+            final HashSet<Restriction> dbres;
             final OXContextExtensionImpl dbctxext = (OXContextExtensionImpl) data.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
-            dbres = dbctxext.getRestriction();
-            final HashSet<Restriction> ret = ResellerAbstraction.handleAddEditRemoveRestrictions(OXResellerTools.array2HashSet(dbres), addres, removeRes, editRes);
-            Restriction[] restrictions = null;
-            if( null != ret ) {
-                restrictions = ret.toArray(new Restriction[ret.size()]);
+            if (null == dbctxext) {
+                dbres = new HashSet<Restriction>();
+            } else {
+                dbres = dbctxext.getRestriction();
             }
+            final HashSet<Restriction> restrictions = ResellerAbstraction.handleAddEditRemoveRestrictions(dbres, addres, removeRes, editRes);
             if (null == firstExtensionByName) {
                 final OXContextExtensionImpl ctxext;
                 if (null != restrictions) {

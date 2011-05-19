@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
-import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -100,7 +99,7 @@ public class ListRestrictions extends ResellerAbstraction {
 
             final OXResellerInterface rsi = getResellerInterface();
 
-            res = OXResellerTools.array2HashSet(rsi.getAvailableRestrictions(auth));
+            res = rsi.getAvailableRestrictions(auth);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);

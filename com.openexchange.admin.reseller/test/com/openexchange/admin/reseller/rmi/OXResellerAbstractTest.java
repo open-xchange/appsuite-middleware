@@ -53,6 +53,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.HashSet;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.AbstractTest;
@@ -194,8 +195,8 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         oxctx.delete(ctx, auth);
     }
 
-    protected static Restriction getRestrictionByName(final String name, final Restriction[] res) {
-        for(final Restriction r : res) {
+    protected static Restriction getRestrictionByName(final String name, final HashSet<Restriction> res) {
+        for(final Restriction r : res.toArray(new Restriction[res.size()])) {
             if( r.getName().equals(name) ) {
                 return r;
             }

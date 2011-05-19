@@ -132,11 +132,7 @@ public class OXResellerException extends Exception {
         /**
          * The following restrictions are going to be removed, but still are in use: %1$s
          */
-        MODULE_ACCESS_RESTRICTIONS_IN_USE("The following restrictions are going to be removed, but still are in use: %1$s"),
-        /**
-         * Subadmin %s is not allowed to create subadmins
-         */
-        SUBADMIN_NOT_ALLOWED_TO_CREATE_SUBADMIN("Subadmin %s is not allowed to create subadmins");
+        MODULE_ACCESS_RESTRICTIONS_IN_USE("The following restrictions are going to be removed, but still are in use: %1$s");
         
         
         private final String text;

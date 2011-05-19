@@ -124,7 +124,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                         if (nextLine[i].length() > 0) {
                             final HashSet<Restriction> restrictions = getRestrictions(getRestrictionFromCSV(nextLine, i));
                             if (null != restrictions) {
-                                ctxext.setRestriction(restrictions.toArray(new Restriction[restrictions.size()]));
+                                ctxext.setRestriction(restrictions);
                             }
                         }
                     }
@@ -146,7 +146,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                         if (nextLine[i].length() > 0) {
                             final HashSet<Restriction> restrictions = getRestrictions(getRestrictionFromCSV(nextLine, i));
                             if (null != restrictions) {
-                                firstExtensionByName.setRestriction(restrictions.toArray(new Restriction[restrictions.size()]));
+                                firstExtensionByName.setRestriction(restrictions);
                             }
                         }
                     }
@@ -184,8 +184,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         try {
-            HashSet<Restriction> ret = getRestrictions(ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption));
-            final Restriction[] restrictions = ret.toArray(new Restriction[ret.size()]);
+            HashSet<Restriction> restrictions = getRestrictions(ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption));
             final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
             if (null == firstExtensionByName) {
                 final OXContextExtensionImpl ctxext;

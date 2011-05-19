@@ -65,7 +65,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -171,7 +170,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 prep.close();
             }
 
-            final Restriction[] res = adm.getRestrictions();
+            final HashSet<Restriction> res = adm.getRestrictions();
             if (res != null) {
                 prep = oxcon.prepareStatement("DELETE FROM subadmin_restrictions WHERE sid=?");
                 prep.setInt(1, sid);
@@ -244,7 +243,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.executeUpdate();
             prep.close();
 
-            final HashSet<Restriction> res = OXResellerTools.array2HashSet(adm.getRestrictions());
+            final HashSet<Restriction> res = adm.getRestrictions();
             if (res != null) {
                 final Iterator<Restriction> i = res.iterator();
                 while (i.hasNext()) {
@@ -335,23 +334,16 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
-    public ResellerAdmin[] list(final String search_pattern, int pid) throws StorageException {
+    public ResellerAdmin[] list(final String search_pattern) throws StorageException {
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
-        String query = "SELECT * FROM subadmin WHERE ( sid LIKE ? OR name LIKE ?)";
-        if( pid > 0 ) {
-            query += " AND pid=?";
-        }
         try {
             con = cache.getConnectionForConfigDB();
             final String search_patterntmp = search_pattern.replace('*', '%');
-            prep = con.prepareStatement(query);
+            prep = con.prepareStatement("SELECT * FROM subadmin WHERE sid LIKE ? OR name LIKE ?");
             prep.setString(1, search_patterntmp);
             prep.setString(2, search_patterntmp);
-            if( pid > 0 ) {
-                prep.setInt(3, pid);
-            }
             rs = prep.executeQuery();
 
             final ArrayList<ResellerAdmin> ret = new ArrayList<ResellerAdmin>();
@@ -378,11 +370,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
-    @Override
-    public ResellerAdmin[] list(final String search_pattern) throws StorageException {
-        return list(search_pattern, 0);
-    }
-
     private ResellerAdmin getRestrictionDataForAdmin(final ResellerAdmin admin, Connection con) throws SQLException {
         final PreparedStatement prep = con.prepareStatement("SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?");
         prep.setInt(1, admin.getId());
@@ -397,7 +384,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             res.add(r);
         }
         if (res.size() > 0) {
-            admin.setRestrictions(res.toArray(new Restriction[res.size()]));
+            admin.setRestrictions(res);
         }
         rs.close();
         prep.close();
@@ -406,11 +393,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     
     @Override
     public ResellerAdmin[] getData(final ResellerAdmin[] admins) throws StorageException {
-        return getData(admins, 0);
-    }
-
-    @Override
-    public ResellerAdmin[] getData(final ResellerAdmin[] admins, int pid) throws StorageException {
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -429,17 +411,11 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 } else {
                     throw new InvalidDataException("either ID or name must be specified");
                 }
-                if( pid > 0 ) {
-                    query += " AND pid=?";
-                }
                 prep = con.prepareStatement(query);
                 if (hasId) {
                     prep.setInt(1, adm.getId());
                 } else {
                     prep.setString(1, adm.getName());
-                }
-                if(pid > 0) {
-                    prep.setInt(2, pid);
                 }
                 rs = prep.executeQuery();
                 if (!rs.next()) {
@@ -476,21 +452,12 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
-    public boolean existsAdmin(final ResellerAdmin adm, int pid) throws StorageException {
-        return existsAdmin(new ResellerAdmin[] { adm }, pid);
-    }
-
-    @Override
     public boolean existsAdmin(final ResellerAdmin adm) throws StorageException {
-        return existsAdmin(new ResellerAdmin[] { adm }, 0);
+        return existsAdmin(new ResellerAdmin[] { adm });
     }
 
     @Override
     public boolean existsAdmin(final ResellerAdmin[] admins) throws StorageException {
-        return existsAdmin(masteradmin);
-    }
-
-    private boolean existsAdmin(final ResellerAdmin[] admins, int pid) throws StorageException {
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -514,17 +481,11 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 } else {
                     throw new InvalidDataException("either ID or name must be specified");
                 }
-                if( pid > 0 ) {
-                    query += " AND pid=?";
-                }
                 prep = con.prepareStatement(query);
                 if (hasId) {
                     prep.setInt(1, adm.getId());
                 } else {
                     prep.setString(1, name);
-                }
-                if(pid > 0) {
-                    prep.setInt(2, pid);
                 }
                 rs = prep.executeQuery();
                 if (!rs.next()) {
@@ -897,7 +858,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             cache.closeConfigDBSqlStuff(null, prep2, rs2);
         }
     }
-    
+
     private void checkMaxOverallUserRestriction(final Connection con, final ResellerAdmin adm, final int maxvalue, final boolean contextMode) throws StorageException, OXResellerException, SQLException, PoolException {
         PreparedStatement prep = null;
         PreparedStatement prep2 = null;
@@ -1122,14 +1083,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     @Override
     public void checkPerSubadminRestrictions(final Credentials creds, final UserModuleAccess access, final String... restriction_types) throws StorageException {
         final ResellerAdmin adm = getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
-        HashSet<Restriction> restrictions = OXResellerTools.array2HashSet(adm.getRestrictions());
-        // default is: not allowed to create SUBADMINS
-        if( restrictions == null ) {
-            restrictions = new HashSet<Restriction>();
-        }
-        if( ! restrictions.contains(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS) ) {
-            restrictions.add(new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, "false"));
-        }
+        final HashSet<Restriction> restrictions = adm.getRestrictions();
         if (restrictions != null && restrictions.size() > 0) {
             Connection con = null;
             try {
@@ -1154,11 +1108,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                                 checkMaxOverallUserRestriction(con, adm, Integer.parseInt(value), true);
                                 //long tend = System.currentTimeMillis();
                                 //System.out.println("checkMaxOverallUserRestriction: " + (tend - tstart) + " ms");
-                            } else if (tocheck.equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS)) {
-                                if( !OXResellerTools.isTrue(value) ) {
-                                    throw new OXResellerException(OXResellerException.Code.SUBADMIN_NOT_ALLOWED_TO_CREATE_SUBADMIN, adm.getName());
-                                }
-                            } else if (tocheck.equals(Restriction.MAX_SUBADMIN_PER_SUBADMIN)) {
                             }
                         } else if (name.startsWith(tocheck)) {
                             if (tocheck.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
@@ -1207,9 +1156,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         try {
             con = cache.getConnectionForConfigDB();
             final ResellerAdmin adm = getResellerAdminForContext(ctx, con);
-            final Restriction[] admrestrictions = adm.getRestrictions();
-            final Restriction[] ctxrestrictions = getRestrictionsFromContext(ctx, con);
-            if (admrestrictions != null && admrestrictions.length > 0) {
+            final HashSet<Restriction> admrestrictions = adm.getRestrictions();
+            final HashSet<Restriction> ctxrestrictions = getRestrictionsFromContext(ctx, con);
+            if (admrestrictions != null && admrestrictions.size() > 0) {
                 for (final Restriction res : admrestrictions) {
                     final String name = res.getName();
                     for (final String tocheck : restriction_types) {
@@ -1229,7 +1178,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     }
                 }
             }
-            if (ctxrestrictions != null && ctxrestrictions.length > 0) {
+            if (ctxrestrictions != null && ctxrestrictions.size() > 0) {
                 for (final Restriction res : ctxrestrictions) {
                     final String name = res.getName();
                     for (final String tocheck : restriction_types) {
@@ -1309,7 +1258,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      * com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override
-    public void applyRestrictionsToContext(final Restriction[] restrictions, final Context ctx) throws StorageException {
+    public void applyRestrictionsToContext(final HashSet<Restriction> restrictions, final Context ctx) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;
 
@@ -1323,7 +1272,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.executeUpdate();
             prep.close();
             if (restrictions != null) {
-                for(final Restriction r : restrictions) {
+                final Iterator<Restriction> i = restrictions.iterator();
+                while (i.hasNext()) {
+                    final Restriction r = i.next();
                     prep = oxcon.prepareStatement("INSERT INTO context_restrictions (cid,rid,value) VALUES (?,?,?)");
                     prep.setInt(1, cid);
                     prep.setInt(2, r.getId());
@@ -1362,7 +1313,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      * .dataobjects.Context)
      */
     @Override
-    public Restriction[] getRestrictionsFromContext(final Context ctx) throws StorageException {
+    public HashSet<Restriction> getRestrictionsFromContext(final Context ctx) throws StorageException {
         Connection con = null;
         try {
             con = cache.getConnectionForConfigDB();
@@ -1381,7 +1332,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      * @return
      * @throws StorageException
      */
-    private Restriction[] getRestrictionsFromContext(final Context ctx, final Connection con) throws StorageException {
+    private HashSet<Restriction> getRestrictionsFromContext(final Context ctx, final Connection con) throws StorageException {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
@@ -1396,7 +1347,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     rs.getString(DATABASE_COLUMN_NAME),
                     rs.getString(DATABASE_COLUMN_VALUE)));
             }
-            return res.size() > 0 ? res.toArray(new Restriction[res.size()]) : null;
+            return res.size() > 0 ? res : null;
         } catch (final SQLException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
@@ -1416,7 +1367,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         try {
             con = cache.getConnectionForConfigDB();
             con.setAutoCommit(false);
-            for (final String res : Restriction.ALL_RESTRICTIONS) {
+            for (final String res : new String[] {
+                Restriction.MAX_CONTEXT_PER_SUBADMIN, Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
+                Restriction.MAX_OVERALL_USER_PER_SUBADMIN, Restriction.MAX_USER_PER_CONTEXT }) {
                 final int rid = IDGenerator.getId(con);
                 prep = con.prepareStatement("INSERT INTO restrictions (rid,name) VALUES (?,?)");
                 prep.setInt(1, rid);
@@ -1757,45 +1710,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             con.rollback();
         } catch (final SQLException e2) {
             log.error("Error doing rollback", e2);
-        }
-    }
-
-    @Override
-    public void updateRestrictions() throws StorageException, OXResellerException {
-        Connection con = null;
-        PreparedStatement prep = null;
-
-        HashSet<String> missingRestrictions = new HashSet<String>();
-        final Map<String, Restriction> curCombinations = listRestrictions("*");
-        for(final String res : Restriction.ALL_RESTRICTIONS) {
-            if(! curCombinations.containsKey(res)) {
-                missingRestrictions.add(res);
-            }
-        }
-        if( missingRestrictions.size() > 0 ) {
-            try {
-                con = cache.getConnectionForConfigDB();
-                con.setAutoCommit(false);
-                for (final String res : missingRestrictions) {
-                    final int rid = IDGenerator.getId(con);
-                    prep = con.prepareStatement("INSERT INTO restrictions (rid,name) VALUES (?,?)");
-                    prep.setInt(1, rid);
-                    prep.setString(2, res);
-                    prep.executeUpdate();
-                    prep.close();
-                }
-                con.commit();
-            } catch (final PoolException e) {
-                log.error(e.getMessage(), e);
-                doRollback(con);
-                throw new StorageException(e.getMessage());
-            } catch (final SQLException e) {
-                log.error(e.getMessage(), e);
-                doRollback(con);
-                throw new StorageException(e.getMessage());
-            } finally {
-                cache.closeConfigDBSqlStuff(con, prep);
-            }
         }
     }
 
