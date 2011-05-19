@@ -339,6 +339,8 @@ public final class MessageUtility {
 
     private static final String BIG5 = "big5";
 
+    private static final String BIGFIVE = "bigfive";
+
     /**
      * Checks if specified charset name can be considered as BIG5.
      * 
@@ -350,7 +352,8 @@ public final class MessageUtility {
         if (!lc.startsWith("big", 0)) {
             return false;
         }
-        return BIG5.equals(PATTERN_BIG5.matcher(lc).replaceAll(""));
+        final String wo = PATTERN_BIG5.matcher(lc).replaceAll("");
+        return BIG5.equals(wo) || BIGFIVE.equals(wo);
     }
 
     /**
