@@ -1,3 +1,9 @@
+open-xchange-mobile-configuration-json-action-sms (6.21.0.0-0) unstable; urgency=low
+
+  * new unstable cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 May 2011 07:07:20 +0000
+
 open-xchange-mobile-configuration-json-action-sms (6.20.0.0-10) unstable; urgency=low
 
   * build for public ptf 2011-05-18
