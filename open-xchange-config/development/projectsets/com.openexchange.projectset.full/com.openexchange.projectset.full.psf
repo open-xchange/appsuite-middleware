@@ -41,7 +41,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.audit,com.openexchange.audit"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.twitter,com.openexchange.twitter"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.calendar.printing,com.openexchange.calendar.printing"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.crawler.offering,com.openexchange.subscribe.crawler.offering"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.report.client,com.openexchange.report.client"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.voipnow.json,com.openexchange.voipnow.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.sso,com.openexchange.sso"/>
@@ -90,7 +89,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.http.deferrer,com.openexchange.http.deferrer"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.frontend.uwa,com.openexchange.frontend.uwa"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.frontend.uwa.json,com.openexchange.frontend.uwa.json"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.frontend.uwa.rmi,com.openexchange.frontend.uwa.rmi"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.modules.json,com.openexchange.modules.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.modules.model,com.openexchange.modules.model"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.modules.storage,com.openexchange.modules.storage"/>
