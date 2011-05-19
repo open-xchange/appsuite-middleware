@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -119,9 +119,6 @@ mv doc javadoc
 /opt/open-xchange/bundles/com.openexchange.axis2/services/*
 
 %changelog
-* Mon May 16 2011 - dennis.sieben@open-xchange.com
- - Bugfix #19253 - com.openexchange.admin.reseller.console.extensionimpl.ContextConsoleChangeImpl
-                   ignores RMI_HOSTNAME environment
 * Tue May 10 2011 - choeger@open-xchange.com
  - Bugfix #19102: reseller bundle: unable to change restrictions on commandline
  - Bugfix #19135: Reseller Plugin: Exception occurred while trying to invoke service

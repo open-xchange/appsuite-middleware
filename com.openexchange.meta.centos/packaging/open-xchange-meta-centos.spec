@@ -6,7 +6,7 @@ BuildArch:	noarch
 BuildRequires:  ant
 BuildRequires:  java-1.6.0-openjdk-devel
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
