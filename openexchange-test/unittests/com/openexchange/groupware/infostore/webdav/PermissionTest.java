@@ -169,7 +169,8 @@ public class PermissionTest extends TestCase implements SessionHolder {
     }
 
     // Bug 10051
-    public void testProppatchFolderWithoutWritePermissions() throws Exception{
+    public void testProppatchFolderWithoutWritePermissions() throws Exception {
+        assertEquals("Parent folder should be another one.", FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, root.getObjectID());
         final FolderObject testFolder =  createFolder(root, "test"+ System.currentTimeMillis(),
                 adminPermission(user1),
                 permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
@@ -184,7 +185,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             collection.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
         } catch(final WebdavProtocolException x) {
-            if(x.getStatus() != 403) {
+            if (x.getStatus() != 403) {
                 x.printStackTrace();
             }
             assertEquals("Expected Forbidden Status", 403, x.getStatus());
