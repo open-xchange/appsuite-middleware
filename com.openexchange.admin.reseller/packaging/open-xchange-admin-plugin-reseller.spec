@@ -111,7 +111,7 @@ mv doc javadoc
 /opt/open-xchange/sbin/*
 /opt/open-xchange/lib/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
-%doc javadoc README.SETUP
+%doc javadoc
 
 %files -n open-xchange-admin-plugin-reseller-soap
 %defattr(-,root,root)
