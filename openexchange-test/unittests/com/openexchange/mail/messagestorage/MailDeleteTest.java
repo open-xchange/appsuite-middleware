@@ -135,7 +135,7 @@ public final class MailDeleteTest extends MessageStorageTest {
             final int prevMessageCount = trash.getMessageCount();
 
             MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
-            final Set<Long> prevIds = new HashSet<Long>(prevMessageCount);
+            final Set<Long> prevIds = new HashSet<Long>();
             for (final MailMessage mail : trashed) {
                 prevIds.add(Long.valueOf(mail.getMailId()));
             }
