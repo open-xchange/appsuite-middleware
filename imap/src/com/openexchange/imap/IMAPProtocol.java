@@ -147,6 +147,9 @@ public final class IMAPProtocol extends Protocol {
         if (null != overallMaxCount) {
             return overallMaxCount.intValue();
         }
+        if (null == map) {
+            return -1;
+        }
         try {
             final Integer mc = map.get(InetAddress.getByName(host));
             return mc == null ? -1 : mc.intValue();
