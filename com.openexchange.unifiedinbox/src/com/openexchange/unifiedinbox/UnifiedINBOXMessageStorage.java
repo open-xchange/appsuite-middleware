@@ -388,6 +388,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             } catch (final MailAccountException e) {
                 throw new UnifiedINBOXException(e);
             }
+            final MailFields mfs = new MailFields(fields);
+            mfs.add(MailField.getField(sortField.getField()));
+            final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             final int length = accounts.length;
             final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
@@ -414,7 +417,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             }
                             // Get account's messages
                             final MailMessage[] accountMails =
-                                mailAccess.getMessageStorage().searchMessages(fn, indexRange, sortField, order, searchTerm, fields);
+                                mailAccess.getMessageStorage().searchMessages(fn, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             final UnifiedINBOXUID helper = new UnifiedINBOXUID();
                             for (final MailMessage accountMail : accountMails) {
@@ -441,7 +444,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         completionService.getDuration()).append("msec."));
                 }
                 // Sort them
-                Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale()));
+                final MailMessageComparator c = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale());
+                Collections.sort(messages, c);
                 // Return as array
                 return messages.toArray(new MailMessage[messages.size()]);
             } catch (final InterruptedException e) {

@@ -4,6 +4,7 @@
  - Bugfix #18885: Fixed display of winmail.dat attachments
  - Bugfix #19289: Disable JSON message cache for external accounts
  - Bugfix #19228: Disabled admin permission on Unified Mail folders
+ - Bugfix #19269: Applying proper fields on fast FETCH
 
 * 2011-05-18 - thorben.betten@open-xchange.com
 

@@ -439,8 +439,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
-                if (((null == sortField) || MailSortField.RECEIVED_DATE.equals(sortField)) && onlyLowCostFields(usedFields)) {
-                    final MailMessage[] mailMessages = performLowCostFetch(fullName, usedFields, order, indexRange);
+                final MailFields mfs = new MailFields(mailFields);
+                if (((null == sortField) || MailSortField.RECEIVED_DATE.equals(sortField)) && onlyLowCostFields(mfs)) {
+                    final MailMessage[] mailMessages = performLowCostFetch(fullName, mfs, order, indexRange);
                     imapFolderStorage.updateCacheIfDiffer(fullName, mailMessages.length);
                     return mailMessages;
                 }
@@ -1787,7 +1788,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static final MailFields MAILFIELDS_DEFAULT = new MailFields(MailField.ID, MailField.FOLDER_ID, MailField.RECEIVED_DATE);
+    private static final MailFields MAILFIELDS_DEFAULT = new MailFields(MailField.ID, MailField.FOLDER_ID );
 
     /**
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
@@ -1814,7 +1815,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         final int len = uids.length;
                         final List<MailMessage> list = new ArrayList<MailMessage>(len);
                         for (int i = 0; i < len; i++) {
-                            list.add(new IDMailMessage(String.valueOf(uids[i]), fullName));
+                            final IDMailMessage mail = new IDMailMessage(String.valueOf(uids[i]), fullName);
+                            list.add(mail);
                         }
                         retval = list.toArray(new MailMessage[list.size()]);
                         allFetch = false;
