@@ -147,7 +147,6 @@ public class TemplateMultipleHandler implements MultipleHandler {
     }
 
     private JSONArray ARRAY(List<String> templateNames) {
-        Collections.sort(templateNames);
         JSONArray array = new JSONArray();
         for (String name : templateNames) {
             array.put(name);

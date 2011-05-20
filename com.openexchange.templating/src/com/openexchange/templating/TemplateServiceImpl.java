@@ -271,13 +271,25 @@ public class TemplateServiceImpl implements TemplateService {
             return new ArrayList<String>(0);
         }
         Set<String> names = new HashSet<String>();
+        Set<String> defaults = new HashSet<String>();
         for (File file : files) {
         	Set<String> tags = tagMap.get(file.getName());
             if (file.isFile() && file.canRead() && file.getName().endsWith(".tmpl") && (tags == null || tags.containsAll(sieve))) {
-                names.add(file.getName());
+                if (tags != null && tags.contains("default")) {
+                    defaults.add(file.getName());
+                } else {
+                    names.add(file.getName());
+                }
+                
             }
         }
-        return new ArrayList<String>(names);
+        List<String> a = new ArrayList(defaults);
+        List<String> b = new ArrayList(names);
+        Collections.sort(a);
+        Collections.sort(b);
+        a.addAll(b);
+        
+        return a;
     }
 
     private Map<String, Set<String>> getTagMap(File templateDir) {
@@ -338,9 +350,8 @@ public class TemplateServiceImpl implements TemplateService {
 			filter = new String[0];
 		}
         Set<String> names = new HashSet<String>();
-        names.addAll(getBasicTemplateNames(filter));
         if (!isUserTemplatingEnabled(session)) {
-            return new ArrayList<String>(names);
+            return getBasicTemplateNames(filter);
         }
 
         try {
@@ -357,8 +368,11 @@ public class TemplateServiceImpl implements TemplateService {
         } catch (AbstractOXException e) {
             throw new TemplateException(e);
         }
-
-        return new ArrayList<String>(names);
+        List<String> basicTemplateNames = getBasicTemplateNames(filter);
+        ArrayList<String> userTemplates = new ArrayList<String>(names);
+        Collections.sort(userTemplates);
+        basicTemplateNames.addAll(userTemplates);
+        return basicTemplateNames;
 	}
 	
 
