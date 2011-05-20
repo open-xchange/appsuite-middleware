@@ -657,8 +657,6 @@ public final class AJPv13Task implements Task<Object> {
 
         private final int max;
 
-        private Long avg;
-
         /**
          * Initializes a new {@link KeepAliveTask} to only perform keep-alive on given AJP task.
          * 
