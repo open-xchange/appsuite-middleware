@@ -161,20 +161,6 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         }
     }
 
-    static Integer compareReferences(final Object o1, final Object o2) {
-        if ((o1 == null) && (o2 != null)) {
-            return Integer.valueOf(-1);
-        } else if ((o1 != null) && (o2 == null)) {
-            return Integer.valueOf(1);
-        } else if ((o1 == null) && (o2 == null)) {
-            return Integer.valueOf(0);
-        }
-        /*
-         * Both references are not null
-         */
-        return null;
-    }
-
     private static final EnumMap<MailSortField, FieldComparer> COMPARERS;
 
     static {
@@ -184,8 +170,16 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 final Date d1 = msg1.getSentDate();
                 final Date d2 = msg2.getSentDate();
-                final Integer refComp = compareReferences(d1, d2);
-                return refComp == null ? d1.compareTo(d2) : refComp.intValue();
+                if (null == d1) {
+                    if (null == d2) {
+                        return 0;
+                    }
+                    return -1;
+                } else if (null == d2) {
+                    return 1;
+                } else {
+                    return d1.compareTo(d2);
+                }
             }
         });
         COMPARERS.put(MailSortField.RECEIVED_DATE, new FieldComparer() {
@@ -193,8 +187,16 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 final Date d1 = msg1.getReceivedDate();
                 final Date d2 = msg2.getReceivedDate();
-                final Integer refComp = compareReferences(d1, d2);
-                return refComp == null ? d1.compareTo(d2) : refComp.intValue();
+                if (null == d1) {
+                    if (null == d2) {
+                        return 0;
+                    }
+                    return -1;
+                } else if (null == d2) {
+                    return 1;
+                } else {
+                    return d1.compareTo(d2);
+                }
             }
         });
         COMPARERS.put(MailSortField.FLAG_SEEN, new FieldComparer() {
