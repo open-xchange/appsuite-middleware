@@ -49,8 +49,6 @@
 
 package com.openexchange.ajp13.najp;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,11 +58,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13Request;
-import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
-import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -345,112 +339,6 @@ public class AJPv13TaskWatcher {
                     "\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime()).append(
                     "msec -> Processing time: ").append(currentProcTime).append("msec").toString(), t);
             }
-            /*
-             * Check if keep-alive shall be sent
-             */
-            final AJPv13ConnectionImpl ajpConnection = task.getAJPConnection();
-            if ((System.currentTimeMillis() - ajpConnection.getLastWriteAccess()) > AJPv13Config.getAJPWatcherMaxRunningTime()) {
-                /*
-                 * Send "keep-alive" package
-                 */
-                try {
-                    keepAlive();
-                } catch (final AJPv13Exception e) {
-                    log.error("AJP KEEP-ALIVE failed.", e);
-                } catch (final IOException e) {
-                    log.error("AJP KEEP-ALIVE failed.", e);
-                }
-            }
-        }
-
-        /**
-         * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
-         * 
-         * @throws IOException If an I/O error occurs
-         * @throws AJPv13Exception If an AJP error occurs
-         */
-        private void keepAlive() throws IOException, AJPv13Exception {
-            /*
-             * Send "keep-alive" package depending on current request handler's state.
-             */
-            final AJPv13ConnectionImpl ajpConnection = task.getAJPConnection();
-            final AJPv13RequestHandler ajpRequestHandler = ajpConnection.getAjpRequestHandler();
-            ajpConnection.blockOutputStream(true);
-            try {
-                if (!ajpRequestHandler.isEndResponseSent()) {
-                    final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
-                    final BlockableBufferedOutputStream out = ajpConnection.getOutputStream();
-                    if (ajpRequestHandler.isHeadersSent()) {
-                        /*
-                         * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data
-                         * or an empty SEND_BODY package.
-                         */
-                        final byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
-                        if (remainingData.length > 0) {
-                            /*
-                             * Flush available data cut into MAX_BODY_CHUNK_SIZE chunks
-                             */
-                            keepAliveSendAvailableData(remoteAddress, out, remainingData);
-                        } else {
-                            /*
-                             * Empty SEND_BODY package.
-                             */
-                            keepAliveSendEmptyBody(remoteAddress, out);
-                        }
-                    } else {
-                        /*
-                         * Pending SEND_HEADERS package. Keep-Alive needs to be performed by requesting an empty data chunk.
-                         */
-                        keepAliveGetEmptyBody(ajpConnection, remoteAddress, out);
-                    }
-                }
-            } finally {
-                ajpConnection.blockOutputStream(false);
-            }
-        } // End of keepAlive()
-
-        private void keepAliveSendAvailableData(final String remoteAddress, final BlockableBufferedOutputStream out, final byte[] remainingData) throws IOException, AJPv13Exception {
-            AJPv13Request.writeChunked(remainingData, out);
-            if (log.isDebugEnabled()) {
-                log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
-                    "\" to initiate a KEEP-ALIVE poll."));
-            }
-        }
-
-        private void keepAliveSendEmptyBody(final String remoteAddress, final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
-            AJPv13Request.writeEmpty(out);
-            if (log.isDebugEnabled()) {
-                log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(
-                    remoteAddress).append("\" to initiate a KEEP-ALIVE poll."));
-            }
-        }
-
-        private void keepAliveGetEmptyBody(final AJPv13ConnectionImpl ajpConnection, final String remoteAddress, final OutputStream out) throws IOException, AJPv13Exception {
-            ajpConnection.blockInputStream(true);
-            try {
-                out.write(AJPv13Response.getGetBodyChunkBytes(0));
-                out.flush();
-                if (log.isDebugEnabled()) {
-                    log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
-                        "\" to initiate a KEEP-ALIVE poll."));
-                }
-                /*
-                 * Swallow expected empty body chunk
-                 */
-                final int bodyRequestDataLength = ajpConnection.readInitialBytes(true, false);
-                if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
-                    log.warn("AJP KEEP-ALIVE: Got a non-empty data chunk from web server although an empty one was requested");
-                } else if (log.isDebugEnabled()) {
-                    log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
-                        "\" initiated by former KEEP-ALIVE poll."));
-                }
-            } finally {
-                ajpConnection.blockInputStream(false);
-            }
-        }
-
-        private static int parseInt(final byte[] payloadData) {
-            return ((payloadData[0] & 0xff) << 8) + (payloadData[1] & 0xff);
         }
 
         public void afterExecute(final Throwable t) {

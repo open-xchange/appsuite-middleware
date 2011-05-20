@@ -52,12 +52,19 @@ package com.openexchange.ajp13.najp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Date;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletException;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
+import com.openexchange.ajp13.AJPv13Request;
+import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
@@ -65,6 +72,8 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.UploadServletException;
 
 /**
@@ -152,6 +161,11 @@ public final class AJPv13Task implements Task<Object> {
      * Control for AJP task.
      */
     private volatile Future<Object> control;
+
+    /**
+     * The scheduled keep-alive task.
+     */
+    private volatile ScheduledTimerTask scheduledKeepAliveTask;
 
     /**
      * Initializes a new {@link AJPv13Task}.
@@ -462,12 +476,29 @@ public final class AJPv13Task implements Task<Object> {
 
     public void afterExecute(final Throwable t) {
         watcher.removeTask(this);
+        if (null != scheduledKeepAliveTask) {
+            scheduledKeepAliveTask.cancel(false);
+            scheduledKeepAliveTask = null;
+            /*
+             * Task is automatically purged from TimerService
+             */
+        }
         changeNumberOfRunningAJPTasks(false);
         listenerMonitor.decrementNumActive();
     }
 
     public void beforeExecute(final Thread t) {
         watcher.addTask(this);
+        final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
+        if (null != timer) {
+            final int max = AJPv13Config.getAJPWatcherMaxRunningTime();
+            scheduledKeepAliveTask =
+                timer.scheduleWithFixedDelay(
+                    new KeepAliveTask(this, max, LOG),
+                    max,
+                    (long) max/2,
+                    TimeUnit.MILLISECONDS);
+        }
         changeNumberOfRunningAJPTasks(true);
         listenerMonitor.incrementNumActive();
     }
@@ -616,5 +647,162 @@ public final class AJPv13Task implements Task<Object> {
         out.write(AJPv13Response.getSendBodyChunkBytes(data));
         out.flush();
     }
+
+    private static final class KeepAliveTask implements Runnable {
+
+        private final AJPv13Task task;
+
+        private final org.apache.commons.logging.Log log;
+
+        private final boolean info;
+
+        private final int max;
+
+        private Long avg;
+
+        /**
+         * Initializes a new {@link KeepAliveTask} to only perform keep-alive on given AJP task.
+         * 
+         * @param task The AJP task
+         * @param max The max. processing time when a AJP task is considered as exceeded an keep-alive takes place
+         * @param log The logger
+         */
+        public KeepAliveTask(final AJPv13Task task, final int max, final org.apache.commons.logging.Log log) {
+            super();
+            this.task = task;
+            this.log = log;
+            info = log.isInfoEnabled();
+            this.max = max;
+        }
+
+        public void run() {
+            try {
+                if (task.isProcessing() && ((System.currentTimeMillis() - task.getAJPConnection().getLastWriteAccess()) > max)) {
+                    /*
+                     * Send "keep-alive" package
+                     */
+                    if (null != avg) {
+                        System.out.println("Duration: " + (task.getAJPConnection().getLastWriteAccess() - avg.longValue()) + "msec");
+                    } else {
+                        System.out.println("First kee-alive package at: " + new Date(task.getAJPConnection().getLastWriteAccess()));
+                    }
+                    avg = Long.valueOf(task.getAJPConnection().getLastWriteAccess());
+                    
+                    
+                    
+                    keepAlive();
+                }
+            } catch (final AJPv13Exception e) {
+                log.error("AJP KEEP-ALIVE failed.", e);
+            } catch (final IOException e) {
+                log.error("AJP KEEP-ALIVE failed.", e);
+            } catch (final Exception e) {
+                log.error("AJP KEEP-ALIVE failed.", e);
+            }
+        }
+
+        /**
+         * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
+         * 
+         * @throws IOException If an I/O error occurs
+         * @throws AJPv13Exception If an AJP error occurs
+         */
+        private void keepAlive() throws IOException, AJPv13Exception {
+            /*
+             * Send "keep-alive" package depending on current request handler's state.
+             */
+            final AJPv13ConnectionImpl ajpConnection = task.getAJPConnection();
+            final AJPv13RequestHandler ajpRequestHandler = ajpConnection.getAjpRequestHandler();
+            ajpConnection.blockOutputStream(true);
+            try {
+                if (!ajpRequestHandler.isEndResponseSent()) {
+                    final String remoteAddress = info ? task.getSocket().getRemoteSocketAddress().toString() : null;
+                    final BlockableBufferedOutputStream out = ajpConnection.getOutputStream();
+                    if (ajpRequestHandler.isHeadersSent()) {
+                        /*
+                         * SEND_HEADERS package already flushed to web server. Keep-Alive needs to be performed by flushing available data
+                         * or an empty SEND_BODY package.
+                         */
+                        final byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
+                        if (remainingData.length > 0) {
+                            /*
+                             * Flush available data cut into MAX_BODY_CHUNK_SIZE chunks
+                             */
+                            keepAliveSendAvailableData(remoteAddress, out, remainingData);
+                        } else {
+                            /*
+                             * Empty SEND_BODY package.
+                             */
+                            keepAliveSendEmptyBody(remoteAddress, out);
+                        }
+                    } else {
+                        /*
+                         * Pending SEND_HEADERS package. Keep-Alive needs to be performed by requesting an empty data chunk.
+                         */
+                        keepAliveGetEmptyBody(ajpConnection, remoteAddress, out);
+                    }
+                }
+            } finally {
+                ajpConnection.blockOutputStream(false);
+            }
+        } // End of keepAlive()
+
+        private void keepAliveSendAvailableData(final String remoteAddress, final BlockableBufferedOutputStream out, final byte[] remainingData) throws IOException, AJPv13Exception {
+            AJPv13Request.writeChunked(remainingData, out);
+            if (log.isDebugEnabled()) {
+                log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
+                    "\" to initiate a KEEP-ALIVE poll."));
+            }
+        }
+
+        private void keepAliveSendEmptyBody(final String remoteAddress, final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
+            AJPv13Request.writeEmpty(out);
+            if (log.isDebugEnabled()) {
+                log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(
+                    remoteAddress).append("\" to initiate a KEEP-ALIVE poll."));
+            }
+        }
+
+        private void keepAliveGetEmptyBody(final AJPv13ConnectionImpl ajpConnection, final String remoteAddress, final OutputStream out) throws IOException, AJPv13Exception {
+            ajpConnection.blockInputStream(true);
+            try {
+                out.write(AJPv13Response.getGetBodyChunkBytes(0));
+                out.flush();
+                if (log.isDebugEnabled()) {
+                    log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
+                        "\" to initiate a KEEP-ALIVE poll."));
+                }
+                /*
+                 * Swallow expected empty body chunk
+                 */
+                final int bodyRequestDataLength = ajpConnection.readInitialBytes(true, false);
+                if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
+                    log.warn("AJP KEEP-ALIVE: Got a non-empty data chunk from web server although an empty one was requested");
+                } else if (log.isDebugEnabled()) {
+                    log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
+                        "\" initiated by former KEEP-ALIVE poll."));
+                }
+            } finally {
+                ajpConnection.blockInputStream(false);
+            }
+        }
+
+        private static int parseInt(final byte[] payloadData) {
+            return ((payloadData[0] & 0xff) << 8) + (payloadData[1] & 0xff);
+        }
+
+        public void afterExecute(final Throwable t) {
+            // NOP
+        }
+
+        public void beforeExecute(final Thread t) {
+            // NOP
+        }
+
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            // NOP
+        }
+
+    } // End of TaskRunCallable class
 
 }
