@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -150,8 +151,10 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             params.append("&wrap_callback=").append(URLEncoder.encode(callback, "UTF-8"));
             params.append("&wrap_verification_code=").append(verifier);
 
-            final URL url = new URL(accessTokenGrabber);            
-            final URLConnection connection = url.openConnection();
+            final URL url = new URL(accessTokenGrabber);  
+            //System.out.println("***** URL : "+url);
+            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setInstanceFollowRedirects(false);
             connection.setConnectTimeout(2500);
             connection.setReadTimeout(2500);
             connection.setDoOutput(true);
@@ -181,7 +184,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             
         } catch (UnsupportedEncodingException x) {
             LOG.error(x.getMessage(), x);
-        } catch (IOException e) {
+        } catch (IOException e) {           
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (writer != null) {
@@ -201,6 +204,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
         }
 
         return super.getOAuthToken(arguments);
+        //throw OAuthExceptionCodes.IO_ERROR.create(" ***** Something went terribly wrong!");
     }
 
 }
