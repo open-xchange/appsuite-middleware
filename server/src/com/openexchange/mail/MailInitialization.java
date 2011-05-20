@@ -129,16 +129,16 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                 }
 
             }, startedStack);
-            startUp(new Initialization() {
-
-                public void start() throws AbstractOXException {
-                    JSONMessageCache.initInstance();
-                }
-
-                public void stop() {
-                    JSONMessageCache.releaseInstance();
-                }
-            }, startedStack);
+//            startUp(new Initialization() {
+//
+//                public void start() throws AbstractOXException {
+//                    JSONMessageCache.initInstance();
+//                }
+//
+//                public void stop() {
+//                    JSONMessageCache.releaseInstance();
+//                }
+//            }, startedStack);
             startUp(new Initialization() {
 
                 public void start() throws AbstractOXException {
