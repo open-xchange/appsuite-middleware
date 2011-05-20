@@ -351,7 +351,7 @@ public final class AJPv13Task implements Task<Object> {
                         ajpCon.processRequest();
                         ajpCon.createResponse();
                         if (!ajpCon.getAjpRequestHandler().isEndResponseSent()) {
-                            LOG.warn("Detected AJP cycle without terminating END_RESPONSE package.", new Throwable());
+                            LOG.warn("Detected AJP cycle without terminating END_RESPONSE package.");
                             /*
                              * Just for safety reason to ensure END_RESPONSE package is going to be sent.
                              */
