@@ -480,7 +480,7 @@ public final class AJPv13Task implements Task<Object> {
             scheduledKeepAliveTask.cancel(false);
             scheduledKeepAliveTask = null;
             /*
-             * Task is automatically purged from TimerService
+             * Task is automatically purged from TimerService by PurgeRunnable
              */
         }
         changeNumberOfRunningAJPTasks(false);
