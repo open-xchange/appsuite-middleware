@@ -52,7 +52,6 @@ package com.openexchange.ajp13.najp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -681,15 +680,6 @@ public final class AJPv13Task implements Task<Object> {
                     /*
                      * Send "keep-alive" package
                      */
-                    if (null != avg) {
-                        System.out.println("Duration: " + (task.getAJPConnection().getLastWriteAccess() - avg.longValue()) + "msec");
-                    } else {
-                        System.out.println("First kee-alive package at: " + new Date(task.getAJPConnection().getLastWriteAccess()));
-                    }
-                    avg = Long.valueOf(task.getAJPConnection().getLastWriteAccess());
-                    
-                    
-                    
                     keepAlive();
                 }
             } catch (final AJPv13Exception e) {
