@@ -475,14 +475,14 @@ final class ListLsubCollection {
                 final StringBuilder sb = new StringBuilder(128);
                 sb.append("LIST/LSUB cache");
                 if (doStatus || doGetAcl) {
-                    sb.append(" (");
+                    sb.append(" ( ");
                     if (doStatus) {
-                        sb.append(" including STATUS");
+                        sb.append("including STATUS");
                     }
                     if (doGetAcl) {
-                        sb.append(" including GETACL");
+                        sb.append("including GETACL");
                     }
-                    sb.append(')');
+                    sb.append(" )");
                 }
                 sb.append(" updated in ").append(dur).append("msec.");
                 LOG.debug(sb.toString());
