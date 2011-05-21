@@ -77,6 +77,7 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -335,7 +336,7 @@ final class ListLsubCollection {
                         } catch (final Exception e) {
                             // Swallow failed ACL command
                             org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
-                                "ACL command failed for " + imapFolder.getStore().toString(),
+                                "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
                                 e);
                         }
                     }
@@ -463,7 +464,7 @@ final class ListLsubCollection {
                         } catch (final Exception e) {
                             // Swallow failed ACL command
                             org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
-                                "ACL command failed for " + imapFolder.getStore().toString(),
+                                "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
                                 e);
                         }
                     }
@@ -1076,6 +1077,10 @@ final class ListLsubCollection {
             return false;
         }
 
+        public Rights getMyRights() {
+            return null;
+        }
+
     }
 
     /**
@@ -1110,6 +1115,8 @@ final class ListLsubCollection {
         private List<ACL> acls;
 
         private Boolean hasChildren;
+
+        private Rights myRights;
 
         ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
@@ -1274,6 +1281,19 @@ final class ListLsubCollection {
 
         public int getUnreadMessageCount() {
             return null == status ? -1 : status[2];
+        }
+
+        void setMyRights(final Rights myRights) {
+            this.myRights = myRights;
+        }
+
+        /**
+         * Gets MYRIGHTS.
+         * 
+         * @return MYRIGHTS or <code>null</code> if absent
+         */
+        public Rights getMyRights() {
+            return myRights;
         }
 
         /**

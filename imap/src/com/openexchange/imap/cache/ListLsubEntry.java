@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Set;
 import javax.mail.Folder;
 import com.sun.mail.imap.ACL;
+import com.sun.mail.imap.Rights;
 
 /**
  * A LIST/LSUB entry.
@@ -166,6 +167,13 @@ public interface ListLsubEntry {
      * @see Folder#HOLDS_MESSAGES
      */
     int getType();
+
+    /**
+     * Gets MYRIGHTS.
+     * 
+     * @return MYRIGHTS or <code>null</code> if absent
+     */
+    public Rights getMyRights();
 
     /**
      * Gets the ACL list.
