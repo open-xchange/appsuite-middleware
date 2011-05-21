@@ -493,7 +493,7 @@ public final class AJPv13Task implements Task<Object> {
             final int max = AJPv13Config.getAJPWatcherMaxRunningTime();
             scheduledKeepAliveTask =
                 timer.scheduleWithFixedDelay(
-                    new KeepAliveTask(this, max, LOG),
+                    new KeepAliveRunnable(this, max, LOG),
                     max,
                     (long) max/2,
                     TimeUnit.MILLISECONDS);
@@ -647,7 +647,7 @@ public final class AJPv13Task implements Task<Object> {
         out.flush();
     }
 
-    private static final class KeepAliveTask implements Runnable {
+    private static final class KeepAliveRunnable implements Runnable {
 
         private final AJPv13Task task;
 
@@ -658,13 +658,13 @@ public final class AJPv13Task implements Task<Object> {
         private final int max;
 
         /**
-         * Initializes a new {@link KeepAliveTask} to only perform keep-alive on given AJP task.
+         * Initializes a new {@link KeepAliveRunnable} to only perform keep-alive on given AJP task.
          * 
          * @param task The AJP task
          * @param max The max. processing time when a AJP task is considered as exceeded an keep-alive takes place
          * @param log The logger
          */
-        public KeepAliveTask(final AJPv13Task task, final int max, final org.apache.commons.logging.Log log) {
+        public KeepAliveRunnable(final AJPv13Task task, final int max, final org.apache.commons.logging.Log log) {
             super();
             this.task = task;
             this.log = log;
@@ -779,18 +779,6 @@ public final class AJPv13Task implements Task<Object> {
             return ((payloadData[0] & 0xff) << 8) + (payloadData[1] & 0xff);
         }
 
-        public void afterExecute(final Throwable t) {
-            // NOP
-        }
-
-        public void beforeExecute(final Thread t) {
-            // NOP
-        }
-
-        public void setThreadName(final ThreadRenamer threadRenamer) {
-            // NOP
-        }
-
-    } // End of TaskRunCallable class
+    } // End of class
 
 }
