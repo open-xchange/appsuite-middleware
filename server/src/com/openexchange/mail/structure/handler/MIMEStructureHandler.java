@@ -154,13 +154,15 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private JSONValue currentBodyObject;
 
-    private int multipartCount;
-
     private final long maxSize;
 
     // private JSONValue bodyJsonObject;
 
     private JSONArray userFlags;
+
+    private int multipartCount;
+
+    private boolean forceJSONArray4Multipart;
 
     /**
      * Initializes a new {@link MIMEStructureHandler}.
@@ -172,6 +174,18 @@ public final class MIMEStructureHandler implements StructureHandler {
         mailJsonObjectQueue = new LinkedList<JSONObject>();
         mailJsonObjectQueue.addLast((currentMailObject = new JSONObject()));
         this.maxSize = maxSize;
+        forceJSONArray4Multipart = true;
+    }
+
+    /**
+     * Sets whether a JSON array is enforced for a multipart even if it consists only of one part.
+     * 
+     * @param forceJSONArray4Multipart <code>true</code> to enforce a JSON array; otherwise <code>false</code>
+     * @return This handler with new behavior applied
+     */
+    public MIMEStructureHandler setForceJSONArray4Multipart(final boolean forceJSONArray4Multipart) {
+        this.forceJSONArray4Multipart = forceJSONArray4Multipart;
+        return this;
     }
 
     /**
@@ -196,7 +210,13 @@ public final class MIMEStructureHandler implements StructureHandler {
             /*
              * Nothing applied before
              */
-            currentBodyObject = bodyObject;
+            if (forceJSONArray4Multipart && multipartCount > 0) {
+                final JSONArray jsonArray = new JSONArray();
+                jsonArray.put(bodyObject);
+                currentBodyObject = jsonArray;
+            } else {
+                currentBodyObject = bodyObject;
+            }
             currentMailObject.put(BODY, currentBodyObject);
         } else {
             /*
@@ -432,6 +452,9 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     public boolean handleUserFlags(final String[] userFlags) throws MailException {
+        if (null == userFlags || 0 == userFlags.length) {
+            return true;
+        }
         try {
             final JSONArray userFlagsArr = getUserFlags();
             for (final String userFlag : userFlags) {
