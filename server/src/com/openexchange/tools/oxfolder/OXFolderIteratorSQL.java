@@ -52,6 +52,7 @@ package com.openexchange.tools.oxfolder;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -783,6 +784,77 @@ public final class OXFolderIteratorSQL {
     }
 
     /**
+     * Gets visible subfolders' identifiers from specified parent.
+     * 
+     * @param parent The parent identifier
+     * @param userId The user identifier
+     * @param memberInGroups The user's group identifiers
+     * @param accessibleModules The user's accessible modules
+     * @param ctx The context
+     * @param con An optional connection; set to <code>null</code> to obtain from connection pool
+     * @return The subfolders' identifiers
+     * @throws OXFolderException If an error occurs
+     */
+    public static TIntArrayList getVisibleSubfolders(final int parent, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXFolderException {
+        final StringBuilder condBuilder = new StringBuilder(32);
+        final String fields = condBuilder.append(STR_OT).append(".fuid").toString();
+        condBuilder.setLength(0);
+        condBuilder.append("AND (ot.parent = ").append(parent).append(')');
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                fields,
+                StringCollection.getSqlInString(userId, memberInGroups),
+                StringCollection.getSqlInString(accessibleModules),
+                condBuilder.toString(),
+                getSubfolderOrderBy(STR_OT));
+        Connection readCon = con;
+        boolean closeCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final int contextId = ctx.getContextId();
+        try {
+            if (null == readCon) {
+                try {
+                    readCon = DBPool.pickup(ctx);
+                } catch (final DBPoolingException e) {
+                    throw new OXFolderException(e);
+                }
+                closeCon = true;
+            }
+            stmt = readCon.prepareStatement(sqlSelectStr);
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+
+            if (DEBUG) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
+
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return new TIntArrayList(0);
+            }
+            final TIntArrayList retval = new TIntArrayList(16);
+            do {
+                retval.add(rs.getInt(1));
+            } while (rs.next());
+            return retval;
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+        } catch (final Throwable t) {
+            throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
+        } finally {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+        }
+    }
+
+    /**
      * Checks existence of user-visible shared folders.
      */
     public static boolean hasVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException {
@@ -805,10 +877,10 @@ public final class OXFolderIteratorSQL {
         final SQLStuff stuff = getVisibleSharedFolders0(userId, memberInGroups, accessibleModules, owner, ctx, since, con);
         try {
             return new FolderObjectIterator(stuff.rs, stuff.stmt, false, ctx, stuff.readCon, stuff.closeCon);
-        } catch (SearchIteratorException e) {
+        } catch (final SearchIteratorException e) {
             closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
             throw e;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
             throw new SearchIteratorException(SearchIteratorException.Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
