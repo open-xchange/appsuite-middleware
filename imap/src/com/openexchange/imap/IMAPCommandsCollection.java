@@ -503,7 +503,7 @@ public final class IMAPCommandsCollection {
         return (List<ACL>) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                if (!protocol.hasCapability("ACL")) {
+                if (checkCapabilities && !protocol.hasCapability("ACL")) {
                     throw new com.sun.mail.iap.BadCommandException("ACL not supported");
                 }
                 /*
