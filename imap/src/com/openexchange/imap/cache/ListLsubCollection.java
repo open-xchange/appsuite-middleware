@@ -933,20 +933,21 @@ final class ListLsubCollection {
              */
             attributes = new HashSet<String>(s.length);
             for (int i = 0; i < s.length; i++) {
-                attributes.add(s[i].toLowerCase(Locale.US));
-            }
-            if (attributes.contains("\\marked")) {
-                changeState = ChangeState.CHANGED;
-            } else if (attributes.contains("\\unmarked")) {
-                changeState = ChangeState.UNCHANGED;
-            } else if (attributes.contains("\\noselect")) {
-                canOpen = false;
-            } else if (attributes.contains("\\noinferiors")) {
-                hasInferiors = false;
-            } else if (attributes.contains("\\haschildren")) {
-                hasChildren = Boolean.TRUE;
-            } else if (attributes.contains("\\hasnochildren")) {
-                hasChildren = Boolean.FALSE;
+                final String attr = s[i].toLowerCase(Locale.US);
+                if ("\\marked".equals(attr)) {
+                    changeState = ChangeState.CHANGED;
+                } else if ("\\unmarked".equals(attr)) {
+                    changeState = ChangeState.UNCHANGED;
+                } else if ("\\noselect".equals(attr)) {
+                    canOpen = false;
+                } else if (attr.equals("\\noinferiors")) {
+                    hasInferiors = false;
+                } else if (attr.equals("\\haschildren")) {
+                    hasChildren = Boolean.TRUE;
+                } else if (attr.equals("\\hasnochildren")) {
+                    hasChildren = Boolean.FALSE;
+                }
+                attributes.add(attr);
             }
         } else {
             attributes = Collections.emptySet();
