@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.cache;
 
+import gnu.trove.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -914,6 +915,18 @@ final class ListLsubCollection {
         return lsubMap.get(fullName);
     }
 
+    private static final TObjectIntHashMap<String> POS_MAP;
+
+    static {
+        POS_MAP = new TObjectIntHashMap<String>(6);
+        POS_MAP.put("\\marked", 1);
+        POS_MAP.put("\\unmarked", 2);
+        POS_MAP.put("\\noselect", 3);
+        POS_MAP.put("\\noinferiors", 4);
+        POS_MAP.put("\\haschildren", 5);
+        POS_MAP.put("\\hasnochildren", 6);
+    }
+
     private ListLsubEntryImpl parseListResponse(final IMAPResponse listResponse, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
         /*
          * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
@@ -934,18 +947,21 @@ final class ListLsubCollection {
             attributes = new HashSet<String>(s.length);
             for (int i = 0; i < s.length; i++) {
                 final String attr = s[i].toLowerCase(Locale.US);
-                if ("\\marked".equals(attr)) {
-                    changeState = ChangeState.CHANGED;
-                } else if ("\\unmarked".equals(attr)) {
-                    changeState = ChangeState.UNCHANGED;
-                } else if ("\\noselect".equals(attr)) {
-                    canOpen = false;
-                } else if (attr.equals("\\noinferiors")) {
-                    hasInferiors = false;
-                } else if (attr.equals("\\haschildren")) {
-                    hasChildren = Boolean.TRUE;
-                } else if (attr.equals("\\hasnochildren")) {
-                    hasChildren = Boolean.FALSE;
+                final int pos = POS_MAP.get(attr);
+                if (pos > 0) {
+                    if (1 == pos) {
+                        changeState = ChangeState.CHANGED;
+                    } else if (2 == pos) {
+                        changeState = ChangeState.UNCHANGED;
+                    } else if (3 == pos) {
+                        canOpen = false;
+                    } else if (4 == pos) {
+                        hasInferiors = false;
+                    } else if (5 == pos) {
+                        hasChildren = Boolean.TRUE;
+                    } else if (6 == pos) {
+                        hasChildren = Boolean.FALSE;
+                    }
                 }
                 attributes.add(attr);
             }
