@@ -492,7 +492,7 @@ public final class IMAPCommandsCollection {
     /**
      * Gets ACL list from denoted IMAP folder.
      * 
-     * @param fullName The full name of the folder whose STATUS shall be returned
+     * @param fullName The full name of the folder whose ACL list shall be returned
      * @param imapFolder An IMAP folder providing connected {@link IMAPProtocol protocol}
      * @param checkCapabilities Whether to check for needed capability
      * @return The ACL list
@@ -507,14 +507,10 @@ public final class IMAPCommandsCollection {
                     throw new com.sun.mail.iap.BadCommandException("ACL not supported");
                 }
                 /*
-                 * Encode the mbox as per RFC2060
-                 */
-                final String mbox = BASE64MailboxEncoder.encode(fullName);
-                /*
                  * Arguments...
                  */
                 final Argument args = new Argument(); 
-                args.writeString(mbox);
+                args.writeString(BASE64MailboxEncoder.encode(fullName));
                 /*
                  * Execute
                  */
@@ -557,6 +553,66 @@ public final class IMAPCommandsCollection {
                 protocol.notifyResponseHandlers(r);
                 protocol.handleResult(response);
                 return list;
+            }
+        });
+    }
+
+    /**
+     * Gets MYRIGHTS from denoted IMAP folder.
+     * 
+     * @param fullName The full name of the folder whose MYRIGHTS shall be returned
+     * @param imapFolder An IMAP folder providing connected {@link IMAPProtocol protocol}
+     * @param checkCapabilities Whether to check for needed capability
+     * @return The MYRIGHTS
+     * @throws MessagingException If determining counts fails
+     */
+    public static Rights getMyRights(final String fullName, final IMAPFolder imapFolder, final boolean checkCapabilities) throws MessagingException {
+        return (Rights) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                if (checkCapabilities && !protocol.hasCapability("ACL")) {
+                    throw new com.sun.mail.iap.BadCommandException("ACL not supported");
+                }
+                /*
+                 * Arguments...
+                 */
+                final Argument args = new Argument(); 
+                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                /*
+                 * Execute
+                 */
+                final String command = "MYRIGHTS";
+                final Response[] r = protocol.command(command, args);
+                final Response response = r[r.length-1];
+                /*
+                 * Grab all responses
+                 */
+                Rights rights = null;
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals(command)) {
+                            /*
+                             * Read name of mailbox and throw away
+                             */
+                            ir.readAtomString();
+                            final String rs = ir.readAtomString();
+                            if (rights == null) {
+                                rights = new Rights(rs);
+                            }
+                            r[i] = null;
+                        }
+                    }
+                }
+                /*
+                 * Dispatch remaining untagged responses
+                 */
+                protocol.notifyResponseHandlers(r);
+                protocol.handleResult(response);
+                return rights;
             }
         });
     }
