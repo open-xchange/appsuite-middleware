@@ -178,7 +178,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     /**
-     * Sets whether a JSON array is enforced for a multipart even if it consists only of one part.
+     * Sets whether a JSON array is enforced for a multipart even if it only consists of one part.
      * 
      * @param forceJSONArray4Multipart <code>true</code> to enforce a JSON array; otherwise <code>false</code>
      * @return This handler with new behavior applied
