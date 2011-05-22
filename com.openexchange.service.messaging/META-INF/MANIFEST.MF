@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Messaging Service Bundle
+Bundle-SymbolicName: com.openexchange.service.messaging
+Bundle-Version: 6.21.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.config,
+ com.openexchange.exceptions,
+ com.openexchange.exceptions.osgi,
+ com.openexchange.groupware,
+ com.openexchange.java.util,
+ com.openexchange.mdns,
+ com.openexchange.server.osgiservice,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
+ com.openexchange.tools.stream,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.service.messaging
+Bundle-Activator: com.openexchange.service.messaging.osgi.MessagingServiceActivator
