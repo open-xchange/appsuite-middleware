@@ -142,7 +142,10 @@ public final class UUIDs {
         return append(toBytes(uuid.getMostSignificantBits()), toBytes(uuid.getLeastSignificantBits()));
     }
 
-    private static final int UUID_BYTE_LENGTH = 16;
+    /**
+     * The UUID byte length.
+     */
+    public static final int UUID_BYTE_LENGTH = 16;
 
     /**
      * Generates a new {@link UUID} instance from specified byte array.
