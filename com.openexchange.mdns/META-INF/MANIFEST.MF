@@ -15,3 +15,4 @@ Import-Package: com.openexchange.exceptions,
  org.eclipse.osgi.framework.console,
  org.osgi.framework
 Bundle-Activator: com.openexchange.mdns.osgi.MDNSActivator
+Export-Package: com.openexchange.mdns
