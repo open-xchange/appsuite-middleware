@@ -1,6 +1,7 @@
 * 2011-05-23 - thorben.betten@open-xchange.com
 
  - Bugfix #19214: Fixed mail connection counter
+ - Bugfix #19312: Applying proper server and port setting if SMPT authentication is disabled
 
 * 2011-05-20 - thorben.betten@open-xchange.com
 

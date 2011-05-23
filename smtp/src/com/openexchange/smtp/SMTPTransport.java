@@ -434,7 +434,7 @@ public final class SMTPTransport extends MailTransport {
                         smtpConfig.getLogin(),
                         encodePassword(smtpConfig.getPassword()));
                 } else {
-                    transport.connect();
+                    transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                 }
             } catch (final javax.mail.AuthenticationFailedException e) {
                 throw new MIMEMailException(MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS, e, smtpConfig.getServer(), e.getMessage());
@@ -471,7 +471,7 @@ public final class SMTPTransport extends MailTransport {
                         final String encPass = encodePassword(smtpConfig.getPassword());
                         transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
                     } else {
-                        transport.connect();
+                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw new MIMEMailException(
@@ -539,7 +539,7 @@ public final class SMTPTransport extends MailTransport {
                         final String encPass = encodePassword(smtpConfig.getPassword());
                         transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
                     } else {
-                        transport.connect();
+                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw new MIMEMailException(
@@ -626,7 +626,7 @@ public final class SMTPTransport extends MailTransport {
                     final String encPass = encodePassword(config.getPassword());
                     transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
                 } else {
-                    transport.connect();
+                    transport.connect(config.getServer(), config.getPort(), null, null);
                 }
                 close = true;
             } catch (final javax.mail.AuthenticationFailedException e) {
