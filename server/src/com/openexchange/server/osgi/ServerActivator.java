@@ -90,6 +90,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.counter.MailCounter;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -114,7 +115,6 @@ import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
 import com.openexchange.folder.internal.FolderServiceImpl;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
@@ -147,6 +147,7 @@ import com.openexchange.id.IDGeneratorService;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageSessionEventHandler;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
@@ -546,11 +547,18 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(ContextService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ContextService.class,
             true), null));
+        // Register mail stuff
         {
             registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, MailSessionEventHandler.getTopics());
             registrationList.add(context.registerService(EventHandler.class.getName(), new MailSessionEventHandler(), serviceProperties));
+            registrationList.add(context.registerService(MailCounter.class.getName(), new MailCounter() {
+                
+                public int getCount() {
+                    return MailAccessWatcher.getNumberOfMailAccesses();
+                }
+            }, null));
         }
         registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ImageService.class), null));
