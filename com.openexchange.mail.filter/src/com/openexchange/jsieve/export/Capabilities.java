@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.jsieve;
+package com.openexchange.jsieve.export;
 
 import java.util.ArrayList;
 import java.util.List;
