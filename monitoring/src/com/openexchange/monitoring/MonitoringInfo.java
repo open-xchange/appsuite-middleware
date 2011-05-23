@@ -49,7 +49,10 @@
 
 package com.openexchange.monitoring;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.counter.Counter;
 
 /**
  * {@link MonitoringInfo} - Container for various monitoring information.
@@ -93,13 +96,33 @@ public class MonitoringInfo {
 
     private static final AtomicInteger numberOfSyncMLConnections = new AtomicInteger();
 
-    private static final AtomicInteger numberOfIMAPConnections = new AtomicInteger();
-
     private static final AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
     private static int[] numberOfSessionsInContainer;
 
     private static final AtomicInteger numberOfRunningAJPListeners = new AtomicInteger();
+
+    private static final ConcurrentMap<Integer, Counter> COUNTER_MAP = new ConcurrentHashMap<Integer, Counter>(8);
+
+    private static final Counter EMPTY_COUNTER = new Counter() {
+        
+        public int getCount() {
+            return 0;
+        }
+    };
+
+    public static boolean putIfAbsent(final int connectionType, final Counter value) {
+        return null == COUNTER_MAP.putIfAbsent(Integer.valueOf(connectionType), value);
+    }
+
+    public static void remove(final int connectionType) {
+        COUNTER_MAP.remove(Integer.valueOf(connectionType));
+    }
+
+    private static Counter getCounter(final int connectionType) {
+        final Counter counter = COUNTER_MAP.get(Integer.valueOf(connectionType));
+        return null == counter ? EMPTY_COUNTER : counter;
+    }
 
     public static int getNumberOfActiveSessions() {
         return getNumberOfConnections(SESSION);
@@ -168,7 +191,7 @@ public class MonitoringInfo {
             retval = numberOfSyncMLConnections.get();
             break;
         case IMAP:
-            retval = numberOfIMAPConnections.get();
+            retval = getCounter(connectionType).getCount();
             break;
         case SESSION:
             retval = numberOfActiveSessions.get();
@@ -217,11 +240,7 @@ public class MonitoringInfo {
             }
             break;
         case IMAP:
-            if (increment) {
-                numberOfIMAPConnections.incrementAndGet();
-            } else {
-                numberOfIMAPConnections.decrementAndGet();
-            }
+            // Nothing to do
             break;
         case SESSION:
             if (increment) {

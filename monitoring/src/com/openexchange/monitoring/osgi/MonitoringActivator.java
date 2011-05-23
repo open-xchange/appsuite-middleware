@@ -49,8 +49,11 @@
 
 package com.openexchange.monitoring.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
@@ -71,6 +74,8 @@ public final class MonitoringActivator extends DeferredActivator {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MonitoringActivator.class);
 
     private ServiceRegistration serviceRegistration;
+
+    private List<ServiceTracker> trackers;
 
     /**
      * Initializes a new {@link MonitoringActivator}
@@ -118,6 +123,12 @@ public final class MonitoringActivator extends DeferredActivator {
 
             MonitoringInit.getInstance().start();
 
+            trackers = new ArrayList<ServiceTracker>(2);
+            trackers.add(new MailCounterServiceTracker(context));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
+
             /*
              * Register monitor service
              */
@@ -131,6 +142,12 @@ public final class MonitoringActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            if (null != trackers) {
+                while (!trackers.isEmpty()) {
+                    trackers.remove(0).close();
+                }
+                trackers = null;
+            }
             if (null != serviceRegistration) {
                 serviceRegistration.unregister();
                 serviceRegistration = null;
