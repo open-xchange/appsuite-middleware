@@ -216,11 +216,13 @@ public class Workflow {
                 stacktrace += element + "\n";
             }
             LOG.error(stacktrace);
-            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+            LOG.error("User with id="+subscription.getUserId()+ " and context="+ subscription.getContext()+" failed to subscribe source="+subscription.getSource().getDisplayName()+" with display_name="+subscription.getDisplayName());
+            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }
         catch (ClassCastException e) {
             LOG.error(e);
-            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+            LOG.error("User with id="+subscription.getUserId()+ " and context="+ subscription.getContext()+" failed to subscribe source="+subscription.getSource().getDisplayName()+" with display_name="+subscription.getDisplayName());
+            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }
         finally {
             /*MultiThreadedHttpConnectionManager manager = (MultiThreadedHttpConnectionManager) crawlerConnection.getHttpClient().getHttpConnectionManager();

@@ -112,6 +112,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             feedUrl = new URL("http://www.google.com/m8/feeds/contacts/" + username + "/full?max-results=5000");
             final ContactFeed resultFeed = myService.getFeed(feedUrl, ContactFeed.class);           
             for (int i = 0; i < resultFeed.getEntries().size(); i++) {
+                try{
                 final Contact contact = new Contact();
                 final ContactEntry entry = resultFeed.getEntries().get(i);
                 if (entry.hasName()) {
@@ -261,17 +262,27 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                     contact.setImageContentType("image/jpeg");
                 }
 
-                contacts.add(contact);
+                contacts.add(contact);                
+                } catch (final NullPointerException e){            
+                    LOG.error(e);
+                }
             }
         } catch (final MalformedURLException e) {
             LOG.error(e);
+            LOG.error("User with id="+workflow.getSubscription().getUserId()+ " and context="+ workflow.getSubscription().getContext()+" failed to subscribe source="+workflow.getSubscription().getSource().getDisplayName()+" with display_name="+workflow.getSubscription().getDisplayName());
+            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         } catch (final IOException e) {
             LOG.error(e);
+            LOG.error("User with id="+workflow.getSubscription().getUserId()+ " and context="+ workflow.getSubscription().getContext()+" failed to subscribe source="+workflow.getSubscription().getSource().getDisplayName()+" with display_name="+workflow.getSubscription().getDisplayName());
+            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         } catch (final InvalidCredentialsException e){
+            LOG.error("User with id="+workflow.getSubscription().getUserId()+ " and context="+ workflow.getSubscription().getContext()+" failed to subscribe source="+workflow.getSubscription().getSource().getDisplayName()+" with display_name="+workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
         } catch (final ServiceException e) {
-            LOG.error(e);            
-        }
+            LOG.error("User with id="+workflow.getSubscription().getUserId()+ " and context="+ workflow.getSubscription().getContext()+" failed to subscribe source="+workflow.getSubscription().getSource().getDisplayName()+" with display_name="+workflow.getSubscription().getDisplayName());
+            LOG.error(e); 
+            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
+        } 
 
         output = new Contact[contacts.size()];
         for (int i = 0; i < output.length && i < contacts.size(); i++) {

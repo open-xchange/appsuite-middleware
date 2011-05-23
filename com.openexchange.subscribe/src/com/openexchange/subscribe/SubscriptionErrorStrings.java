@@ -113,5 +113,9 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     // The subscription source this subscription belongs to is currently inactive, and cannot provide data.
     public static final String SUBSCRIPTION_SOURCE_CANT_PROVIDE_DATA = "The subscription source this subscription belongs to is currently inactive, and cannot provide data.";
     
-
+    //Please try using this service again at a later time
+    public static final String TRY_AGAIN_LATER = "Please try using this service again at a later time";
+    
+    // This service is temporarily unavailable. This may be due to a temporary outage or a permanent change on the 3rd-party-side. Please try using this service again at a later time
+    public static final String SERVICE_TEMPORARILY_UNAVAILABLE = "This service is temporarily unavailable. This may be due to a temporary outage or a permanent change on the 3rd-party-side. Please try using this service again at a later time";
 }

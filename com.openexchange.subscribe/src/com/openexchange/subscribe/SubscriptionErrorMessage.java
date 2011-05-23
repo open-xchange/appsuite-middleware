@@ -84,6 +84,7 @@ public enum SubscriptionErrorMessage implements OXErrorMessage {
     
     INVALID_LOGIN(Category.USER_INPUT, 7, SubscriptionErrorStrings.CORRECT_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD),
     COMMUNICATION_PROBLEM(Category.SUBSYSTEM_OR_SERVICE_DOWN, 8, SubscriptionErrorStrings.CHECK_WEBSITE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE),
+    TEMPORARILY_UNAVAILABLE(Category.SUBSYSTEM_OR_SERVICE_DOWN, 8, SubscriptionErrorStrings.TRY_AGAIN_LATER, SubscriptionErrorStrings.SERVICE_TEMPORARILY_UNAVAILABLE),
     INVALID_WORKFLOW(Category.SETUP_ERROR, 9, SubscriptionErrorStrings.OUTPUT_MUST_MATCH_INPUT, SubscriptionErrorStrings.INCONSISTENT_WORKFLOW),
     INACTIVE_SOURCE(Category.SETUP_ERROR, 10, SubscriptionErrorStrings.INACTIVE_SOURCE, SubscriptionErrorStrings.SUBSCRIPTION_SOURCE_CANT_PROVIDE_DATA);
 
