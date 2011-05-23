@@ -49,8 +49,10 @@
 
 package com.openexchange.publish.microformats.tools;
 
+import javax.servlet.http.HttpServletRequest;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.publish.Publication;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -67,6 +69,10 @@ public class InfostoreTemplateUtils {
         } else {
             return "/publications/files/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get("siteName")+"/"+document.getId()+"/current";
         }
+    }
+    
+    public String getScheme(HttpServletRequest req) {
+        return Tools.getProtocol(req);
     }
 
 }

@@ -37,7 +37,7 @@
 		</div>
 		<div class="co_12">
 			<span class="">
-				<a class="ox_file button btn" href="${request.scheme!"http"}://${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
+				<a class="ox_file button btn" href="${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
 			</span>
 		</div>
 	</div>
