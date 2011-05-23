@@ -116,8 +116,8 @@ public final class MessagingServer implements Runnable {
      */
     public void startServer(final MessagingConfig config) throws MessagingServiceException {
         if (running.compareAndSet(false, true)) {
+            listenerPort = config.getListenerPort();
             try {
-                listenerPort = config.getListenerPort();
                 final InetAddress bindAddress = config.getBindAddress();
                 if (null == bindAddress) {
                     serverSocket = new DatagramSocket(listenerPort);
@@ -126,7 +126,7 @@ public final class MessagingServer implements Runnable {
                 }
                 serverSocket.setReceiveBufferSize(Constants.PACKAGE_LENGTH);
             } catch (final IOException e) {
-                throw MessagingServiceExceptionCodes.BIND_ERROR.create(Integer.valueOf(config.getListenerPort()));
+                throw MessagingServiceExceptionCodes.BIND_ERROR.create(Integer.valueOf(listenerPort));
             }
             /*
              * Initialize server threads
