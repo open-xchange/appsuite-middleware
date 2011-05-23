@@ -170,12 +170,11 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
     // Bug 10051
     public void testProppatchFolderWithoutWritePermissions() throws Exception {
-        assertEquals("Parent folder should be another one.", FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, root.getObjectID());
         final FolderObject testFolder =  createFolder(root, "test"+ System.currentTimeMillis(),
                 adminPermission(user1),
                 permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
 
-        final WebdavCollection collection = factory.resolveCollection(new WebdavPath(testFolder.getFolderName()));
+        final WebdavCollection collection = factory.resolveCollection(new WebdavPath("public_infostore", testFolder.getFolderName()));
 
         switchUser(user2);
         final WebdavProperty prop = new WebdavProperty("http://www.open-xchange.com/testProperties","test");
