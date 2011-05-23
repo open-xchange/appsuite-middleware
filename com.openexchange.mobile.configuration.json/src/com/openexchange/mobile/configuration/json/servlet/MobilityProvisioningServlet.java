@@ -220,7 +220,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			    }
 			    
 				if (provisioningResponse == null) {
-					provisioningResponse = new ProvisioningResponse(false, "Unkown error");
+					provisioningResponse = new ProvisioningResponse(false, "Unknown error");
 				}
 
 				obj.put("success", provisioningResponse.isSuccess());
