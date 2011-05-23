@@ -259,7 +259,8 @@ public class AppointmentState extends LinkableState {
         I(Appointment.NOTIFICATION),
         I(Appointment.RECURRENCE_TYPE),
         I(Appointment.CATEGORIES),
-        I(Appointment.SEQUENCE)
+        I(Appointment.SEQUENCE),
+        I(Appointment.SHOWN_AS)
     ));
 
     public boolean onlyIrrelevantFieldsChanged(Session session, CalendarObject oldObj, CalendarObject newObj) {
