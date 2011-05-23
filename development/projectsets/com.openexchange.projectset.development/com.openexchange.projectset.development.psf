@@ -16,5 +16,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.mail,com.openexchange.messaging.mail"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.frontend.uwa.rmi,com.openexchange.frontend.uwa.rmi"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.crawler.offering,com.openexchange.subscribe.crawler.offering"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-gui-plugins/com.openexchange.potest,com.openexchange.potest"/>
 </provider>
 </psf>
