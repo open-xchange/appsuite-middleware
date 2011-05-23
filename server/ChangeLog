@@ -2,6 +2,7 @@
 
  - Bugfix #19214: Fixed mail connection counter
  - Bugfix #19312: Applying proper server and port setting if SMPT authentication is disabled
+ - Bugfix #19299: Allowing an empty subject in MAL API
 
 * 2011-05-20 - thorben.betten@open-xchange.com
 
