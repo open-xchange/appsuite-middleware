@@ -57,6 +57,7 @@ import com.openexchange.groupware.Component;
  * {@link MessagingServiceException} - A messaging service exception.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.22
  */
 public class MessagingServiceException extends AbstractOXException {
 

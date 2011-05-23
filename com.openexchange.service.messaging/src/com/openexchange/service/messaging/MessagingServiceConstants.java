@@ -53,6 +53,7 @@ package com.openexchange.service.messaging;
  * {@link MessagingServiceConstants}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.22
  */
 public final class MessagingServiceConstants {
 

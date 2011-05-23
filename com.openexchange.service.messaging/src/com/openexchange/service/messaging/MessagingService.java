@@ -54,6 +54,7 @@ package com.openexchange.service.messaging;
  * {@link MessagingService} - The messaging service to broadcast messages to remote hosts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.22
  */
 public interface MessagingService {
 

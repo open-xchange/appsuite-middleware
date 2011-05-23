@@ -60,10 +60,10 @@ import java.util.List;
 public interface MDNSService {
 
     /**
-     * Lists all resolved <i>io.ox.wd</i> services by given service identifier.
+     * Lists all resolved services by given service identifier.
      * 
      * @param serviceId The service identifier; such as <code>"openexchange.messaging.service"</code>.
-     * @return A list containing all resolved <i>io.ox.wd</i> services matching given service identifier.
+     * @return A list containing all resolved services matching given service identifier.
      * @throws MDNSException If listing fails
      */
     List<MDNSServiceEntry> listByService(String serviceId) throws MDNSException;

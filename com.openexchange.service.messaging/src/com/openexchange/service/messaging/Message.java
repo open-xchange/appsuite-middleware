@@ -61,6 +61,7 @@ import java.util.Map.Entry;
  * {@link Message} - Messages are delivered to <code>MessageHandler</code> services which subscribe to the topic of the message.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.22
  */
 public class Message {
 

@@ -57,6 +57,7 @@ import com.openexchange.service.messaging.exception.MessagingServiceExceptionFac
  * {@link MessagingServiceExceptionCodes} - Enumeration of all {@link MessagingServiceException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.22
  */
 public enum MessagingServiceExceptionCodes implements OXErrorMessage {
 

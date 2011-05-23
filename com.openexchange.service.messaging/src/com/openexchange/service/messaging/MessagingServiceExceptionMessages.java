@@ -55,6 +55,7 @@ import com.openexchange.exceptions.LocalizableStrings;
  * {@link MessagingServiceExceptionMessages} - Exception messages for {@link MessagingServiceException} that needs to be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.22
  */
 public final class MessagingServiceExceptionMessages implements LocalizableStrings {
 
