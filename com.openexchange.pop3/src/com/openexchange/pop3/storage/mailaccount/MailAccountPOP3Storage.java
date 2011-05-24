@@ -753,8 +753,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
      * @throws MailException If fetching all UIDLs fails
      */
     private Set<String> getStorageIDs() throws MailException {
-        final Set<String> tmp = new HashSet<String>();
-        tmp.addAll(getUIDLMap().getAllUIDLs().keySet());
+        final Set<String> tmp = new HashSet<String>(getUIDLMap().getAllUIDLs().keySet());
         tmp.addAll(getTrashContainer().getUIDLs());
         return tmp;
     }
