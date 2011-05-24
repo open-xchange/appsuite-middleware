@@ -49,12 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.folder.actions.API;
-import com.openexchange.folder.json.FolderField;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -96,11 +90,4 @@ public class CountMailTest extends AbstractMailTest {
         assertEquals("Should be empty again", 0, count(folder) );
     }
 
-
-    protected int count(final String folder) throws AjaxException, IOException, JSONException {
-        final JSONObject data =
-            (JSONObject) client.execute(
-                new com.openexchange.ajax.folder.actions.GetRequest(API.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
-        return data.getInt(FolderField.TOTAL.getName());
-    }
 }
