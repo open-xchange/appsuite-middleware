@@ -1,3 +1,7 @@
+* 2011-05-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #17858: Writing now a stack trace if a runtime exception occurs.
+
 * 2011-03-10 - benjamin.otterbach@open-xchange.com
 
  - Bugfix #18588: Report client requests wrong values for OLOX2 reporting

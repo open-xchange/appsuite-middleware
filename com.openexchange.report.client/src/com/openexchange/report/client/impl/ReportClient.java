@@ -77,55 +77,54 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
 public class ReportClient extends AbstractJMXTools {
 
-	private static final char OPT_SEND_ONLY_SHORT = 's';
+    private static final char OPT_SEND_ONLY_SHORT = 's';
 
-	private static final String OPT_SEND_ONLY_LONG = "sendonly";
+    private static final String OPT_SEND_ONLY_LONG = "sendonly";
 
-	private static final char OPT_DISPLAY_ONLY_SHORT = 'd';
+    private static final char OPT_DISPLAY_ONLY_SHORT = 'd';
 
-	private static final String OPT_DISPLAY_ONLY_LONG = "displayonly";
-	
-	private static final char OPT_CSV_SHORT = 'c';
+    private static final String OPT_DISPLAY_ONLY_LONG = "displayonly";
 
-	private static final String OPT_CSV_LONG = "csv";
+    private static final char OPT_CSV_SHORT = 'c';
 
-	private CLIOption displayonly = null;
+    private static final String OPT_CSV_LONG = "csv";
 
-	private CLIOption sendonly = null;
-	
-	private CLIOption csv = null;
+    private CLIOption displayonly = null;
 
-	public static void main(final String args[]) {
-		System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
-		
-		final AbstractJMXTools t = new ReportClient();
-		t.start(args, "report");
-	}
+    private CLIOption sendonly = null;
+
+    private CLIOption csv = null;
+
+    public static void main(final String args[]) {
+        System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
+
+        final AbstractJMXTools t = new ReportClient();
+        t.start(args, "report");
+    }
 
     @Override
     protected void furtherOptionsHandling(final AdminParser parser, HashMap<String, String[]> env) throws InterruptedException, IOException, MalformedURLException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
-		try {
-			final MBeanServerConnection initConnection = initConnection(false, env);
-			
-        	List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
-        	List<ContextDetail> contextDetails = ObjectHandler.getDetailObjects(initConnection);
-        	String[] versions = VersionHandler.getServerVersion();
-        	ClientLoginCount clc = ObjectHandler.getClientLoginCount(initConnection);
+        try {
+            final MBeanServerConnection initConnection = initConnection(false, env);
+            List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
+            List<ContextDetail> contextDetails = ObjectHandler.getDetailObjects(initConnection);
+            String[] versions = VersionHandler.getServerVersion();
+            ClientLoginCount clc = ObjectHandler.getClientLoginCount(initConnection);
 
-        	if ((null != parser.getOptionValue(this.sendonly) &&
-        			(null != parser.getOptionValue(this.displayonly)))) {
+            if ((null != parser.getOptionValue(this.sendonly) &&
+                    (null != parser.getOptionValue(this.displayonly)))) {
                 System.err.println("More than one of the stat options given. Using the default one one only (display and send)");
                 new TransportHandler().sendReport(totals, contextDetails, versions, clc);
                 print(totals, contextDetails, versions, parser, clc);
             } else {
                 int count = 0;
                 if (null != parser.getOptionValue(this.sendonly)) {
-                	new TransportHandler().sendReport(totals, contextDetails, versions, clc);
-                	count++;
+                    new TransportHandler().sendReport(totals, contextDetails, versions, clc);
+                    count++;
                 }
                 if (null != parser.getOptionValue(this.displayonly)) {
                     if (0 == count) {
-                    	print(totals, contextDetails, versions, parser, clc);
+                        print(totals, contextDetails, versions, parser, clc);
                     }
                     count++;
                 }
@@ -135,61 +134,64 @@ public class ReportClient extends AbstractJMXTools {
                     print(totals, contextDetails, versions, parser, clc);
                 }
             }
-		} catch (MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             printServerException(e, parser);
             sysexit(1);
-		} catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             printServerException(e, parser);
             sysexit(1);
-		} catch (JSONException e) {
+        } catch (JSONException e) {
             printServerException(e, parser);
             sysexit(1);
-		} catch (InvalidAttributeValueException e) {
+        } catch (InvalidAttributeValueException e) {
             printServerException(e, parser);
             sysexit(1);
-		}
+        } catch (Exception e) {
+            printServerException(e, parser);
+            sysexit(1);
+        }
     }
 
     @Override
     public void setFurtherOptions(AdminParser parser) {
         this.sendonly = setShortLongOpt(parser,
-        		OPT_SEND_ONLY_SHORT,
-        		OPT_SEND_ONLY_LONG,
-        		"Send report without displaying it (Disables default)",
-        		false,
-        		NeededQuadState.notneeded);
+                OPT_SEND_ONLY_SHORT,
+                OPT_SEND_ONLY_LONG,
+                "Send report without displaying it (Disables default)",
+                false,
+                NeededQuadState.notneeded);
         this.displayonly = setShortLongOpt(parser, OPT_DISPLAY_ONLY_SHORT,
-        		OPT_DISPLAY_ONLY_LONG,
-        		"Display report without sending it (Disables default)",
-        		false,
-        		NeededQuadState.notneeded);
+                OPT_DISPLAY_ONLY_LONG,
+                "Display report without sending it (Disables default)",
+                false,
+                NeededQuadState.notneeded);
         this.csv = setShortLongOpt(parser, OPT_CSV_SHORT,
-        		OPT_CSV_LONG,
-        		"Show output as CSV",
-        		false,
-        		NeededQuadState.notneeded);
+                OPT_CSV_LONG,
+                "Show output as CSV",
+                false,
+                NeededQuadState.notneeded);
     }
-    	
+
     private void print(List<Total> totals, List<ContextDetail> contextDetails, String[] versions, final AdminParser parser, ClientLoginCount clc) {
-    	System.out.println("");
-    	
-    	if (null != parser.getOptionValue(this.csv)) {
+        System.out.println("");
+
+        if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createVersionList(versions)).write();
         } else {
             new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createVersionList(versions)).write();
         }
-    	
-    	System.out.println("");
-    	
-    	if (null != parser.getOptionValue(this.csv)) {
+
+        System.out.println("");
+
+        if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createTotalList(totals)).write();
         } else {
             new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createTotalList(totals)).write();
         }
-    	
-    	System.out.println("");
-    	
-    	if (null != parser.getOptionValue(this.csv)) {
+
+        System.out.println("");
+
+        if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createDetailList(contextDetails)).write();
         } else {
             new TableWriter(System.out, new ColumnFormat[] {
