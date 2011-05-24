@@ -55,7 +55,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -662,7 +661,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
          * Folder implementations are expected to provide light-weight Message objects, which get filled on demand.
          */
         final Message[] messages = inbox.getMessages(start, end);
-        final Set<String> storageUIDLs = new HashSet<String>(Arrays.asList(getStorageIDs()));
+        final Set<String> storageUIDLs = getStorageIDs();
         /*
          * Gather new messages
          */
@@ -753,11 +752,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
      * @return All known UIDLs of the messages kept in this storage
      * @throws MailException If fetching all UIDLs fails
      */
-    private String[] getStorageIDs() throws MailException {
+    private Set<String> getStorageIDs() throws MailException {
         final Set<String> tmp = new HashSet<String>();
         tmp.addAll(getUIDLMap().getAllUIDLs().keySet());
         tmp.addAll(getTrashContainer().getUIDLs());
-        return tmp.toArray(new String[tmp.size()]);
+        return tmp;
     }
 
     public POP3StorageUIDLMap getUIDLMap() throws MailException {
