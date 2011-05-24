@@ -1,3 +1,7 @@
+* 2011-05-24 - steffen.templin@open-xchange.com
+
+ - Repaired autoconf function of most scripts.
+ 
 * 2011-04-29 - wolfgang.rosenauer@open-xchange.com
 
  - RPM %post script calls munin-node-configure with explicit libdir path
