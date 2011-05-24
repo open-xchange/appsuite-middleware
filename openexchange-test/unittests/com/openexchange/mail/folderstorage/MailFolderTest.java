@@ -842,12 +842,12 @@ public final class MailFolderTest extends AbstractMailTest {
 				final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 				String[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
 
-				MailFolder f = mailAccess.getFolderStorage().getFolder(fullname);
+				//MailFolder f = mailAccess.getFolderStorage().getFolder(fullname);
 				assertTrue("Messages not completely appended to mail folder " + fullname,
-						f.getMessageCount() == uids.length);
+						getMessageCount(mailAccess, fullname) == uids.length);
 
 				trashFullname = mailAccess.getFolderStorage().getTrashFolder();
-				int numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
+				int numTrashedMails = getMessageCount(mailAccess, trashFullname);
 				final Set<Long> ids = new HashSet<Long>(numTrashedMails);
 				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
 						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
@@ -857,11 +857,9 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				mailAccess.getFolderStorage().clearFolder(fullname);
 
-				assertTrue("Folder should be empty", mailAccess.getFolderStorage().getFolder(fullname)
-						.getMessageCount() == 0);
+				assertTrue("Folder should be empty", getMessageCount(mailAccess, fullname) == 0);
 				final int expectedMsgCount = numTrashedMails + uids.length;
-				assertTrue("Mails not completely backuped", mailAccess.getFolderStorage().getFolder(trashFullname)
-						.getMessageCount() == expectedMsgCount);
+				assertTrue("Mails not completely backuped", getMessageCount(mailAccess, trashFullname) == expectedMsgCount);
 
 				final Set<String> newIds = new HashSet<String>(expectedMsgCount);
 				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
@@ -881,18 +879,16 @@ public final class MailFolderTest extends AbstractMailTest {
 				trashedIDs = null;
 
 				uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
-				f = mailAccess.getFolderStorage().getFolder(fullname);
+				//f = mailAccess.getFolderStorage().getFolder(fullname);
 				assertTrue("Messages not completely appended to mail folder " + fullname,
-						f.getMessageCount() == uids.length);
+						getMessageCount(mailAccess, fullname) == uids.length);
 
-				numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
+				numTrashedMails = getMessageCount(mailAccess, trashFullname);
 
 				mailAccess.getFolderStorage().clearFolder(fullname, true);
 
-				assertTrue("Folder should be empty", mailAccess.getFolderStorage().getFolder(fullname)
-						.getMessageCount() == 0);
-				assertTrue("Mails not deleted permanently although hardDelete flag set to true", mailAccess
-						.getFolderStorage().getFolder(trashFullname).getMessageCount() == numTrashedMails);
+				assertTrue("Folder should be empty", getMessageCount(mailAccess, fullname) == 0);
+				assertTrue("Mails not deleted permanently although hardDelete flag set to true", getMessageCount(mailAccess, trashFullname) == numTrashedMails);
 
 			} finally {
 				if (fullname != null) {

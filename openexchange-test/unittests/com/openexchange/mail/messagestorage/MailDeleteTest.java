@@ -57,7 +57,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -131,8 +130,8 @@ public final class MailDeleteTest extends MessageStorageTest {
         String[] trashedIDs = null;
         try {
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
-            MailFolder trash = mailAccess.getFolderStorage().getFolder(trashFullname);
-            final int prevMessageCount = trash.getMessageCount();
+            // MailFolder trash = mailAccess.getFolderStorage().getFolder(trashFullname);
+            final int prevMessageCount = getMessageCount(mailAccess, trashFullname);
 
             MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
             final Set<Long> prevIds = new HashSet<Long>();
@@ -142,12 +141,12 @@ public final class MailDeleteTest extends MessageStorageTest {
 
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, false);
 
-            trash = mailAccess.getFolderStorage().getFolder(trashFullname);
-            assertTrue("Trash's number of message has not been increased appropriately", prevMessageCount + uids.length == trash.getMessageCount());
+            // trash = mailAccess.getFolderStorage().getFolder(trashFullname);
+            assertTrue("Trash's number of message has not been increased appropriately", prevMessageCount + uids.length == getMessageCount(mailAccess, trashFullname));
 
             trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
-            assertTrue("Size mismatch: " + trashed.length + " but should be " + trash.getMessageCount(), trashed.length == trash.getMessageCount());
-            final Set<String> ids = new HashSet<String>(trash.getMessageCount());
+            assertTrue("Size mismatch: " + trashed.length + " but should be " + getMessageCount(mailAccess, trashFullname), trashed.length == getMessageCount(mailAccess, trashFullname));
+            final Set<String> ids = new HashSet<String>(getMessageCount(mailAccess, trashFullname));
             for (final MailMessage mail : trashed) {
                 ids.add(mail.getMailId());
             }

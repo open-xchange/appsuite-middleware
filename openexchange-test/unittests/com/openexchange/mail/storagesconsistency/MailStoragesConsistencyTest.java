@@ -223,7 +223,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                  */
                 final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
 
-                final int numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
+                final int numTrashedMails = getMessageCount(mailAccess, trashFullname);
                 MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(
                     trashFullname,
                     IndexRange.NULL,
@@ -246,8 +246,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                  */
                 if (!getUserSettingMail().isHardDeleteMsgs()) {
                     final int expectedMsgCount = numTrashedMails + uids.length;
-                    assertEquals("Mails not completely moved to trash", expectedMsgCount, mailAccess.getFolderStorage().getFolder(
-                        trashFullname).getMessageCount());
+                    assertEquals("Mails not completely moved to trash", expectedMsgCount, getMessageCount(mailAccess, trashFullname));
                     trashed = mailAccess.getMessageStorage().getAllMessages(
                         trashFullname,
                         IndexRange.NULL,
