@@ -400,17 +400,27 @@ public final class MIMEStructureHandler implements StructureHandler {
             final MIMEStructureHandler inner = new MIMEStructureHandler(maxSize);
             new StructureMailMessageParser().parseMailMessage(nestedMail, inner, id);
             /*
-             * Apply to this
+             * Apply to this handler
              */
-            final JSONObject bodyObject = new JSONObject();
+            final JSONObject bodyObject;
             if (multipartCount > 0) {
-                // Put headers
+                bodyObject = new JSONObject();
+                /*
+                 * Put headers
+                 */
                 generateHeadersObject(mailPart.getHeadersIterator(), bodyObject);
-                // Put body
+                /*
+                 * Put body
+                 */
                 final JSONObject jsonMailObject = inner.getJSONMailObject();
                 jsonMailObject.put(KEY_ID, mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
                 bodyObject.put(BODY, jsonMailObject);
+            } else {
+                bodyObject = inner.getJSONMailObject();
             }
+            /*
+             * Add
+             */
             add2BodyJsonObject(bodyObject);
             return true;
         } catch (final JSONException e) {
