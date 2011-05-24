@@ -80,51 +80,49 @@ public class Bug18846StructureTest extends AbstractMailTest {
         super(name);
     }
 
-    
-
-    private static final byte[] SIMPLE = ("Date: Wed, 18 May 2011 12:05:12 +0200 (CEST)\n" + 
-    		"From: me@somewhere.com\n" + 
-    		"To: you@another.org\n" + 
-    		"Message-ID: <1003957407.805.1305713112926>\n" + 
-    		"Subject: Bug #18846 Test\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: multipart/mixed; \n" + 
-    		"    boundary=\"----=_Part_803_1839345999.1305713112873\"\n" + 
-    		"X-Priority: 3\n" + 
-    		"Importance: Medium\n" + 
-    		"X-Mailer: Open-Xchange Mailer v6.20.0-Rev11\n" + 
-    		"X-OX-Marker: 44b0d69f-716f-404d-9fbb-e22a1f5fad53\n" + 
-    		"\n" + 
-    		"------=_Part_803_1839345999.1305713112873\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: text/plain; charset=UTF-8\n" + 
-    		"Content-Transfer-Encoding: quoted-printable\n" + 
-    		"\n" + 
-    		"Some mail text.\n" + 
-    		"\n" + 
-    		"------=_Part_803_1839345999.1305713112873\n" + 
-    		"Content-Type: message/rfc822\n" + 
-    		"\n" + 
-    		"Date: Tue, 26 Apr 2011 09:29:24 +0200 (CEST)\n" + 
-    		"From: jane@bar.com\n" + 
-    		"To: christine@domain.com\n" + 
-    		"Message-ID: <675680366.104.1303802964881>\n" + 
-    		"Subject: blabla\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: text/plain; charset=UTF-8\n" + 
-    		"X-Priority: 3\n" + 
-    		"Importance: Medium\n" + 
-    		"X-Mailer: Open-Xchange Mailer v6.18.2-Rev33\n" + 
-    		"\n" + 
-    		"lalalalalalala\n" + 
-    		"\n" + 
-    		"------=_Part_803_1839345999.1305713112873--\n").getBytes();
+    private static final byte[] SOURCE = ("Date: Wed, 18 May 2011 12:05:12 +0200 (CEST)\n" + 
+        "From: me@somewhere.com\n" + 
+        "To: you@another.org\n" + 
+        "Message-ID: <1003957407.805.1305713112926>\n" + 
+        "Subject: Bug #18846 Test\n" + 
+        "MIME-Version: 1.0\n" + 
+        "Content-Type: multipart/mixed; \n" + 
+        "    boundary=\"----=_Part_803_1839345999.1305713112873\"\n" + 
+        "X-Priority: 3\n" + 
+        "Importance: Medium\n" + 
+        "\n" + 
+        "------=_Part_803_1839345999.1305713112873\n" + 
+        "MIME-Version: 1.0\n" + 
+        "Content-Type: text/plain; charset=UTF-8\n" + 
+        "Content-Transfer-Encoding: quoted-printable\n" + 
+        "\n" + 
+        "Some mail text.\n" + 
+        "\n" + 
+        "------=_Part_803_1839345999.1305713112873\n" + 
+        "Content-Type: message/rfc822; name=part.eml\n" + 
+        "Content-Disposition: INLINE; filename=part.eml\n" + 
+        "\n" + 
+        "Content-Type: message/rfc822\n" + 
+        "\n" + 
+        "Date: Tue, 26 Apr 2011 09:29:24 +0200 (CEST)\n" + 
+        "From: jane@bar.com\n" + 
+        "To: christine@domain.com\n" + 
+        "Message-ID: <675680366.104.1303802964881>\n" + 
+        "Subject: blabla\n" + 
+        "MIME-Version: 1.0\n" + 
+        "Content-Type: text/plain; charset=UTF-8\n" + 
+        "X-Priority: 3\n" + 
+        "Importance: Medium\n" + 
+        "\n" + 
+        "lalalalalalala\n" + 
+        "\n" + 
+        "------=_Part_803_1839345999.1305713112873--\n").getBytes();
 
     public void testMIMEStructure() {
         try {
             final SessionObject session = getSession();
 
-            final MailMessage mail = MIMEMessageConverter.convertMessage(SIMPLE);
+            final MailMessage mail = MIMEMessageConverter.convertMessage(SOURCE);
 
             final MIMEStructureHandler handler = new MIMEStructureHandler(-1L);
             new StructureMailMessageParser().parseMailMessage(mail, handler);
@@ -139,12 +137,26 @@ public class Bug18846StructureTest extends AbstractMailTest {
                 final Object bodyObject = jsonMailObject.opt("body");
                 assertNotNull("Missing mail body.", bodyObject);
 
-                // {"data":"This is a text message.\n\n","id":"1"}
                 assertTrue("Body object is not a JSON array.", (bodyObject instanceof JSONArray));
                 jsonBodyArray = (JSONArray) bodyObject;
             }
-            
             assertTrue("Unexpected array length.", jsonBodyArray.length() == 2);
+            
+            final JSONObject bodyPart = jsonBodyArray.getJSONObject(1);
+            {
+                final String contentType = bodyPart.getJSONObject("headers").getJSONObject("content-type").getString("type");
+                assertEquals("Unexpected Content-Type: " + contentType, "message/rfc822", contentType);
+            }
+            final JSONObject nestedMail = bodyPart.getJSONObject("body");
+            {
+                final String contentType = nestedMail.getJSONObject("headers").getJSONObject("content-type").getString("type");
+                assertEquals("Unexpected Content-Type: " + contentType, "message/rfc822", contentType);
+            }
+            final JSONObject nestedNestedMail = nestedMail.getJSONObject("body");
+            {
+                final String contentType = nestedNestedMail.getJSONObject("headers").getJSONObject("content-type").getString("type");
+                assertEquals("Unexpected Content-Type: " + contentType, "text/plain", contentType);
+            }
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
