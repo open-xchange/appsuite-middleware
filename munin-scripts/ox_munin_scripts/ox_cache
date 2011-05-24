@@ -2,17 +2,18 @@
 #%# family=auto
 #%# capabilities=autoconf
 
-$showruntimestats="/opt/open-xchange/sbin/showruntimestats -d com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!";
+showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showexec -d com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
-	if (-x $showruntimestats) {
+	if (-x showruntimestats) {
 		print "yes\n";
 		exit 0;
 	}
 	else {
 		print "no\n";
-		exit 1;
+		exit 0;
 	}
 }
 

@@ -3,8 +3,8 @@
 #%# capabilities=autoconf
 
 
-$showruntimestats="/opt/open-xchange/sbin/showruntimestats -x";
-
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -x";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
@@ -14,7 +14,7 @@ if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 	}
 	else {
 		print "no\n";
-	exit 1;
+		exit 0;
 	}
 }
 
@@ -32,7 +32,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 }
 									
 
-open(SHOWRUNTIME,"$showruntimestats |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
 
 while (<SHOWRUNTIME>)
 {

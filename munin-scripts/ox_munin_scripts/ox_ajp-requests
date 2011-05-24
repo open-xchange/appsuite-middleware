@@ -2,17 +2,19 @@
 #%# family=auto
 #%# capabilities=autoconf
 
-$showruntimestats="/opt/open-xchange/sbin/showruntimestats -x";
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -x";
 
-if ( $ARGV[0] and $ARGV[0] eq "autoconf") {
-    if (-x $showruntimestats) {
-        print "yes\n";
-        exit 0;
-    }
-    else {
-        print "no\n";
-        exit 1;
-    }
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	if (-x $showruntimestats) {
+		print "yes\n";
+		exit 0;
+	}
+	else {
+		print "no\n";
+		exit 0;
+	}
 }
 
 if ( $ARGV[0] and $ARGV[0] eq "config") {
@@ -27,7 +29,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     exit 0
 }
 
-open(SHOWRUNTIME,"$showruntimestats |") || die "can not read monitoring output";
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>) {
     if ( $_ =~ /AJPv13TaskMonitor,NumRequests/) {
