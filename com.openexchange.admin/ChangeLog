@@ -1,3 +1,7 @@
+* 2011-05-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #17858: Writing now a stack trace if a runtime exception occurs.
+
 * 2011-05-20 - marcus.klein@open-xchange.com
 
  - Bugfix #19184: Improved Spanish name for the Spam folder.

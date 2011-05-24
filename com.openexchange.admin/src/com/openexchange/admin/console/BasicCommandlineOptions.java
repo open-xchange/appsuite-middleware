@@ -250,18 +250,18 @@ public abstract class BasicCommandlineOptions {
                 output = "Server response: " + msg.replace("\n", "");
             } else {
                 output += e.toString();
-                for(final StackTraceElement ste : e.getStackTrace() ) {
-                    output += ": " + ste.toString().replace("\n", "");
-                }
+            }
+            for(final StackTraceElement ste : e.getStackTrace() ) {
+                output += ": " + ste.toString().replace("\n", "");
             }
         } else {
             if( msg != null ) {
-                output = "Server response:\n "+msg;
+                output = "Server response:\n "+msg+'\n';
             } else {
                 output += e.toString() + "\n";
-                for (final StackTraceElement ste : e.getStackTrace()) {
-                    output += "\tat " + ste.toString() + "\n";
-                }
+            }
+            for (final StackTraceElement ste : e.getStackTrace()) {
+                output += "\tat " + ste.toString() + "\n";
             }
         }
         System.err.println(output);
