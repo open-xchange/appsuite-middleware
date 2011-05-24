@@ -56,24 +56,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.regex.Pattern;
-
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-
 import junit.framework.TestCase;
-
 import com.openexchange.configuration.MailConfig;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.internal.StorageParametersImpl;
+import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractMailTest}
@@ -98,6 +103,8 @@ public abstract class AbstractMailTest extends TestCase {
     private int cid;
 
     private String testMailDir;
+
+    private SessionObject session;
 
     /**
      *
@@ -136,6 +143,59 @@ public abstract class AbstractMailTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         Init.stopServer();
+    }
+
+    /**
+     * Gets the denoted folder's message count using folder API.
+     * 
+     * @param mailAccess The mail access
+     * @param fullName The full name
+     * @return The message count
+     * @throws MailException If an error occurs
+     */
+    protected int getMessageCount(final MailAccess<?, ?> mailAccess, final String fullName) throws MailException {
+        return getMessageCount(mailAccess.getAccountId(), fullName);
+    }
+
+    /**
+     * Gets the denoted folder's message count using folder API.
+     * 
+     * @param accountId The account identifier
+     * @param fullName The full name
+     * @return The message count
+     * @throws MailException If an error occurs
+     */
+    protected int getMessageCount(final int accountId, final String fullName) throws MailException {
+        final MailFolderStorage folderStorage = new MailFolderStorage();
+        final StorageParametersImpl storageParameters;
+        try {
+            storageParameters = new StorageParametersImpl(new ServerSessionAdapter(getSession()));
+        } catch (final ContextException e) {
+            throw new MailException(e);
+        }
+        final boolean started;
+        try {
+            started = folderStorage.startTransaction(storageParameters, false);
+        } catch (final FolderException e) {
+            throw new MailException(e);
+        }
+        try {
+            final Folder folder = folderStorage.getFolder(MailFolderStorage.REAL_TREE_ID, MailFolderUtility.prepareFullname(accountId, fullName), storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            return folder.getTotal();
+        } catch (final FolderException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw new MailException(e);
+        } catch (final RuntimeException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        }
     }
 
     /**
@@ -216,10 +276,11 @@ public abstract class AbstractMailTest extends TestCase {
      * @return A newly created session for user obtained by {@link #getUser()}
      */
     protected final SessionObject getSession() {
-        final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
-                "mail-test-session");
-        session.setPassword(getPassword());
-        session.setLocalIp(getLocalIP());
+        if (null == session) {
+            session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
+            session.setPassword(getPassword());
+            session.setLocalIp(getLocalIP());
+        }
         return session;
     }
 
