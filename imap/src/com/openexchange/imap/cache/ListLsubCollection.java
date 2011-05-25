@@ -1377,7 +1377,7 @@ final class ListLsubCollection {
             if (null != attributes && !attributes.isEmpty()) {
                 final Iterator<String> iterator = new TreeSet<String>(attributes).iterator();
                 sb.append('"').append(iterator.next()).append('"');
-                for (int i = 1, size = attributes.size(); i < size; i++) {
+                while (iterator.hasNext()) {
                     sb.append(", \"").append(iterator.next()).append('"');
                 }
             }
@@ -1386,7 +1386,7 @@ final class ListLsubCollection {
             if (null != children && !children.isEmpty()) {
                 final Iterator<ListLsubEntryImpl> iterator = new TreeSet<ListLsubEntryImpl>(children).iterator();
                 sb.append('"').append(iterator.next().getFullName()).append('"');
-                for (int i = 1, size = children.size(); i < size; i++) {
+                while (iterator.hasNext()) {
                     sb.append(", \"").append(iterator.next().getFullName()).append('"');
                 }
             }
