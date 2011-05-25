@@ -497,6 +497,10 @@ final class ListLsubCollection {
         "\\noselect",
         "\\haschildren")));
 
+    private static final Set<String> ATTRIBUTES_NON_EXISTING_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "\\noselect",
+        "\\hasnochildren")));
+
     /**
      * Performs a LIST/LSUB command with specified IMAP protocol.
      * 
@@ -600,6 +604,45 @@ final class ListLsubCollection {
              * Handle parent map
              */
             handleParentMap(parentMap, separator, rootEntry, lsub, map, removeFullNames, false);
+            /*
+             * Check namespace folders
+             */
+            if (!lsub) {
+                for (final String sharedNamespace : shared) {
+                    if (!map.containsKey(sharedNamespace)) {
+                        final ListLsubEntryImpl namespaceFolder =
+                            new ListLsubEntryImpl(
+                                sharedNamespace,
+                                ATTRIBUTES_NON_EXISTING_NAMESPACE,
+                                separator,
+                                ChangeState.UNDEFINED,
+                                true,
+                                false,
+                                Boolean.FALSE,
+                                lsub ? null : lsubMap).setNamespace(true);
+                        namespaceFolder.setParent(rootEntry);
+                        rootEntry.addChildIfAbsent(namespaceFolder);
+                        map.put(sharedNamespace, namespaceFolder);
+                    }
+                }
+                for (final String userNamespace : user) {
+                    if (!map.containsKey(userNamespace)) {
+                        final ListLsubEntryImpl namespaceFolder =
+                            new ListLsubEntryImpl(
+                                userNamespace,
+                                ATTRIBUTES_NON_EXISTING_NAMESPACE,
+                                separator,
+                                ChangeState.UNDEFINED,
+                                true,
+                                false,
+                                Boolean.FALSE,
+                                lsub ? null : lsubMap).setNamespace(true);
+                        namespaceFolder.setParent(rootEntry);
+                        rootEntry.addChildIfAbsent(namespaceFolder);
+                        map.put(userNamespace, namespaceFolder);
+                    }
+                }
+            }
             /*
              * Drop removed folders
              */
