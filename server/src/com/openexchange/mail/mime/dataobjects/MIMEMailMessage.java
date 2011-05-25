@@ -68,7 +68,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
 
     private MIMEMailPart mailPart;
 
-    private String uid;
+    private String id;
 
     private int unreadMessages;
 
@@ -152,18 +152,12 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
 
     @Override
     public String getMailId() {
-        /*
-         * Mail ID is equal to UID in IMAP
-         */
-        return uid;
+        return id;
     }
 
     @Override
     public void setMailId(final String id) {
-        /*
-         * Mail ID is equal to UID in IMAP
-         */
-        uid = id;
+        this.id = id;
     }
 
     @Override
