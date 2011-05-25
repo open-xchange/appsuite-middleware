@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
+import gnu.trove.TIntObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,10 +60,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import javax.mail.Address;
@@ -526,13 +525,13 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         return;
                     }
                     final Vector<POP3Message> messageCache = getMessageCache(inbox);
-                    final Map<Integer, String> seqnum2uidl;
+                    final TIntObjectHashMap<String> seqnum2uidl;
                     {
                         /*
                          * The current UIDLs
                          */
                         final Message[] all = inbox.getMessages();
-                        seqnum2uidl = new HashMap<Integer, String>(all.length);
+                        seqnum2uidl = new TIntObjectHashMap<String>(all.length);
                         final long startMillis = System.currentTimeMillis();
                         inbox.fetch(all, FETCH_PROFILE_UID);
                         MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - startMillis);
@@ -541,7 +540,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                             final Message message = all[i];
                             final String uidl = inbox.getUID(message);
                             uidlsFromPOP3[i] = uidl;
-                            seqnum2uidl.put(Integer.valueOf(message.getMessageNumber()), uidl);
+                            seqnum2uidl.put(message.getMessageNumber(), uidl);
                         }
                         messageCache.clear();
                         messageCache.setSize(messageCount);
@@ -631,7 +630,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     }
 
-    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final Map<Integer, String> seqnum2uidl) throws MessagingException, MailException {
+    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, MailException {
         final int retval; // The number of messages added to storage
         final int end; // The ending sequence number (inclusive)
         {
@@ -668,7 +667,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         final List<Message> toFetch = new ArrayList<Message>(messages.length);
         for (int i = 0; i < messages.length; i++) {
             final Message message = messages[i];
-            final String uidl = seqnum2uidl.get(Integer.valueOf(message.getMessageNumber()));
+            final String uidl = seqnum2uidl.get(message.getMessageNumber());
             if (!storageUIDLs.contains(uidl)) {
                 /*
                  * Unknown UIDL...
@@ -702,7 +701,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final Map<Integer, String> seqnum2uidl) throws MessagingException, MailException {
+    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, MailException {
         /*
          * Fetch ENVELOPE for new messages
          */
@@ -718,7 +717,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             final Message message = msgs[i];
             delegater.setMimeMessage((MimeMessage) message);
             final MailMessage mm = MIMEMessageConverter.convertMessage(delegater);
-            mm.setMailId(seqnum2uidl.get(Integer.valueOf(message.getMessageNumber())));
+            mm.setMailId(seqnum2uidl.get(message.getMessageNumber()));
             toAppend.add(mm);
         }
         /*
