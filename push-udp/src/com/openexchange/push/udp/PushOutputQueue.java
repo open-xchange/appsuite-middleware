@@ -69,6 +69,7 @@ import com.openexchange.event.RemoteEvent;
 import com.openexchange.groupware.Types;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.tools.StringCollection;
+import static com.openexchange.push.udp.PushChannels.ChannelType.*;
 
 /**
  * {@link PushOutputQueue} - Holds main queue containing objects to deliver.
@@ -97,6 +98,8 @@ public class PushOutputQueue implements Runnable {
 
     private static int remoteHostTimeOut = 3600000;
 
+    private static PushChannels channels;
+    
     /**
      * Adds specified push object to queue for delivery.
      * 
@@ -197,7 +200,7 @@ public class PushOutputQueue implements Runnable {
                 sb.append(folderId);
                 sb.append('\1');
                 try {
-                    makeAndSendPackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj.getPort());
+                    channels.makeAndSendPackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj.getPort(), INTERNAL);
                 } catch (final Exception exc) {
                     LOG.error("createPushPackage", exc);
                 }
@@ -269,7 +272,7 @@ public class PushOutputQueue implements Runnable {
                     final byte b[] = sb.toString().getBytes();
 
                     if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
-                        makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
+                        channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), EXTERNAL);
                     } else {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("remote host object is timed out");
@@ -294,7 +297,7 @@ public class PushOutputQueue implements Runnable {
             final StringBuilder sb = new StringBuilder();
             sb.append("OK\1");
             try {
-                makeAndSendPackage(sb.toString().getBytes(), registerObject.getHostAddress(), registerObject.getPort());
+                channels.makeAndSendPackage(sb.toString().getBytes(), registerObject.getHostAddress(), registerObject.getPort(), EXTERNAL);
             } catch (final Exception exc) {
                 LOG.error("createRegisterPackage", exc);
             }
@@ -332,7 +335,7 @@ public class PushOutputQueue implements Runnable {
 
                     final byte b[] = sb.toString().getBytes();
                     if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
-                        makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
+                        channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), INTERNAL);
                     } else {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("remote host object is timed out");
@@ -372,19 +375,11 @@ public class PushOutputQueue implements Runnable {
         }
     }
 
-    private static void makeAndSendPackage(final byte[] b, final InetAddress host, final int port) throws Exception {
-        final DatagramSocket datagramSocket = PushSocket.getPushDatagramSocket();
-        final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
-        datagramSocket.send(datagramPackage);
-    }
-
-    private static void makeAndSendPackage(final byte[] b, final String host, final int port) throws Exception {
-        makeAndSendPackage(b, InetAddress.getByName(host), port);
-    }
+  
 
     private boolean isRunning = false;
 
-    public PushOutputQueue(final PushConfiguration pushConfigInterface) {
+    public PushOutputQueue(final PushConfiguration pushConfigInterface, PushChannels channels2) {
         PushOutputQueue.pushConfigInterface = pushConfigInterface;
 
         remoteHost = pushConfigInterface.getRemoteHost();
@@ -403,6 +398,8 @@ public class PushOutputQueue implements Runnable {
             isEnabled = true;
 
             isRunning = true;
+            
+            channels = channels2;
 
             final Thread th = new Thread(this);
             th.setName(this.getClass().getName());

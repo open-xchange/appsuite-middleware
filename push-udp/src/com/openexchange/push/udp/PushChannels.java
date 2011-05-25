@@ -49,33 +49,39 @@
 
 package com.openexchange.push.udp;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
+import java.util.LinkedList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+
 /**
- * PushSocket
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * {@link PushChannels}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PushSocket implements Runnable {
-
-    private Thread thread;
-
-    private boolean running = true;
-
-    private static DatagramSocket datagramSocket;
-
-    private static final Log LOG = LogFactory.getLog(PushSocket.class);
-
-    public PushSocket(final PushConfiguration config) {
+public class PushChannels {
+    
+    public static enum ChannelType {
+        INTERNAL, EXTERNAL;
+    }
+    
+    private static final Log LOG = LogFactory.getLog(PushChannels.class);
+    
+    private DatagramSocket internalChannel = null;
+    private DatagramSocket externalChannel = null;
+    
+    private List<PushRegistryListenerThread> listeners = new LinkedList<PushRegistryListenerThread>();
+    
+    public PushChannels(PushConfiguration config) {
         final int serverRegisterPort = config.getRegisterPort();
         final InetAddress senderAddress = config.getSenderAddress();
 
+        final InetAddress internalSenderAddress = config.getHostName();
+        
         try {
             if (config.isPushEnabled()) {
                 if (LOG.isInfoEnabled()) {
@@ -83,67 +89,85 @@ public class PushSocket implements Runnable {
                 }
 
                 if (senderAddress != null) {
-                    datagramSocket = new DatagramSocket(serverRegisterPort, senderAddress);
+                    externalChannel = new DatagramSocket(serverRegisterPort, senderAddress);
                 } else {
-                    datagramSocket = new DatagramSocket(serverRegisterPort);
+                    externalChannel = new DatagramSocket(serverRegisterPort);
                 }
+                
+                if (internalSenderAddress != null && !internalSenderAddress.equals(senderAddress)) {
+                    internalChannel = new DatagramSocket(serverRegisterPort, internalSenderAddress);
+                }
+                
+                listenForRegistrations();
 
-                thread = new Thread(this);
-                thread.setName(PushSocket.class.getName());
-                thread.start();
             } else {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Push Register Socket is disabled");
+                    LOG.info("Push Registeration is disabled");
                 }
             }
         } catch (final Exception exc) {
             LOG.error("PushSocket", exc);
         }
     }
+    
+    private void listenForRegistrations() {
+        listeners.add(new PushRegistryListenerThread(externalChannel));
+        
+        if (internalChannel != null) {
+            listeners.add(new PushRegistryListenerThread(internalChannel));
+        }
+        
+        for (Thread t : listeners) {
+            t.start();
+        }
+    }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Runnable#run()
-     */
-    public void run() {
-        while (running) {
-            final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
-            try {
-                datagramSocket.receive(datagramPacket);
+    public DatagramSocket getInternalChannel() {
+        if (internalChannel == null) {
+            return externalChannel;
+        }
+        return internalChannel;
+    }
+    
+    
+    public DatagramSocket getExternalChannel() {
+        return externalChannel;
+    }
+    
+    public void makeAndSendPackage(final byte[] b, final InetAddress host, final int port, ChannelType channel) throws Exception {
+        final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
+        getSocket(channel).send(datagramPackage);
+    }
 
-                if (datagramPacket.getLength() > 0) {
-                    final PushRequest serverRegisterRequest = new PushRequest();
-                    serverRegisterRequest.init(datagramPacket);
-                } else {
-                    LOG.warn("recieved empty udp package: " + datagramSocket);
-                }
-            } catch (final SocketException e) {
-                if (running) {
-                    LOG.error(e.getMessage(), e);
-                }
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+    public void makeAndSendPackage(final byte[] b, final String host, final int port, ChannelType channel) throws Exception {
+        makeAndSendPackage(b, InetAddress.getByName(host), port, channel);
+    }
+
+    private DatagramSocket getSocket(ChannelType channel) {
+        if (channel == ChannelType.INTERNAL) {
+            return getInternalChannel();
+        }
+        return getExternalChannel();
+    }
+    
+    public void shutdown() {
+        try {
+            if (internalChannel != null) {
+                internalChannel.close();
             }
+        } catch (Exception x) {
+            // Don't care
+        }
+        try {
+            externalChannel.close();
+        } catch (Exception x) {
+            // Don't care
+        }
+        
+        for (PushRegistryListenerThread t : listeners) {
+            t.stopListening();
         }
     }
-
-    public void close() {
-        running = false;
-        if (null != datagramSocket) {
-            datagramSocket.close();
-            datagramSocket = null;
-        }
-        if (null != thread) {
-            try {
-                thread.join();
-            } catch (final InterruptedException e) {
-                LOG.error(e.getMessage(), e);
-            }
-            thread = null;
-        }
-    }
-
-    public static DatagramSocket getPushDatagramSocket() {
-        return datagramSocket;
-    }
+    
+    
 }

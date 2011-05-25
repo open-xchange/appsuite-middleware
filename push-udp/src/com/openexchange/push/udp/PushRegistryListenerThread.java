@@ -49,95 +49,58 @@
 
 package com.openexchange.push.udp;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.push.udp.registry.PushServiceRegistry;
-import com.openexchange.server.Initialization;
 
 /**
- * Initializes the event system.
+ * {@link PushRegistryListenerThread}
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PushInit implements Initialization {
-
-    /**
-     * Singleton.
-     */
-    private static final PushInit SINGLETON = new PushInit();
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(PushInit.class);
-
-    private PushMulticastSocket multicast;
-
-    private PushOutputQueue output;
-
-    private PushChannels channels;
-
-    private PushConfiguration config;
-
+// Refactored from PushSocket
+public class PushRegistryListenerThread extends Thread {
     
-    public PushConfiguration getConfig() {
-        return config;
+    private static final AtomicInteger instances = new AtomicInteger(0);
+
+    private static final Log LOG = LogFactory.getLog(PushRegistryListenerThread.class);
+    
+    private DatagramSocket datagramSocket;
+
+    private boolean running;
+
+    public PushRegistryListenerThread(DatagramSocket socket) {
+        this.datagramSocket = socket;
+        setName("PushRegistryListenerThread-"+instances.getAndIncrement());
+    }
+    
+    @Override
+    public void run() {
+        running = true;
+        while (running) {
+            final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
+            try {
+                datagramSocket.receive(datagramPacket);
+
+                if (datagramPacket.getLength() > 0) {
+                    final PushRequest serverRegisterRequest = new PushRequest();
+                    serverRegisterRequest.init(datagramPacket);
+                } else {
+                    LOG.warn("received empty udp package: " + datagramSocket);
+                }
+            } catch (final SocketException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
     }
 
-    private final AtomicBoolean started = new AtomicBoolean();
-
-    /**
-     * Prevent instantiation.
-     */
-    private PushInit() {
-        super();
-    }
-
-    /**
-     * @return the singleton instance.
-     */
-    public static PushInit getInstance() {
-        return SINGLETON;
-    }
-
-    public void start() throws AbstractOXException {
-        if (!started.compareAndSet(false, true)) {
-            LOG.error("Duplicate push initialization.");
-            return;
-        }
-
-        final ConfigurationService conf = PushServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        if (conf != null) {
-            config = new PushConfigurationImpl(conf);
-        }
-
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Starting Push UDP");
-        }
-
-        if (config == null) {
-            throw new PushUDPException(PushUDPException.Code.MISSING_CONFIG);
-        }
-        channels = new PushChannels(config);
-        output = new PushOutputQueue(config, channels);
-
-        multicast = new PushMulticastSocket(config);
-    }
-
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.error("Duplicate push component shutdown.");
-            return;
-        }
-        multicast.close();
-        multicast = null;
-        output.close();
-        output = null;
-        channels.shutdown();
-        channels = null;
-        config = null;
+    public void stopListening() {
+        running = false;
     }
 }
