@@ -181,7 +181,7 @@ public enum ContactField{
     CREATION_DATE (4 , "creating_date" , "CREATION_DATE" , "Creation date"  , ContactFields.CREATION_DATE),
     LAST_MODIFIED (5 , "changing_date" , "LAST_MODIFIED" , "Changing date"  , ContactFields.LAST_MODIFIED),
     BIRTHDAY (511 , "timestampfield01" , "BIRTHDAY" , "Birthday" , ContactFields.BIRTHDAY),
-    ANNIVERSARY (517 , "timestampfield02" , "ANNIVERSARY" , "Anniversay" , ContactFields.ANNIVERSARY),
+    ANNIVERSARY (517 , "timestampfield02" , "ANNIVERSARY" , "Anniversary" , ContactFields.ANNIVERSARY),
     IMAGE1 (570 , "intfield04" , "IMAGE1" , ""  , ContactFields.IMAGE1),
     IMAGE_LAST_MODIFIED (597 , "intfield04" , "IMAGE_LAST_MODIFIED" , ""  , ""),
     IMAGE1_CONTENT_TYPE (601 , "intfield04" , "IMAGE1_CONTENT_TYPE" , ""  , ""),
