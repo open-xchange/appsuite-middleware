@@ -1407,6 +1407,18 @@ public final class MIMEMessageConverter {
      * @throws MailException If conversion fails
      */
     public static MailMessage convertMessage(final MimeMessage msg) throws MailException {
+        return convertMessage(msg, true);
+    }
+
+    /**
+     * Creates a message data object from given MIME message.
+     * 
+     * @param msg The MIME message
+     * @param considerFolder <code>true</code> to consider MIME message's folder (see {@link Message#getFolder()}); otherwise <code>false</code>
+     * @return An instance of <code>{@link MailMessage}</code> containing the attributes from given MIME message
+     * @throws MailException If conversion fails
+     */
+    public static MailMessage convertMessage(final MimeMessage msg, final boolean considerFolder) throws MailException {
         try {
             /*
              * Create with reference to content
@@ -1422,7 +1434,7 @@ public final class MIMEMessageConverter {
             /*
              * Set folder data
              */
-            {
+            if (considerFolder) {
                 final Folder f = msg.getFolder();
                 if (f != null) {
                     /*
