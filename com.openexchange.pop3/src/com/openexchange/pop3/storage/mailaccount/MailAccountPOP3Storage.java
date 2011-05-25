@@ -560,24 +560,26 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     /*
                      * Expunge if necessary
                      */
-                    final boolean dwt = Boolean.parseBoolean(properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH));
-                    if (containsWarnings || expunge || dwt) {
+                    if (containsWarnings || expunge) {
                         /*
                          * Expunge all messages
                          */
                         final Message[] messages = inbox.getMessages();
-                        if (dwt) {
-                            final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
-                            for (int i = 0; i < messages.length; i++) {
-                                final Message message = messages[i];
-                                final String uidl = seqnum2uidl.get(message.getMessageNumber());
-                                if (trashedUIDLs.contains(uidl)) {
-                                    message.setFlags(FLAGS_DELETED, true);
-                                }
-                            }
-                        } else {
-                            for (int i = 0; i < messages.length; i++) {
-                                messages[i].setFlags(FLAGS_DELETED, true);
+                        for (int i = 0; i < messages.length; i++) {
+                            messages[i].setFlags(FLAGS_DELETED, true);
+                        }
+                        doExpunge = true;
+                    } else if (isDeleteWriteThrough()) {
+                        /*
+                         * Expunge trashed messages
+                         */
+                        final Message[] messages = inbox.getMessages();
+                        final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
+                        for (int i = 0; i < messages.length; i++) {
+                            final Message message = messages[i];
+                            final String uidl = seqnum2uidl.get(message.getMessageNumber());
+                            if (trashedUIDLs.contains(uidl)) {
+                                message.setFlags(FLAGS_DELETED, true);
                             }
                         }
                         doExpunge = true;
@@ -625,6 +627,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 connectCounter.decrementCounter();
             }
         }
+    }
+
+    private boolean isDeleteWriteThrough() throws MailException {
+        final String property = properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH);
+        return null == property ? false : Boolean.parseBoolean(property.trim());
     }
 
     private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, MailException {
