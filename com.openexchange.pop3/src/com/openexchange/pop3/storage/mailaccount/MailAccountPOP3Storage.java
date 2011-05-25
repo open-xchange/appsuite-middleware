@@ -51,30 +51,21 @@ package com.openexchange.pop3.storage.mailaccount;
 
 import gnu.trove.TIntObjectHashMap;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-import javax.mail.Address;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
-import javax.mail.Flags.Flag;
-import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
-import javax.mail.search.SearchTerm;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -83,7 +74,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -716,11 +706,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
          * Append them to storage
          */
         final List<MailMessage> toAppend = new ArrayList<MailMessage>(msgs.length);
-        final NoFolderMimeMessage delegater = new NoFolderMimeMessage(MIMEDefaultSession.getDefaultSession());
         for (int i = 0; i < msgs.length; i++) {
             final Message message = msgs[i];
-            delegater.setMimeMessage((MimeMessage) message);
-            final MailMessage mm = MIMEMessageConverter.convertMessage(delegater);
+            final MailMessage mm = MIMEMessageConverter.convertMessage((MimeMessage) message, false);
             mm.setMailId(seqnum2uidl.get(message.getMessageNumber()));
             toAppend.add(mm);
         }
@@ -814,400 +802,6 @@ public class MailAccountPOP3Storage implements POP3Storage {
         } catch (final IllegalAccessException e) {
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
         }
-    }
-
-    private static final class NoFolderMimeMessage extends MimeMessage {
-
-        private MimeMessage mimeMessage;
-
-        public NoFolderMimeMessage(final javax.mail.Session session) {
-            super(session);
-        }
-
-        public void setMimeMessage(final MimeMessage mimeMessage) {
-            this.mimeMessage = mimeMessage;
-        }
-
-        @Override
-        public int hashCode() {
-            return mimeMessage.hashCode();
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            return mimeMessage.equals(obj);
-        }
-
-        @Override
-        public String toString() {
-            return mimeMessage.toString();
-        }
-
-        @Override
-        public void setRecipient(final javax.mail.Message.RecipientType type, final Address address) throws MessagingException {
-            mimeMessage.setRecipient(type, address);
-        }
-
-        @Override
-        public Address[] getFrom() throws MessagingException {
-            return mimeMessage.getFrom();
-        }
-
-        @Override
-        public void setFrom(final Address address) throws MessagingException {
-            mimeMessage.setFrom(address);
-        }
-
-        @Override
-        public void addRecipient(final javax.mail.Message.RecipientType type, final Address address) throws MessagingException {
-            mimeMessage.addRecipient(type, address);
-        }
-
-        @Override
-        public void setFrom() throws MessagingException {
-            mimeMessage.setFrom();
-        }
-
-        @Override
-        public void addFrom(final Address[] addresses) throws MessagingException {
-            mimeMessage.addFrom(addresses);
-        }
-
-        @Override
-        public Address getSender() throws MessagingException {
-            return mimeMessage.getSender();
-        }
-
-        @Override
-        public void setSender(final Address address) throws MessagingException {
-            mimeMessage.setSender(address);
-        }
-
-        @Override
-        public Address[] getRecipients(final javax.mail.Message.RecipientType type) throws MessagingException {
-            return mimeMessage.getRecipients(type);
-        }
-
-        @Override
-        public Address[] getAllRecipients() throws MessagingException {
-            return mimeMessage.getAllRecipients();
-        }
-
-        @Override
-        public void setRecipients(final javax.mail.Message.RecipientType type, final Address[] addresses) throws MessagingException {
-            mimeMessage.setRecipients(type, addresses);
-        }
-
-        @Override
-        public void setFlag(final Flag flag, final boolean set) throws MessagingException {
-            mimeMessage.setFlag(flag, set);
-        }
-
-        @Override
-        public void setRecipients(final javax.mail.Message.RecipientType type, final String addresses) throws MessagingException {
-            mimeMessage.setRecipients(type, addresses);
-        }
-
-        @Override
-        public int getMessageNumber() {
-            return mimeMessage.getMessageNumber();
-        }
-
-        @Override
-        public Folder getFolder() {
-            return null;
-        }
-
-        @Override
-        public boolean isExpunged() {
-            return mimeMessage.isExpunged();
-        }
-
-        @Override
-        public void addRecipients(final javax.mail.Message.RecipientType type, final Address[] addresses) throws MessagingException {
-            mimeMessage.addRecipients(type, addresses);
-        }
-
-        @Override
-        public void addRecipients(final javax.mail.Message.RecipientType type, final String addresses) throws MessagingException {
-            mimeMessage.addRecipients(type, addresses);
-        }
-
-        @Override
-        public Address[] getReplyTo() throws MessagingException {
-            return mimeMessage.getReplyTo();
-        }
-
-        @Override
-        public void setReplyTo(final Address[] addresses) throws MessagingException {
-            mimeMessage.setReplyTo(addresses);
-        }
-
-        @Override
-        public boolean match(final SearchTerm term) throws MessagingException {
-            return mimeMessage.match(term);
-        }
-
-        @Override
-        public String getSubject() throws MessagingException {
-            return mimeMessage.getSubject();
-        }
-
-        @Override
-        public void setSubject(final String subject) throws MessagingException {
-            mimeMessage.setSubject(subject);
-        }
-
-        @Override
-        public void setSubject(final String subject, final String charset) throws MessagingException {
-            mimeMessage.setSubject(subject, charset);
-        }
-
-        @Override
-        public Date getSentDate() throws MessagingException {
-            return mimeMessage.getSentDate();
-        }
-
-        @Override
-        public void setSentDate(final Date d) throws MessagingException {
-            mimeMessage.setSentDate(d);
-        }
-
-        @Override
-        public Date getReceivedDate() throws MessagingException {
-            return mimeMessage.getReceivedDate();
-        }
-
-        @Override
-        public int getSize() throws MessagingException {
-            return mimeMessage.getSize();
-        }
-
-        @Override
-        public int getLineCount() throws MessagingException {
-            return mimeMessage.getLineCount();
-        }
-
-        @Override
-        public String getContentType() throws MessagingException {
-            return mimeMessage.getContentType();
-        }
-
-        @Override
-        public boolean isMimeType(final String mimeType) throws MessagingException {
-            return mimeMessage.isMimeType(mimeType);
-        }
-
-        @Override
-        public String getDisposition() throws MessagingException {
-            return mimeMessage.getDisposition();
-        }
-
-        @Override
-        public void setDisposition(final String disposition) throws MessagingException {
-            mimeMessage.setDisposition(disposition);
-        }
-
-        @Override
-        public String getEncoding() throws MessagingException {
-            return mimeMessage.getEncoding();
-        }
-
-        @Override
-        public String getContentID() throws MessagingException {
-            return mimeMessage.getContentID();
-        }
-
-        @Override
-        public void setContentID(final String cid) throws MessagingException {
-            mimeMessage.setContentID(cid);
-        }
-
-        @Override
-        public String getContentMD5() throws MessagingException {
-            return mimeMessage.getContentMD5();
-        }
-
-        @Override
-        public void setContentMD5(final String md5) throws MessagingException {
-            mimeMessage.setContentMD5(md5);
-        }
-
-        @Override
-        public String getDescription() throws MessagingException {
-            return mimeMessage.getDescription();
-        }
-
-        @Override
-        public void setDescription(final String description) throws MessagingException {
-            mimeMessage.setDescription(description);
-        }
-
-        @Override
-        public void setDescription(final String description, final String charset) throws MessagingException {
-            mimeMessage.setDescription(description, charset);
-        }
-
-        @Override
-        public String[] getContentLanguage() throws MessagingException {
-            return mimeMessage.getContentLanguage();
-        }
-
-        @Override
-        public void setContentLanguage(final String[] languages) throws MessagingException {
-            mimeMessage.setContentLanguage(languages);
-        }
-
-        @Override
-        public String getMessageID() throws MessagingException {
-            return mimeMessage.getMessageID();
-        }
-
-        @Override
-        public String getFileName() throws MessagingException {
-            return mimeMessage.getFileName();
-        }
-
-        @Override
-        public void setFileName(final String filename) throws MessagingException {
-            mimeMessage.setFileName(filename);
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException, MessagingException {
-            return mimeMessage.getInputStream();
-        }
-
-        @Override
-        public InputStream getRawInputStream() throws MessagingException {
-            return mimeMessage.getRawInputStream();
-        }
-
-        @Override
-        public Object getContent() throws IOException, MessagingException {
-            return mimeMessage.getContent();
-        }
-
-        @Override
-        public void setContent(final Object o, final String type) throws MessagingException {
-            mimeMessage.setContent(o, type);
-        }
-
-        @Override
-        public void setText(final String text) throws MessagingException {
-            mimeMessage.setText(text);
-        }
-
-        @Override
-        public void setText(final String text, final String charset) throws MessagingException {
-            mimeMessage.setText(text, charset);
-        }
-
-        @Override
-        public void setText(final String text, final String charset, final String subtype) throws MessagingException {
-            mimeMessage.setText(text, charset, subtype);
-        }
-
-        @Override
-        public void setContent(final Multipart mp) throws MessagingException {
-            mimeMessage.setContent(mp);
-        }
-
-        @Override
-        public Message reply(final boolean replyToAll) throws MessagingException {
-            return mimeMessage.reply(replyToAll);
-        }
-
-        @Override
-        public void writeTo(final OutputStream os) throws IOException, MessagingException {
-            mimeMessage.writeTo(os);
-        }
-
-        @Override
-        public void writeTo(final OutputStream os, final String[] ignoreList) throws IOException, MessagingException {
-            mimeMessage.writeTo(os, ignoreList);
-        }
-
-        @Override
-        public String[] getHeader(final String name) throws MessagingException {
-            return mimeMessage.getHeader(name);
-        }
-
-        @Override
-        public String getHeader(final String name, final String delimiter) throws MessagingException {
-            return mimeMessage.getHeader(name, delimiter);
-        }
-
-        @Override
-        public void setHeader(final String name, final String value) throws MessagingException {
-            mimeMessage.setHeader(name, value);
-        }
-
-        @Override
-        public void addHeader(final String name, final String value) throws MessagingException {
-            mimeMessage.addHeader(name, value);
-        }
-
-        @Override
-        public void removeHeader(final String name) throws MessagingException {
-            mimeMessage.removeHeader(name);
-        }
-
-        @Override
-        public Enumeration<?> getAllHeaders() throws MessagingException {
-            return mimeMessage.getAllHeaders();
-        }
-
-        @Override
-        public Enumeration<?> getMatchingHeaders(final String[] names) throws MessagingException {
-            return mimeMessage.getMatchingHeaders(names);
-        }
-
-        @Override
-        public Enumeration<?> getNonMatchingHeaders(final String[] names) throws MessagingException {
-            return mimeMessage.getNonMatchingHeaders(names);
-        }
-
-        @Override
-        public void addHeaderLine(final String line) throws MessagingException {
-            mimeMessage.addHeaderLine(line);
-        }
-
-        @Override
-        public Enumeration<?> getAllHeaderLines() throws MessagingException {
-            return mimeMessage.getAllHeaderLines();
-        }
-
-        @Override
-        public Enumeration<?> getMatchingHeaderLines(final String[] names) throws MessagingException {
-            return mimeMessage.getMatchingHeaderLines(names);
-        }
-
-        @Override
-        public Enumeration<?> getNonMatchingHeaderLines(final String[] names) throws MessagingException {
-            return mimeMessage.getNonMatchingHeaderLines(names);
-        }
-
-        @Override
-        public Flags getFlags() throws MessagingException {
-            return mimeMessage.getFlags();
-        }
-
-        @Override
-        public boolean isSet(final Flag flag) throws MessagingException {
-            return mimeMessage.isSet(flag);
-        }
-
-        @Override
-        public void setFlags(final Flags flag, final boolean set) throws MessagingException {
-            mimeMessage.setFlags(flag, set);
-        }
-
-        @Override
-        public void saveChanges() throws MessagingException {
-            mimeMessage.saveChanges();
-        }
-
     }
 
 }
