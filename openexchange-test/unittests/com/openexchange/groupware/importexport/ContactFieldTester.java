@@ -72,7 +72,7 @@ public class ContactFieldTester extends TestCase {
 	}
 	
 	public void testReadableName(){
-		final String value = "Anniversay";
+		final String value = "Anniversary";
 		assertEquals(value, ContactField.ANNIVERSARY.getReadableName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDisplayName(value));
 	}
