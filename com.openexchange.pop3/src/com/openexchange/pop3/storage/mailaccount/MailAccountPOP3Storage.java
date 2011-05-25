@@ -670,7 +670,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             final String uidl = seqnum2uidl.get(message.getMessageNumber());
             if (!storageUIDLs.contains(uidl)) {
                 /*
-                 * Unknown UIDL...
+                 * UIDL not yet contained in storage
                  */
                 toFetch.add(message);
             }
