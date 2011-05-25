@@ -512,7 +512,6 @@ public class MailAccountPOP3Storage implements POP3Storage {
              * Get message count
              */
             final int messageCount;
-            final String[] uidlsFromPOP3;
             inbox.open(POP3Folder.READ_WRITE);
             try {
                 synchronized (inbox) {
@@ -535,11 +534,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         final long startMillis = System.currentTimeMillis();
                         inbox.fetch(all, FETCH_PROFILE_UID);
                         MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - startMillis);
-                        uidlsFromPOP3 = new String[all.length];
                         for (int i = 0; i < all.length; i++) {
                             final Message message = all[i];
                             final String uidl = inbox.getUID(message);
-                            uidlsFromPOP3[i] = uidl;
                             seqnum2uidl.put(message.getMessageNumber(), uidl);
                         }
                         messageCache.clear();
@@ -573,7 +570,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                             final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
                             for (int i = 0; i < messages.length; i++) {
                                 final Message message = messages[i];
-                                final String uidl = uidlsFromPOP3[i];
+                                final String uidl = seqnum2uidl.get(message.getMessageNumber());
                                 if (trashedUIDLs.contains(uidl)) {
                                     message.setFlags(FLAGS_DELETED, true);
                                 }
