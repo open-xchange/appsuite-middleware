@@ -1,3 +1,7 @@
+* 2011-05-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #19315: Converting distribution list to an appropriate VCard attachment
+
 * 2011-05-26 - francisco.laguna@open-xchange.com
 
   - Bugfix 19140: Improved error message, improved reauthorization

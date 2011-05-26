@@ -85,6 +85,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -1405,121 +1406,135 @@ public class OXContainerConverter {
         addProperty(object, "N", n);
         // NICKNAME
         addProperty(object, "NICKNAME", getList(contact.getNickname(), ','));
-        // PHOTO
-        if (contact.getImage1() != null) {
-            final byte[] imageData = contact.getImage1();
-            // First try as URI
-            try {
-                addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, CHARSET_ISO_8859_1)));
-            } catch (final UnsupportedEncodingException e2) {
-                LOG.error(e2);
-                throw new ConverterException(e2);
-            } catch (final URISyntaxException e) {
-                // Insert raw base64-encoded image bytes
-                final Parameter type = new Parameter(P_TYPE);
-                {
-                    final String mimeType = contact.getImageContentType();
-                    final String param;
-                    if (mimeType == null) {
-                        param = "JPEG";
-                    } else if (mimeType.indexOf('/') != -1) {
-                        param = mimeType.substring(mimeType.indexOf('/') + 1).toUpperCase();
-                    } else {
-                        param = mimeType.toUpperCase();
+        // Distribution list?
+        final DistributionListEntryObject[] distributionList = contact.getDistributionList();
+        if (null == distributionList || 0 == distributionList.length) {
+            // PHOTO
+            if (contact.getImage1() != null) {
+                final byte[] imageData = contact.getImage1();
+                // First try as URI
+                try {
+                    addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, CHARSET_ISO_8859_1)));
+                } catch (final UnsupportedEncodingException e2) {
+                    LOG.error(e2);
+                    throw new ConverterException(e2);
+                } catch (final URISyntaxException e) {
+                    // Insert raw base64-encoded image bytes
+                    final Parameter type = new Parameter(P_TYPE);
+                    {
+                        final String mimeType = contact.getImageContentType();
+                        final String param;
+                        if (mimeType == null) {
+                            param = "JPEG";
+                        } else if (mimeType.indexOf('/') != -1) {
+                            param = mimeType.substring(mimeType.indexOf('/') + 1).toUpperCase();
+                        } else {
+                            param = mimeType.toUpperCase();
+                        }
+                        type.addValue(new ParameterValue(param));
                     }
-                    type.addValue(new ParameterValue(param));
+                    /*
+                     * Add image data as it is since ValueDefinition#write(FoldingWriter fw, Property property)) applies proper encoding
+                     * dependent on "ENCODING" parameter
+                     */
+                    addProperty(object, "PHOTO", "ENCODING", new String[] { "B" }, imageData).addParameter(type);
                 }
-                /*
-                 * Add image data as it is since ValueDefinition#write(FoldingWriter fw, Property property)) applies proper encoding
-                 * dependent on "ENCODING" parameter
-                 */
-                addProperty(object, "PHOTO", "ENCODING", new String[] { "B" }, imageData).addParameter(type);
             }
-        }
-        String s = null;
-        // BDAY
-        addDate(object, "BDAY", contact.getBirthday(), false);
-        // ADR
-        addADR(
-            object,
-            contact,
-            new String[] { PARAM_WORK },
-            Contact.STREET_BUSINESS,
-            Contact.CITY_BUSINESS,
-            Contact.STATE_BUSINESS,
-            Contact.POSTAL_CODE_BUSINESS,
-            Contact.COUNTRY_BUSINESS);
-        // ADR HOME
-        addADR(
-            object,
-            contact,
-            new String[] { PARAM_HOME },
-            Contact.STREET_HOME,
-            Contact.CITY_HOME,
-            Contact.STATE_HOME,
-            Contact.POSTAL_CODE_HOME,
-            Contact.COUNTRY_HOME);
-        // ADR OTHER (as "dom" since there is no equivalent)
-    	addADR(
-            object,
-            contact,
-            new String[] { PARAM_OTHER },
-            Contact.STREET_OTHER,
-            Contact.CITY_OTHER,
-            Contact.STATE_OTHER,
-            Contact.POSTAL_CODE_OTHER,
-            Contact.COUNTRY_OTHER);
-        // LABEL is ignored
-        // TEL
-        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness1());
-        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness2());
-        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, "fax" }, contact.getFaxBusiness());
-        addProperty(object, P_TEL, P_TYPE, new String[] { "car", PARAM_VOICE }, contact.getTelephoneCar());
-        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE }, contact.getTelephoneHome1());
-        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE }, contact.getTelephoneHome2());
-        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, "fax" }, contact.getFaxHome());
-        addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone1());
-        addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone2());
-        
-        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, PARAM_VOICE }, contact.getTelephoneOther());
-        addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, "fax" }, contact.getFaxOther());
-        addProperty(object, P_TEL, P_TYPE, new String[] { "isdn" }, contact.getTelephoneISDN());
-        addProperty(object, P_TEL, P_TYPE, new String[] { "pager" }, contact.getTelephonePager());
-        // EMAIL
-        addProperty(object, P_EMAIL, contact.getEmail1());
-        addProperty(object, P_EMAIL, contact.getEmail2());
-        addProperty(object, P_EMAIL, contact.getEmail3());
-        // MAILER is ignored
-        // TZ is ignored
-        // GEO is ignored
-        // TITLE
-        addProperty(object, "TITLE", contact.getProfession());
-        // ROLE
-        addProperty(object, "ROLE", contact.getPosition());
-        // LOGO is ignored
-        // TODO AGENT
-        // ORG
-        final ArrayList<String> list = new ArrayList<String>();
-        list.add(s = contact.getCompany());
-        boolean set = (s != null);
-        s = contact.getBranches();
-        if (s != null) {
-            final StringTokenizer st = new StringTokenizer(s, ",");
-            set |= st.hasMoreTokens();
-            while (st.hasMoreTokens()) {
-                list.add(st.nextToken());
+            String s = null;
+            // BDAY
+            addDate(object, "BDAY", contact.getBirthday(), false);
+            // ADR
+            addADR(
+                object,
+                contact,
+                new String[] { PARAM_WORK },
+                Contact.STREET_BUSINESS,
+                Contact.CITY_BUSINESS,
+                Contact.STATE_BUSINESS,
+                Contact.POSTAL_CODE_BUSINESS,
+                Contact.COUNTRY_BUSINESS);
+            // ADR HOME
+            addADR(
+                object,
+                contact,
+                new String[] { PARAM_HOME },
+                Contact.STREET_HOME,
+                Contact.CITY_HOME,
+                Contact.STATE_HOME,
+                Contact.POSTAL_CODE_HOME,
+                Contact.COUNTRY_HOME);
+            // ADR OTHER (as "dom" since there is no equivalent)
+        	addADR(
+                object,
+                contact,
+                new String[] { PARAM_OTHER },
+                Contact.STREET_OTHER,
+                Contact.CITY_OTHER,
+                Contact.STATE_OTHER,
+                Contact.POSTAL_CODE_OTHER,
+                Contact.COUNTRY_OTHER);
+            // LABEL is ignored
+            // TEL
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness1());
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness2());
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, "fax" }, contact.getFaxBusiness());
+            addProperty(object, P_TEL, P_TYPE, new String[] { "car", PARAM_VOICE }, contact.getTelephoneCar());
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE }, contact.getTelephoneHome1());
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE }, contact.getTelephoneHome2());
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, "fax" }, contact.getFaxHome());
+            addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone1());
+            addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone2());
+            
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, PARAM_VOICE }, contact.getTelephoneOther());
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, "fax" }, contact.getFaxOther());
+            addProperty(object, P_TEL, P_TYPE, new String[] { "isdn" }, contact.getTelephoneISDN());
+            addProperty(object, P_TEL, P_TYPE, new String[] { "pager" }, contact.getTelephonePager());
+            // EMAIL
+            addProperty(object, P_EMAIL, contact.getEmail1());
+            addProperty(object, P_EMAIL, contact.getEmail2());
+            addProperty(object, P_EMAIL, contact.getEmail3());
+            // MAILER is ignored
+            // TZ is ignored
+            // GEO is ignored
+            // TITLE
+            addProperty(object, "TITLE", contact.getProfession());
+            // ROLE
+            addProperty(object, "ROLE", contact.getPosition());
+            // LOGO is ignored
+            // TODO AGENT
+            // ORG
+            final ArrayList<String> list = new ArrayList<String>();
+            list.add(s = contact.getCompany());
+            boolean set = (s != null);
+            s = contact.getBranches();
+            if (s != null) {
+                final StringTokenizer st = new StringTokenizer(s, ",");
+                set |= st.hasMoreTokens();
+                while (st.hasMoreTokens()) {
+                    list.add(st.nextToken());
+                }
             }
-        }
-        s = contact.getDepartment();
-        set |= (s != null);
-        if (s != null) {
-            list.add(s);
-        }
-        if (set) {
-            addProperty(object, "ORG", list);
+            s = contact.getDepartment();
+            set |= (s != null);
+            if (s != null) {
+                list.add(s);
+            }
+            if (set) {
+                addProperty(object, "ORG", list);
+            }
+        } else {
+            for (final DistributionListEntryObject distributionListEntry : distributionList) {
+                final String address = distributionListEntry.getEmailaddress();
+                if (address != null) {
+                    final Property property = new Property(P_EMAIL);
+                    property.setValue(address);
+                    property.addParameter(new Parameter("INTERNET"));
+                    object.addProperty(property);
+                }
+            }
         }
         // CATEGORIES
-        s = contact.getCategories();
+        final String s = contact.getCategories();
         if (s != null) {
             addProperty(object, P_CATEGORIES, getList(s, ','));
         }
