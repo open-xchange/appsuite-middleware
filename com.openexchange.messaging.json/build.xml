@@ -42,6 +42,7 @@
     <property name="messagingjar" value="com.openexchange.messaging.jar"/>
     <property name="messaginggenericjar" value="com.openexchange.messaging.generic.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
+    <property name="cascadejar" value="com.openexchange.config.cascade.jar"/>
 
     <property name="mailjar" value="mail-1.4.3.jar"/>
     <property name="codecjar" value="commons-codec-1.4.jar"/>
