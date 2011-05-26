@@ -7033,7 +7033,7 @@ public final class Contacts {
             }
 
             public String getReadableTitle() {
-                return "Anniversay";
+                return "Anniversary";
             }
         };
 
