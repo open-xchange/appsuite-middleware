@@ -109,6 +109,7 @@ import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
+import com.openexchange.folderstorage.mail.MailServiceRegistry;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
@@ -616,6 +617,7 @@ public final class Init {
             final MailAccountStorageService storageService = MailAccountStorageInit.newMailAccountStorageService();
             services.put(MailAccountStorageService.class, storageService);
             ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, storageService);
+            MailServiceRegistry.getServiceRegistry().addService(MailAccountStorageService.class, storageService);
     
             final UnifiedINBOXManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
             services.put(UnifiedINBOXManagement.class, unifiedINBOXManagement);
