@@ -155,10 +155,10 @@ public final class ContactDataSource implements DataSource {
         /*
          * Create necessary objects
          */
-        final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream(len << 12);
+        final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(len << 12);
         final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
         for (final Contact contact : contacts) {
-            writeVCard2Stream(contact, byteArrayOutputStream, contactDef, session);
+            writeVCard2Stream(contact, sink, contactDef, session);
         }
         /*
          * Return data
@@ -170,7 +170,7 @@ public final class ContactDataSource implements DataSource {
         final String displayName = contacts.length == 1 ? contacts[0].getDisplayName() : null;
         properties.put(DataProperties.PROPERTY_NAME, displayName == null ? "vcard.vcf" : new StringBuilder(
             displayName.replaceAll(" +", "_")).append(".vcf").toString());
-        final byte[] vcardBytes = byteArrayOutputStream.toByteArray();
+        final byte[] vcardBytes = sink.toByteArray();
         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(vcardBytes.length));
         return new SimpleData<D>(
             (D) (InputStream.class.equals(type) ? new UnsynchronizedByteArrayInputStream(vcardBytes) : vcardBytes),
