@@ -27,6 +27,7 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
+	<property name="cascadejar" value="com.openexchange.config.cascade.jar"/>
 
     <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -41,6 +42,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${genericonfjar}"/>
+    	<pathelement location="${bundlesdir}/${cascadejar}"/>
     	<fileset refid="3rdpartyjars"/>
     </path>
 
