@@ -180,7 +180,7 @@ public final class FacebookOAuthAccess {
         if (object.has("error")) {
             JSONObject error = object.getJSONObject("error");
             if ("OAuthException".equals(error.opt("type"))) {
-                throw new FacebookMessagingException(OAuthExceptionCodes.TOKEN_EXPIRED.create());
+                throw new FacebookMessagingException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
             } else {
                 throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
             }
