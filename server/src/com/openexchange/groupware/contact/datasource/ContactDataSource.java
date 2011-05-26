@@ -124,8 +124,8 @@ public final class ContactDataSource implements DataSource {
                     folderIds[i] = pairObject.getInt(PARAMETER_FOLDERID);
                     objectIds[i] = pairObject.getInt(PARAMETER_ID);
                 }
-            } catch (final JSONException e1) {
-                throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], dataArguments.get(ARGS[0]));
+            } catch (final JSONException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[0], dataArguments.get(ARGS[0]));
             }
         }
         /*
