@@ -49,21 +49,17 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
-import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxException;
@@ -74,7 +70,8 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CreateAction extends AbstractOAuthAJAXActionService {
+public final class CreateAction extends 
+AbstractOAuthTokenAction {
 
     /**
      * Initializes a new {@link CreateAction}.
@@ -101,45 +98,7 @@ public final class CreateAction extends AbstractOAuthAJAXActionService {
                 final OAuthServiceMetaDataRegistry registry = oAuthService.getMetaDataRegistry();
                 service = registry.getService(serviceId);
             }
-            /*
-             * Parse OAuth parameters
-             */
-            // http://wiki.oauth.net/w/page/12238555/Signed-Callback-URLs
-            // http://developer.linkedin.com/message/4568
-            String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
-            if (oauthToken == null) {
-                oauthToken = request.getParameter("access_token");
-            }
-            final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
-            if (uuid == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.SESSION_PARAM_UUID);
-            }
-            /*
-             * Get request token secret from session parameters
-             */
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
-            final String oauthTokenSecret = (String) state.get(OAuthConstants.ARGUMENT_SECRET);
-            session.setParameter(uuid, null);
-            /*
-             * The OAuth verifier (PIN)
-             */
-            final String oauthVerfifier = request.getParameter(OAuthConstants.URLPARAM_OAUTH_VERIFIER);
-            /*
-             * Invoke
-             */
-            final Map<String, Object> arguments = new HashMap<String, Object>(3);
-            arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, request.getParameter(AccountField.DISPLAY_NAME.getName()));
-            arguments.put(OAuthConstants.ARGUMENT_PIN, oauthVerfifier);
-            arguments.put(OAuthConstants.ARGUMENT_PASSWORD, secret( session ));
-            final DefaultOAuthToken token = new DefaultOAuthToken();
-            token.setSecret(oauthTokenSecret);
-            token.setToken(oauthToken);
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
-            /*
-             * Process arguments
-             */
-            service.processArguments(arguments, request.getParameters(), state);
+            final Map<String, Object> arguments = processOAuthArguments(request, session, service);
             /*
              * By now it doesn't matter which interaction type is passed
              */

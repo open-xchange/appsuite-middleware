@@ -121,4 +121,8 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         getService0().updateAccount(accountId, arguments, user, contextId);
     }
 
+    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+        return getService0().updateAccount(accountId, serviceMetaData, type, arguments, user, contextId);
+    }
+
 }

@@ -103,6 +103,8 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
     }
+    
+    //FIXME: Refactor this. These methods are pretty similar. DRY
 
     private AJAXRequestResult createCallbackAction(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
         final OAuthService oAuthService = getOAuthService();
@@ -192,8 +194,13 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString());
         final OAuthToken requestToken = interaction.getRequestToken();
-        session.setParameter(uuid, requestToken.getSecret());
         /*
+         * Create a container to set some state information: Request token's secret, call-back URL, whatever
+         */
+        final Map<String, Object> oauthState = new HashMap<String, Object>();
+        oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
+        oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrlBuilder.toString());
+        session.setParameter(uuid, oauthState);        /*
          * Write as JSON
          */
         final JSONObject jsonInteraction = AccountWriter.write(interaction, uuid);

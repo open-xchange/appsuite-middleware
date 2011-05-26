@@ -110,6 +110,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.Command;
 import com.openexchange.sql.grammar.INSERT;
+import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -220,7 +221,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
              * Get appropriate Scribe service implementation
              */
             OAuthInteraction interaction = metaData.initOAuth(callbackUrl);
-            if (interaction != null)  {
+            if (interaction != null) {
                 return interaction;
             }
             String modifiedUrl = metaData.modifyCallbackURL(callbackUrl);
@@ -536,6 +537,56 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
+    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+        try {
+            /*
+             * Create appropriate OAuth account instance
+             */
+            final DefaultOAuthAccount account = new DefaultOAuthAccount();
+            /*
+             * Determine associated service's meta data
+             */
+            final OAuthServiceMetaData service = registry.getService(serviceMetaData);
+            account.setMetaData(service);
+            /*
+             * Set display name & identifier
+             */
+            final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            account.setDisplayName(null == displayName ? null : displayName);
+            account.setId(accountId);
+            /*
+             * Obtain & apply the access token
+             */
+            obtainToken(type, arguments, account);
+            /*
+             * Crypt tokens
+             */
+            final String password = (String) arguments.get(OAuthConstants.ARGUMENT_PASSWORD);
+            if (null == password) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PASSWORD);
+            }
+            account.setToken(encrypt(account.getToken(), password));
+            account.setSecret(encrypt(account.getSecret(), password));
+            /*
+             * Create UPDATE command
+             */
+            final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+            final UPDATE update = SQLStructure.updateAccount(account, contextId, user, values);
+            /*
+             * Execute UPDATE command
+             */
+            executeUpdate(contextId, update, values);
+            /*
+             * Return the account
+             */
+            return account;
+        } catch (final OAuthException x) {
+            throw x;
+        } catch (final AbstractOXException x) {
+            throw new OAuthException(x);
+        }
+    }
+
     // OAuth
 
     protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
@@ -747,17 +798,17 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, session.getUserId());
             rs = stmt.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt(1);
                 try {
                     decrypt(rs.getString(2), secret);
                 } catch (OAuthException x) {
-                    return "oauthAccount: "+id+" accessToken";
+                    return "oauthAccount: " + id + " accessToken";
                 }
                 try {
                     decrypt(rs.getString(3), secret);
                 } catch (OAuthException x) {
-                    return "oauthAccount: "+id+" accessSecret";
+                    return "oauthAccount: " + id + " accessSecret";
                 }
             }
         } catch (final SQLException e) {
@@ -780,7 +831,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, session.getUserId());
             rs = stmt.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 try {
                     int id = rs.getInt(1);
                     String accessToken = rs.getString(2);
@@ -799,7 +850,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
                         decrypt(accessSecret, newSecret);
                     } catch (OAuthException x) {
                         String newToken = encrypt(decrypt(accessSecret, oldSecret), newSecret);
-                        if(update != null) {
+                        if (update != null) {
                             update.close();
                         }
                         update = con.prepareStatement("UPDATE oauthAccounts SET accessSecret=? WHERE cid=? AND id=?");
@@ -809,7 +860,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
                         update.executeUpdate();
                     }
                 } finally {
-                    if(update != null) {
+                    if (update != null) {
                         update.close();
                     }
                 }

@@ -50,11 +50,17 @@
 package com.openexchange.oauth.internal;
 
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
+import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.sql.grammar.Column;
+import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.Table;
+import com.openexchange.sql.grammar.UPDATE;
 
 /**
  * {@link SQLStructure}
@@ -81,6 +87,9 @@ public class SQLStructure {
         ACCESS_SECRET("accessSecret"),
         SERVICE_ID("serviceId");
 
+        public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
+        
+        
         private final Column column;
 
         private OAUTH_COLUMN(final String colName) {
@@ -146,6 +155,26 @@ public class SQLStructure {
         }
 
         return insert;
+    }
+
+    /**
+     * @param account
+     * @param contextId
+     * @param user
+     * @param values
+     * @return
+     */
+    public static UPDATE updateAccount(final OAuthAccount account, int contextId, int user, ArrayList<Object> values) {
+        final UPDATE update = new UPDATE(OAUTH_ACCOUNTS);
+        for (final OAUTH_COLUMN column : OAUTH_COLUMN.updateableColumns) {
+            final Object o = column.get(account, contextId, user);
+            if (o != null) {
+                update.SET(column.getColumn(), PLACEHOLDER);
+                values.add(o);
+            }
+        }
+        update.WHERE(new EQUALS(OAUTH_COLUMN.CID.getColumn(), contextId).AND(new EQUALS(OAUTH_COLUMN.ID.getColumn(), account.getId())));
+        return update;
     }
 
 }

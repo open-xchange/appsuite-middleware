@@ -165,4 +165,12 @@ public class MockOAuthService implements OAuthService {
 
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
+     */
+    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

@@ -161,6 +161,8 @@ public interface OAuthService {
      * @throws OAuthException If deletion fails
      */
     void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
+    
+    OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
 
     /**
      * Gets the specified account.
