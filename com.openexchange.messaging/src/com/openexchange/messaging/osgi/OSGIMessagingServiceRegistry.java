@@ -50,6 +50,7 @@
 package com.openexchange.messaging.osgi;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,6 +58,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
@@ -81,6 +86,8 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
      */
     private ServiceTracker tracker;
 
+    private ServiceTracker configTracker;
+    
     /**
      * Initializes a new {@link OSGIMessagingServiceRegistry}.
      */
@@ -99,6 +106,10 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             tracker = new ServiceTracker(context, MessagingService.class.getName(), new Customizer(context));
             tracker.open();
         }
+        if (null == configTracker) {
+            configTracker = new ServiceTracker(context, ConfigViewFactory.class.getName(), null);
+            configTracker.open();
+        }
     }
 
     /**
@@ -109,22 +120,81 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             tracker.close();
             tracker = null;
         }
+        if (null != configTracker) {
+            configTracker.close();
+            configTracker = null;
+        }
     }
 
-    public List<MessagingService> getAllServices() throws MessagingException {
-        return new ArrayList<MessagingService>(map.values());
+    public List<MessagingService> getAllServices(int user, int context) throws MessagingException {
+        return filter(new ArrayList<MessagingService>(map.values()), user, context);
     }
 
-    public MessagingService getMessagingService(final String id) throws MessagingException {
+
+    public MessagingService getMessagingService(final String id, int user, int context) throws MessagingException {
         final MessagingService messagingService = map.get(id);
-        if (null == messagingService) {
+        if (null == messagingService || ! isAllowed(id, user, context)) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
         }
         return messagingService;
     }
 
-    public boolean containsMessagingService(final String id) {
-        return null == id ? false : map.containsKey(id);
+    private boolean isAllowed(String id, int user, int context) throws MessagingException {
+        try {
+            ConfigView configView = getView(user, context);
+            if ( !isMessagingEnabled(configView)) {
+                return false;
+            }
+            ComposedConfigProperty<Boolean> configProperty = configView.property(id, boolean.class);
+            return (configProperty.isDefined() && configProperty.get());
+        } catch (ConfigCascadeException e) {
+            throw new MessagingException(e);
+        }        
+    }
+
+    private List<MessagingService> filter(ArrayList<MessagingService> arrayList, int user, int context) throws MessagingException {
+        List<MessagingService> filteredList = new ArrayList<MessagingService>(arrayList.size());
+        try {
+            ConfigView configView = getView(user, context);
+            if (!isMessagingEnabled(configView)) {
+                return Collections.emptyList();
+            }
+            for (MessagingService messagingService : arrayList) {
+                ComposedConfigProperty<Boolean> configProperty = configView.property(messagingService.getId(), boolean.class);
+                if (configProperty.isDefined() && configProperty.get()) {
+                    filteredList.add(messagingService);
+                }
+            }
+        } catch (ConfigCascadeException x) {
+            throw new MessagingException(x);
+        }
+        
+        return filteredList;
+    }
+
+    private boolean isMessagingEnabled(ConfigView configView) throws MessagingException {
+        try {
+            ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.messaging.enabled", boolean.class);
+            if (property.isDefined() && property.get()) {
+                return true;
+            }
+        } catch (ConfigCascadeException e) {
+            throw new MessagingException(e);
+        }
+        return false;
+    }
+
+    private ConfigView getView(int user, int context) throws ConfigCascadeException {
+        ConfigViewFactory service = (ConfigViewFactory) configTracker.getService();
+        return service.getView(user, context);
+    }
+
+    public boolean containsMessagingService(final String id, int user, int context) {
+        try {
+            return null == id ? false : (map.containsKey(id) && isAllowed(id, user, context));
+        } catch (MessagingException e) {
+            return false;
+        }
     }
 
     private final class Customizer implements ServiceTrackerCustomizer {
@@ -175,4 +245,5 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
     } // End of Customizer class
 
+    
 }

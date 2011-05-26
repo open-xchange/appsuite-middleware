@@ -1684,7 +1684,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 messagingSubfolderIDs = Collections.emptyList();
             } else {
                 try {
-                    final List<MessagingService> allServices = msr.getAllServices();
+                    final List<MessagingService> allServices = msr.getAllServices(user.getId(), contextId);
                     for (final MessagingService messagingService : allServices) {
                         if (!messagingService.getId().equals(MailMessagingService.ID)) {
                             /*

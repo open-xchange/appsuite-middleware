@@ -177,7 +177,7 @@ public class AllTest extends TestCase {
     }
     
     public void testExceptionInMessagingAccountManager() throws AbstractOXException {
-        ((SimAccountManager) registry.getAllServices().get(0).getAccountManager()).setException(new MessagingException(null, -1, null, null));
+        ((SimAccountManager) registry.getAllServices(-1, -1).get(0).getAccountManager()).setException(new MessagingException(null, -1, null, null));
         final AllAction action = new AllAction(registry);
         
         final AJAXRequestData requestData = new AJAXRequestData();

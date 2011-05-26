@@ -82,7 +82,7 @@ public class SendTest extends AbstractMessagingActionTest {
 
         perform(req);
         
-        final SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1").getAccountTransport(12, new SimServerSession(null, null, null));
+        final SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1", -1, -1).getAccountTransport(12, new SimServerSession(null, null, null));
         
         final MessagingMessage message = transport.getMessage();
         assertNotNull(message);
@@ -104,7 +104,7 @@ public class SendTest extends AbstractMessagingActionTest {
 
         perform(req);
         
-        final SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1").getAccountTransport(12, new SimServerSession(null, null, null));
+        final SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1", -1, -1).getAccountTransport(12, new SimServerSession(null, null, null));
         
         final MessagingMessage message = transport.getMessage();
         assertNotNull(message);

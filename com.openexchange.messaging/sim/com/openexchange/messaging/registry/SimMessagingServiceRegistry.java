@@ -67,12 +67,12 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
 
     private MessagingException exception;
     
-    public List<MessagingService> getAllServices() throws MessagingException {
+    public List<MessagingService> getAllServices(int user, int context) throws MessagingException {
         exception();
         return new ArrayList<MessagingService>(services.values());
     }
 
-    public MessagingService getMessagingService(final String id) throws MessagingException {
+    public MessagingService getMessagingService(final String id, int user, int context) throws MessagingException {
         exception();
         return services.get(id);
     }
@@ -91,7 +91,7 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
         this.exception = exception;
     }
 
-    public boolean containsMessagingService(final String id) {
+    public boolean containsMessagingService(final String id, int user, int context) {
         return services.containsKey(id);
     }
 }

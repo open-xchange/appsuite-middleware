@@ -102,7 +102,7 @@ public class AllAction extends AbstractMessagingAction {
     @Override
     protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException {
 
-        final MessagingMessageAccess access = req.getMessageAccess();
+        final MessagingMessageAccess access = req.getMessageAccess(session.getUserId(), session.getContextId());
 
         final MessagingField sort = req.getSort();
         OrderDirection order = null;

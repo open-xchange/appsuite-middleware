@@ -95,7 +95,7 @@ public class GetAction extends AbstractMessagingAccountAction {
         }
         
         
-        final MessagingAccount account = registry.getMessagingService(messagingServiceId).getAccountManager().getAccount(id, session);
+        final MessagingAccount account = registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId()).getAccountManager().getAccount(id, session);
         
         return new AJAXRequestResult(writer.write(account));
     }

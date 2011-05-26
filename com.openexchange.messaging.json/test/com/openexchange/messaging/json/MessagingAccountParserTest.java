@@ -88,7 +88,7 @@ public class MessagingAccountParserTest extends TestCase {
         configJSON.put("inputField", "My nice input value");
         accountJSON.put("configuration", configJSON);
         
-        final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
+        final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
         
         assertNotNull("Account was null!", account);
         assertEquals(12, account.getId());
@@ -112,7 +112,7 @@ public class MessagingAccountParserTest extends TestCase {
         accountJSON.put("messagingService", "com.openexchange.twitter");
        
         
-        final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
+        final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
         
         assertNotNull("Account was null!", account);
         assertTrue("Expected unset ID, but was: "+account.getId(), 0 >= account.getId());
@@ -129,7 +129,7 @@ public class MessagingAccountParserTest extends TestCase {
         try {
             final JSONObject accountJSON = new JSONObject();
             accountJSON.put("messagingService", "com.openexchange.twitter");
-            final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
+            final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
             fail("Should have failed with exception from message service lookup");
         } catch (final MessagingException x) {
             assertSame(exception, x);

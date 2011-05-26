@@ -211,7 +211,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         if (null == accountAccess) {
             try {
                 accountAccess =
-                    getServiceRegistry().getService(MessagingServiceRegistry.class, true).getMessagingService(serviceId).getAccountAccess(
+                    getServiceRegistry().getService(MessagingServiceRegistry.class, true).getMessagingService(serviceId, session.getUserId(), session.getContextId()).getAccountAccess(
                         accountId,
                         session);
             } catch (final MessagingException e) {
@@ -531,7 +531,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             if ("".equals(fullname)) {
                 final MessagingServiceRegistry msr =
                     MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class, true);
-                final MessagingService messagingService = msr.getMessagingService(serviceId);
+                final MessagingService messagingService = msr.getMessagingService(serviceId, session.getUserId(), session.getContextId());
                 final MessagingAccount messagingAccount =
                     messagingService.getAccountManager().getAccount(accountId, session);
 
@@ -648,7 +648,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                 final List<MessagingAccount> accounts = new ArrayList<MessagingAccount>(8);
                 {
                     final MessagingServiceRegistry registry = getServiceRegistry().getService(MessagingServiceRegistry.class, true);
-                    final List<MessagingService> allServices = registry.getAllServices();
+                    final List<MessagingService> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
                     final boolean available = mailFolderStorageAvailable;
                     final String mailMessagingServiceId = MailMessagingService.ID;
                     for (final MessagingService messagingService : allServices) {

@@ -105,7 +105,7 @@ public abstract class AbstractMessagingActionTest extends TestCase {
     }
 
     protected Call getMessagingAccessCall(final String serviceId, final int accountId) throws MessagingException {
-        final MessagingService service = registry.getMessagingService(serviceId);
+        final MessagingService service = registry.getMessagingService(serviceId, -1, -1);
         final MessagingAccountAccess accountAccess = service.getAccountAccess(accountId, null);
         final SimMessageAccess messageAccess = (SimMessageAccess) accountAccess.getMessageAccess();
         final List<Call> calls = messageAccess.getCalls();

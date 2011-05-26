@@ -101,7 +101,7 @@ public class MessagesServlet extends MultipleAdapterServletNew {
             final MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, session);
             
             try {
-                final MessagingMessageAccess messageAccess = request.getMessageAccess();
+                final MessagingMessageAccess messageAccess = request.getMessageAccess(session.getUserId(), session.getContextId());
                 
                 final MessagingContent content = messageAccess.resolveContent(request.getFolderId(), request.getId(), request.getReferenceId());
                 

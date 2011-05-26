@@ -151,7 +151,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(contextId));
             }
-            final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId);
+            final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId, session.getUserId(), session.getContextId());
             final DefaultMessagingAccount account = new DefaultMessagingAccount();
             account.setId(id);
             account.setMessagingService(messagingService);
@@ -222,7 +222,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 final MessagingService messagingService;
                 {
                     final MessagingServiceRegistry registry = getService(MessagingServiceRegistry.class);
-                    messagingService = registry.getMessagingService(serviceId);
+                    messagingService = registry.getMessagingService(serviceId, session.getUserId(), session.getContextId());
                 }
                 do {
                     final DefaultMessagingAccount account = new DefaultMessagingAccount();
@@ -325,7 +325,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 /*
                  * Encrypt password fields to not having clear-text representation in database
                  */
-                final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId);
+                final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId, session.getUserId(), session.getContextId());
                 final Set<String> secretPropNames = messagingService.getSecretProperties();
                 if (!secretPropNames.isEmpty()) {
                     for (final String passwordElementName : secretPropNames) {
@@ -468,7 +468,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     /*
                      * Encrypt password fields to not having clear-text representation in database
                      */
-                    final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId);
+                    final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId, session.getUserId(), session.getContextId());
                     final Set<String> secretPropNames = messagingService.getSecretProperties();
                     if (!secretPropNames.isEmpty()) {
                         for (final String passwordElementName : secretPropNames) {

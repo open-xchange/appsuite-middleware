@@ -85,7 +85,7 @@ public class SendAction extends AbstractMessagingAction {
         if(message == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
         }
-        req.getTransport().transport(message, req.getRecipients());
+        req.getTransport(session.getUserId(), session.getContextId()).transport(message, req.getRecipients());
         return new AJAXRequestResult(1);
     }
 

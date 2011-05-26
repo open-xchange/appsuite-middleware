@@ -74,7 +74,7 @@ public class AllAction extends AbstractMessagingServiceAction {
     @Override
     public AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
         final JSONArray result = new JSONArray();
-        for(final MessagingService service : registry.getAllServices()) {
+        for(final MessagingService service : registry.getAllServices(session.getUserId(), session.getContextId())) {
             result.put(getWriter(session).write(service));
         }
         return new AJAXRequestResult(result);

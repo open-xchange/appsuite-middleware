@@ -110,8 +110,8 @@ public class MessagingRequestData {
         this(request, session, registry, parser, null);
     }
 
-    public MessagingMessageAccess getMessageAccess(final String messagingService, final int account) throws MessagingException {
-        final MessagingAccountAccess access = registry.getMessagingService(messagingService).getAccountAccess(account, session);
+    public MessagingMessageAccess getMessageAccess(final String messagingService, final int account, int user, int cid) throws MessagingException {
+        final MessagingAccountAccess access = registry.getMessagingService(messagingService, user, cid).getAccountAccess(account, session);
         if (!access.isConnected()) {
             access.connect();
             mustClose(access);
@@ -126,22 +126,24 @@ public class MessagingRequestData {
 
     /**
      * Tries to get a message access for the messaging service and account ID as given in the request parameters
+     * @param user 
+     * @param cid 
      * 
      * @throws MessagingException If parameters 'messagingService' or 'account' are missing
      */
-    public MessagingMessageAccess getMessageAccess() throws MessagingException {
+    public MessagingMessageAccess getMessageAccess(int user, int cid) throws MessagingException {
         if (messageAccess != null) {
             return messageAccess;
         }
-        final MessagingMessageAccess access = getAccountAccess().getMessageAccess();
+        final MessagingMessageAccess access = getAccountAccess(user, cid).getMessageAccess();
         return messageAccess = wrap(access, getMessagingServiceId(), getAccountID());
     }
 
-    public MessagingAccountAccess getAccountAccess() throws MessagingException {
+    public MessagingAccountAccess getAccountAccess(int user, int cid) throws MessagingException {
         if (accountAccess != null) {
             return accountAccess;
         }
-        accountAccess = registry.getMessagingService(getMessagingServiceId()).getAccountAccess(getAccountID(), session);
+        accountAccess = registry.getMessagingService(getMessagingServiceId(), user, cid).getAccountAccess(getAccountID(), session);
 
         if (!accountAccess.isConnected()) {
             accountAccess.connect();
@@ -332,9 +334,11 @@ public class MessagingRequestData {
     /**
      * Retrieves the MessagingAccountTransport that matches the parameters 'messagingService' and 'account'. Fails when either of the
      * parameters has not been set.
+     * @param user 
+     * @param cid 
      */
-    public MessagingAccountTransport getTransport() throws MessagingException {
-        return registry.getMessagingService(getMessagingServiceId()).getAccountTransport(getAccountID(), session);
+    public MessagingAccountTransport getTransport(int user, int cid) throws MessagingException {
+        return registry.getMessagingService(getMessagingServiceId(), user, cid).getAccountTransport(getAccountID(), session);
     }
 
     /**

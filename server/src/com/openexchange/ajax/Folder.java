@@ -688,7 +688,7 @@ public class Folder extends SessionServlet {
                                 final MessagingServiceRegistry msr =
                                     ServerServiceRegistry.getInstance().getService(MessagingServiceRegistry.class);
                                 if (null != msr) {
-                                    final List<MessagingService> allServices = msr.getAllServices();
+                                    final List<MessagingService> allServices = msr.getAllServices(session.getUserId(), session.getContextId());
                                     for (final MessagingService messagingService : allServices) {
                                         if (!messagingService.getId().equals(MailMessagingService.ID)) {
                                             /*
@@ -1020,7 +1020,7 @@ public class Folder extends SessionServlet {
                      * A messaging folder identifier
                      */
                     final String serviceId = mfi.getServiceId();
-                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId, session.getUserId(), session.getContextId());
                     final int accountId = mfi.getAccountId();
                     final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
                     accountAccess.connect();
@@ -1249,7 +1249,7 @@ public class Folder extends SessionServlet {
                      * A messaging folder identifier
                      */
                     final String serviceId = mfi.getServiceId();
-                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId, session.getUserId(), session.getContextId());
                     final int accountId = mfi.getAccountId();
                     final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
                     accountAccess.connect();
@@ -1562,7 +1562,7 @@ public class Folder extends SessionServlet {
                 {
                     final MessagingServiceRegistry msr = ServerServiceRegistry.getInstance().getService(MessagingServiceRegistry.class);
                     if (null != msr) {
-                        final List<MessagingService> allServices = msr.getAllServices();
+                        final List<MessagingService> allServices = msr.getAllServices(session.getUserId(), session.getContextId());
                         for (final MessagingService messagingService : allServices) {
                             if (!messagingService.getId().equals(MailMessagingService.ID)) {
                                 /*
@@ -1790,7 +1790,7 @@ public class Folder extends SessionServlet {
                      * A messaging folder identifier
                      */
                     final String serviceId = mfi.getServiceId();
-                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId, session.getUserId(), session.getContextId());
                     final int accountId = mfi.getAccountId();
                     final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
                     accountAccess.connect();
@@ -1929,7 +1929,7 @@ public class Folder extends SessionServlet {
                     }
                     if (!done) {
                         final String serviceId = mfi.getServiceId();
-                        final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                        final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId, session.getUserId(), session.getContextId());
                         final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
                         accountAccess.connect();
                         try {
@@ -2045,7 +2045,7 @@ public class Folder extends SessionServlet {
                      * A messaging folder identifier
                      */
                     final String serviceId = mfi.getServiceId();
-                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId,session.getUserId(), session.getContextId());
                     final int accountId = mfi.getAccountId();
                     final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
                     accountAccess.connect();
@@ -2168,7 +2168,7 @@ public class Folder extends SessionServlet {
                                 jsonWriter.value(deleteIdentifier);
                             }
                         } else {
-                            final MessagingService messagingService = messagingServiceRegistry().getMessagingService(mfi.getServiceId());
+                            final MessagingService messagingService = messagingServiceRegistry().getMessagingService(mfi.getServiceId(), session.getUserId(), session.getContextId());
                             final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(mfi.getAccountId(), session);
                             accountAccess.connect();
                             try {
@@ -2297,7 +2297,7 @@ public class Folder extends SessionServlet {
                                 jsonWriter.value(deleteIdentifier);
                             }
                         } else {
-                            final MessagingService messagingService = messagingServiceRegistry().getMessagingService(mfi.getServiceId());
+                            final MessagingService messagingService = messagingServiceRegistry().getMessagingService(mfi.getServiceId(), session.getUserId(), session.getContextId());
                             final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(mfi.getAccountId(), session);
                             accountAccess.connect();
                             try {

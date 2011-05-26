@@ -97,12 +97,12 @@ public class PerformAction extends AbstractMessagingAction {
         
         if(input == null) {
             if(req.isset("folder", "id")) {
-                output = req.getMessageAccess().perform(req.getFolderId(), req.getId(), req.getMessageAction());
+                output = req.getMessageAccess(session.getUserId(), session.getContextId()).perform(req.getFolderId(), req.getId(), req.getMessageAction());
             } else {
-                output = req.getMessageAccess().perform(req.getMessageAction());
+                output = req.getMessageAccess(session.getUserId(), session.getContextId()).perform(req.getMessageAction());
             }
         } else {
-            output = req.getMessageAccess().perform(input, req.getMessageAction());
+            output = req.getMessageAccess(session.getUserId(), session.getContextId()).perform(input, req.getMessageAction());
         }
         
         if(output == null) {

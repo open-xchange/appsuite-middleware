@@ -80,7 +80,7 @@ public class GetAction extends AbstractMessagingServiceAction {
         if (id == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        final MessagingService service = registry.getMessagingService(id);
+        final MessagingService service = registry.getMessagingService(id, session.getUserId(), session.getContextId());
         if (null == service) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
         }

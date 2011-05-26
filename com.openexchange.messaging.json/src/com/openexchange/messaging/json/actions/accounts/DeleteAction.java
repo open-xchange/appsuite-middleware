@@ -94,7 +94,7 @@ public class DeleteAction extends AbstractMessagingAccountAction {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("id", idS);
         }
         
-        final MessagingService messagingService = registry.getMessagingService(messagingServiceId);
+        final MessagingService messagingService = registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId());
         
         final DefaultMessagingAccount messagingAccount = new DefaultMessagingAccount();
         messagingAccount.setMessagingService(messagingService);

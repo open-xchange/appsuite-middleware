@@ -119,7 +119,7 @@ public class ListAction extends AbstractMessagingAction {
             return new AJAXRequestResult(new JSONArray());
         }
         
-        final MessagingMessageAccess messageAccess = req.getMessageAccess(folder.getMessagingService(), folder.getAccount());
+        final MessagingMessageAccess messageAccess = req.getMessageAccess(folder.getMessagingService(), folder.getAccount(), session.getUserId(), session.getContextId());
         final List<MessagingMessage> messages = messageAccess.getMessages(folder.getFolder(), ids.toArray(new String[ids.size()]), fields);
         
         for (final MessagingMessage messagingMessage : messages) {

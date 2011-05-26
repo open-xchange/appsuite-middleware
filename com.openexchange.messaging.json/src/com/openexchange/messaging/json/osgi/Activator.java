@@ -63,6 +63,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.json.Enabled;
@@ -87,7 +88,7 @@ public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class };
+    private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class };
 
     private final List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
 
@@ -185,7 +186,7 @@ public class Activator extends DeferredActivator {
             registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
             registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
             registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
-            registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(), null));
+            registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(getService(ConfigViewFactory.class)), null));
             registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

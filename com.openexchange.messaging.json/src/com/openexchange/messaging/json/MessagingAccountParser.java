@@ -74,14 +74,14 @@ public class MessagingAccountParser {
         registry = serviceRegistry;
     }
 
-    public MessagingAccount parse(final JSONObject accountJSON) throws MessagingException, JSONException {
+    public MessagingAccount parse(final JSONObject accountJSON, int userId, int contextId) throws MessagingException, JSONException {
         final DefaultMessagingAccount account = new DefaultMessagingAccount();
         
         account.setId(accountJSON.optInt(ID));
         if(accountJSON.has("displayName")) {
             account.setDisplayName(accountJSON.optString("displayName"));
         }
-        final MessagingService messagingService = registry.getMessagingService(accountJSON.getString(MESSAGING_SERVICE));
+        final MessagingService messagingService = registry.getMessagingService(accountJSON.getString(MESSAGING_SERVICE), userId, contextId);
         account.setMessagingService(messagingService);
         if(accountJSON.has("configuration")) {
             account.setConfiguration( new FormContentParser().parse(

@@ -80,7 +80,7 @@ public class UpdateAction extends AbstractMessagingAccountAction {
         if(!data.has("id")) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        final MessagingAccount account = parser.parse(data);
+        final MessagingAccount account = parser.parse(data, session.getUserId(), session.getContextId());
         account.getMessagingService().getAccountManager().updateAccount(account, session);
         return new AJAXRequestResult(1);
     }

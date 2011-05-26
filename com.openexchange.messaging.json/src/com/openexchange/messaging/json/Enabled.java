@@ -49,12 +49,17 @@
 
 package com.openexchange.messaging.json;
 
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -65,8 +70,12 @@ import com.openexchange.session.Session;
  */
 public class Enabled implements PreferencesItemService {
 
-    public Enabled() {
-        super();
+static final String ENABLED = "com.openexchange.messaging.enabled";
+    
+    ConfigViewFactory configViews;
+
+    public Enabled(ConfigViewFactory configViews) {
+        this.configViews = configViews;
     }
 
     public String[] getPath() {
@@ -75,13 +84,31 @@ public class Enabled implements PreferencesItemService {
 
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
-                setting.setSingleValue(Boolean.valueOf(true));
+
+            /**
+             * {@inheritDoc}
+             */
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                try {
+                    ConfigView view = configViews.getView(user.getId(), ctx.getContextId());
+                    ComposedConfigProperty<Boolean> property = view.property(ENABLED, boolean.class);
+                    if (property.isDefined()) {
+                        setting.setSingleValue(property.get());
+                    } else {
+                        setting.setSingleValue(true);
+                    }
+                } catch (ConfigCascadeException e) {
+                    throw new SettingException(e);
+                }
             }
 
+            /**
+             * {@inheritDoc}
+             */
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
         };
+
     }
 }

@@ -92,7 +92,7 @@ public class GetAction extends AbstractMessagingAction {
     @Override
     protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException {
         
-        final MessagingMessageAccess messageAccess = req.getMessageAccess();
+        final MessagingMessageAccess messageAccess = req.getMessageAccess(session.getUserId(), session.getContextId());
         final MessagingMessage message = messageAccess.getMessage(req.getFolderId(), req.getId(), req.getPeek());
         
         return new AJAXRequestResult(writer.write(message, req.getAccountAddress(), session, DISPLAY_MODE));
