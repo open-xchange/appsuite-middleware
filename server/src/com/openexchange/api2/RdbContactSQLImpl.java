@@ -321,7 +321,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final SuperCollator collation = SuperCollator.get(collation2);
         final StringBuilder order = new StringBuilder();
         if (order_field > 0 && order_field != Contact.USE_COUNT_GLOBAL_FIRST) {
-        	order.append( generateOrder(order_field, orderMechanism, collation) );
+            String orderSQL = generateOrder(order_field, orderMechanism, collation);
+            if (null != orderSQL) {
+                order.append(orderSQL);
+            }
         } else {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
                 Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2 });
@@ -391,8 +394,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if(whereFolder != null && !conv.hasFolders()){ //if the filter does not check for folders...
         	query.append(" AND ").append(whereFolder).append(" "); //...search all folders you have access rights to
         }
-        if(sqlOrder != null)
+        if (null != sqlOrder) {
         	query.append(sqlOrder).append(" ");
+        }
 
         String queryStr = query.toString();
         
