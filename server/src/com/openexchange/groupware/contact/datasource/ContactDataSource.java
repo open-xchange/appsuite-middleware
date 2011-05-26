@@ -109,11 +109,12 @@ public final class ContactDataSource implements DataSource {
          */
         final int[] folderIds;
         final int[] objectIds;
+        final int len;
         {
             final JSONArray pairsArray;
             try {
                 pairsArray = new JSONArray(dataArguments.get(ARGS[0]));
-                final int len = pairsArray.length();
+                len = pairsArray.length();
                 if (len == 0) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[0]);
                 }
@@ -131,10 +132,10 @@ public final class ContactDataSource implements DataSource {
         /*
          * Get contact
          */
-        final Contact[] contacts = new Contact[folderIds.length];
+        final Contact[] contacts = new Contact[len];
         try {
-            final Map<Integer, ContactInterface> tmp = new HashMap<Integer, ContactInterface>(contacts.length);
-            for (int i = 0; i < contacts.length; i++) {
+            final Map<Integer, ContactInterface> tmp = new HashMap<Integer, ContactInterface>(len);
+            for (int i = 0; i < len; i++) {
                 final int folderId = folderIds[i];
                 final Integer key = Integer.valueOf(folderId);
                 ContactInterface contactInterface = tmp.get(key);
@@ -152,7 +153,7 @@ public final class ContactDataSource implements DataSource {
         /*
          * Create necessary objects
          */
-        final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream(folderIds.length << 12);
+        final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream(len << 12);
         final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
         for (final Contact contact : contacts) {
             writeVCard2Stream(contact, byteArrayOutputStream, contactDef, session);
