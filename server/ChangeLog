@@ -1,3 +1,7 @@
+* 2011-05-26 - francisco.laguna@open-xchange.com
+
+  - Bugfix 19140: Improved error message
+
 * 2011-05-25 - steffen.templin@open-xchange.com
 
  - Bugfix #18983: Changed the 7zip module of the outlook updater bundle and the installer name of the OXUpdater to support installing without administrator privileges
