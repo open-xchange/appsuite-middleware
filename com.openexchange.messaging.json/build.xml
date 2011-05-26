@@ -62,6 +62,7 @@
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${messaginggenericjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${cascadejar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${codecjar}"/>
