@@ -52,6 +52,8 @@ package com.openexchange.subscribe.msn;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.FolderObject;
@@ -73,6 +75,8 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
     private Activator activator;
     
     private final SubscriptionSource source = new SubscriptionSource();
+    
+    private static final Log LOG = LogFactory.getLog(MSNSubscribeService.class);
     
     public MSNSubscribeService(Activator activator){
         this.activator = activator;
@@ -104,11 +108,20 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
-        super.modifyIncoming(subscription);
-        Integer accountId = (Integer) subscription.getConfiguration().get("account");
-        if(accountId != null) {
-            subscription.getConfiguration().put("account", accountId.toString());
+    public void modifyIncoming(Subscription subscription) throws SubscriptionException {                
+        if(subscription != null) {
+            super.modifyIncoming(subscription);
+            if (subscription.getConfiguration() != null){
+                if (subscription.getConfiguration().get("account") != null){
+                    subscription.getConfiguration().put("account", subscription.getConfiguration().get("account"));
+                }else {
+                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : "+subscription.getConfiguration());                    
+                }                
+            } else {
+                LOG.error("subscription.getConfiguration() is null");            
+            }
+        } else {
+            LOG.error("subscription is null");
         }
     }
     
