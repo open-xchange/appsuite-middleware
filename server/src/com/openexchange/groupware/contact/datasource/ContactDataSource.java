@@ -51,11 +51,10 @@ package com.openexchange.groupware.contact.datasource;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_FOLDERID;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
+import gnu.trove.TIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +69,7 @@ import com.openexchange.conversion.SimpleData;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -134,20 +134,22 @@ public final class ContactDataSource implements DataSource {
          */
         final Contact[] contacts = new Contact[len];
         try {
-            final Map<Integer, ContactInterface> tmp = new HashMap<Integer, ContactInterface>(len);
+            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
+                ContactInterfaceDiscoveryService.class,
+                true);
+            final TIntObjectHashMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
             for (int i = 0; i < len; i++) {
                 final int folderId = folderIds[i];
-                final Integer key = Integer.valueOf(folderId);
-                ContactInterface contactInterface = tmp.get(key);
+                ContactInterface contactInterface = tmp.get(folderId);
                 if (null == contactInterface) {
-                    contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-                        folderId,
-                        session);
-                    tmp.put(key, contactInterface);
+                    contactInterface = discoveryService.newContactInterface(folderId, session);
+                    tmp.put(folderId, contactInterface);
                 }
                 contacts[i] = contactInterface.getObjectById(objectIds[i], folderId);
             }
         } catch (final OXException e) {
+            throw new DataException(e);
+        } catch (final ServiceException e) {
             throw new DataException(e);
         }
         /*
