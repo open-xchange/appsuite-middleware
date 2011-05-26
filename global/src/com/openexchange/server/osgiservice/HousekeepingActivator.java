@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -96,6 +97,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
        serviceTrackers.add(tracker);
     }
     
+    protected void forgetTracker(ServiceTracker tracker) {
+        serviceTrackers.remove(tracker);
+    }
+    
     protected ServiceTracker track(Class<?> klass, ServiceTrackerCustomizer customizer) {
         ServiceTracker tracker = new ServiceTracker(context, klass.getName(), customizer);
         rememberTracker(tracker);
@@ -109,11 +114,55 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
     
     protected ServiceTracker track(Class<?> klass) {
-        return track(klass, null);
+        return track(klass, (ServiceTrackerCustomizer) null);
     }
     
     protected ServiceTracker track(Filter filter) {
-        return track(filter, null);
+        return track(filter, (ServiceTrackerCustomizer) null);
+    }
+    
+    protected <T> ServiceTracker track(Class<?> klass, final SimpleRegistryListener<T> listener) {
+        return track(klass, new ServiceTrackerCustomizer() {
+
+            public Object addingService(ServiceReference arg0) {
+                Object service = context.getService(arg0);
+                listener.added(arg0, (T) service);
+                return service;
+            }
+
+            public void modifiedService(ServiceReference arg0, Object arg1) {
+               // Don't care
+                
+            }
+
+            public void removedService(ServiceReference arg0, Object arg1) {
+                listener.removed(arg0, (T) arg1);
+                context.ungetService(arg0);
+            }
+            
+        });
+    }
+    
+    protected <T> ServiceTracker track(Filter filter, final SimpleRegistryListener<T> listener) {
+        return track(filter, new ServiceTrackerCustomizer() {
+
+            public Object addingService(ServiceReference arg0) {
+                Object service = context.getService(arg0);
+                listener.added(arg0, (T) service);
+                return service;
+            }
+
+            public void modifiedService(ServiceReference arg0, Object arg1) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            public void removedService(ServiceReference arg0, Object arg1) {
+                listener.removed(arg0, (T) arg1);
+                context.ungetService(arg0);
+            }
+            
+        });
     }
     
     protected void openTrackers() {

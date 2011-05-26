@@ -1,6 +1,7 @@
 * 2011-05-26 - francisco.laguna@open-xchange.com
 
   - Bugfix 19140: Improved error message, improved reauthorization
+  - Bugfix 19220: Make messaging configurable.
 
 * 2011-05-25 - steffen.templin@open-xchange.com
 
