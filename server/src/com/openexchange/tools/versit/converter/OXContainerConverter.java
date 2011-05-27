@@ -722,8 +722,7 @@ public class OXContainerConverter {
                 boolean isProperEmailAddress = value != null && value.length() > 0;
                 if (isProperEmailAddress) {
                     try {
-                        final InternetAddress ia = new InternetAddress(value);
-                        ia.validate();
+                        new InternetAddress(value).validate();
                     } catch (final AddressException e) {
                         isProperEmailAddress = false;
                     }
