@@ -60,6 +60,11 @@ import com.openexchange.tools.versit.valuedefinitions.rfc2426.VCardValueDefiniti
 import com.openexchange.tools.versit.valuedefinitions.rfc2445.BinaryValueDefinition;
 import com.openexchange.tools.versit.valuedefinitions.rfc2445.TextValueDefinition;
 
+/**
+ * {@link VCard} - <a href="http://tools.ietf.org/html/rfc2426">vCard MIME Directory Profile</a>
+ *
+ * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
+ */
 public class VCard {
 
     // Empty arrays
