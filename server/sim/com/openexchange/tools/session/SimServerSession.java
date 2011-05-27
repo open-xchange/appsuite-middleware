@@ -67,6 +67,7 @@ public class SimServerSession implements ServerSession {
     private Context context;
     private User user;
     private UserConfiguration userConfig;
+    private String login;
 
     public SimServerSession(Context context, User user, UserConfiguration userConfig) {
         super();
@@ -109,7 +110,7 @@ public class SimServerSession implements ServerSession {
     }
 
     public String getLogin() {
-        return null;
+        return login;
     }
 
     public String getLoginName() {
@@ -180,6 +181,10 @@ public class SimServerSession implements ServerSession {
 
     public void setUserConfig(UserConfiguration userConfig) {
         this.userConfig = userConfig;
+    }
+    
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public String getClient() {
