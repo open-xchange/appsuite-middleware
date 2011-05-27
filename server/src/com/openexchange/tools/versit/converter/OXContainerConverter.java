@@ -122,6 +122,8 @@ import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
  */
 public class OXContainerConverter {
 
+    private static final String P_OPEN_XCHANGE_CTYPE = "X-OPEN-XCHANGE-CTYPE";
+
     private static final String P_ORGANIZER = "ORGANIZER";
 
     private static final String P_TLX = "TLX";
@@ -159,6 +161,10 @@ public class OXContainerConverter {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXContainerConverter.class);
 
     private static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
+
+    private static final String CTYPE_CONTACT = "contact";
+
+    private static final String CTYPE_DISTRIBUTION_LIST = "dlist";
 
     private static final String atdomain;
 
@@ -1409,6 +1415,7 @@ public class OXContainerConverter {
         // Distribution list?
         final DistributionListEntryObject[] distributionList = contact.getDistributionList();
         if (null == distributionList || 0 == distributionList.length) {
+            addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_CONTACT);
             // PHOTO
             if (contact.getImage1() != null) {
                 final byte[] imageData = contact.getImage1();
@@ -1523,6 +1530,7 @@ public class OXContainerConverter {
                 addProperty(object, "ORG", list);
             }
         } else {
+            addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_DISTRIBUTION_LIST);
             for (final DistributionListEntryObject distributionListEntry : distributionList) {
                 final String address = distributionListEntry.getEmailaddress();
                 if (address != null) {
