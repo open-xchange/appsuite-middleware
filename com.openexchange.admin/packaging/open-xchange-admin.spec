@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 10
+%define		ox_release 11
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -404,6 +404,12 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue May 24 2011 - marcus.klein@open-xchange.com
+ - Bugfix #17858: Writing now a stack trace if a runtime exception occurs.
+* Fri May 20 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19184: Improved Spanish name for the Spam folder.
+* Wed May 11 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #19047: Chinese names for default mail folders have been added to User.properties
 * Fri Apr 08 2011 - choeger@open-xchange.com
  - Bugfix #18880: createadmin of reseller package does not work when no masterpw set
 * Thu Mar 31 2011 - marcus.klein@open-xchange.com
