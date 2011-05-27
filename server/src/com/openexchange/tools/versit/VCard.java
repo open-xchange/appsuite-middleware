@@ -129,7 +129,7 @@ public class VCard {
     private static final String[] PropertyNames3 = {
         "NAME", "PROFILE", "SOURCE", "FN", "N", "NICKNAME", "PHOTO", "BDAY", "ADR", "LABEL", "TEL", "EMAIL", "MAILER", "TZ", "GEO",
         "TITLE", "ROLE", "LOGO", "AGENT", "ORG", "CATEGORIES", "NOTE", "PRODID", "REV", "SORT-STRING", "SOUND", "UID", "URL", "VERSION",
-        "CLASS", "KEY" };
+        "CLASS", "KEY", "X-OPEN-XCHANGE-CTYPE" };
 
     private static final PropertyDefinition[] Properties3 = {
         DefaultProperty, DefaultProperty, DefaultProperty, DefaultProperty, DoubleListProperty, CommaListProperty, BinaryProperty,
@@ -141,7 +141,7 @@ public class VCard {
         new PropertyDefinition(SemicolonList), CommaListProperty, DefaultProperty, DefaultProperty,
         new PropertyDefinition(DateTimeValueDefinition.Default, DateValueNames, DateValues, NoNames, NoParameters), DefaultProperty,
         BinaryProperty, DefaultProperty, new PropertyDefinition(URIValueDefinition.Default), DefaultProperty, DefaultProperty,
-        new PropertyDefinition(BinaryValue, KeyValueNames, KeyValues, NoNames, NoParameters) };
+        new PropertyDefinition(BinaryValue, KeyValueNames, KeyValues, NoNames, NoParameters), DefaultProperty };
 
     // Arrays of object definitions
 
