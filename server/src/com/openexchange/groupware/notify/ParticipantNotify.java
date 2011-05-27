@@ -587,7 +587,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (oldObj == null || newObj == null) {
             return false;
         }
-        return state.onlyIrrelevantFieldsChanged(session, oldObj, newObj);
+        return state.onlyIrrelevantFieldsChanged(oldObj, newObj);
     }
 
     private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession session, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {

@@ -170,8 +170,7 @@ public interface State {
 
 	/**
 	 * Tries to find out whether anything else but irrelevant fields (for notification purposes) have changed
-	 * @param session 
 	 * @return true if only the alarm settings or nothing was changed, false otherwise.
 	 */
-    public boolean onlyIrrelevantFieldsChanged(Session session, CalendarObject oldObj, CalendarObject newObj);
+    public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj);
 }

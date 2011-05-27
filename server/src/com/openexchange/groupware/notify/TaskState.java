@@ -160,7 +160,7 @@ public class TaskState extends LinkableState {
 	    Task.LAST_MODIFIED
 	));
 	
-    public boolean onlyIrrelevantFieldsChanged(Session session, CalendarObject oldObj, CalendarObject newObj) {
+    public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
         Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);
         return differingFields.isEmpty();
