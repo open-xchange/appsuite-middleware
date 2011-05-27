@@ -81,6 +81,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -116,6 +117,8 @@ import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
 /**
  * This class transforms VersitObjects to OX Contacts, Appointments and Tasks and back. If you want to translate more fields used in ICAL or
  * VCard, you're at the right place - but don't forget to do it in both directions.
+ * <p>
+ * <a href="http://tools.ietf.org/html/rfc2426">vCard MIME Directory Profile</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixing and refactoring)
@@ -627,6 +630,14 @@ public class OXContainerConverter {
 
         final ArrayList<Object> cats = new ArrayList<Object>();
 
+        boolean dlist = false;
+        {
+            final Property oxCtype = object.getProperty(P_OPEN_XCHANGE_CTYPE);
+            if (oxCtype != null && CTYPE_DISTRIBUTION_LIST.equalsIgnoreCase(oxCtype.getValue().toString())) {
+                dlist = true;
+            }
+        }
+
         final int count = object.getPropertyCount();
         for (int i = 0; i < count; i++) {
             property = object.getProperty(i);
@@ -729,12 +740,37 @@ public class OXContainerConverter {
                 }
                 // fix: end
                 if (isProperEmailAddress) {
-                    ComplexProperty(contactContainer, emails, emailIndex, value);
+                    if (dlist) {
+                        try {
+                            DistributionListEntryObject[] distributionList = contactContainer.getDistributionList();
+                            if (null == distributionList) {
+                                distributionList = new DistributionListEntryObject[1];
+                            } else {
+                                final DistributionListEntryObject[] newDistributionList = new DistributionListEntryObject[distributionList.length + 1];
+                                System.arraycopy(distributionList, 0, newDistributionList, 0, distributionList.length);
+                                distributionList = newDistributionList;
+                            }
+                            /*
+                             * Append new entry
+                             */
+                            final DistributionListEntryObject newEntry = new DistributionListEntryObject();
+                            newEntry.setEmailaddress(value);
+                            distributionList[distributionList.length - 1] = newEntry;
+                            contactContainer.setDistributionList(distributionList);
+                        } catch (final ContactException e) {
+                            throw new ConverterException(e);
+                        }
+                    } else {
+                        ComplexProperty(contactContainer, emails, emailIndex, value);
+                    }
                 } else {
                     // fix for: 7719
                     final Parameter type = property.getParameter(P_TYPE);
-                    if (type != null && type.getValue(0) != null && type.getValue(0).getText() != null && P_TLX.equals(type.getValue(0).getText())) {
-                        contactContainer.setTelephoneTelex(property.getValue().toString());
+                    if (type != null) {
+                        final ParameterValue parameterValue = type.getValue(0);
+                        if (parameterValue != null && parameterValue.getText() != null && P_TLX.equals(parameterValue.getText())) {
+                            contactContainer.setTelephoneTelex(property.getValue().toString());
+                        }
                     }
                 }
             }
@@ -1535,7 +1571,12 @@ public class OXContainerConverter {
                 if (address != null) {
                     final Property property = new Property(P_EMAIL);
                     property.setValue(address);
-                    property.addParameter(new Parameter("INTERNET"));
+                    /*
+                     * Add TYPE parameter
+                     */
+                    final Parameter parameter = new Parameter(P_TYPE);
+                    parameter.addValue(new ParameterValue("INTERNET"));
+                    property.addParameter(parameter);
                     object.addProperty(property);
                 }
             }
