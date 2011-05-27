@@ -1542,7 +1542,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (cdao.containsUid()) {
             final int resolvedUid = resolveUid(so, cdao.getUid());
             if (resolvedUid > 0) {
-                throw new OXCalendarException(OXCalendarException.Code.UID_ALREDY_EXISTS, cdao.getUid());
+                throw new OXCalendarException(OXCalendarException.Code.UID_ALREDY_EXISTS, cdao.getTitle(), cdao.getUid());
             }
         } else {
             cdao.setUid(UUID.randomUUID().toString());
