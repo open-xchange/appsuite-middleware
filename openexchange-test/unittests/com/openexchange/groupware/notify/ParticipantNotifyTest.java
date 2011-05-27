@@ -573,7 +573,7 @@ public class ParticipantNotifyTest extends TestCase {
             // TODO Auto-generated method stub
             return null;
         }
-        public boolean onlyIrrelevantFieldsChanged(Session session, CalendarObject oldObj, CalendarObject newObj) {
+        public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
             // TODO Auto-generated method stub
             return false;
         }
