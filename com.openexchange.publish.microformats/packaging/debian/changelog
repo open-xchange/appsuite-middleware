@@ -1,3 +1,9 @@
+open-xchange-publish-microformats (6.20.0.0-11) unstable; urgency=low
+
+  * Public PTF 2011-05-31
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Fri, 27 May 2011 16:25:51 +0000
+
 open-xchange-publish-microformats (6.20.0.0-10) unstable; urgency=low
 
   * build for public ptf 2011-05-18
