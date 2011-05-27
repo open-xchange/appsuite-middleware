@@ -308,10 +308,19 @@ final class ListLsubCollection {
 
             });
             if (doStatus) {
+                final ConcurrentMap<String, ListLsubEntryImpl> primary;
+                final ConcurrentMap<String, ListLsubEntryImpl> lookup;
+                if (listMap.size() > lsubMap.size()) {
+                    primary = lsubMap;
+                    lookup = listMap;
+                } else {
+                    primary = listMap;
+                    lookup = lsubMap;
+                }
                 /*
                  * Gather STATUS for each entry
                  */
-                for (final Iterator<ListLsubEntryImpl> iter = listMap.values().iterator(); iter.hasNext();) {
+                for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
                     final ListLsubEntryImpl listEntry = iter.next();
                     if (listEntry.canOpen()) {
                         try {
@@ -319,7 +328,7 @@ final class ListLsubCollection {
                             final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
                             if (null != status) {
                                 listEntry.setStatus(status);
-                                final ListLsubEntryImpl lsubEntry = lsubMap.get(fullName);
+                                final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
                                 if (null != lsubEntry) {
                                     lsubEntry.setStatus(status);
                                 }
@@ -334,17 +343,26 @@ final class ListLsubCollection {
                 }
             }
             if (doGetAcl && ((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
+                final ConcurrentMap<String, ListLsubEntryImpl> primary;
+                final ConcurrentMap<String, ListLsubEntryImpl> lookup;
+                if (listMap.size() > lsubMap.size()) {
+                    primary = lsubMap;
+                    lookup = listMap;
+                } else {
+                    primary = listMap;
+                    lookup = lsubMap;
+                }
                 /*
                  * Perform GETACL command for each entry
                  */
-                for (final Iterator<ListLsubEntryImpl> iter = listMap.values().iterator(); iter.hasNext();) {
+                for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
                     final ListLsubEntryImpl listEntry = iter.next();
                     if (listEntry.canOpen()) {
                         try {
                             final String fullName = listEntry.getFullName();
                             final List<ACL> aclList = IMAPCommandsCollection.getAcl(fullName, imapFolder, false);
                             listEntry.setAcls(aclList);
-                            final ListLsubEntryImpl lsubEntry = lsubMap.get(fullName);
+                            final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
                             if (null != lsubEntry) {
                                 lsubEntry.setAcls(aclList);
                             }
@@ -1610,7 +1628,7 @@ final class ListLsubCollection {
         }
 
         public void rememberACLs(final List<ACL> aclList) {
-            this.acls = new ArrayList<ACL>(acls);
+            this.acls = new ArrayList<ACL>(aclList);
         }
 
         public void rememberCounts(final int total, final int recent, final int unseen) {
