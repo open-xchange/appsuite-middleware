@@ -141,6 +141,25 @@ public final class ListLsubCache {
     }
 
     /**
+     * Adds single entry to cache. Replaces any existing entry.
+     * 
+     * @param fullName The entry's full name
+     * @param accountId The account ID
+     * @param imapFolder The IMAP folder providing connected protocol
+     * @param session The session
+     * @throws MailException If entry could not be added
+     */
+    public static void addSingle(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection)) {
+                return;
+            }
+            collection.addSingle(fullName, imapFolder, DO_STATUS, DO_GETACL);
+        }
+    }
+
+    /**
      * Gets the separator character.
      * 
      * @param accountId The account ID

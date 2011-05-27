@@ -171,6 +171,20 @@ final class ListLsubCollection {
         return false;
     }
 
+    boolean equalsNamespace(final String fullName) {
+        for (final String sharedNamespace : shared) {
+            if (fullName.equals(sharedNamespace)) {
+                return true;
+            }
+        }
+        for (final String userNamespace : user) {
+            if (fullName.equals(userNamespace)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Checks if associated mailbox is considered as MBox format.
      * 
@@ -531,7 +545,6 @@ final class ListLsubCollection {
         if (response.isOK()) {
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
-            char separator = '\0';
             final Set<String> unsubscribeFullNames = lsub ? new HashSet<String>(4) : Collections.<String> emptySet();
             final Set<String> removeFullNames = new HashSet<String>(map.keySet());
             removeFullNames.remove(ROOT_FULL_NAME);
@@ -540,6 +553,7 @@ final class ListLsubCollection {
              * Get sorted responses
              */
             final List<ListLsubEntryImpl> listResponses = sortedListResponses(r, command, lsub);
+            char separator = '\0';
             for (final ListLsubEntryImpl next : listResponses) {
                 ListLsubEntryImpl listLsubEntry = next;
                 if (listLsubEntry.hasInferiors() && listLsubEntry.canOpen()) {
@@ -666,6 +680,10 @@ final class ListLsubCollection {
                 }
             }
             /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            /*
              * Debug logs
              */
             if (DEBUG) {
@@ -678,12 +696,13 @@ final class ListLsubCollection {
                 }
                 LOG.debug(sb.toString());
             }
+        } else {
+            /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            protocol.handleResult(response);
         }
-        /*
-         * Dispatch remaining untagged responses
-         */
-        protocol.notifyResponseHandlers(r);
-        protocol.handleResult(response);
     }
 
     /**
@@ -710,12 +729,12 @@ final class ListLsubCollection {
         if (response.isOK()) {
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
-            char separator = '\0';
             final ListLsubEntryImpl rootEntry = map.get(ROOT_FULL_NAME);
             /*
              * Get sorted responses
              */
             final List<ListLsubEntryImpl> listResponses = sortedListResponses(r, command, lsub);
+            char separator = '\0';
             for (final ListLsubEntryImpl next : listResponses) {
                 ListLsubEntryImpl listLsubEntry = next;
                 final String fn = listLsubEntry.getFullName();
@@ -772,6 +791,10 @@ final class ListLsubCollection {
                 handleParentMap(parentMap, separator, rootEntry, lsub, map, fullNames, true);
             }
             /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            /*
              * Debug logs
              */
             if (DEBUG) {
@@ -784,12 +807,13 @@ final class ListLsubCollection {
                 }
                 LOG.debug(sb.toString());
             }
+        } else {
+            /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            protocol.handleResult(response);
         }
-        /*
-         * Dispatch remaining untagged responses
-         */
-        protocol.notifyResponseHandlers(r);
-        protocol.handleResult(response);
     }
 
     private List<ListLsubEntryImpl> sortedListResponses(final Response[] r, final String command, final boolean lsub) {
@@ -918,12 +942,208 @@ final class ListLsubCollection {
                     r[i] = null;
                 }
             }
+            /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+        } else {
+            /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            protocol.handleResult(response);
+        }
+    }
+
+    /**
+     * Adds single entry to collection.
+     * 
+     * @param fullName The full name
+     * @param imapStore The IMAP store
+     * @param doStatus Whether to perform STATUS command
+     * @param doGetAcl Whether to perform GETACL command
+     * @throws MailException If operation fails
+     */
+    public void addSingle(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
+        try {
+            addSingle(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Adds single entry to collection.
+     * 
+     * @param fullName The full name
+     * @param imapFolder The IMAP folder
+     * @param doStatus Whether to perform STATUS command
+     * @param doGetAcl Whether to perform GETACL command
+     * @throws MailException If operation fails
+     */
+    public void addSingle(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+        try {
+            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    doSingleListCommand(fullName, protocol, false);
+                    return null;
+                }
+
+            });
+
+            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    doSingleListCommand(fullName, protocol, true);
+                    return null;
+                }
+
+            });
+
+            doOther(fullName, imapFolder, doStatus, doGetAcl);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Performs a LIST/LSUB command for a single folder with specified IMAP protocol.
+     * 
+     * @param fullName The full name
+     * @param protocol The IMAP protocol
+     * @throws ProtocolException If a protocol error occurs
+     */
+    ListLsubEntryImpl doSingleListCommand(final String fullName, final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
+        /*
+         * Perform command: LIST "" "INBOX"
+         */
+        final String command = lsub ? "LSUB" : "LIST";
+        final Response[] r = protocol.command(
+            new StringBuilder(command).append(" \"\" \"").append(BASE64MailboxEncoder.encode(fullName)).append("\"").toString(),
+            null);
+        final Response response = r[r.length - 1];
+        if (response.isOK()) {
+            ListLsubEntryImpl retval = null;
+            final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
+            for (int i = 0, len = r.length; i < len; i++) {
+                if (!(r[i] instanceof IMAPResponse)) {
+                    continue;
+                }
+                final IMAPResponse ir = (IMAPResponse) r[i];
+                if (ir.keyEquals(command)) {
+                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
+                    retval = listLsubEntry;
+                    {
+                        final ListLsubEntryImpl oldEntry = map.get(fullName);
+                        final ListLsubEntryImpl parent;
+                        if (null != oldEntry) {
+                            for (final ListLsubEntryImpl child : oldEntry.getChildrenSet()) {
+                                child.setParent(listLsubEntry);
+                                listLsubEntry.addChild(child);
+                            }
+                            parent = (ListLsubEntryImpl) oldEntry.getParent();
+                        } else {
+                            final int pos = fullName.lastIndexOf(listLsubEntry.getSeparator());
+                            if (pos > 0) {
+                                final String parentFullName = fullName.substring(0, pos);
+                                final ListLsubEntryImpl tmp = map.get(parentFullName);
+                                parent = null == tmp ? doSingleListCommand(parentFullName, protocol, lsub) : tmp;
+                            } else {
+                                parent = map.get(ROOT_FULL_NAME);
+                            } 
+                        }
+                        if (null != parent) {
+                            listLsubEntry.setParent(parent);
+                            parent.addChild(listLsubEntry);
+                        }
+                    }
+                    map.put(fullName, listLsubEntry);
+                    r[i] = null;
+                }
+            }
+            /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            /*
+             * Debug logs
+             */
+            if (DEBUG) {
+                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>();
+                tm.putAll(map);
+                final StringBuilder sb = new StringBuilder(1024);
+                sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
+                sb.append(fullName).append("\":\n");
+                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                }
+                LOG.debug(sb.toString());
+            }
+            return retval;
         }
         /*
          * Dispatch remaining untagged responses
          */
         protocol.notifyResponseHandlers(r);
         protocol.handleResult(response);
+        /*
+         * Never reached...
+         */
+        return null;
+    }
+
+    private void doOther(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+        try {
+            final ListLsubEntryImpl listEntry = listMap.get(fullName);
+            if (null == listEntry) {
+                return;
+            }
+            if (doStatus) {
+                /*
+                 * Do STATUS
+                 */
+                if (listEntry.canOpen()) {
+                    try {
+                        final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
+                        if (null != status) {
+                            listEntry.setStatus(status);
+                            final ListLsubEntryImpl lsubEntry = lsubMap.get(fullName);
+                            if (null != lsubEntry) {
+                                lsubEntry.setStatus(status);
+                            }
+                        }
+                    } catch (final Exception e) {
+                        // Swallow failed STATUS command
+                        org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
+                            "STATUS command failed for " + imapFolder.getStore().toString(),
+                            e);
+                    }
+                }
+            }
+            if (doGetAcl && ((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
+                /*
+                 * Do GETACL
+                 */
+                if (listEntry.canOpen()) {
+                    try {
+                        final List<ACL> aclList = IMAPCommandsCollection.getAcl(fullName, imapFolder, false);
+                        listEntry.setAcls(aclList);
+                        final ListLsubEntryImpl lsubEntry = lsubMap.get(fullName);
+                        if (null != lsubEntry) {
+                            lsubEntry.setAcls(aclList);
+                        }
+                    } catch (final Exception e) {
+                        // Swallow failed ACL command
+                        org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
+                            "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
+                            e);
+                    }
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
     }
 
     /**
@@ -1297,7 +1517,7 @@ final class ListLsubCollection {
             return null == children ? Collections.<ListLsubEntry> emptyList() : new ArrayList<ListLsubEntry>(children);
         }
 
-        Set<? extends ListLsubEntry> getChildrenSet() {
+        Set<ListLsubEntryImpl> getChildrenSet() {
             return null == children ? Collections.<ListLsubEntryImpl> emptySet() : children;
         }
 

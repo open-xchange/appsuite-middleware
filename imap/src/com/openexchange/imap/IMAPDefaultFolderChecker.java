@@ -238,7 +238,7 @@ public final class IMAPDefaultFolderChecker {
                             } catch (final MessagingException e) {
                                 IMAPCommandsCollection.createFolder(tmp, sep, IMAPFolder.HOLDS_MESSAGES);
                             }
-                            ListLsubCache.clearCache(accountId, session);
+                            ListLsubCache.addSingle(INBOX, accountId, tmp, session);
                             inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
                             entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
                         }
@@ -249,7 +249,7 @@ public final class IMAPDefaultFolderChecker {
                          * Subscribe INBOX folder
                          */
                         inboxFolder.setSubscribed(true);
-                        ListLsubCache.clearCache(accountId, session);
+                        ListLsubCache.addSingle(INBOX, accountId, inboxFolder, session);
                         inboxListEntry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
                     }
                     /*
@@ -545,7 +545,7 @@ public final class IMAPDefaultFolderChecker {
                         if (!entry.isSubscribed()) {
                             try {
                                 f.setSubscribed(true);
-                                ListLsubCache.clearCache(accountId, session);
+                                ListLsubCache.addSingle(fullname, accountId, f, session);
                             } catch (final MethodNotSupportedException e) {
                                 LOG.error(e.getMessage(), e);
                             } catch (final MessagingException e) {
@@ -556,7 +556,7 @@ public final class IMAPDefaultFolderChecker {
                         if (entry.isSubscribed()) {
                             try {
                                 f.setSubscribed(false);
-                                ListLsubCache.clearCache(accountId, session);
+                                ListLsubCache.addSingle(fullname, accountId, f, session);
                             } catch (final MethodNotSupportedException e) {
                                 LOG.error(e.getMessage(), e);
                             } catch (final MessagingException e) {
@@ -583,11 +583,12 @@ public final class IMAPDefaultFolderChecker {
                  */
                 try {
                     IMAPCommandsCollection.createFolder(f, sep, type);
-                    ListLsubCache.clearCache(accountId, session);
+                    ListLsubCache.addSingle(fullname, accountId, f, session);
                     return null;
                 } catch (final MessagingException e) {
                     LOG.warn(new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
                         "\" failed.").toString(), e);
+                    ListLsubCache.clearCache(accountId, session);
                 }
             } else {
                 /*
@@ -622,22 +623,24 @@ public final class IMAPDefaultFolderChecker {
                      */
                     try {
                         IMAPCommandsCollection.createFolder(f, sep, type);
-                        ListLsubCache.clearCache(accountId, session);
+                        ListLsubCache.addSingle(fullname, accountId, f, session);
                     } catch (final MessagingException e) {
                         LOG.warn(new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
                             "\" failed.").toString(), e);
+                        ListLsubCache.clearCache(accountId, session);
                     }
                 } else {
                     if (MailAccount.DEFAULT_ID == accountId) {
                         // Must not edit default mail account. Try to create IMAP folder
                         try {
                             IMAPCommandsCollection.createFolder(f, sep, type);
-                            ListLsubCache.clearCache(accountId, session);
+                            ListLsubCache.addSingle(fullname, accountId, f, session);
                         } catch (final MessagingException e) {
                             LOG.warn(
                                 new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
                                     "\" failed.").toString(),
                                 e);
+                            ListLsubCache.clearCache(accountId, session);
                         }
                     } else {
                         /*
