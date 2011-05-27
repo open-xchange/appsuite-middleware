@@ -1,3 +1,7 @@
+* 2011-05-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #19372: Removing MS Word tags in a mail's HTML content
+
 * 2011-05-26 - thorben.betten@open-xchange.com
 
  - Bugfix #19315: Converting distribution list to an appropriate VCard attachment

@@ -132,6 +132,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     private boolean body;
 
+    private boolean withinSuppress;
+
     /**
      * Used to track all subsequent elements of a tag from which only its tag elements ought to be removed.
      */
@@ -379,7 +381,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
             }
             addStartTag(tag, attributes, false, htmlMap.get(tag));
         } else {
-            if (!body || SCRIPT.equals(tag)) {
+            if (!body || isRemoveWholeTag(tag)) {
                 /*
                  * Remove whole tag incl. subsequent content and tags
                  */
@@ -391,6 +393,11 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 mark();
             }
         }
+    }
+
+    private boolean isRemoveWholeTag(final String tag) {
+        final String check = tag.toLowerCase(Locale.US);
+        return (SCRIPT.equals(check) || check.startsWith("w:worddocument"));
     }
 
     public void handleCDATA(final String text) {
@@ -452,7 +459,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
             return;
         }
         for (final Entry<String, String> e : a.entrySet()) {
-            final String attr = e.getKey().toLowerCase(Locale.ENGLISH);
+            final String attr = e.getKey().toLowerCase(Locale.US);
             final String val = e.getValue();
             if (STYLE.equals(attr)) {
                 /*
@@ -481,7 +488,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 } else {
                     if (attribs.containsKey(attr)) {
                         final Set<String> allowedValues = attribs.get(attr);
-                        if (null == allowedValues || allowedValues.contains(val.toLowerCase(Locale.ENGLISH))) {
+                        if (null == allowedValues || allowedValues.contains(val.toLowerCase(Locale.US))) {
                             if (isNonJavaScriptURL(val)) {
                                 attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlService.htmlFormat(val, false)).append('"');
                             }
@@ -542,7 +549,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
         final Map<String, Map<String, Set<String>>> tagMap = new HashMap<String, Map<String, Set<String>>>();
         while (m.find()) {
             final String attributes = m.group(2);
-            final String tagName = m.group(1).toLowerCase(Locale.ENGLISH);
+            final String tagName = m.group(1).toLowerCase(Locale.US);
             if (null == attributes) {
                 tagMap.put(tagName, null);
             } else {
@@ -550,7 +557,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 final Map<String, Set<String>> attribMap = new HashMap<String, Set<String>>();
                 while (attribMatcher.find()) {
                     final String values = attribMatcher.group(2);
-                    final String attributeName = attribMatcher.group(1).toLowerCase(Locale.ENGLISH);
+                    final String attributeName = attribMatcher.group(1).toLowerCase(Locale.US);
                     if (null == values) {
                         attribMap.put(attributeName, null);
                     } else if (values.length() == 0) {
@@ -560,7 +567,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                         final String[] valArr =
                             values.charAt(0) == ':' ? values.substring(1).split("\\s*:\\s*") : values.split("\\s*:\\s*");
                         for (final String value : valArr) {
-                            valueSet.add(value.toLowerCase(Locale.ENGLISH));
+                            valueSet.add(value.toLowerCase(Locale.US));
                         }
                         attribMap.put(attributeName, valueSet);
                     }
@@ -593,7 +600,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 /*
                  * Fetch from combination map
                  */
-                final String cssElement = m.group(1).toLowerCase(Locale.ENGLISH);
+                final String cssElement = m.group(1).toLowerCase(Locale.US);
                 styleMap.put(cssElement, combiMap.get(cssElement));
             } else {
                 /*
@@ -604,7 +611,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 while (valueMatcher.find()) {
                     valueSet.add(valueMatcher.group());
                 }
-                styleMap.put(m.group(1).toLowerCase(Locale.ENGLISH), valueSet);
+                styleMap.put(m.group(1).toLowerCase(Locale.US), valueSet);
             }
         }
         return styleMap;
@@ -629,7 +636,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
             while (valueMatcher.find()) {
                 valueSet.add(valueMatcher.group());
             }
-            combiMap.put(m.group(1).toLowerCase(Locale.ENGLISH), valueSet);
+            combiMap.put(m.group(1).toLowerCase(Locale.US), valueSet);
         }
         return combiMap;
     }
