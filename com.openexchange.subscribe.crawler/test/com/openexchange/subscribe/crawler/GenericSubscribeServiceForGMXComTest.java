@@ -75,7 +75,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         crawler.setId("com.openexchange.subscribe.crawler.gmx.com");
         crawler.setCrawlerApiVersion(618);
         //crawler.setJavascriptEnabled(true);       
-        crawler.setPriority(11);       
+        crawler.setPriority(12);       
 
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
         listOfSteps.add(new LoginPageByFormActionReturningStringStep("Log into gmx.com", "https://www.gmx.com", "", "", ".*wicket\\:interface.*", "TextfieldEmail", "TextfieldPassword", 1, "", "ButtonLogin", "community=([0-9]*)&lang"));
@@ -85,7 +85,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         parameters.add(new NameValuePair("idList", ""));
         parameters.add(new NameValuePair("format", "csv_Outlook2003_eng"));
         
-        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.37.6.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
+        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.37.8.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
         
         HashMap<Integer, String> fieldMapping = new HashMap<Integer,String>();
         fieldMapping.put(0, "last_name");
