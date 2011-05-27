@@ -65,6 +65,7 @@ import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -76,6 +77,8 @@ import java.util.TimeZone;
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -191,6 +194,8 @@ public class OXContainerConverter {
 
     private boolean sendFloating;
 
+    private boolean addDisplayName4DList;
+
     public OXContainerConverter(final TimeZone timezone, final String organizerMailAddress) {
         super();
         this.timezone = timezone;
@@ -232,6 +237,24 @@ public class OXContainerConverter {
 
     public void setSendFloating(final boolean sendFloating) {
         this.sendFloating = sendFloating;
+    }
+    
+    /**
+     * Gets the addDisplayName4DList
+     *
+     * @return The addDisplayName4DList
+     */
+    public boolean isAddDisplayName4DList() {
+        return addDisplayName4DList;
+    }
+    
+    /**
+     * Sets the addDisplayName4DList
+     *
+     * @param addDisplayName4DList The addDisplayName4DList to set
+     */
+    public void setAddDisplayName4DList(final boolean addDisplayName4DList) {
+        this.addDisplayName4DList = addDisplayName4DList;
     }
 
     public boolean isSendUTC() {
@@ -754,6 +777,12 @@ public class OXContainerConverter {
                              * Append new entry
                              */
                             final DistributionListEntryObject newEntry = new DistributionListEntryObject();
+                            if (addDisplayName4DList) {
+                                final Parameter displayNameParameter = property.getParameter("FN");
+                                if (null != displayNameParameter) {
+                                    newEntry.setDisplayname(decodeQP(displayNameParameter.getValue(0).getText()));
+                                }
+                            }
                             newEntry.setEmailaddress(value);
                             distributionList[distributionList.length - 1] = newEntry;
                             contactContainer.setDistributionList(distributionList);
@@ -1571,12 +1600,19 @@ public class OXContainerConverter {
                 if (address != null) {
                     final Property property = new Property(P_EMAIL);
                     property.setValue(address);
-                    /*
-                     * Add TYPE parameter
-                     */
-                    final Parameter parameter = new Parameter(P_TYPE);
-                    parameter.addValue(new ParameterValue("INTERNET"));
-                    property.addParameter(parameter);
+                    {
+                        final Parameter parameter = new Parameter(P_TYPE);
+                        parameter.addValue(new ParameterValue("INTERNET"));
+                        property.addParameter(parameter);
+                    }
+                    if (addDisplayName4DList) {
+                        final String displayName = distributionListEntry.getDisplayname();
+                        if (null != displayName) {
+                            final Parameter parameter = new Parameter("FN");
+                            parameter.addValue(new ParameterValue(encodeQP(displayName)));
+                            property.addParameter(parameter);
+                        }
+                    }
                     object.addProperty(property);
                 }
             }
@@ -1947,4 +1983,39 @@ public class OXContainerConverter {
         }
         return (bimg != null);
     }
+
+    private static final BitSet PRINTABLE_CHARS = new BitSet(256);
+    // Static initializer for printable chars collection
+    static {
+        for (int i = '0'; i <= '9'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        for (int i = 'A'; i <= 'Z'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        for (int i = 'a'; i <= 'z'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+    }
+
+    private static String encodeQP(final String string) throws ConverterException {
+        try {
+            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes("UTF-8")),"US-ASCII").replaceAll("=", "%");
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            throw new ConverterException(e);
+        }
+    }
+
+    private static String decodeQP(final String string) throws ConverterException {
+        try {
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(string.replaceAll("%", "=").getBytes("US-ASCII")), "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            throw new ConverterException(e);
+        } catch (final DecoderException e) {
+            throw new ConverterException(e);
+        }
+    }
+
 }
