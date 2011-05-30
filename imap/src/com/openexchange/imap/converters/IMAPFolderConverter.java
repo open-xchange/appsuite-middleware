@@ -143,9 +143,9 @@ public final class IMAPFolderConverter {
     /**
      * New mailbox attribute added by the "LIST-EXTENDED" extension.
      */
-    private static final String ATTRIBUTE_NON_EXISTENT = "\\NonExistent";
+    private static final String ATTRIBUTE_NON_EXISTENT = "\\nonexistent";
 
-    private static final String ATTRIBUTE_HAS_CHILDREN = "\\HasChildren";
+    private static final String ATTRIBUTE_HAS_CHILDREN = "\\haschildren";
 
     // private static final String ATTRIBUTE_HAS_NO_CHILDREN = "\\HasNoChildren";
 
@@ -285,17 +285,12 @@ public final class IMAPFolderConverter {
                  */
                 if (exists) {
                     final Set<String> attrs = listEntry.getAttributes();
-                    if (null != attrs) {
-                        final boolean hasChildren = imapConfig.getImapCapabilities().hasChildren();
-                        for (final String attribute : attrs) {
-                            if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
-                                mailFolder.setNonExistent(true);
-                            }
-                            if (hasChildren) {
-                                if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-                                    mailFolder.setSubfolders(true);
-                                }
-                            }
+                    if (null != attrs && !attrs.isEmpty()) {
+                        if (attrs.contains(ATTRIBUTE_NON_EXISTENT)) {
+                            mailFolder.setNonExistent(true);
+                        }
+                        if (imapConfig.getImapCapabilities().hasChildren() && attrs.contains(ATTRIBUTE_HAS_CHILDREN)) {
+                            mailFolder.setSubfolders(true);
                         }
                     }
                     if (!mailFolder.containsSubfolders()) {
@@ -504,17 +499,12 @@ public final class IMAPFolderConverter {
             final String imapFullname = "";
             final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(imapFullname, imapConfig.getAccountId(), rootFolder, session);
             final Set<String> attrs = listEntry.getAttributes();
-            if (null != attrs) {
-                final boolean hasChildren = imapConfig.getImapCapabilities().hasChildren();
-                for (final String attribute : attrs) {
-                    if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
-                        mailFolder.setNonExistent(true);
-                    }
-                    if (hasChildren) {
-                        if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-                            mailFolder.setSubfolders(true);
-                        }
-                    }
+            if (null != attrs && !attrs.isEmpty()) {
+                if (attrs.contains(ATTRIBUTE_NON_EXISTENT)) {
+                    mailFolder.setNonExistent(true);
+                }
+                if (imapConfig.getImapCapabilities().hasChildren() && attrs.contains(ATTRIBUTE_HAS_CHILDREN)) {
+                    mailFolder.setSubfolders(true);
                 }
             }
             mailFolder.setSubfolders(true);
