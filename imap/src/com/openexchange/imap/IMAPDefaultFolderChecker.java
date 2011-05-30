@@ -474,37 +474,53 @@ public final class IMAPDefaultFolderChecker {
             setSeparator(sep, mailSessionCache);
             final boolean inboxInferiors = inboxListEntry.hasInferiors();
             /*
-             * Examine root folder if subfolders allowed
-             */
-            final boolean rootInferiors = RootSubfolderCache.canCreateSubfolders(
-                (DefaultFolder) imapStore.getDefaultFolder(),
-                true,
-                session,
-                accountId).booleanValue();
-            /*
              * Determine where to create default folders and store as a prefix for folder fullname
              */
-            if (!inboxInferiors && rootInferiors) {
-                // Create folder beside INBOX folder
-                prefix.append("");
-            } else if (inboxInferiors && !rootInferiors) {
-                // Create folder under INBOX folder
-                prefix.append(inboxfullName).append(sep);
-            } else if (inboxInferiors && rootInferiors) {
+            if (inboxInferiors) {
                 if (MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
                     /*
                      * Only allow default folder below INBOX if inferiors are permitted nested default folder are explicitly allowed
                      */
                     prefix.append(inboxfullName).append(sep);
+                } else if (false) {
+                    // TODO: Consider NAMEPSACE
                 } else {
-                    prefix.append("");
+                    /*
+                     * Examine root folder if subfolders allowed
+                     */
+                    if (isRootInferiors()) {
+                        /*
+                         * Create folder beside INBOX folder
+                         */
+                        prefix.append("");
+                    } else {
+                        /*
+                         * Create folder below INBOX folder
+                         */
+                        prefix.append(inboxfullName).append(sep);
+                    }
                 }
             } else {
-                // Cannot occur: No folders are allowed to be created, neither below INBOX nor below root folder
+                /*
+                 * Examine root folder if subfolders allowed
+                 */
+                if (isRootInferiors()) {
+                    /*
+                     * Create folder beside INBOX folder
+                     */
+                    prefix.append("");
+                }
+                /*
+                 * Cannot occur: No folders are allowed to be created, neither below INBOX nor below root folder
+                 */
                 throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, INBOX);
             }
         }
         return new String[] { prefix.toString(), String.valueOf(sep) };
+    }
+
+    private boolean isRootInferiors() throws MessagingException {
+        return RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue();
     }
 
     /**
