@@ -1248,21 +1248,28 @@ final class ListLsubCollection {
             attributes = new HashSet<String>(s.length);
             for (int i = 0; i < s.length; i++) {
                 final String attr = s[i].toLowerCase(Locale.US);
-                final int pos = POS_MAP.get(attr);
-                if (pos > 0) {
-                    if (1 == pos) {
-                        changeState = ChangeState.CHANGED;
-                    } else if (2 == pos) {
-                        changeState = ChangeState.UNCHANGED;
-                    } else if (3 == pos) {
-                        canOpen = false;
-                    } else if (4 == pos) {
-                        hasInferiors = false;
-                    } else if (5 == pos) {
-                        hasChildren = Boolean.TRUE;
-                    } else if (6 == pos) {
-                        hasChildren = Boolean.FALSE;
-                    }
+                switch (POS_MAP.get(attr)) {
+                case 1:
+                    changeState = ChangeState.CHANGED;
+                    break;
+                case 2:
+                    changeState = ChangeState.UNCHANGED;
+                    break;
+                case 3:
+                    canOpen = false;
+                    break;
+                case 4:
+                    hasInferiors = false;
+                    break;
+                case 5:
+                    hasChildren = Boolean.TRUE;
+                    break;
+                case 6:
+                    hasChildren = Boolean.FALSE;
+                    break;
+                default:
+                    // Nothing
+                    break;
                 }
                 attributes.add(attr);
             }
