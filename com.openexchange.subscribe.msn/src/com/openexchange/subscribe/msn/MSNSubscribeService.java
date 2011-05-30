@@ -113,7 +113,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
             super.modifyIncoming(subscription);
             if (subscription.getConfiguration() != null){
                 if (subscription.getConfiguration().get("account") != null){
-                    subscription.getConfiguration().put("account", subscription.getConfiguration().get("account"));
+                    subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
                 }else {
                     LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : "+subscription.getConfiguration());                    
                 }                
