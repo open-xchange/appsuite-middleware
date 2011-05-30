@@ -467,7 +467,8 @@ public final class IMAPFolderConverter {
                 }
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("IMAP folder converted in " + dur + "msec.");
+                    LOG.debug(new StringBuilder("IMAP folder \"").append(imapFullName).append("\" converted in ").append(dur).append(
+                        "msec.").toString());
                 }
                 return mailFolder;
             }
