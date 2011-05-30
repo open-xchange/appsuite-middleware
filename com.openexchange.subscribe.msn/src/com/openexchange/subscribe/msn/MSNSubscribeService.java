@@ -60,6 +60,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.msn.osgi.Activator;
@@ -112,10 +113,10 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
         if(subscription != null) {
             super.modifyIncoming(subscription);
             if (subscription.getConfiguration() != null){
-                if (subscription.getConfiguration().get("account") != null){
+                if (subscription.getConfiguration().get("account") != null && !subscription.getConfiguration().get("account").equals("null")){
                     subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
                 }else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : "+subscription.getConfiguration());                    
+                    throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");               
                 }                
             } else {
                 LOG.error("subscription.getConfiguration() is null");            
