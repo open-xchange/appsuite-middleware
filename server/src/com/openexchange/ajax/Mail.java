@@ -75,8 +75,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -3484,6 +3486,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
         private final BlockingQueue<MimeMessage> queue;
 
+        private AbstractOXException exception;
+
         AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
             super();
             this.mailInterface = mailInterface;
@@ -3521,6 +3525,15 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
                     }
                 }
+            } catch (MailException e) {
+                exception = e;
+                throw e;
+            } catch (MessagingException e) {
+                exception = getWrappingOXException(e);
+                throw exception;
+            } catch (InterruptedException e) {
+                exception = getWrappingOXException(e);
+                throw exception;
             } finally {
                 mailInterface.close(true);
             }
@@ -3565,7 +3578,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                     future = service.submit(task);
                     try {
                         final FileItemIterator iter = servletFileUpload.getItemIterator(req);
-                        while (iter.hasNext()) {
+                        boolean keepgoing = true;
+                        while (keepgoing && iter.hasNext()) {
                             final FileItemStream item = iter.next();
                             final String filename = item.getName();
                             final InputStream is = item.openStream();
@@ -3576,7 +3590,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 message.setFrom(defaultSendAddr);
                             }
                             message.setFileName(filename);
-                            queue.put(message);
+                            while (!keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
+                                keepgoing = !future.isDone();
+                            }
                         }
                     } finally {
                         task.finished();
