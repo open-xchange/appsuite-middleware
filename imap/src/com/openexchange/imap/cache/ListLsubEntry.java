@@ -60,6 +60,9 @@ import com.sun.mail.imap.Rights;
  */
 public interface ListLsubEntry {
 
+    /**
+     * A LIST/LSUB entry's change state.
+     */
     public static enum ChangeState {
         CHANGED, UNCHANGED, UNDEFINED;
     }
