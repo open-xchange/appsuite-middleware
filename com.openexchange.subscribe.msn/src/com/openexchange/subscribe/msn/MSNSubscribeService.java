@@ -130,8 +130,12 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
     public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
         String accountId = (String) subscription.getConfiguration().get("account");
         if (null != accountId){
-            Integer accountIdInt = Integer.parseInt(accountId);
-            if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
+            try {
+                Integer accountIdInt = Integer.parseInt(accountId);
+                if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
+            } catch (NumberFormatException x) {
+                // Invalid account, but at least allow people to delete it.
+            }
             String displayName = null;
             if(subscription.getSecret() != null) {
                 displayName = activator.getMsnService().getAccountDisplayName(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
