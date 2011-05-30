@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-05-18 16:15+0200\n"
+"PO-Revision-Date: 2011-05-30 09:43+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -283,11 +283,6 @@ msgstr "Erinnerung mit ID %1$s konnte nicht im Kontext %2$d gefunden werden."
 msgid "Can not generate uid."
 msgstr "UID konnte nicht generiert werden"
 
-msgid "Can not insert appointment with uid %1$s. Uid already exists."
-msgstr ""
-"Ein Termin mit der uid %1$s kann nicht eingefügt werden. Die uid ist bereits "
-"vorhanden."
-
 msgid "Can not resolve resource: %1$s"
 msgstr "Fehler beim Auflösen der Ressource: %1$s"
 
@@ -372,6 +367,14 @@ msgstr "Verbindung zur Datenbank kann nicht hergestellt werden."
 
 msgid "Cannot initialize mail module"
 msgstr "E-Mail-Modul kann nicht initialisiert werden"
+
+msgid ""
+"Cannot insert appointment (%1$s). An appointment with the unique identifier "
+"(%2$s) already exists."
+msgstr ""
+"Der Termin  (%1$s) kann nicht angelegt werden. Ein Termin mit der "
+"eindeutigen "
+"ID (%2$s) ist bereits vorhanden."
 
 msgid "Cannot instantiate class %1$s."
 msgstr "Anlegen von Instanzen für Klasse %1$s nicht möglich"
@@ -3562,10 +3565,13 @@ msgid "Missing argument: %1$s"
 msgstr "Fehlendes Argument: %1$s"
 
 #. OAuth Token has expired. Please authorize this account and try again.
-msgid "OAuth Token has expired. Please authorize this account and try again."
+msgid ""
+"OAuth Token has expired. Please authorize the '%1$s' account in "
+"configuration->my social ox->accounts and try again."
 msgstr ""
-"OAuth Token ist abgelaufen. Authorisieren Sie bitte diesen Account und "
-"versuchen Sie es erneut."
+"OAuth Token ist abgelaufen. Authorisieren Sie bitte den '%1$s' -Account "
+"unter Konfiguration -> Mein Social OX -> Accounts und versuchen Sie es "
+"erneut."
 
 #. An OAuth error occurred: %1$s
 msgid "An OAuth error occurred: %1$s"
@@ -3624,6 +3630,50 @@ msgstr "Fehlende Eigenschaft: %1$s"
 #. Invalid property value in property "%1$s": %2$s
 msgid "Invalid property value in property \"%1$s\": %2$s"
 msgstr "Ungültiger Eigenschafts-Wert in Eigenschaft \"%1$s\": %2$s"
+
+#. The IP address of host %1$s could not be determined.
+msgid "The IP address of host %1$s could not be determined."
+msgstr "Die IP-Adresse des Host \"%1$s\" konnte nicht bestimmt werden."
+
+#. Integer value is too big: %1$s
+msgid "Integer value is too big: %1$s"
+msgstr "Zu hoher Ganzzahlenwert %1$s"
+
+#. Missing previous truncated message package(s).
+msgid "Missing previous truncated message package(s)."
+msgstr "Zuvor gekürzte(s) Nachrichtenpaket(e) nicht vorhanden"
+
+#. Conflicting truncated message package(s).
+msgid "Conflicting truncated message package(s)."
+msgstr "Konflikt für gekürzte(s) Nachrichtenpaket(e) "
+
+#. Missing or wrong magic bytes: %1$s
+msgid "Missing or wrong magic bytes: %1$s"
+msgstr "Fehlende oder inkorrekte Magic bytes: %1$s"
+
+#. Unknown prefix code: %1$s
+msgid "Unknown prefix code: %1$s"
+msgstr "Unbekannter Präfix-Code: %1$s"
+
+#. Invalid message package
+msgid "Invalid message package"
+msgstr "Ungültiges Nachrichten-Paket"
+
+#. Unparseable string.
+msgid "Unparseable string."
+msgstr "Nicht analysierbare Zeichenkette"
+
+#. Invalid quoted-printable encoding.
+msgid "Invalid quoted-printable encoding."
+msgstr "Ungültige Quoted-printable-Kodierung"
+
+#. Messaging server socket could not be bound to port %1$d. Probably another process is already listening on this port.
+msgid ""
+"Messaging server socket could not be bound to port %1$d. Probably another "
+"process is already listening on this port."
+msgstr ""
+"Messaging-Server Socket konnte nicht an Port %1$d angebunden werden. "
+"Möglicherweise lauscht bereits ein anderer Prozess auf diesem Port."
 
 #. An IOException occurred: %1$s. Was trying to get the service at %2$s.
 msgid "An IOException occurred: %1$s. Was trying to get the service at %2$s."
@@ -3720,6 +3770,21 @@ msgid ""
 msgstr ""
 "Die Quelle dieses Abonnements ist derzeit nicht aktiv und kann keine Daten "
 "bereitstellen."
+
+#. Please try using this service again at a later time
+msgid "Please try using this service again at a later time"
+msgstr "Bitte rufen Sie diesen Dienst zu einem späteren Zeitpunkt wieder auf."
+
+#. This service is temporarily unavailable. This may be due to a temporary outage or a permanent change on the 3rd-party-side. Please try using this service again at a later time
+msgid ""
+"This service is temporarily unavailable. This may be due to a temporary "
+"outage or a permanent change on the 3rd-party-side. Please try using this "
+"service again at a later time"
+msgstr ""
+"Dieser Dienst ist vorübergehend nicht erreichbar. Dies liegt entweder an "
+"einem zeitweisen Ausfall oder einer dauerhaften Änderung seitens des "
+"Drittanbieters. Bitte rufen Sie diesen Dienst zu einem späteren Zeitpunkt "
+"wieder auf."
 
 #. The consumer key/consumer secret pair is missing in configuration.
 msgid "The consumer key/consumer secret pair is missing in configuration."
