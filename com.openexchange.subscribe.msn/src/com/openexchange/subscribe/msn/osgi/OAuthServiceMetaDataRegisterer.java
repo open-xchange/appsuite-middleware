@@ -54,7 +54,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.oauth.OAuthServiceMetaData;
 
-
 /**
  * {@link OAuthServiceMetaDataRegisterer}
  *
@@ -64,7 +63,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer 
 
     private BundleContext context;
     private Activator activator;
-    
+
     public OAuthServiceMetaDataRegisterer(BundleContext context, Activator activator){
         this.context = context;
         this.activator = activator;
@@ -86,11 +85,10 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer 
 
     public void removedService(ServiceReference reference, Object arg1) {
         OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) arg1;
-        if ("com.openexchange.socialplugin.linkedin".equals(oAuthServiceMetaData.getId())) {
+        if ("com.openexchange.oauth.msn".equals(oAuthServiceMetaData.getId())) {
             activator.setOAuthServiceMetaData(null);
             activator.unregisterSubscribeService();
         }
         context.ungetService(reference);
     }
-
 }
