@@ -148,10 +148,10 @@ public final class IMAPActivator extends DeferredActivator {
              */
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
+            imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary);
             /*
              * Register event handler for mail push events
              */
-            imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary);
             {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
