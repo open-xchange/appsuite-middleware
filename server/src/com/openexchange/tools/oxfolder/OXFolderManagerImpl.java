@@ -447,6 +447,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
          */
         try {
             OXFolderSQL.insertFolderSQL(fuid, user.getId(), folderObj, createTime, ctx, writeCon);
+            folderObj.setObjectID(fuid);
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final DataTruncation e) {
@@ -458,7 +459,6 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Update cache with writable connection!
          */
         final Date creatingDate = new Date(createTime);
-        folderObj.setObjectID(fuid);
         folderObj.setCreationDate(creatingDate);
         if (!folderObj.containsCreatedBy()) {
             folderObj.setCreatedBy(user.getId());
