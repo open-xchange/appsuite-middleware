@@ -151,6 +151,28 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
      * @return The user-sensitive subfolders
      * @throws FolderException If a folder error occurs
      */
+    public List<UserizedFolder[]> doVisibleFolders(final String treeId, final ContentType contentType, final boolean all, final Type type, final Type... otherTypes) throws FolderException {
+        if (null == otherTypes || 0 == otherTypes.length) {
+            return Collections.<UserizedFolder[]> singletonList(doVisibleFolders(treeId, contentType, type, all));
+        }
+        final List<UserizedFolder[]> list = new ArrayList<UserizedFolder[]>(otherTypes.length + 1);
+        list.add(doVisibleFolders(treeId, contentType, type, all));
+        for (final Type otherType : otherTypes) {
+            list.add(doVisibleFolders(treeId, contentType, otherType, all));
+        }
+        return list;
+    }
+
+    /**
+     * Performs the <code>LIST</code> request.
+     * 
+     * @param treeId The tree identifier
+     * @param parentId The parent folder identifier
+     * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
+     *            subscribed ones
+     * @return The user-sensitive subfolders
+     * @throws FolderException If a folder error occurs
+     */
     public UserizedFolder[] doVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all) throws FolderException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
@@ -340,7 +362,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             if (SharedType.getInstance().equals(type)) {
                 final int userId = storageParameters.getUserId();
                 final int len = FolderObject.SHARED_PREFIX.length();
-                StringBuilder sb = new StringBuilder(FolderObject.SHARED_PREFIX);
+                final StringBuilder sb = new StringBuilder(FolderObject.SHARED_PREFIX);
                 for (final UserizedFolder userizedFolder : ret) {
                     final int createdBy = userizedFolder.getCreatedBy();
                     if (createdBy > 0 && createdBy != userId) {
