@@ -10,7 +10,8 @@
     <property name="lib.dir" value="lib"/>
 	<property name="conf.dir" value="conf"/>
 	<property name="conf.install.dir" value="${prefix}/etc/groupware"/>
-	
+    <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
+
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
