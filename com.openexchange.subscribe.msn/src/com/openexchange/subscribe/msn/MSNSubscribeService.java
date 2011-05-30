@@ -113,7 +113,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
         if(subscription != null) {
             super.modifyIncoming(subscription);
             if (subscription.getConfiguration() != null){
-                if (subscription.getConfiguration().get("account") != null && !subscription.getConfiguration().get("account").equals("null")){
+                if (subscription.getConfiguration().get("account") != null && !subscription.getConfiguration().get("account").toString().equals("null")){
                     subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
                 }else {
                     throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");               
