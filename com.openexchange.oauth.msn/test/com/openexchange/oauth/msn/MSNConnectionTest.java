@@ -49,21 +49,29 @@
 
 package com.openexchange.oauth.msn;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
-//import junit.framework.TestCase;
 
 /**
  * {@link MSNConnectionTest}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class MSNConnectionTest /*extends TestCase*/{
+public class MSNConnectionTest extends TestCase{
     
     public void testMSNServiceImpl(){
        String apiKey = "000000004C03D925";
@@ -114,6 +122,43 @@ public class MSNConnectionTest /*extends TestCase*/{
         
        System.out.println("Length of long URL : " + longURL.length());
        System.out.println("Length of short URL : " + shortURL.length());
+    }
+    
+    public void testHandlingOfInvalidSSLCertificate(){
+        OutputStreamWriter writer = null;
+        BufferedReader reader = null;
+        try {
+            
+
+            final URL url = new URL("https://consent.live.com/AccessToken.aspx");            
+            final URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(2500);
+            connection.setReadTimeout(2500);
+            connection.setDoOutput(true);
+
+            writer = new OutputStreamWriter(connection.getOutputStream());
+            
+            writer.flush();
+            
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+            String line = null;
+            
+            DefaultOAuthToken token = new DefaultOAuthToken();
+            token.setSecret("");
+            
+            while((line = reader.readLine()) != null) {
+                String[] keyValuePairs = line.split("&");
+                for (String keyValuePair : keyValuePairs) {
+                    System.out.println(keyValuePair);
+                }
+            }
+            
+        } catch (UnsupportedEncodingException x) {
+            System.out.println(x.getMessage());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }

@@ -51,14 +51,13 @@ package com.openexchange.oauth.msn;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Map;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -75,6 +74,7 @@ import com.openexchange.oauth.OAuthToken;
  * {@link OAuthServiceMetaDataMSNImpl}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
@@ -129,7 +129,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
     @Override
     public void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) {
         String verifier = parameter.get("wrap_verification_code");
-        if (null == verifier){
+        if (null == verifier) {
             LOG.error("No wrap_verification_code present.");
         }
         arguments.put(OAuthConstants.ARGUMENT_PIN, verifier);
@@ -146,45 +146,39 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
 
             StringBuilder params = new StringBuilder();
-            params.append("wrap_client_id=").append(getAPIKey());
+            params.append("?wrap_client_id=").append(getAPIKey());
             params.append("&wrap_client_secret=").append(getAPISecret());
             params.append("&wrap_callback=").append(URLEncoder.encode(callback, "UTF-8"));
             params.append("&wrap_verification_code=").append(verifier);
 
-            final URL url = new URL(accessTokenGrabber);  
-            //System.out.println("***** URL : "+url);
-            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setInstanceFollowRedirects(false);
-            connection.setConnectTimeout(2500);
-            connection.setReadTimeout(2500);
-            connection.setDoOutput(true);
+            HttpClient httpClient = new HttpClient();
+            Protocol protocol = new Protocol("https", new TrustAllAdapter(), 443);
+            httpClient.getHostConfiguration().setHost("live.com", 443, protocol);
+            String urlString = accessTokenGrabber;
+            System.out.println(urlString + params);
+            PostMethod postMethod = new PostMethod(urlString + params);
+            postMethod.addParameter("wrap_client_id", getAPIKey());
+            postMethod.addParameter("wrap_client_secret", getAPISecret());
+            postMethod.addParameter("wrap_callback", callback);
+            postMethod.addParameter("wrap_verification_code", verifier);
 
-            writer = new OutputStreamWriter(connection.getOutputStream());
+            httpClient.executeMethod(postMethod);            
 
-            writer.write(params.toString());
-            writer.flush();
-            
-            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-            String line = null;
-            
             DefaultOAuthToken token = new DefaultOAuthToken();
             token.setSecret("");
-            
-            while((line = reader.readLine()) != null) {
-                String[] keyValuePairs = line.split("&");
-                for (String keyValuePair : keyValuePairs) {
-                    String[] split = keyValuePair.split("=");
-                    if(split[0].equals(REFRESH_TOKEN_KEY)) {
-                        token.setToken(split[1]);
-                        return token;
-                    }
+            String response = postMethod.getResponseBodyAsString();
+            String[] keyValuePairs = response.split("&");
+            for (String keyValuePair : keyValuePairs) {
+                String[] split = keyValuePair.split("=");
+                if (split[0].equals(REFRESH_TOKEN_KEY)) {
+                    token.setToken(split[1]);                                        
+                    return token;
                 }
             }
-            
+
         } catch (UnsupportedEncodingException x) {
             LOG.error(x.getMessage(), x);
-        } catch (IOException e) {           
+        } catch (IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (writer != null) {
@@ -194,7 +188,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
                     // IGNORE
                 }
             }
-            if(reader != null) {
+            if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
@@ -204,7 +198,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
         }
 
         return super.getOAuthToken(arguments);
-        //throw OAuthExceptionCodes.IO_ERROR.create(" ***** Something went terribly wrong!");
+        // throw OAuthExceptionCodes.IO_ERROR.create(" ***** Something went terribly wrong!");
     }
 
 }
