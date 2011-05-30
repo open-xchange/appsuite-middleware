@@ -517,6 +517,10 @@ public class OXFolderException extends OXException {
          * </p>
          */
         NO_RENAME_ACCESS("User %1$s must not rename folder %2$s in context %3$s", Category.PERMISSION, 86),
+        /**
+         * Failed to create folder. Please retry.
+         */
+        CREATE_FAILED("Failed to create folder. Please retry.", Category.TRY_AGAIN, 87),
         
         ;
 

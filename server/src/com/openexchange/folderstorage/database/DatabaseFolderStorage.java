@@ -116,6 +116,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
@@ -330,7 +331,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
             // Create
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.createFolder(createMe, true, millis);
-            folder.setID(String.valueOf(createMe.getObjectID()));
+            final int fuid = createMe.getObjectID();
+            if (fuid <= 0) {
+                throw new OXFolderException(FolderCode.CREATE_FAILED, new Object[0]);
+            }
+            folder.setID(String.valueOf(fuid));
         } catch (final OXException e) {
             throw new FolderException(e);
         }
