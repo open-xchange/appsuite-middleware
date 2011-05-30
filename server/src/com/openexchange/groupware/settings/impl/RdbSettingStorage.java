@@ -76,9 +76,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RdbSettingStorage extends SettingStorage {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(RdbSettingStorage.class);
 
     /**
@@ -160,10 +157,10 @@ public class RdbSettingStorage extends SettingStorage {
         this.userId = user.getId();
         this.userConfig = userConfig;
     }
-    
+
     /**
      * Special constructor for admin daemon.
-     * @param ctxId 
+     * @param ctxId
      * @param userId
      */
     RdbSettingStorage(final int ctxId, final int userId) {
@@ -175,17 +172,12 @@ public class RdbSettingStorage extends SettingStorage {
         this.user = null;
         this.userConfig = null;
     }
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void save(final Setting setting) throws SettingException {
         save(null, setting);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void save(final Connection con, final Setting setting) throws
         SettingException {
@@ -265,10 +257,7 @@ public class RdbSettingStorage extends SettingStorage {
             closeSQLStuff(null, stmt);
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void readValues(final Setting setting) throws SettingException {
         final Connection con;
@@ -292,9 +281,6 @@ public class RdbSettingStorage extends SettingStorage {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void readValues(final Connection con, final Setting setting) throws SettingException {
         if (!setting.isLeaf()) {
