@@ -54,15 +54,23 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.IMAPProvider;
+import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -80,6 +88,8 @@ public final class IMAPActivator extends DeferredActivator {
 
     private WhiteboardSecretService secretService;
 
+    private ServiceRegistration<?> serviceRegistration;
+
     /**
      * Initializes a new {@link IMAPActivator}
      */
@@ -91,7 +101,7 @@ public final class IMAPActivator extends DeferredActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ThreadPoolService.class,
-            TimerService.class };
+            TimerService.class, SessiondService.class };
     }
 
     @Override
@@ -138,7 +148,15 @@ public final class IMAPActivator extends DeferredActivator {
              */
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
+            /*
+             * Register event handler for mail push events
+             */
             imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary);
+            {
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
+                serviceRegistration = context.registerService(EventHandler.class.getName(), new PushMailEventHandler(), dict);
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -152,6 +170,10 @@ public final class IMAPActivator extends DeferredActivator {
                 imapServiceRegistration.unregister();
                 imapServiceRegistration = null;
             }
+            if (null != serviceRegistration) {
+                serviceRegistration.unregister();
+                serviceRegistration = null;
+            }
             /*
              * Clear service registry
              */
@@ -163,6 +185,39 @@ public final class IMAPActivator extends DeferredActivator {
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
+        }
+    }
+
+    private final class PushMailEventHandler implements EventHandler {
+
+        
+        public PushMailEventHandler() {
+            super();
+        }
+
+        public void handleEvent(final Event event) {
+            final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+            if (null != contentRelated && !contentRelated.booleanValue()) {
+                /*
+                 * Folder changed...
+                 */
+                final SessiondService sessiondService = getService(SessiondService.class);
+                if (null != sessiondService) { // Service present
+                    final int accountId = parseAccountId(event);
+                    final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
+                    final String sessionID = session.getSessionID();
+                    for (final Session ses : sessiondService.getSessions(session.getUserId(), session.getContextId())) {
+                        if (!sessionID.equals(ses.getSessionID())) { // Not for propagating session
+                            ListLsubCache.clearCache(accountId, ses);
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+        private int parseAccountId(final Event event) {
+            return MailFolderUtility.prepareMailFolderParam((String) event.getProperty(PushEventConstants.PROPERTY_FOLDER)).getAccountId();
         }
     }
 

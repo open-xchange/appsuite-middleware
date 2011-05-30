@@ -1,6 +1,7 @@
 * 2011-05-30 - thorben.betten@open-xchange.com
 
  - Bugfix #19362: Throwing a meaningful error if folder creation returns an invalid folder identifier
+ - Bugfix #19377: Introduced listener for folder events in IMAP bundle to clear LIST/LSUB cache if necessary
 
 * 2011-05-27 - thorben.betten@open-xchange.com
 
