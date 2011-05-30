@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-05-30 13:50+0200\n"
+"PO-Revision-Date: 2011-05-30 16:41+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -3568,12 +3568,14 @@ msgstr "Fehlendes Argument: %1$s"
 
 #. OAuth Token has expired. Please authorize this account and try again.
 msgid ""
-"OAuth Token has expired. Please authorize the '%1$s' account in "
-"configuration->my social ox->accounts and try again."
+"Your '%1$s' password changed. You have to authorize the server to use your "
+"account with the new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
 msgstr ""
-"OAuth Token ist abgelaufen. Authorisieren Sie bitte den '%1$s' -Account "
-"unter Konfiguration -> Mein Social OX -> Accounts und versuchen Sie es "
-"erneut."
+"Ihr '%1$s'-Passwort wurde geändert. Sie müssen den Server zur Nutzung Ihres "
+"Accounts mit dem neuen Passwort autorisieren: Konfiguration -> Meine "
+"Social-Einstellungen -> Accounts. "
+"Versuchen Sie es dann erneut."
 
 #. An OAuth error occurred: %1$s
 msgid "An OAuth error occurred: %1$s"
@@ -3787,6 +3789,9 @@ msgstr ""
 "einem zeitweisen Ausfall oder einer dauerhaften Änderung seitens des "
 "Drittanbieters. Bitte rufen Sie diesen Dienst zu einem späteren Zeitpunkt "
 "wieder auf."
+
+msgid "Missing argument. %1$s"
+msgstr "Fehlendes Argument. %1$s"
 
 #. The consumer key/consumer secret pair is missing in configuration.
 msgid "The consumer key/consumer secret pair is missing in configuration."
@@ -5021,6 +5026,14 @@ msgstr "Fehlendes Feld \"%1$s\" in JSON-Objekt."
 #. Unknown operation: %1$s.
 msgid "Unknown operation: %1$s."
 msgstr "Unbekannte Aktion: %1$s."
+
+#~ msgid ""
+#~ "OAuth Token has expired. Please authorize the '%1$s' account in "
+#~ "configuration->my social ox->accounts and try again."
+#~ msgstr ""
+#~ "OAuth Token ist abgelaufen. Authorisieren Sie bitte den '%1$s' -Account "
+#~ "unter Konfiguration -> Mein Social OX -> Accounts und versuchen Sie es "
+#~ "erneut."
 
 #~ msgid ""
 #~ "Defined permissions for folder %1$s in context %2$s are not applicable to "
