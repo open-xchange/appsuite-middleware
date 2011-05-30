@@ -97,6 +97,8 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
 
     private static final Log LOG = LogFactory.getLog(VisibleFoldersPerformer.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link VisibleFoldersPerformer} from given session.
      * 
@@ -178,7 +180,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
+        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
             final List<SortableId> allSubfolderIds =
@@ -377,7 +379,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("VisibleSubfoldersPerformer.doVisibleSubfolders() took ").append(duration).append(
                     "msec").toString());

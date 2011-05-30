@@ -72,6 +72,8 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GetPerformer.class);
 
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link GetPerformer}.
      * 
@@ -121,7 +123,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
+        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (folderStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(folderStorage);
@@ -146,7 +148,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
             // TODO: All or only subscribed subfolders?
             final UserizedFolder userizedFolder =
                 getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("Get.doGet() took ").append(duration).append("msec for folder: ").append(folderId).toString());
             }

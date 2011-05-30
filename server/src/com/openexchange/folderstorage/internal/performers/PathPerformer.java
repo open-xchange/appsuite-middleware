@@ -74,6 +74,8 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PathPerformer.class);
 
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link PathPerformer} from given session.
      * 
@@ -180,7 +182,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
+        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (folderStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(folderStorage);
@@ -238,7 +240,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG_ENABLED) {
             final long duration = System.currentTimeMillis() - start;
             LOG.debug(new StringBuilder().append("Path.doPath() took ").append(duration).append(
                 "msec for parent folder: ").append(folderId).toString());

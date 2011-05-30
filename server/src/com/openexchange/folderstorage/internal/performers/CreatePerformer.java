@@ -80,6 +80,8 @@ public final class CreatePerformer extends AbstractPerformer {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CreatePerformer.class);
 
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link CreatePerformer}.
      * 
@@ -131,7 +133,7 @@ public final class CreatePerformer extends AbstractPerformer {
         if (null == parentId) {
             throw FolderExceptionErrorMessage.MISSING_PARENT_ID.create(new Object[0]);
         }
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
+        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         final String treeId = toCreate.getTreeID();
         if (null == treeId) {
             throw FolderExceptionErrorMessage.MISSING_TREE_ID.create(new Object[0]);
@@ -175,7 +177,7 @@ public final class CreatePerformer extends AbstractPerformer {
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.commitTransaction(storageParameters);
             }
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("Create.doCreate() took ").append(duration).append("msec for folder: ").append(newId).toString());
             }
