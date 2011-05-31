@@ -61,6 +61,10 @@ import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -103,6 +107,10 @@ public final class ListLsubCache {
                 collection.remove(fullName);
             }
         }
+        /*
+         * Clear other sessions' caches
+         */
+        performClearOtherCaches(accountId, session);
     }
 
     /**
@@ -138,6 +146,45 @@ public final class ListLsubCache {
                 collection.clear();
             }
         }
+        /*
+         * Clear other sessions' caches
+         */
+        performClearOtherCaches(accountId, session);
+    }
+
+    private static void performClearOtherCaches(final int accountId, final Session session) {
+        final ThreadPoolService pool = IMAPServiceRegistry.getService(ThreadPoolService.class);
+        if (null == pool) {
+            clearOtherCaches(accountId, session);
+        } else {
+            final Runnable clearTask = new Runnable() {
+
+                public void run() {
+                    try {
+                        clearOtherCaches(accountId, session);
+                    } catch (final Exception e) {
+                        org.apache.commons.logging.LogFactory.getLog(ListLsubCache.class).warn("Failed to clear other sessions' caches.", e);
+                    }
+                }
+            };
+            pool.submit(ThreadPools.task(clearTask), CallerRunsBehavior.getInstance());
+        }
+    }
+
+    static void clearOtherCaches(final int accountId, final Session session) {
+        /*
+         * Clear cache for other known sessions, too
+         */
+        final SessiondService sessiondService = IMAPServiceRegistry.getService(SessiondService.class);
+        if (null != sessiondService) { // Service present
+            final String sessionID = session.getSessionID();
+            for (final Session ses : sessiondService.getSessions(session.getUserId(), session.getContextId())) {
+                if (!sessionID.equals(ses.getSessionID())) { // Not for specified session
+                    ListLsubCache.clearCache(accountId, ses);
+                }
+            }
+
+        }
     }
 
     /**
@@ -157,6 +204,10 @@ public final class ListLsubCache {
             }
             collection.addSingle(fullName, imapFolder, DO_STATUS, DO_GETACL);
         }
+        /*
+         * Clear other sessions' caches
+         */
+        performClearOtherCaches(accountId, session);
     }
 
     /**
