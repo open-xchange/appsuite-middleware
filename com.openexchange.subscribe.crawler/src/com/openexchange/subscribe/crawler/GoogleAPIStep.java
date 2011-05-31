@@ -88,7 +88,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements LoginStep {
 
     private String username, password;
-    
+
     private static final Log LOG = LogFactory.getLog(GoogleAPIStep.class);
 
     public GoogleAPIStep() {
@@ -110,179 +110,191 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             final ContactsService myService = new ContactsService("com.openexchange");
             myService.setUserCredentials(username, password);
             feedUrl = new URL("http://www.google.com/m8/feeds/contacts/" + username + "/full?max-results=5000");
-            final ContactFeed resultFeed = myService.getFeed(feedUrl, ContactFeed.class);           
+            final ContactFeed resultFeed = myService.getFeed(feedUrl, ContactFeed.class);
             for (int i = 0; i < resultFeed.getEntries().size(); i++) {
-                try{
-                final Contact contact = new Contact();
-                final ContactEntry entry = resultFeed.getEntries().get(i);
-                if (entry.hasName()) {
-                    final com.google.gdata.data.extensions.Name name = entry.getName();
-                    if (name.hasFullName()) {
-                        contact.setDisplayName(name.getFullName().getValue());
+                try {
+                    final Contact contact = new Contact();
+                    final ContactEntry entry = resultFeed.getEntries().get(i);
+                    if (entry.hasName()) {
+                        final com.google.gdata.data.extensions.Name name = entry.getName();
+                        if (name.hasFullName()) {
+                            contact.setDisplayName(name.getFullName().getValue());
+                        }
+                        if (name.hasNamePrefix()) {
+                            contact.setTitle(name.getNamePrefix().getValue());
+                        }
+                        if (name.hasGivenName()) {
+                            contact.setGivenName(name.getGivenName().getValue());
+                        }
+                        if (name.hasAdditionalName()) {
+                            contact.setMiddleName(name.getAdditionalName().getValue());
+                        }
+                        if (name.hasFamilyName()) {
+                            contact.setSurName(name.getFamilyName().getValue());
+                        }
+                        if (name.hasNameSuffix()) {
+                            contact.setSuffix(name.getNameSuffix().getValue());
+                        }
                     }
-                    if (name.hasNamePrefix()) {
-                        contact.setTitle(name.getNamePrefix().getValue());
+                    if (entry.hasOrganizations()) {
+                        for (final Organization o : entry.getOrganizations()) {
+                            if (o.hasOrgName())
+                                contact.setCompany(o.getOrgName().getValue());
+                            if (o.hasOrgJobDescription())
+                                contact.setTitle(o.getOrgJobDescription().getValue());
+                        }
                     }
-                    if (name.hasGivenName()) {
-                        contact.setGivenName(name.getGivenName().getValue());
-                    }
-                    if (name.hasAdditionalName()) {
-                        contact.setMiddleName(name.getAdditionalName().getValue());
-                    }
-                    if (name.hasFamilyName()) {
-                        contact.setSurName(name.getFamilyName().getValue());
-                    }
-                    if (name.hasNameSuffix()) {
-                        contact.setSuffix(name.getNameSuffix().getValue());
-                    }
-                }
-                
-                for (final Organization o : entry.getOrganizations()) {
-                    contact.setCompany(o.getOrgName().getValue());
-                }
 
-                for (final Email email : entry.getEmailAddresses()) {
-                    if (email.getRel() != null) {
-                        if (email.getRel().endsWith("work")) {
-                            contact.setEmail1(email.getAddress());
-                        } else if (email.getRel().endsWith("home")) {
-                            contact.setEmail2(email.getAddress());
-                        } else if (email.getRel().endsWith("other")) {
-                            contact.setEmail3(email.getAddress());
+                    if (entry.hasEmailAddresses()) {
+                        for (final Email email : entry.getEmailAddresses()) {
+                            if (email.getRel() != null) {
+                                if (email.getRel().endsWith("work")) {
+                                    contact.setEmail1(email.getAddress());
+                                } else if (email.getRel().endsWith("home")) {
+                                    contact.setEmail2(email.getAddress());
+                                } else if (email.getRel().endsWith("other")) {
+                                    contact.setEmail3(email.getAddress());
+                                }
+                            }
                         }
                     }
-                }
 
-                for (final PhoneNumber pn : entry.getPhoneNumbers()) {
-                    if (pn.getRel() != null) {
-                        if (pn.getRel().endsWith("work")) {
-                            contact.setTelephoneBusiness1(pn.getPhoneNumber());
-                        } else if (pn.getRel().endsWith("home")) {
-                            contact.setTelephoneHome1(pn.getPhoneNumber());
-                        } else if (pn.getRel().endsWith("other")) {
-                            contact.setTelephoneOther(pn.getPhoneNumber());
-                        } else if (pn.getRel().endsWith("work_fax")) {
-                            contact.setFaxBusiness(pn.getPhoneNumber());
-                        } else if (pn.getRel().endsWith("home_fax")) {
-                            contact.setFaxHome(pn.getPhoneNumber());
-                        } else if (pn.getRel().endsWith("mobile")) {
-                            contact.setCellularTelephone1(pn.getPhoneNumber());
-                        }
-                    }
-                }
-                
-                if (entry.getBirthday() != null){
-                    final String birthday = entry.getBirthday().getValue();
-                    final String regex = "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})";        
-                    if (birthday.matches(regex)){
-                        final Pattern pattern = Pattern.compile(regex);
-                        final Matcher matcher = pattern.matcher(birthday);
-                        if (matcher.matches() && matcher.groupCount() == 3){
-                            final int year = Integer.valueOf(matcher.group(1));
-                            final int month = Integer.valueOf(matcher.group(2));
-                            final int day = Integer.valueOf(matcher.group(3));
-                            final Calendar cal = Calendar.getInstance();
-                            cal.clear();
-                            cal.set(year, month, day);
-                            contact.setBirthday(cal.getTime());
-                        }
-                    }
-                }
-                for (final StructuredPostalAddress pa :entry.getStructuredPostalAddresses()){
-                    if (pa.getRel() != null){
-                        if (pa.getRel().endsWith("work")){                            
-                            if (pa.getStreet() != null) {
-                                contact.setStreetBusiness(pa.getStreet().getValue());
-                            }
-                            if (pa.getPostcode() != null) {
-                                contact.setPostalCodeBusiness(pa.getPostcode().getValue());
-                            }
-                            if (pa.getCity() != null) {
-                                contact.setCityBusiness(pa.getCity().getValue());
-                            }
-                            if (pa.getCountry() != null) {
-                                contact.setCountryBusiness(pa.getCountry().getValue());
-                                //TODO: This will be used to write the address to the contacts note-field if the data is not structured
-                                //System.out.println("***** "+"Work:\n"+pa.getFormattedAddress().getValue()+"\n");
-                            }
-                        }
-                        if (pa.getRel().endsWith("home")){
-                            if (pa.getStreet() != null) {
-                                contact.setStreetHome(pa.getStreet().getValue());
-                            }
-                            if (pa.getPostcode() != null) {
-                                contact.setPostalCodeHome(pa.getPostcode().getValue());
-                            }
-                            if (pa.getCity() != null) {
-                                contact.setCityHome(pa.getCity().getValue());
-                            }
-                            if (pa.getCountry() != null) {
-                                contact.setCountryHome(pa.getCountry().getValue());
-                            }
-                        }
-                        if (pa.getRel().endsWith("other")){
-                            if (pa.getStreet() != null) {
-                                contact.setStreetOther(pa.getStreet().getValue());
-                            }
-                            if (pa.getPostcode() != null) {
-                                contact.setPostalCodeOther(pa.getPostcode().getValue());
-                            }
-                            if (pa.getCity() != null) {
-                                contact.setCityOther(pa.getCity().getValue());
-                            }
-                            if (pa.getCountry() != null) {
-                                contact.setCountryOther(pa.getCountry().getValue());
+                    if (entry.hasPhoneNumbers()) {
+                        for (final PhoneNumber pn : entry.getPhoneNumbers()) {
+                            if (pn.getRel() != null) {
+                                if (pn.getRel().endsWith("work")) {
+                                    contact.setTelephoneBusiness1(pn.getPhoneNumber());
+                                } else if (pn.getRel().endsWith("home")) {
+                                    contact.setTelephoneHome1(pn.getPhoneNumber());
+                                } else if (pn.getRel().endsWith("other")) {
+                                    contact.setTelephoneOther(pn.getPhoneNumber());
+                                } else if (pn.getRel().endsWith("work_fax")) {
+                                    contact.setFaxBusiness(pn.getPhoneNumber());
+                                } else if (pn.getRel().endsWith("home_fax")) {
+                                    contact.setFaxHome(pn.getPhoneNumber());
+                                } else if (pn.getRel().endsWith("mobile")) {
+                                    contact.setCellularTelephone1(pn.getPhoneNumber());
+                                }
                             }
                         }
                     }
-                }   
-                for (final Im im : entry.getImAddresses()) {
-                    if (im.getProtocol() != null) {
-                        final String regex = "[^#]*#([a-zA-Z\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc]*)";
-                        final Pattern pattern = Pattern.compile(regex);
-                        final Matcher matcher = pattern.matcher(im.getProtocol());
-                        if (matcher.matches()){
-                            contact.setInstantMessenger1(im.getAddress()+" ("+matcher.group(1)+")");
+
+                    if (entry.getBirthday() != null) {
+                        final String birthday = entry.getBirthday().getValue();
+                        final String regex = "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})";
+                        if (birthday.matches(regex)) {
+                            final Pattern pattern = Pattern.compile(regex);
+                            final Matcher matcher = pattern.matcher(birthday);
+                            if (matcher.matches() && matcher.groupCount() == 3) {
+                                final int year = Integer.valueOf(matcher.group(1));
+                                final int month = Integer.valueOf(matcher.group(2));
+                                final int day = Integer.valueOf(matcher.group(3));
+                                final Calendar cal = Calendar.getInstance();
+                                cal.clear();
+                                cal.set(year, month, day);
+                                contact.setBirthday(cal.getTime());
+                            }
+                        }
+                    }
+                    if (entry.hasStructuredPostalAddresses()) {
+                        for (final StructuredPostalAddress pa : entry.getStructuredPostalAddresses()) {
+                            if (pa.getRel() != null) {
+                                if (pa.getRel().endsWith("work")) {
+                                    if (pa.getStreet() != null) {
+                                        contact.setStreetBusiness(pa.getStreet().getValue());
+                                    }
+                                    if (pa.getPostcode() != null) {
+                                        contact.setPostalCodeBusiness(pa.getPostcode().getValue());
+                                    }
+                                    if (pa.getCity() != null) {
+                                        contact.setCityBusiness(pa.getCity().getValue());
+                                    }
+                                    if (pa.getCountry() != null) {
+                                        contact.setCountryBusiness(pa.getCountry().getValue());
+                                        // TODO: This will be used to write the address to the contacts note-field if the data is not
+                                        // structured
+                                        // System.out.println("***** "+"Work:\n"+pa.getFormattedAddress().getValue()+"\n");
+                                    }
+                                }
+                                if (pa.getRel().endsWith("home")) {
+                                    if (pa.getStreet() != null) {
+                                        contact.setStreetHome(pa.getStreet().getValue());
+                                    }
+                                    if (pa.getPostcode() != null) {
+                                        contact.setPostalCodeHome(pa.getPostcode().getValue());
+                                    }
+                                    if (pa.getCity() != null) {
+                                        contact.setCityHome(pa.getCity().getValue());
+                                    }
+                                    if (pa.getCountry() != null) {
+                                        contact.setCountryHome(pa.getCountry().getValue());
+                                    }
+                                }
+                                if (pa.getRel().endsWith("other")) {
+                                    if (pa.getStreet() != null) {
+                                        contact.setStreetOther(pa.getStreet().getValue());
+                                    }
+                                    if (pa.getPostcode() != null) {
+                                        contact.setPostalCodeOther(pa.getPostcode().getValue());
+                                    }
+                                    if (pa.getCity() != null) {
+                                        contact.setCityOther(pa.getCity().getValue());
+                                    }
+                                    if (pa.getCountry() != null) {
+                                        contact.setCountryOther(pa.getCountry().getValue());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (entry.hasImAddresses()) {
+                        for (final Im im : entry.getImAddresses()) {
+                            if (im.getProtocol() != null) {
+                                final String regex = "[^#]*#([a-zA-Z\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc]*)";
+                                final Pattern pattern = Pattern.compile(regex);
+                                final Matcher matcher = pattern.matcher(im.getProtocol());
+                                if (matcher.matches()) {
+                                    contact.setInstantMessenger1(im.getAddress() + " (" + matcher.group(1) + ")");
+                                }
+                            }
+
                         }
                     }
                     
+                    if (entry.getContactPhotoLink() != null && entry.getContactPhotoLink().getEtag() != null) {
+                        final Link photoLink = entry.getContactPhotoLink();
+                        final Service.GDataRequest request = myService.createLinkQueryRequest(photoLink);
+                        request.execute();
+                        final InputStream in = request.getResponseStream();
+                        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        final byte[] buffer = new byte[4096];
+                        for (int read = 0; (read = in.read(buffer)) != -1; out.write(buffer, 0, read)) {
+                        }
+                        contact.setImage1(out.toByteArray());
+                        contact.setImageContentType("image/jpeg");
+                    }
 
-                }
-
-                if (entry.getContactPhotoLink() != null && entry.getContactPhotoLink().getEtag() != null){
-                    final Link photoLink = entry.getContactPhotoLink();
-                    final Service.GDataRequest request = myService.createLinkQueryRequest(photoLink);
-                    request.execute();
-                    final InputStream in = request.getResponseStream();
-                    final ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    final byte[] buffer = new byte[4096];
-                    for (int read = 0; (read = in.read(buffer)) != -1; 
-                        out.write(buffer, 0, read)) {}
-                    contact.setImage1(out.toByteArray());
-                    contact.setImageContentType("image/jpeg");
-                }
-
-                contacts.add(contact);                
-                } catch (final NullPointerException e){            
+                    contacts.add(contact);
+                } catch (final NullPointerException e) {
                     LOG.error(e);
                 }
             }
         } catch (final MalformedURLException e) {
             LOG.error(e);
-            LOG.error("User with id="+workflow.getSubscription().getUserId()+ " and context="+ workflow.getSubscription().getContext()+" failed to subscribe source="+workflow.getSubscription().getSource().getDisplayName()+" with display_name="+workflow.getSubscription().getDisplayName());
+            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         } catch (final IOException e) {
             LOG.error(e);
-            LOG.error("User with id="+workflow.getSubscription().getUserId()+ " and context="+ workflow.getSubscription().getContext()+" failed to subscribe source="+workflow.getSubscription().getSource().getDisplayName()+" with display_name="+workflow.getSubscription().getDisplayName());
+            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
-        } catch (final InvalidCredentialsException e){
-            LOG.error("User with id="+workflow.getSubscription().getUserId()+ " and context="+ workflow.getSubscription().getContext()+" failed to subscribe source="+workflow.getSubscription().getSource().getDisplayName()+" with display_name="+workflow.getSubscription().getDisplayName());
+        } catch (final InvalidCredentialsException e) {
+            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
         } catch (final ServiceException e) {
-            LOG.error("User with id="+workflow.getSubscription().getUserId()+ " and context="+ workflow.getSubscription().getContext()+" failed to subscribe source="+workflow.getSubscription().getSource().getDisplayName()+" with display_name="+workflow.getSubscription().getDisplayName());
-            LOG.error(e); 
+            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            LOG.error(e);
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
-        } 
+        }
 
         output = new Contact[contacts.size()];
         for (int i = 0; i < output.length && i < contacts.size(); i++) {
