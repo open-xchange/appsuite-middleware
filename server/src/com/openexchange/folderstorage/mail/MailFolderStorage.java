@@ -93,6 +93,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
@@ -101,6 +102,7 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailProvider;
@@ -512,13 +514,23 @@ public final class MailFolderStorage implements FolderStorage {
             }
             mailAccess = MailAccess.getInstance(session, accountId);
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-                return 0 == mailAccess.getRootFolder().getMessageCount();
+                return true;
             }
             /*
              * Non-root folder
              */
             mailAccess.connect(false);
-            return 0 == mailAccess.getFolderStorage().getFolder(fullname).getMessageCount();
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof IMailFolderStorageEnhanced) {
+                return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(fullname) > 0;
+            }
+            return 0 == mailAccess.getMessageStorage().searchMessages(
+                fullname,
+                new IndexRange(0, 1),
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.DESC,
+                null,
+                new MailField[] { MailField.ID }).length;
         } catch (final MailException e) {
             throw new FolderException(e);
         } finally {
