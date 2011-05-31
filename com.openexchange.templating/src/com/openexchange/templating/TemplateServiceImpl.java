@@ -274,7 +274,7 @@ public class TemplateServiceImpl implements TemplateService {
         Set<String> defaults = new HashSet<String>();
         for (File file : files) {
         	Set<String> tags = tagMap.get(file.getName());
-            if (file.isFile() && file.canRead() && file.getName().endsWith(".tmpl") && (tags == null || tags.containsAll(sieve))) {
+            if (file.isFile() && file.canRead() && file.getName().endsWith(".tmpl") && tags != null && tags.containsAll(sieve)) {
                 if (tags != null && tags.contains("default")) {
                     defaults.add(file.getName());
                 } else {
