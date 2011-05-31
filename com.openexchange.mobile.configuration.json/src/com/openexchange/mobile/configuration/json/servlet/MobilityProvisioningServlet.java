@@ -74,9 +74,11 @@ import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
 import com.openexchange.mobile.configuration.json.container.ProvisioningInformation;
 import com.openexchange.mobile.configuration.json.container.ProvisioningResponse;
+import com.openexchange.mobile.configuration.json.exception.MobileProvisioningJsonExceptionCodes;
 import com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -127,8 +129,10 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			}
 		} catch (AjaxException e) {
 			LOG.error("Missing or wrong field action in JSON request", e);
+			response.setException(e);
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
+            response.setException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e) );
 		}
 		
 		response.setData(obj);
@@ -206,14 +210,18 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 								user);
 												
 			    		provisioningResponse = service.handleAction(provisioningInformation);
-			    	} catch (ActionException e) {
-			    		LOG.error(e.getLocalizedMessage(), e);
 			    	} catch (ContextException e) {
 			    		LOG.error(e.getLocalizedMessage(), e);
+			    		response.setException(MobileProvisioningJsonExceptionCodes.CONTEXT_ERROR.create(e, session.getContextId()));
 					} catch (LdapException e) {
 						LOG.error(e.getLocalizedMessage(), e);
+						response.setException(MobileProvisioningJsonExceptionCodes.USER_ERROR.create(e, session.getUserId()));
 					} catch (ServiceException e) {
 						LOG.error(e.getLocalizedMessage(), e);
+						response.setException(MobileProvisioningJsonExceptionCodes.CONFIGURATION_ERROR.create(e));
+					} catch (ActionException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+			    		response.setException(MobileProvisioningJsonExceptionCodes.ACTION_ERROR.create(e));
 					}
 			    } else {
 			    	provisioningResponse = new ProvisioningResponse(false, "Service " + action + " provisioning is not available.");
@@ -228,8 +236,12 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			}
 		} catch (AjaxException e) {
 			LOG.error("Missing or wrong field action in JSON request", e);
+			response.setException(e);
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
+            response.setException(
+            	new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e)
+            );
 		}
 		
 		response.setData(obj);
@@ -240,6 +252,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		try {
 			ResponseWriter.write(response, resp.getWriter());
 		} catch (final JSONException e) {
+			//cannot send this to user, so just log it:
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 

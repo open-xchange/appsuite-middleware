@@ -60,7 +60,9 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.mobile.configuration.json.action.ActionService;
+import com.openexchange.mobile.configuration.json.exception.MobileProvisioningJsonExceptionFactory;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.tools.service.SessionServletRegistration;
@@ -71,7 +73,8 @@ import com.openexchange.tools.service.SessionServletRegistration;
  * 
  */
 public class MobilityProvisioningActivator extends DeferredActivator {
-    
+    private ComponentRegistration componentRegistration;
+
     private static transient final Log LOG = LogFactory.getLog(MobilityProvisioningActivator.class);
     private final static String SERVLET_PATH = "/ajax/mobilityprovisioning";
     
@@ -127,7 +130,8 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 			
 			this.servletRegistration = new SessionServletRegistration(context, new MobilityProvisioningServlet(), SERVLET_PATH);
 			this.servletRegistration.open();
-			
+            this.componentRegistration = new ComponentRegistration(context, "MCJ", "com.openexchange.mobile.configuration.json", MobileProvisioningJsonExceptionFactory.getInstance());
+
             serviceTrackerList.add(new ServiceTracker(context, ActionService.class.getName(), new ActionServiceListener(context)));
             
             // Open service trackers
@@ -147,6 +151,11 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 		    if(this.servletRegistration != null) {
 	            this.servletRegistration.close();
 	            this.servletRegistration = null;
+		    }
+		    
+		    if(this.componentRegistration != null) {
+		    	componentRegistration.unregister();
+		    	componentRegistration = null;
 		    }
 		    
             /*

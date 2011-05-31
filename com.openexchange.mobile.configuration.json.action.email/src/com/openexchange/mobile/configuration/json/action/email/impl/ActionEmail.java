@@ -72,7 +72,7 @@ public class ActionEmail implements ActionService {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 	
-    public ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation) throws ActionException {
+    public ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation){
     	ProvisioningResponse provisioningResponse = new ProvisioningResponse();
     	
     	try {		
@@ -111,8 +111,12 @@ public class ActionEmail implements ActionService {
 			provisioningResponse.setSuccess(true);
 		} catch (MailException e) {
 			logError("Couldn't send provisioning mail", e, provisioningResponse);
+			provisioningResponse.setMessage("Couldn't send provisioning mail");
+			provisioningResponse.setSuccess(false);
 		} catch (AddressException e) {
 			logError("Target Spam email address cannot be parsed", e, provisioningResponse);
+			provisioningResponse.setMessage("Target Spam email address cannot be parsed");
+			provisioningResponse.setSuccess(false);
 		}
     	
     	return provisioningResponse;

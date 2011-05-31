@@ -73,8 +73,7 @@ public class ActionSMS implements ActionService {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 
 	public ProvisioningResponse handleAction(
-			ProvisioningInformation provisioningInformation)
-			throws ActionException {
+			ProvisioningInformation provisioningInformation){
 		ProvisioningResponse provisioningResponse = new ProvisioningResponse();
 		int cid = provisioningInformation.getCtx().getContextId();
 		int userid = provisioningInformation.getUser().getId();
