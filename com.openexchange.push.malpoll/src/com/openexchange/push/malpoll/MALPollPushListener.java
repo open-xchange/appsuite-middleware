@@ -385,9 +385,9 @@ public final class MALPollPushListener implements PushListener {
         mailAccess.connect();
         try {
             final String fullname = folder;
-            final Set<String> uidSet = new HashSet<String>(mailAccess.getFolderStorage().getFolder(fullname).getMessageCount());
             final MailMessage[] messages =
                 mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
+            final Set<String> uidSet = new HashSet<String>(messages.length);
             for (final MailMessage mailMessage : messages) {
                 uidSet.add(mailMessage.getMailId());
             }
