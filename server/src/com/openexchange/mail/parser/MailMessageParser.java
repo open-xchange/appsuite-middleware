@@ -483,8 +483,7 @@ public final class MailMessageParser {
                          * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
                          * implementation
                          */
-                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount);
-                        partCount++;
+                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
                     }
                     /*
                      * Stop to further process TNEF attachment
@@ -510,8 +509,7 @@ public final class MailMessageParser {
                          * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
                          * implementation
                          */
-                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount);
-                        partCount++;
+                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
                     }
                     /*
                      * Stop to further process TNEF attachment
@@ -559,8 +557,7 @@ public final class MailMessageParser {
                         /*
                          * Parse part
                          */
-                        parseMailContent(MIMEMessageConverter.convertPart(part), handler, prefix, partCount);
-                        partCount++;
+                        parseMailContent(MIMEMessageConverter.convertPart(part), handler, prefix, partCount++);
                         /*
                          * Stop to further process TNEF attachment
                          */
@@ -576,8 +573,7 @@ public final class MailMessageParser {
                     final String value = (String) attrBody.getValue();
                     bodyPart.setText(value);
                     bodyPart.setSize(value.length());
-                    parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount);
-                    partCount++;
+                    parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                 }
                 /*
                  * Check for possible RTF content
@@ -606,8 +602,7 @@ public final class MailMessageParser {
                             bodyPart.setSize(decompressedBytes.length);
                             final MailPart convertedPart = MIMEMessageConverter.convertPart(bodyPart);
                             convertedPart.setFileName(new StringBuilder(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
-                            parseMailContent(convertedPart, handler, prefix, partCount);
-                            partCount++;
+                            parseMailContent(convertedPart, handler, prefix, partCount++);
                             /*
                              * Stop to further process TNEF attachment
                              */
@@ -659,8 +654,7 @@ public final class MailMessageParser {
                             os.reset();
                             attachment.writeTo(os);
                             bodyPart.setSize(os.size());
-                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount);
-                            partCount++;
+                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
                              * Nested message
@@ -671,8 +665,7 @@ public final class MailMessageParser {
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
                             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
-                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount);
-                            partCount++;
+                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         }
                     }
                 } else {
@@ -708,8 +701,7 @@ public final class MailMessageParser {
                                 MIMEMessageUtility.foldContentDisposition(cd.toString()));
                         }
                         bodyPart.setSize(messageClass.getLength());
-                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount);
-                        partCount++;
+                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
             } catch (final IOException tnefExc) {
