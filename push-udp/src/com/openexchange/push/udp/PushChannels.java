@@ -49,9 +49,11 @@
 
 package com.openexchange.push.udp;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -134,12 +136,16 @@ public class PushChannels {
         return externalChannel;
     }
     
-    public void makeAndSendPackage(final byte[] b, final InetAddress host, final int port, ChannelType channel) throws Exception {
+    public void makeAndSendPackage(final byte[] b, final InetAddress host, final int port, ChannelType channel) {
         final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
-        getSocket(channel).send(datagramPackage);
+        try {
+            getSocket(channel).send(datagramPackage);
+        } catch (IOException x) {
+            LOG.error("Could not send package to "+host+":"+port+" Using "+channel+" socket.", x);
+        }
     }
 
-    public void makeAndSendPackage(final byte[] b, final String host, final int port, ChannelType channel) throws Exception {
+    public void makeAndSendPackage(final byte[] b, final String host, final int port, ChannelType channel) throws UnknownHostException {
         makeAndSendPackage(b, InetAddress.getByName(host), port, channel);
     }
 

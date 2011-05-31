@@ -1,3 +1,7 @@
+* 2011-05-31 - francisco.laguna@open-xchange.com
+
+  - Bugfix 18630: Improved logging of UDP send errors.
+
 * 2011-05-30 - thorben.betten@open-xchange.com
 
  - Bugfix #19362: Throwing a meaningful error if folder creation returns an invalid folder identifier
