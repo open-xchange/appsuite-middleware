@@ -164,7 +164,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
     public abstract Quota[] getQuotas(String folder, Quota.Type[] types) throws MailException;
 
     /**
-     * Gets the prefix for default folders.
+     * Gets the prefix (incl. separator character) for default folders.
      * <p>
      * By now a compound full name is assumed. Override if not appropriate.
      * 
@@ -175,7 +175,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
         final String trashFullName = getTrashFolder();
         final char separator = getFolder(trashFullName).getSeparator();
         final int pos = trashFullName.lastIndexOf(separator);
-        return pos < 0 ? "" : trashFullName.substring(0, pos);
+        return pos < 0 ? "" : trashFullName.substring(0, pos + 1);
     }
 
     public abstract String getConfirmedHamFolder() throws MailException;
