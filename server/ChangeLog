@@ -10,6 +10,7 @@
 * 2011-06-01 - steffen.templin@open-xchange.com
 
  - Bugfix #19373 - The outlook updater should not display OXtender1 if outlook 2010 is installed
+ - Bugfix #19226 - OutlookUpdater bundle now provides two settings to indicate if module is available and if the user has all necessary permissions to see it
 
 * 2011-05-31 - thorben.betten@open-xchange.com
 
