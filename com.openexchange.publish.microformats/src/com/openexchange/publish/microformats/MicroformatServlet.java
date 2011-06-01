@@ -191,6 +191,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (!checkProtected(publication, args, resp)) {
                 return;
             }
+            
+            if (!checkPublicationPermission(publication, resp)) {
+                return;
+            }
+
 
             final Collection<? extends Object> loaded = dataLoader.load(publication);
 

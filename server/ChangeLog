@@ -1,3 +1,7 @@
+* 2011-06-01 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19391: Check publication permission before delivering publication
+
 * 2011-06-01 - thorben.betten@open-xchange.com
 
  - Bugfix #19407: Checking for forbidden subscribe operation on a default folder

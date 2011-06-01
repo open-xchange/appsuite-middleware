@@ -145,7 +145,8 @@ public class ServletActivator extends DeferredActivator {
         activator.setTemplateService(templates);
         
         OnlinePublicationServlet.setContextService(contexts);
-
+        OnlinePublicationServlet.setUserConfigurationService(userConfigs);
+        
         MicroformatServlet.setPublicationDataLoaderService(dataLoader);
         MicroformatServlet.setUserService(users);
         MicroformatServlet.setStringTranslator(customizer);

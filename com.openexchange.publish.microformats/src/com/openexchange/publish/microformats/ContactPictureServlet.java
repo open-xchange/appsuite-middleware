@@ -114,6 +114,10 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
                 return;
             }
             
+            if (!checkPublicationPermission(publication, resp)) {
+                return;
+            }
+            
             final int folderId = Integer.parseInt(publication.getEntityId());
             final int contactId = Integer.parseInt(args.get(CONTACT_ID));
             

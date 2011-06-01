@@ -60,18 +60,24 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.publish.Publication;
-
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link OnlinePublicationServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class OnlinePublicationServlet extends HttpServlet {
 
+    private static final Log LOG = LogFactory.getLog(OnlinePublicationServlet.class);
+    
     private static final long serialVersionUID = 6966967169899449051L;
 
     protected static final String SECRET = "secret";
@@ -82,11 +88,17 @@ public class OnlinePublicationServlet extends HttpServlet {
      * The pattern to split by <code>"/"</code> character.
      */
     protected static final Pattern SPLIT = Pattern.compile("/");
-    
+
     protected static ContextService contexts = null;
 
     public static void setContextService(final ContextService service) {
         contexts = service;
+    }
+
+    protected static UserConfigurationService userConfigs = null;
+
+    public static void setUserConfigurationService(UserConfigurationService userConfigurationService) {
+        userConfigs = userConfigurationService;
     }
 
     protected boolean checkProtected(final Publication publication, final Map<String, String> args, final HttpServletResponse resp) throws IOException {
@@ -101,18 +113,37 @@ public class OnlinePublicationServlet extends HttpServlet {
         }
         return true;
     }
-    
+
+    protected boolean checkPublicationPermission(final Publication publication, final HttpServletResponse resp) throws IOException {
+
+        Context ctx = publication.getContext();
+        int userId = publication.getUserId();
+
+        try {
+            UserConfiguration userConfiguration = userConfigs.getUserConfiguration(userId, ctx);
+            if (userConfiguration.isPublication()) {
+                return true;
+            }
+        } catch (UserConfigurationException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        resp.getWriter().println("Cannot find the publication site.");
+
+        return true;
+    }
+
     // FIXME: Get Default Encoding from config service
     protected Collection<String> decode(final List<String> subList, final HttpServletRequest req) throws UnsupportedEncodingException {
         final String encoding = req.getCharacterEncoding() == null ? "UTF-8" : req.getCharacterEncoding();
         final List<String> decoded = new ArrayList<String>();
-        for(final String component : subList) {
+        for (final String component : subList) {
             final String decodedComponent = decode(component, encoding);
             decoded.add(decodedComponent);
         }
         return decoded;
     }
-    
+
     // FIXME use server service for this
     private String decode(final String string, final String encoding) throws UnsupportedEncodingException {
         final String[] chunks = string.split("\\+");
@@ -121,11 +152,11 @@ public class OnlinePublicationServlet extends HttpServlet {
         for (int i = 0; i < chunks.length; i++) {
             final String chunk = chunks[i];
             decoded.append(URLDecoder.decode(chunk, encoding));
-            if(i != chunks.length - 1 || endsWithPlus) {
+            if (i != chunks.length - 1 || endsWithPlus) {
                 decoded.append('+');
             }
         }
-        
+
         return decoded.toString();
     }
 }

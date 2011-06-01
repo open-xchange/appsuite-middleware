@@ -137,6 +137,10 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             if (!checkProtected(publication, args, resp)) {
                 return;
             }
+            
+            if (!checkPublicationPermission(publication, resp)) {
+                return;
+            }
 
             final int infoId = Integer.parseInt(args.get(INFOSTORE_ID));
      
