@@ -284,14 +284,6 @@ public interface IMailFolderStorage {
     public Quota[] getQuotas(String folder, Quota.Type[] types) throws MailException;
 
     /**
-     * Gets the prefix for default folders.
-     * 
-     * @return The prefix
-     * @throws MailException If a mail error occurs
-     */
-    public String getDefaultFolderPrefix() throws MailException;
-
-    /**
      * Gets the fullname of default confirmed ham folder
      * 
      * @return The fullname of default confirmed ham folder

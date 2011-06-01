@@ -163,6 +163,12 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
 
     public abstract Quota[] getQuotas(String folder, Quota.Type[] types) throws MailException;
 
+    /**
+     * Gets the prefix for default folders.
+     * 
+     * @return The prefix
+     * @throws MailException If a mail error occurs
+     */
     public String getDefaultFolderPrefix() throws MailException {
         final String trashFullName = getTrashFolder();
         final char separator = getFolder(trashFullName).getSeparator();
