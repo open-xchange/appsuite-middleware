@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-05-30 16:41+0200\n"
+"PO-Revision-Date: 2011-06-01 08:55+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -3483,6 +3483,20 @@ msgstr ""
 msgid "Message %1$s not found in folder %2$s."
 msgstr "Nachricht %1$s nicht im Ordner %2$s gefunden."
 
+msgid "An error occurred for action: %1$s"
+msgstr "Es trat ein Fehler für folgende Aktion auf: %1$s"
+
+#. this should not happen, action
+msgid "An error occurred loading context %1$s"
+msgstr "Beim Laden des Kontext %1$s trat ein Fehler auf"
+
+msgid "An error occurred loading user data for user %1$s"
+msgstr "Beim Laden der Benutzerdaten für den Benutzer %1$s trat ein Fehler auf"
+
+msgid "Could not load configuration or necessary field from configuration"
+msgstr ""
+"Konfiguration bzw. benötigtes Konfigurationsfeld konnte nicht geladen werden "
+
 #. Response is not of type: %1$s
 msgid "Response is not of type: %1$s"
 msgstr "Antwort ist nicht vom Typ: %1$s."
@@ -3573,9 +3587,8 @@ msgid ""
 "Configuration -> Accounts. Then try again."
 msgstr ""
 "Ihr '%1$s'-Passwort wurde geändert. Sie müssen den Server zur Nutzung Ihres "
-"Accounts mit dem neuen Passwort autorisieren: Konfiguration -> Meine "
-"Social-Einstellungen -> Accounts. "
-"Versuchen Sie es dann erneut."
+"Accounts mit dem neuen Passwort autorisieren: Konfiguration -> Meine Social-"
+"Einstellungen -> Accounts. Versuchen Sie es dann erneut."
 
 #. An OAuth error occurred: %1$s
 msgid "An OAuth error occurred: %1$s"
