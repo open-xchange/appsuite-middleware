@@ -603,6 +603,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         final MailConfig mailConfig = getMailConfig();
         final HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
         final Map<HostAndPort, Long> map = timedOutServers;
+        if (null == map) {
+            return;
+        }
         final Long range = map.get(key);
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
