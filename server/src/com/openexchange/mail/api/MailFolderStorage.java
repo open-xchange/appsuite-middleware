@@ -163,6 +163,13 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
 
     public abstract Quota[] getQuotas(String folder, Quota.Type[] types) throws MailException;
 
+    public String getDefaultFolderPrefix() throws MailException {
+        final String trashFullName = getTrashFolder();
+        final char separator = getFolder(trashFullName).getSeparator();
+        final int pos = trashFullName.lastIndexOf(separator);
+        return pos < 0 ? "" : trashFullName.substring(0, pos);
+    }
+
     public abstract String getConfirmedHamFolder() throws MailException;
 
     public abstract String getConfirmedSpamFolder() throws MailException;
