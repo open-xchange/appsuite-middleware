@@ -99,7 +99,7 @@ public final class ListAction extends AbstractMailAccountAction {
                 final int id = ids.getInt(i);
                 final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
                 if (!isUnifiedINBOXAccount(account) && (multipleEnabled || isDefaultMailAccount(account))) {
-                    accounts.add(account);
+                    accounts.add(checkFullNames(account, storageService, session));
                 }
             }
 

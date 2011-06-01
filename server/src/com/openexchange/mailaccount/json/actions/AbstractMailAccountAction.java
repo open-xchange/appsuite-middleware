@@ -52,16 +52,25 @@ package com.openexchange.mailaccount.json.actions;
 import static com.openexchange.mailaccount.json.Tools.getUnsignedInteger;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.secret.SecretService;
@@ -208,6 +217,118 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         }
         // All columns
         return Arrays.asList(Attribute.values());
+    }
+
+    protected static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session) throws MailAccountException {
+        final int accountId = account.getId();
+        if (MailAccount.DEFAULT_ID == accountId) {
+            /*
+             * No check for primary account
+             */
+            return account;
+        }
+        final MailAccountDescription mad = new MailAccountDescription();
+        mad.setId(accountId);
+        final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
+        /*
+         * Variables
+         */
+        String prefix = null;
+        StringBuilder tmp = null;
+        /*
+         * Check full names
+         */
+        String fullName = account.getConfirmedHamFullname();
+        if (null == fullName) {
+            prefix = getPrefix(accountId, session);
+            mad.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(account.getConfirmedHam()).toString());
+            attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
+        }
+        // Confirmed-Ham
+        fullName = account.getConfirmedSpamFullname();
+        if (null == fullName) {
+            if (null == prefix) {
+                prefix = getPrefix(accountId, session);
+                tmp = new StringBuilder(prefix);
+            } else {
+                tmp.setLength(prefix.length());
+            }
+            mad.setConfirmedSpamFullname(tmp.append(account.getConfirmedSpam()).toString());
+            attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
+        }
+        // Drafts
+        fullName = account.getDraftsFullname();
+        if (null == fullName) {
+            if (null == prefix) {
+                prefix = getPrefix(accountId, session);
+                tmp = new StringBuilder(prefix);
+            } else {
+                tmp.setLength(prefix.length());
+            }
+            mad.setDraftsFullname(tmp.append(account.getDrafts()).toString());
+            attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
+        }
+        // Sent
+        fullName = account.getSentFullname();
+        if (null == fullName) {
+            if (null == prefix) {
+                prefix = getPrefix(accountId, session);
+                tmp = new StringBuilder(prefix);
+            } else {
+                tmp.setLength(prefix.length());
+            }
+            mad.setSentFullname(tmp.append(account.getSent()).toString());
+            attributes.add(Attribute.SENT_FULLNAME_LITERAL);
+        }
+        // Spam
+        fullName = account.getSpamFullname();
+        if (null == fullName) {
+            if (null == prefix) {
+                prefix = getPrefix(accountId, session);
+                tmp = new StringBuilder(prefix);
+            } else {
+                tmp.setLength(prefix.length());
+            }
+            mad.setSpamFullname(tmp.append(account.getSpam()).toString());
+            attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
+        }
+        // Trash
+        fullName = account.getTrashFullname();
+        if (null == fullName) {
+            if (null == prefix) {
+                prefix = getPrefix(accountId, session);
+                tmp = new StringBuilder(prefix);
+            } else {
+                tmp.setLength(prefix.length());
+            }
+            mad.setTrashFullname(tmp.append(account.getTrash()).toString());
+            attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
+        }
+        /*
+         * Something to update?
+         */
+        if (attributes.isEmpty()) {
+            return account;
+        }
+        /*
+         * Update and return refetched account instance
+         */
+        storageService.updateMailAccount(mad, attributes, session.getUserId(), session.getContextId(), session.getPassword());
+        return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+    }
+
+    private static String getPrefix(final int accountId, final ServerSession session) throws MailAccountException {
+        try {
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = MailAccess.getInstance(session, accountId);
+            access.connect(false);
+            try {
+                return ((MailFolderStorage) access.getFolderStorage()).getDefaultFolderPrefix();
+            } finally {
+                access.close(true);
+            }
+        } catch (final MailException e) {
+            throw new MailAccountException(e);
+        }
     }
 
 }

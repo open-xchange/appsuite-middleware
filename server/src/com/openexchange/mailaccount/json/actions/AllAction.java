@@ -95,7 +95,7 @@ public final class AllAction extends AbstractMailAccountAction {
         for (final MailAccount userMailAccount : userMailAccounts) {
             final MailAccount mailAccount = userMailAccount;
             if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
-                tmp.add(mailAccount);
+                tmp.add(checkFullNames(mailAccount, storageService, session));
             }
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
