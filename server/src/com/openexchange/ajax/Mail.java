@@ -3513,7 +3513,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     queue.drainTo(messages);
                     for (final MimeMessage message : messages) {
-                        final String s = message.getHeader("Date", null);
+                        message.getHeader("Date", null);
                         final MailMessage mm = MIMEMessageConverter.convertMessage(message);
                         mails.add(mm);
                     }
