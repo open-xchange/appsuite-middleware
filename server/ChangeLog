@@ -1,3 +1,7 @@
+* 2011-06-01 - thorben.betten@open-xchange.com
+
+ - Bugfix #19407: Checking for forbidden subscribe operation on a default folder
+
 * 2011-06-01 - steffen.templin@open-xchange.com
 
  - Bugfix #19373 - The outlook updater should not display OXtender1 if outlook 2010 is installed

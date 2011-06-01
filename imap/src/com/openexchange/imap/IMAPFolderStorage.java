@@ -1523,6 +1523,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
              */
             synchronized (updateMe) {
                 /*
+                 * Check for standard folder & possible subscribe operation
+                 */
+                final boolean performSubscription = performSubscribe(toUpdate, updateMe);
+                if (performSubscription && getChecker().isDefaultFolder(fullName)) {
+                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, fullName);
+                }
+                /*
                  * Notify message storage
                  */
                 imapAccess.getMessageStorage().notifyIMAPFolderModification(fullName);
@@ -1603,7 +1610,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                 }
-                if (/* !MailProperties.getInstance().isIgnoreSubscription() && */toUpdate.containsSubscribed()) {
+                if (/* !MailProperties.getInstance().isIgnoreSubscription() && */performSubscription) {
                     /*
                      * Check read permission
                      */
@@ -1621,11 +1628,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                     final boolean subscribe = toUpdate.isSubscribed();
-                    if (updateMe.isSubscribed() != subscribe) {
-                        updateMe.setSubscribed(subscribe);
-                        IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), subscribe);
-                        changed = true;
-                    }
+                    updateMe.setSubscribed(subscribe);
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), subscribe);
+                    changed = true;
                 }
                 return updateMe.getFullName();
             }
@@ -1642,6 +1647,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 ListLsubCache.clearCache(accountId, session);
             }
         }
+    }
+
+    private static boolean performSubscribe(final MailFolderDescription toUpdate, final IMAPFolder updateMe) {
+        return toUpdate.containsSubscribed() && (toUpdate.isSubscribed() != updateMe.isSubscribed());
     }
 
     private void deleteTemporaryCreatedFolder(final IMAPFolder temporaryFolder) throws MailException, MessagingException {
