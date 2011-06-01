@@ -172,6 +172,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * @throws MailException If a mail error occurs
      */
     public String getDefaultFolderPrefix() throws MailException {
+        checkDefaultFolders();
         final String trashFullName = getTrashFolder();
         final char separator = getFolder(trashFullName).getSeparator();
         final int pos = trashFullName.lastIndexOf(separator);
