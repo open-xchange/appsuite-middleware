@@ -1996,6 +1996,54 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     @Override
+    public String getDefaultFolderPrefix() throws MailException {
+        try {
+            /*
+             * Try NAMESPACE command
+             */
+            final String prefix;
+            try {
+                final String[] namespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
+                if (null == namespaces || 0 == namespaces.length) {
+                    /*
+                     * No namespaces available
+                     */
+                    return prefixByInferiors();
+                }
+                prefix = namespaces[0];
+            } catch (final MessagingException e) {
+               /*
+                * NAMESPACE command failed for any reason
+                */
+               return prefixByInferiors();
+            }
+            final boolean isEmpty = prefix.length() == 0;
+            if (isEmpty && RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue()) {
+                return prefix;
+            }
+            return new StringBuilder(isEmpty ? STR_INBOX : prefix).append(NamespaceFoldersCache.getPersonalSeparator()).toString();
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    private String prefixByInferiors() throws MailException {
+        try {
+            final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+            if (!RootSubfolderCache.canCreateSubfolders(defaultFolder, true, session, accountId).booleanValue() || MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
+                return new StringBuilder(STR_INBOX).append(defaultFolder.getSeparator()).toString();
+            }
+            return "";
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
     public String getConfirmedHamFolder() throws MailException {
         return getChecker().getDefaultFolder(StorageUtility.INDEX_CONFIRMED_HAM);
     }
