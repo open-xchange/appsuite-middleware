@@ -165,6 +165,8 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
 
     /**
      * Gets the prefix for default folders.
+     * <p>
+     * By now a compound full name is assumed. Override if not appropriate.
      * 
      * @return The prefix
      * @throws MailException If a mail error occurs

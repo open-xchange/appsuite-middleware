@@ -268,14 +268,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 mailAccount.setPassword(pw);
             }
             mailAccount.setPrimaryAddress(result.getString(5));
+            /*
+             * Default folder names
+             */
             mailAccount.setTrash(getOptionalString(result.getString(7)));
             mailAccount.setSent(getOptionalString(result.getString(8)));
             mailAccount.setDrafts(getOptionalString(result.getString(9)));
             mailAccount.setSpam(getOptionalString(result.getString(10)));
             mailAccount.setConfirmedSpam(getOptionalString(result.getString(11)));
             mailAccount.setConfirmedHam(getOptionalString(result.getString(12)));
+            /*
+             * Spam handler name
+             */
             mailAccount.setSpamHandler(result.getString(13));
+            /*
+             * Unified mail enabled
+             */
             mailAccount.setUnifiedINBOXEnabled(result.getInt(14) > 0);
+            /*
+             * Default folder full names
+             */
             mailAccount.setTrashFullname(getOptionalString(result.getString(15)));
             mailAccount.setSentFullname(getOptionalString(result.getString(16)));
             mailAccount.setDraftsFullname(getOptionalString(result.getString(17)));
