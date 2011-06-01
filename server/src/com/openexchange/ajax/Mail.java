@@ -3486,7 +3486,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
         private final BlockingQueue<MimeMessage> queue;
 
-        private AbstractOXException exception;
+        private AbstractOXException exception = null;
 
         AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
             super();
@@ -3513,7 +3513,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     queue.drainTo(messages);
                     for (final MimeMessage message : messages) {
-                        final String s = message.getHeader("Date", null);
+                        message.getHeader("Date", null);
                         final MailMessage mm = MIMEMessageConverter.convertMessage(message);
                         mails.add(mm);
                     }
@@ -3544,12 +3544,16 @@ public class Mail extends PermissionServlet implements UploadListener {
         public void setThreadName(final ThreadRenamer threadRenamer) {
             threadRenamer.rename("Mail Import Thread");
         }
+        
+        public boolean hasException() {
+            return exception != null;
+        }
     }
 
     private final Response actionPostImportMail(final ServerSession session, final HttpServletRequest req, final ParamContainer paramContainer) {
         final Response response = new Response();
         JSONValue responseData = null;
-        AppenderTask task;
+        
         try {
             final String folder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final int flags;
@@ -3574,7 +3578,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (ServletFileUpload.isMultipartContent(req)) {
                     final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                     final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
-                    task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);
+                    final AppenderTask task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);
                     future = service.submit(task);
                     try {
                         final FileItemIterator iter = servletFileUpload.getItemIterator(req);
@@ -3590,8 +3594,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 message.setFrom(defaultSendAddr);
                             }
                             message.setFileName(filename);
-                            while (!keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
-                                keepgoing = !future.isDone();
+
+                            while (!task.hasException() && !queue.offer(message)) {
+                                continue;
+                            }
+                            
+                            if (task.hasException()) {
+                                keepgoing = false;
                             }
                         }
                     } finally {
