@@ -91,11 +91,10 @@ public final class ListAction extends AbstractMailAccountAction {
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final JSONArray ids = (JSONArray) request.getData();
-
-            final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
-            final List<MailAccount> accounts = new ArrayList<MailAccount>();
-
             final int len = ids.length();
+            final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+            final List<MailAccount> accounts = new ArrayList<MailAccount>(len);
+
             for (int i = 0, size = len; i < size; i++) {
                 final int id = ids.getInt(i);
                 final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
