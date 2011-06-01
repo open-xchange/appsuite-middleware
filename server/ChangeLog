@@ -1,6 +1,7 @@
 * 2011-06-01 - francisco.laguna@open-xchange.com
 
  - Bugfix #19391: Check publication permission before delivering publication
+ - Bugfix #18899: Don't lose title when saving a mail attachment in the infostore
 
 * 2011-06-01 - thorben.betten@open-xchange.com
 
