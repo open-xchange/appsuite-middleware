@@ -6,7 +6,7 @@
 * 2011-06-01 - thorben.betten@open-xchange.com
 
  - Bugfix #19407: Checking for forbidden subscribe operation on a default folder
- - Bugfix #19155: Introduced create-if-absent mechansim for external accounts' default folder full names
+ - Bugfix #19155: Introduced create-if-absent mechanism for external accounts' default folder full names
 
 * 2011-06-01 - steffen.templin@open-xchange.com
 
