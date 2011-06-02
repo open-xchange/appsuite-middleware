@@ -1736,7 +1736,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Append message to draft folder
                  */
                 imapFolderStorage.removeFromCache(draftFullName);
-                uid = appendMessagesLong(draftFullName, new MailMessage[] { MIMEMessageConverter.convertMessage(mimeMessage) })[0];
+                uid = appendMessagesLong(draftFullName, new MailMessage[] { MIMEMessageConverter.convertMessage(mimeMessage, false) })[0];
             } finally {
                 composedMail.cleanUp();
             }
