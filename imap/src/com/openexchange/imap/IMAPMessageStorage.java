@@ -365,6 +365,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      * Obviously message was removed in the meantime
                      */
                     return null;
+                } else if (MIMEMailException.Code.MESSAGING_ERROR.getNumber() == e.getDetailNumber()) {
+                    /*-
+                     * Detected generic messaging error. This most likely hints to a severe JavaMail problem.
+                     * 
+                     * Perform some debug logs for traceability...
+                     */
+                    if (DEBUG) {
+                        final StringBuilder sb = new StringBuilder(128);
+                        sb.append("Generic messaging error occurred for mail \"").append(msgUID).append("\" in folder \"");
+                        sb.append(fullName).append("\" with login \"").append(imapConfig.getLogin()).append("\" on server \"");
+                        sb.append(imapConfig.getServer()).append("\" (user=").append(session.getUserId());
+                        sb.append(", context=").append(session.getContextId()).append("): ").append(e.getMessage());
+                        LOG.debug(sb.toString(), e);
+                    }
                 }
                 throw e;
             }
