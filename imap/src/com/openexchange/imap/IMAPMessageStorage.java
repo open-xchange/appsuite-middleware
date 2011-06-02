@@ -148,11 +148,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     /*-
      * Flag constants
      */
-    
+
     /**
      * This message is a draft. This flag is set by clients to indicate that the message is a draft message.
      */
     private static final Flag DRAFT = Flags.Flag.DRAFT;
+
+    /**
+     * This message is marked deleted. Clients set this flag to mark a message as deleted. The expunge operation on a folder removes all
+     * messages in that folder that are marked for deletion.
+     */
+    private static final Flag DELETED = Flags.Flag.DELETED;
 
     /**
      * The Flags object initialized with the \Draft system flag.
@@ -162,7 +168,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     /**
      * The Flags object initialized with the \Deleted system flag.
      */
-    private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
+    private static final Flags FLAGS_DELETED = new Flags(DELETED);
 
     /*-
      * String constants
@@ -1379,7 +1385,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(myRights)) {
                     throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
-                affectedFlags.add(Flags.Flag.DELETED);
+                affectedFlags.add(DELETED);
                 applyFlags = true;
             }
             if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
@@ -1499,7 +1505,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(myRights)) {
                     throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
-                affectedFlags.add(Flags.Flag.DELETED);
+                affectedFlags.add(DELETED);
                 applyFlags = true;
             }
             if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
