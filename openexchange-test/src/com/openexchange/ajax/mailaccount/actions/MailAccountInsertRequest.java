@@ -57,6 +57,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 
 /**
@@ -131,7 +132,11 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             }
 
             public String generateMailServerURL() {
-                return acc.generateMailServerURL();
+                try {
+                    return acc.generateMailServerURL();
+                } catch (final MailAccountException e) {
+                    throw new IllegalStateException(e);
+                }
             }
             
             public int getMailPort() {

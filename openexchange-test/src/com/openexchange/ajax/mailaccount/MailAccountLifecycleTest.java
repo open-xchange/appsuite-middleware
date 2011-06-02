@@ -61,9 +61,9 @@ import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountListRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountListResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateRequest;
-import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateResponse;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -92,7 +92,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         super.tearDown();
     }
 
-    public void testLifeCycle() throws AjaxException, IOException, SAXException, JSONException {
+    public void testLifeCycle() throws AjaxException, IOException, SAXException, JSONException, MailAccountException {
 
         createMailAccount();
         readByGet();
@@ -106,14 +106,14 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     }
 
-    private void updateMailAccount() throws AjaxException, IOException, SAXException, JSONException {
+    private void updateMailAccount() throws AjaxException, IOException, JSONException {
         mailAccountDescription.setName("Other Name");
         mailAccountDescription.setLogin("Other Login");
         mailAccountDescription.setPassword("New Password");
         mailAccountDescription.setTransportLogin("Other Login");
         mailAccountDescription.setTransportPassword("New Password");
         mailAccountDescription.setMailPort(123);
-        final MailAccountUpdateResponse response = getClient().execute(
+        getClient().execute(
             new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(
                 Attribute.NAME_LITERAL,
                 Attribute.LOGIN_LITERAL,
@@ -124,7 +124,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         // *shrugs* don't need the response
     }
 
-    private void readByList() throws AjaxException, IOException, SAXException, JSONException {
+    private void readByList() throws AjaxException, IOException, JSONException, MailAccountException {
 
         final MailAccountListResponse response = getClient().execute(
             new MailAccountListRequest(new int[] { mailAccountDescription.getId() }, allFields()));
@@ -143,13 +143,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         assertTrue("Did not find mail account in response", found);
     }
 
-    /**
-     * @throws JSONException
-     * @throws SAXException
-     * @throws IOException
-     * @throws AjaxException
-     */
-    private void readByAll() throws AjaxException, IOException, SAXException, JSONException {
+    private void readByAll() throws AjaxException, IOException, JSONException, MailAccountException {
         final int[] fields = allFields();
         final MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
 
@@ -175,13 +169,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         return fields;
     }
 
-    /**
-     * @throws JSONException
-     * @throws SAXException
-     * @throws IOException
-     * @throws AjaxException
-     */
-    private void readByGet() throws AjaxException, IOException, SAXException, JSONException {
+    private void readByGet() throws AjaxException, IOException, JSONException, MailAccountException {
         final MailAccountGetRequest request = new MailAccountGetRequest(mailAccountDescription.getId());
         final MailAccountGetResponse response = getClient().execute(request);
 
@@ -191,7 +179,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     }
 
-    private void compare(final MailAccountDescription expectedAcc, final MailAccountDescription actualAcc) {
+    private void compare(final MailAccountDescription expectedAcc, final MailAccountDescription actualAcc) throws MailAccountException {
         final GetSwitch expectedSwitch = new GetSwitch(expectedAcc);
         final GetSwitch actualSwitch = new GetSwitch(actualAcc);
 

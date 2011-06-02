@@ -56,37 +56,41 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
-
 
 /**
  * {@link ParserTools}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ParserTools {
-    public static List<MailAccountDescription> parseList(JSONArray arrayOfArrays, int[] cols) throws JSONException {
-        List<MailAccountDescription> accounts = new LinkedList<MailAccountDescription>();
-        
-        for(int i = 0, size = arrayOfArrays.length(); i < size; i++) {
-            JSONArray row = arrayOfArrays.getJSONArray(i);
-            MailAccountDescription desc = new MailAccountDescription();
-            SetSwitch setter = new SetSwitch(desc);
-            int j = 0;
-            
-            for(int col : cols) {
-                Attribute attr = Attribute.getById(col);
-                               
-                Object value = row.get(j++);
-                if(value == JSONObject.NULL) {
-                    value = null;
+
+    public static List<MailAccountDescription> parseList(final JSONArray arrayOfArrays, final int[] cols) throws JSONException {
+        try {
+            final List<MailAccountDescription> accounts = new LinkedList<MailAccountDescription>();
+
+            for (int i = 0, size = arrayOfArrays.length(); i < size; i++) {
+                final JSONArray row = arrayOfArrays.getJSONArray(i);
+                final MailAccountDescription desc = new MailAccountDescription();
+                final SetSwitch setter = new SetSwitch(desc);
+                int j = 0;
+
+                for (final int col : cols) {
+                    final Attribute attr = Attribute.getById(col);
+
+                    Object value = row.get(j++);
+                    if (value == JSONObject.NULL) {
+                        value = null;
+                    }
+                    setter.setValue(value);
+                    attr.doSwitch(setter);
                 }
-                setter.setValue(value);
-                attr.doSwitch(setter);
+                accounts.add(desc);
             }
-            accounts.add(desc);
+            return accounts;
+        } catch (final MailAccountException e) {
+            throw new JSONException(e);
         }
-        return accounts;
     }
 }

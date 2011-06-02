@@ -57,6 +57,7 @@ import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertResponse;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.tools.servlet.AjaxException;
 
 
@@ -73,7 +74,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
 
     protected MailAccountDescription mailAccountDescription;
 
-    protected static MailAccountDescription createMailAccountObject() {
+    protected static MailAccountDescription createMailAccountObject() throws MailAccountException {
         final MailAccountDescription mailAccountDescription = new MailAccountDescription();
         mailAccountDescription.setConfirmedHam("confirmedHam");
         mailAccountDescription.setConfirmedSpam("confirmedSpam");
@@ -93,7 +94,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         return mailAccountDescription;
     }
 
-    protected void createMailAccount() throws AjaxException, IOException, SAXException, JSONException {
+    protected void createMailAccount() throws AjaxException, IOException, SAXException, JSONException, MailAccountException {
         mailAccountDescription = createMailAccountObject();
         
         final MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));

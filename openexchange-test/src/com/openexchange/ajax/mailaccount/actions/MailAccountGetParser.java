@@ -54,6 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.tools.servlet.OXJSONException;
 
@@ -66,17 +67,19 @@ import com.openexchange.tools.servlet.OXJSONException;
  */
 public class MailAccountGetParser extends AbstractAJAXParser<MailAccountGetResponse> {
 
-    protected MailAccountGetParser(boolean failOnError) {
+    protected MailAccountGetParser(final boolean failOnError) {
         super(failOnError);
     }
 
     @Override
-    protected MailAccountGetResponse createResponse(Response response) throws JSONException {
-        MailAccountGetResponse resp = new MailAccountGetResponse(response);
-        MailAccountDescription account = new MailAccountDescription();
+    protected MailAccountGetResponse createResponse(final Response response) throws JSONException {
+        final MailAccountGetResponse resp = new MailAccountGetResponse(response);
+        final MailAccountDescription account = new MailAccountDescription();
         try {
             new MailAccountParser().parse(account, (JSONObject) response.getData());
-        } catch (OXJSONException e) {
+        } catch (final OXJSONException e) {
+            throw new JSONException(e);
+        } catch (final MailAccountException e) {
             throw new JSONException(e);
         }
         resp.setDescription(account);

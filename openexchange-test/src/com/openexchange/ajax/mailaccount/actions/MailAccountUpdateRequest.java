@@ -58,6 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 
 
@@ -69,39 +70,43 @@ import com.openexchange.mailaccount.json.fields.GetSwitch;
  */
 public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateResponse>{
 
-    private MailAccountDescription account;
-    private Set<Attribute> attributes;
-    private boolean failOnError;
+    private final MailAccountDescription account;
+    private final Set<Attribute> attributes;
+    private final boolean failOnError;
 
-    public MailAccountUpdateRequest(MailAccountDescription account, Set<Attribute> attributes, boolean failOnError) {
+    public MailAccountUpdateRequest(final MailAccountDescription account, final Set<Attribute> attributes, final boolean failOnError) {
         this.account = account;
         this.attributes = attributes;
         this.failOnError = failOnError;
     }
     
-    public MailAccountUpdateRequest(MailAccountDescription account, boolean failOnError) {
+    public MailAccountUpdateRequest(final MailAccountDescription account, final boolean failOnError) {
         this(account, EnumSet.allOf(Attribute.class), failOnError);
     }
     
-    public MailAccountUpdateRequest(MailAccountDescription account, Set<Attribute> attributes) {
+    public MailAccountUpdateRequest(final MailAccountDescription account, final Set<Attribute> attributes) {
         this(account, attributes, true);
     }
     
-    public MailAccountUpdateRequest(MailAccountDescription account) {
+    public MailAccountUpdateRequest(final MailAccountDescription account) {
         this(account, true);
     }
     
     public Object getBody() throws JSONException {
-        JSONObject incrementalUpdate = new JSONObject();
-        GetSwitch getter = new GetSwitch(account);
-        for(Attribute attribute : attributes) {
-            incrementalUpdate.put(attribute.getName(), attribute.doSwitch(getter));
+        try {
+            final JSONObject incrementalUpdate = new JSONObject();
+            final GetSwitch getter = new GetSwitch(account);
+            for(final Attribute attribute : attributes) {
+                incrementalUpdate.put(attribute.getName(), attribute.doSwitch(getter));
+            }
+            if(! attributes.contains(Attribute.ID_LITERAL)) {
+                incrementalUpdate.put(Attribute.ID_LITERAL.getName(), account.getId());
+            }
+            
+            return incrementalUpdate;
+        } catch (final MailAccountException e) {
+            throw new JSONException(e);
         }
-        if(! attributes.contains(Attribute.ID_LITERAL)) {
-            incrementalUpdate.put(Attribute.ID_LITERAL.getName(), account.getId());
-        }
-        
-        return incrementalUpdate;
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
