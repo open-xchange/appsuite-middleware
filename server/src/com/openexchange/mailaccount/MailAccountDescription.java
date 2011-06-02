@@ -55,7 +55,6 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -396,25 +395,27 @@ public final class MailAccountDescription implements Serializable {
      * Generates the mail server URL.
      * 
      * @return The generated mail server URL
+     * @throws MailAccountException If mail server URL is invalid
      */
-    public String generateMailServerURL() {
+    public String generateMailServerURL() throws MailAccountException {
         if (null != mailServerUrl) {
             return mailServerUrl;
         }
         if (isEmpty(mailServer)) {
             return null;
         }
-        final String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
         try {
-            return mailServerUrl = URITools.generateURI(protocol, mailServer, mailPort).toString();
+            return mailServerUrl = URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, mailServer, mailPort).toString();
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e);
             final StringBuilder sb = new StringBuilder(32);
             sb.append(mailProtocol);
             if (mailSecure) {
                 sb.append('s');
             }
-            return mailServerUrl = sb.append("://").append(mailServer).append(':').append(mailPort).toString();
+            throw MailAccountExceptionFactory.getInstance().create(
+                MailAccountExceptionMessages.INVALID_HOST_NAME,
+                e,
+                sb.append("://").append(mailServer).append(':').append(mailPort).toString());
         }
     }
 
@@ -422,9 +423,9 @@ public final class MailAccountDescription implements Serializable {
      * Parses specified mail server URL
      * 
      * @param mailServerURL The mail server URL to parse
-     * @throws MailAccountException 
+     * @throws MailAccountException If URL cannot be parsed
      */
-    public void parseMailServerURL(final String mailServerURL) {
+    public void parseMailServerURL(final String mailServerURL) throws MailAccountException {
         if (null == mailServerURL) {
             setMailServer((String) null);
             return;
@@ -432,28 +433,28 @@ public final class MailAccountDescription implements Serializable {
         try {
             setMailServer(URIParser.parse(mailServerURL, URIDefaults.IMAP));
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e);
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_HOST_NAME, e, mailServerURL);
             // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
             // instead now.
             // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, mailServerURL);
-            final String[] tmp = MailConfig.parseProtocol(mailServerURL);
-            final String prot;
-            final Object[] parsed;
-            if (tmp != null) {
-                prot = tmp[0];
-                parsed = parseServerAndPort(tmp[1], getMailPort());
-            } else {
-                prot = getMailProtocol();
-                parsed = parseServerAndPort(mailServerURL, getMailPort());
-            }
-            if (prot.endsWith("s")) {
-                setMailSecure(true);
-                setMailProtocol(prot.substring(0, prot.length() - 1));
-            } else {
-                setMailProtocol(prot);
-            }
-            setMailServer(parsed[0].toString());
-            setMailPort(((Integer) parsed[1]).intValue());
+            // final String[] tmp = MailConfig.parseProtocol(mailServerURL);
+            // final String prot;
+            // final Object[] parsed;
+            // if (tmp != null) {
+            // prot = tmp[0];
+            // parsed = parseServerAndPort(tmp[1], getMailPort());
+            // } else {
+            // prot = getMailProtocol();
+            // parsed = parseServerAndPort(mailServerURL, getMailPort());
+            // }
+            // if (prot.endsWith("s")) {
+            // setMailSecure(true);
+            // setMailProtocol(prot.substring(0, prot.length() - 1));
+            // } else {
+            // setMailProtocol(prot);
+            // }
+            // setMailServer(parsed[0].toString());
+            // setMailPort(((Integer) parsed[1]).intValue());
         }
     }
 

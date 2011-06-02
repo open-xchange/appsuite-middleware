@@ -80,6 +80,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -224,6 +225,8 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                     handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
                 } catch (final UpdateException e) {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
+                } catch (final MailAccountException e) {
+                    LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 }
             }
         } catch (final UserException e) {
@@ -231,11 +234,11 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static User loadUser(Context ctx, int userId) throws UpdateException, UserException {
+    private static User loadUser(final Context ctx, final int userId) throws UpdateException, UserException {
         final Connection con;
         try {
             con = Database.get(ctx, true);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
         try {
@@ -246,11 +249,11 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static UserSettingMail loadUserSettingMail(Context ctx, int userId) throws UpdateException {
+    private static UserSettingMail loadUserSettingMail(final Context ctx, final int userId) throws UpdateException {
         final Connection con;
         try {
             con = Database.get(ctx, true);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
         try {
@@ -260,7 +263,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb, final org.apache.commons.logging.Log LOG) throws UpdateException {
+    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb, final org.apache.commons.logging.Log LOG) throws UpdateException, MailAccountException {
         /*
          * Insert
          */
@@ -273,7 +276,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static MailAccountDescription createAccountDescription(final User user, final FolderNameProvider folderNameProvdider) {
+    private static MailAccountDescription createAccountDescription(final User user, final FolderNameProvider folderNameProvdider) throws MailAccountException {
         final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
         account.setConfirmedHam(prepareNonNullString(folderNameProvdider.getConfirmedHam()));
@@ -432,6 +435,8 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final MailAccountException e) {
+            throw new UpdateException(e);
         } finally {
             closeSQLStuff(stmt);
             Database.back(cid, true, con);

@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -82,8 +83,9 @@ public class MailAccountParser extends DataParser {
      * @param account Any attributes will be stored in this account object.
      * @param json A JSON object containing a reminder.
      * @throws OXJSONException If parsing fails.
+     * @throws MailAccountException If parsing fails
      */
-    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json) throws OXJSONException {
+    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json) throws OXJSONException, MailAccountException {
         try {
             return parseElementAccount(account, json);
         } catch (final JSONException e) {
@@ -91,7 +93,7 @@ public class MailAccountParser extends DataParser {
         }
     }
 
-    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json) throws JSONException, OXJSONException {
+    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json) throws JSONException, OXJSONException, MailAccountException {
         final Set<Attribute> attributes = new HashSet<Attribute>();
         if (json.has(MailAccountFields.ID)) {
             account.setId(parseInt(json, MailAccountFields.ID));
@@ -110,7 +112,6 @@ public class MailAccountParser extends DataParser {
             account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL).trim());
             attributes.add(Attribute.MAIL_URL_LITERAL);
             attributes.addAll(Attribute.MAIL_URL_ATTRIBUTES);
-
         } else {
             final SetSwitch setSwitch = new SetSwitch(account);
             for (final Attribute attribute : Attribute.MAIL_URL_ATTRIBUTES) {

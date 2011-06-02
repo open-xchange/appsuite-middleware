@@ -82,6 +82,7 @@ import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -351,7 +352,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONObject actionValidateTree(final MailAccountDescription accountDescription) throws OXException, MailException, JSONException {
+    private JSONObject actionValidateTree(final MailAccountDescription accountDescription) throws OXException, MailException, JSONException, MailAccountException {
         if (!actionValidateBoolean(accountDescription).booleanValue()) {
             // TODO: How to indicate error if folder tree requested?
             return null;
@@ -428,7 +429,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription) throws MailException {
+    private MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription) throws MailException, MailAccountException {
         final String mailServerURL = accountDescription.generateMailServerURL();
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
@@ -477,7 +478,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException {
+    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException, MailAccountException {
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription);
         if (null == mailAccess) {

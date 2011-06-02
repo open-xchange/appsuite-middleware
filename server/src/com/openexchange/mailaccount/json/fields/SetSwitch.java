@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.json.fields;
 
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
 
 /**
  * {@link SetSwitch}
@@ -99,7 +100,7 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
-    public Object mailURL() {
+    public Object mailURL() throws MailAccountException {
         desc.parseMailServerURL((String) value);
         return null;
     }

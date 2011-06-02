@@ -134,7 +134,13 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
     /**
      * Unable to parse mail server URI "%1$s".
      */
-    URI_PARSE_FAILED(MailAccountExceptionStrings.URI_PARSE_FAILED_MSG, Category.SETUP_ERROR, 18);    
+    URI_PARSE_FAILED(MailAccountExceptionStrings.URI_PARSE_FAILED_MSG, Category.SETUP_ERROR, 18),
+    /**
+     * Invalid host name: %1$s
+     */
+    INVALID_HOST_NAME(MailAccountExceptionStrings.INVALID_HOST_NAME_MSG, Category.USER_INPUT, 19),
+    
+    ;
 
     /**
      * Message of the exception.

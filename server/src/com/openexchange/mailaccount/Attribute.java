@@ -123,7 +123,7 @@ public enum Attribute {
         this.id = id;
     }
 
-    public Object doSwitch(final AttributeSwitch switcher) {
+    public Object doSwitch(final AttributeSwitch switcher) throws MailAccountException {
         switch (this) {
         case ID_LITERAL:
             return switcher.id();

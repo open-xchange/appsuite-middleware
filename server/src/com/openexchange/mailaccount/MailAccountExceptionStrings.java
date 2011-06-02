@@ -116,6 +116,9 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // %1$s is replaced with the not understandable mail server URI.
     public static final String URI_PARSE_FAILED_MSG = "Unable to parse mail server URI \"%1$s\".";
 
+    // Invalid host name: %1$s
+    public static final String INVALID_HOST_NAME_MSG = "Invalid host name: %1$s";
+
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.
      */

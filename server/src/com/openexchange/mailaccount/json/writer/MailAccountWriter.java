@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 
@@ -143,8 +144,9 @@ public final class MailAccountWriter {
      * @param mailAccounts The mail accounts
      * @param attributes The attributes
      * @return A JSON array of JSON arrays for each account
+     * @throws MailAccountException If writing JSON fails
      */
-    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes) {
+    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes) throws MailAccountException {
         final JSONArray rows = new JSONArray();
         for (final MailAccount account : mailAccounts) {
             final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
