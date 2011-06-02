@@ -49,38 +49,55 @@
 
 package com.openexchange.ajax.config;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Arrays;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+
 
 /**
- * Suite for all config tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link Bug19226Test}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ConfigTestSuite {
+public class Bug19226Test extends AbstractAJAXSession {
+    
+    AJAXClient client;
 
     /**
-     * Prevent instantiation
+     * Initializes a new {@link Bug19226Test}.
+     * @param name
      */
-    private ConfigTestSuite() {
-        super();
+    public Bug19226Test(String name) {
+        super(name);
     }
     
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AvailableModulesTest.class);
-        tests.addTestSuite(ConfigMenuTest.class);
-        tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
-        tests.addTestSuite(FunctionTests.class);
-        tests.addTestSuite(SpamButtonTest.class);
-        tests.addTestSuite(ModulesTest.class);
-        tests.addTestSuite(BugTests.class);
-        tests.addTestSuite(Bug15354Test.class);
-        tests.addTestSuite(Bug19226Test.class);
-        
-        return tests;
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
     }
+    
+    public void testOXUpdaterConfig() throws Exception {
+        GetRequest getAvailableModulesReq = new GetRequest(Tree.AvailableModules);
+        GetResponse getAvailableModulesResp = client.execute(getAvailableModulesReq);
+        String availableModulesStr = Arrays.toString(getAvailableModulesResp.getArray());
+        
+        assertTrue("com.openexchange.oxupdater was not found in available modules.", availableModulesStr.contains("com.openexchange.oxupdater"));
+        
+        GetRequest getNodesReq = new GetRequest(Tree.OXUpdater);
+        GetResponse getNodesResp = client.execute(getNodesReq);
+        String nodesStr = getNodesResp.getData().toString();
+        
+        assertTrue("Node module was not found.", nodesStr.contains("module"));
+        assertTrue("Node active was not found", nodesStr.contains("active"));
+    }
+    
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+
 }
