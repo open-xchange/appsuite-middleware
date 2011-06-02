@@ -365,7 +365,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      * Obviously message was removed in the meantime
                      */
                     return null;
-                } else if (MIMEMailException.Code.MESSAGING_ERROR.getNumber() == e.getDetailNumber()) {
+                } 
+                /*
+                 * Check for generic messaging error
+                 */
+                if (MIMEMailException.Code.MESSAGING_ERROR.getNumber() == e.getDetailNumber()) {
                     /*-
                      * Detected generic messaging error. This most likely hints to a severe JavaMail problem.
                      * 
