@@ -1420,11 +1420,11 @@ public final class MIMEMessageConverter {
      * @throws MailException If conversion fails
      */
     public static MailMessage convertMessage(final MimeMessage msg, final boolean considerFolder) throws MailException {
+        /*
+         * Create with reference to content
+         */
+        final MIMEMailMessage mail = new MIMEMailMessage(msg);
         try {
-            /*
-             * Create with reference to content
-             */
-            final MIMEMailMessage mail = new MIMEMailMessage(msg);
             /*
              * Parse flags
              */
