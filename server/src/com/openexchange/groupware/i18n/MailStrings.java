@@ -108,4 +108,16 @@ public class MailStrings implements LocalizableStrings {
     // "Dear Sir or Madam Jane Doe"
     public static final String GREETING = "Dear Sir or Madam";
 
+    // The name for trash folder
+    public static final String DEFAULT_TRASH = "Trash";
+    
+    // The name for trash folder
+    public static final String DEFAULT_DRAFTS = "Drafts";
+    
+    // The name for trash folder
+    public static final String DEFAULT_SENT = "Sent objects";
+    
+    // The name for trash folder
+    public static final String DEFAULT_SPAM = "Spam";
+
 }
