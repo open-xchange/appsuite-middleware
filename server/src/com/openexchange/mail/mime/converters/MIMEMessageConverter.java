@@ -61,6 +61,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -1545,37 +1546,43 @@ public final class MIMEMessageConverter {
             } else {
                 parsePriority(mail.getFirstHeader(MessageHeaders.HDR_X_PRIORITY), mail);
             }
-            if (msg.getReceivedDate() == null) {
-                /*
-                 * Check for "Received" header
-                 */
-                /*
-                 * TODO: Grab first or determine latest available date through iterating headers?
-                 */
-                /*-
-                 * final String[] receivedHdrs = msg.getHeader(MessageHeaders.HDR_RECEIVED);
-                 * if (null != receivedHdrs) {
-                 *     long lastReceived = Long.MIN_VALUE;
-                 *     for (int i = 0; i &lt; receivedHdrs.length; i++) {
-                 *         final String hdr = unfold(receivedHdrs[i]);
-                 *         int pos;
-                 *         if (hdr != null &amp;&amp; (pos = hdr.lastIndexOf(';')) != -1) {
-                 *             try {
-                 *                 lastReceived = Math.max(lastReceived, com.openexchange.mail.utils.DateUtils.getDateRFC822(
-                 *                         hdr.substring(pos + 1).trim()).getTime());
-                 *             } catch (final IllegalArgumentException e) {
-                 *                 continue;
-                 *             }
-                 *         }
-                 *     }
-                 *     mail.setReceivedDate(new java.util.Date(lastReceived));
-                 * } else {
-                 *     mail.setReceivedDate(null);
-                 * }
-                 */
-                mail.setReceivedDate(null);
-            } else {
-                mail.setReceivedDate(msg.getReceivedDate());
+            /*
+             * Received date aka INTERNALDATE
+             */
+            {
+                final Date receivedDate = msg.getReceivedDate();
+                if (receivedDate == null) {
+                    /*
+                     * Check for "Received" header
+                     */
+                    /*
+                     * TODO: Grab first or determine latest available date through iterating headers?
+                     */
+                    /*-
+                     * final String[] receivedHdrs = msg.getHeader(MessageHeaders.HDR_RECEIVED);
+                     * if (null != receivedHdrs) {
+                     *     long lastReceived = Long.MIN_VALUE;
+                     *     for (int i = 0; i &lt; receivedHdrs.length; i++) {
+                     *         final String hdr = unfold(receivedHdrs[i]);
+                     *         int pos;
+                     *         if (hdr != null &amp;&amp; (pos = hdr.lastIndexOf(';')) != -1) {
+                     *             try {
+                     *                 lastReceived = Math.max(lastReceived, com.openexchange.mail.utils.DateUtils.getDateRFC822(
+                     *                         hdr.substring(pos + 1).trim()).getTime());
+                     *             } catch (final IllegalArgumentException e) {
+                     *                 continue;
+                     *             }
+                     *         }
+                     *     }
+                     *     mail.setReceivedDate(new java.util.Date(lastReceived));
+                     * } else {
+                     *     mail.setReceivedDate(null);
+                     * }
+                     */
+                    mail.setReceivedDate(null);
+                } else {
+                    mail.setReceivedDate(receivedDate);
+                }
             }
             if (msg.getSentDate() == null) {
                 mail.setSentDate(null);
