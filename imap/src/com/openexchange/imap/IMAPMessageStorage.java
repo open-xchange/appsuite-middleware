@@ -67,6 +67,7 @@ import java.util.Set;
 import java.util.UUID;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
@@ -147,8 +148,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     /*-
      * Flag constants
      */
+    
+    private static final Flag DRAFT = Flags.Flag.DRAFT;
 
-    private static final Flags FLAGS_DRAFT = new Flags(Flags.Flag.DRAFT);
+    private static final Flags FLAGS_DRAFT = new Flags(DRAFT);
 
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
@@ -1374,7 +1377,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
                     throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
-                affectedFlags.add(Flags.Flag.DRAFT);
+                affectedFlags.add(DRAFT);
                 applyFlags = true;
             }
             if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
@@ -1494,7 +1497,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
                     throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
-                affectedFlags.add(Flags.Flag.DRAFT);
+                affectedFlags.add(DRAFT);
                 applyFlags = true;
             }
             if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
@@ -1730,7 +1733,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Fill body
                  */
                 filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
-                mimeMessage.setFlag(Flags.Flag.DRAFT, true);
+                mimeMessage.setFlag(DRAFT, true);
                 mimeMessage.saveChanges();
                 /*
                  * Append message to draft folder
