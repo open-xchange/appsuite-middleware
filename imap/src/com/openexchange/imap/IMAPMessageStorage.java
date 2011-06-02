@@ -154,8 +154,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      */
     private static final Flag DRAFT = Flags.Flag.DRAFT;
 
+    /**
+     * The Flags object initialized with the \Draft system flag.
+     */
     private static final Flags FLAGS_DRAFT = new Flags(DRAFT);
 
+    /**
+     * The Flags object initialized with the \Deleted system flag.
+     */
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
     /*-
