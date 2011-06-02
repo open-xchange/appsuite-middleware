@@ -149,6 +149,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * Flag constants
      */
     
+    /**
+     * This message is a draft. This flag is set by clients to indicate that the message is a draft message.
+     */
     private static final Flag DRAFT = Flags.Flag.DRAFT;
 
     private static final Flags FLAGS_DRAFT = new Flags(DRAFT);
