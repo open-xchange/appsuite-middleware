@@ -2,6 +2,7 @@
 
  - Bugfix #19291: Throwing proper error if an invalid host name is entered
  - Bugfix #19305: Disabled caching for Unified Mail folders
+ - Bugfix #19335: Fixed NPE when converting TNEF to ICal
 
 * 2011-06-01 - francisco.laguna@open-xchange.com
 

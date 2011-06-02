@@ -664,10 +664,14 @@ public final class TNEF2ICal {
             final String tzid;
             {
                 String tmp = findNamedProp("0x8234", mapiProps);
-                final int p1 = tmp.indexOf('(') + 1;
-                final int p2 = tmp.indexOf(')', p1);
-                tmp = tmp.substring(p1, p2);
-                tzid = java.util.TimeZone.getTimeZone(tmp).getID();
+                if (null == tmp) {
+                    tzid = "GMT";
+                } else {
+                    final int p1 = tmp.indexOf('(') + 1;
+                    final int p2 = tmp.indexOf(')', p1);
+                    tmp = tmp.substring(p1, p2);
+                    tzid = java.util.TimeZone.getTimeZone(tmp).getID();
+                }
             }
             /*
              * Creation date
