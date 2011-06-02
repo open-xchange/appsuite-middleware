@@ -83,6 +83,9 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -306,13 +309,26 @@ public final class MailFolderImpl extends AbstractFolder {
             permissionBits |= BIT_RENAME_FLAG;
         }
         bits = permissionBits;
-        if (mailFolder.containsShared() && mailFolder.isShared()) {
-            cacheable = false;
-        } else {
-            /*
-             * Trash folder must not be cacheable
-             */
-            cacheable = !mailFolder.isTrash(); // || !mailFolderType.equals(MailFolderType.TRASH);
+        /*
+         * Check if folder is cacheable
+         */
+        boolean cache = true;
+        if (mailFolder.containsShared() && mailFolder.isShared()) { // A shared mail folder must not be cacheable
+            cache = false;
+        } else if (mailFolder.isTrash()) { // Trash folder must not be cacheable
+            cache = false;
+        } else if (isUnifiedMail()) { // Unified mail must not be cacheable
+            cache = false;
+        }
+        cacheable = cache;
+    }
+
+    private boolean isUnifiedMail() throws FolderException {
+        try {
+            return UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(MailServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class).getMailAccount(accountId, userId, contextId).getMailProtocol());
+        } catch (final MailAccountException e) {
+            throw new FolderException(e);
         }
     }
 

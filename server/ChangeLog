@@ -1,6 +1,7 @@
 * 2011-06-02 - thorben.betten@open-xchange.com
 
  - Bugfix #19291: Throwing proper error if an invalid host name is entered
+ - Bugfix #19305: Disabled caching for Unified Mail folders
 
 * 2011-06-01 - francisco.laguna@open-xchange.com
 
