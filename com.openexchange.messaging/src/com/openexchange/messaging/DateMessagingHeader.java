@@ -57,15 +57,6 @@ package com.openexchange.messaging;
 public interface DateMessagingHeader extends MessagingHeader {
 
     /**
-     * The RFC822 date pattern to initialize a <tt>java.text.SimpleDateFormat</tt> instance.
-     * <p>
-     * <code>
-     * &nbsp;SimpleDateFormat&nbsp;sdf&nbsp;=&nbsp;new&nbsp;SimpleDateFormat(&quot;EEE,&nbsp;d&nbsp;MMM&nbsp;yyyy&nbsp;HH:mm:ss&nbsp;'XXXXX'&nbsp;(z)&quot;,&nbsp;Locale.US);
-     * </code>
-     */
-    public static final String RFC822_PATTERN = "EEE, d MMM yyyy HH:mm:ss 'XXXXX' (z)";
-
-    /**
      * Gets the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this date header.
      * 
      * @return The number of milliseconds since January 1, 1970, 00:00:00 GMT
