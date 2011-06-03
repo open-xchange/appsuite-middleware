@@ -321,7 +321,10 @@ public final class DefaultFolderNamesProvider {
         return fullnames;
     }
 
-    private static interface FallbackProvider {
+    /**
+     * Provides fall-back values.
+     */
+    public static interface FallbackProvider {
 
         String getTrash();
 
