@@ -395,7 +395,10 @@ public final class DefaultFolderNamesProvider {
 
     }
 
-    static final FallbackProvider DEFAULT_PROVIDER = new FallbackProvider() {
+    /**
+     * The fall-back provider.
+     */
+    public static final FallbackProvider DEFAULT_PROVIDER = new FallbackProvider() {
 
         public String getConfirmeHam() {
             return STD_CONFIRMED_HAM;
