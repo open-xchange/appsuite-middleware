@@ -1,3 +1,7 @@
+* 2011-06-03 - marcus.klein@open-xchange.com
+
+ - Added Czech and Hungarian translations for default mail folders.
+
 * 2011-05-24 - marcus.klein@open-xchange.com
 
  - Bugfix #17858: Writing now a stack trace if a runtime exception occurs.
