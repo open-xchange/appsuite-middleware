@@ -1,3 +1,7 @@
+* 2011-06-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #19418: Adding user's time zone offset to date message headers
+
 * 2011-06-03 - marcus.klein@open-xchange.com
 
  - Bugfix #19373: Not presenting OXtender for Outlook 1 if Outlook 2010 is installed.

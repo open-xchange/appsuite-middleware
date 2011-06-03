@@ -83,7 +83,7 @@ public class ContentTypeWriterTest extends TestCase{
         assertTrue(writer.handles(entry));
         assertEquals("Content-Type", writer.writeKey(entry));
         
-        final Object value = writer.writeValue(entry);
+        final Object value = writer.writeValue(entry, null);
         assertNotNull(value);
         
         final JSONObject jsonCType = (JSONObject) value;
@@ -111,7 +111,7 @@ public class ContentTypeWriterTest extends TestCase{
         assertTrue(writer.handles(entry));
         assertEquals("Content-Type", writer.writeKey(entry));
         
-        final Object value = writer.writeValue(entry);
+        final Object value = writer.writeValue(entry, null);
         assertNotNull(value);
         
         final JSONObject jsonCType = (JSONObject) value;

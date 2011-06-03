@@ -55,9 +55,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.json.JSONArray;
@@ -67,6 +70,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.BinaryContent;
+import com.openexchange.messaging.DateMessagingHeader;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
@@ -77,6 +81,7 @@ import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
+import com.openexchange.messaging.generic.Utility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -103,10 +108,10 @@ public class MessagingMessageWriter {
             return entry.getKey();
         }
 
-        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
             final JSONArray array = new JSONArray();
             for (final MessagingHeader header : entry.getValue()) {
-                array.put(header.getValue());
+                array.put(getHeaderValue(header, session));
             }
             return array;
         }
@@ -127,13 +132,46 @@ public class MessagingMessageWriter {
             return entry.getKey();
         }
 
-        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-            return entry.getValue().iterator().next().getValue();
+        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
+            final Collection<MessagingHeader> collection = entry.getValue();
+            if (null == collection || collection.isEmpty()) {
+                return ""; // Empty string
+            }
+            return getHeaderValue(collection.iterator().next(), session);
         }
-        
+
     };
-    
-    
+
+    /**
+     * Gets the value of specified header.
+     * 
+     * @param header The header
+     * @param session The session
+     * @return The header value
+     */
+    static String getHeaderValue(final MessagingHeader header, final ServerSession session) {
+        if (header instanceof DateMessagingHeader) {
+            final DateMessagingHeader dateHeader = (DateMessagingHeader) header;
+            final String timeZone = session.getUser().getTimeZone();
+            final SimpleDateFormat mailDateFormat = Utility.getDefaultMailDateFormat();
+            synchronized (mailDateFormat) {
+                return mailDateFormat.format(new Date(addTimeZoneOffset(dateHeader.getTime(), TimeZone.getTimeZone(timeZone))));
+            }
+        }
+        return header.getValue();
+    }
+
+    /**
+     * Adds time zone's offset to specified UTC time.
+     * 
+     * @param date The UTC time
+     * @param timeZone The time zone
+     * @return The UTC time with offset applied
+     */
+    private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
+        return (date + timeZone.getOffset(date));
+    }
+
     public MessagingMessageWriter() {
         headerWriters.add(new ContentTypeWriter());
         headerWriters.add(new AddressHeaderWriter());
@@ -146,7 +184,7 @@ public class MessagingMessageWriter {
             messageJSON.put("sectionId", message.getSectionId());
         }
         if(null != message.getHeaders() && ! message.getHeaders().isEmpty()) {
-            final JSONObject headerJSON = writeHeaders(message.getHeaders());
+            final JSONObject headerJSON = writeHeaders(message.getHeaders(), session);
             
             messageJSON.put("headers", headerJSON);
         }
@@ -167,7 +205,7 @@ public class MessagingMessageWriter {
                     final SimpleEntry<String, Collection<MessagingHeader>> entry = new SimpleEntry<String, Collection<MessagingHeader>>(field.getEquivalentHeader().toString(), header);
                     final MessagingHeaderWriter writer = selectWriter(entry);
                     
-                    messageJSON.put(field.toString(), writer.writeValue(entry));
+                    messageJSON.put(field.toString(), writer.writeValue(entry, session));
                 }
             }
         }
@@ -176,13 +214,13 @@ public class MessagingMessageWriter {
 
     }
 
-    private JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers) throws MessagingException, JSONException {
+    private JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers, final ServerSession session) throws MessagingException, JSONException {
         final JSONObject headerJSON = new JSONObject();
         
         for (final Map.Entry<String, Collection<MessagingHeader>> entry : headers.entrySet()) {
 
             final MessagingHeaderWriter writer = selectWriter(entry);
-            headerJSON.put(writer.writeKey(entry), writer.writeValue(entry));
+            headerJSON.put(writer.writeKey(entry), writer.writeValue(entry, session));
             
         }
         return headerJSON;
@@ -420,11 +458,11 @@ public class MessagingMessageWriter {
             if(value == null) {
                 
             }else if(messagingField == MessagingField.HEADERS) {
-                value = writeHeaders(message.getHeaders());
+                value = writeHeaders(message.getHeaders(), session);
             }else if(messagingField.getEquivalentHeader() != null) {
                 final Entry<String, Collection<MessagingHeader>> entry = new SimpleEntry<String, Collection<MessagingHeader>>(messagingField.getEquivalentHeader().toString(), (Collection<MessagingHeader>) value);
                 final MessagingHeaderWriter writer = selectWriter(entry);
-                value = writer.writeValue(entry);
+                value = writer.writeValue(entry, session);
             } else if (MessagingContent.class.isInstance(value)) {
                 final MessagingContent content = (MessagingContent) value;
                 final MessagingContentWriter writer = getWriter(message, content);

@@ -54,6 +54,7 @@ import java.util.Map.Entry;
 import org.json.JSONException;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -84,6 +85,6 @@ public interface MessagingHeaderWriter {
     /**
      * Writes the JSON value for the given entry
      */
-    Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException;
+    Object writeValue(Entry<String, Collection<MessagingHeader>> entry, ServerSession session) throws JSONException, MessagingException;
     
 }

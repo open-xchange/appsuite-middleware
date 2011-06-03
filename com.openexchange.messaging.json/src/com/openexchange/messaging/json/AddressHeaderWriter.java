@@ -62,6 +62,7 @@ import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AddressHeaderWriter}
@@ -97,7 +98,7 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         return entry.getKey();
     }
 
-    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
         final JSONArray addresses = new JSONArray();
         for (final MessagingHeader address : entry.getValue()) {
             final JSONObject object = new JSONObject();

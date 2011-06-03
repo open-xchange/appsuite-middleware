@@ -99,7 +99,7 @@ public class AddressHeaderWriterTest extends TestCase {
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();
 
-        final JSONArray headerJSON = (JSONArray) writer.writeValue(entry(header));
+        final JSONArray headerJSON = (JSONArray) writer.writeValue(entry(header), null);
 
         assertNotNull(headerJSON);
 
@@ -116,7 +116,7 @@ public class AddressHeaderWriterTest extends TestCase {
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();
 
-        final JSONObject headerJSON = (JSONObject) writer.writeValue(entry(header));
+        final JSONObject headerJSON = (JSONObject) writer.writeValue(entry(header), null);
 
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("personal").withValue("Clark Kent").hasKey("address").withValue(
@@ -130,7 +130,7 @@ public class AddressHeaderWriterTest extends TestCase {
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();
 
-        final JSONArray headerJSON = (JSONArray) writer.writeValue(entry(header));
+        final JSONArray headerJSON = (JSONArray) writer.writeValue(entry(header), null);
 
         assertNotNull(headerJSON);
 

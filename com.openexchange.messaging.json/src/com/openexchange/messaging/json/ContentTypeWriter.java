@@ -58,6 +58,7 @@ import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -80,7 +81,7 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
         return "Content-Type";
     }
 
-    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
         final ContentType cType = toCType(entry.getValue().iterator().next());
         final JSONObject jsonCType = new JSONObject();
 
