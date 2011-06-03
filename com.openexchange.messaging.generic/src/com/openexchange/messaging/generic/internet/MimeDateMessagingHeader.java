@@ -50,8 +50,8 @@
 package com.openexchange.messaging.generic.internet;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.mail.internet.MailDateFormat;
 import com.openexchange.messaging.DateMessagingHeader;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -81,7 +81,7 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
         super();
         this.name = name;
         this.time = time;
-        final MailDateFormat mdf = Utility.getDefaultMailDateFormat();
+        final SimpleDateFormat mdf = Utility.getDefaultMailDateFormat();
         synchronized (mdf) {
             value = mdf.format(new Date(time));
         }
@@ -99,7 +99,7 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
         super();
         this.name = name;
         value = formattedDate;
-        final MailDateFormat mdf = Utility.getDefaultMailDateFormat();
+        final SimpleDateFormat mdf = Utility.getDefaultMailDateFormat();
         synchronized (mdf) {
             try {
                 final Date parsedDate = mdf.parse(formattedDate);
@@ -120,7 +120,7 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
         super();
         this.name = name;
         time = date.getTime();
-        final MailDateFormat mdf = Utility.getDefaultMailDateFormat();
+        final SimpleDateFormat mdf = Utility.getDefaultMailDateFormat();
         synchronized (mdf) {
             value = mdf.format(date);
         }

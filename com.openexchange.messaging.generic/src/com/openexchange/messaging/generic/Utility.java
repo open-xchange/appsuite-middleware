@@ -51,6 +51,7 @@ package com.openexchange.messaging.generic;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -91,9 +92,9 @@ public final class Utility {
     }
 
     /**
-     * Gets the default {@link MailDateFormat} instance configured with GMT time zone.
+     * Gets the default {@link SimpleDateFormat} instance configured with GMT time zone.
      * <p>
-     * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
+     * Note that returned instance of {@link SimpleDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
      * 
      * <pre>
@@ -105,16 +106,16 @@ public final class Utility {
      * ...
      * </pre>
      * 
-     * @return The default {@link MailDateFormat} instance configured with GMT time zone
+     * @return The default {@link SimpleDateFormat} instance configured with GMT time zone
      */
-    public static MailDateFormat getDefaultMailDateFormat() {
+    public static SimpleDateFormat getDefaultMailDateFormat() {
         return DEFAULT_MAIL_DATE_FORMAT;
     }
 
     /**
-     * Gets the {@link MailDateFormat} for specified time zone identifier.
+     * Gets the {@link SimpleDateFormat} for specified time zone identifier.
      * <p>
-     * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
+     * Note that returned instance of {@link SimpleDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
      * 
      * <pre>
@@ -127,9 +128,9 @@ public final class Utility {
      * </pre>
      * 
      * @param timeZoneId The time zone identifier
-     * @return The {@link MailDateFormat} for specified time zone identifier
+     * @return The {@link SimpleDateFormat} for specified time zone identifier
      */
-    public static MailDateFormat getMailDateFormat(final String timeZoneId) {
+    public static SimpleDateFormat getMailDateFormat(final String timeZoneId) {
         Future<MailDateFormat> future = MDF_MAP.get(timeZoneId);
         if (null == future) {
             final FutureTask<MailDateFormat> ft = new FutureTask<MailDateFormat>(new Callable<MailDateFormat>() {
