@@ -1,3 +1,7 @@
+* 2011-06-03 - marcus.klein@open-xchange.com
+
+ - Bugfix #19373: Not presenting OXtender for Outlook 1 if Outlook 2010 is installed.
+
 * 2011-06-02 - thorben.betten@open-xchange.com
 
  - Bugfix #19291: Throwing proper error if an invalid host name is entered
