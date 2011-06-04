@@ -84,4 +84,8 @@ public class MimeStringMessagingHeader implements MessagingHeader {
         return value;
     }
 
+    public HeaderType getHeaderType() {
+        return HeaderType.PLAIN;
+    }
+
 }
