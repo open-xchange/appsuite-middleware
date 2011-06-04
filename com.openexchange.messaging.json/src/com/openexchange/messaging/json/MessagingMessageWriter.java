@@ -171,6 +171,9 @@ public class MessagingMessageWriter {
         return Utility.addTimeZoneOffset(date, timeZone);
     }
 
+    /**
+     * Initializes a new {@link MessagingMessageWriter}.
+     */
     public MessagingMessageWriter() {
         headerWriters.add(new ContentTypeWriter());
         headerWriters.add(new AddressHeaderWriter());
