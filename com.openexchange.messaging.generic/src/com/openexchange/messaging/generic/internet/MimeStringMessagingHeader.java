@@ -88,4 +88,9 @@ public class MimeStringMessagingHeader implements MessagingHeader {
         return HeaderType.PLAIN;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder(32).append(name).append('=').append(value).toString();
+    }
+
 }

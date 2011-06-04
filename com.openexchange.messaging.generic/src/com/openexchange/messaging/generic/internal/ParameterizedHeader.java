@@ -112,6 +112,10 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         return true;
     }
 
+    public HeaderType getHeaderType() {
+        return HeaderType.PARAMETERIZED;
+    }
+
     /**
      * Adds specified value to given parameter name. If existing, the parameter is treated as a contiguous parameter according to RFC2231.
      * 

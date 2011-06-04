@@ -126,6 +126,10 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
         }
     }
 
+    public HeaderType getHeaderType() {
+        return HeaderType.DATE;
+    }
+
     public long getTime() {
         return time;
     }

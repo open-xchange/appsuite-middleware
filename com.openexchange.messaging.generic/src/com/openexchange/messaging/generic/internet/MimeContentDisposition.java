@@ -158,6 +158,10 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
         cdo.setContentDisposition(contentDisp.cdo);
     }
 
+    public HeaderType getHeaderType() {
+        return HeaderType.PARAMETERIZED;
+    }
+
     /**
      * @return disposition
      */

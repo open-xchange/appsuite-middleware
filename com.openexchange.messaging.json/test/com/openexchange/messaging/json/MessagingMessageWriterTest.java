@@ -166,8 +166,8 @@ public class MessagingMessageWriterTest extends TestCase {
             return entry.getKey();
         }
 
-        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, ServerSession session) throws JSONException, MessagingException {
-            return new StringBuilder((String) entry.getValue().iterator().next().getValue()).reverse().toString();
+        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
+            return new StringBuilder(entry.getValue().iterator().next().getValue()).reverse().toString();
         }
 
     }
@@ -392,6 +392,10 @@ public class MessagingMessageWriterTest extends TestCase {
 
                 public String getValue() {
                     return value;
+                }
+
+                public HeaderType getHeaderType() {
+                    return HeaderType.PLAIN;
                 }
 
             });

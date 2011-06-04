@@ -191,6 +191,10 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         return CONTENT_TYPE;
     }
 
+    public HeaderType getHeaderType() {
+        return HeaderType.PARAMETERIZED;
+    }
+
     public String getValue() {
         return toString();
     }

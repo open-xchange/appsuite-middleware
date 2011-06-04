@@ -207,12 +207,12 @@ public interface MessagingHeader {
         ;
     }
 
-//    /**
-//     * Gets the header type.
-//     * 
-//     * @return The header type
-//     */
-//    public HeaderType getHeaderType();
+    /**
+     * Gets the header type.
+     * 
+     * @return The header type
+     */
+    public HeaderType getHeaderType();
 
     /**
      * Gets the name.

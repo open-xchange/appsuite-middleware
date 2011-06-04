@@ -75,6 +75,7 @@ import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.MessagingHeader.HeaderType;
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageGetSwitch;
@@ -155,7 +156,7 @@ public class MessagingMessageWriter {
      * @return The header value
      */
     static String getHeaderValue(final MessagingHeader header, final ServerSession session) {
-        if (header instanceof DateMessagingHeader) {
+        if (HeaderType.DATE.equals(header.getHeaderType())) {
             final DateMessagingHeader dateHeader = (DateMessagingHeader) header;
             final SimpleDateFormat mailDateFormat = Utility.getDefaultMailDateFormat();
             synchronized (mailDateFormat) {

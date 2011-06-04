@@ -50,6 +50,7 @@
 package com.openexchange.messaging;
 
 
+
 /**
  * {@link StringMessageHeader}
  *
@@ -79,6 +80,10 @@ public class StringMessageHeader implements MessagingHeader {
 
     public String getValue() {
         return value;
+    }
+
+    public HeaderType getHeaderType() {
+        return HeaderType.PLAIN;
     }
 
     @Override
