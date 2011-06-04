@@ -75,6 +75,7 @@ import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MessagingPart;
@@ -197,10 +198,11 @@ public class MessagingMessageWriter {
         }
         
         for (final MessagingField field : MessagingField.values()) {
-            if(null != field.getEquivalentHeader()) {
-                final Collection<MessagingHeader> header = message.getHeader(field.getEquivalentHeader().toString());
+            final KnownHeader knownHeader = field.getEquivalentHeader();
+            if(null != knownHeader) {
+                final Collection<MessagingHeader> header = message.getHeader(knownHeader.toString());
                 if(header != null && ! header.isEmpty()) {
-                    final SimpleEntry<String, Collection<MessagingHeader>> entry = new SimpleEntry<String, Collection<MessagingHeader>>(field.getEquivalentHeader().toString(), header);
+                    final SimpleEntry<String, Collection<MessagingHeader>> entry = new SimpleEntry<String, Collection<MessagingHeader>>(knownHeader.toString(), header);
                     final MessagingHeaderWriter writer = selectWriter(entry);
                     
                     messageJSON.put(field.toString(), writer.writeValue(entry, session));
