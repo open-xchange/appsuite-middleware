@@ -293,12 +293,15 @@ public class MessagingMessageWriter {
         messageJSON.put("size", message.getSize());
         messageJSON.put("threadLevel", message.getThreadLevel());
 
-        if (null != message.getUserFlags()) {
-            final JSONArray userFlagsJSON = new JSONArray();
-            for (final String flag : message.getUserFlags()) {
-                userFlagsJSON.put(flag);
+        {
+            final Collection<String> userFlags = message.getUserFlags();
+            if (null != userFlags && !userFlags.isEmpty()) {
+                final JSONArray userFlagsJSON = new JSONArray();
+                for (final String flag : userFlags) {
+                    userFlagsJSON.put(flag);
+                }
+                messageJSON.put("user", userFlagsJSON);
             }
-            messageJSON.put("user", userFlagsJSON);
         }
         
         messageJSON.put("folder", folderPrefix+"/"+message.getFolder());
