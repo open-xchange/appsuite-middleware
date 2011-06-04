@@ -85,11 +85,17 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
 
     private final Session session;
 
+    /**
+     * The prefix for a group name: &lt;context-id&gt; + "/" + &lt;folder-prefix&gt; + "/"
+     */
+    private final String groupNamePrefix;
+
     public CacheingMessageAccess(final MessagingMessageAccess delegate, final Cache cache, final String folderPrefix, final Session session) {
         this.delegate = delegate;
         this.cache = cache;
         this.folderPrefix = folderPrefix;
         this.session = session;
+        groupNamePrefix = new StringBuilder(session.getContextId()).append('/').append(folderPrefix).append('/').toString();
     }
 
     public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
@@ -228,7 +234,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
     }
 
     protected String getGroupName(final String folderId) {
-        return session.getContextId() + "/" + folderPrefix + "/" + folderId;
+        return new StringBuilder(groupNamePrefix).append(folderId).toString();
     }
 
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
