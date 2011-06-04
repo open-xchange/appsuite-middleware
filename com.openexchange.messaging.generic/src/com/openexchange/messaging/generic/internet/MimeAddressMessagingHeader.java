@@ -167,6 +167,10 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         return internetAddress.toString();
     }
 
+    public HeaderType getHeaderType() {
+        return HeaderType.ADDRESS;
+    }
+
     /**
      * Gets the properly formatted address.
      * 
