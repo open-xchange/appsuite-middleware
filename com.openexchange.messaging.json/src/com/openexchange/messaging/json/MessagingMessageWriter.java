@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.json.JSONArray;
@@ -152,10 +151,9 @@ public class MessagingMessageWriter {
     static String getHeaderValue(final MessagingHeader header, final ServerSession session) {
         if (header instanceof DateMessagingHeader) {
             final DateMessagingHeader dateHeader = (DateMessagingHeader) header;
-            final String timeZone = session.getUser().getTimeZone();
             final SimpleDateFormat mailDateFormat = Utility.getDefaultMailDateFormat();
             synchronized (mailDateFormat) {
-                return mailDateFormat.format(new Date(addTimeZoneOffset(dateHeader.getTime(), TimeZone.getTimeZone(timeZone))));
+                return mailDateFormat.format(new Date(addTimeZoneOffset(dateHeader.getTime(), session.getUser().getTimeZone())));
             }
         }
         return header.getValue();
@@ -168,8 +166,8 @@ public class MessagingMessageWriter {
      * @param timeZone The time zone
      * @return The UTC time with offset applied
      */
-    private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
-        return (date + timeZone.getOffset(date));
+    private static long addTimeZoneOffset(final long date, final String timeZone) {
+        return Utility.addTimeZoneOffset(date, timeZone);
     }
 
     public MessagingMessageWriter() {
@@ -290,9 +288,7 @@ public class MessagingMessageWriter {
         {
             final long receivedDate = message.getReceivedDate();
             if (receivedDate > 0) {
-                messageJSON.put(
-                    "receivedDate",
-                    addTimeZoneOffset(receivedDate, TimeZone.getTimeZone(session.getUser().getTimeZone())));
+                messageJSON.put("receivedDate", addTimeZoneOffset(receivedDate, session.getUser().getTimeZone()));
             }
         }
 
