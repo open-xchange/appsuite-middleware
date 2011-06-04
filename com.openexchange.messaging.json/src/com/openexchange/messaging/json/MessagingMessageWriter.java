@@ -304,7 +304,7 @@ public class MessagingMessageWriter {
             }
         }
         
-        messageJSON.put("folder", folderPrefix+"/"+message.getFolder());
+        messageJSON.put("folder", new StringBuilder(folderPrefix).append('/').append(message.getFolder()).toString());
         
         if(message.getPicture() != null) {
             messageJSON.put("picture", message.getPicture());
