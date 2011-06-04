@@ -281,8 +281,13 @@ public class MessagingMessageWriter {
         }
         messageJSON.put("flags", message.getFlags());
 
-        if (message.getReceivedDate() > 0) {
-            messageJSON.put("receivedDate", message.getReceivedDate());
+        {
+            final long receivedDate = message.getReceivedDate();
+            if (receivedDate > 0) {
+                messageJSON.put(
+                    "receivedDate",
+                    addTimeZoneOffset(receivedDate, TimeZone.getTimeZone(session.getUser().getTimeZone())));
+            }
         }
 
         messageJSON.put("size", message.getSize());
