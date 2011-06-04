@@ -184,6 +184,37 @@ public interface MessagingHeader {
     }
 
     /**
+     * The header type.
+     */
+    public static enum HeaderType {
+        /**
+         * The header value is a usual string.
+         */
+        PLAIN,
+        /**
+         * The header value is a date.
+         */
+        DATE,
+        /**
+         * The header value is an address.
+         */
+        ADDRESS,
+        /**
+         * The header contains parameter.
+         */
+        PARAMETERIZED,
+        
+        ;
+    }
+
+//    /**
+//     * Gets the header type.
+//     * 
+//     * @return The header type
+//     */
+//    public HeaderType getHeaderType();
+
+    /**
      * Gets the name.
      * 
      * @return The name
