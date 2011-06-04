@@ -272,13 +272,19 @@ public class MessagingMessageWriter {
     public JSONObject write(final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode) throws JSONException, MessagingException {
         final JSONObject messageJSON = write(message, session, mode);
 
-        if(message.getId() != null) {
-            messageJSON.put("id", message.getId());
+        {
+            final String id = message.getId();
+            if (id != null) {
+                messageJSON.put("id", id);
+            }
         }
-        
-        if (message.getColorLabel() > 0) {
-            messageJSON.put("colorLabel", message.getColorLabel());
+        {
+            final int colorLabel = message.getColorLabel();
+            if (colorLabel > 0) {
+                messageJSON.put("colorLabel", colorLabel);
+            }
         }
+
         messageJSON.put("flags", message.getFlags());
 
         {
@@ -306,12 +312,17 @@ public class MessagingMessageWriter {
         
         messageJSON.put("folder", new StringBuilder(folderPrefix).append('/').append(message.getFolder()).toString());
         
-        if(message.getPicture() != null) {
-            messageJSON.put("picture", message.getPicture());
+        {
+            final String picture = message.getPicture();
+            if (picture != null) {
+                messageJSON.put("picture", picture);
+            }
         }
-        
-        if(message.getUrl() != null) {
-            messageJSON.putOpt("url", message.getUrl());
+        {
+            final String url = message.getUrl();
+            if (url != null) {
+                messageJSON.putOpt("url", url);
+            }
         }
         return messageJSON;
     }
