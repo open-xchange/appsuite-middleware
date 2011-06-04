@@ -56,24 +56,29 @@ import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * A pair of {@link MessagingHeaderParser} and {@link MessagingHeaderWriter} are used for customizing header reading and writing. Instances
- * of those classes can be registered in a given {@link MessagingMessageWriter}. 
- *
+ * of those classes can be registered in a given {@link MessagingMessageWriter}.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingHeaderWriter {
 
     /**
-     * Returns true if this writer feels responsible for this header map entry. Will usually orient itself
-     * along the key of the entry {@link Entry#getKey()}
+     * Checks if this writer feels responsible for specified header map entry. Will usually orient itself along the key of the entry
+     * {@link Entry#getKey()}
+     * 
+     * @return <code>true</code> if this writer is responsible for header map entry; otherwise <code>false</code>
      */
     boolean handles(Entry<String, Collection<MessagingHeader>> entry);
 
     /**
+     * Gets this writer priority.
+     * <p>
      * If multiple header writers feel responsible for a certain header, the one with the highest priority will win.
+     * 
+     * @return The priority
      */
     int getPriority();
 
@@ -86,5 +91,5 @@ public interface MessagingHeaderWriter {
      * Writes the JSON value for the given entry
      */
     Object writeValue(Entry<String, Collection<MessagingHeader>> entry, ServerSession session) throws JSONException, MessagingException;
-    
+
 }
