@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -80,6 +81,39 @@ public final class Utility {
      */
     private Utility() {
         super();
+    }
+
+    /**
+     * Gets the {@link TimeZone} instance for the given ID.
+     * 
+     * @param id The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
+     *            custom ID such as "GMT-8:00".
+     * @return The specified {@link TimeZone} instance, or the GMT zone if the given ID cannot be understood.
+     */
+    public static TimeZone getTimeZone(final String id) {
+        return TimeZoneUtils.getTimeZone(id);
+    }
+
+    /**
+     * Adds the time zone offset to given date millis.
+     * 
+     * @param date The date millis
+     * @param timeZone The time zone identifier
+     * @return The date millis with time zone offset added
+     */
+    public static long addTimeZoneOffset(final long date, final String timeZone) {
+        return (date + TimeZoneUtils.getTimeZone(timeZone).getOffset(date));
+    }
+
+    /**
+     * Adds the time zone offset to given date millis.
+     * 
+     * @param date The date millis
+     * @param timeZone The time zone
+     * @return The date millis with time zone offset added
+     */
+    public static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
+        return (date + timeZone.getOffset(date));
     }
 
     private static final ConcurrentMap<String, Future<MailDateFormat>> MDF_MAP = new ConcurrentHashMap<String, Future<MailDateFormat>>();
