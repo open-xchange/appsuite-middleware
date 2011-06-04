@@ -157,10 +157,11 @@ public class MessagingMessageWriter {
      */
     static String getHeaderValue(final MessagingHeader header, final ServerSession session) {
         if (HeaderType.DATE.equals(header.getHeaderType())) {
-            final DateMessagingHeader dateHeader = (DateMessagingHeader) header;
             final SimpleDateFormat mailDateFormat = Utility.getDefaultMailDateFormat();
             synchronized (mailDateFormat) {
-                return mailDateFormat.format(new Date(addTimeZoneOffset(dateHeader.getTime(), session.getUser().getTimeZone())));
+                return mailDateFormat.format(new Date(addTimeZoneOffset(
+                    ((DateMessagingHeader) header).getTime(),
+                    session.getUser().getTimeZone())));
             }
         }
         return header.getValue();
