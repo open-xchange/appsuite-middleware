@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,8 +78,11 @@ import com.openexchange.session.Session;
 public class CacheingMessageAccess implements MessagingMessageAccess {
 
     private final MessagingMessageAccess delegate;
+
     private final Cache cache;
+
     private final String folderPrefix;
+
     private final Session session;
 
     public CacheingMessageAccess(final MessagingMessageAccess delegate, final Cache cache, final String folderPrefix, final Session session) {
@@ -128,47 +130,43 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         MessagingMessage msg = get(folder, id);
         if (msg != null) {
             return msg;
-        } else {
-            msg = delegate.getMessage(folder, id, peek);
         }
-        
+        msg = delegate.getMessage(folder, id, peek);
         if (msg == null) {
             throw MessagingExceptionCodes.MESSAGE_NOT_FOUND.create(id, folder);
-        } else {
-            return remember(msg);
-        }        
+        }
+        return remember(msg);
     }
 
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
-        final Map<String, MessagingMessage> allMessages = new HashMap<String, MessagingMessage>();
-        final List<String> idsToLoad = new LinkedList<String>();
-        
+        final Map<String, MessagingMessage> allMessages = new HashMap<String, MessagingMessage>(messageIds.length);
+        final List<String> idsToLoad = new ArrayList<String>(messageIds.length);
+
         for (final String id : messageIds) {
             final MessagingMessage cached = get(folder, id);
-            if(cached != null) {
-                allMessages.put(id, cached);
-            } else {
+            if (cached == null) {
                 idsToLoad.add(id);
+            } else {
+                allMessages.put(id, cached);
             }
         }
-        
-        if(!idsToLoad.isEmpty()) {
+
+        if (!idsToLoad.isEmpty()) {
             final List<MessagingMessage> messages = delegate.getMessages(folder, idsToLoad.toArray(new String[idsToLoad.size()]), fields);
             remember(messages);
-            if(allMessages.isEmpty()) {
+            if (allMessages.isEmpty()) {
                 return remember(messages);
             }
             for (final MessagingMessage messagingMessage : messages) {
                 allMessages.put(messagingMessage.getId(), messagingMessage);
             }
-            
         }
-        
+
         final List<MessagingMessage> messages = new ArrayList<MessagingMessage>(messageIds.length);
         for (final String id : messageIds) {
             messages.add(allMessages.get(id));
         }
-        
+
         return remember(messages);
     }
 
@@ -212,25 +210,25 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
     protected MessagingMessage remember(final MessagingMessage message) throws MessagingException {
         final String groupName = getGroupName(message.getFolder());
         final String key = message.getId();
-        
+
         try {
-            if(key != null) {
+            if (key != null) {
                 cache.putInGroup(key, groupName, message);
             }
         } catch (final CacheException e) {
             throw new MessagingException(e);
         }
-        
+
         return message;
     }
 
     protected void clear(final String folderId) {
         cache.invalidateGroup(getGroupName(folderId));
-        
+
     }
 
     protected String getGroupName(final String folderId) {
-        return session.getContextId()+"/"+folderPrefix+"/"+folderId;
+        return session.getContextId() + "/" + folderPrefix + "/" + folderId;
     }
 
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
