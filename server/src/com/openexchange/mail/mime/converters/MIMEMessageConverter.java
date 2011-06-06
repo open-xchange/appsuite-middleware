@@ -1584,14 +1584,7 @@ public final class MIMEMessageConverter {
                     mail.setReceivedDate(receivedDate);
                 }
             }
-            {
-                final Date sentDate = msg.getSentDate();
-                if (sentDate == null) {
-                    mail.setSentDate(null);
-                } else {
-                    mail.setSentDate(sentDate);
-                }
-            }
+            mail.setSentDate(msg.getSentDate());
             mail.setSize(msg.getSize());
             /*-
              * Fetch subject from mail headers since JavaMail fails to return a
