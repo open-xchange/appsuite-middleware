@@ -220,7 +220,7 @@ public final class AllFetch {
                     while (i < chars.length) {
                         final char c = chars[i];
                         if ('\t' == c || ' ' == c) {
-                            if ((i + 1) < chars.length && ' ' == chars[i + 1]) {
+                            while ((i + 1) < chars.length && ' ' == chars[i + 1]) {
                                 i++;
                             }
                             sb.append(' ');

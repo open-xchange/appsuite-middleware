@@ -1527,7 +1527,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  */
                 final boolean performSubscription = performSubscribe(toUpdate, updateMe);
                 if (performSubscription && getChecker().isDefaultFolder(fullName)) {
-                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, fullName);
+                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UNSUBSCRIBE, imapConfig, session, fullName);
                 }
                 /*
                  * Notify message storage
