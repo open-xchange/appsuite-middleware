@@ -117,7 +117,6 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         if(MessagingAddressHeader.class.isInstance(address)) {
             return (MessagingAddressHeader) address;
         }
-        
         return MimeAddressMessagingHeader.valueOfRFC822(address.getName(), address.getValue());
     }
 
