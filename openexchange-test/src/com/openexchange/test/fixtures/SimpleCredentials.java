@@ -74,6 +74,7 @@ public class SimpleCredentials implements Cloneable {
 	private String privateTaskFolderId = null;
 	private String privateContactFolderId = null;
 	private String privateInfostoreFolderId = null;
+	private TimeZone timezone = null;
 
     public SimpleCredentials(TestUserConfigFactory userConfigFactory, ContactFinder contactFinder) {
         super();
@@ -174,7 +175,10 @@ public class SimpleCredentials implements Cloneable {
     }
 
     public TimeZone getTimeZone() {
-        return TimeZone.getTimeZone(getConfig().getString(Tree.TimeZone));
+        if(null == timezone) {
+            timezone = TimeZone.getTimeZone(getConfig().getString(Tree.TimeZone));
+        }
+        return timezone;
     }
 
     public Locale getLocale() throws FixtureException {
