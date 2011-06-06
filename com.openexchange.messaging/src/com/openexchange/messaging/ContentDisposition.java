@@ -71,9 +71,9 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
     /**
      * Applies given content disposition to this content disposition
      * 
-     * @param contentDisposition The content disposition to apply
+     * @param contentDisp The content disposition to apply
      */
-    public void setContentDispositio(final ContentDisposition contentDisposition);
+    public void setContentDispositio(final ContentDisposition contentDisp);
 
     /**
      * @return disposition
