@@ -66,7 +66,6 @@ import javax.mail.internet.InternetHeaders;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -727,9 +726,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
              * is transferred as:
              * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
              */
-            final String subject;
             if (null == env.subject) {
-                subject = "";
+                msg.setSubject("");
             } else {
                 final String subj = MIMEMessageUtility.checkNonAscii(env.subject);
                 final char[] chars = subj.toCharArray();
@@ -747,9 +745,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                     }
                     i++;
                 }
-                subject = MIMEMessageUtility.decodeEnvelopeHeader(sb.toString());
+                msg.setSubject(MIMEMessageUtility.decodeEnvelopeHeader(sb.toString()));
             }
-            msg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
 
             msg.setSentDate(env.date);
         }

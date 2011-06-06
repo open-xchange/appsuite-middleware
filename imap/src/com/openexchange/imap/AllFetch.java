@@ -210,9 +210,8 @@ public final class AllFetch {
                  * is transferred as:
                  * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
                  */
-                final String subject;
                 if (null == envelope.subject) {
-                    subject = "";
+                    m.setSubject("");
                 } else {
                     final char[] chars = envelope.subject.toCharArray();
                     final StringBuilder sb = new StringBuilder(chars.length);
@@ -229,9 +228,8 @@ public final class AllFetch {
                         }
                         i++;
                     }
-                    subject = MIMEMessageUtility.decodeEnvelopeHeader(sb.toString());
+                    m.setSubject(MIMEMessageUtility.decodeEnvelopeHeader(sb.toString()));
                 }
-                m.setSubject(subject);
             }
 
             private String addrs2String(final InternetAddress[] addrs) {

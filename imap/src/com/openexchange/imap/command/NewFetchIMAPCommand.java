@@ -900,9 +900,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
              * is transferred as:
              * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
              */
-            final String subject;
             if (null == env.subject) {
-                subject = "";
+                msg.setSubject("");
             } else {
                 final String subj = MIMEMessageUtility.checkNonAscii(env.subject);
                 final char[] chars = subj.toCharArray();
@@ -920,9 +919,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     }
                     i++;
                 }
-                subject = MIMEMessageUtility.decodeEnvelopeHeader(sb.toString());
+                msg.setSubject(MIMEMessageUtility.decodeEnvelopeHeader(sb.toString()));
             }
-            msg.setSubject(subject);
 
             msg.setSentDate(env.date);
         }
