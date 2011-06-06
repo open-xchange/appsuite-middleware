@@ -25,6 +25,13 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-741
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/settings/ui.properties
+  if ! ox_exists_property "ui/portal/autoRefresh" $pfile; then
+      ox_set_property "ui/portal/autoRefresh" false $pfile
+  fi
+
   # SoftwareChange_Request-717
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/settings/ui.properties
