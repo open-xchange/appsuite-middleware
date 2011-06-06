@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-06-01 08:55+0200\n"
+"PO-Revision-Date: 2011-06-06 15:01+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -518,15 +518,26 @@ msgstr ""
 msgid "Default folder %1$s cannot be renamed in context %2$s"
 msgstr "Standardordner %1$s kann im Kontext %2$s nicht umbenannt werden"
 
-msgid "Default folder %1$s cannot be updated"
-msgstr "Standardordner %1$s kann nicht aktualisiert werden"
+msgid ""
+"Default folder %1$s must not be unsubscribed on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Das Abonnement für den Standardordner %1$s kann auf dem Server %2$s mit dem "
+"Login %3$s "
+"(Benutzer=%4$s, Kontext=%5$s) nicht gelöscht werden."
+
+msgid "Default folder %1$s must not be unsubscribed."
+msgstr "Das Abonnement für den Standardordner %1$s darf nicht gelöscht werden."
+
+msgid "Default folder %1$s must not be updated"
+msgstr "Der Standardordner %1$s darf nicht aktualisiert werden"
 
 msgid ""
-"Default folder %1$s cannot be updated on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)"
+"Default folder %1$s must not be updated on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
 msgstr ""
-"Standardordner %1$s kann nicht auf dem Server %2$s mit dem Login %3$s "
-"(Benutzer=%4$s, Kontext=%5$s) aktualisiert werden."
+"Der Standardordner %1$s darf auf dem Server %2$s mit dem Login %3$s "
+"(Benutzer=%4$s, Kontext=%5$s) nicht aktualisiert werden."
 
 msgid "Deletion of folder %1$s failed"
 msgstr "Das Löschen des Ordnders %1$s ist fehlgeschlagen."
@@ -4711,6 +4722,14 @@ msgstr "Leere Datei hochgeladen"
 msgid "The file you selected does not exist."
 msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden"
 
+#. Invalid date format detected: "%1$s". Ignoring value.
+msgid "Invalid date format detected: \"%1$s\". Ignoring value."
+msgstr "Ungültiges Datumsformat: \"%1$s\". Wert wird ignoriert."
+
+#. Ignoring invalid value for field "%1$s": %2$s
+msgid "Ignoring invalid value for field \"%1$s\": %2$s"
+msgstr "Ungültiger Wert für das Feld \"%1$s\" wird ignoriert: %2$s"
+
 msgid "Some fields have values, that are too long"
 msgstr "Die Werte einiger Felder sind zu lang"
 
@@ -5015,6 +5034,10 @@ msgstr "Mail-Account-Duplikat für Benutzer %1$s in Kontext %2$s."
 #. Duplicate transport account for user %1$s in context %2$s.
 msgid "Duplicate transport account for user %1$s in context %2$s."
 msgstr "Transport-Account-Duplikat für Benutzer %1$s in Kontext %2$s."
+
+#. Invalid host name: %1$s
+msgid "Invalid host name: %1$s"
+msgstr "Ungültiger Hostname: %1$s"
 
 #. Search failed: %1$s.
 msgid "Search failed: %1$s."
