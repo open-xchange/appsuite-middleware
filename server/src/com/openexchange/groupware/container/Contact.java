@@ -53,8 +53,12 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Set;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -767,8 +771,35 @@ public class Contact extends CommonObject implements Serializable {
 
     protected DistributionListEntryObject[] dlists;
 
+    private final Collection<AbstractOXException> warnings;
+
+    /**
+     * Initializes a new {@link Contact}.
+     */
     public Contact() {
         reset();
+        warnings = new LinkedList<AbstractOXException>();
+    }
+
+    /**
+     * Adds specified warning to this contact.
+     * 
+     * @param warning The warning
+     */
+    public void addWarning(final AbstractOXException warning) {
+        if (null == warning) {
+            return;
+        }
+        warnings.add(warning);
+    }
+
+    /**
+     * Gets the warnings.
+     * 
+     * @return The warnings
+     */
+    public Collection<AbstractOXException> getWarnings() {
+        return Collections.unmodifiableCollection(warnings);
     }
 
     // GET METHODS
@@ -1739,17 +1770,17 @@ public class Contact extends CommonObject implements Serializable {
         b_useCount = true;
     }
     
-    public void setYomiFirstName(String yomiFirstName) {
+    public void setYomiFirstName(final String yomiFirstName) {
         this.yomiFirstName = yomiFirstName;
         b_yomiFirstName = true;
     }
     
-    public void setYomiLastName(String yomiLastName) {
+    public void setYomiLastName(final String yomiLastName) {
         this.yomiLastName = yomiLastName;
         b_yomiLastName = true;
     }
     
-    public void setYomiCompany(String yomiCompany) {
+    public void setYomiCompany(final String yomiCompany) {
         this.yomiCompany = yomiCompany;
         b_yomiCompany = true;
     }
@@ -4420,11 +4451,12 @@ public class Contact extends CommonObject implements Serializable {
 
     @Override
     public Contact clone(){
-        Contact clone = new Contact();
-        for(ContactField field: ContactField.values()){
-            int fieldNum = field.getNumber();
-            if(contains(fieldNum))
+        final Contact clone = new Contact();
+        for(final ContactField field: ContactField.values()){
+            final int fieldNum = field.getNumber();
+            if(contains(fieldNum)) {
                 clone.set(fieldNum, get(fieldNum));
+            }
         }
         return clone;
     }
@@ -4434,17 +4466,18 @@ public class Contact extends CommonObject implements Serializable {
         final int prime = 31;
         int result = 1;
 
-        for(int col : Contact.ALL_COLUMNS){
-            if(contains(col))
+        for(final int col : Contact.ALL_COLUMNS){
+            if(contains(col)) {
                 result = prime * result + get(col).hashCode();
-            else
+            } else {
                 result = prime * result;
+            }
         }
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -4454,11 +4487,11 @@ public class Contact extends CommonObject implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        Contact other = (Contact) obj;
+        final Contact other = (Contact) obj;
         return matches(other, ALL_COLUMNS);
     }
 
-    public boolean equalsContentwise(Object obj){
+    public boolean equalsContentwise(final Object obj){
         if (this == obj) {
             return true;
         }
@@ -4468,26 +4501,30 @@ public class Contact extends CommonObject implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        Contact other = (Contact) obj;
+        final Contact other = (Contact) obj;
         return matches(other, CONTENT_COLUMNS);
     }
 
-    public boolean matches(Contact other, int[] fields){
-        for(int col: fields){
-            if(! contains(col) && other.contains(col))
+    public boolean matches(final Contact other, final int[] fields){
+        for(final int col: fields){
+            if(! contains(col) && other.contains(col)) {
                 return false;
-            if(contains(col) && !other.contains(col))
+            }
+            if(contains(col) && !other.contains(col)) {
                 return false;
+            }
             if(contains(col) && other.contains(col)){
-                Object thisValue = get(col);
-                Object otherValue = other.get(col);
+                final Object thisValue = get(col);
+                final Object otherValue = other.get(col);
                 if(thisValue == null){
-                    if(otherValue != null)
+                    if(otherValue != null) {
                         return false;
+                    }
                     continue;
                 }
-                if(! thisValue.equals(otherValue))
+                if(! thisValue.equals(otherValue)) {
                     return false;
+                }
             }
         }
         return true;

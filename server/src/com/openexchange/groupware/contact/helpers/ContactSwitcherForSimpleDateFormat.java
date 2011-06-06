@@ -51,12 +51,16 @@ package com.openexchange.groupware.contact.helpers;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 
 /**
  * This switcher is able to convert a given String into a date using
@@ -68,14 +72,94 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 
     private static final Log LOG = LogFactory.getLog(ContactSwitcherForSimpleDateFormat.class);
 
-    private final List<DateFormat> dateFormats = new LinkedList<DateFormat>();
+    private static interface DateValidator {
+        
+        boolean isValid(String dateString);
+    }
+
+    private static final DateValidator DEFAULT_VALIDATOR = new DateValidator() {
+        
+        public boolean isValid(final String dateString) {
+            return true;
+        }
+    };
+
+    private static final class RegexDateValidator implements DateValidator {
+        
+        private final Pattern invalidPattern;
+
+        public RegexDateValidator(final Pattern pattern) {
+            super();
+            this.invalidPattern = pattern;
+        }
+
+        public boolean isValid(final String dateString) {
+            return !invalidPattern.matcher(dateString).matches();
+        }
+
+    }
+
+    private static DateValidator getValidatorFor(final DateFormat dateFormat) {
+        final String pattern = getPatternFrom(dateFormat);
+        if (null == pattern) {
+            return DEFAULT_VALIDATOR;
+        }
+        try {
+            final String invalidRegex = pattern.replaceAll("[a-zA-Z]+", "0+");
+            return new RegexDateValidator(Pattern.compile(invalidRegex));
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+            return DEFAULT_VALIDATOR;
+        }
+    }
+
+    private static String getPatternFrom(final DateFormat dateFormat) {
+        if (!(dateFormat instanceof SimpleDateFormat)) {
+            return null;
+        }
+        return ((SimpleDateFormat) dateFormat).toPattern();
+    }
+
+    /*
+     * Member stuff
+     */
+
+    private final List<DateFormat> dateFormats;
+
+    private final List<DateValidator> dateValidators;
+
+    /**
+     * Initializes a new {@link ContactSwitcherForSimpleDateFormat}.
+     */
+    public ContactSwitcherForSimpleDateFormat() {
+        super();
+        dateFormats = new LinkedList<DateFormat>();
+        dateValidators = new LinkedList<DateValidator>();
+    }
 
     private Object[] makeDate(final Object... objects) throws ContactException {
         if (objects[1] instanceof String) {
-            // Not parsed by previous ContactSwitcher
-            for (final DateFormat dateFormat: dateFormats) {
+            /*
+             * Not parsed by previous ContactSwitcher
+             */
+            final String dateString = (String) objects[1];
+            /*
+             * Parse date string
+             */
+            final int size = dateFormats.size();
+            for (int index = 0; index < size; index++) {
                 try {
-                    objects[1] = dateFormat.parse((String) objects[1]);
+                    objects[1] = dateFormats.get(index).parse(dateString);
+                    /*
+                     * Parse successful so far. Is invalid?
+                     */
+                    if (!dateValidators.get(index).isValid(dateString)) {
+                        /*
+                         * Detected invalid value. Set to null.
+                         */
+                        objects[1] = null;
+                        ((Contact) objects[0]).addWarning(ImportExportExceptionCodes.INVALID_DATE.create(dateString));
+                    }
                     return objects;
                 } catch (final ParseException e) {
                     LOG.debug(e.getMessage());
@@ -86,8 +170,14 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         return objects;
     }
 
+    /**
+     * Adds specified {@link DateFormat date format} to this switcher.
+     * 
+     * @param dateFormat The date format to add
+     */
     public void addDateFormat(final DateFormat dateFormat) {
         dateFormats.add(dateFormat);
+        dateValidators.add(getValidatorFor(dateFormat));
     }
 
     /* CHANGED METHODS */
