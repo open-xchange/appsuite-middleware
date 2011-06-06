@@ -134,8 +134,8 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String FILE_NOT_EXISTS_MSG = "The file you selected does not exist.";
 
-    // Invalid date format detected. Ignoring value.
-    public static final String INVALID_DATE_MSG = "Invalid date format detected. Ignoring value.";
+    // Invalid date format detected: "%1$s". Ignoring value.
+    public static final String INVALID_DATE_MSG = "Invalid date format detected: \"%1$s\". Ignoring value.";
 
     private ImportExportExceptionMessages() {
         super();

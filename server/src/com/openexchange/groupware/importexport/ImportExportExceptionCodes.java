@@ -175,7 +175,7 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     EMPTY_FILE(EMPTY_FILE_MSG, Category.USER_INPUT, 1303),
     /** The file you selected does not exist. */
     FILE_NOT_EXISTS(FILE_NOT_EXISTS_MSG, Category.USER_INPUT, 1304),
-    /** Invalid date format detected. Ignoring value. */
+    /** Invalid date format detected: "%1$s". Ignoring value. */
     INVALID_DATE(ImportExportExceptionMessages.INVALID_DATE_MSG, Category.USER_INPUT, 1305),
     
     ;
