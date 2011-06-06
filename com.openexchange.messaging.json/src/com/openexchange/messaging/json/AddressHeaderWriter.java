@@ -110,7 +110,6 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
             }
             addresses.put(object);
         }
-        
         return addresses;
     }
 
