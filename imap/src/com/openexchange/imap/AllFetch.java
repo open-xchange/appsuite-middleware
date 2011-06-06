@@ -219,10 +219,12 @@ public final class AllFetch {
                     int i = 0;
                     while (i < chars.length) {
                         final char c = chars[i];
-                        if ('\t' != c && '\r' != c && '\n' != c) {
-                            if (' ' == c && (i + 1) < chars.length && ' ' == chars[i + 1]) {
+                        if ('\t' == c || ' ' == c) {
+                            if ((i + 1) < chars.length && ' ' == chars[i + 1]) {
                                 i++;
                             }
+                            sb.append(' ');
+                        } else if ('\r' != c && '\n' != c) {
                             sb.append(c);
                         }
                         i++;
