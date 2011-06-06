@@ -112,7 +112,7 @@ public final class ContentDisposition extends ParameterizedHeader {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((disposition == null) ? 0 : disposition.toLowerCase(Locale.ENGLISH).hashCode());
+        result = prime * result + ((disposition == null) ? 0 : disposition.toLowerCase(Locale.US).hashCode());
         return result;
     }
 
@@ -161,7 +161,7 @@ public final class ContentDisposition extends ParameterizedHeader {
         if (cdMatcher.start() != 0) {
             throw new MailException(MailException.Code.INVALID_CONTENT_DISPOSITION, contentDispArg);
         }
-        disposition = cdMatcher.group().toUpperCase(Locale.ENGLISH);
+        disposition = cdMatcher.group().toUpperCase(Locale.US);
         if (paramList) {
             parameterList = new ParameterList(contentDisp.substring(cdMatcher.end()));
         }

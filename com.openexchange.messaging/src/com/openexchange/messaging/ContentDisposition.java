@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging;
 
+
 /**
  * {@link ContentDisposition} - The Content-Disposition header.
  * 
@@ -58,11 +59,21 @@ package com.openexchange.messaging;
 public interface ContentDisposition extends ParameterizedMessagingHeader {
 
     /**
+     * The constant for "inline" disposition.
+     */
+    public static final String INLINE = "inline";
+
+    /**
+     * The constant for "attachment" disposition.
+     */
+    public static final String ATTACHMENT = "attachment";
+
+    /**
      * Applies given content disposition to this content disposition
      * 
-     * @param contentDisp The content disposition to apply
+     * @param contentDisposition The content disposition to apply
      */
-    public void setContentDispositio(final ContentDisposition contentDisp);
+    public void setContentDispositio(final ContentDisposition contentDisposition);
 
     /**
      * @return disposition
