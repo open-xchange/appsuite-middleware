@@ -203,4 +203,8 @@ public final class MailContentType implements ContentType {
         return contentType.toString();
     }
 
+    public HeaderType getHeaderType() {
+        return HeaderType.PARAMETERIZED;
+    }
+
 }
