@@ -5,6 +5,7 @@ package com.openexchange.webdav.protocol;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -28,5 +29,13 @@ public class DummySessionHolder implements SessionHolder{
 	public Context getContext() {
 		return ctx;
 	}
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.impl.SessionHolder#getUser()
+     */
+    public User getUser() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 	
 }

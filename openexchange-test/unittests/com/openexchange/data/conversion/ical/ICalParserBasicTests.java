@@ -628,6 +628,19 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals("nrw3rn2983nxi", appointment.getUid());
     }
     
+    public void testAppRecurrenceID() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+        Date rdp = D("29/06/2011 00:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+        String icalText = fixtures.veventWithSimpleProperties(start, end, "RECURRENCE-ID", "20110629T160000");
+        Appointment appointment = parseAppointment(icalText, utc);
+
+        assertEquals(rdp.getTime(), appointment.getRecurrenceDatePosition().getTime());
+    }
+    
     public void testAppOrganizer() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -997,6 +1010,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         assertEquals(D("23/04/1989 00:00"), task.getUntil());
     }
+    
 
     /**
      * Tasks do not have delete exceptions.

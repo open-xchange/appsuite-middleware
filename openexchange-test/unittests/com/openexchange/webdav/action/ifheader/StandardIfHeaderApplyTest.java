@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import junit.framework.TestCase;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -289,6 +290,11 @@ public class StandardIfHeaderApplyTest extends TestCase {
             public void unlock(String token) throws WebdavProtocolException {
             }
 
+            public Protocol getProtocol() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
         };
     }
     
@@ -448,6 +454,11 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             public void unlock(String token) throws WebdavProtocolException {
+            }
+
+            public Protocol getProtocol() {
+                // TODO Auto-generated method stub
+                return null;
             }
 
         };

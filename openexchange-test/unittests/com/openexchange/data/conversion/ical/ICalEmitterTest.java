@@ -290,6 +290,15 @@ public class ICalEmitterTest extends TestCase {
 
     }
 
+    public void testAppRecurrenceId() throws IOException {
+        Appointment appointment = getDefault();
+        appointment.setRecurrenceID(12);
+        appointment.setRecurrenceDatePosition(D("26/06/2011 00:00"));
+        
+        ICalFile ical = serialize(appointment);
+        
+        assertProperty(ical, "RECURRENCE-ID", "20110626");
+    }
 
     public void testAppAlarm() throws IOException {
         final int MINUTES = 1;

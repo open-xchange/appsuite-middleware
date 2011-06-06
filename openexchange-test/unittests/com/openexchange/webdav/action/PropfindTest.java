@@ -42,7 +42,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		final WebdavAction action = new WebdavPropfindAction();
+		final WebdavAction action = new WebdavPropfindAction(new Protocol());
 		action.perform(req, res);
 		
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
@@ -78,7 +78,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		final WebdavAction action = new WebdavPropfindAction();
+		final WebdavAction action = new WebdavPropfindAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
@@ -99,7 +99,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		final WebdavAction action = new WebdavPropfindAction();
+		final WebdavAction action = new WebdavPropfindAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
@@ -121,7 +121,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		final WebdavAction action = new WebdavPropfindAction();
+		final WebdavAction action = new WebdavPropfindAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		final XMLCompare compare = new XMLCompare();
@@ -149,7 +149,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setUrl(DEVELOPMENT_URL);
 		req.setHeader("depth", "0");
 		
-		final WebdavAction action = new WebdavPropfindAction();
+		final WebdavAction action = new WebdavPropfindAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
@@ -204,7 +204,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		final WebdavAction action = new WebdavPropfindAction();
+		final WebdavAction action = new WebdavPropfindAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
@@ -228,7 +228,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		final WebdavAction action = new WebdavPropfindAction();
+		final WebdavAction action = new WebdavPropfindAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
@@ -251,7 +251,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(SPECIAL_URL);
 		
-		final WebdavAction action = new WebdavPropfindAction();
+		final WebdavAction action = new WebdavPropfindAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
@@ -276,7 +276,7 @@ public class PropfindTest extends ActionTestCase {
         req.setBodyAsString(body);
         req.setUrl(problematicUrl);
 
-        final WebdavAction action = new WebdavPropfindAction();
+        final WebdavAction action = new WebdavPropfindAction(new Protocol());
         action.perform(req, res);
         assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 
