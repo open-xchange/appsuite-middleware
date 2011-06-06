@@ -76,7 +76,7 @@ public class ContentDispositionWriter implements MessagingHeaderWriter {
         super();
     }
 
-    public int getPriority() {
+    public int getRanking() {
         return 0;
     }
 

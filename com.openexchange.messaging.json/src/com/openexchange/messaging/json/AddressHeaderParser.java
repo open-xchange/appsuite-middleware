@@ -85,7 +85,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         "Resent-Cc",
         "Resent-Bcc"));
     
-    public int getPriority() {
+    public int getRanking() {
         return 1;
     }
 

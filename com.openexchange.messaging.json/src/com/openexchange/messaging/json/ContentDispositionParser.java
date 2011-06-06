@@ -80,7 +80,7 @@ public class ContentDispositionParser implements MessagingHeaderParser {
         super();
     }
 
-    public int getPriority() {
+    public int getRanking() {
         return 1;
     }
 
