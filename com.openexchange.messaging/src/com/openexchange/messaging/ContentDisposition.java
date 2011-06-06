@@ -126,6 +126,7 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
      * Checks if disposition is inline
      * 
      * @return <code>true</code> if disposition is inline; otherwise <code>false</code>
+     * @see #INLINE
      */
     public boolean isInline();
 
@@ -133,6 +134,7 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
      * Checks if disposition is attachment
      * 
      * @return <code>true</code> if disposition is attachment; otherwise <code>false</code>
+     * @see #ATTACHMENT
      */
     public boolean isAttachment();
 
