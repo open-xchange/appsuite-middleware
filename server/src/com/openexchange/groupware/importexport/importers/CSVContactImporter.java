@@ -319,6 +319,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     public Contact convertCsvToContact(final List<String> fields, final List<String> entry, final ContactSwitcher conSet, final int lineNumber, final ImportResult result, final boolean[] atLeastOneFieldInserted) throws ContactException {
         final Contact contactObj = new Contact();
+        final Collection<AbstractOXException> warnings = new LinkedList<AbstractOXException>();
         final List<String> wrongFields = new LinkedList<String>();
         boolean atLeastOneFieldWithWrongName = false;
         for (int i = 0; i < fields.size(); i++) {
@@ -335,11 +336,14 @@ public class CSVContactImporter extends AbstractImporter {
             } else {
                 if (!currEntry.equals("")) {
                     currField.doSwitch(conSet, contactObj, currEntry);
+                    final Collection<AbstractOXException> warns = contactObj.getWarnings();
+                    if (!warns.isEmpty()) {
+                        warnings.add(ImportExportExceptionCodes.PROBLEM_FIELD.create(warns.iterator().next(), fieldName, currEntry));
+                    }
                 }
                 atLeastOneFieldInserted[0] = true;
             }
         }
-        final Collection<AbstractOXException> warnings = contactObj.getWarnings();
         if (!warnings.isEmpty()) {
             final AbstractOXException warning = warnings.iterator().next();
             result.setException(warning);
