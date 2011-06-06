@@ -94,17 +94,23 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
     public void setDisposition(final String disposition);
 
     /**
-     * Sets <code>"filename"</code> parameter
+     * Sets <code>"filename"</code> parameter.
+     * 
+     * @param filename The file name; e.g. "sometext.txt"
      */
     public void setFilenameParameter(final String filename);
 
     /**
-     * @return the <code>"filename"</code> parameter value or <code>null</code> if not present
+     * Gets <code>"filename"</code> parameter.
+     * 
+     * @return The <code>"filename"</code> parameter value or <code>null</code> if not present
      */
     public String getFilenameParameter();
 
     /**
-     * @return <code>true</code> if <code>"filename"</code> parameter is present, <code>false</code> otherwise
+     * Checks if <code>"filename"</code> parameter is present.
+     * 
+     * @return <code>true</code> if <code>"filename"</code> parameter is present, <code>false</code> otherwise if absent
      */
     public boolean containsFilenameParameter();
 
