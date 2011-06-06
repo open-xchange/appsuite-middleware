@@ -1584,10 +1584,13 @@ public final class MIMEMessageConverter {
                     mail.setReceivedDate(receivedDate);
                 }
             }
-            if (msg.getSentDate() == null) {
-                mail.setSentDate(null);
-            } else {
-                mail.setSentDate(msg.getSentDate());
+            {
+                final Date sentDate = msg.getSentDate();
+                if (sentDate == null) {
+                    mail.setSentDate(null);
+                } else {
+                    mail.setSentDate(sentDate);
+                }
             }
             mail.setSize(msg.getSize());
             /*-

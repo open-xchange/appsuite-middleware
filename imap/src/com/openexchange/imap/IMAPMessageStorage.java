@@ -376,7 +376,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             // TODO: Examine behavior when applying: msg.setPeek(!markSeen);
             final MailMessage mail;
             try {
-                mail = MIMEMessageConverter.convertMessage(msg);
+                mail = MIMEMessageConverter.convertMessage(msg, false);
+                mail.setFolder(fullName);
+                mail.setMailId(String.valueOf(msgUID));
             } catch (final MIMEMailException e) {
                 if (MIMEMailException.Code.MESSAGE_REMOVED.getNumber() == e.getDetailNumber()) {
                     /*
