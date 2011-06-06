@@ -66,7 +66,7 @@ public class InvertedHeaderParser implements MessagingHeaderParser {
         headers.put(key, Arrays.asList((MessagingHeader)header));
     }
 
-    public int getPriority() {
+    public int getRanking() {
         return 2;
     }
 

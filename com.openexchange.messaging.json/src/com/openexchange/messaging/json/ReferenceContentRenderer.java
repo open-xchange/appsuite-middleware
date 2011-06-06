@@ -71,7 +71,7 @@ public class ReferenceContentRenderer implements MessagingContentWriter {
      */
     private static final String REF = "ref";
 
-    public int getPriority() {
+    public int getRanking() {
         return 0;
     }
 

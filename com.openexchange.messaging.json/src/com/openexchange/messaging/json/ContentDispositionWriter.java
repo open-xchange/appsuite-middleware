@@ -91,20 +91,26 @@ public class ContentDispositionWriter implements MessagingHeaderWriter {
     public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
         final ContentDisposition cDisp = toCType(entry.getValue().iterator().next());
         final JSONObject jsonCType = new JSONObject();
-
+        /*
+         * Put disposition
+         */
         jsonCType.put("type", cDisp.getDisposition());
-
-        final JSONObject params = new JSONObject();
+        /*
+         * Put parameters
+         */
         final Iterator<String> names = cDisp.getParameterNames();
-        boolean write = false;
-        while (names.hasNext()) {
-            write = true;
-            final String name = names.next();
-            final String value = cDisp.getParameter(name);
-            params.put(name, value);
+        if (names.hasNext()) {
+            final JSONObject params = new JSONObject();
+            do {
+                final String name = names.next();
+                final String value = cDisp.getParameter(name);
+                params.put(name, value);
+            } while (names.hasNext());
+            jsonCType.put("params", params);
         }
-
-        jsonCType.put("params", params);
+        /*
+         * Return JSON
+         */
         return jsonCType;
     }
 

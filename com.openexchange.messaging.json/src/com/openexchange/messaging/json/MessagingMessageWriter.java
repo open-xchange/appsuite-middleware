@@ -126,7 +126,7 @@ public class MessagingMessageWriter {
      */
     private static final MessagingHeaderWriter MULTI_HEADER_WRITER = new MessagingHeaderWriter() {
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
 
@@ -153,7 +153,7 @@ public class MessagingMessageWriter {
      */
     private static final MessagingHeaderWriter SINGLE_HEADER_WRITER = new MessagingHeaderWriter() {
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
 
@@ -219,7 +219,7 @@ public class MessagingMessageWriter {
             return HTMLProcessing.formatTextForDisplay(data, session.getUserSettingMail(), mode);
         }
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
 
@@ -258,7 +258,7 @@ public class MessagingMessageWriter {
 
         }
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
 
@@ -288,7 +288,7 @@ public class MessagingMessageWriter {
             return array;
         }
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
     }
@@ -387,13 +387,13 @@ public class MessagingMessageWriter {
     }
 
     private MessagingContentWriter getWriter(final MessagingPart message, final MessagingContent content) {
-        int priority = 0;
+        int ranking = 0;
         MessagingContentWriter writer = null;
         for (final MessagingContentWriter renderer : contentWriters) {
             if (renderer.handles(message, content)) {
-                if (writer == null || priority < renderer.getPriority()) {
+                if (writer == null || ranking < renderer.getRanking()) {
                     writer = renderer;
-                    priority = renderer.getPriority();
+                    ranking = renderer.getRanking();
                 }
             }
         }
@@ -401,17 +401,17 @@ public class MessagingMessageWriter {
     }
 
     private MessagingHeaderWriter selectWriter(final Entry<String, Collection<MessagingHeader>> entry) {
-        int priority = 0;
+        int ranking = 0;
         MessagingHeaderWriter candidate = null;
 
         for (final MessagingHeaderWriter writer : headerWriters) {
             if (writer.handles(entry)) {
                 if (candidate == null) {
                     candidate = writer;
-                    priority = candidate.getPriority();
-                } else if (priority < candidate.getPriority()) {
+                    ranking = candidate.getRanking();
+                } else if (ranking < candidate.getRanking()) {
                     candidate = writer;
-                    priority = candidate.getPriority();
+                    ranking = candidate.getRanking();
                 }
             }
         }

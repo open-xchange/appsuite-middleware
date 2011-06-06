@@ -154,7 +154,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
     private static final class InverseWriter implements MessagingHeaderWriter {
 
-        public int getPriority() {
+        public int getRanking() {
             return 2;
         }
 
@@ -272,7 +272,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
     private static class InverseContentWriter implements MessagingContentWriter {
 
-        public int getPriority() {
+        public int getRanking() {
             return 2;
         }
 

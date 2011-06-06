@@ -221,12 +221,12 @@ public class MessagingMessageParser {
             final Object value = object.get(key);
 
             MessagingHeaderParser candidate = null;
-            int priority = 0;
+            int ranking = 0;
             for (final MessagingHeaderParser parser : headerParsers) {
                 if (parser.handles(key, value)) {
-                    if (candidate == null || priority < parser.getPriority()) {
+                    if (candidate == null || ranking < parser.getRanking()) {
                         candidate = parser;
-                        priority = parser.getPriority();
+                        ranking = parser.getRanking();
                     }
                 }
             }
@@ -243,13 +243,13 @@ public class MessagingMessageParser {
 
     private void setContent(final Object content, final MessagingInputStreamRegistry registry, final MimeMessagingBodyPart message) throws MessagingException, JSONException, IOException {
         MessagingContentParser candidate = null;
-        int priority = 0;
+        int ranking = 0;
 
         for (final MessagingContentParser parser : contentParsers) {
             if (parser.handles(message, content)) {
-                if (candidate == null || priority < parser.getPriority()) {
+                if (candidate == null || ranking < parser.getRanking()) {
                     candidate = parser;
-                    priority = parser.getPriority();
+                    ranking = parser.getRanking();
                 }
             }
         }
@@ -265,7 +265,7 @@ public class MessagingMessageParser {
             super();
         }
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
 
@@ -291,7 +291,7 @@ public class MessagingMessageParser {
             super();
         }
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
 
@@ -313,7 +313,7 @@ public class MessagingMessageParser {
             super();
         }
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
 
@@ -368,7 +368,7 @@ public class MessagingMessageParser {
             super();
         }
 
-        public int getPriority() {
+        public int getRanking() {
             return 0;
         }
 

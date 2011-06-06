@@ -74,12 +74,12 @@ public interface MessagingContentWriter {
     public boolean handles(MessagingPart part, MessagingContent content);
 
     /**
-     * When multiple content writers feel responsible for a certain content the one with the highest priority is used.
+     * When multiple content writers feel responsible for a certain content the one with the highest ranking is used.
      */
-    public int getPriority();
+    public int getRanking();
 
     /**
-     * Turns the messaging content into its json representation
+     * Turns the messaging content into its JSON representation
      */
     public Object write(MessagingPart part, MessagingContent content, ServerSession session, DisplayMode mode) throws MessagingException, JSONException;
 }

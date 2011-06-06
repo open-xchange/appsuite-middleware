@@ -91,29 +91,34 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
     public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
         final ContentType cType = toCType(entry.getValue().iterator().next());
         final JSONObject jsonCType = new JSONObject();
-
+        /*
+         * Put base type
+         */
         jsonCType.put("type", cType.getBaseType());
-        
-        final JSONObject params = new JSONObject();
+        /*
+         * Put parameters
+         */
         final Iterator<String> names = cType.getParameterNames();
-        boolean write = false;
-        while(names.hasNext()) {
-            write = true;
-            final String name = names.next();
-            final String value = cType.getParameter(name);
-            params.put(name, value);
+        if (names.hasNext()) {
+            final JSONObject params = new JSONObject();
+            do {
+                final String name = names.next();
+                final String value = cType.getParameter(name);
+                params.put(name, value);
+            } while (names.hasNext());
+            jsonCType.put("params", params);
         }
-        
-        jsonCType.put("params", params);
+        /*
+         * Return JSON
+         */
         return jsonCType;
     }
 
     private ContentType toCType(final MessagingHeader header) throws MessagingException {
         if(ContentType.class.isInstance(header)) {
             return (ContentType) header;
-        } else {
-            return new MimeContentType(header.getValue());
         }
+        return new MimeContentType(header.getValue());
     }
 
 }

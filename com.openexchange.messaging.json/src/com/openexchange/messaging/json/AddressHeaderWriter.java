@@ -87,7 +87,7 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         "Resent-Cc".toLowerCase(Locale.US),
         "Resent-Bcc".toLowerCase(Locale.US)));
 
-    public int getPriority() {
+    public int getRanking() {
         return 1;
     }
 

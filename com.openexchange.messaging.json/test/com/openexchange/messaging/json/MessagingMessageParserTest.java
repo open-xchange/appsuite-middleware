@@ -322,7 +322,7 @@ public class MessagingMessageParserTest extends TestCase {
     
     private static final class ReversedContentParser implements MessagingContentParser {
 
-        public int getPriority() {
+        public int getRanking() {
             return 2;
         }
 

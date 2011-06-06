@@ -76,11 +76,11 @@ public interface MessagingHeaderWriter {
     /**
      * Gets this writer priority.
      * <p>
-     * If multiple header writers feel responsible for a certain header, the one with the highest priority will win.
+     * If multiple header writers feel responsible for a certain header, the one with the highest ranking will win.
      * 
      * @return The priority
      */
-    int getPriority();
+    int getRanking();
 
     /**
      * Writes the JSON key for the given entry

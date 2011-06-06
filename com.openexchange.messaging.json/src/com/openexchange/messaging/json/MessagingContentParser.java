@@ -66,12 +66,12 @@ import com.openexchange.messaging.MessagingException;
  */
 public interface MessagingContentParser {
     /**
-     * If multiple parsers feel responsible for a certain content object, the one with the highest priority wins.
+     * If multiple parsers feel responsible for a certain content object, the one with the highest ranking wins.
      */
-    public int getPriority();
+    public int getRanking();
 
     /**
-     * Determine whether this parser can handle the given json representation of a messaging content. Will usually orient
+     * Determine whether this parser can handle the given JSON representation of a messaging content. Will usually orient
      * itself along the (already parsed) content type in the given message.
      */
     public boolean handles(MessagingBodyPart message, Object content) throws MessagingException;

@@ -108,7 +108,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         headers.put(key, list);
     }
 
-    private void parse(final String key, final Object value, final ArrayList<MessagingHeader> list) throws JSONException, MessagingException {
+    private void parse(final String key, final Object value, final ArrayList<MessagingHeader> list) throws MessagingException {
         if(JSONObject.class.isInstance(value)) {
             list.add(parseObject(key, (JSONObject) value));
         } else if (String.class.isInstance(value)) {
@@ -120,7 +120,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         return MimeAddressMessagingHeader.parseRFC822(key, value).iterator().next();
     }
 
-    private MessagingHeader parseObject(final String key, final JSONObject value) throws JSONException {
+    private MessagingHeader parseObject(final String key, final JSONObject value) {
         final String address = value.optString("address");
         final String personal = value.optString("personal");
         return MimeAddressMessagingHeader.valueOfPlain(key, personal, address);
