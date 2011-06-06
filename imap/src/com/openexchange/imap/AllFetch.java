@@ -213,7 +213,7 @@ public final class AllFetch {
                 if (null == envelope.subject) {
                     m.setSubject("");
                 } else {
-                    final char[] chars = envelope.subject.toCharArray();
+                    final char[] chars = MIMEMessageUtility.checkNonAscii(envelope.subject).toCharArray();
                     final StringBuilder sb = new StringBuilder(chars.length);
                     int i = 0;
                     while (i < chars.length) {

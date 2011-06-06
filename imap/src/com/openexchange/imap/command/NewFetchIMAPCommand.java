@@ -903,8 +903,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             if (null == env.subject) {
                 msg.setSubject("");
             } else {
-                final String subj = MIMEMessageUtility.checkNonAscii(env.subject);
-                final char[] chars = subj.toCharArray();
+                final char[] chars = MIMEMessageUtility.checkNonAscii(env.subject).toCharArray();
                 final StringBuilder sb = new StringBuilder(chars.length);
                 int i = 0;
                 while (i < chars.length) {
