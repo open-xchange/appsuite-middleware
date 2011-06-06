@@ -60,10 +60,11 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 
 /**
  * Parses the long and short forms of the json version of the content-type header.
+ * <p>
  * <code>
- * {"type":"text/plain", "params":{"name":"something.txt","charset":"UTF-8"}}
- * </code>
- * or
+ * {&nbsp;"type":"text/plain",&nbsp;"params":&nbsp;{"name":"something.txt","charset":"UTF-8"}&nbsp;}
+ * </code><br>
+ * &nbsp;&nbsp;or<br>
  * <code>
  * "text/plain;charset=UTF-8;name=something.txt"
  * </code> 
@@ -71,6 +72,13 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentTypeParser implements MessagingHeaderParser {
+
+    /**
+     * Initializes a new {@link ContentTypeParser}.
+     */
+    public ContentTypeParser() {
+        super();
+    }
 
     public int getPriority() {
         return 1;
@@ -97,15 +105,15 @@ public class ContentTypeParser implements MessagingHeaderParser {
         final MimeContentType contentType = new MimeContentType();
         final JSONObject jsonCType = value;
         contentType.setBaseType(jsonCType.getString("type"));
-
         if (jsonCType.has("params")) {
             final JSONObject params = jsonCType.getJSONObject("params");
             if (params.has("charset")) {
                 contentType.setCharsetParameter(params.getString("charset"));
+            }
+            if (params.has("name")) {
                 contentType.setNameParameter(params.getString("name"));
             }
         }
-
         headers.put(MimeContentType.getContentTypeName(), Arrays.asList((MessagingHeader) contentType));
     }
 

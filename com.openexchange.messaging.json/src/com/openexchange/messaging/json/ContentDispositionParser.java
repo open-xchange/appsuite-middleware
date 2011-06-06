@@ -49,71 +49,71 @@
 
 package com.openexchange.messaging.json;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
-import com.openexchange.messaging.generic.internet.MimeContentType;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 
 /**
- * Writes a content-type in the long form.
- * @see ContentTypeParser
+ * Parses the long and short forms of the json version of the content-disposition header.
+ * <p>
+ * <code>
+ * {"type":"attachment", "params":{"filename":"somefile.dat"}}
+ * </code><br>
+ * &nbsp;&nbsp;or<br>
+ * <code>
+ * "attachment;filename=somefile.dat"
+ * </code> 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTypeWriter implements MessagingHeaderWriter {
+public class ContentDispositionParser implements MessagingHeaderParser {
 
     /**
-     * Initializes a new {@link ContentTypeWriter}.
+     * Initializes a new {@link ContentDispositionParser}.
      */
-    public ContentTypeWriter() {
+    public ContentDispositionParser() {
         super();
     }
 
     public int getPriority() {
-        return 0;
+        return 1;
     }
 
-    public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
-        return "content-type".equalsIgnoreCase(entry.getKey());
+    public boolean handles(final String key, final Object value) {
+        return MimeContentDisposition.getContentDispositionName().equalsIgnoreCase(key);
     }
 
-    public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        return "Content-Type";
-    }
-
-    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
-        final ContentType cType = toCType(entry.getValue().iterator().next());
-        final JSONObject jsonCType = new JSONObject();
-
-        jsonCType.put("type", cType.getBaseType());
-        
-        final JSONObject params = new JSONObject();
-        final Iterator<String> names = cType.getParameterNames();
-        boolean write = false;
-        while(names.hasNext()) {
-            write = true;
-            final String name = names.next();
-            final String value = cType.getParameter(name);
-            params.put(name, value);
+    public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, MessagingException {
+        if (JSONObject.class.isInstance(value)) {
+            parseObject(headers, key, (JSONObject) value);
+        } else if (String.class.isInstance(value)) {
+            parseString(headers, key, (String) value);
         }
-        
-        jsonCType.put("params", params);
-        return jsonCType;
     }
 
-    private ContentType toCType(final MessagingHeader header) throws MessagingException {
-        if(ContentType.class.isInstance(header)) {
-            return (ContentType) header;
-        } else {
-            return new MimeContentType(header.getValue());
+    private void parseString(final Map<String, Collection<MessagingHeader>> headers, final String key, final String value) throws MessagingException {
+        final MimeContentDisposition contentType = new MimeContentDisposition(value);
+        headers.put(MimeContentDisposition.getContentDispositionName(), Arrays.asList((MessagingHeader) contentType));
+    }
+
+    private void parseObject(final Map<String, Collection<MessagingHeader>> headers, final String key, final JSONObject value) throws MessagingException, JSONException {
+        final MimeContentDisposition contentType = new MimeContentDisposition();
+        final JSONObject jsonCType = value;
+        contentType.setDisposition(jsonCType.getString("type"));
+
+        if (jsonCType.has("params")) {
+            final JSONObject params = jsonCType.getJSONObject("params");
+            if (params.has("filename")) {
+                contentType.setFilenameParameter(params.getString("filename"));
+            }
         }
+
+        headers.put(MimeContentDisposition.getContentDispositionName(), Arrays.asList((MessagingHeader) contentType));
     }
 
 }

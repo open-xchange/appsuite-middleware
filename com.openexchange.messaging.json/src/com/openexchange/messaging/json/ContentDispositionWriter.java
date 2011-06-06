@@ -54,25 +54,25 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.messaging.ContentType;
+import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
-import com.openexchange.messaging.generic.internet.MimeContentType;
+import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * Writes a content-type in the long form.
- * @see ContentTypeParser
+ * Writes a content-disposition in the long form.
+ * 
+ * @see ContentDispositionParser
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTypeWriter implements MessagingHeaderWriter {
+public class ContentDispositionWriter implements MessagingHeaderWriter {
 
     /**
-     * Initializes a new {@link ContentTypeWriter}.
+     * Initializes a new {@link ContentDispositionWriter}.
      */
-    public ContentTypeWriter() {
+    public ContentDispositionWriter() {
         super();
     }
 
@@ -81,39 +81,38 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
     }
 
     public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
-        return "content-type".equalsIgnoreCase(entry.getKey());
+        return "content-disposition".equalsIgnoreCase(entry.getKey());
     }
 
     public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        return "Content-Type";
+        return "Content-Disposition";
     }
 
     public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
-        final ContentType cType = toCType(entry.getValue().iterator().next());
+        final ContentDisposition cDisp = toCType(entry.getValue().iterator().next());
         final JSONObject jsonCType = new JSONObject();
 
-        jsonCType.put("type", cType.getBaseType());
-        
+        jsonCType.put("type", cDisp.getDisposition());
+
         final JSONObject params = new JSONObject();
-        final Iterator<String> names = cType.getParameterNames();
+        final Iterator<String> names = cDisp.getParameterNames();
         boolean write = false;
-        while(names.hasNext()) {
+        while (names.hasNext()) {
             write = true;
             final String name = names.next();
-            final String value = cType.getParameter(name);
+            final String value = cDisp.getParameter(name);
             params.put(name, value);
         }
-        
+
         jsonCType.put("params", params);
         return jsonCType;
     }
 
-    private ContentType toCType(final MessagingHeader header) throws MessagingException {
-        if(ContentType.class.isInstance(header)) {
-            return (ContentType) header;
-        } else {
-            return new MimeContentType(header.getValue());
+    private ContentDisposition toCType(final MessagingHeader header) throws MessagingException {
+        if (ContentDisposition.class.isInstance(header)) {
+            return (ContentDisposition) header;
         }
+        return new MimeContentDisposition(header.getValue());
     }
 
 }

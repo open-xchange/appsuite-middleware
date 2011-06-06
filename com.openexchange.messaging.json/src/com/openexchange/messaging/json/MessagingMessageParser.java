@@ -87,19 +87,32 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class MessagingMessageParser {
 
-    private final Collection<MessagingHeaderParser> headerParsers = new ConcurrentLinkedQueue<MessagingHeaderParser>();
+    /**
+     * The collection of {@link MessagingHeaderParser header parsers}.
+     */
+    private final Collection<MessagingHeaderParser> headerParsers;
 
-    private final Collection<MessagingContentParser> contentParsers = new ConcurrentLinkedQueue<MessagingContentParser>();
+    /**
+     * The collection of {@link MessagingContentParser content parsers}.
+     */
+    private final Collection<MessagingContentParser> contentParsers;
 
+    /**
+     * Initializes a new {@link MessagingMessageParser}.
+     */
     public MessagingMessageParser() {
+        super();
+        headerParsers = new ConcurrentLinkedQueue<MessagingHeaderParser>();
+        contentParsers = new ConcurrentLinkedQueue<MessagingContentParser>();
+        // Header parsers
         headerParsers.add(new AddressHeaderParser());
         headerParsers.add(new ContentTypeParser());
+        headerParsers.add(new ContentDispositionParser());
         headerParsers.add(new MultiStringParser());
-
+        // Content parsers
         contentParsers.add(new StringContentParser());
         contentParsers.add(new BinaryContentParser());
         contentParsers.add(new MultipartContentParser());
-
     }
 
     /**
