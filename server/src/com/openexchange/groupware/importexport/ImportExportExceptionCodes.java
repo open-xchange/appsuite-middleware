@@ -49,7 +49,44 @@
 
 package com.openexchange.groupware.importexport;
 
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.*;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.BROKEN_CSV_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.CALENDAR_DISABLED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.CANNOT_EXPORT_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.CANNOT_IMPORT_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.CONTACTS_DISABLED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.DATA_AFTER_LAST_LINE_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.EMPTY_FILE_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.FILE_NOT_EXISTS_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ICAL_CONVERSION_FAILED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ICAL_EMITTER_SERVICE_MISSING_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ICAL_PARSER_SERVICE_MISSING_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.IOEXCEPTION_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.LOADING_CONTACTS_FAILED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.LOADING_FOLDER_FAILED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NOT_FOUND_FIELD_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_DATABASE_CONNECTION_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_EXPORTER_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_FIELD_FOR_NAMING_IN_LINE_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_FIELD_FOR_NAMING_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_FIELD_IMPORTED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_FOLDEROBJECT_CONSTANT_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_IMPORTER_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_TYPES_CONSTANT_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_VALID_CSV_COLUMNS_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_VCARD_FOUND_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NUMBER_FAILED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ONLY_ONE_FILE_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ONLY_ONE_FOLDER_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.RESOURCE_HARD_CONFLICT_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.TASKS_DISABLED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.UNKNOWN_FORMAT_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.UNKNOWN_VCARD_FORMAT_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.UTF8_ENCODE_FAILED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.VCARD_CONVERSION_FAILED_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.VCARD_CONVERSION_PROBLEM_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.VCARD_PARSING_PROBLEM_MSG;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.WARNINGS_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
@@ -138,13 +175,16 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     EMPTY_FILE(EMPTY_FILE_MSG, Category.USER_INPUT, 1303),
     /** The file you selected does not exist. */
     FILE_NOT_EXISTS(FILE_NOT_EXISTS_MSG, Category.USER_INPUT, 1304),
+    /** Invalid date format detected. Ignoring value. */
+    INVALID_DATE(ImportExportExceptionMessages.INVALID_DATE_MSG, Category.USER_INPUT, 1305),
+    
     ;
 
     private String message;
     private Category category;
     private int number;
 
-    private ImportExportExceptionCodes(String message, Category category, int number) {
+    private ImportExportExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
@@ -166,11 +206,11 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
         return category;
     }
 
-    public ImportExportException create(Object... args) {
+    public ImportExportException create(final Object... args) {
         return ImportExportExceptionFactory.getInstance().create(this, args);
     }
 
-    public ImportExportException create(Throwable cause, Object... args) {
+    public ImportExportException create(final Throwable cause, final Object... args) {
         return ImportExportExceptionFactory.getInstance().create(this, cause, args);
     }
 }
