@@ -70,8 +70,6 @@ public class AuthorizationException extends AbstractOXException {
             return STR_COMPONENT;
         }
     };
-
-    private StackTraceElement[] elements;
     
     /**
      * Initializes a new {@link AuthorizationException}.
@@ -85,28 +83,6 @@ public class AuthorizationException extends AbstractOXException {
     /**
      * Initializes a new {@link AuthorizationException}.
      * 
-     * @param message The message
-     * @param cause The cause
-     */
-    public AuthorizationException(final String message, final AbstractOXException cause) {
-        super(AUTHORIZATION_COMPONENT, message, cause);
-    }
-
-    /**
-     * Initializes a new {@link AuthorizationException}.
-     * 
-     * @param category The category
-     * @param detailNumber The detail number
-     * @param message The message
-     * @param cause The cause
-     */
-    public AuthorizationException(final Category category, final int detailNumber, final String message, final Throwable cause) {
-        super(AUTHORIZATION_COMPONENT, category, detailNumber, message, cause);
-    }
-
-    /**
-     * Initializes a new {@link AuthorizationException}.
-     * 
      * @param message The error message
      * @param cause The cause
      * @param args The message arguments
@@ -114,19 +90,5 @@ public class AuthorizationException extends AbstractOXException {
     public AuthorizationException(ErrorMessage message, Throwable cause, Object... args) {
         super(message, cause);
         setMessageArgs(args);
-    }
-
-    public StackTraceElement[] getElements() {
-        return elements;
-    }
-    
-    public void printStarterTrace(){
-        if(elements == null) {
-            System.err.println("No Stack Trace recorded");
-            return;
-        }
-        for(final StackTraceElement element : elements) {
-            System.err.println(element);
-        }
     }
 }
