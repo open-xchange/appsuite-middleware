@@ -302,6 +302,9 @@ public class MessagingMessageWriter {
      */
     private final Collection<MessagingHeaderWriter> headerWriters;
 
+    /**
+     * The collection of {@link MessagingContentWriter content writers}.
+     */
     private final Collection<MessagingContentWriter> contentWriters;
 
     /**
