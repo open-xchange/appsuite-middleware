@@ -52,6 +52,7 @@ package com.openexchange.messaging.json;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
@@ -72,26 +73,30 @@ import com.openexchange.tools.session.ServerSession;
 public class AddressHeaderWriter implements MessagingHeaderWriter {
 
     private static final Set<String> WHITELIST = new HashSet<String>(Arrays.asList(
-        "From",
-        "To",
-        "Cc",
-        "Bcc",
-        "Reply-To",
-        "Resent-Reply-To",
-        "Disposition-Notification-To",
-        "Resent-From",
-        "Sender",
-        "Resent-Sender",
-        "Resent-To",
-        "Resent-Cc",
-        "Resent-Bcc"));
+        "From".toLowerCase(Locale.US),
+        "To".toLowerCase(Locale.US),
+        "Cc".toLowerCase(Locale.US),
+        "Bcc".toLowerCase(Locale.US),
+        "Reply-To".toLowerCase(Locale.US),
+        "Resent-Reply-To".toLowerCase(Locale.US),
+        "Disposition-Notification-To".toLowerCase(Locale.US),
+        "Resent-From".toLowerCase(Locale.US),
+        "Sender".toLowerCase(Locale.US),
+        "Resent-Sender".toLowerCase(Locale.US),
+        "Resent-To".toLowerCase(Locale.US),
+        "Resent-Cc".toLowerCase(Locale.US),
+        "Resent-Bcc".toLowerCase(Locale.US)));
 
     public int getPriority() {
         return 1;
     }
 
     public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
-        return WHITELIST.contains(entry.getKey());
+        final String name = entry.getKey();
+        if (null == name) {
+            return false;
+        }
+        return WHITELIST.contains(name.toLowerCase(Locale.US));
     }
 
     public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {

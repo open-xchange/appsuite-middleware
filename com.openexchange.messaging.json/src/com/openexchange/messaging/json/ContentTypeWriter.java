@@ -74,7 +74,7 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
     }
 
     public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
-        return entry.getKey().equalsIgnoreCase("content-type");
+        return "content-type".equalsIgnoreCase(entry.getKey());
     }
 
     public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
