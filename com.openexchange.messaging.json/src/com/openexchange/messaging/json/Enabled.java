@@ -74,7 +74,7 @@ static final String ENABLED = "com.openexchange.messaging.enabled";
     
     ConfigViewFactory configViews;
 
-    public Enabled(ConfigViewFactory configViews) {
+    public Enabled(final ConfigViewFactory configViews) {
         this.configViews = configViews;
     }
 
@@ -90,14 +90,14 @@ static final String ENABLED = "com.openexchange.messaging.enabled";
              */
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 try {
-                    ConfigView view = configViews.getView(user.getId(), ctx.getContextId());
-                    ComposedConfigProperty<Boolean> property = view.property(ENABLED, boolean.class);
+                    final ConfigView view = configViews.getView(user.getId(), ctx.getContextId());
+                    final ComposedConfigProperty<Boolean> property = view.property(ENABLED, boolean.class);
                     if (property.isDefined()) {
                         setting.setSingleValue(property.get());
                     } else {
-                        setting.setSingleValue(true);
+                        setting.setSingleValue(Boolean.TRUE);
                     }
-                } catch (ConfigCascadeException e) {
+                } catch (final ConfigCascadeException e) {
                     throw new SettingException(e);
                 }
             }

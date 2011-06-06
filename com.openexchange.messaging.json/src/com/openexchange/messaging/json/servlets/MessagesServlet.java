@@ -77,15 +77,19 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessagesServlet extends MultipleAdapterServletNew {
 
-    
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 2342329232570692011L;
+
     private static final Object RESOLVE = "resolve";
-    private final List<MessagingContentDumper> dumpers = new ArrayList<MessagingContentDumper>(1) {{
-        add(new BinaryContentDumper());
-        // Add more as needed
-    }};
+
+    private final List<MessagingContentDumper> dumpers;
 
     public MessagesServlet() {
         super(MessagingActionFactory.INSTANCE);
+        dumpers = new ArrayList<MessagingContentDumper>(1);
+        dumpers.add(new BinaryContentDumper());
     }
     
     @Override

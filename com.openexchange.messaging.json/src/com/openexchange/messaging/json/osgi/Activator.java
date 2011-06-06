@@ -53,12 +53,10 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
@@ -94,7 +92,7 @@ public class Activator extends DeferredActivator {
 
     private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
 
-    private List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(3);
+    private final List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(3);
     
     private MessagingServiceRegistry registry;
 
@@ -113,11 +111,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        try {
-            register();
-        } catch (final CacheException e) {
-            LOG.error(e.getMessage(), e);
-        }
+        register();
     }
 
     @Override
@@ -128,7 +122,7 @@ public class Activator extends DeferredActivator {
     }
 
     private void hide() {
-        for(SessionServletRegistration reg : servletRegistrations) {
+        for(final SessionServletRegistration reg : servletRegistrations) {
             reg.close();
         }
         servletRegistrations.clear();
@@ -161,7 +155,7 @@ public class Activator extends DeferredActivator {
         }
     }
 
-    private void register() throws CacheException {
+    private void register() {
         try {
 
             registry = getService(MessagingServiceRegistry.class);
@@ -179,7 +173,7 @@ public class Activator extends DeferredActivator {
             servletRegistrations.add(new SessionServletRegistration(context, new MessagesServlet(), "/ajax/messaging/message"));
             servletRegistrations.add(new SessionServletRegistration(context, new ServicesServlet(), "/ajax/messaging/service"));
 
-            for(SessionServletRegistration reg : servletRegistrations) {
+            for(final SessionServletRegistration reg : servletRegistrations) {
                 reg.open();
             }
 
