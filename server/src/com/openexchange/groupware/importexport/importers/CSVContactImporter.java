@@ -338,7 +338,7 @@ public class CSVContactImporter extends AbstractImporter {
                     currField.doSwitch(conSet, contactObj, currEntry);
                     final Collection<AbstractOXException> warns = contactObj.getWarnings();
                     if (!warns.isEmpty()) {
-                        warnings.add(ImportExportExceptionCodes.PROBLEM_FIELD.create(warns.iterator().next(), fieldName, currEntry));
+                        warnings.add(ImportExportExceptionCodes.IGNORE_FIELD.create(warns.iterator().next(), fieldName, currEntry));
                     }
                 }
                 atLeastOneFieldInserted[0] = true;
