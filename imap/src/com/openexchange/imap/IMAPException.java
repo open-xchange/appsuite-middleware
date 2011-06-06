@@ -501,11 +501,11 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Default folder %1$s must not be updated
          */
-        NO_DEFAULT_FOLDER_UPDATE("Default folder %1$s cannot be updated", Category.PERMISSION, 2018),
+        NO_DEFAULT_FOLDER_UPDATE("Default folder %1$s must not be updated", Category.PERMISSION, 2018),
         /**
          * Default folder %1$s must not be updated on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
-        NO_DEFAULT_FOLDER_UPDATE_EXT("Default folder %1$s cannot be updated on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_DEFAULT_FOLDER_UPDATE),
+        NO_DEFAULT_FOLDER_UPDATE_EXT("Default folder %1$s must not be updated on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_DEFAULT_FOLDER_UPDATE),
         /**
          * Deletion of folder %1$s failed
          */
