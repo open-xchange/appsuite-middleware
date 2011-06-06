@@ -161,7 +161,7 @@ public final class ContentDisposition extends ParameterizedHeader {
         if (cdMatcher.start() != 0) {
             throw new MailException(MailException.Code.INVALID_CONTENT_DISPOSITION, contentDispArg);
         }
-        disposition = cdMatcher.group().toUpperCase(Locale.US);
+        disposition = cdMatcher.group().toLowerCase(Locale.US);
         if (paramList) {
             parameterList = new ParameterList(contentDisp.substring(cdMatcher.end()));
         }

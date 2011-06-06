@@ -71,9 +71,9 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
     /**
      * Applies given content disposition to this content disposition
      * 
-     * @param contentDisp The content disposition to apply
+     * @param contentDisposition The content disposition to apply
      */
-    public void setContentDispositio(final ContentDisposition contentDisp);
+    public void setContentDispositio(final ContentDisposition contentDisposition);
 
     /**
      * @return disposition
@@ -103,10 +103,10 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
     /**
      * Sets the Content-Disposition.
      * 
-     * @param contentDisp The Content-Disposition
+     * @param contentDisposition The Content-Disposition as a string
      * @throws MessagingException If applying Content-Disposition fails
      */
-    public void setContentDisposition(final String contentDisp) throws MessagingException;
+    public void setContentDisposition(final String contentDisposition) throws MessagingException;
 
     /**
      * Checks if disposition is inline

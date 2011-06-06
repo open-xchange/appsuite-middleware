@@ -70,13 +70,13 @@ import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 public class ContentDispositionWriterTest extends TestCase{
 
     public void testWriteContentType() throws MessagingException, JSONException {
-        final ContentDisposition contentType = new MimeContentDisposition();
-        contentType.setDisposition(ContentDisposition.ATTACHMENT);
-        contentType.setFilenameParameter("foo.dat");
+        final ContentDisposition contentDisp = new MimeContentDisposition();
+        contentDisp.setDisposition(ContentDisposition.ATTACHMENT);
+        contentDisp.setFilenameParameter("foo.dat");
 
         final ContentDispositionWriter writer = new ContentDispositionWriter();
 
-        final SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
+        final SimEntry<String, Collection<MessagingHeader>> entry = entry( contentDisp );
 
         assertTrue(writer.handles(entry));
         assertEquals("Content-Disposition", writer.writeKey(entry));
@@ -84,7 +84,7 @@ public class ContentDispositionWriterTest extends TestCase{
         final Object value = writer.writeValue(entry, null);
         assertNotNull(value);
         
-        final JSONObject jsonCType = (JSONObject) value;
+        final JSONObject jsonCDisp = (JSONObject) value;
         
         final JSONAssertion assertion = new JSONAssertion()
             .isObject()
@@ -94,16 +94,16 @@ public class ContentDispositionWriterTest extends TestCase{
                 .objectEnds()
             .objectEnds();
         
-        assertValidates(assertion, jsonCType);
+        assertValidates(assertion, jsonCDisp);
         
     }
     
     public void testWriteBasicHeader() throws MessagingException, JSONException {
-        final MessagingHeader contentType = new StringMessageHeader("Content-Disposition", ContentDisposition.ATTACHMENT+";filename=foo.dat");
+        final MessagingHeader contentDisp = new StringMessageHeader("Content-Disposition", ContentDisposition.ATTACHMENT+";filename=foo.dat");
 
         final ContentDispositionWriter writer = new ContentDispositionWriter();
 
-        final SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
+        final SimEntry<String, Collection<MessagingHeader>> entry = entry( contentDisp );
 
         assertTrue(writer.handles(entry));
         assertEquals("Content-Disposition", writer.writeKey(entry));
@@ -111,7 +111,7 @@ public class ContentDispositionWriterTest extends TestCase{
         final Object value = writer.writeValue(entry, null);
         assertNotNull(value);
         
-        final JSONObject jsonCType = (JSONObject) value;
+        final JSONObject jsonCDisp = (JSONObject) value;
 
         final JSONAssertion assertion = new JSONAssertion()
         .isObject()
@@ -121,7 +121,7 @@ public class ContentDispositionWriterTest extends TestCase{
             .objectEnds()
         .objectEnds();
         
-        assertValidates(assertion, jsonCType);
+        assertValidates(assertion, jsonCDisp);
         
     }
 
