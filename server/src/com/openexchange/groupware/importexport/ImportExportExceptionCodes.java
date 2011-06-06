@@ -178,7 +178,7 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     /** Invalid date format detected: "%1$s". Ignoring value. */
     INVALID_DATE(ImportExportExceptionMessages.INVALID_DATE_MSG, Category.USER_INPUT, 1305),
     /** Ignoring invalid value for field "%1$s": %2$s  */
-    PROBLEM_FIELD(ImportExportExceptionMessages.PROBLEM_FIELD_MSG, Category.USER_INPUT, 1306),
+    IGNORE_FIELD(ImportExportExceptionMessages.IGNORE_FIELD_MSG, Category.USER_INPUT, 1306),
     
     ;
 

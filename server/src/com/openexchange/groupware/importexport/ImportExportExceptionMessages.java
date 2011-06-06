@@ -138,7 +138,7 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
     public static final String INVALID_DATE_MSG = "Invalid date format detected: \"%1$s\". Ignoring value.";
 
     //  Ignoring invalid value for field "%1$s": %2$s
-    public static final String PROBLEM_FIELD_MSG = "Ignoring invalid value for field \"%1$s\": %2$s";
+    public static final String IGNORE_FIELD_MSG = "Ignoring invalid value for field \"%1$s\": %2$s";
 
     private ImportExportExceptionMessages() {
         super();
