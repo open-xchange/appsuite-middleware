@@ -1,3 +1,7 @@
+* 2011-06-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #19358: Ignoring invalid date strings and generate an appropriate warning
+
 * 2011-06-03 - thorben.betten@open-xchange.com
 
  - Bugfix #19418: Adding user's time zone offset to date message headers
