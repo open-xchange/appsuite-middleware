@@ -76,12 +76,20 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
     public void setContentDispositio(final ContentDisposition contentDisposition);
 
     /**
-     * @return disposition
+     * Gets the disposition.
+     * 
+     * @return The disposition
+     * @see #INLINE
+     * @see #ATTACHMENT
      */
     public String getDisposition();
 
     /**
-     * Sets disposition
+     * Sets the disposition.
+     * 
+     * @param disposition The disposition
+     * @see #INLINE
+     * @see #ATTACHMENT
      */
     public void setDisposition(final String disposition);
 
