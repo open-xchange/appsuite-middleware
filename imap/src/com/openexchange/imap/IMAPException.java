@@ -321,8 +321,16 @@ public final class IMAPException extends MIMEMailException {
          * No rename access to mail folder %1$s
          */
         NO_RENAME_ACCESS(IMAPCode.NO_RENAME_ACCESS),
-        /** Unable to parse IMAP server URI "%1$s". */
-        URI_PARSE_FAILED(IMAPCode.URI_PARSE_FAILED);
+        /**
+         * Unable to parse IMAP server URI "%1$s".
+         */
+        URI_PARSE_FAILED(IMAPCode.URI_PARSE_FAILED),
+        /**
+         * Default folder %1$s must not be unsubscribed.
+         */
+        NO_DEFAULT_FOLDER_UNSUBSCRIBE(IMAPCode.NO_DEFAULT_FOLDER_UNSUBSCRIBE),
+        
+        ;
 
         private final IMAPCode imapCode;
 
@@ -775,6 +783,10 @@ public final class IMAPException extends MIMEMailException {
          * Unable to parse IMAP server URI "%1$s".
          */
         URI_PARSE_FAILED("Unable to parse IMAP server URI \"%1$s\".", Category.SETUP_ERROR, 2055),
+        /**
+         * Default folder %1$s must not be unsubscribed.
+         */
+        NO_DEFAULT_FOLDER_UNSUBSCRIBE("Default folder %1$s must not be unsubscribed.", Category.USER_INPUT, 2056),
         ;
 
         private final String message;
