@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.webdav.protocol.impl;
+package com.openexchange.webdav.protocol.helpers;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -71,6 +71,14 @@ import com.openexchange.webdav.xml.WebdavLockWriter;
 public abstract class AbstractResource implements WebdavResource {
 	
 	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.GET, WEBDAV_METHOD.PUT, WEBDAV_METHOD.DELETE, WEBDAV_METHOD.HEAD, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.TRACE, WEBDAV_METHOD.PROPPATCH, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.MOVE, WEBDAV_METHOD.COPY, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK};
+	
+	protected List<PropertyMixin> mixins = new ArrayList<PropertyMixin>();
+	
+	public void includeProperties(PropertyMixin...mixins) {
+	    for (PropertyMixin mixin : mixins) {
+	        this.mixins.add(mixin);
+        }
+	}
 	
 	protected void checkPath() throws WebdavProtocolException {
 		checkParentExists(getUrl());
@@ -155,15 +163,21 @@ public abstract class AbstractResource implements WebdavResource {
 
 
 	public WebdavProperty getProperty(final String namespace, final String name) throws WebdavProtocolException {
-		final WebdavProperty prop = handleSpecialGet(namespace, name);
+		WebdavProperty prop = handleSpecialGet(namespace, name);
 		if(prop != null) {
 			return prop;
+		}
+		prop = getFromMixin(namespace, name);
+		if (prop != null) {
+		    return prop;
 		}
 		return internalGetProperty(namespace, name);
 	}
 	
-	public List<WebdavProperty> getAllProps() throws WebdavProtocolException{
+
+    public List<WebdavProperty> getAllProps() throws WebdavProtocolException{
 		final List<WebdavProperty> props = internalGetAllProps();
+		props.addAll(getAllFromMixin());
 		for(final Property p : getFactory().getProtocol().getKnownProperties()){
 			final WebdavProperty prop = getProperty(p.getNamespace(),p.getName());
 			if(prop != null) {
@@ -173,6 +187,25 @@ public abstract class AbstractResource implements WebdavResource {
 		
 		return props;
 	}
+
+    protected List<WebdavProperty> getAllFromMixin() throws WebdavProtocolException {
+        List<WebdavProperty> allProps = new ArrayList<WebdavProperty>();
+        for (PropertyMixin mixin : mixins) {
+            List<WebdavProperty> properties = mixin.getAllProperties();
+            allProps.addAll(properties);
+        }
+        return allProps;
+    }
+
+    protected WebdavProperty getFromMixin(String namespace, String name) throws WebdavProtocolException {
+        for (PropertyMixin mixin : mixins) {
+            WebdavProperty property = mixin.getProperty(namespace, name);
+            if (property != null) {
+                return property;
+            }
+        }
+        return null;
+    }
 	
 	public boolean isCollection() {
 		return false;
@@ -288,7 +321,11 @@ public abstract class AbstractResource implements WebdavResource {
 	public String toString(){
 		return getUrl().toString();
 	}
-
+	
+	public Protocol getProtocol() {
+	    return getFactory().getProtocol();
+	}
+	
 	public abstract void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException;
 	
 	public abstract boolean hasBody() throws WebdavProtocolException;

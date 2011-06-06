@@ -138,5 +138,7 @@ public interface WebdavResource {
 
 	WebdavResource reload() throws WebdavProtocolException;
 
+    Protocol getProtocol();
+
 
 }

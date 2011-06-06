@@ -69,6 +69,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
     private WebdavResource dest;
     private final WebdavFactory factory;
     private Map<String, Object> userInfo = new HashMap<String, Object>();
+    private Document bodyDocument;
     
     public AbstractWebdavRequest(final WebdavFactory factory) {
         this.factory = factory;
@@ -99,7 +100,10 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
     }
     
     public Document getBodyAsDocument() throws JDOMException, IOException {
-        return ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(getBody());
+        if (bodyDocument != null) {
+            return bodyDocument;
+        }
+        return bodyDocument = ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(getBody());
     }
     
     public IfHeader getIfHeader() throws IfHeaderParseException {

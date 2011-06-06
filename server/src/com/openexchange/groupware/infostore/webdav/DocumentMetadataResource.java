@@ -89,7 +89,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.impl.AbstractResource;
+import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 public class DocumentMetadataResource extends AbstractResource implements OXWebdavResource {
 

@@ -47,49 +47,43 @@
  *
  */
 
-package com.openexchange.webdav.xml.resources;
+package com.openexchange.webdav.protocol.helpers;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import org.jdom.Element;
-import com.openexchange.tools.collections.Injector;
-import com.openexchange.tools.collections.OXCollections;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
 
-public class RecursiveMarshaller implements ResourceMarshaller {
 
-	private final ResourceMarshaller delegate;
-	private final int depth;
-	
-	public RecursiveMarshaller(final ResourceMarshaller delegate, final int depth) {
-		this.delegate = delegate;
-		this.depth = depth;
-	}
+/**
+ * {@link SinglePropertyMixin}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public abstract class SinglePropertyMixin implements PropertyMixin {
 
-	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException  {
-		final List<Element> list = new ArrayList<Element>();
-		final List<Element> delegateMarshal = delegate.marshal(resource);
-		list.addAll(delegateMarshal);
-		if(resource.isCollection()) {
-			try {
-				OXCollections.inject(list, resource.toCollection().toIterable(depth), new Injector<List<Element>, WebdavResource>(){
+    private String namespace;
+    private String name;
+    
+    public SinglePropertyMixin(String namespace, String name) {
+        super();
+        this.namespace = namespace;
+        this.name = name;
+    }
 
-					public List<Element> inject(final List<Element> list, final WebdavResource element) {
-						try {
-                            list.addAll(delegate.marshal(element));
-                        } catch (WebdavProtocolException e) {
-                            // IGNORE
-                        }
-						return list;
-					}
-					
-				});
-			} catch (final WebdavProtocolException e) {
-				return list;
-			}
-		}
-		return list;
-	}
+    public List<WebdavProperty> getAllProperties() throws WebdavProtocolException {
+        return Collections.emptyList();
+    }
+
+    public WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException {
+        if (this.namespace.equals(namespace) && this.name.equals(name)) {
+            WebdavProperty property = new WebdavProperty(namespace, name);
+            configureProperty(property);
+            return property;
+        }
+        return null;
+    }
+
+    protected abstract void configureProperty(WebdavProperty property);
 
 }

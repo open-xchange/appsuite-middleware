@@ -98,9 +98,10 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.impl.AbstractResource;
+import com.openexchange.webdav.protocol.helpers.AbstractResource;
+import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
-public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
+public class InfostoreWebdavFactory extends AbstractWebdavFactory implements BulkLoader {
 
     private static final Protocol PROTOCOL = new Protocol();
     private WebdavFolderAliases aliases;
@@ -285,16 +286,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         }
     }
 
-    public WebdavCollection resolveCollection(String url)
-            throws WebdavProtocolException {
-        url = normalize(url);
-        return resolveCollection(new WebdavPath(url));
-    }
-
-    public WebdavResource resolveResource(String url) throws WebdavProtocolException {
-        url = normalize(url);
-        return resolveResource(new WebdavPath(url));
-    }
+   
 
     private Set<TransactionAware> services(){
         return this.services;
@@ -601,17 +593,6 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         invalidate(resource.getUrl(), resource.getId(), (resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE );
         final State s = state.get();
         s.remove(resource);
-    }
-
-    private final String normalize(String url) {
-        if(url.length()==0) {
-            return "/";
-        }
-        url = url.replaceAll("/+", "/");
-        if(url.charAt(url.length()-1)=='/') {
-            return url.substring(0,url.length()-1);
-        }
-        return url;
     }
 
     public ServerSession getSession() throws OXException {

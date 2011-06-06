@@ -78,8 +78,8 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
-import com.openexchange.webdav.protocol.impl.AbstractCollection;
-import com.openexchange.webdav.protocol.impl.AbstractResource;
+import com.openexchange.webdav.protocol.helpers.AbstractCollection;
+import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 public class InfostoreLockNullResource extends AbstractCollection implements OXWebdavResource{
 

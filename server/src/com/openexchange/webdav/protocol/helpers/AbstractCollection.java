@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.webdav.protocol.impl;
+package com.openexchange.webdav.protocol.helpers;
 
 import java.io.InputStream;
 import java.util.ArrayList;

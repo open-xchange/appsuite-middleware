@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 
 public interface SessionHolder {
@@ -57,4 +58,6 @@ public interface SessionHolder {
 	public Session getSessionObject();
 
 	public Context getContext();
+
+	public User getUser();
 }

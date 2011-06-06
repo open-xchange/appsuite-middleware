@@ -73,6 +73,7 @@ import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
@@ -196,7 +197,7 @@ public final class InfostorePerformer implements SessionHolder {
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
-        propFind = prepare(new WebdavPropfindAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
+        propFind = prepare(new WebdavPropfindAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
         options = prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false));
         move = prepare(new WebdavMoveAction(infoFactory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true));
         mkcol = prepare(new WebdavMkcolAction(), true, true, new WebdavIfAction(0, true, false));
@@ -320,6 +321,10 @@ public final class InfostorePerformer implements SessionHolder {
 
     public Context getContext() {
         return session.get().getContext();
+    }
+    
+    public User getUser() {
+        return session.get().getUser();
     }
 
     public void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action, final ServerSession sess) {

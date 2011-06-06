@@ -47,49 +47,51 @@
  *
  */
 
-package com.openexchange.webdav.xml.resources;
+package com.openexchange.webdav.action;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import org.jdom.Document;
 import org.jdom.Element;
-import com.openexchange.tools.collections.Injector;
-import com.openexchange.tools.collections.OXCollections;
+import org.jdom.JDOMException;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
 
-public class RecursiveMarshaller implements ResourceMarshaller {
 
-	private final ResourceMarshaller delegate;
-	private final int depth;
-	
-	public RecursiveMarshaller(final ResourceMarshaller delegate, final int depth) {
-		this.delegate = delegate;
-		this.depth = depth;
-	}
+/**
+ * {@link WebdavReportAction}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class WebdavReportAction extends AbstractAction {
 
-	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException  {
-		final List<Element> list = new ArrayList<Element>();
-		final List<Element> delegateMarshal = delegate.marshal(resource);
-		list.addAll(delegateMarshal);
-		if(resource.isCollection()) {
-			try {
-				OXCollections.inject(list, resource.toCollection().toIterable(depth), new Injector<List<Element>, WebdavResource>(){
-
-					public List<Element> inject(final List<Element> list, final WebdavResource element) {
-						try {
-                            list.addAll(delegate.marshal(element));
-                        } catch (WebdavProtocolException e) {
-                            // IGNORE
-                        }
-						return list;
-					}
-					
-				});
-			} catch (final WebdavProtocolException e) {
-				return list;
-			}
-		}
-		return list;
-	}
+    private Protocol protocol;
+    
+    public WebdavReportAction(Protocol protocol) {
+        this.protocol = protocol;
+    }
+    
+    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
+        try {
+            Document reportQuery = req.getBodyAsDocument();
+            Element root = reportQuery.getRootElement();
+            String ns = root.getNamespace().getURI();
+            String name = root.getName();
+            
+            WebdavAction reportAction = protocol.getReportAction(ns, name);
+            
+            if (reportAction == null) {
+                throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            }
+            
+            reportAction.perform(req, res);
+            
+        } catch (JDOMException e) {
+            throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        } catch (IOException e) {
+            throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+        
+    }
 
 }

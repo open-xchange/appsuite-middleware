@@ -51,6 +51,7 @@ package com.openexchange.webdav.xml.resources;
 
 import org.jdom.Element;
 import org.jdom.Namespace;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class PropfindPropNamesMarshaller extends PropfindAllPropsMarshaller {
@@ -60,11 +61,8 @@ public class PropfindPropNamesMarshaller extends PropfindAllPropsMarshaller {
 	}
 
 	@Override
-	public Element marshalProperty(final WebdavProperty property) {
-		final Element propElement = new Element(property.getName(), Namespace.getNamespace(property.getNamespace()));
+	public Element marshalProperty(WebdavProperty property, Protocol protocol) {
+	    final Element propElement = new Element(property.getName(), Namespace.getNamespace(property.getNamespace()));
 		return propElement;
 	}
-	
-	
-
 }

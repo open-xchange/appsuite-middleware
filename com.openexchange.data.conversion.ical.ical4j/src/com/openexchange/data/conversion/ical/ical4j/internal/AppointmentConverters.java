@@ -133,6 +133,7 @@ public final class AppointmentConverters {
         tmp.add(new CreatedBy<VEvent, Appointment>());
         tmp.add(new Sequence<VEvent, Appointment>());
         
+        
         // All standard converters
         final List<AttributeConverter<VEvent, Appointment>> all = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
         final Participants<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();

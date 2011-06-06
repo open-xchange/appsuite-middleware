@@ -108,6 +108,8 @@ public abstract class WebDavServlet extends HttpServlet {
                 allow.append("LOCK,");
             } else if ("doUnLock".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("UNLOCK,");
+            } else if ("doReport".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
+                allow.append("REPORT,");
             }
         }
         allow.append("TRACE,OPTIONS");
@@ -146,6 +148,11 @@ public abstract class WebDavServlet extends HttpServlet {
     protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"UNLOCK\" is not supported by this servlet");
     }
+    
+    protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"REPORT\" is not supported by this servlet");
+    }
+
 
     /**
      * {@inheritDoc}
@@ -169,6 +176,8 @@ public abstract class WebDavServlet extends HttpServlet {
                 doLock(req, resp);
             } else if ("UNLOCK".equals(method)) {
                 doUnLock(req, resp);
+            } else if ("REPORT".equals(method)) {
+                doReport(req, resp);
             } else {
                 super.service(req, resp);
             }

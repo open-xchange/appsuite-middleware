@@ -72,18 +72,29 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 public class WebdavPropfindAction extends AbstractAction {
 
-	private static final Namespace DAV_NS = Protocol.DAV_NS;
+	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 	
 	private static final Log LOG = LogFactory.getLog(WebdavPropfindAction.class);
 	
-	private final XMLOutputter outputter = new XMLOutputter();
+	protected final XMLOutputter outputter = new XMLOutputter();
+
+    protected Protocol protocol;
 	
-	
+	public WebdavPropfindAction(Protocol protocol) {
+	    this.protocol = protocol;
+	}
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavProtocolException {
 		
 		final Element response = new Element("multistatus",DAV_NS);
+		
+        List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+        for (Namespace namespace : namespaces) {
+            response.addNamespaceDeclaration(namespace);
+        }
+
+		
 		final Document responseBody = new Document(response);
 		
 		boolean forceAllProp = false;
@@ -98,30 +109,8 @@ public class WebdavPropfindAction extends AbstractAction {
 			throw new WebdavProtocolException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
 		}
 		
-		ResourceMarshaller marshaller = null;
-		final LoadingHints loadingHints = new LoadingHints();
-		loadingHints.setUrl(req.getUrl());
-		
-		if(null != requestBody && null != requestBody.getRootElement().getChild("propname", DAV_NS)) {
-			marshaller = new PropfindPropNamesMarshaller(req.getURLPrefix(),req.getCharset()); 
-			loadingHints.setProps(LoadingHints.Property.ALL);
-		} 
-		
-		if(null != requestBody && null != requestBody.getRootElement().getChild("allprop", DAV_NS) || forceAllProp) {
-			marshaller = new PropfindAllPropsMarshaller(req.getURLPrefix(), req.getCharset());
-			loadingHints.setProps(LoadingHints.Property.ALL);
-		} 
-		if (null != requestBody && null != requestBody.getRootElement().getChild("prop",DAV_NS)) {
-			marshaller = new PropfindResponseMarshaller(req.getURLPrefix(), req.getCharset());
-			loadingHints.setProps(LoadingHints.Property.SOME);
-			
-			for(final Element props : (List<Element>) requestBody.getRootElement().getChildren("prop", DAV_NS)){
-				for(final Element requested : (List<Element>) props.getChildren()) {
-					((PropfindResponseMarshaller) marshaller).addProperty(requested.getNamespaceURI(), requested.getName());
-					loadingHints.addProperty(requested.getNamespaceURI(), requested.getName());
-				}
-			}
-		}
+        final LoadingHints loadingHints = new LoadingHints();
+		ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, loadingHints);
 		
 		if(null != req.getHeader("Depth")) {
 			int depth = 0;
@@ -147,5 +136,35 @@ public class WebdavPropfindAction extends AbstractAction {
 			LOG.debug("Client gone?", e);
 		}
 	}
+
+    protected ResourceMarshaller getMarshaller(final WebdavRequest req, boolean forceAllProp, Document requestBody, LoadingHints loadingHints) {
+        if (loadingHints == null) {
+            loadingHints = new LoadingHints();
+        }
+        ResourceMarshaller marshaller = null;
+		loadingHints.setUrl(req.getUrl());
+		
+		if(null != requestBody && null != requestBody.getRootElement().getChild("propname", DAV_NS)) {
+			marshaller = new PropfindPropNamesMarshaller(req.getURLPrefix(),req.getCharset()); 
+			loadingHints.setProps(LoadingHints.Property.ALL);
+		} 
+		
+		if(null != requestBody && null != requestBody.getRootElement().getChild("allprop", DAV_NS) || forceAllProp) {
+			marshaller = new PropfindAllPropsMarshaller(req.getURLPrefix(), req.getCharset());
+			loadingHints.setProps(LoadingHints.Property.ALL);
+		} 
+		if (null != requestBody && null != requestBody.getRootElement().getChild("prop",DAV_NS)) {
+			marshaller = new PropfindResponseMarshaller(req.getURLPrefix(), req.getCharset());
+			loadingHints.setProps(LoadingHints.Property.SOME);
+			
+			for(final Element props : (List<Element>) requestBody.getRootElement().getChildren("prop", DAV_NS)){
+				for(final Element requested : (List<Element>) props.getChildren()) {
+					((PropfindResponseMarshaller) marshaller).addProperty(requested.getNamespaceURI(), requested.getName());
+					loadingHints.addProperty(requested.getNamespaceURI(), requested.getName());
+				}
+			}
+		}
+        return marshaller;
+    }
 
 }

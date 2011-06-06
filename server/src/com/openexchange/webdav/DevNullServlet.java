@@ -47,49 +47,23 @@
  *
  */
 
-package com.openexchange.webdav.xml.resources;
+package com.openexchange.webdav;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.jdom.Element;
-import com.openexchange.tools.collections.Injector;
-import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-public class RecursiveMarshaller implements ResourceMarshaller {
 
-	private final ResourceMarshaller delegate;
-	private final int depth;
-	
-	public RecursiveMarshaller(final ResourceMarshaller delegate, final int depth) {
-		this.delegate = delegate;
-		this.depth = depth;
-	}
-
-	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException  {
-		final List<Element> list = new ArrayList<Element>();
-		final List<Element> delegateMarshal = delegate.marshal(resource);
-		list.addAll(delegateMarshal);
-		if(resource.isCollection()) {
-			try {
-				OXCollections.inject(list, resource.toCollection().toIterable(depth), new Injector<List<Element>, WebdavResource>(){
-
-					public List<Element> inject(final List<Element> list, final WebdavResource element) {
-						try {
-                            list.addAll(delegate.marshal(element));
-                        } catch (WebdavProtocolException e) {
-                            // IGNORE
-                        }
-						return list;
-					}
-					
-				});
-			} catch (final WebdavProtocolException e) {
-				return list;
-			}
-		}
-		return list;
-	}
-
+/**
+ * {@link DevNullServlet}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class DevNullServlet extends HttpServlet {
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.getWriter().write("OK");
+    }
 }

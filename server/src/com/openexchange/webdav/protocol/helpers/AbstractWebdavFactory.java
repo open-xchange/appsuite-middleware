@@ -47,49 +47,76 @@
  *
  */
 
-package com.openexchange.webdav.xml.resources;
+package com.openexchange.webdav.protocol.helpers;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.jdom.Element;
-import com.openexchange.tools.collections.Injector;
-import com.openexchange.tools.collections.OXCollections;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
-public class RecursiveMarshaller implements ResourceMarshaller {
+/**
+ * {@link AbstractWebdavFactory}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public abstract class AbstractWebdavFactory implements WebdavFactory {
 
-	private final ResourceMarshaller delegate;
-	private final int depth;
-	
-	public RecursiveMarshaller(final ResourceMarshaller delegate, final int depth) {
-		this.delegate = delegate;
-		this.depth = depth;
-	}
+    private PropertyMixin[] mixins;
 
-	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException  {
-		final List<Element> list = new ArrayList<Element>();
-		final List<Element> delegateMarshal = delegate.marshal(resource);
-		list.addAll(delegateMarshal);
-		if(resource.isCollection()) {
-			try {
-				OXCollections.inject(list, resource.toCollection().toIterable(depth), new Injector<List<Element>, WebdavResource>(){
+    public void beginRequest() {
 
-					public List<Element> inject(final List<Element> list, final WebdavResource element) {
-						try {
-                            list.addAll(delegate.marshal(element));
-                        } catch (WebdavProtocolException e) {
-                            // IGNORE
-                        }
-						return list;
-					}
-					
-				});
-			} catch (final WebdavProtocolException e) {
-				return list;
-			}
-		}
-		return list;
-	}
+    }
+
+    public void endRequest(int status) {
+
+    }
+
+    public WebdavCollection resolveCollection(String url) throws WebdavProtocolException {
+        url = normalize(url);
+        return resolveCollection(decode(new WebdavPath(url)));
+    }
+
+    public WebdavResource resolveResource(String url) throws WebdavProtocolException {
+        url = normalize(url);
+        return resolveResource(decode(new WebdavPath(url)));
+    }
+    
+    public WebdavPath decode(WebdavPath webdavPath) {
+        WebdavPath path = new WebdavPath();
+        for(String component : webdavPath) {
+            try {
+                path.append(URLDecoder.decode(component, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                // Won't happen
+            }
+        }
+        return path;
+    }
+
+    public <T extends AbstractResource> T mixin(T thing) {
+        thing.includeProperties(mixins);
+        return thing;
+    }
+    
+    protected String normalize(String url) {
+        if(url.length()==0) {
+            return "/";
+        }
+        url = url.replaceAll("/+", "/");
+        if(url.charAt(url.length()-1)=='/') {
+            return url.substring(0,url.length()-1);
+        }
+        return url;
+    }
+    
+    public void setGlobalMixins(PropertyMixin...mixins) {
+        this.mixins = mixins;
+    }
+
+
 
 }

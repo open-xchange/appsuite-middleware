@@ -89,9 +89,9 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
             return;
         }
         // Only when the DateList is created this way the correct dates are written to iCal file.
-        final DateList deleteExceptions = new DateList(dates.length);
-        deleteExceptions.setUtc(true);
         for (final java.util.Date deleteException : dates) {
+            final DateList deleteExceptions = new DateList(dates.length);
+            deleteExceptions.setUtc(true);
             final net.fortuna.ical4j.model.Date date;
             if (CalendarDataObject.class.isAssignableFrom(appointment.getClass())) {
                 final CalendarDataObject cloned = (CalendarDataObject) appointment.clone();
@@ -100,9 +100,8 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
                 date = EmitterTools.toDateTime(deleteException);
             }
             deleteExceptions.add(date);
+            vEvent.getProperties().add(new ExDate(deleteExceptions));
         }
-        final ExDate exDates = new ExDate(deleteExceptions);
-        vEvent.getProperties().add(exDates);
     }
 
     public boolean hasProperty(final VEvent vEvent) {

@@ -52,7 +52,10 @@ package com.openexchange.webdav.protocol;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.jdom.Document;
 import org.jdom.Namespace;
+import com.openexchange.webdav.action.WebdavAction;
+import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
 public class Protocol {
@@ -114,6 +117,7 @@ public class Protocol {
 			p.setName(name);
 			switch(id){
 			case CREATIONDATE : case GETLASTMODIFIED : p.setDate(true); break;
+			case RESOURCETYPE: p.setXML(true); break;
 			}
 			return p;
 		}
@@ -220,4 +224,12 @@ public class Protocol {
 		default : return false;
 		}
 	}
+
+    public List<Namespace> getAdditionalNamespaces() {
+        return Collections.emptyList();
+    }
+
+    public WebdavAction getReportAction(String ns, String name) {
+        return null;
+    }
 }

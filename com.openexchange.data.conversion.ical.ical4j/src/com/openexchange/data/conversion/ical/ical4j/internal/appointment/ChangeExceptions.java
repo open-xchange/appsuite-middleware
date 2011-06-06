@@ -49,6 +49,8 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.recalculateMidnight;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -76,7 +78,8 @@ import com.openexchange.groupware.contexts.Context;
 public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
     private static final Log LOG = LogFactory.getLog(ChangeExceptions.class);
-
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    
     private static CalendarCollectionService calendarCollection;
 
     public ChangeExceptions() {
@@ -128,11 +131,11 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
     }
 
     public boolean hasProperty(final VEvent vEvent) {
-        return false;
+        return vEvent.getRecurrenceId() != null;
     }
 
     public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-        // Currently unimplemented. Series must be changed for change exceptions.
+        appointment.setRecurrenceDatePosition(recalculateMidnight(parseDate(vEvent,new RecurrenceId(), timeZone), UTC));
     }
 
     /**

@@ -114,7 +114,7 @@ public class WebdavLockAction extends AbstractAction {
 			res.setHeader("content-type", "application/xml");
 			final WebdavProperty lockdiscovery = resource.getProperty("DAV:", "lockdiscovery");
 			
-			final Element lockDiscoveryElement = new PropertiesMarshaller(req.getCharset()).marshalProperty(lockdiscovery);
+			final Element lockDiscoveryElement = new PropertiesMarshaller(req.getCharset()).marshalProperty(lockdiscovery, resource.getProtocol());
 			
 			final Document responseDoc = new Document();
 			final Element rootElement = new Element("prop",DAV_NS);

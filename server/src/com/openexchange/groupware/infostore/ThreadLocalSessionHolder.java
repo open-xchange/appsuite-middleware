@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
@@ -81,6 +82,10 @@ public class ThreadLocalSessionHolder implements SessionHolder {
 
     public Session getSessionObject() {
         return session.get();
+    }
+
+    public User getUser() {
+        return session.get().getUser();
     }
 
     public static ThreadLocalSessionHolder getInstance() {

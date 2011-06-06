@@ -67,6 +67,7 @@ import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavStatus;
 import com.openexchange.webdav.protocol.util.Utils;
@@ -98,9 +99,9 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		this.charset = charset;
 	}
 
-	public List<Element> marshal(final WebdavResource resource) {
+	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException {
 		final Element response =  new Element("response",DAV_NS);
-		response.addContent(marshalHREF(resource.getUrl())); //TODO: Fix the new bug here
+		response.addContent(marshalHREF(resource.getUrl(), resource.getResourceType() != null)); //TODO: Fix the new bug here
 		final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);
 		for(final int statusCode : multistatus.getStatusCodes()) {
 			for(final WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {
@@ -109,7 +110,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 				
 				for(final WebdavProperty p : status.getAdditional()) {
 					if(p != null) {
-						prop.addContent(marshalProperty(p));
+						prop.addContent(marshalProperty(p, resource.getProtocol()));
 					}
 				}
 				propstat.addContent(prop);
@@ -120,7 +121,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return Arrays.asList(response);
 	}
 	
-	public Element marshalHREF(final WebdavPath uri) {
+	public Element marshalHREF(final WebdavPath uri, boolean trailingSlash) {
 		final Element href = new Element("href", DAV_NS);
         final StringBuilder builder = new StringBuilder(uriPrefix);
         if(builder.charAt(builder.length()-1) != '/') {
@@ -129,7 +130,9 @@ public class PropertiesMarshaller implements ResourceMarshaller {
         for(final String component : uri) {
             builder.append(escape(component)).append("/");
         }
-        builder.setLength(builder.length()-1);
+        if (!trailingSlash) {
+            builder.setLength(builder.length()-1);
+        }
         href.setText(builder.toString());
 		return href;
 	}
@@ -157,7 +160,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return status;
 	}
 
-	public Element marshalProperty(final WebdavProperty property) {
+	public Element marshalProperty(final WebdavProperty property, Protocol protocol) {
 		final Element propertyElement = new Element(property.getName(), getNamespace(property));
 		if(property.getValue() == null) {
 			return propertyElement;
@@ -166,9 +169,21 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 			try {
 				String asXML = null;
 				if("DAV:".equals(property.getNamespace())) {
-					asXML = "<FKR:fakeroot xmlns:FKR=\"http://www.open-xchange.com/webdav/fakeroot\" xmlns:D=\""+property.getNamespace()+"\">"+property.getValue()+"</FKR:fakeroot>";
+					StringBuilder xmlBuilder = new StringBuilder("<FKR:fakeroot xmlns:FKR=\"http://www.open-xchange.com/webdav/fakeroot\" xmlns:D=\"DAV:\"");
+                    List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+                    for (Namespace namespace : namespaces) {
+                        xmlBuilder.append(" xmlns:").append(namespace.getPrefix()).append("=\"").append(namespace.getURI()).append('"');
+                    }
+                    xmlBuilder.append('>').append(property.getValue()).append("</FKR:fakeroot>");
+                    asXML = xmlBuilder.toString();
 				} else {
-					asXML = "<FKR:fakeroot xmlns:FKR=\"http://www.open-xchange.com/webdav/fakeroot\" xmlns=\""+property.getNamespace()+"\">"+property.getValue()+"</FKR:fakeroot>";
+					StringBuilder xmlBuilder = new StringBuilder("<FKR:fakeroot xmlns:FKR=\"http://www.open-xchange.com/webdav/fakeroot\" xmlns:D=\"DAV:\" xmlns=\"").append(property.getNamespace()).append('"');
+					List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+					for (Namespace namespace : namespaces) {
+                        xmlBuilder.append(" xmlns:").append(namespace.getPrefix()).append("=\"").append(namespace.getURI()).append('"');
+                    }
+					xmlBuilder.append('>').append(property.getValue()).append("</FKR:fakeroot>");
+					asXML = xmlBuilder.toString();
 				}
 				final Document doc = new SAXBuilder().build(new StringReader(asXML));
 				propertyElement.setContent(doc.getRootElement().cloneContent());

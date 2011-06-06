@@ -76,9 +76,11 @@ public class WebdavProppatchAction extends AbstractAction {
 	private static final PropertyAction REMOVE = new RemoveAction();
 	
 	private final XMLOutputter outputter = new XMLOutputter();
+    private Protocol protocol;
 
 	public WebdavProppatchAction(final Protocol protocol) {
 		SET = new SetAction(protocol);
+		this.protocol = protocol;
 	}
 	
 	
@@ -87,6 +89,12 @@ public class WebdavProppatchAction extends AbstractAction {
 			final Document requestDoc = req.getBodyAsDocument();
 			final Document responseDoc = new Document();
 			final Element multistatus = new Element("multistatus",DAV_NS);
+
+			List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+			for (Namespace namespace : namespaces) {
+                multistatus.addNamespaceDeclaration(namespace);
+            }
+			
 			responseDoc.addContent(multistatus);
 			final Element response = new Element("response", DAV_NS);
 			final Element href = new Element("href", DAV_NS);

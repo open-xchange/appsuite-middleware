@@ -94,7 +94,7 @@ import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.impl.AbstractCollection;
+import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 public class FolderCollection extends AbstractCollection implements OXWebdavResource {
 
@@ -522,7 +522,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				//oxfa.createFolder(folder, session, true, writeCon, writeCon, true);
 				setId(folder.getObjectID());
 			} catch (final OXFolderException x) {
-				if (isPermissionException(x)) {
+				if(isPermissionException(x)) {
 				    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 				}
 				throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
