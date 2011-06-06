@@ -787,6 +787,11 @@ public final class IMAPException extends MIMEMailException {
          * Default folder %1$s must not be unsubscribed.
          */
         NO_DEFAULT_FOLDER_UNSUBSCRIBE("Default folder %1$s must not be unsubscribed.", Category.USER_INPUT, 2056),
+        /**
+         * Default folder %1$s must not be unsubscribed on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         */
+        NO_DEFAULT_FOLDER_UNSUBSCRIBE_EXT("Default folder %1$s must not be unsubscribed on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_DEFAULT_FOLDER_UNSUBSCRIBE),
+        
         ;
 
         private final String message;
