@@ -108,12 +108,12 @@ public class CSVContactImporter extends AbstractImporter {
 
     private static final Log LOG = LogFactory.getLog(CSVContactImporter.class);
 
-    public boolean canImport(final ServerSession sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
         if (!format.equals(getResponsibleFor())) {
             return false;
         }
 
-        if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasContact()) {
+        if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasContact()) {
             throw ImportExportExceptionCodes.CONTACTS_DISABLED.create(new OXPermissionException(
                 OXPermissionException.Code.NoPermissionForModul,
                 "Contacts"));
@@ -127,7 +127,7 @@ public class CSVContactImporter extends AbstractImporter {
 
         FolderObject fo = null;
         try {
-            fo = getFolderObject(sessObj, folder);
+            fo = getFolderObject(session, folder);
         } catch (final ImportExportException e) {
             return false;
         }
@@ -145,8 +145,8 @@ public class CSVContactImporter extends AbstractImporter {
         EffectivePermission perm;
         try {
             perm = fo.getEffectiveUserPermission(
-                sessObj.getUserId(),
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
+                session.getUserId(),
+                UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
         } catch (final DBPoolingException e) {
             return false;
         } catch (final SQLException e) {
