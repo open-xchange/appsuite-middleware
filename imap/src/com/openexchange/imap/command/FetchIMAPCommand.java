@@ -716,37 +716,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             msg.setReplyTo(env.replyTo);
             msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
             msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
-            /*-
-             * Hmm... Why does ENVELOPE FETCH response omit CR?LFs in subject?!
-             * 
-             * Example:
-             * Subject: =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?=
-             *  =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
-             *  
-             * is transferred as:
-             * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
-             */
-            if (null == env.subject) {
-                msg.setSubject("");
-            } else {
-                final char[] chars = MIMEMessageUtility.checkNonAscii(env.subject).toCharArray();
-                final StringBuilder sb = new StringBuilder(chars.length);
-                int i = 0;
-                while (i < chars.length) {
-                    final char c = chars[i];
-                    if ('\t' == c || ' ' == c) {
-                        while ((i + 1) < chars.length && ' ' == chars[i + 1]) {
-                            i++;
-                        }
-                        sb.append(' ');
-                    } else if ('\r' != c && '\n' != c) {
-                        sb.append(c);
-                    }
-                    i++;
-                }
-                msg.setSubject(MIMEMessageUtility.decodeEnvelopeHeader(sb.toString()));
-            }
-
+            msg.setSubject(MIMEMessageUtility.decodeEnvelopeSubject(env.subject));
             msg.setSentDate(env.date);
         }
     };

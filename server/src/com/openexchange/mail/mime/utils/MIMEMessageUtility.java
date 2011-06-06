@@ -513,6 +513,34 @@ public final class MIMEMessageUtility {
     }
 
     /**
+     * Decodes a "Subject" header obtained from ENVELOPE fetch item.
+     * 
+     * @param subject The subject obtained from ENVELOPE fetch item
+     * @return The decoded subject value
+     */
+    public static String decodeEnvelopeSubject(final String subject) {
+        if (null == subject) {
+            return "";
+        }
+        final char[] chars = MIMEMessageUtility.checkNonAscii(subject).toCharArray();
+        final StringBuilder sb = new StringBuilder(chars.length);
+        int i = 0;
+        while (i < chars.length) {
+            final char c = chars[i];
+            if ('\t' == c || ' ' == c) {
+                while ((i + 1) < chars.length && ' ' == chars[i + 1]) {
+                    i++;
+                }
+                sb.append(' ');
+            } else if ('\r' != c && '\n' != c) {
+                sb.append(c);
+            }
+            i++;
+        }
+        return MIMEMessageUtility.decodeEnvelopeHeader(sb.toString());
+    }
+
+    /**
      * The max. length of a RFC 2047 style encoded word.
      */
     private static final int ENCODED_WORD_LEN = 75;

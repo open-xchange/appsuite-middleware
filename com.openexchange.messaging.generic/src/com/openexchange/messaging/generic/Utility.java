@@ -195,6 +195,16 @@ public final class Utility {
     }
 
     /**
+     * Decodes a "Subject" header obtained from ENVELOPE fetch item.
+     * 
+     * @param subject The subject obtained from ENVELOPE fetch item
+     * @return The decoded subject value
+     */
+    public static String decodeEnvelopeSubject(final String subject) {
+        return MIMEMessageUtility.decodeEnvelopeSubject(subject);
+    }
+
+    /**
      * Decodes a string header obtained from ENVELOPE fetch item.
      * 
      * @param headerValue The header value
