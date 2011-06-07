@@ -230,11 +230,11 @@ public class MessagingMessageParser {
                     }
                 }
             }
-            if (candidate != null) {
-                candidate.parseAndAdd(headers, key, value);
-            } else {
+            if (candidate == null) {
                 final StringMessageHeader header = new StringMessageHeader(key, value.toString());
                 headers.put(key, Arrays.asList((MessagingHeader) header));
+            } else {
+                candidate.parseAndAdd(headers, key, value);
             }
 
         }
