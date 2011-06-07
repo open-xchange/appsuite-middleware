@@ -4,7 +4,7 @@
 
 * 2011-06-03 - thorben.betten@open-xchange.com
 
- - Bugfix #19418: Adding user's time zone offset to date message headers
+ - Bugfix #19418: Adding user's time zone offset to a message's date headers and its received date
 
 * 2011-06-03 - marcus.klein@open-xchange.com
 
