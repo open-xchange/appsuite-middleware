@@ -256,6 +256,7 @@ public class MessagingMessageParser {
         if (candidate != null) {
             final MessagingContent parsedContent = candidate.parse(message, content, registry);
             message.setContent(parsedContent, message.getContentType().getValue());
+        } else {
         }
     }
 
