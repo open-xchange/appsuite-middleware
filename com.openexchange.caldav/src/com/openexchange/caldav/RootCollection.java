@@ -65,7 +65,7 @@ import com.openexchange.webdav.protocol.Protocol.Property;
 
 
 /**
- * {@link RootCollection}
+ * The {@link RootCollection} is a caldav collection containing, as its subcollections, all calendars of a user.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
