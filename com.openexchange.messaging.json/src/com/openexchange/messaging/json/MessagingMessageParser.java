@@ -339,8 +339,8 @@ public class MessagingMessageParser {
                  */
                 final InputStream in = new BufferedInputStream(registry.get(id));
                 try {
-                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
-                    final byte[] buf = new byte[2048];
+                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192 << 1);
+                    final byte[] buf = new byte[8192];
                     int read;
                     while ((read = in.read(buf, 0, buf.length)) != -1) {
                         out.write(buf, 0, read);
