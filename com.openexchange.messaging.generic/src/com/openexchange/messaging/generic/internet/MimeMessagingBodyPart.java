@@ -90,7 +90,7 @@ public class MimeMessagingBodyPart extends MimeMessagingPart implements Messagin
      * @param part The MIME body part
      * @param parent The multipart parent
      */
-    public MimeMessagingBodyPart(final MimePart part, final MimeMultipartContent parent) {
+    protected MimeMessagingBodyPart(final MimePart part, final MimeMultipartContent parent) {
         super(part);
         this.parent = parent;
     }

@@ -76,7 +76,7 @@ public class MimeBinaryContent implements BinaryContent {
      * 
      * @param part The MIME part
      */
-    public MimeBinaryContent(final Part part) {
+    protected MimeBinaryContent(final Part part) {
         super();
         this.part = part;
     }

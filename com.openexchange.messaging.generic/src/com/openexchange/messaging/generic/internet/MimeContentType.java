@@ -65,7 +65,7 @@ import com.openexchange.messaging.generic.internal.ParameterizedHeader;
  */
 public final class MimeContentType extends ParameterizedHeader implements ContentType {
 
-    private static final long serialVersionUID = 8048448895301469418L;
+    private static final long serialVersionUID = 4939166973387612908L;
 
     private static final String CONTENT_TYPE = "Content-Type";
 
@@ -191,6 +191,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         return CONTENT_TYPE;
     }
 
+    @Override
     public HeaderType getHeaderType() {
         return HeaderType.PARAMETERIZED;
     }

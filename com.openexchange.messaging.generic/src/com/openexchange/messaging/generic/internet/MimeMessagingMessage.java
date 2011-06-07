@@ -68,6 +68,8 @@ import com.openexchange.messaging.generic.internal.InternalUtility.ParsedFlags;
  */
 public class MimeMessagingMessage extends MimeMessagingBodyPart implements MessagingMessage {
 
+    private static final long serialVersionUID = -1043416749304746683L;
+
     private static final Flags ALL_COLOR_LABELS;
 
     private static final Flags ALL_SYSTEM_FLAGS;
@@ -125,7 +127,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      * 
      * @param mimeMessage The MIME message
      */
-    public MimeMessagingMessage(final MimeMessage mimeMessage) {
+    protected MimeMessagingMessage(final MimeMessage mimeMessage) {
         super(mimeMessage, null);
         this.mimeMessage = mimeMessage;
     }

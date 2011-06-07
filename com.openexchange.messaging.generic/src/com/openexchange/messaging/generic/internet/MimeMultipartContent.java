@@ -115,7 +115,7 @@ public class MimeMultipartContent implements MultipartContent {
      * 
      * @param mimeMultipart The MIME multipart
      */
-    public MimeMultipartContent(final MimeMultipart mimeMultipart) {
+    protected MimeMultipartContent(final MimeMultipart mimeMultipart) {
         super();
         this.mimeMultipart = mimeMultipart;
     }

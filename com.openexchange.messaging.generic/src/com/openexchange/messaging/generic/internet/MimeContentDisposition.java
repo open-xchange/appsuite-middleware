@@ -65,6 +65,8 @@ import com.openexchange.messaging.generic.internal.ParameterizedHeader;
  */
 public final class MimeContentDisposition extends ParameterizedHeader implements ContentDisposition {
 
+    private static final long serialVersionUID = -1040187672540142351L;
+
     private static final String CONTENT_DISPOSITION = "Content-Disposition";
 
     /**
@@ -158,6 +160,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
         cdo.setContentDisposition(contentDisp.cdo);
     }
 
+    @Override
     public HeaderType getHeaderType() {
         return HeaderType.PARAMETERIZED;
     }
