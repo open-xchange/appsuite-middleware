@@ -60,21 +60,29 @@ import com.openexchange.groupware.container.Contact;
  * @author Stefan Preuss <stefan.preuss@open-xchange.com>
  */
 public class SimpleCredentials implements Cloneable {
+
     private String login;
     private String imapLogin;
     private String password;
     private Contact contact;
     private TestUserConfig config;
     private TestUserConfigFactory userConfigFactory = null;
-	private ContactFinder contactFinder;
-	private Locale locale = null;
-	private int userId = 0;
-	private int contactId = 0;
-	private String privateAppointmentFolderId = null;
-	private String privateTaskFolderId = null;
-	private String privateContactFolderId = null;
-	private String privateInfostoreFolderId = null;
-	private TimeZone timezone = null;
+    private ContactFinder contactFinder;
+    private Locale locale = null;
+    private int userId = 0;
+    private int contactId = 0;
+    private String privateAppointmentFolderId = null;
+    private String privateTaskFolderId = null;
+    private String privateContactFolderId = null;
+    private String privateInfostoreFolderId = null;
+    private TimeZone timezone = null;
+
+    private boolean hasFullGroupware;
+    private boolean hasFullGroupwareSet = false;
+    private boolean hasActiveSync;
+    private boolean hasActiveSyncSet = false;
+    private boolean hasOXUpdater;
+    private boolean hasOXUpdaterSet = false;
 
     public SimpleCredentials(TestUserConfigFactory userConfigFactory, ContactFinder contactFinder) {
         super();
@@ -163,15 +171,27 @@ public class SimpleCredentials implements Cloneable {
     }
 
     public boolean hasFullGroupware() {
-        return getConfig().getBool(Tree.InfostoreEnabled);
+        if (!hasFullGroupwareSet) {
+            hasFullGroupware = getConfig().getBool(Tree.InfostoreEnabled);
+            hasFullGroupwareSet = true;
+        }
+        return hasFullGroupware;
     }
 
     public boolean hasActiveSync() {
-        return getConfig().getBool(Tree.ActiveSync);
+        if (!hasActiveSyncSet) {
+            hasActiveSync = getConfig().getBool(Tree.ActiveSync);
+            hasActiveSyncSet = true;
+        }
+        return hasActiveSync;
     }
 
     public boolean hasOXUpdater() {
-        return getConfig().getBool(Tree.OXUpdater);
+        if (!hasOXUpdaterSet) {
+            hasOXUpdater = getConfig().getBool(Tree.OXUpdater);
+            hasOXUpdaterSet = true;
+        }
+        return hasOXUpdater;
     }
 
     public TimeZone getTimeZone() {
