@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.generic.internet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.mail.Part;
@@ -57,6 +58,8 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeBinaryContent} - A MIME {@link BinaryContent binary content}.
@@ -72,6 +75,52 @@ public class MimeBinaryContent implements BinaryContent {
     protected final Part part;
 
     /**
+     * The cached content.
+     */
+    protected final byte[] cachedContent;
+
+    /**
+     * Initializes a new {@link MimeBinaryContent}.
+     * 
+     * @param inputStream The binary content as an input stream; gets closed
+     * @throws MessagingException If an I/O error occurs
+     */
+    public MimeBinaryContent(final InputStream inputStream) throws MessagingException {
+        super();
+        part = null;
+        try {
+            final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(8192 << 1);
+            final byte[] buf = new byte[8192];
+            int read;
+            while ((read = inputStream.read(buf, 0, buf.length)) != -1) {
+                buffer.write(buf, 0, read);
+            }
+            cachedContent = buffer.toByteArray();
+        } catch (final IOException e) {
+            throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            try {
+                inputStream.close();
+            } catch (final IOException e) {
+                org.apache.commons.logging.LogFactory.getLog(MimeBinaryContent.class).error("Couldn't close stream.", e);
+            }
+        }
+    }
+
+    
+    /**
+     * Initializes a new {@link MimeBinaryContent}.
+     * 
+     * @param content The binary content
+     */
+    public MimeBinaryContent(final byte[] content) {
+        super();
+        part = null;
+        cachedContent = new byte[content.length];
+        System.arraycopy(content, 0, cachedContent, 0, content.length);
+    }
+
+    /**
      * Initializes a new {@link MimeBinaryContent}.
      * 
      * @param part The MIME part
@@ -79,6 +128,7 @@ public class MimeBinaryContent implements BinaryContent {
     protected MimeBinaryContent(final Part part) {
         super();
         this.part = part;
+        cachedContent = null;
     }
 
     public InputStream getData() throws MessagingException {
@@ -93,6 +143,12 @@ public class MimeBinaryContent implements BinaryContent {
      * @throws MessagingException If neither input stream nor raw input stream can be returned
      */
     private InputStream getBodyPartInputStream() throws MessagingException {
+        if (cachedContent != null) {
+            return new UnsynchronizedByteArrayInputStream(cachedContent);
+        }
+        if (null == part) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create("No content");
+        }
         try {
             return part.getInputStream();
         } catch (final IOException e) {
