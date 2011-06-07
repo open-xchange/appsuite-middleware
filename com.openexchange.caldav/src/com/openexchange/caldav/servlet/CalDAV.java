@@ -66,7 +66,7 @@ import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.caldav.servlet.CaldavPerformer.Action;
 
 /**
- * {@link CalDAV}
+ * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

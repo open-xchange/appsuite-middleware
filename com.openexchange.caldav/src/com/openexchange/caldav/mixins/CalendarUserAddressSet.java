@@ -54,7 +54,7 @@ import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link CalendarUserAddressSet}
+ * The {@link CalendarUserAddressSet} mixin extends resources and collections to list the aliases of a user
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

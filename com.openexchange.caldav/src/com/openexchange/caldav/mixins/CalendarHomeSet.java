@@ -54,7 +54,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * {@link CalendarHomeSet}
+ * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

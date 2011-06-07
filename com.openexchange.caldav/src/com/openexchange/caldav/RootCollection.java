@@ -103,9 +103,5 @@ public class RootCollection extends AbstractStandardCaldavCollection {
         return true;
     }
     
-    private static final List<WebdavProperty> STATIC_PROPERTIES = new ArrayList<WebdavProperty>();
-    static {
-        
-    }
 
 }

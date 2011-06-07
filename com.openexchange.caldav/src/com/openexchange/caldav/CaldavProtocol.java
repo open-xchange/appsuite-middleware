@@ -57,7 +57,7 @@ import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.Protocol;
 
 /**
- * {@link CaldavProtocol}
+ * The {@link CaldavProtocol} contains constants useful for our caldav implementation
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

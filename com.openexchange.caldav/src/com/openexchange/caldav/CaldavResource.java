@@ -90,7 +90,7 @@ import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
- * {@link CaldavResource}
+ * A {@link CaldavResource} bridges an OX appointment to a caldav resource. 
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

@@ -88,7 +88,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
- * {@link GroupwareCaldavFactory}
+ * The {@link GroupwareCaldavFactory} holds access to all external groupware services and acts as the factory for CaldavResources and CaldavCollections
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

@@ -105,7 +105,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
- * {@link CaldavPerformer}
+ * The {@link CaldavPerformer} contains all the wiring for caldav actions. This is the central entry point for caldav requests.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

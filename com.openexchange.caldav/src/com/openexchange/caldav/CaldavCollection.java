@@ -71,7 +71,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 
 /**
- * {@link CaldavCollection}
+ * A {@link CaldavCollection} bridges OX calendar folders to caldav collections. 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
