@@ -956,7 +956,7 @@ public final class HTMLServiceImpl implements HTMLService {
          * Run tidy, providing a reader and writer
          */
         final Writer writer = new UnsynchronizedStringWriter(htmlContent.length());
-        tidy.parse(new StringReader(htmlContent), writer);
+        tidy.parse(new UnsynchronizedStringReader(htmlContent), writer);
         return writer.toString();
     }
 
