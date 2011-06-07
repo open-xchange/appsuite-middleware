@@ -80,14 +80,14 @@ public class Bug18981StructureTest extends AbstractMailTest {
         super(name);
     }
 
-    private static final byte[] SOURCE = ("Reply-To: <Dell_orderstatus_notification@dell.com>\n" + 
-    		"From: <Dell_orderstatus_notification@dell.com>\n" + 
-    		"To: <oliver.meimberg@form4.de>, \n" + 
+    private static final byte[] SOURCE = ("Reply-To: <orderstatus_notification@barfoo.com>\n" + 
+    		"From: <orderstatus_notification@barfoo.com>\n" + 
+    		"To: <foobar@dotcom.de>, \n" + 
     		"    <>, \n" + 
     		"    <>, \n" + 
     		"Cc: <>, \n" + 
-    		"    <Madeleine_Froehlich@Dell.com>, \n" + 
-    		"Subject: Ihre Bestellung bei Dell - Voraussichtliches Lieferdatum \n" + 
+    		"    <blubber@barfoo.com>, \n" + 
+    		"Subject: Ihre Bestellung bei Foobar - Voraussichtliches Lieferdatum \n" + 
     		"Date: Sat, 16 Apr 2011 06:16:43 +0100\n" + 
     		"Message-ID: 129474046034864895@E3BUSOPSDB\n" + 
     		"MIME-Version: 1.0\n" + 
@@ -95,10 +95,8 @@ public class Bug18981StructureTest extends AbstractMailTest {
     		"    boundary=\"----=_NextPart_000_0001_0ce908fe.cc7a5096\"\n" + 
     		"X-Priority: 3 (Normal)\n" + 
     		"X-MSMail-Priority: Normal\n" + 
-    		"X-Mailer: database integration MailManager Engine V1.0\n" + 
+    		"X-Mailer: SuperMailer V1.0\n" + 
     		"Importance: Normal\n" + 
-    		"X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2800.1165\n" + 
-    		"X-Virus-Scanned: ClamAV using ClamSMTP\n" + 
     		"\n" + 
     		"This is a multi-partmessage in MIME  format.\n" + 
     		"\n" + 
