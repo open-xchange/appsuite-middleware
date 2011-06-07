@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,7 +98,7 @@ public class PushChannels {
                     externalChannel = new DatagramSocket(serverRegisterPort);
                 }
                 
-                if (internalSenderAddress != null && !internalSenderAddress.equals(senderAddress)) {
+                if (!isSameInterface(senderAddress, internalSenderAddress)) {
                     internalChannel = new DatagramSocket(serverRegisterPort, internalSenderAddress);
                 }
                 
@@ -112,6 +114,13 @@ public class PushChannels {
         }
     }
     
+    private boolean isSameInterface(InetAddress senderAddress, InetAddress internalSenderAddress) throws SocketException {
+        NetworkInterface senderIface = NetworkInterface.getByInetAddress(senderAddress);
+        NetworkInterface internalIface = NetworkInterface.getByInetAddress(internalSenderAddress);
+        
+        return senderIface.equals(internalIface);
+    }
+
     private void listenForRegistrations() {
         listeners.add(new PushRegistryListenerThread(externalChannel));
         

@@ -142,7 +142,7 @@ public class PeerServerListener {
         String myPort = "44331"; //args[4];
 
         try {
-            new PeerServerListener(remoteHost, remotePort, myHost, myPort).run();
+            new PeerServerListener(remoteHost, remotePort, myHost, myPort).send(PushRequest.REMOTE_HOST_REGISTER,"fe80::223:32ff:fec8:2bc8", myPort);
         } catch (Exception e) {
             e.printStackTrace();
         }

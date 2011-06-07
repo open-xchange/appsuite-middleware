@@ -1,6 +1,8 @@
 * 2011-06-07 - francisco.laguna@open-xchange.com
 
  - Bugfix #19410: No stack trace in publications on error.
+ - Bugfix #18646: Better equality check for network interfaces in use in UDP push.
+ 
 
 * 2011-06-06 - thorben.betten@open-xchange.com
 
