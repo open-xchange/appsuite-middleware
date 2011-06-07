@@ -905,11 +905,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final List<String[]> subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
+                final List<FuidAndName> subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
-                for (final String[] sa : subfolderIds) {
-                    list.add(new DatabaseId(sa[0], i++, sa[1]));
+                for (final FuidAndName fuidAndName : subfolderIds) {
+                    list.add(new DatabaseId(fuidAndName.fuid, i++, fuidAndName.name));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }

@@ -58,6 +58,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
+import com.openexchange.folderstorage.database.FuidAndName;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
@@ -115,7 +116,7 @@ public final class SharedPrefixFolder {
                 ctx,
                 null,
                 con);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -211,7 +212,7 @@ public final class SharedPrefixFolder {
      * @return The corresponding database folder with subfolders set
      * @throws FolderException If returning corresponding database folder fails
      */
-    public static List<String[]> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<FuidAndName> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -234,9 +235,9 @@ public final class SharedPrefixFolder {
         } catch (final OXException e) {
             throw new FolderException(e);
         }
-        final List<String[]> ret = new ArrayList<String[]>(q.size());
+        final List<FuidAndName> ret = new ArrayList<FuidAndName>(q.size());
         for (final FolderObject fo : q) {
-            ret.add(new String[] { String.valueOf(fo.getObjectID()), fo.getFolderName() });
+            ret.add(new FuidAndName(fo.getObjectID(), fo.getFolderName()));
         }
         return ret;
     }
