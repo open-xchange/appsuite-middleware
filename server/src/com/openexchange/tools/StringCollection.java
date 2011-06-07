@@ -321,13 +321,17 @@ public final class StringCollection {
      * @return SQLInString or null
      */
     public static String getSqlInString(final int arr[]) {
-        if (arr == null || arr.length <= 0) {
+        if (arr == null) {
             return null;
         }
-        final StringBuilder sb = new StringBuilder(arr.length * 5);
+        final int length = arr.length;
+        if (length <= 0) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder(length << 2);
         sb.append('(');
         sb.append(arr[0]);
-        for (int a = 1; a < arr.length; a++) {
+        for (int a = 1; a < length; a++) {
             sb.append(',');
             sb.append(arr[a]);
         }
