@@ -138,7 +138,7 @@ public class Bug18981StructureTest extends AbstractMailTest {
             final JSONObject jsonMailObject = handler.getJSONMailObject();
             assertNotNull("Structured JSON mail object is null.", jsonMailObject);
 
-            System.out.println(jsonMailObject.toString(2));
+            // System.out.println(jsonMailObject.toString(2));
 
             final JSONArray jsonBodyArray;
             {

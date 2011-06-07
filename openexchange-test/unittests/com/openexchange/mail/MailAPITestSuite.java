@@ -123,6 +123,7 @@ public final class MailAPITestSuite extends TestSuite {
 		mailSuite.addTestSuite(com.openexchange.mail.structure.MailUUEncodedStructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug16174StructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug18846StructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug18981StructureTest.class);
 		return mailSuite;
 	}
 }
