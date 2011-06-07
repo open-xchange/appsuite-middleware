@@ -356,6 +356,8 @@ public class MessagingMessageParser {
                     return new ByteArrayContent(out.toByteArray());
                 }
                 return null; // Should never happen
+            } else if (byte[].class.isInstance(content)) {
+                return new ByteArrayContent((byte[]) content);
             } else {
                 return null; // FIXME
             }
