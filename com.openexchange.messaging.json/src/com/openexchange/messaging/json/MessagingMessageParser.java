@@ -68,6 +68,7 @@ import com.openexchange.messaging.ByteArrayContent;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
@@ -333,33 +334,31 @@ public class MessagingMessageParser {
             } else if (JSONObject.class.isInstance(content)) {
                 final JSONObject reference = (JSONObject) content;
                 final Object id = reference.get("ref");
-
-                InputStream in = null;
-                ByteArrayOutputStream out = null;
+                /*
+                 * Initialize input stream
+                 */
+                final InputStream in = new BufferedInputStream(registry.get(id));
                 try {
-                    in = new BufferedInputStream(registry.get(id));
-                    out = new UnsynchronizedByteArrayOutputStream();
-                    int b = -1;
-                    while ((b = in.read()) != -1) {
-                        out.write(b);
+                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
+                    final byte[] buf = new byte[2048];
+                    int read;
+                    while ((read = in.read(buf, 0, buf.length)) != -1) {
+                        out.write(buf, 0, read);
                     }
-                } finally {
-                    if (in != null) {
-                        in.close();
-                    }
-                    if (out != null) {
-                        out.close();
-                    }
-                }
-
-                if (out != null) {
                     return new ByteArrayContent(out.toByteArray());
+                } finally {
+                    try {
+                        in.close();
+                    } catch (final IOException e) {
+                        org.apache.commons.logging.LogFactory.getLog(MessagingMessageParser.BinaryContentParser.class).error(
+                            "Couldn't close input stream.",
+                            e);
+                    }
                 }
-                return null; // Should never happen
             } else if (byte[].class.isInstance(content)) {
                 return new ByteArrayContent((byte[]) content);
             } else {
-                return null; // FIXME
+                throw MessagingExceptionCodes.UNEXPECTED_ERROR.create("Unexpected content type: " + null == content ? "null" : content.getClass().getName());
             }
         }
 
