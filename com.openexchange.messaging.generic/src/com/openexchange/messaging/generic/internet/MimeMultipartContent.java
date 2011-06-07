@@ -58,7 +58,7 @@ import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MultipartContent;
 
 /**
- * {@link MimeMultipartContent}
+ * {@link MimeMultipartContent} - The implementation of the {@link MultipartContent} using MIME conventions for the multipart data.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
