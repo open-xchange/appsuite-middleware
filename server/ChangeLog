@@ -1,6 +1,8 @@
 * 2011-06-07 - thorben.betten@open-xchange.com
 
  - Bugfix #19428: Using HtmlCleaner library to generate a well-formed and pretty-printed HTML because JTidy fails to do so
+ - Bugfix #19459: Changed session-bound LIST/LSUB cache to user-bound one. Thus changes are available for all active sessions without the
+                  need for propagating throughout sessions.
 
 * 2011-06-07 - francisco.laguna@open-xchange.com
 
