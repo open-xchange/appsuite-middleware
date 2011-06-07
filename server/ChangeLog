@@ -1,3 +1,7 @@
+* 2011-06-07 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19410: No stack trace in publications on error.
+
 * 2011-06-06 - thorben.betten@open-xchange.com
 
  - Bugfix #19358: Ignoring invalid date strings and generate an appropriate warning
