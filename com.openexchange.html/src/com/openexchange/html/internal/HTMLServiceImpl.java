@@ -737,7 +737,7 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) {
-        if (null == htmlContent) {
+        if (null == htmlContent || 0 == htmlContent.length()) {
             /*
              * Nothing to do...
              */

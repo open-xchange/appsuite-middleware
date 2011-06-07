@@ -53,13 +53,13 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
- * {@link StringReader} - An unsynchronized string {@link Reader reader}. 
+ * {@link UnsynchronizedStringReader} - An unsynchronized string {@link Reader reader}. 
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class StringReader extends Reader {
+public class UnsynchronizedStringReader extends Reader {
 
-    private String str;
+    private final String str;
 
     private final int length;
 
@@ -72,7 +72,7 @@ public class StringReader extends Reader {
      * 
      * @param s String providing the character stream.
      */
-    public StringReader(final String s) {
+    public UnsynchronizedStringReader(final String s) {
         this.str = s;
         this.length = s.length();
     }
@@ -189,7 +189,7 @@ public class StringReader extends Reader {
      */
     @Override
     public void close() {
-        str = null;
+        // Nope
     }
 
 }
