@@ -77,6 +77,7 @@ import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 import com.openexchange.tools.encoding.Base64;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * A parser to parse JSON representations of MessagingMessages. Note that parsing can be customized by registering one or more
@@ -337,7 +338,7 @@ public class MessagingMessageParser {
                 ByteArrayOutputStream out = null;
                 try {
                     in = new BufferedInputStream(registry.get(id));
-                    out = new ByteArrayOutputStream();
+                    out = new UnsynchronizedByteArrayOutputStream();
                     int b = -1;
                     while ((b = in.read()) != -1) {
                         out.write(b);
