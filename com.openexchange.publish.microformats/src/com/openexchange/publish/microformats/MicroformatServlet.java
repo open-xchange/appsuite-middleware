@@ -68,6 +68,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
@@ -234,11 +235,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             }
             resp.getWriter().write(html);
             
-
+        } catch (AbstractOXException x) {
+            LOG.error(x.getMessage(), x);
+            resp.getWriter().println("Publishing failed. Please try again later. Exception ID: "+x.getExceptionID());
+            
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
-            resp.getWriter().println("An exception occurred: ");
-            t.printStackTrace(resp.getWriter());
+            resp.getWriter().println("Publishing failed. Please try again later.");
         }
     }
 
