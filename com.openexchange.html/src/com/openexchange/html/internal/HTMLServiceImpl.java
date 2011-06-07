@@ -69,6 +69,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.PrettyXmlSerializer;
+import org.htmlcleaner.TagNode;
 import org.w3c.tidy.Tidy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
@@ -957,7 +961,30 @@ public final class HTMLServiceImpl implements HTMLService {
          */
         final Writer writer = new UnsynchronizedStringWriter(htmlContent.length());
         tidy.parse(new UnsynchronizedStringReader(htmlContent), writer);
-        return writer.toString();
+        final String validatedHtml = writer.toString();
+        /*
+         * Check Tidy output
+         */
+        if (null == validatedHtml || 0 == validatedHtml.length()) {
+            try {
+                /*
+                 * Tidy failed... Try HTMLCleaner!!!
+                 */
+                final CleanerProperties props = new CleanerProperties();
+                final TagNode node = new HtmlCleaner(props).clean(new UnsynchronizedStringReader(htmlContent));
+                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
+                new PrettyXmlSerializer(props).writeToStream(node, out, "UTF-8");
+                return new String(out.toByteArray(), "UTF-8");
+            } catch (final UnsupportedEncodingException e) {
+                // Cannot occur
+                LOG.error("Unsupported encoding: " + e.getMessage(), e);
+                return "";
+            } catch (final IOException e) {
+                LOG.error("I/O error: " + e.getMessage(), e);
+                return "";
+            }
+        }
+        return validatedHtml;
     }
 
     private Tidy createNewTidyInstance() {
