@@ -219,14 +219,18 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
     }
 
     private static final String DATE = "Date";
-    private static final SimpleDateFormat dateFormat = new MailDateFormat();
-    
+
+    private static final SimpleDateFormat DATE_FORMAT = new MailDateFormat();
+
     private Object getValue(final MessagingHeader h) {
-        if(DATE.equalsIgnoreCase(h.getName())) {
-            try {
-                return dateFormat.parse(h.getValue());
-            } catch (final ParseException e) {
-                // IGNORE
+        if (DATE.equalsIgnoreCase(h.getName())) {
+            synchronized (DATE_FORMAT) {
+                try {
+                    return DATE_FORMAT.parse(h.getValue());
+                } catch (final ParseException e) {
+                    // IGNORE
+                    org.apache.commons.logging.LogFactory.getLog(MessagingComparator.class).error("Comparison failed.", e);
+                }
             }
         }
         return h.getValue();
