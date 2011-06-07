@@ -424,11 +424,18 @@ public final class StringCollection {
      * @return SQLInString or null
      */
     public static String getSqlInString(final int i, final int arr[]) {
-        final StringBuffer sb = new StringBuffer();
+        if (null == arr) {
+            return null;
+        }
+        final int length = arr.length;
+        if (0 == length) {
+            return null;
+        }
+        final StringBuffer sb = new StringBuffer(length << 1);
         sb.append('(');
         sb.append(i);
-        if (arr.length > 0) {
-            for (int a = 0; a < arr.length; a++) {
+        if (length > 0) {
+            for (int a = 0; a < length; a++) {
                 sb.append(',');
                 sb.append(arr[a]);
             }
