@@ -53,7 +53,6 @@ import gnu.inet.encoding.IDNAException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -289,7 +288,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(anchorTag.substring(pos)).toString();
     }
 
-    public String formatURLs(final String content, List<Range> links) {
+    public String formatURLs(final String content, final List<Range> links) {
         try {
             final Matcher m = PATTERN_URL.matcher(content);
             final StringBuilder targetBuilder = new StringBuilder(content.length());
@@ -298,17 +297,17 @@ public final class HTMLServiceImpl implements HTMLService {
             // Adding links shift the positions compared to the original mail text. This must be added.
             int shift = 0;
             while (m.find()) {
-                int startOpeningPos = m.start();
+                final int startOpeningPos = m.start();
                 targetBuilder.append(content.substring(lastMatch, startOpeningPos));
                 sb.setLength(0);
                 appendLink(m.group(), sb);
                 targetBuilder.append(sb.toString());
                 lastMatch = m.end();
-                int endOpeningPos = sb.indexOf(">");
-                Range range1 = new Range(startOpeningPos + shift, startOpeningPos + endOpeningPos + 1 + shift);
+                final int endOpeningPos = sb.indexOf(">");
+                final Range range1 = new Range(startOpeningPos + shift, startOpeningPos + endOpeningPos + 1 + shift);
                 links.add(range1);
-                int startClosingPos = sb.indexOf("<", endOpeningPos);
-                Range range2 = new Range(startOpeningPos + startClosingPos + shift, startOpeningPos + sb.length() + shift);
+                final int startClosingPos = sb.indexOf("<", endOpeningPos);
+                final Range range2 = new Range(startOpeningPos + startClosingPos + shift, startOpeningPos + sb.length() + shift);
                 links.add(range2);
                 shift += range1.end - range1.start;
                 shift += range2.end - range2.start;
