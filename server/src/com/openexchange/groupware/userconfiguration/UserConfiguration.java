@@ -211,6 +211,11 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public static final int OLOX20 = 1 << 27;
 
+    /**
+     * The permission bit for denied portal access.
+     */
+    public static final int DENIED_PORTAL = 1 << 28;
+
     /*-
      * Field members
      */
@@ -680,7 +685,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if portal page is allowed; otherwise <code>false</code>
      */
     public boolean hasPortal() {
-        return hasCalendar() && hasContact() && hasTask();
+        return !hasPermission(DENIED_PORTAL);
+    }
+
+    /**
+     * Sets if this user is denied to access portal.
+     */
+    public void setDeniedPortal(final boolean deniedPortal) {
+        setPermission(deniedPortal, DENIED_PORTAL);
     }
 
     /**
