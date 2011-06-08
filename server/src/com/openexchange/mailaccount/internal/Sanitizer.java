@@ -73,6 +73,59 @@ import com.openexchange.tools.sql.DBUtils;
  */
 final class Sanitizer {
 
+    private static final class InvalidateProcedure implements TIntProcedure {
+
+        private final MailAccountStorageService storageService;
+
+        private final int user;
+
+        private final int contextId;
+
+        protected InvalidateProcedure(final MailAccountStorageService storageService, final int user, final int contextId) {
+            this.storageService = storageService;
+            this.user = user;
+            this.contextId = contextId;
+        }
+
+        public boolean execute(final int accountId) {
+            try {
+                storageService.invalidateMailAccount(accountId, user, contextId);
+            } catch (final MailAccountException e) {
+                // Swallow
+                org.apache.commons.logging.LogFactory.getLog(Sanitizer.class).error(e.getMessage(), e);
+            }
+            return true;
+        }
+    }
+
+    private static final class AddBatchProcedure implements TIntObjectProcedure<String> {
+
+        private final int contextId;
+
+        private final int user;
+
+        private final PreparedStatement stmt;
+
+        protected AddBatchProcedure(final int contextId, final int user, final PreparedStatement stmt) {
+            this.contextId = contextId;
+            this.user = user;
+            this.stmt = stmt;
+        }
+
+        public boolean execute(final int accountId, final String uri) {
+            try {
+                stmt.setString(1, uri);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, user);
+                stmt.setInt(4, accountId);
+                stmt.addBatch();
+                return true;
+            } catch (final SQLException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
     /**
      * Initializes a new {@link Sanitizer}.
      */
@@ -144,40 +197,12 @@ final class Sanitizer {
                  * Batch update broken accounts
                  */
                 stmt = con.prepareStatement("UPDATE user_mail_account SET url = ? WHERE cid = ? AND user = ? AND id = ?");
-                {
-                    final PreparedStatement finalStmt = stmt;
-                    map.forEachEntry(new TIntObjectProcedure<String>() {
-
-                        public boolean execute(final int accountId, final String uri) {
-                            try {
-                                finalStmt.setString(1, uri);
-                                finalStmt.setInt(2, contextId);
-                                finalStmt.setInt(3, user);
-                                finalStmt.setInt(4, accountId);
-                                finalStmt.addBatch();
-                                return true;
-                            } catch (final SQLException e) {
-                                throw new IllegalStateException(e);
-                            }
-                        }
-                    });
-                }
+                map.forEachEntry(new AddBatchProcedure(contextId, user, stmt));
                 stmt.executeBatch();
                 /*
                  * Invalidate cache
                  */
-                map.forEachKey(new TIntProcedure() {
-
-                    public boolean execute(final int accountId) {
-                        try {
-                            storageService.invalidateMailAccount(accountId, user, contextId);
-                        } catch (final MailAccountException e) {
-                            // Swallow
-                            org.apache.commons.logging.LogFactory.getLog(Sanitizer.class).error(e.getMessage(), e);
-                        }
-                        return true;
-                    }
-                });
+                map.forEachKey(new InvalidateProcedure(storageService, user, contextId));
             }
             /*
              * Commit possible changes
