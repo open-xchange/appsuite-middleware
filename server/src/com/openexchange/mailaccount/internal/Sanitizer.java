@@ -144,22 +144,24 @@ final class Sanitizer {
                  * Batch update broken accounts
                  */
                 stmt = con.prepareStatement("UPDATE user_mail_account SET url = ? WHERE cid = ? AND user = ? AND id = ?");
-                final PreparedStatement finalStmt = stmt;
-                map.forEachEntry(new TIntObjectProcedure<String>() {
+                {
+                    final PreparedStatement finalStmt = stmt;
+                    map.forEachEntry(new TIntObjectProcedure<String>() {
 
-                    public boolean execute(final int accountId, final String uri) {
-                        try {
-                            finalStmt.setString(1, uri);
-                            finalStmt.setInt(2, contextId);
-                            finalStmt.setInt(3, user);
-                            finalStmt.setInt(4, accountId);
-                            finalStmt.addBatch();
-                            return true;
-                        } catch (final SQLException e) {
-                            throw new IllegalStateException(e);
+                        public boolean execute(final int accountId, final String uri) {
+                            try {
+                                finalStmt.setString(1, uri);
+                                finalStmt.setInt(2, contextId);
+                                finalStmt.setInt(3, user);
+                                finalStmt.setInt(4, accountId);
+                                finalStmt.addBatch();
+                                return true;
+                            } catch (final SQLException e) {
+                                throw new IllegalStateException(e);
+                            }
                         }
-                    }
-                });
+                    });
+                }
                 stmt.executeBatch();
                 /*
                  * Invalidate cache
