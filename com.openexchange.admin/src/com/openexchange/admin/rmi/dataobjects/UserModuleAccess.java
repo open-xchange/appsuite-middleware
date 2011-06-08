@@ -131,6 +131,8 @@ public class UserModuleAccess implements Serializable {
 
     private boolean PublicFolderEditable = true;
 
+    private boolean deniedPortal;
+
     /**
      * Creates a new instance of UserModuleAccess
      */
@@ -535,6 +537,14 @@ public class UserModuleAccess implements Serializable {
 
     public void setOLOX20(final boolean val) {
         this.OLOX20 = val;
+    }
+
+    public void setDeniedPortal(final boolean val) {
+        this.deniedPortal = val;
+    }
+
+    public boolean isDeniedPortal() {
+        return deniedPortal;
     }
 
     public boolean isGlobalAddressBookDisabled() {

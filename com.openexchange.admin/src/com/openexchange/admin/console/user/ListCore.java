@@ -59,8 +59,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -297,6 +297,7 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
             columnnames.add(UserAbstraction.OPT_ACCESS_USM);
             columnnames.add(UserAbstraction.OPT_ACCESS_OLOX20);
+            columnnames.add(UserAbstraction.OPT_ACCESS_DENIED_PORTAL);
             columnnames.add(UserAbstraction.OPT_DISABLE_GAB);
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLIC_FOLDER_EDITABLE);
 
@@ -362,6 +363,7 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.isActiveSync()));
             datarow.add(String.valueOf(access.isUSM()));
             datarow.add(String.valueOf(access.isOLOX20()));
+            datarow.add(String.valueOf(access.isDeniedPortal()));
             datarow.add(String.valueOf(access.isGlobalAddressBookDisabled()));
             datarow.add(String.valueOf(access.isPublicFolderEditable()));
             data.add(datarow);

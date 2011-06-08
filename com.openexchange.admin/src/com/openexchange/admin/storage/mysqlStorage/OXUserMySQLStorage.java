@@ -2134,6 +2134,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setActiveSync(user.hasPermission(UserConfiguration.ACTIVE_SYNC));
             acc.setUSM(user.hasPermission(UserConfiguration.USM));
             acc.setOLOX20(user.hasPermission(UserConfiguration.OLOX20));
+            acc.setDeniedPortal(user.hasPermission(UserConfiguration.DENIED_PORTAL));
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             acc.setGlobalAddressBookDisabled(adminHelper.isGlobalAddressBookDisabled(ctx.getId().intValue(), user_id, read_ox_con));
             acc.setPublicFolderEditable(adminHelper.isPublicFolderEditable(ctx.getId().intValue(), user_id, read_ox_con));
@@ -2458,6 +2459,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setActiveSync(access.isActiveSync());
             user.setUSM(access.isUSM());
             user.setOLOX20(access.isOLOX20());
+            user.setDeniedPortal(access.isDeniedPortal());
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
