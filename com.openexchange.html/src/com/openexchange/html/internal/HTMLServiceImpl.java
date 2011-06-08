@@ -73,6 +73,7 @@ import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.TagNode;
+import org.htmlcleaner.XmlSerializer;
 import org.w3c.tidy.Tidy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
@@ -946,6 +947,28 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     /**
+     * The {@link HtmlCleaner} constant which is safe being used by multiple threads as of <a
+     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
+     */
+    private static final HtmlCleaner HTML_CLEANER;
+
+    /**
+     * The {@link XmlSerializer} constant which is safe being used by multiple threads as of <a
+     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
+     */
+    private static final XmlSerializer XML_SERIALIZER;
+
+    static {
+        final CleanerProperties props = new CleanerProperties();
+        props.setTranslateSpecialEntities(false);
+        props.setRecognizeUnicodeChars(false);
+        props.setOmitDoctypeDeclaration(false);
+        props.setPruneTags("script");
+        HTML_CLEANER = new HtmlCleaner(props);
+        XML_SERIALIZER = new PrettyXmlSerializer(props);
+    }
+
+    /**
      * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library.
      * 
      * @param htmlContent The HTML content
@@ -970,16 +993,16 @@ public final class HTMLServiceImpl implements HTMLService {
                 /*
                  * Tidy failed... Try HTMLCleaner!!!
                  */
-                final CleanerProperties props = new CleanerProperties();
-                final TagNode node = new HtmlCleaner(props).clean(new UnsynchronizedStringReader(htmlContent));
+                final TagNode node = HTML_CLEANER.clean(new UnsynchronizedStringReader(htmlContent));
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
-                new PrettyXmlSerializer(props).writeToStream(node, out, "UTF-8");
+                XML_SERIALIZER.writeToStream(node, out, "UTF-8");
                 return new String(out.toByteArray(), "UTF-8");
             } catch (final UnsupportedEncodingException e) {
                 // Cannot occur
                 LOG.error("Unsupported encoding: " + e.getMessage(), e);
                 return "";
             } catch (final IOException e) {
+                // Cannot occur
                 LOG.error("I/O error: " + e.getMessage(), e);
                 return "";
             }
