@@ -784,6 +784,70 @@ public final class OXFolderIteratorSQL {
     }
 
     /**
+     * Checks if specified folder is visible.
+     * 
+     * @param folderId The folder identifier
+     * @param userId The user identifier
+     * @param memberInGroups The user's group identifiers
+     * @param accessibleModules The user's accessible modules
+     * @param ctx The context
+     * @param con An optional connection; set to <code>null</code> to obtain from connection pool
+     * @return <code>true</code> if folder is visible; otherwise <code>false</code>
+     * @throws OXFolderException If an error occurs
+     */
+    public static boolean isVisibleFolder(final int folderId, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXFolderException {
+        final StringBuilder condBuilder = new StringBuilder(32);
+        final String fields = condBuilder.append(STR_OT).append(".fuid").toString();
+        condBuilder.setLength(0);
+        condBuilder.append("AND (ot.fuid = ").append(folderId).append(')');
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                fields,
+                StringCollection.getSqlInString(userId, memberInGroups),
+                StringCollection.getSqlInString(accessibleModules),
+                condBuilder.toString(),
+                getSubfolderOrderBy(STR_OT));
+        Connection readCon = con;
+        boolean closeCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final int contextId = ctx.getContextId();
+        try {
+            if (null == readCon) {
+                try {
+                    readCon = DBPool.pickup(ctx);
+                } catch (final DBPoolingException e) {
+                    throw new OXFolderException(e);
+                }
+                closeCon = true;
+            }
+            stmt = readCon.prepareStatement(sqlSelectStr);
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+
+            if (DEBUG) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
+
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+        } catch (final Throwable t) {
+            throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
+        } finally {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+        }
+    }
+
+    /**
      * Gets visible subfolders' identifiers from specified parent.
      * 
      * @param parent The parent identifier
