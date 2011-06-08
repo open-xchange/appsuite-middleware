@@ -1000,7 +1000,7 @@ public final class HTMLServiceImpl implements HTMLService {
         if (null == validatedHtml || 0 == validatedHtml.length()) {
             try {
                 /*
-                 * Tidy failed... Try HTMLCleaner!!!
+                 * Tidy failed... Try HtmlCleaner!!!
                  */
                 final TagNode node = HTML_CLEANER.clean(new UnsynchronizedStringReader(htmlContent));
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
