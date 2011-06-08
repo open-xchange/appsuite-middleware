@@ -126,6 +126,7 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.isActiveSync()));
         datarow.add(String.valueOf(access.isUSM()));
         datarow.add(String.valueOf(access.isOLOX20()));
+        datarow.add(String.valueOf(access.isDeniedPortal()));
         datarow.add(String.valueOf(access.isGlobalAddressBookDisabled()));
         datarow.add(String.valueOf(access.isPublicFolderEditable()));
         data.add(datarow);
@@ -162,6 +163,7 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
         columnnames.add(UserAbstraction.OPT_ACCESS_USM);
         columnnames.add(UserAbstraction.OPT_ACCESS_OLOX20);
+        columnnames.add(UserAbstraction.OPT_ACCESS_DENIED_PORTAL);
         columnnames.add(UserAbstraction.OPT_DISABLE_GAB);
         columnnames.add(UserAbstraction.OPT_ACCESS_PUBLIC_FOLDER_EDITABLE);
         return columnnames;
