@@ -1036,9 +1036,9 @@ public final class HTMLServiceImpl implements HTMLService {
             /*
              * Serialize
              */
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
-            SERIALIZER.writeToStream(htmlNode, out, "UTF-8");
-            final StringBuilder builder = new StringBuilder(new String(out.toByteArray(), "UTF-8"));
+            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
+            SERIALIZER.write(htmlNode, writer, "UTF-8");
+            final StringBuilder builder = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */
