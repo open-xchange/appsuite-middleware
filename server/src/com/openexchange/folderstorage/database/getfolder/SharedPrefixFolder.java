@@ -50,15 +50,19 @@
 package com.openexchange.folderstorage.database.getfolder;
 
 import gnu.trove.TIntArrayList;
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntProcedure;
+import gnu.trove.TObjectProcedure;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
-import com.openexchange.folderstorage.database.FuidAndName;
+import com.openexchange.folderstorage.database.FolderIdNamePair;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
@@ -79,7 +83,42 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  */
 public final class SharedPrefixFolder {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SharedPrefixFolder.class);
+    private static final class RemovingProcedure implements TIntProcedure {
+
+        private final TIntObjectHashMap<FolderObject> map;
+
+        public RemovingProcedure(final TIntObjectHashMap<FolderObject> map) {
+            this.map = map;
+        }
+
+        public boolean execute(final int folderId) {
+            map.remove(folderId);
+            return true;
+        }
+    }
+
+    private static final class DetectDirectSubfoldersProcedure implements TObjectProcedure<FolderObject> {
+
+        private final TIntObjectHashMap<FolderObject> map;
+
+        private final TIntArrayList toRemove;
+
+        public DetectDirectSubfoldersProcedure(final TIntObjectHashMap<FolderObject> map, final TIntArrayList toRemove) {
+            this.map = map;
+            this.toRemove = toRemove;
+        }
+
+        public boolean execute(final FolderObject folder) {
+            /*
+             * Check if current folder's parent is contained in map.
+             */
+            final int parent = folder.getParentFolderID();
+            if (map.containsKey(parent)) {
+                toRemove.add(folder.getObjectID());
+            }
+            return true;
+        }
+    }
 
     /**
      * Initializes a new {@link SharedPrefixFolder}.
@@ -146,7 +185,6 @@ public final class SharedPrefixFolder {
             }
             creatorDisplayName = new StringHelper(user.getLocale()).getString(Groups.ALL_USERS);
         }
-
         final FolderObject virtualOwnerFolder = FolderObject.createVirtualSharedFolderObject(sharedOwner, creatorDisplayName);
         /*
          * This highly user-specific folder is NOT cacheable
@@ -194,9 +232,23 @@ public final class SharedPrefixFolder {
         } catch (final OXException e) {
             throw new FolderException(e);
         }
+        if (q.isEmpty()) {
+            return new int[0];
+        }
+        /*
+         * Get first level shared folders
+         */
+        final int size = q.size();
+        final TIntObjectHashMap<FolderObject> set = getFirstLevelSharedFolders(q, size);
+        /*
+         * Return filtered list
+         */
         final TIntArrayList ret = new TIntArrayList(q.size());
         for (final FolderObject fo : q) {
-            ret.add(fo.getObjectID());
+            final int folderId = fo.getObjectID();
+            if (set.containsKey(folderId)) {
+                ret.add(folderId);
+            }
         }
         return ret.toNativeArray();
     }
@@ -212,7 +264,7 @@ public final class SharedPrefixFolder {
      * @return The corresponding database folder with subfolders set
      * @throws FolderException If returning corresponding database folder fails
      */
-    public static List<FuidAndName> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<FolderIdNamePair> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -235,11 +287,47 @@ public final class SharedPrefixFolder {
         } catch (final OXException e) {
             throw new FolderException(e);
         }
-        final List<FuidAndName> ret = new ArrayList<FuidAndName>(q.size());
+        if (q.isEmpty()) {
+            return Collections.<FolderIdNamePair> emptyList();
+        }
+        /*
+         * Get first level shared folders
+         */
+        final int size = q.size();
+        final TIntObjectHashMap<FolderObject> set = getFirstLevelSharedFolders(q, size);
+        /*
+         * Return filtered list
+         */
+        final List<FolderIdNamePair> ret = new ArrayList<FolderIdNamePair>(size);
         for (final FolderObject fo : q) {
-            ret.add(new FuidAndName(fo.getObjectID(), fo.getFolderName()));
+            final int folderId = fo.getObjectID();
+            if (set.containsKey(folderId)) {
+                ret.add(new FolderIdNamePair(folderId, fo.getFolderName()));
+            }
         }
         return ret;
+    }
+
+    private static TIntObjectHashMap<FolderObject> getFirstLevelSharedFolders(final Queue<FolderObject> q, final int size) {
+        /*
+         * Generate mapping
+         */
+        final TIntObjectHashMap<FolderObject> map = new TIntObjectHashMap<FolderObject>(size);
+        for (final FolderObject fo : q) {
+            map.put(fo.getObjectID(), fo);
+        }
+        /*
+         * Strip direct subfolders
+         */
+        {
+            final TIntArrayList toRemove = new TIntArrayList(size >> 1);
+            map.forEachValue(new DetectDirectSubfoldersProcedure(map, toRemove));
+            toRemove.forEach(new RemovingProcedure(map));
+        }
+        /*
+         * Return set view
+         */
+        return map;
     }
 
 }

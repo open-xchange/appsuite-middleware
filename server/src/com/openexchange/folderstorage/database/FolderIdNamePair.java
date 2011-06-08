@@ -50,11 +50,11 @@
 package com.openexchange.folderstorage.database;
 
 /**
- * {@link FuidAndName} - Simple container for folder identifier and its name (optional).
+ * {@link FolderIdNamePair} - Simple container for folder identifier and its name (optional).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FuidAndName {
+public final class FolderIdNamePair {
 
     /**
      * The folder identifier as a string.
@@ -67,24 +67,12 @@ public final class FuidAndName {
     public final String name;
 
     /**
-     * Initializes a new {@link FuidAndName}.
+     * Initializes a new {@link FolderIdNamePair}.
      * 
      * @param fuid The folder identifier
      * @param name The folder name
      */
-    public FuidAndName(final String fuid, final String name) {
-        super();
-        this.fuid = fuid;
-        this.name = name;
-    }
-
-    /**
-     * Initializes a new {@link FuidAndName}.
-     * 
-     * @param fuid The folder identifier
-     * @param name The folder name
-     */
-    public FuidAndName(final int fuid, final String name) {
+    public FolderIdNamePair(final int fuid, final String name) {
         super();
         this.fuid = String.valueOf(fuid);
         this.name = name;

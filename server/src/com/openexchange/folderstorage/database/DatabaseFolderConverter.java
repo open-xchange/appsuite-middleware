@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link DatabaseFolderConverter}
@@ -212,14 +214,39 @@ public final class DatabaseFolderConverter {
                 retval = new DatabaseFolder(fo);
             }
             if (PrivateType.getInstance().equals(retval.getType()) && user.getId() != retval.getCreatedBy()) {
-                retval.setType(SharedType.getInstance());
                 /*
-                 * A shared folder has no subfolders in real tree
+                 * A shared folder
                  */
-                retval.setSubfolderIDs(new String[0]);
-                retval.setSubscribedSubfolders(false);
-                retval.setCacheable(false);
-                retval.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
+                retval.setType(SharedType.getInstance());
+                retval.setGlobal(false); // user-sensitive!
+                retval.setDefault(false);
+                /*
+                 * Determine user-visible subfolders
+                 */
+                final TIntArrayList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, con);
+                if (visibleSubfolders.isEmpty()) {
+                    retval.setSubfolderIDs(new String[0]);
+                    retval.setSubscribedSubfolders(false);
+                } else {
+                    final String[] tmp = new String[visibleSubfolders.size()];
+                    for (int i = 0; i < tmp.length; i++) {
+                        tmp[i] = String.valueOf(visibleSubfolders.get(i));
+                    }
+                    retval.setSubfolderIDs(tmp);
+                    retval.setSubscribedSubfolders(true);
+                }
+                /*
+                 * Determine parent
+                 */
+                final int parent = fo.getParentFolderID();
+                if (OXFolderIteratorSQL.isVisibleFolder(parent, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, con)) {
+                    /*
+                     * Parent is visible
+                     */
+                    retval.setParentID(String.valueOf(parent));
+                } else {
+                    retval.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
+                }
             } else {
                 /*
                  * Set subfolders for folder.

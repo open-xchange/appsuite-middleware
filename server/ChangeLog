@@ -1,3 +1,7 @@
+* 2011-06-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #19374: Hierarchical-wise display of shared folders
+
 * 2011-06-07 - thorben.betten@open-xchange.com
 
  - Bugfix #19428: Using HtmlCleaner library to generate a well-formed and pretty-printed HTML because JTidy fails to do so
