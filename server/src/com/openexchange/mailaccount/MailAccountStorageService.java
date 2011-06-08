@@ -64,6 +64,16 @@ import com.openexchange.groupware.contexts.Context;
 public interface MailAccountStorageService {
 
     /**
+     * Invalidates specified mail account.
+     * 
+     * @param id The account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @throws MailAccountException If invalidation fails
+     */
+    public void invalidateMailAccount(int id, int user, int cid) throws MailAccountException;
+
+    /**
      * Gets the mail account identified by specified ID.
      * 
      * @param id The mail account ID

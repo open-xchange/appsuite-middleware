@@ -103,6 +103,47 @@ public final class URIParser {
     }
 
     /**
+     * Checks if specified input is a valid URI.
+     * 
+     * @param input The input to check
+     * @return <code>true</code> if specified input is a valid URI; otherwise <code>false</code>
+     */
+    public static boolean isValid(final String input) {
+        if (null == input || 0 == input.length()) {
+            return false;
+        }
+        Matcher matcher;
+        if ((matcher = IPV6_PATTERN.matcher(input)).matches()) {
+            // Nothing to do
+        } else if ((matcher = IPV4_PATTERN.matcher(input)).matches()) {
+            // Nothing to do
+        } else {
+            // Try to parse
+            try {
+                new URI(input);
+                return true;
+            } catch (final URISyntaxException e) {
+                return false;
+            }
+        }
+        int port;
+        try {
+            port = Integer.parseInt(matcher.group(3));
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+        if (port < 0 || port > 65535) {
+            return false;
+        }
+        try {
+            new URI(matcher.group(1), null, matcher.group(2), port, null, null, null);
+            return true;
+        } catch (final URISyntaxException e) {
+            return false;
+        }
+    }
+
+    /**
      * Tries to sanitize specified broken URI string.
      * 
      * @param input The broken URI string
@@ -130,7 +171,11 @@ public final class URIParser {
             final String scheme = matcher.group(1);
             final int usedPort = applyDefault(port, scheme, defs);
             final String usedScheme = applyDefault(scheme, port, defs);
-            return new URI(usedScheme, null, "localhost", usedPort, null, null, null);
+            try {
+                return new URI(usedScheme, null, matcher.group(2), usedPort, null, null, null);
+            } catch (final URISyntaxException e) {
+                return new URI(usedScheme, null, "localhost", usedPort, null, null, null);
+            }
         } catch (final URISyntaxException e) {
             /*
              * Cannot sanitize

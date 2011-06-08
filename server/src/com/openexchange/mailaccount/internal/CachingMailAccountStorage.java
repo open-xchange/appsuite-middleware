@@ -108,7 +108,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
     }
 
-    private void invalidateMailAccount(final int id, final int user, final int cid) throws MailAccountException {
+    public void invalidateMailAccount(final int id, final int user, final int cid) throws MailAccountException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {

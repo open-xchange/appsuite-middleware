@@ -179,7 +179,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
         }
     }
-    
+
+    public void invalidateMailAccount(final int id, final int user, final int cid) throws MailAccountException {
+        // Nothing to do
+    }
+
     /**
      * Gets the POP3 storage folders for specified session.
      * 
