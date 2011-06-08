@@ -215,7 +215,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessPublication(25, OPT_ACCESS_PUBLICATION, false),
         accessActiveSync(26, OPT_ACCESS_ACTIVE_SYNC, false),
         accessUsm(27, OPT_ACCESS_USM, false),
-        accessOlox20(28, OPT_ACCESS_OLOX20, false);
+        accessOlox20(28, OPT_ACCESS_OLOX20, false),
+        accessDeniedPortal(29, OPT_ACCESS_DENIED_PORTAL, false);
         
         private final String string;
         
@@ -460,6 +461,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_ACTIVE_SYNC = "access-active-sync";
     protected static final String OPT_ACCESS_USM = "access-usm";
     protected static final String OPT_ACCESS_OLOX20 = "access-olox20";
+    protected static final String OPT_ACCESS_DENIED_PORTAL = "access-denied-portal";
     protected static final String OPT_DISABLE_GAB = "access-global-address-book-disabled";
     protected static final String OPT_ACCESS_PUBLIC_FOLDER_EDITABLE = "access-public-folder-editable";
     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
@@ -642,6 +644,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessActiveSync = null;
     protected CLIOption accessUSM = null;
     protected CLIOption accessOLOX20 = null;
+    protected CLIOption accessDeniedPortal = null;
     protected CLIOption accessGAB = null;
     protected CLIOption accessPublicFolderEditable = null;
     
@@ -935,6 +938,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (-1 != olox20) {
             if (nextLine[olox20].length() > 0) {
                 moduleaccess.setOLOX20(stringToBool(nextLine[olox20]));
+            }
+        }
+        final int portal = idarray[AccessCombinations.accessDeniedPortal.getIndex()];
+        if (-1 != portal) {
+            if (nextLine[portal].length() > 0) {
+                moduleaccess.setDeniedPortal(stringToBool(nextLine[portal]));
             }
         }
         final int u2 = idarray[AccessCombinations.accessVcard.getIndex()];
@@ -1891,6 +1900,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setActiveSync(accessOption2BooleanCreate(parser,this.accessActiveSync));
         access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
         access.setOLOX20(accessOption2BooleanCreate(parser, this.accessOLOX20));
+        access.setDeniedPortal(accessOption2BooleanCreate(parser, this.accessDeniedPortal));
         access.setGlobalAddressBookDisabled(accessOption2BooleanCreate(parser, this.accessGAB));
         access.setPublicFolderEditable(accessOption2BooleanCreate(parser, this.accessPublicFolderEditable));
     }
@@ -2028,6 +2038,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             access.setOLOX20(accessOption2BooleanCreate(parser, this.accessOLOX20));
             changed = true;
         }
+        if((String) parser.getOptionValue(this.accessDeniedPortal) != null) {
+            access.setDeniedPortal(accessOption2BooleanCreate(parser, this.accessDeniedPortal));
+            changed = true;
+        }
         if((String) parser.getOptionValue(this.accessGAB) != null) {
             access.setGlobalAddressBookDisabled(accessOption2BooleanCreate(parser, this.accessGAB));
             changed = true;
@@ -2095,37 +2109,38 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setModuleAccessOptions(final AdminParser admp, final boolean required, final boolean extended) {
-        // TODO: The default values should be dynamically generates from the setting in the core
-        this.accessCalendarOption = setLongOpt(admp, OPT_ACCESS_CALENDAR,"on/off","Calendar module (Default is off)", true, required, extended);
-        this.accessContactOption = setLongOpt(admp, OPT_ACCESS_CONTACTS,"on/off","Contact module access (Default is on)", true, required,extended);
-        this.accessDelegateTasksOption = setLongOpt(admp, OPT_ACCESS_DELEGATE_TASKS,"on/off","Delegate tasks access (Default is off)", true, required,extended);
-        this.accessEditPublicFolderOption = setLongOpt(admp, OPT_ACCESS_EDIT_PUBLIC_FOLDERS,"on/off","Edit public folder access (Default is off)", true, required,extended);
-        this.accessForumOption = setLongOpt(admp, OPT_ACCESS_FORUM,"on/off","Forum module access (Default is off)", true, required,extended);
-        this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is off)", true, required,extended);
-        this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is off)", true, required,extended);
-        this.accessPinboardWriteOption = setLongOpt(admp, OPT_ACCESS_PINBOARD_WRITE,"on/off","Pinboard write access (Default is off)", true, required,extended);
-        this.accessProjectsOption = setLongOpt(admp, OPT_ACCESS_PROJECTS,"on/off","Project module access (Default is off)", true, required,extended);
-        this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is off)", true, required,extended);
-        this.accessRssBookmarkOption= setLongOpt(admp, OPT_ACCESS_RSS_BOOKMARKS,"on/off","RSS bookmarks access (Default is off)", true, required,extended);
-        this.accessRssPortalOption = setLongOpt(admp, OPT_ACCESS_RSS_PORTAL,"on/off","RSS portal access (Default is off)", true, required,extended);
-        this.accessSyncmlOption = setLongOpt(admp, OPT_ACCESS_SYNCML,"on/off","Syncml access (Default is off)", true, required,extended);
-        this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS,"on/off","Tasks access (Default is off)", true, required,extended);
-        this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD,"on/off","Vcard access (Default is off)", true, required,extended);
-        this.accessWebdavOption = setLongOpt(admp, OPT_ACCESS_WEBDAV,"on/off","Webdav access (Default is off)", true, required,extended);
-        this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML,"on/off","Webdav-Xml access (Default is off)", true, required,extended);
-        this.accessWebmailOption = setLongOpt(admp, OPT_ACCESS_WEBMAIL,"on/off","Webmail access (Default is on)", true, required,extended);
-        this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP,"on/off","Edit Group access (Default is off)", true, required,extended);
-        this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE,"on/off","Edit Resource access (Default is off)", true, required,extended);
-        this.accessEditPasswordOption = setLongOpt(admp, OPT_ACCESS_EDIT_PASSWORD,"on/off","Edit Password access (Default is off)", true, required,extended);
-        this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES,"on/off","Collect Email Addresses access (Default is off)", true, required,extended);
-        this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS,"on/off","Multiple Mail Accounts access (Default is off)", true, required,extended);
-        this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, required,extended);
-        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, required,extended);
-        this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, required, extended);
-        this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, required, extended);
-        this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off)", true, required, extended);
-        this.accessGAB = setLongOpt(admp, OPT_DISABLE_GAB, "on/off", "Disable Global Address Book access (Default is off)", true, required, extended);
-        this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Governs whether this user can edit the root public folder(s) (Default is off)", true, required, extended);
+        // TODO: The default values should be dynamically generated from the setting in the core
+        this.accessCalendarOption = setLongOpt(admp, OPT_ACCESS_CALENDAR,"on/off","Calendar module (Default is off)", true, false,true);
+        this.accessContactOption = setLongOpt(admp, OPT_ACCESS_CONTACTS,"on/off","Contact module access (Default is on)", true, false,true);
+        this.accessDelegateTasksOption = setLongOpt(admp, OPT_ACCESS_DELEGATE_TASKS,"on/off","Delegate tasks access (Default is off)", true, false,true);
+        this.accessEditPublicFolderOption = setLongOpt(admp, OPT_ACCESS_EDIT_PUBLIC_FOLDERS,"on/off","Edit public folder access (Default is off)", true, false,true);
+        this.accessForumOption = setLongOpt(admp, OPT_ACCESS_FORUM,"on/off","Forum module access (Default is off)", true, false,true);
+        this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is off)", true, false,true);
+        this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is off)", true, false,true);
+        this.accessPinboardWriteOption = setLongOpt(admp, OPT_ACCESS_PINBOARD_WRITE,"on/off","Pinboard write access (Default is off)", true, false,true);
+        this.accessProjectsOption = setLongOpt(admp, OPT_ACCESS_PROJECTS,"on/off","Project module access (Default is off)", true, false,true);
+        this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is off)", true, false,true);
+        this.accessRssBookmarkOption= setLongOpt(admp, OPT_ACCESS_RSS_BOOKMARKS,"on/off","RSS bookmarks access (Default is off)", true, false,true);
+        this.accessRssPortalOption = setLongOpt(admp, OPT_ACCESS_RSS_PORTAL,"on/off","RSS portal access (Default is off)", true, false,true);
+        this.accessSyncmlOption = setLongOpt(admp, OPT_ACCESS_SYNCML,"on/off","Syncml access (Default is off)", true, false,true);
+        this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS,"on/off","Tasks access (Default is off)", true, false,true);
+        this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD,"on/off","Vcard access (Default is off)", true, false,true);
+        this.accessWebdavOption = setLongOpt(admp, OPT_ACCESS_WEBDAV,"on/off","Webdav access (Default is off)", true, false,true);
+        this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML,"on/off","Webdav-Xml access (Default is off)", true, false,true);
+        this.accessWebmailOption = setLongOpt(admp, OPT_ACCESS_WEBMAIL,"on/off","Webmail access (Default is on)", true, false,true);
+        this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP,"on/off","Edit Group access (Default is off)", true, false,true);
+        this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE,"on/off","Edit Resource access (Default is off)", true, false,true);
+        this.accessEditPasswordOption = setLongOpt(admp, OPT_ACCESS_EDIT_PASSWORD,"on/off","Edit Password access (Default is off)", true, false,true);
+        this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES,"on/off","Collect Email Addresses access (Default is off)", true, false,true);
+        this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS,"on/off","Multiple Mail Accounts access (Default is off)", true, false,true);
+        this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, false,true);
+        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);
+        this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
+        this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
+        this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off)", true, false, true);
+        this.accessDeniedPortal = setLongOpt(admp, OPT_ACCESS_DENIED_PORTAL, "on/off", "Denied portal access (Default is off)", true, false, true);
+        this.accessGAB = setLongOpt(admp, OPT_DISABLE_GAB, "on/off", "Disable Global Address Book access (Default is off)", true, false, true);
+        this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Whether public folder(s) is/are editable (Default is off). Applies only to context admin user.", true, false, true);
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
