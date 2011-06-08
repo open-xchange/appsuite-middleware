@@ -51,6 +51,7 @@ package com.openexchange.publish.microformats;
 
 import java.util.ArrayList;
 import java.util.List;
+import junit.framework.TestCase;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.contexts.Context;
@@ -60,11 +61,10 @@ import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.OXTemplateExceptionHandler;
 import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
-import freemarker.template.TemplateExceptionHandler;
-import junit.framework.TestCase;
 
 /**
  * {@link OXMFPublicationServiceTest}
@@ -303,11 +303,11 @@ public class OXMFPublicationServiceTest extends TestCase {
             return new ArrayList<String>(0);
         }
 
-        public OXTemplate loadTemplate(String templateName, TemplateExceptionHandler exceptionHandler) throws TemplateException {
+        public OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws TemplateException {
             return null;
         }
 
-        public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, TemplateExceptionHandler exceptionHandler) throws TemplateException {
+        public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, OXTemplateExceptionHandler exceptionHandler) throws TemplateException {
             return null;
         }
     }

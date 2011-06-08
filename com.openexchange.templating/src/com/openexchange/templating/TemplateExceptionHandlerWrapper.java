@@ -49,24 +49,37 @@
 
 package com.openexchange.templating;
 
-import java.util.List;
-import com.openexchange.tools.session.ServerSession;
+import java.io.Writer;
+import freemarker.core.Environment;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link TemplateExceptionHandlerWrapper}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface TemplateService {
+public class TemplateExceptionHandlerWrapper implements TemplateExceptionHandler {
+    
+    private final OXTemplateExceptionHandler exceptionHandler;
+    
+    public TemplateExceptionHandlerWrapper(final OXTemplateExceptionHandler exceptionHandler) {
+        super();
+        this.exceptionHandler = exceptionHandler;
+    }
 
-    public OXTemplate loadTemplate(String templateName) throws TemplateException;
-    
-    public OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws TemplateException;
-    
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException;
-    
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, OXTemplateExceptionHandler exceptionHandler) throws TemplateException;
-    
-    public List<String> getBasicTemplateNames(String...filter) throws TemplateException;
-    
-    public List<String> getTemplateNames(ServerSession session, String... filter) throws TemplateException;
+    /** 
+     * {@inheritDoc}
+     */
+    public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
+        final com.openexchange.templating.TemplateException exception = TemplateErrorMessage.UnderlyingException.create(te);
+        
+        try {
+            exceptionHandler.handleTemplateException(exception, out);
+        } catch (com.openexchange.templating.TemplateException e) {
+            throw new TemplateException(e, env);
+        }
+    }
+
 }

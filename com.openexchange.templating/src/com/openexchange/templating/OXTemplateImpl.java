@@ -51,7 +51,6 @@ package com.openexchange.templating;
 
 import java.io.IOException;
 import java.io.Writer;
-import com.openexchange.templating.OXTemplate.TemplateLevel;
 import freemarker.template.Template;
 
 /**

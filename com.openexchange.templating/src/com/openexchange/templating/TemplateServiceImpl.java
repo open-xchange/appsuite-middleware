@@ -389,23 +389,19 @@ public class TemplateServiceImpl implements TemplateService {
         return basicTemplateNames;
 	}
 
-    /**
-     * @see com.openexchange.templating.TemplateService#loadTemplate(java.lang.String, freemarker.template.TemplateExceptionHandler)
-     */
-    public OXTemplate loadTemplate(String templateName, TemplateExceptionHandler exceptionHandler) throws TemplateException {
-        this.exceptionHandler = exceptionHandler;
-        
+    public OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws TemplateException {
+             
         return loadTemplate(templateName);
     }
 
-    /**
-     * @see com.openexchange.templating.TemplateService#loadTemplate(java.lang.String, java.lang.String, com.openexchange.tools.session.ServerSession, freemarker.template.TemplateExceptionHandler)
-     */
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, TemplateExceptionHandler exceptionHandler) throws TemplateException {
-        this.exceptionHandler = exceptionHandler;
-        
+    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, OXTemplateExceptionHandler exceptionHandler) throws TemplateException {
+        setExceptionHandler(exceptionHandler);   
         return loadTemplate(templateName, defaultTemplateName, session);
     }
 	
+    private void setExceptionHandler(OXTemplateExceptionHandler exceptionHandler) {
+        TemplateExceptionHandler wrapper = new TemplateExceptionHandlerWrapper(exceptionHandler);
+        this.exceptionHandler = wrapper;
+    }
 
 }

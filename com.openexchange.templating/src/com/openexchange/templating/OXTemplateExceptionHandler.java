@@ -49,24 +49,22 @@
 
 package com.openexchange.templating;
 
-import java.util.List;
-import com.openexchange.tools.session.ServerSession;
+import java.io.Writer;
 
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link OXTemplateExceptionHandler}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface TemplateService {
+public interface OXTemplateExceptionHandler {
 
-    public OXTemplate loadTemplate(String templateName) throws TemplateException;
+    void handleTemplateException(TemplateException te, Writer out) throws TemplateException;    
     
-    public OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws TemplateException;
-    
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException;
-    
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, OXTemplateExceptionHandler exceptionHandler) throws TemplateException;
-    
-    public List<String> getBasicTemplateNames(String...filter) throws TemplateException;
-    
-    public List<String> getTemplateNames(ServerSession session, String... filter) throws TemplateException;
+    OXTemplateExceptionHandler RETHROW_HANDLER = new OXTemplateExceptionHandler() {
+        
+        public void handleTemplateException(TemplateException te, Writer out) throws TemplateException {
+            throw te;            
+        }
+    };
 }
