@@ -1026,7 +1026,7 @@ public final class HTMLServiceImpl implements HTMLService {
             /*
              * Clean...
              */
-            final TagNode htmlNode = HTML_CLEANER.clean(new UnsynchronizedStringReader(htmlContent));
+            final TagNode htmlNode = HTML_CLEANER.clean(htmlContent);
             /*
              * Check for presence of HTML namespace
              */
