@@ -2138,7 +2138,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
         this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off)", true, false, true);
-        this.accessDeniedPortal = setLongOpt(admp, OPT_ACCESS_DENIED_PORTAL, "on/off", "Denied portal access (Default is off)", true, false, true);
+        this.accessDeniedPortal = setLongOpt(admp, OPT_ACCESS_DENIED_PORTAL, "on/off", "Denies portal access (Default is off)", true, false, true);
         this.accessGAB = setLongOpt(admp, OPT_DISABLE_GAB, "on/off", "Disable Global Address Book access (Default is off)", true, false, true);
         this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Whether public folder(s) is/are editable (Default is off). Applies only to context admin user.", true, false, true);
     }
