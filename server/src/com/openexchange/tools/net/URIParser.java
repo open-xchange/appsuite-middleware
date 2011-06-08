@@ -61,6 +61,8 @@ import java.util.regex.Pattern;
  */
 public final class URIParser {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(URIParser.class);
+
     // The magic is the not being there of the dot character that would allow the match to IPv4 addresses. Place here \. in the pattern to
     // break it.
     private static final Pattern IPV6_PATTERN = Pattern.compile("^(?:(?:([a-zA-Z][0-9a-zA-Z]*)://\\[)|\\[)?([0-9a-zA-Z:]*?)(?:\\]|(?:\\]:(.*)))?$");
@@ -79,7 +81,7 @@ public final class URIParser {
      * @return The parsed URI instance
      * @throws URISyntaxException If parsing fails
      */
-    public static final URI parse(final String input, final URIDefaults defaults) throws URISyntaxException {
+    public static URI parse(final String input, final URIDefaults defaults) throws URISyntaxException {
         if (null == input || 0 == input.length()) {
             return null;
         }
@@ -92,29 +94,79 @@ public final class URIParser {
             // Try fallback.
             return new URI(input);
         }
-        final int port = parsePort(input, matcher.group(3));
-        final String scheme = matcher.group(1);
         final URIDefaults defs = null == defaults ? URIDefaults.NULL : defaults;
+        final int port = parsePort(input, matcher.group(3), defs);
+        final String scheme = matcher.group(1);
         final int usedPort = applyDefault(port, scheme, defs);
         final String usedScheme = applyDefault(scheme, port, defs);
         return new URI(usedScheme, null, matcher.group(2), usedPort, null, null, null);
     }
 
-    private static final int parsePort(final String input, final String port) throws URISyntaxException {
-        int retval;
-        if (null != port) {
-            try {
-                retval = Integer.parseInt(port);
-            } catch (final NumberFormatException e) {
-                throw new URISyntaxException(input, e.getMessage());
-            }
-        } else {
-            retval = -1;
+    /**
+     * Tries to sanitize specified broken URI string.
+     * 
+     * @param input The broken URI string
+     * @param defaults The defaults for parsing
+     * @return The sanitized URI or <code>null</code> if not able to sanitize
+     */
+    public static URI sanitize(final String input, final URIDefaults defaults) {
+        if (null == input || 0 == input.length()) {
+            return null;
         }
-        return retval;
+        try {
+            Matcher matcher;
+            if ((matcher = IPV6_PATTERN.matcher(input)).matches()) {
+                // Nothing to do
+            } else if ((matcher = IPV4_PATTERN.matcher(input)).matches()) {
+                // Nothing to do
+            } else {
+                /*
+                 * Unknown pattern. Cannot sanitize
+                 */
+                return null;
+            }
+            final URIDefaults defs = null == defaults ? URIDefaults.NULL : defaults;
+            final int port = parsePort(input, matcher.group(3), defs);
+            final String scheme = matcher.group(1);
+            final int usedPort = applyDefault(port, scheme, defs);
+            final String usedScheme = applyDefault(scheme, port, defs);
+            return new URI(usedScheme, null, "localhost", usedPort, null, null, null);
+        } catch (final URISyntaxException e) {
+            /*
+             * Cannot sanitize
+             */
+            LOG.warn("Couldn't sanitize URI: " + input, e);
+            return null;
+        }
     }
 
-    private static final int applyDefault(final int port, final String scheme, final URIDefaults defaults) {
+    private static int parsePort(final String input, final String port, final URIDefaults defaults) throws URISyntaxException {
+        if (null == port) {
+            return -1;
+        }
+        try {
+            final int iPort = Integer.parseInt(port);
+            /*
+             * A valid port value is between 0 and 65535
+             */
+            if (iPort < 0 || iPort > 65535) {
+                if (URIDefaults.NULL.equals(defaults)) {
+                    throw new URISyntaxException(input, "A valid port value is between 0 and 65535, but is: " + port);
+                }
+                LOG.warn("Invalid port: " + port);
+                return defaults.getPort();
+            }
+            return iPort;
+        } catch (final NumberFormatException e) {
+            if (URIDefaults.NULL.equals(defaults)) {
+                throw new URISyntaxException(input, e.getMessage());
+            }
+            LOG.warn("Couldn't parse port: " + e.getMessage(), e);
+            return defaults.getPort();
+        }
+    }
+
+    private static int applyDefault(final int port, final String scheme, final URIDefaults defaults) {
         if (-1 == port) {
             if (null != defaults.getSSLProtocol() && defaults.getSSLProtocol().equals(scheme)) {
                 return defaults.getSSLPort();
@@ -124,7 +176,7 @@ public final class URIParser {
         return port;
     }
 
-    private static final String applyDefault(final String scheme, final int port, final URIDefaults defaults) {
+    private static String applyDefault(final String scheme, final int port, final URIDefaults defaults) {
         if (null == scheme) {
             if (defaults.getSSLPort() == port) {
                 return defaults.getSSLProtocol();
