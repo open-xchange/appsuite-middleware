@@ -71,12 +71,20 @@ public final class URIParser {
         super();
     }
 
-    public static final URI parse(String input, URIDefaults defaults) throws URISyntaxException {
+    /**
+     * Parses specified URL string.
+     * 
+     * @param input The URL string
+     * @param defaults The defaults for parsing or {@link URIDefaults#NULL} for no defaults
+     * @return The parsed URI instance
+     * @throws URISyntaxException If parsing fails
+     */
+    public static final URI parse(final String input, final URIDefaults defaults) throws URISyntaxException {
         if (null == input || 0 == input.length()) {
             return null;
         }
-        Matcher matcher6 = IPV6_PATTERN.matcher(input);
-        Matcher matcher4 = IPV4_PATTERN.matcher(input);
+        final Matcher matcher6 = IPV6_PATTERN.matcher(input);
+        final Matcher matcher4 = IPV4_PATTERN.matcher(input);
         final Matcher matcher;
         if (matcher6.matches()) {
             matcher = matcher6;
@@ -88,17 +96,18 @@ public final class URIParser {
         }
         final int port = parsePort(input, matcher.group(3));
         final String scheme = matcher.group(1);
-        final int usedPort = applyDefault(port, scheme, defaults);
-        final String usedScheme = applyDefault(scheme, port, defaults);
+        final URIDefaults defs = null == defaults ? URIDefaults.NULL : defaults;
+        final int usedPort = applyDefault(port, scheme, defs);
+        final String usedScheme = applyDefault(scheme, port, defs);
         return new URI(usedScheme, null, matcher.group(2), usedPort, null, null, null);
     }
 
-    private static final int parsePort(String input, String port) throws URISyntaxException {
+    private static final int parsePort(final String input, final String port) throws URISyntaxException {
         int retval;
         if (null != port) {
             try {
                 retval = Integer.parseInt(port);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 throw new URISyntaxException(input, e.getMessage());
             }
         } else {
@@ -107,7 +116,7 @@ public final class URIParser {
         return retval;
     }
 
-    private static final int applyDefault(int port, String scheme, URIDefaults defaults) {
+    private static final int applyDefault(final int port, final String scheme, final URIDefaults defaults) {
         if (-1 == port) {
             if (null != defaults.getSSLProtocol() && defaults.getSSLProtocol().equals(scheme)) {
                 return defaults.getSSLPort();
@@ -117,7 +126,7 @@ public final class URIParser {
         return port;
     }
 
-    private static final String applyDefault(String scheme, int port, URIDefaults defaults) {
+    private static final String applyDefault(final String scheme, final int port, final URIDefaults defaults) {
         if (null == scheme) {
             if (defaults.getSSLPort() == port) {
                 return defaults.getSSLProtocol();
