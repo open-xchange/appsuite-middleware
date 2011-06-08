@@ -130,7 +130,7 @@ public class OnlinePublicationServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
         resp.getWriter().println("Cannot find the publication site.");
 
-        return true;
+        return false;
     }
 
     // FIXME: Get Default Encoding from config service
