@@ -72,8 +72,8 @@ import java.util.regex.Pattern;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyXmlSerializer;
+import org.htmlcleaner.Serializer;
 import org.htmlcleaner.TagNode;
-import org.htmlcleaner.XmlSerializer;
 import org.w3c.tidy.Tidy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
@@ -714,7 +714,7 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     public String dropScriptTagsInHeader(final String htmlContent) {
-        if (null == htmlContent) {
+        if (null == htmlContent || htmlContent.indexOf("<script") < 0) {
             return htmlContent;
         }
         final Matcher m1 = PATTERN_BODY_START.matcher(htmlContent);
@@ -947,34 +947,27 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     /**
-     * The {@link HtmlCleaner} constant which is safe being used by multiple threads as of <a
-     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
-     */
-    private static final HtmlCleaner HTML_CLEANER;
-
-    /**
-     * The {@link XmlSerializer} constant which is safe being used by multiple threads as of <a
-     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
-     */
-    private static final XmlSerializer XML_SERIALIZER;
-
-    static {
-        final CleanerProperties props = new CleanerProperties();
-        props.setTranslateSpecialEntities(false);
-        props.setRecognizeUnicodeChars(false);
-        props.setOmitDoctypeDeclaration(false);
-        props.setPruneTags("script");
-        HTML_CLEANER = new HtmlCleaner(props);
-        XML_SERIALIZER = new PrettyXmlSerializer(props);
-    }
-
-    /**
-     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library.
+     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
+     * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
      * 
      * @param htmlContent The HTML content
      * @return The validated HTML content
      */
     private String validate(final String htmlContent) {
+        return validate(htmlContent, true);
+    }
+
+    /**
+     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
+     * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
+     * 
+     * @param htmlContent The HTML content
+     * @return The validated HTML content
+     */
+    private String validate(final String htmlContent, final boolean forceHtmlCleaner) {
+        if (forceHtmlCleaner) {
+            return validateWithHtmlCleaner(htmlContent);
+        }
         /*
          * Obtain a new Tidy instance
          */
@@ -991,38 +984,83 @@ public final class HTMLServiceImpl implements HTMLService {
             /*
              * Tidy failed horribly...
              */
-            LOG.warn("JTidy library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
+            LOG.warn("JTidy library failed to pretty-print HTML content. Using HtmlCleaner library as fall-back.", rte);
             validatedHtml = null;
         }
         /*
          * Check Tidy output
          */
         if (null == validatedHtml || 0 == validatedHtml.length()) {
-            try {
-                /*
-                 * Tidy failed... Try HtmlCleaner!!!
-                 */
-                final TagNode node = HTML_CLEANER.clean(new UnsynchronizedStringReader(htmlContent));
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
-                XML_SERIALIZER.writeToStream(node, out, "UTF-8");
-                validatedHtml = new String(out.toByteArray(), "UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                // Cannot occur
-                LOG.error("Unsupported encoding: " + e.getMessage(), e);
-                validatedHtml = "";
-            } catch (final IOException e) {
-                // Cannot occur
-                LOG.error("I/O error: " + e.getMessage(), e);
-                validatedHtml = "";
-            } catch (final RuntimeException rte) {
-                /*
-                 * HtmlCleaner failed horribly...
-                 */
-                LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
-                validatedHtml = "";
-            }
+            validatedHtml = validateWithHtmlCleaner(htmlContent);
         }
         return validatedHtml;
+    }
+
+    /**
+     * The {@link HtmlCleaner} constant which is safe being used by multiple threads as of <a
+     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
+     */
+    private static final HtmlCleaner HTML_CLEANER;
+
+    /**
+     * The {@link Serializer} constant which is safe being used by multiple threads as of <a
+     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
+     */
+    private static final Serializer SERIALIZER;
+
+    static {
+        final CleanerProperties props = new CleanerProperties();
+        props.setTranslateSpecialEntities(false);
+        props.setRecognizeUnicodeChars(false);
+        props.setOmitDoctypeDeclaration(false);
+        props.setOmitXmlDeclaration(true);
+        props.setPruneTags("script");
+        HTML_CLEANER = new HtmlCleaner(props);
+        SERIALIZER = new PrettyXmlSerializer(props, " ");
+    }
+
+    private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
+
+    private String validateWithHtmlCleaner(final String htmlContent) {
+        try {
+            /*
+             * Tidy failed... Try HtmlCleaner!!!
+             */
+            final TagNode htmlNode = HTML_CLEANER.clean(new UnsynchronizedStringReader(htmlContent));
+            /*
+             * Check for presence of HTML namespace
+             */
+            if (!htmlNode.hasAttribute("xmlns")) {
+                htmlNode.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+            }
+            /*
+             * Serialize
+             */
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
+            SERIALIZER.writeToStream(htmlNode, out, "UTF-8");
+            final StringBuilder builder = new StringBuilder(new String(out.toByteArray(), "UTF-8"));
+            /*
+             * Insert DOCTYPE if absent
+             */
+            if (builder.indexOf("<!DOCTYPE") < 0) {
+                builder.insert(0, DOCTYPE_DECL);
+            }
+            return builder.toString();
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            LOG.error("Unsupported encoding: " + e.getMessage(), e);
+            return "";
+        } catch (final IOException e) {
+            // Cannot occur
+            LOG.error("I/O error: " + e.getMessage(), e);
+            return "";
+        } catch (final RuntimeException rte) {
+            /*
+             * HtmlCleaner failed horribly...
+             */
+            LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
+            return "";
+        }
     }
 
     private Tidy createNewTidyInstance() {
