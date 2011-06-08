@@ -83,13 +83,11 @@ public final class URIParser {
         if (null == input || 0 == input.length()) {
             return null;
         }
-        final Matcher matcher6 = IPV6_PATTERN.matcher(input);
-        final Matcher matcher4 = IPV4_PATTERN.matcher(input);
-        final Matcher matcher;
-        if (matcher6.matches()) {
-            matcher = matcher6;
-        } else if (matcher4.matches()) {
-            matcher = matcher4;
+        Matcher matcher;
+        if ((matcher = IPV6_PATTERN.matcher(input)).matches()) {
+            // Nothing to do
+        } else if ((matcher = IPV4_PATTERN.matcher(input)).matches()) {
+            // Nothing to do
         } else {
             // Try fallback.
             return new URI(input);
