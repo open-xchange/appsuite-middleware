@@ -1,3 +1,7 @@
+* 2011-06-08 - steffen.templin@open-xchange.com
+
+ - Bugfix #19442: The OXUpdater now provides a fallback mechanism that delivers files in en_US if the users preferred language is not available.
+
 * 2011-06-08 - thorben.betten@open-xchange.com
 
  - Bugfix #19374: Hierarchical-wise display of shared folders
