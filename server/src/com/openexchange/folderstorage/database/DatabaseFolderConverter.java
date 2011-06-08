@@ -252,8 +252,27 @@ public final class DatabaseFolderConverter {
                  * Set subfolders for folder.
                  */
                 if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
-                    retval.setSubfolderIDs(null);
-                    retval.setSubscribedSubfolders(true);
+                    /*
+                     * User-sensitive loading of user infostore folder
+                     */
+                    final TIntArrayList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, null);
+                    if (subfolders.isEmpty()) {
+                        retval.setSubfolderIDs(new String[0]);
+                        retval.setSubscribedSubfolders(false);
+                    } else {
+                        final int len = subfolders.size();
+                        final String[] arr = new String[len];
+                        for (int i = 0; i < len; i++) {
+                            arr[i] = String.valueOf(subfolders.get(i));
+                        }
+                        retval.setSubfolderIDs(arr);
+                        retval.setSubscribedSubfolders(true);
+                    }
+                    /*
+                     * Mark for user-sensitive cache
+                     */
+                    retval.setCacheable(true);
+                    retval.setGlobal(false);
                 } else {
                     final List<Integer> subfolderIds;
                     if (fo.containsSubfolderIds()) {

@@ -221,7 +221,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         return Arrays.asList(Attribute.values());
     }
 
-    protected static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session) throws MailAccountException {
+    protected static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session) {
         final int accountId = account.getId();
         if (MailAccount.DEFAULT_ID == accountId) {
             /*
@@ -241,123 +241,134 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         /*
          * Check full names
          */
-        String fullName = account.getConfirmedHamFullname();
-        if (null == fullName) {
-            prefix = getPrefix(accountId, session);
-            String name = account.getConfirmedHam();
-            if (null == name) {
-                primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
-                name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount);
-            }
-            mad.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
-            attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
-        }
-        // Confirmed-Ham
-        fullName = account.getConfirmedSpamFullname();
-        if (null == fullName) {
-            if (null == prefix) {
+        try {
+            String fullName = account.getConfirmedHamFullname();
+            if (null == fullName) {
                 prefix = getPrefix(accountId, session);
-                tmp = new StringBuilder(prefix);
-            } else {
-                tmp.setLength(prefix.length());
-            }
-            String name = account.getConfirmedSpam();
-            if (null == name) {
-                if (null == primaryAccount) {
+                String name = account.getConfirmedHam();
+                if (null == name) {
                     primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                    name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount);
                 }
-                name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount);
+                mad.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
+                attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
             }
-            mad.setConfirmedSpamFullname(tmp.append(name).toString());
-            attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
-        }
-        // Drafts
-        fullName = account.getDraftsFullname();
-        if (null == fullName) {
-            if (null == prefix) {
-                prefix = getPrefix(accountId, session);
-                tmp = new StringBuilder(prefix);
-            } else {
-                tmp.setLength(prefix.length());
-            }
-            String name = account.getDrafts();
-            if (null == name) {
-                if (null == primaryAccount) {
-                    primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+            // Confirmed-Ham
+            fullName = account.getConfirmedSpamFullname();
+            if (null == fullName) {
+                if (null == prefix) {
+                    prefix = getPrefix(accountId, session);
+                    tmp = new StringBuilder(prefix);
+                } else {
+                    tmp.setLength(prefix.length());
                 }
-                name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
-            }
-            mad.setDraftsFullname(tmp.append(name).toString());
-            attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
-        }
-        // Sent
-        fullName = account.getSentFullname();
-        if (null == fullName) {
-            if (null == prefix) {
-                prefix = getPrefix(accountId, session);
-                tmp = new StringBuilder(prefix);
-            } else {
-                tmp.setLength(prefix.length());
-            }
-            String name = account.getSent();
-            if (null == name) {
-                if (null == primaryAccount) {
-                    primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                String name = account.getConfirmedSpam();
+                if (null == name) {
+                    if (null == primaryAccount) {
+                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                    }
+                    name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount);
                 }
-                name = getName(StorageUtility.INDEX_SENT, primaryAccount);
+                mad.setConfirmedSpamFullname(tmp.append(name).toString());
+                attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
             }
-            mad.setSentFullname(tmp.append(name).toString());
-            attributes.add(Attribute.SENT_FULLNAME_LITERAL);
-        }
-        // Spam
-        fullName = account.getSpamFullname();
-        if (null == fullName) {
-            if (null == prefix) {
-                prefix = getPrefix(accountId, session);
-                tmp = new StringBuilder(prefix);
-            } else {
-                tmp.setLength(prefix.length());
-            }
-            String name = account.getSpam();
-            if (null == name) {
-                if (null == primaryAccount) {
-                    primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+            // Drafts
+            fullName = account.getDraftsFullname();
+            if (null == fullName) {
+                if (null == prefix) {
+                    prefix = getPrefix(accountId, session);
+                    tmp = new StringBuilder(prefix);
+                } else {
+                    tmp.setLength(prefix.length());
                 }
-                name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
-            }
-            mad.setSpamFullname(tmp.append(name).toString());
-            attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
-        }
-        // Trash
-        fullName = account.getTrashFullname();
-        if (null == fullName) {
-            if (null == prefix) {
-                prefix = getPrefix(accountId, session);
-                tmp = new StringBuilder(prefix);
-            } else {
-                tmp.setLength(prefix.length());
-            }
-            String name = account.getTrash();
-            if (null == name) {
-                if (null == primaryAccount) {
-                    primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                String name = account.getDrafts();
+                if (null == name) {
+                    if (null == primaryAccount) {
+                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                    }
+                    name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
                 }
-                name = getName(StorageUtility.INDEX_TRASH, primaryAccount);
+                mad.setDraftsFullname(tmp.append(name).toString());
+                attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
             }
-            mad.setTrashFullname(tmp.append(name).toString());
-            attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
-        }
-        /*
-         * Something to update?
-         */
-        if (attributes.isEmpty()) {
+            // Sent
+            fullName = account.getSentFullname();
+            if (null == fullName) {
+                if (null == prefix) {
+                    prefix = getPrefix(accountId, session);
+                    tmp = new StringBuilder(prefix);
+                } else {
+                    tmp.setLength(prefix.length());
+                }
+                String name = account.getSent();
+                if (null == name) {
+                    if (null == primaryAccount) {
+                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                    }
+                    name = getName(StorageUtility.INDEX_SENT, primaryAccount);
+                }
+                mad.setSentFullname(tmp.append(name).toString());
+                attributes.add(Attribute.SENT_FULLNAME_LITERAL);
+            }
+            // Spam
+            fullName = account.getSpamFullname();
+            if (null == fullName) {
+                if (null == prefix) {
+                    prefix = getPrefix(accountId, session);
+                    tmp = new StringBuilder(prefix);
+                } else {
+                    tmp.setLength(prefix.length());
+                }
+                String name = account.getSpam();
+                if (null == name) {
+                    if (null == primaryAccount) {
+                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                    }
+                    name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
+                }
+                mad.setSpamFullname(tmp.append(name).toString());
+                attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
+            }
+            // Trash
+            fullName = account.getTrashFullname();
+            if (null == fullName) {
+                if (null == prefix) {
+                    prefix = getPrefix(accountId, session);
+                    tmp = new StringBuilder(prefix);
+                } else {
+                    tmp.setLength(prefix.length());
+                }
+                String name = account.getTrash();
+                if (null == name) {
+                    if (null == primaryAccount) {
+                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                    }
+                    name = getName(StorageUtility.INDEX_TRASH, primaryAccount);
+                }
+                mad.setTrashFullname(tmp.append(name).toString());
+                attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
+            }
+            /*
+             * Something to update?
+             */
+            if (attributes.isEmpty()) {
+                return account;
+            }
+            /*
+             * Update and return refetched account instance
+             */
+            storageService.updateMailAccount(mad, attributes, session.getUserId(), session.getContextId(), session.getPassword());
+            return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+        } catch (final MailAccountException e) {
+            /*
+             * Checking full names failed
+             */
+            final StringBuilder sb = new StringBuilder("Checking default folder full names for account ");
+            sb.append(account.getId()).append(" failed with user ").append(session.getUserId());
+            sb.append(" in context ").append(session.getContextId());
+            org.apache.commons.logging.LogFactory.getLog(AbstractMailAccountAction.class).warn(sb.toString(), e);
             return account;
         }
-        /*
-         * Update and return refetched account instance
-         */
-        storageService.updateMailAccount(mad, attributes, session.getUserId(), session.getContextId(), session.getPassword());
-        return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
     }
 
     private static String getName(final int index, final MailAccount primaryAccount) {
