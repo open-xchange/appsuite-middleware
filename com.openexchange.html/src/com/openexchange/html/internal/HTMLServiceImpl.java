@@ -1024,7 +1024,7 @@ public final class HTMLServiceImpl implements HTMLService {
     private String validateWithHtmlCleaner(final String htmlContent) {
         try {
             /*
-             * Tidy failed... Try HtmlCleaner!!!
+             * Clean...
              */
             final TagNode htmlNode = HTML_CLEANER.clean(new UnsynchronizedStringReader(htmlContent));
             /*
