@@ -51,6 +51,7 @@ package com.openexchange.templating;
 
 import java.util.List;
 import com.openexchange.tools.session.ServerSession;
+import freemarker.template.TemplateExceptionHandler;
 
 
 /**
@@ -60,7 +61,11 @@ public interface TemplateService {
 
     public OXTemplate loadTemplate(String templateName) throws TemplateException;
     
+    public OXTemplate loadTemplate(String templateName, TemplateExceptionHandler exceptionHandler) throws TemplateException;
+    
     public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException;
+    
+    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, TemplateExceptionHandler exceptionHandler) throws TemplateException;
     
     public List<String> getBasicTemplateNames(String...filter) throws TemplateException;
     

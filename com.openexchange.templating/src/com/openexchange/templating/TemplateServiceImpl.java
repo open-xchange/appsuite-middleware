@@ -85,6 +85,7 @@ import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateExceptionHandler;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -104,9 +105,12 @@ public class TemplateServiceImpl implements TemplateService {
     private OXFolderHelper folders;
 
     private OXInfostoreHelper infostore;
+    
+    private TemplateExceptionHandler exceptionHandler;
 
     public TemplateServiceImpl(ConfigurationService config) {
         this.config = config;
+        exceptionHandler = null;
     }
 
     public OXTemplateImpl loadTemplate(String templateName) throws TemplateException {
@@ -133,6 +137,9 @@ public class TemplateServiceImpl implements TemplateService {
             TemplateLoader templateLoader = new FileTemplateLoader(path);
             Configuration config = new Configuration();
             config.setTemplateLoader(templateLoader);
+            if (exceptionHandler != null) {
+                config.setTemplateExceptionHandler(exceptionHandler);
+            }
             retval = config.getTemplate(templateName);
         } catch (IOException e) {
             throw IOException.create(e);
@@ -158,9 +165,13 @@ public class TemplateServiceImpl implements TemplateService {
             }
             String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
 
+            Configuration config = new Configuration();
+            if (exceptionHandler != null) {
+                config.setTemplateExceptionHandler(exceptionHandler);
+            }
             if (templateText != null) {
                 OXTemplateImpl template = new OXTemplateImpl();
-                template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
+                template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                 template.setLevel(TemplateLevel.USER);
                 return template;
             }
@@ -177,7 +188,7 @@ public class TemplateServiceImpl implements TemplateService {
                 if (existsInFilesystem(templateName)) {
                     templateText = loadFromFileSystem(templateName);
                     OXTemplateImpl template = new OXTemplateImpl();
-                    template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
+                    template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                     template.setLevel(TemplateLevel.SERVER);
                     return template;
                 }
@@ -190,7 +201,7 @@ public class TemplateServiceImpl implements TemplateService {
                 infostore.storeTemplateInFolder(session, privateFolder, templateName, templateText);
             }
             OXTemplateImpl template = new OXTemplateImpl();
-            template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
+            template.setTemplate(new Template(templateName, new StringReader(templateText), config));
             template.setLevel(TemplateLevel.USER);
             return template;
         } catch (AbstractOXException e) {
@@ -273,10 +284,10 @@ public class TemplateServiceImpl implements TemplateService {
         Set<String> names = new HashSet<String>();
         Set<String> defaults = new HashSet<String>();
         for (File file : files) {
-        	Set<String> tags = tagMap.get(file.getName());
-        	if (tags == null) {
-        	    tags = Collections.emptySet();
-        	}
+            Set<String> tags = tagMap.get(file.getName());
+            if (tags == null) {
+                tags = Collections.emptySet();
+            }
             if (file.isFile() && file.canRead() && file.getName().endsWith(".tmpl") && (tags.containsAll(sieve))) {
                 if (tags.contains("default")) {
                     defaults.add(file.getName());
@@ -377,6 +388,24 @@ public class TemplateServiceImpl implements TemplateService {
         basicTemplateNames.addAll(userTemplates);
         return basicTemplateNames;
 	}
+
+    /**
+     * @see com.openexchange.templating.TemplateService#loadTemplate(java.lang.String, freemarker.template.TemplateExceptionHandler)
+     */
+    public OXTemplate loadTemplate(String templateName, TemplateExceptionHandler exceptionHandler) throws TemplateException {
+        this.exceptionHandler = exceptionHandler;
+        
+        return loadTemplate(templateName);
+    }
+
+    /**
+     * @see com.openexchange.templating.TemplateService#loadTemplate(java.lang.String, java.lang.String, com.openexchange.tools.session.ServerSession, freemarker.template.TemplateExceptionHandler)
+     */
+    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, TemplateExceptionHandler exceptionHandler) throws TemplateException {
+        this.exceptionHandler = exceptionHandler;
+        
+        return loadTemplate(templateName, defaultTemplateName, session);
+    }
 	
 
 }

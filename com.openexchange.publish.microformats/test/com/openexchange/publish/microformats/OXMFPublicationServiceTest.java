@@ -63,6 +63,7 @@ import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
+import freemarker.template.TemplateExceptionHandler;
 import junit.framework.TestCase;
 
 /**
@@ -300,6 +301,14 @@ public class OXMFPublicationServiceTest extends TestCase {
 
         public List<String> getTemplateNames(ServerSession session, String...filter) throws TemplateException {
             return new ArrayList<String>(0);
+        }
+
+        public OXTemplate loadTemplate(String templateName, TemplateExceptionHandler exceptionHandler) throws TemplateException {
+            return null;
+        }
+
+        public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, TemplateExceptionHandler exceptionHandler) throws TemplateException {
+            return null;
         }
     }
 }
