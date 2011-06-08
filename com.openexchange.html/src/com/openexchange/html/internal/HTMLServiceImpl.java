@@ -1010,8 +1010,6 @@ public final class HTMLServiceImpl implements HTMLService {
 
     static {
         final CleanerProperties props = new CleanerProperties();
-        props.setTranslateSpecialEntities(false);
-        props.setRecognizeUnicodeChars(false);
         props.setOmitDoctypeDeclaration(false);
         props.setOmitXmlDeclaration(true);
         props.setPruneTags("script");
