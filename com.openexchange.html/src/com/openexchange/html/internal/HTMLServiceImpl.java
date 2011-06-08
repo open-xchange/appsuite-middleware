@@ -982,9 +982,18 @@ public final class HTMLServiceImpl implements HTMLService {
         /*
          * Run tidy, providing a reader and writer
          */
-        final Writer writer = new UnsynchronizedStringWriter(htmlContent.length());
-        tidy.parse(new UnsynchronizedStringReader(htmlContent), writer);
-        final String validatedHtml = writer.toString();
+        String validatedHtml;
+        try {
+            final Writer writer = new UnsynchronizedStringWriter(htmlContent.length());
+            tidy.parse(new UnsynchronizedStringReader(htmlContent), writer);
+            validatedHtml = writer.toString();
+        } catch (final RuntimeException rte) {
+            /*
+             * Tidy failed horribly...
+             */
+            LOG.warn("JTidy library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
+            validatedHtml = null;
+        }
         /*
          * Check Tidy output
          */
@@ -996,15 +1005,21 @@ public final class HTMLServiceImpl implements HTMLService {
                 final TagNode node = HTML_CLEANER.clean(new UnsynchronizedStringReader(htmlContent));
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
                 XML_SERIALIZER.writeToStream(node, out, "UTF-8");
-                return new String(out.toByteArray(), "UTF-8");
+                validatedHtml = new String(out.toByteArray(), "UTF-8");
             } catch (final UnsupportedEncodingException e) {
                 // Cannot occur
                 LOG.error("Unsupported encoding: " + e.getMessage(), e);
-                return "";
+                validatedHtml = "";
             } catch (final IOException e) {
                 // Cannot occur
                 LOG.error("I/O error: " + e.getMessage(), e);
-                return "";
+                validatedHtml = "";
+            } catch (final RuntimeException rte) {
+                /*
+                 * HtmlCleaner failed horribly...
+                 */
+                LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
+                validatedHtml = "";
             }
         }
         return validatedHtml;
