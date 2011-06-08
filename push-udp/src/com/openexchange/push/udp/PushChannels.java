@@ -98,7 +98,7 @@ public class PushChannels {
                     externalChannel = new DatagramSocket(serverRegisterPort);
                 }
                 
-                if (!isSameInterface(senderAddress, internalSenderAddress)) {
+                if (internalSenderAddress != null && (senderAddress == null || !isSameInterface(senderAddress, internalSenderAddress))) {
                     internalChannel = new DatagramSocket(serverRegisterPort, internalSenderAddress);
                 }
                 
