@@ -1,3 +1,7 @@
+* 2011-06-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #19455: Introduced command-line parameter to switch off portal (--access-denied-portal)
+
 * 2011-06-03 - marcus.klein@open-xchange.com
 
  - Added Czech and Hungarian translations for default mail folders.
