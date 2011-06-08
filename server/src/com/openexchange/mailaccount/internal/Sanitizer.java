@@ -71,7 +71,7 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Sanitizer {
+final class Sanitizer {
 
     /**
      * Initializes a new {@link Sanitizer}.
@@ -88,7 +88,7 @@ public final class Sanitizer {
      * @param storageService The storage service
      * @throws MailAccountException If sanitizing fails
      */
-    public static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService) throws MailAccountException {
+    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService) throws MailAccountException {
         sanitize(user, contextId, storageService, URIDefaults.IMAP, "imap://localhost:143");
     }
 
@@ -100,7 +100,7 @@ public final class Sanitizer {
      * @param storageService The storage service
      * @throws MailAccountException If sanitizing fails
      */
-    public static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService, final URIDefaults defaults, final String fallbackUri) throws MailAccountException {
+    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService, final URIDefaults defaults, final String fallbackUri) throws MailAccountException {
         final Connection con;
         try {
             con = Database.get(contextId, true);
