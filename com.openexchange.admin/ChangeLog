@@ -1,6 +1,7 @@
 * 2011-06-09 - thorben.betten@open-xchange.com
 
  - Bugfix #18481: Introduced config parameter to signal whether POP3 bundle is enabled or not
+ - Bugfix #19438: Properly cleaning system-wide known folders from virtual tree tables
 
 * 2011-06-08 - thorben.betten@open-xchange.com
 
