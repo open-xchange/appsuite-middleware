@@ -137,6 +137,62 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class);
 
+    private static interface ConnectionProvider {
+
+        Connection getConnection();
+
+        void close();
+    }
+
+    private static final class NonClosingConnectionProvider implements ConnectionProvider {
+
+        private final Connection connection;
+
+        protected NonClosingConnectionProvider(final Connection connection) {
+            super();
+            this.connection = connection;
+        }
+
+        public Connection getConnection() {
+            return connection;
+        }
+
+        public void close() {
+            // Nothing to do
+        }
+    }
+
+    private static final class ClosingConnectionProvider implements ConnectionProvider {
+
+        private final DatabaseService databaseService;
+
+        private final Connection connection;
+
+        private final boolean writeable;
+
+        private final int contextId;
+
+        protected ClosingConnectionProvider(final Connection connection, final boolean writeable, final DatabaseService databaseService, final int contextId) {
+            super();
+            this.connection = connection;
+            this.databaseService = databaseService;
+            this.writeable = writeable;
+            this.contextId = contextId;
+        }
+
+        public Connection getConnection() {
+            return connection;
+        }
+
+        public void close() {
+            if (writeable) {
+                databaseService.backWritable(contextId, connection);
+            } else {
+                databaseService.backReadOnly(contextId, connection);
+            }
+        }
+    }
+
     /**
      * Initializes a new {@link DatabaseFolderStorage}.
      */
@@ -145,8 +201,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final ServerSession session;
             {
                 final Session s = storageParameters.getSession();
@@ -189,6 +246,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final ContextException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
@@ -206,8 +265,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final Connection con;
         final Boolean writable;
         try {
-            con = getConnection(params);
-            writable = getParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
+            con = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
+            writable = optParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
         } catch (final FolderException e) {
             /*
              * Already committed
@@ -215,6 +274,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Storage already committed:\n" + params.getCommittedTrace(), e);
             }
+            return;
+        }
+        if (null == con) {
             return;
         }
         try {
@@ -239,8 +301,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public void restore(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -260,12 +323,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
         }
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -338,6 +404,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             folder.setID(String.valueOf(fuid));
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
@@ -368,8 +436,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final FolderObject fo = getFolderObject(Integer.parseInt(folderId), storageParameters.getContext(), con);
             final Session session = storageParameters.getSession();
             if (null == session) {
@@ -381,12 +450,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
     public void deleteFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final FolderObject fo = new FolderObject();
             final int folderId = Integer.parseInt(folderIdentifier);
             fo.setObjectID(folderId);
@@ -411,17 +483,20 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
-        final Context context = storageParameters.getContext();
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
+            final Context context = storageParameters.getContext();
             final int folderId;
             if (TaskContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.TASK, con, context);
@@ -439,6 +514,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
         }
     }
 
@@ -472,8 +549,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
             /*
              * A numeric folder identifier
@@ -518,12 +596,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
     public boolean isEmpty(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
             /*
              * A numeric folder identifier
@@ -568,12 +649,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
     public void updateLastModified(final long lastModified, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
             final int folderId = getUnsignedInteger(folderIdentifier);
             if (getFolderAccess(storageParameters).getFolderLastModified(folderId).after(new Date(lastModified))) {
@@ -586,6 +670,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
@@ -593,14 +679,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return getFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
     }
 
-    private static final int[] VIRTUAL_IDS =
-        {
-            FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-            FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+    private static final int[] VIRTUAL_IDS = {
+        FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+        FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -665,6 +751,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw e;
         } catch (final AbstractOXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
@@ -673,8 +761,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -691,7 +780,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             if (StorageType.WORKING.equals(storageType)) {
                 final int size = folderIdentifiers.size();
-                final Folder[] ret = new Folder[size]; 
+                final Folder[] ret = new Folder[size];
                 final TIntIntHashMap map = new TIntIntHashMap(size);
                 /*
                  * Check for special folder identifier
@@ -743,7 +832,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     if (null != folder) {
                         l.add(folder);
                     } else {
-                        storageParameters.addWarning(FolderExceptionErrorMessage.NOT_FOUND.create(Integer.valueOf(folderIdentifiers.get(i)), treeId));
+                        storageParameters.addWarning(FolderExceptionErrorMessage.NOT_FOUND.create(
+                            Integer.valueOf(folderIdentifiers.get(i)),
+                            treeId));
                     }
                 }
                 return l;
@@ -755,7 +846,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             for (final String folderIdentifier : folderIdentifiers) {
                 list.add(getUnsignedInteger(folderIdentifier));
             }
-            final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toNativeArray(), ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            final List<FolderObject> folders =
+                OXFolderBatchLoader.loadFolderObjectsFromDB(
+                    list.toNativeArray(),
+                    ctx,
+                    con,
+                    true,
+                    false,
+                    "del_oxfolder_tree",
+                    "del_oxfolder_permissions");
             final int size = folders.size();
             final List<Folder> ret = new ArrayList<Folder>(size);
             for (int i = 0; i < size; i++) {
@@ -773,6 +872,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw e;
         } catch (final AbstractOXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
@@ -781,8 +882,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
@@ -805,7 +907,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     userConfiguration.getAccessibleModules(),
                     iType,
                     new int[] { iModule },
-                    ctx, con)).asList();
+                    ctx,
+                    con)).asList();
             if (FolderObject.PRIVATE == iType) {
                 /*
                  * Remove shared ones manually
@@ -815,7 +918,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         iterator.remove();
                     }
                 }
-            } else if (FolderObject.PUBLIC == iType && FolderObject.CONTACT == iModule ) {
+            } else if (FolderObject.PUBLIC == iType && FolderObject.CONTACT == iModule) {
                 try {
                     /*
                      * Add global address book manually
@@ -886,12 +989,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final SearchIteratorException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
                 final User user = storageParameters.getUser();
@@ -905,7 +1011,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final List<FolderIdNamePair> subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
+                final List<FolderIdNamePair> subfolderIds =
+                    SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
                 for (final FolderIdNamePair props : subfolderIds) {
@@ -941,7 +1048,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final List<String[]> subfolderIds = VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userConfiguration, ctx, con);
+                final List<String[]> subfolderIds =
+                    VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userConfiguration, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1041,7 +1149,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, con);
+                final List<String[]> subfolderIds =
+                    SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1107,6 +1216,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final ContextException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
@@ -1114,10 +1225,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final Connection con;
         final Boolean writable;
         try {
-            con = getConnection(params);
-            writable = getParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
+            con = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
+            writable = optParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
         } catch (final FolderException e) {
             LOG.error(e.getMessage(), e);
+            return;
+        }
+        if (null == con) {
             return;
         }
         try {
@@ -1172,8 +1286,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -1264,6 +1379,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             folderManager.updateFolder(updateMe, true, millis.getTime());
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     }
 
@@ -1276,8 +1393,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -1363,12 +1481,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
         }
     } // End of containsFolder()
 
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
 
             final Queue<FolderObject> q =
@@ -1388,12 +1509,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
     } // End of getModifiedFolderIDs()
 
     public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
-            final Connection con = getConnection(storageParameters);
+            final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -1426,6 +1550,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
+        } finally {
+            provider.close();
         }
 
     } // End of getDeletedFolderIDs()
@@ -1484,27 +1610,60 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters) throws FolderException {
-        OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
+        OXFolderAccess ret =
+            (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
         if (null == ret) {
-            final Connection con = getConnection(storageParameters);
-            do {
-                ret = new OXFolderAccess(con, storageParameters.getContext());
-                if (!storageParameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS, ret)) {
-                    ret = (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
-                }
-            } while (null == ret);
+            final ConnectionProvider provider = getConnection(false, storageParameters);
+            try {
+                final Connection con = provider.getConnection();
+                do {
+                    ret = new OXFolderAccess(con, storageParameters.getContext());
+                    if (!storageParameters.putParameterIfAbsent(
+                        DatabaseFolderType.getInstance(),
+                        DatabaseParameterConstants.PARAM_ACCESS,
+                        ret)) {
+                        ret =
+                            (OXFolderAccess) storageParameters.getParameter(
+                                DatabaseFolderType.getInstance(),
+                                DatabaseParameterConstants.PARAM_ACCESS);
+                    }
+                } while (null == ret);
+            } finally {
+                provider.close();
+            }
         }
         return ret;
     }
 
-    private static Connection getConnection(final StorageParameters storageParameters) throws FolderException {
-        return getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+    private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws FolderException {
+        final Connection connection = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+        if (null != connection) {
+            return new NonClosingConnectionProvider(connection);
+        }
+        try {
+            final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+            final Context context = storageParameters.getContext();
+            final Connection con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
+            return new ClosingConnectionProvider(con, modify, databaseService, context.getContextId());
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
     }
 
     private static <T> T getParameter(final Class<T> clazz, final String name, final StorageParameters parameters) throws FolderException {
+        final T parameter = optParameter(clazz, name, parameters);
+        if (null == parameter) {
+            throw new FolderException(new OXFolderException(OXFolderException.FolderCode.MISSING_PARAMETER, name));
+        }
+        return parameter;
+    }
+
+    private static <T> T optParameter(final Class<T> clazz, final String name, final StorageParameters parameters) throws FolderException {
         final Object obj = parameters.getParameter(DatabaseFolderType.getInstance(), name);
         if (null == obj) {
-            throw new FolderException(new OXFolderException(OXFolderException.FolderCode.MISSING_PARAMETER, name));
+            return null;
         }
         try {
             return clazz.cast(obj);
@@ -1576,7 +1735,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         final int owner1 = o1.getCreatedBy();
                         final int owner2 = o2.getCreatedBy();
                         if (owner1 > 0 && owner2 > 0) {
-                            return collator.compare(UserStorage.getStorageUser(owner1, context).getDisplayName(), UserStorage.getStorageUser(owner2, context).getDisplayName());
+                            return collator.compare(
+                                UserStorage.getStorageUser(owner1, context).getDisplayName(),
+                                UserStorage.getStorageUser(owner2, context).getDisplayName());
                         }
                     }
                     return compareById(o1.getObjectID(), o2.getObjectID());
@@ -1621,7 +1782,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final int owner1 = o1.getCreatedBy();
                 final int owner2 = o2.getCreatedBy();
                 if (owner1 > 0 && owner2 > 0) {
-                    return collator.compare(UserStorage.getStorageUser(owner1, context).getDisplayName(), UserStorage.getStorageUser(owner2, context).getDisplayName());
+                    return collator.compare(
+                        UserStorage.getStorageUser(owner1, context).getDisplayName(),
+                        UserStorage.getStorageUser(owner2, context).getDisplayName());
                 }
             }
             return collator.compare(folderName1, folderName2);
