@@ -39,6 +39,7 @@
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
+	<property name="cascadejar" value="com.openexchange.config.cascade.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
 	<property name="activationjar" value="activation-1.1.1.jar"/>
 	<property name="trovejar" value="trove-2.1.0.jar"/>
@@ -56,6 +57,7 @@
         <pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${configreadBundle}/${configjar}"/>
+    	<pathelement location="${bundlesdir}/${cascadejar}"/>
         <pathelement location="${bundlesdir}/${monitoringjar}"/>
         <pathelement location="${bundlesdir}/${cachingBundle}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
