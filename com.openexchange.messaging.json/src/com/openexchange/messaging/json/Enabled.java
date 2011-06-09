@@ -72,7 +72,7 @@ public class Enabled implements PreferencesItemService {
 
     private static final String ENABLED = "com.openexchange.messaging.enabled";
     
-    private final ConfigViewFactory configViews;
+    final ConfigViewFactory configViews;
 
     public Enabled(final ConfigViewFactory configViews) {
         this.configViews = configViews;
