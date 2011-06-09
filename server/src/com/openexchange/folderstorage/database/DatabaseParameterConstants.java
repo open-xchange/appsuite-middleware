@@ -66,16 +66,16 @@ public final class DatabaseParameterConstants {
     /**
      * The parameter name for connection.
      */
-    public static final String PARAM_CONNECTION = "c~.o~.r~.Con";
+    public static final String PARAM_CONNECTION = "DB.Con";
 
     /**
      * The parameter name for writable connection.
      */
-    public static final String PARAM_WRITABLE = "c~.o~.r~.Write";
+    public static final String PARAM_WRITABLE = "DB.Write";
 
     /**
      * The parameter name for folder access instance.
      */
-    public static final String PARAM_ACCESS = "c~.o~.r~.Access";
+    public static final String PARAM_ACCESS = "DB.Access";
 
 }

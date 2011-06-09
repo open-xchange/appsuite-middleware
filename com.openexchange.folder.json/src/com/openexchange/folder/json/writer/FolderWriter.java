@@ -76,7 +76,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class FolderWriter {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderWriter.class);
+    /**
+     * The logger constant.
+     */
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderWriter.class);
 
     /**
      * Initializes a new {@link FolderWriter}.
@@ -232,7 +235,12 @@ public final class FolderWriter {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String[] obj = folder.getSubfolderIDs();
-                jsonPutter.put(FolderField.SUBFOLDERS.getName(), null == obj ? JSONObject.NULL : Boolean.valueOf(obj.length > 0));
+                if (null == obj) {
+                    LOG.warn("Got null as subfolders for folder " + folder.getID() + ". Marking this folder to hold subfolders...");
+                    jsonPutter.put(FolderField.SUBFOLDERS.getName(), Boolean.TRUE);
+                } else {
+                    jsonPutter.put(FolderField.SUBFOLDERS.getName(), Boolean.valueOf(obj.length > 0));
+                }
             }
         });
         m.put(FolderField.OWN_RIGHTS.getColumn(), new FolderFieldWriter() {
