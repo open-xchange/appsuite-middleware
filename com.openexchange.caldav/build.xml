@@ -48,7 +48,7 @@
     	<pathelement location="${bundlesdir}/${calendarjar}"/>
     	<pathelement location="${bundlesdir}/${cascadejar}"/>
     	<pathelement location="${bundlesdir}/${webdavacljar}"/>
-    	<pathelement location="${bundlesdir}/${xmlBundle}/${jdomjar}"/>
+    	<pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
     			
     	
     </path>
