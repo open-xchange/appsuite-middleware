@@ -1647,15 +1647,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws FolderException {
-        final Connection connection = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+        Connection connection = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
         if (null != connection) {
             return new NonClosingConnectionProvider(connection);
         }
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
             final Context context = storageParameters.getContext();
-            final Connection con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
-            return new ClosingConnectionProvider(con, modify, databaseService, context.getContextId());
+            connection = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
+            return new ClosingConnectionProvider(connection, modify, databaseService, context.getContextId());
         } catch (final ServiceException e) {
             throw new FolderException(e);
         } catch (final DBPoolingException e) {

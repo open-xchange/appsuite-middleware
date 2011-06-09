@@ -59,6 +59,8 @@ import com.openexchange.folderstorage.FolderType;
  */
 public final class DatabaseFolderType implements FolderType {
 
+    private static final String STRING = "DB";
+
     private static final DatabaseFolderType instance = new DatabaseFolderType();
 
     /**
@@ -87,6 +89,11 @@ public final class DatabaseFolderType implements FolderType {
 
     public boolean servesParentId(final String parentId) {
         return servesFolderId(parentId);
+    }
+
+    @Override
+    public String toString() {
+        return STRING;
     }
 
 }
