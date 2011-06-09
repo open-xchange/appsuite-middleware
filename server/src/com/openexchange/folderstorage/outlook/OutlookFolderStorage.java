@@ -1004,24 +1004,38 @@ public final class OutlookFolderStorage implements FolderStorage {
                     }
                 } else {
                     if (realFolder.isDefault() || FolderStorage.PUBLIC_ID.equals(realFolder.getID())) {
-                        /*
-                         * Remove the ones kept in virtual table
-                         */
                         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(storageParameters.getSession());
                         final MemoryTree memoryTree = memoryTable.getTree(tree, userId, contextId);
-                        final boolean[] contained = memoryTree.containsFolders(realSubfolderIDs);
-                        boolean found = false;
-                        for (int i = 0; !found && i < realSubfolderIDs.length; i++) {
-                            if (!contained[i]) {
-                                found = true;
-                            }
-                        }
-                        if (found) {
+                        if (memoryTree.containsParent(folderId)) {
+                            /*
+                             * There's a virtual child
+                             */
                             outlookFolder.setSubfolderIDs(null);
                             outlookFolder.setSubscribedSubfolders(true);
                         } else {
-                            outlookFolder.setSubfolderIDs(new String[0]);
-                            outlookFolder.setSubscribedSubfolders(false);
+                            /*
+                             * Filter children kept in virtual table
+                             */
+                            final boolean[] contained = memoryTree.containsFolders(realSubfolderIDs);
+                            final List<String> filtered = new ArrayList<String>(realSubfolderIDs.length);
+                            for (int i = 0; i < realSubfolderIDs.length; i++) {
+                                if (!contained[i]) {
+                                    filtered.add(realSubfolderIDs[i]);
+                                }
+                            }
+                            /*-
+                             * TODO: If sorting needed:
+                             * 
+                             * outlookFolder.setSubfolderIDs(null);
+                             * outlookFolder.setSubscribedSubfolders(true);
+                             */
+                            if (!filtered.isEmpty()) {
+                                outlookFolder.setSubfolderIDs(filtered.toArray(new String[filtered.size()]));
+                                outlookFolder.setSubscribedSubfolders(true);
+                            } else {
+                                outlookFolder.setSubfolderIDs(new String[0]);
+                                outlookFolder.setSubscribedSubfolders(false);
+                            }
                         }
                     } else {
                         /*
