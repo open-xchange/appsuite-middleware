@@ -40,6 +40,7 @@
     	<pathelement location="${bundlesdir}/${osgiservicejar}"/>
     	<pathelement location="${bundlesdir}/${servletjar}" />
     	
+    	<pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${serverjar}"/>
     	<pathelement location="${bundlesdir}/${xmlBundle}/${jdomjar}"/>
     			
