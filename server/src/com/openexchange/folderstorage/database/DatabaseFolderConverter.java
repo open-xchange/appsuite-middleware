@@ -213,7 +213,10 @@ public final class DatabaseFolderConverter {
             } else {
                 retval = new DatabaseFolder(fo);
             }
-            if (PrivateType.getInstance().equals(retval.getType()) && user.getId() != retval.getCreatedBy()) {
+            final int userId = user.getId();
+            final int[] groups = user.getGroups();
+            final int[] modules = userConfiguration.getAccessibleModules();
+            if (PrivateType.getInstance().equals(retval.getType()) && userId != retval.getCreatedBy()) {
                 /*
                  * A shared folder
                  */
@@ -223,7 +226,7 @@ public final class DatabaseFolderConverter {
                 /*
                  * Determine user-visible subfolders
                  */
-                final TIntArrayList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, con);
+                final TIntArrayList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, con);
                 if (visibleSubfolders.isEmpty()) {
                     retval.setSubfolderIDs(new String[0]);
                     retval.setSubscribedSubfolders(false);
@@ -239,13 +242,16 @@ public final class DatabaseFolderConverter {
                  * Determine parent
                  */
                 final int parent = fo.getParentFolderID();
-                if (OXFolderIteratorSQL.isVisibleFolder(parent, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, con)) {
+                if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parent || !OXFolderIteratorSQL.isVisibleFolder(parent, userId, groups, modules, ctx, con)) {
+                    /*
+                     * Either located below private folder or parent not visible
+                     */
+                    retval.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
+                } else {
                     /*
                      * Parent is visible
                      */
                     retval.setParentID(String.valueOf(parent));
-                } else {
-                    retval.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
                 }
             } else {
                 /*
@@ -255,7 +261,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * User-sensitive loading of user infostore folder
                      */
-                    final TIntArrayList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, null);
+                    final TIntArrayList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, null);
                     if (subfolders.isEmpty()) {
                         retval.setSubfolderIDs(new String[0]);
                         retval.setSubscribedSubfolders(false);
