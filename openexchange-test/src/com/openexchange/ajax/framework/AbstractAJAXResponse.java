@@ -51,9 +51,7 @@ package com.openexchange.ajax.framework;
 
 import java.util.Date;
 import java.util.List;
-
 import junit.framework.Assert;
-
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
@@ -115,6 +113,15 @@ public abstract class AbstractAJAXResponse extends Assert {
         return response.hasError();
     }
 
+    /**
+     * Gets the formatted error message.
+     * 
+     * @return The formatted error message or <code>null</code> if no error present
+     */
+    public String getErrorMessage() {
+        return response.getFormattedErrorMessage();
+    }
+
     public AbstractOXException getException() {
         return response.getException();
     }
@@ -127,7 +134,7 @@ public abstract class AbstractAJAXResponse extends Assert {
         return conflicts;
     }
 
-    public void setConflicts(List <ConflictObject> conflicts) {
+    public void setConflicts(final List <ConflictObject> conflicts) {
         this.conflicts = conflicts;
     }
 
