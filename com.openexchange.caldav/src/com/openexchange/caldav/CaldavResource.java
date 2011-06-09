@@ -441,6 +441,9 @@ public class CaldavResource extends AbstractResource {
     }
 
     public String getETag() throws WebdavProtocolException {
+        if (!exists) {
+            return "";
+        }
         return "http://www.open-xchange.com/caldav/etags/" + appointment.getObjectID() + "-" + appointment.getLastModified().getTime();
     }
 

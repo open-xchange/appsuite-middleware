@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.caldav.GroupwareCaldavFactory.State;
+import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
+import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
@@ -89,7 +91,9 @@ public class CaldavCollection extends AbstractCollection {
         url = parent.getUrl().dup().append(folder.getName());
 
         includeProperties(
-            new CurrentUserPrivilegeSet(folder.getOwnPermission())
+            new CurrentUserPrivilegeSet(folder.getOwnPermission()),
+            new SupportedReportSet(),
+            new SupportedCalendarComponentSet()
         );
         
 
