@@ -76,6 +76,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -102,7 +103,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, MailAccountStorageService.class, ThreadPoolService.class, MessagingServiceRegistry.class,
-            UnifiedINBOXManagement.class, ConfigurationService.class, FileStorageServiceRegistry.class };
+            UnifiedINBOXManagement.class, ConfigurationService.class, FileStorageServiceRegistry.class, SessiondService.class };
     }
 
     @Override
