@@ -88,6 +88,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
@@ -1817,24 +1818,37 @@ final class OXFolderManagerImpl extends OXFolderManager {
     }
 
     private void deleteContainedDocuments(final int folderID) throws OXException {
-        final InfostoreFacade db;
+        final InfostoreFacade infostoreFacade;
         if (writeCon == null) {
-            db = new InfostoreFacadeImpl(new DBPoolProvider());
+            infostoreFacade = new InfostoreFacadeImpl(new DBPoolProvider());
         } else {
-            db = new InfostoreFacadeImpl(new StaticDBPoolProvider(writeCon));
-            db.setCommitsTransaction(false);
+            infostoreFacade = new InfostoreFacadeImpl(new StaticDBPoolProvider(writeCon));
+            infostoreFacade.setCommitsTransaction(false);
         }
-        db.setTransactional(true);
+        infostoreFacade.setTransactional(true);
         try {
-            db.startTransaction();
+            infostoreFacade.startTransaction();
             try {
-                db.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(session, ctx));
-                db.commit();
-            } catch (final OXException x) {
-                db.rollback();
+                infostoreFacade.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(session, ctx));
+                infostoreFacade.commit();
+            } catch (final InfostoreException x) {
+                infostoreFacade.rollback();
+                if (InfostoreExceptionCodes.ALREADY_LOCKED.getDetailNumber() == x.getDetailNumber()) {
+                    throw new OXFolderException(
+                        FolderCode.DELETE_FAILED_LOCKED_DOCUMENTS,
+                        x,
+                        OXFolderUtility.getFolderName(folderID, ctx),
+                        Integer.valueOf(ctx.getContextId()));
+                }
                 throw x;
+            } catch (final OXException x) {
+                infostoreFacade.rollback();
+                throw x;
+            } catch (final RuntimeException x) {
+                infostoreFacade.rollback();
+                throw new OXFolderException(FolderCode.RUNTIME_ERROR, x, Integer.valueOf(ctx.getContextId()));
             } finally {
-                db.finish();
+                infostoreFacade.finish();
             }
         } catch (final TransactionException e) {
             throw new InfostoreException(e);

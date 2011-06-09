@@ -524,7 +524,7 @@ public class OXFolderException extends OXException {
         /**
          * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
          */
-        DELETE_FAILED_LOCKED_DOCUMENTS("Delete cannot be performed because of locked documents in folder %1$s in context %2$s.", Category.PERMISSION, 87),
+        DELETE_FAILED_LOCKED_DOCUMENTS("Delete cannot be performed because of locked documents in folder %1$s in context %2$s.", Category.PERMISSION, 88),
         
         ;
 
