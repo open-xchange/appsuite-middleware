@@ -387,6 +387,9 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 List<Appointment> children = new LinkedList<Appointment>();
                 while (iterator.hasNext()) {
                     Appointment appointment = iterator.next();
+                    if (appointment.getUid() == null) {
+                        continue; // skip
+                    }
                     if (appointment.isException()) {
                         List<Appointment> list = changeExceptionCache.get(appointment.getUid());
                         if (list == null) {
