@@ -222,6 +222,7 @@ public final class DatabaseFolderConverter {
                  */
                 retval.setType(SharedType.getInstance());
                 retval.setGlobal(false); // user-sensitive!
+                retval.setCacheable(false); // Not cacheable
                 retval.setDefault(false);
                 /*
                  * Determine user-visible subfolders
