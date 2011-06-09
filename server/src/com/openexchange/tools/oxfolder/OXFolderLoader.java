@@ -51,6 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -106,7 +107,7 @@ public final class OXFolderLoader {
      * @return The loaded folder object from database
      * @throws OXException If folder cannot be loaded
      */
-    public static final FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList) throws OXException {
+    public static FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList) throws OXException {
         return loadFolderObjectFromDB(folderId, ctx, readConArg, loadPermissions, loadSubfolderList, TABLE_OT, TABLE_OP);
     }
 
@@ -126,7 +127,7 @@ public final class OXFolderLoader {
      * @return The loaded folder object from database
      * @throws OXException If folder cannot be loaded
      */
-    public static final FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
+    public static FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
         try {
             Connection readCon = readConArg;
             boolean closeCon = false;
@@ -195,7 +196,7 @@ public final class OXFolderLoader {
      * @throws SQLException If a SQL error occurs
      * @throws DBPoolingException If a pooling error occurs
      */
-    public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
         return getFolderPermissions(folderId, ctx, readConArg, TABLE_OP);
     }
 
@@ -213,7 +214,7 @@ public final class OXFolderLoader {
      * @throws SQLException If a SQL error occurs
      * @throws DBPoolingException If a pooling error occurs
      */
-    public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -259,7 +260,7 @@ public final class OXFolderLoader {
      * @throws SQLException If a SQL error occurs
      * @throws DBPoolingException If a pooling error occurs
      */
-    public static final List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
         return getSubfolderIdAndNames(folderId, ctx, readConArg, TABLE_OT);
     }
 
@@ -276,7 +277,7 @@ public final class OXFolderLoader {
      * @throws SQLException If a SQL error occurs
      * @throws DBPoolingException If a pooling error occurs
      */
-    public static final List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -310,7 +311,7 @@ public final class OXFolderLoader {
      * @throws SQLException If a SQL error occurs
      * @throws DBPoolingException If a pooling error occurs
      */
-    public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
         return getSubfolderIds(folderId, ctx, readConArg, TABLE_OT);
     }
 
@@ -327,7 +328,7 @@ public final class OXFolderLoader {
      * @throws SQLException If a SQL error occurs
      * @throws DBPoolingException If a pooling error occurs
      */
-    public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -344,6 +345,55 @@ public final class OXFolderLoader {
             final ArrayList<Integer> retval = new ArrayList<Integer>();
             while (rs.next()) {
                 retval.add(Integer.valueOf(rs.getInt(1)));
+            }
+            return retval;
+        } finally {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+        }
+    }
+
+    /**
+     * Gets the subfolder IDs of specified folder.
+     * 
+     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param ctx The context
+     * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
+     * @return The subfolder IDs of specified folder
+     * @throws SQLException If a SQL error occurs
+     * @throws DBPoolingException If a pooling error occurs
+     */
+    public static TIntArrayList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+        return getSubfolderInts(folderId, ctx, readConArg, TABLE_OT);
+    }
+
+    /**
+     * Gets the subfolder IDs of specified folder.
+     * 
+     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param ctx The context
+     * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
+     * @param table The folder's working or backup table name
+     * @return The subfolder IDs of specified folder
+     * @throws SQLException If a SQL error occurs
+     * @throws DBPoolingException If a pooling error occurs
+     */
+    public static TIntArrayList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+        Connection readCon = readConArg;
+        boolean closeCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (readCon == null) {
+                readCon = DBPool.pickup(ctx);
+                closeCon = true;
+            }
+            stmt = readCon.prepareStatement(SQL_SEL.replaceFirst("#TABLE#", table));
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            rs = stmt.executeQuery();
+            final TIntArrayList retval = new TIntArrayList();
+            while (rs.next()) {
+                retval.add(rs.getInt(1));
             }
             return retval;
         } finally {
@@ -373,7 +423,7 @@ public final class OXFolderLoader {
 
         private final int hash;
 
-        IdAndName(int fuid, String fname) {
+        IdAndName(final int fuid, final String fname) {
             super();
             this.fuid = fuid;
             this.fname = fname;
@@ -408,7 +458,7 @@ public final class OXFolderLoader {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -418,7 +468,7 @@ public final class OXFolderLoader {
             if (!(obj instanceof IdAndName)) {
                 return false;
             }
-            IdAndName other = (IdAndName) obj;
+            final IdAndName other = (IdAndName) obj;
             if (fname == null) {
                 if (other.fname != null) {
                     return false;
