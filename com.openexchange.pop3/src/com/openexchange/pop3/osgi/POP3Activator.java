@@ -59,9 +59,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.pop3.Enabled;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
@@ -82,13 +85,13 @@ public final class POP3Activator extends DeferredActivator {
 
     private final Dictionary<String, String> dictionary;
 
-    private ServiceRegistration pop3ServiceRegistration;
-
     private List<ServiceTracker> trackers;
 
     private POP3StorageProviderServiceTrackerCustomizer customizer;
 
     private MailAccountPOP3StorageProvider builtInProvider;
+
+    private List<ServiceRegistration> registrations;
 
     /**
      * Initializes a new {@link POP3Activator}
@@ -102,7 +105,7 @@ public final class POP3Activator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class, TimerService.class };
+            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class, TimerService.class, ConfigViewFactory.class  };
     }
 
     @Override
@@ -141,7 +144,8 @@ public final class POP3Activator extends DeferredActivator {
                     }
                 }
             }
-            pop3ServiceRegistration = context.registerService(MailProvider.class.getName(), POP3Provider.getInstance(), dictionary);
+            registrations = new ArrayList<ServiceRegistration>(2);
+            registrations.add(context.registerService(MailProvider.class.getName(), POP3Provider.getInstance(), dictionary));
             /*
              * Service tracker for possible POP3 storage provider
              */
@@ -157,6 +161,10 @@ public final class POP3Activator extends DeferredActivator {
              */
             builtInProvider = new MailAccountPOP3StorageProvider();
             customizer.addPOP3StorageProvider(builtInProvider);
+            /*
+             * Register
+             */
+            registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(getService(ConfigViewFactory.class)), null));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -184,9 +192,11 @@ public final class POP3Activator extends DeferredActivator {
             /*
              * Unregister service
              */
-            if (null != pop3ServiceRegistration) {
-                pop3ServiceRegistration.unregister();
-                pop3ServiceRegistration = null;
+            if (null != registrations) {
+                while (!registrations.isEmpty()) {
+                    registrations.remove(0).unregister();
+                }
+                registrations = null;
             }
             /*
              * Clear service registry
