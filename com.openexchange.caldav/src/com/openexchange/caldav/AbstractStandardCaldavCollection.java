@@ -58,6 +58,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -193,7 +194,9 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
             UserizedFolder[] response = visibleFolders.getResponse();
             List<WebdavResource> children = new ArrayList<WebdavResource>(response.length);
             for (UserizedFolder folder : response) {
-                children.add(new CaldavCollection(this, folder, factory));
+                if (folder.getOwnPermission().getReadPermission() > Permission.READ_OWN_OBJECTS) {
+                    children.add(new CaldavCollection(this, folder, factory));
+                }
             }
             return children;
         } catch (FolderException e) {

@@ -405,6 +405,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 folderCache.put(folderId, children);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
+                
             }
         }
 
@@ -433,7 +434,11 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
 
         public List<Appointment> getFolder(int id) {
             cacheFolder(id);
-            return folderCache.get(id);
+            List<Appointment> appointments = folderCache.get(id);
+            if (appointments == null) {
+                return Collections.emptyList();
+            }
+            return appointments;
         }
 
     }
