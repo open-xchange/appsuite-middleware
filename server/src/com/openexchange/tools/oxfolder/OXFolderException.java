@@ -521,6 +521,10 @@ public class OXFolderException extends OXException {
          * Failed to create folder. Please retry.
          */
         CREATE_FAILED("Failed to create folder. Please retry.", Category.TRY_AGAIN, 87),
+        /**
+         * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
+         */
+        DELETE_FAILED_LOCKED_DOCUMENTS("Delete cannot be performed because of locked documents in folder %1$s in context %2$s.", Category.PERMISSION, 87),
         
         ;
 
