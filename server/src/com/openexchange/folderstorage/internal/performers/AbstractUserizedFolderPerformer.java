@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
@@ -82,6 +81,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer {
+
+    private static final String DUMMY_ID = "dummyId";
 
     private final FolderServiceDecorator decorator;
 
@@ -306,9 +307,19 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 userizedFolder.setLastModifiedUTC(new Date(time));
             }
         }
-        if (!isShared) {
+        if (isShared) {
             /*
-             * Compute user-sensitive subfolders
+             * Subfolders already calculated for user
+             */
+            final String[] visibleSubfolders = folder.getSubfolderIDs();
+            if (null == visibleSubfolders) {
+                userizedFolder.setSubfolderIDs(nullIsPublicAccess ? new String[] { DUMMY_ID } : new String[0]);
+            } else {
+                userizedFolder.setSubfolderIDs(visibleSubfolders);
+            }
+        } else {
+            /*
+             * Compute user-visible subfolders
              */
             hasVisibleSubfolderIDs(folder, treeId, all, userizedFolder, nullIsPublicAccess, storageParameters, openedStorages);
         }
@@ -320,20 +331,20 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * Subfolders
          */
         final String[] subfolders = folder.getSubfolderIDs();
-        final java.util.List<String> visibleSubfolderIds = new ArrayList<String>(1);
+        String dummyId = null;
         if (null == subfolders) {
             if (nullIsPublicAccess) {
                 /*
                  * A null value hints to a special folder; e.g. a system folder which contains subfolder for all users
                  */
-                visibleSubfolderIds.add("dummyId");
+                dummyId = DUMMY_ID;
             } else {
                 /*
                  * Get appropriate storages and start transaction
                  */
                 final String folderId = folder.getID();
                 final FolderStorage[] ss = folderStorageDiscoverer.getFolderStoragesForParent(treeId, folderId);
-                for (int i = 0; visibleSubfolderIds.isEmpty() && i < ss.length; i++) {
+                for (int i = 0; (null == dummyId) && i < ss.length; i++) {
                     final FolderStorage curStorage = ss[i];
                     boolean alreadyOpened = false;
                     final Iterator<FolderStorage> it = openedStorages.iterator();
@@ -350,13 +361,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                         /*
                          * Found a storage which offers visible subfolder(s)
                          */
-                        for (int j = 0; visibleSubfolderIds.isEmpty() && j < visibleIds.length; j++) {
+                        for (int j = 0; (null == dummyId) && j < visibleIds.length; j++) {
                             final String id = visibleIds[0].getId();
                             final Folder subfolder = curStorage.getFolder(treeId, id, storageParameters);
                             if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
                                 final Permission p = CalculatePermission.calculate(subfolder, session, getAllowedContentTypes());
                                 if (p.isVisible()) {
-                                    visibleSubfolderIds.add(id);
+                                    dummyId = id;
                                 }
                             }
                         }
@@ -370,7 +381,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  * Check until a visible subfolder is found in case of a global folder
                  */
                 if (folder.isGlobalID()) {
-                    for (int i = 0; visibleSubfolderIds.isEmpty() && i < length; i++) {
+                    for (int i = 0; (null == dummyId) && i < length; i++) {
                         final String id = subfolders[i];
                         final FolderStorage tmp = getOpenedStorage(id, treeId, storageParameters, openedStorages);
                         /*
@@ -378,15 +389,15 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                          */
                         final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
                         if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) && CalculatePermission.isVisible(subfolder, getUser(), getContext(), getAllowedContentTypes())) {
-                            visibleSubfolderIds.add(id);
+                            dummyId = id;
                         }
                     }
                 } else if (all || folder.hasSubscribedSubfolders()) { // User-only folder
-                    visibleSubfolderIds.add("dummyId");
+                    dummyId = DUMMY_ID;
                 }
             }
         }
-        userizedFolder.setSubfolderIDs(visibleSubfolderIds.isEmpty() ? new String[0] : new String[] { visibleSubfolderIds.get(0) });
+        userizedFolder.setSubfolderIDs((null == dummyId) ? new String[0] : new String[] { dummyId });
     }
 
     private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
