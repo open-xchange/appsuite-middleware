@@ -767,6 +767,23 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Owner
+         */
+        final int owner = folder.getCreatedBy();
+        if (owner < 0) {
+            return folder;
+        }
+        /*
+         * Check shared...
+         */
+        if (owner == storageParameters.getUserId() || SharedType.getInstance().equals(folder.getType())) {
+            return folder;
+        }
+        return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
+    }
+
     public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageParameters storageParameters) throws FolderException {
         return getFolders(treeId, folderIdentifiers, StorageType.WORKING, storageParameters);
     }

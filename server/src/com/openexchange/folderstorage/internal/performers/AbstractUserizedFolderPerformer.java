@@ -229,32 +229,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @return The user-sensitive folder for given folder
      * @throws FolderException If a folder error occurs
      */
-    protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
-        final UserizedFolder userizedFolder = new UserizedFolderImpl(folder);
-        /*-
-         * 
-        if (folder.isGlobalID()) {
-            // Set default folder flag
-            final String id = folder.getID();
-            final FolderStorage folderStorage = getOpenedStorage(id, treeId, storageParameters, openedStorages);
-            final ContentType contentType = folder.getContentType();
-            if (id.equals(folderStorage.getDefaultFolderID(getUser(), treeId, contentType, storageParameters))) {
-                // Default folder of current user
-                userizedFolder.setDefault(true);
-                userizedFolder.setDefaultType(contentType.getModule());
-            } else {
-                // Not a default folder
-                userizedFolder.setDefault(false);
-                userizedFolder.setDefaultType(0);
-            }
-        }
-         */
-        userizedFolder.setLocale(getLocale());
-        /*
-         * Permissions
-         */
-        userizedFolder.setOwnPermission(ownPermission);
-        CalculatePermission.calculateUserPermissions(userizedFolder, getContext());
+    protected UserizedFolder getUserizedFolder(final Folder foldera, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+        Folder folder = foldera;
+        final UserizedFolder userizedFolder;
         /*
          * Type
          */
@@ -263,30 +240,46 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         {
             final Type type = folder.getType();
             if (SharedType.getInstance().equals(type)) {
-                // userizedFolder.setSubfolderIDs(new String[0]);
+                userizedFolder = new UserizedFolderImpl(folder);
+                userizedFolder.setDefault(false);
                 isShared = true;
             } else if ((createdBy >= 0) && (createdBy != getUserId()) && PrivateType.getInstance().equals(type)) {
+                /*
+                 * Prepare
+                 */
+                final FolderStorage curStorage = folderStorageDiscoverer.getFolderStorage(treeId, folder.getID());
+                boolean alreadyOpened = false;
+                final Iterator<FolderStorage> it = openedStorages.iterator();
+                for (int j = 0; !alreadyOpened && j < openedStorages.size(); j++) {
+                    if (it.next().equals(curStorage)) {
+                        alreadyOpened = true;
+                    }
+                }
+                if (!alreadyOpened && curStorage.startTransaction(storageParameters, false)) {
+                    openedStorages.add(curStorage);
+                }
+                folder = curStorage.prepareFolder(treeId, folder, storageParameters);
+                userizedFolder = new UserizedFolderImpl(folder);
+                userizedFolder.setDefault(false);
                 userizedFolder.setType(SharedType.getInstance());
-                // userizedFolder.setSubfolderIDs(new String[0]);
                 isShared = true;
             } else {
+                userizedFolder = new UserizedFolderImpl(folder);
                 isShared = false;
             }
         }
-        // Modify parent
-        if (isShared) {
-            // userizedFolder.setParentID(FolderObject.SHARED_PREFIX + createdBy);
-            userizedFolder.setDefault(false);
-            
-            // Remain tree if parent is viewable, too.
-            //final FolderStorage parentStorage = getOpenedStorage(treeId, folder.getParentID(), storageParameters, openedStorages);
-            //final Folder parent = parentStorage.getFolder(treeId, folder.getParentID(), storageParameters);
-            //final Permission permission = CalculatePermission.calculate(parent, session, getAllowedContentTypes());
-            //if (!permission.isVisible()) {
-            //   userizedFolder.setParentID(FolderObject.SHARED_PREFIX + userizedFolder.getCreatedBy());
-            //}
-            //userizedFolder.setDefault(false);
-        }
+        /*
+         * Set locale
+         */
+        userizedFolder.setLocale(getLocale());
+        /*
+         * Permissions
+         */
+        userizedFolder.setOwnPermission(ownPermission);
+        CalculatePermission.calculateUserPermissions(userizedFolder, getContext());
+        /*
+         * Check parent
+         */
         if (userizedFolder.getID().startsWith(FolderObject.SHARED_PREFIX)) {
             userizedFolder.setParentID(FolderStorage.SHARED_ID);
         }

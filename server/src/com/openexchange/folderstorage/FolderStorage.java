@@ -191,6 +191,17 @@ public interface FolderStorage {
     void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
+     * Prepares specified folder with user-sensitive informations if needed.
+     * 
+     * @param treeId The tree identifier
+     * @param folder The folder identifier
+     * @param storageParameters The storage parameters
+     * @return The prepared or unchanged folder
+     * @throws FolderException If preparation fails
+     */
+    Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters ) throws FolderException;
+
+    /**
      * Gets the folder denoted by specified folder ID.
      * 
      * @param treeId The tree identifier
