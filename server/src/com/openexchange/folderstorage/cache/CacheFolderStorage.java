@@ -125,9 +125,9 @@ public final class CacheFolderStorage implements FolderStorage {
 
     private final CacheFolderStorageRegistry registry;
 
-    private CacheService cacheService;
+    private volatile CacheService cacheService;
 
-    private Cache globalCache;
+    private volatile Cache globalCache;
 
     // private Cache userCache;
 
@@ -137,6 +137,20 @@ public final class CacheFolderStorage implements FolderStorage {
     public CacheFolderStorage() {
         super();
         registry = CacheFolderStorageRegistry.getInstance();
+    }
+
+    /**
+     * Clears this cache with respect to specified session.
+     * 
+     * @param session The session
+     * @throws FolderException If clear operation fails
+     */
+    public void clear(final Session session) throws FolderException {
+        final Cache cache = globalCache;
+        if (null != cache) {
+            cache.invalidateGroup(String.valueOf(session.getContextId()));
+        }
+        dropUserEntries(session.getUserId(), session.getContextId());
     }
 
     /**
@@ -162,11 +176,13 @@ public final class CacheFolderStorage implements FolderStorage {
      * @throws FolderException If disposal of this folder cache fails
      */
     public void onCacheAbsent() throws FolderException {
-        if (globalCache != null) {
+        final CacheService service = cacheService;
+        final Cache cache = globalCache;
+        if (cache != null) {
             try {
-                globalCache.clear();
-                if (null != cacheService) {
-                    cacheService.freeCache("GlobalFolderCache");
+                cache.clear();
+                if (null != service) {
+                    service.freeCache("GlobalFolderCache");
                 }
             } catch (final CacheException e) {
                 throw new FolderException(e);
@@ -189,7 +205,7 @@ public final class CacheFolderStorage implements FolderStorage {
             }
         }
         */
-        if (cacheService != null) {
+        if (service != null) {
             cacheService = null;
         }
     }
@@ -238,7 +254,7 @@ public final class CacheFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            removeFromCache(folderId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
+            clear(storageParameters.getSession());
         }
     }
 
@@ -304,11 +320,8 @@ public final class CacheFolderStorage implements FolderStorage {
          * Put to cache
          */
         try {
-            final CacheKey key;
-            final String id = folder.getID();
             if (folder.isGlobalID()) {
-                key = newCacheKey(id, treeId, storageParameters.getContextId());
-                globalCache.put(key, folder);
+                globalCache.putInGroup(newCacheKey(folder.getID(), treeId), String.valueOf(storageParameters.getContextId()), folder);
             } else {
                 final FolderMap folderMap = getFolderMapFrom(storageParameters.getSession());
                 if (null != folderMap) {
@@ -348,7 +361,7 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == id) {
             return;
         }
-        try {
+        {
             List<String> ids;
             try {
                 if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
@@ -376,28 +389,27 @@ public final class CacheFolderStorage implements FolderStorage {
             }
             final int contextId = session.getContextId();
             final FolderMap folderMap = optFolderMapFrom(session);
+            final Cache cache = globalCache;
             if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 for (final String folderId : ids) {
-                    globalCache.remove(newCacheKey(folderId, treeId, contextId));
+                    cache.removeFromGroup(newCacheKey(folderId, treeId), String.valueOf(contextId));
                     if (null != folderMap) {
                         folderMap.remove(folderId, treeId);
                     }
                 }
             } else {
                 for (final String folderId : ids) {
-                    globalCache.remove(newCacheKey(folderId, treeId, contextId));
+                    cache.removeFromGroup(newCacheKey(folderId, treeId), String.valueOf(contextId));
                     if (null != folderMap) {
                         folderMap.remove(folderId, treeId);
                     }
                     // Now for real tree, too
-                    globalCache.remove(newCacheKey(folderId, FolderStorage.REAL_TREE_ID, contextId));
+                    cache.removeFromGroup(newCacheKey(folderId, FolderStorage.REAL_TREE_ID), String.valueOf(contextId));
                     if (null != folderMap) {
                         folderMap.remove(folderId, FolderStorage.REAL_TREE_ID);
                     }
                 }
             }
-        } catch (final CacheException e) {
-            throw new FolderException(e);
         }
     }
 
@@ -407,9 +419,8 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param id The folder identifier
      * @param treeId The tree identifier
      * @param session The session
-     * @throws FolderException If removal fails
      */
-    public void removeSingleFromCache(final String id, final String treeId, final int userId, final Session session) throws FolderException {
+    public void removeSingleFromCache(final String id, final String treeId, final int userId, final Session session) {
         removeSingleFromCache(id, treeId, userId, session.getContextId(), session);
     }
 
@@ -420,29 +431,25 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param treeId The tree identifier
      * @param contextId The context identifier
      * @param session The session
-     * @throws FolderException If removal fails
      */
-    public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final Session session) throws FolderException {
-        try {
-            globalCache.remove(newCacheKey(id, treeId, contextId));
+    public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final Session session) {
+        final Cache cache = globalCache;
+        cache.removeFromGroup(newCacheKey(id, treeId), String.valueOf(contextId));
+        if (userId > 0) {
+            final FolderMap folderMap = optFolderMapFrom(session);
+            if (null != folderMap) {
+                folderMap.remove(id, treeId);
+            }
+        }
+        if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
+            // Now for real tree, too
+            cache.removeFromGroup(newCacheKey(id, FolderStorage.REAL_TREE_ID), String.valueOf(contextId));
             if (userId > 0) {
                 final FolderMap folderMap = optFolderMapFrom(session);
                 if (null != folderMap) {
-                    folderMap.remove(id, treeId);
+                    folderMap.remove(id, FolderStorage.REAL_TREE_ID);
                 }
             }
-            if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                // Now for real tree, too
-                globalCache.remove(newCacheKey(id, FolderStorage.REAL_TREE_ID, contextId));
-                if (userId > 0) {
-                    final FolderMap folderMap = optFolderMapFrom(session);
-                    if (null != folderMap) {
-                        folderMap.remove(id, FolderStorage.REAL_TREE_ID);
-                    }
-                }
-            }
-        } catch (final CacheException e) {
-            throw new FolderException(e);
         }
     }
 
@@ -516,21 +523,16 @@ public final class CacheFolderStorage implements FolderStorage {
             }
         }
         if (cacheable) {
-            try {
-                /*
-                 * Delete from cache
-                 */
-                if (global) {
-                    final CacheKey key = newCacheKey(folderId, treeId, storageParameters.getContextId());
-                    globalCache.remove(key);
-                } else {
-                    final FolderMap folderMap = optFolderMapFrom(session);
-                    if (null != folderMap) {
-                        folderMap.remove(folderId, treeId);
-                    }
+            /*
+             * Delete from cache
+             */
+            if (global) {
+                globalCache.removeFromGroup(newCacheKey(folderId, treeId), String.valueOf(storageParameters.getContextId()));
+            } else {
+                final FolderMap folderMap = optFolderMapFrom(session);
+                if (null != folderMap) {
+                    folderMap.remove(folderId, treeId);
                 }
-            } catch (final CacheException e) {
-                throw new FolderException(e);
             }
         }
         /*
@@ -725,7 +727,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Try global cache key
          */
-        Folder folder = (Folder) globalCache.get(newCacheKey(folderId, treeId, contextId));
+        Folder folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), String.valueOf(contextId));
         if (null != folder) {
             /*
              * Return a cloned version from global cache
@@ -1075,10 +1077,14 @@ public final class CacheFolderStorage implements FolderStorage {
      */
 
     /**
-     * Creates a key.
+     * Creates the cache key for specified folder ID and tree ID pair.
+     * 
+     * @param folderId The folder ID
+     * @param treeId The tree ID
+     * @return The cache key
      */
-    private CacheKey newCacheKey(final String folderId, final String treeId, final int cid) {
-        return cacheService.newCacheKey(cid, treeId, folderId);
+    private CacheKey newCacheKey(final String folderId, final String treeId) {
+        return cacheService.newCacheKey(1, treeId, folderId);
     }
 
     /**

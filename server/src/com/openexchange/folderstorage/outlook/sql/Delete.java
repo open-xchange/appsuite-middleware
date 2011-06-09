@@ -76,19 +76,35 @@ public final class Delete {
 
     private static final String SQL_DELETE_SUBS =
         "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    
+    private static final String SQL_GLOBAL_DELETE_SUBS =
+        "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?";
 
     private static final String SQL_DELETE_INSERT_SUBS =
         "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    
+    private static final String SQL_GLOBAL_DELETE_INSERT_SUBS =
+        "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?";
 
     private static final String SQL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    
+    private static final String SQL_GLOBAL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?";
 
     private static final String SQL_DELETE_INSERT_PERMS =
         "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    
+    private static final String SQL_GLOBAL_DELETE_INSERT_PERMS =
+        "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?";
 
     private static final String SQL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
+    private static final String SQL_GLOBAL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND folderId = ?";
+
     private static final String SQL_DELETE_INSERT =
         "INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    private static final String SQL_GLOBAL_DELETE_INSERT =
+        "INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND folderId = ?";
 
     /**
      * Deletes specified folder.
@@ -97,10 +113,11 @@ public final class Delete {
      * @param tree The tree identifier
      * @param user The user identifier
      * @param folderId The folder identifier
+     * @param global <code>true</code> for global folder; otherwise <code>false</code>
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
      * @throws FolderException If delete fails
      */
-    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup) throws FolderException {
+    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean global, final boolean backup) throws FolderException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
@@ -111,7 +128,7 @@ public final class Delete {
         }
         try {
             con.setAutoCommit(false); // BEGIN
-            final boolean ret = deleteFolder(cid, tree, user, folderId, backup, con);
+            final boolean ret = deleteFolder(cid, tree, user, folderId, global, backup, con);
             con.commit(); // COMMIT
             return ret;
         } catch (final SQLException e) {
@@ -136,14 +153,15 @@ public final class Delete {
      * @param tree The tree identifier
      * @param user The user identifier
      * @param folderId The folder identifier
+     * @param global <code>true</code> for global folder; otherwise <code>false</code>
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
      * @param con The connection to use
      * @return <code>true</code> if a folder denoted by given identifier was deleted; otherwise <code>false</code>
      * @throws FolderException If delete fails
      */
-    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Connection con) throws FolderException {
+    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean global, final boolean backup, final Connection con) throws FolderException {
         if (null == con) {
-            return deleteFolder(cid, tree, user, folderId, backup);
+            return deleteFolder(cid, tree, user, folderId, global, backup);
         }
         PreparedStatement stmt = null;
         if (backup) {
@@ -151,11 +169,13 @@ public final class Delete {
              * Backup folder data
              */
             try {
-                stmt = con.prepareStatement(SQL_DELETE_INSERT);
+                stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_INSERT : SQL_DELETE_INSERT);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
+                if (!global) {
+                    stmt.setInt(pos++, user);
+                }
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
@@ -174,11 +194,13 @@ public final class Delete {
              * Backup permission data
              */
             try {
-                stmt = con.prepareStatement(SQL_DELETE_INSERT_PERMS);
+                stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_INSERT_PERMS : SQL_DELETE_INSERT_PERMS);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
+                if (!global) {
+                    stmt.setInt(pos++, user);
+                }
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
@@ -194,11 +216,13 @@ public final class Delete {
              * Backup subscribe data
              */
             try {
-                stmt = con.prepareStatement(SQL_DELETE_INSERT_SUBS);
+                stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_INSERT_SUBS : SQL_DELETE_INSERT_SUBS);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
+                if (!global) {
+                    stmt.setInt(pos++, user);
+                }
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
@@ -215,11 +239,13 @@ public final class Delete {
          * Delete subscribe data
          */
         try {
-            stmt = con.prepareStatement(SQL_DELETE_SUBS);
+            stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_SUBS : SQL_DELETE_SUBS);
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
-            stmt.setInt(pos++, user);
+            if (!global) {
+                stmt.setInt(pos++, user);
+            }
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -232,11 +258,13 @@ public final class Delete {
          * Delete permission data
          */
         try {
-            stmt = con.prepareStatement(SQL_DELETE_PERMS);
+            stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_PERMS : SQL_DELETE_PERMS);
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
-            stmt.setInt(pos++, user);
+            if (!global) {
+                stmt.setInt(pos++, user);
+            }
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -249,11 +277,13 @@ public final class Delete {
          * Delete folder data
          */
         try {
-            stmt = con.prepareStatement(SQL_DELETE);
+            stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE : SQL_DELETE);
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
-            stmt.setInt(pos++, user);
+            if (!global) {
+                stmt.setInt(pos++, user);
+            }
             stmt.setString(pos, folderId);
             return stmt.executeUpdate() > 0;
         } catch (final SQLException e) {

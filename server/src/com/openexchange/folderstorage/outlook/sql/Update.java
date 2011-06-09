@@ -96,7 +96,7 @@ public final class Update {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
         try {
-            if (Delete.deleteFolder(cid, tree, user, folder.getID(), false, con)) {
+            if (Delete.deleteFolder(cid, tree, user, folder.getID(), false, false, con)) {
                 Insert.insertFolder(cid, tree, user, folder, con);
             }
             con.commit(); // COMMIT

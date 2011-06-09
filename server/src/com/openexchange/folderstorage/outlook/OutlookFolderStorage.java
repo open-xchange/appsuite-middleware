@@ -136,6 +136,7 @@ import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -508,12 +509,39 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         TCM.clear();
-        final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(storageParameters.getSession());
+        final boolean global = getFolder(treeId, folderId, storageParameters).isGlobalID();
+        final Session session = storageParameters.getSession();
         final int tree = Tools.getUnsignedInteger(treeId);
-        if (null != memoryTable) {
-            final MemoryTree memoryTree = memoryTable.getTree(tree);
-            if (null != memoryTree) {
-                memoryTree.getCrud().remove(folderId);
+        {
+            final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
+            if (null != memoryTable) {
+                final MemoryTree memoryTree = memoryTable.getTree(tree);
+                if (null != memoryTree) {
+                    memoryTree.getCrud().remove(folderId);
+                }
+            }
+        }
+        if (global) {
+            /*
+             * Cleanse from other session-bound memory tables, too
+             */
+            final SessiondService sessiondService = OutlookServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            if (null != sessiondService) {
+                final Collection<Session> sessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
+                final Set<String> disposed = new HashSet<String>(sessions.size());
+                disposed.add(session.getSessionID());
+                for (final Session current : sessions) {
+                    final String sessionID = current.getSessionID();
+                    if (disposed.add(sessionID)) {
+                        final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
+                        if (null != memoryTable) {
+                            final MemoryTree memoryTree = memoryTable.getTree(tree);
+                            if (null != memoryTree) {
+                                memoryTree.getCrud().remove(folderId);
+                            }
+                        }
+                    }
+                }
             }
         }
         /*
@@ -525,6 +553,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             tree,
             storageParameters.getUserId(),
             folderId,
+            global,
             true,
             wcon);
     }
@@ -925,7 +954,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                             /*
                              * In virtual tree table, but shouldn't
                              */
-                            Delete.deleteFolder(contextId, tree, user.getId(), folderId, false, wcon);
+                            Delete.deleteFolder(contextId, tree, user.getId(), folderId, false, false, wcon);
                             throw FolderExceptionErrorMessage.TEMPORARY_ERROR.create(e, new Object[0]);
                         }
                     } else {
@@ -934,7 +963,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                             /*
                              * In virtual tree table, but shouldn't
                              */
-                            Delete.deleteFolder(contextId, tree, user.getId(), folderId, false, checkWriteConnection(storageParameters));
+                            Delete.deleteFolder(contextId, tree, user.getId(), folderId, false, false, checkWriteConnection(storageParameters));
                             if (null != memoryTree) {
                                 memoryTree.getCrud().remove(folderId);
                             }
