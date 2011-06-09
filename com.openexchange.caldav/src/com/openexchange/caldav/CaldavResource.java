@@ -237,6 +237,7 @@ public class CaldavResource extends AbstractResource {
 
             }
         } catch (ConversionError e) {
+            LOG.error(e.getMessage(),e );
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
@@ -341,13 +342,16 @@ public class CaldavResource extends AbstractResource {
             }
 
         } catch (ClassCastException e) {
+            LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 500);
         } catch (OXPermissionException e) {
+            LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 403);
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 500);
         } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 500);
         }
     }
@@ -379,8 +383,10 @@ public class CaldavResource extends AbstractResource {
         try {
             appointments.deleteAppointmentObject((CalendarDataObject) appointment, parent.getId(), getLastModified());
         } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 500);
         } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 500);
         }
     }
@@ -423,6 +429,7 @@ public class CaldavResource extends AbstractResource {
             icalEmitter.writeSession(session, bytes);
             return fileData = bytes.toByteArray();
         } catch (ConversionError e) {
+            LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 500);
         }
 

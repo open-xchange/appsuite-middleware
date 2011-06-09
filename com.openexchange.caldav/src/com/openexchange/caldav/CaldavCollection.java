@@ -55,11 +55,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.caldav.GroupwareCaldavFactory.State;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.mixins.SupportedReportSet;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -83,12 +90,14 @@ public class CaldavCollection extends AbstractCollection {
     private GroupwareCaldavFactory factory;
     private WebdavPath url;
     private int id = -1;
+    
+    private static final Log LOG = LogFactory.getLog(CaldavCollection.class);
 
     public CaldavCollection(AbstractStandardCaldavCollection parent, UserizedFolder folder, GroupwareCaldavFactory factory) {
         super();
         this.folder = folder;
         this.factory = factory;
-        url = parent.getUrl().dup().append(folder.getName());
+        url = parent.getUrl().dup().append(getFolderName(folder));
 
         includeProperties(
             new CurrentUserPrivilegeSet(folder.getOwnPermission()),
@@ -98,7 +107,30 @@ public class CaldavCollection extends AbstractCollection {
         
 
     }
+    private String getFolderName(UserizedFolder f) {
+        Type type = f.getType();
+        if (type.equals(SharedType.getInstance())) {
+            return f.getName()+" ("+getOwnerName(f)+")";
+        } 
+        return f.getName();
+    }
 
+    private String getOwnerName(UserizedFolder f) {
+        Permission[] permissions = f.getPermissions();
+        for (Permission permission : permissions) {
+            if (permission.isAdmin()) {
+                int entity = permission.getEntity();
+                try {
+                    return factory.resolveUser(entity).getDisplayName();
+                } catch (WebdavProtocolException e) {
+                    LOG.error(e.getMessage(), e);
+                    return new Integer(entity).toString();
+                }
+            }
+        }
+        
+        return null;
+    }
     @Override
     protected void internalDelete() throws WebdavProtocolException {
         // throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
@@ -188,7 +220,7 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     public String getDisplayName() throws WebdavProtocolException {
-        return folder.getName();
+        return getFolderName(folder);
     }
 
     public Date getLastModified() throws WebdavProtocolException {

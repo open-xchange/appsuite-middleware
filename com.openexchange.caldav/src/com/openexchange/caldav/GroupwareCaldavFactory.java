@@ -58,6 +58,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
@@ -93,7 +95,9 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GroupwareCaldavFactory extends AbstractWebdavFactory {
-
+    
+    private static final Log LOG = LogFactory.getLog(GroupwareCaldavFactory.class);
+    
     private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
 
     public static final WebdavPath ROOT_URL = new WebdavPath();
@@ -220,6 +224,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             }
             return property.get();
         } catch (ConfigCascadeException e) {
+            LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(new WebdavPath(), 500);
         }
     }
@@ -292,6 +297,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         try {
             return users.getUser(uid, getContext());
         } catch (UserException e) {
+            LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(new WebdavPath(), 500);
         }
     }
@@ -343,6 +349,9 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 List<Appointment> children = new LinkedList<Appointment>();
                 while (iterator.hasNext()) {
                     Appointment appointment = iterator.next();
+                    if (appointment.getUid() == null) {
+                        continue; // skip
+                    }
                     appointment = calendar.getObjectById(appointment.getObjectID(), folderId);
                     if (appointment.isException()) {
                         List<Appointment> list = changeExceptionCache.get(appointment.getUid());
@@ -358,7 +367,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 }
                 folderCache.put(folderId, children);
             } catch (Exception e) {
-                // Couldn't cache
+                LOG.error(e.getMessage(), e);
             }
         }
         
@@ -392,7 +401,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 }
                 folderCache.put(folderId, children);
             } catch (Exception e) {
-                // Couldn't cache
+                LOG.error(e.getMessage(), e);
             }
         }
 
