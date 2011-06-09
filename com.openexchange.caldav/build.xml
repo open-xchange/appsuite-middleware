@@ -45,6 +45,7 @@
     	<pathelement location="${bundlesdir}/${servletjar}" />
     	
     	<pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${calendarjar}"/>
     	<pathelement location="${bundlesdir}/${cascadejar}"/>
     	<pathelement location="${bundlesdir}/${webdavacljar}"/>
