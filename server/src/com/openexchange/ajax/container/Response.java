@@ -159,6 +159,24 @@ public final class Response {
     }
 
     /**
+     * Gets the formatted message.
+     * <p>
+     * For testing only
+     * 
+     * @return The formatted message or <code>null</code> if no error present
+     */
+    public String getFormattedErrorMessage() {
+        if (null == exception) {
+            return null;
+        }
+        final Object[] messageArgs = exception.getMessageArgs();
+        if (null == messageArgs || 0 == messageArgs.length) {
+            return exception.getMessage();
+        }
+        return String.format(exception.getMessage(), messageArgs);
+    }
+
+    /**
      * @return Returns the timestamp.
      */
     public Date getTimestamp() {
