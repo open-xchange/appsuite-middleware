@@ -297,14 +297,18 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     }
 
     public static final class State {
-
+        
+        private final static int[] FIELDS_FOR_ALL_REQUEST = {
+            DataObject.OBJECT_ID
+        };
+        
         private final static int[] APPOINTMENT_FIELDS = {
             DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
             FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION,
             CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
             CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.PARTICIPANTS, CalendarObject.USERS,
             Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.UID,
-            Appointment.SEQUENCE, Appointment.ORGANIZER };
+            Appointment.SEQUENCE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS };
 
         private GroupwareCaldavFactory factory;
 
@@ -317,8 +321,48 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         private Map<String, List<Appointment>> changeExceptionCache = new HashMap<String, List<Appointment>>();
 
         private Map<Integer, List<Appointment>> folderCache = new HashMap<Integer, List<Appointment>>();
-
+        
+        
         public void cacheFolder(int folderId) {
+            cacheFolderFast(folderId); // Switch this to the other method, once it loads participants
+        }
+        
+        public void cacheFolderSlow(int folderId) {
+            if (folderCache.containsKey(folderId)) {
+                return;
+            }
+            AppointmentSQLInterface calendar = factory.getAppointmentInterface();
+            try {
+                SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(
+                    folderId,
+                    FIELDS_FOR_ALL_REQUEST,
+                    factory.start(),
+                    factory.end(),
+                    -1,
+                    null);
+                List<Appointment> children = new LinkedList<Appointment>();
+                while (iterator.hasNext()) {
+                    Appointment appointment = iterator.next();
+                    appointment = calendar.getObjectById(appointment.getObjectID(), folderId);
+                    if (appointment.isException()) {
+                        List<Appointment> list = changeExceptionCache.get(appointment.getUid());
+                        if (list == null) {
+                            list = new LinkedList<Appointment>();
+                            changeExceptionCache.put(appointment.getUid(), list);
+                        }
+                        list.add(appointment);
+                    } else {
+                        appointmentCache.put(appointment.getUid(), appointment);
+                    }
+                    children.add(appointment);
+                }
+                folderCache.put(folderId, children);
+            } catch (Exception e) {
+                // Couldn't cache
+            }
+        }
+        
+        public void cacheFolderFast(int folderId) {
             if (folderCache.containsKey(folderId)) {
                 return;
             }

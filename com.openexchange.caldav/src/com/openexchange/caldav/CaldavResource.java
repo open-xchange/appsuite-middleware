@@ -58,8 +58,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
@@ -526,11 +528,13 @@ public class CaldavResource extends AbstractResource {
     private void patchOrganizersParticipantState() {
         UserParticipant[] users = appointment.getUsers();
         int createdBy = appointment.getCreatedBy();
+        Map<Integer, UserParticipant> userMap = new HashMap<Integer, UserParticipant>();
         for (UserParticipant userParticipant : users) {
             int identifier = userParticipant.getIdentifier();
             if (createdBy == identifier && userParticipant.getConfirm() == 0) {
                 userParticipant.setConfirm(CalendarObject.ACCEPT);
             }
+            userMap.put(identifier, userParticipant);
         }
 
         Participant[] participants = appointment.getParticipants();
@@ -540,6 +544,10 @@ public class CaldavResource extends AbstractResource {
                 int identifier = userParticipant.getIdentifier();
                 if (createdBy == identifier && userParticipant.getConfirm() == 0) {
                     userParticipant.setConfirm(CalendarObject.ACCEPT);
+                } else {
+                    UserParticipant up = userMap.get(identifier);
+                    userParticipant.setConfirm(up.getConfirm());
+                    userParticipant.setConfirmMessage(up.getConfirmMessage());
                 }
             }
         }
