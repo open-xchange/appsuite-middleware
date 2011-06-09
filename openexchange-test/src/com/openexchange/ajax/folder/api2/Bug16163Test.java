@@ -60,8 +60,8 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.PathRequest;
 import com.openexchange.ajax.folder.actions.PathResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.PermissionTools;
@@ -79,7 +79,12 @@ public class Bug16163Test extends AbstractAJAXSession {
     private AJAXClient client2;
     private int appointmentFolder;
 
-    public Bug16163Test(String name) {
+    /**
+     * Initializes a new {@link Bug16163Test}.
+     * 
+     * @param name The name
+     */
+    public Bug16163Test(final String name) {
         super(name);
     }
 
@@ -93,9 +98,9 @@ public class Bug16163Test extends AbstractAJAXSession {
         appointmentFolder = client.getValues().getPrivateAppointmentFolder();
         testFolder.setParentFolderID(appointmentFolder);
         testFolder.setPermissions(PermissionTools.P(I(client.getValues().getUserId()), "a/a", I(client2.getValues().getUserId()), "v"));
-        testFolder.setFolderName("testFolder4Bug16163");
-        InsertRequest iReq = new InsertRequest(API.OUTLOOK, testFolder);
-        InsertResponse iResp = client.execute(iReq);
+        testFolder.setFolderName("testFolder4Bug16163-" + System.currentTimeMillis());
+        final InsertRequest iReq = new InsertRequest(API.OUTLOOK, testFolder);
+        final InsertResponse iResp = client.execute(iReq);
         iResp.fillObject(testFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         testFolder.setLastModified(new Date());
@@ -110,45 +115,45 @@ public class Bug16163Test extends AbstractAJAXSession {
     public void testPathRequestWorks() throws Throwable {
         {
             // Fill cache with database folder.
-            GetRequest request = new GetRequest(API.OX_NEW, testFolder.getObjectID());
+            final GetRequest request = new GetRequest(API.OX_NEW, testFolder.getObjectID());
             client.execute(request);
         }
         {
             // Fill cache with outlook folder.
-            GetRequest request = new GetRequest(API.OUTLOOK, testFolder.getObjectID());
+            final GetRequest request = new GetRequest(API.OUTLOOK, testFolder.getObjectID());
             client.execute(request);
         }
         {
             // Test with user seeing a shared folder.
-            PathRequest request = new PathRequest(API.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
-            PathResponse response = client2.execute(request);
-            Object[][] data = response.getArray();
-            assertFalse("Path request should work for that folder.", response.hasError());
-            int idPos = response.getColumnPos(FolderObject.OBJECT_ID);
+            final PathRequest request = new PathRequest(API.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
+            final PathResponse response = client2.execute(request);
+            final Object[][] data = response.getArray();
+            assertFalse("Path request should work for that folder, but failed with: " + response.getErrorMessage(), response.hasError());
+            final int idPos = response.getColumnPos(FolderObject.OBJECT_ID);
             assertTrue("Response should contain folder identifier.", idPos >= 0);
-            int namePos = response.getColumnPos(FolderObject.FOLDER_NAME);
+            final int namePos = response.getColumnPos(FolderObject.FOLDER_NAME);
             assertTrue("Response should contain folder names.", namePos >= 0);
             assertEquals("Path on Outlook like tree should have 4 parts.", 4, data.length);
             assertEquals("Path should start with test folder but is folder " + data[0][namePos], Integer.toString(testFolder.getObjectID()), data[0][idPos]);
-            assertEquals("Parent of created folder should be virtual shared user folder but is " + data[1][namePos], FolderObject.SHARED_PREFIX + FolderObject.SYSTEM_SHARED_FOLDER_ID, data[1][idPos]);
+            assertEquals("Parent of created folder should be virtual shared user folder but is " + data[1][namePos], FolderObject.SHARED_PREFIX + client.getValues().getUserId(), data[1][idPos]);
             assertEquals("Parent of virtual shared user folder should be system shared root folder but is " + data[2][namePos], Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID), data[2][idPos]);
             assertEquals("Root folder should be IPM_ROOT but is " + data[3][namePos], FolderStorage.PRIVATE_ID, data[3][idPos]);
         }
         {
             // Check cached folder.
-            GetRequest request = new GetRequest(API.OUTLOOK, testFolder.getObjectID());
-            GetResponse response = client.execute(request);
+            final GetRequest request = new GetRequest(API.OUTLOOK, testFolder.getObjectID());
+            final GetResponse response = client.execute(request);
             assertEquals("Identifier of cached folder is broken.", testFolder.getObjectID(), response.getFolder().getObjectID());
         }
         {
             // Test with sharing user if caching breaks his path.
-            PathRequest request = new PathRequest(API.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
-            PathResponse response = client.execute(request);
-            Object[][] data = response.getArray();
+            final PathRequest request = new PathRequest(API.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
+            final PathResponse response = client.execute(request);
+            final Object[][] data = response.getArray();
             assertFalse("Path request should work for that folder.", response.hasError());
-            int idPos = response.getColumnPos(FolderObject.OBJECT_ID);
+            final int idPos = response.getColumnPos(FolderObject.OBJECT_ID);
             assertTrue("Response should contain folder identifier.", idPos >= 0);
-            int namePos = response.getColumnPos(FolderObject.FOLDER_NAME);
+            final int namePos = response.getColumnPos(FolderObject.FOLDER_NAME);
             assertTrue("Response should contain folder names.", namePos >= 0);
             assertEquals("Path on Outlook like tree should have 3 parts.", 3, data.length);
             assertEquals("Path should start with test folder but is folder " + data[0][namePos], Integer.toString(testFolder.getObjectID()), data[0][idPos]);
