@@ -70,9 +70,9 @@ import com.openexchange.session.Session;
  */
 public class Enabled implements PreferencesItemService {
 
-static final String ENABLED = "com.openexchange.messaging.enabled";
+    private static final String ENABLED = "com.openexchange.messaging.enabled";
     
-    ConfigViewFactory configViews;
+    private final ConfigViewFactory configViews;
 
     public Enabled(final ConfigViewFactory configViews) {
         this.configViews = configViews;
