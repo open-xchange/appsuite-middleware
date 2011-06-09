@@ -229,25 +229,28 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @return The user-sensitive folder for given folder
      * @throws FolderException If a folder error occurs
      */
-    protected UserizedFolder getUserizedFolder(final Folder foldera, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
-        Folder folder = foldera;
+    protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+        Folder f = folder;
         final UserizedFolder userizedFolder;
         /*
          * Type
          */
-        final int createdBy = folder.getCreatedBy();
+        final int createdBy = f.getCreatedBy();
+        /*
+         * Create user-sensitive folder dependent on shared flag
+         */
         final boolean isShared;
         {
-            final Type type = folder.getType();
+            final Type type = f.getType();
             if (SharedType.getInstance().equals(type)) {
-                userizedFolder = new UserizedFolderImpl(folder);
+                userizedFolder = new UserizedFolderImpl(f);
                 userizedFolder.setDefault(false);
                 isShared = true;
             } else if ((createdBy >= 0) && (createdBy != getUserId()) && PrivateType.getInstance().equals(type)) {
                 /*
                  * Prepare
                  */
-                final FolderStorage curStorage = folderStorageDiscoverer.getFolderStorage(treeId, folder.getID());
+                final FolderStorage curStorage = folderStorageDiscoverer.getFolderStorage(treeId, f.getID());
                 boolean alreadyOpened = false;
                 final Iterator<FolderStorage> it = openedStorages.iterator();
                 for (int j = 0; !alreadyOpened && j < openedStorages.size(); j++) {
@@ -258,13 +261,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 if (!alreadyOpened && curStorage.startTransaction(storageParameters, false)) {
                     openedStorages.add(curStorage);
                 }
-                folder = curStorage.prepareFolder(treeId, folder, storageParameters);
-                userizedFolder = new UserizedFolderImpl(folder);
+                f = curStorage.prepareFolder(treeId, f, storageParameters);
+                userizedFolder = new UserizedFolderImpl(f);
                 userizedFolder.setDefault(false);
                 userizedFolder.setType(SharedType.getInstance());
                 isShared = true;
             } else {
-                userizedFolder = new UserizedFolderImpl(folder);
+                userizedFolder = new UserizedFolderImpl(f);
                 isShared = false;
             }
         }
@@ -287,13 +290,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * Time zone offset and last-modified in UTC
          */
         {
-            final Date cd = folder.getCreationDate();
+            final Date cd = f.getCreationDate();
             if (null != cd) {
                 userizedFolder.setCreationDate(new Date(addTimeZoneOffset(cd.getTime(), getTimeZone())));
             }
         }
         {
-            final Date lm = folder.getLastModified();
+            final Date lm = f.getLastModified();
             if (null != lm) {
                 final long time = lm.getTime();
                 userizedFolder.setLastModified(new Date(addTimeZoneOffset(time, getTimeZone())));
@@ -304,7 +307,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             /*
              * Subfolders already calculated for user
              */
-            final String[] visibleSubfolders = folder.getSubfolderIDs();
+            final String[] visibleSubfolders = f.getSubfolderIDs();
             if (null == visibleSubfolders) {
                 userizedFolder.setSubfolderIDs(nullIsPublicAccess ? new String[] { DUMMY_ID } : new String[0]);
             } else {
@@ -314,7 +317,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             /*
              * Compute user-visible subfolders
              */
-            hasVisibleSubfolderIDs(folder, treeId, all, userizedFolder, nullIsPublicAccess, storageParameters, openedStorages);
+            hasVisibleSubfolderIDs(f, treeId, all, userizedFolder, nullIsPublicAccess, storageParameters, openedStorages);
         }
         return userizedFolder;
     }
