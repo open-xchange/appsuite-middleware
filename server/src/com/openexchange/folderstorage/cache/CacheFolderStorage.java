@@ -258,6 +258,35 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        final String folderId = folder.getID();
+        final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        final boolean started = storage.startTransaction(storageParameters, false);
+        try {
+            final Folder preparedFolder = storage.prepareFolder(treeId, folder, storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
+            if (preparedFolder.isCacheable() && preparedFolder.isGlobalID() != folder.isGlobalID()) {
+                putFolder(preparedFolder, treeId, storageParameters);
+            }
+            return preparedFolder;
+        } catch (final FolderException e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
     private PathPerformer newPathPerformer(final StorageParameters storageParameters) throws FolderException {
         final Session session = storageParameters.getSession();
         if (null == session) {

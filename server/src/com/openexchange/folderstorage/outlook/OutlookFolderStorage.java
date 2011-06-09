@@ -393,6 +393,38 @@ public final class OutlookFolderStorage implements FolderStorage {
         // Nothing to restore, not a real storage
     }
 
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Delegate to real storage
+         */
+        final String folderId = folder.getID();
+        final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+        }
+        final boolean started = folderStorage.startTransaction(storageParameters, true);
+        try {
+            final Folder preparedFolder = folderStorage.prepareFolder(realTreeId, folder, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            if (preparedFolder.isGlobalID() != folder.isGlobalID()) {
+                TCM.clear();
+            }
+            return preparedFolder;
+        } catch (final FolderException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final RuntimeException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         /*
          * Delegate clear invocation to real storage

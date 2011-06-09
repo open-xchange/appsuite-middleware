@@ -87,6 +87,10 @@ public final class VirtualFolderStorage implements FolderStorage {
         folderType = new VirtualFolderType();
     }
 
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        return folder;
+    }
+
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         // TODO: Implement it
     }

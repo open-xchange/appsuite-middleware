@@ -197,6 +197,10 @@ public final class MessagingFolderStorage implements FolderStorage {
         // TODO:
     }
 
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        return folder;
+    }
+
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         // Nothing to do
     }

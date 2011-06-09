@@ -258,6 +258,10 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        return folder;
+    }
+
     public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         MailAccess<?, ?> mailAccess = null;
         try {

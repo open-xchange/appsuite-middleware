@@ -177,6 +177,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
         // TODO:
     }
 
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        // TODO
+        return folder;
+    }
+
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         // Nothing to do
     }
@@ -554,10 +559,10 @@ public final class FileStorageFolderStorage implements FolderStorage {
                          */
                         final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(session);
                         for (final FileStorageAccount userAccount : userAccounts) {
-                            FileStorageAccountAccess accountAccess = userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), session);
+                            final FileStorageAccountAccess accountAccess = userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), session);
                             accountAccess.connect();
                             try {
-                                FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
+                                final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
                                 if (null != rootFolder) {
                                     accounts.add(userAccount);
                                 }
