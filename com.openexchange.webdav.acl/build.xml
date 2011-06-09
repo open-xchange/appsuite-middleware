@@ -31,7 +31,8 @@
 	<property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	
-	<property name="jdomjar" value="jdom-1.1.jar" />
+    <property name="jdomjar" value="jdom-1.1.jar"/>
+
 	
     <!-- Classpath -->
     <path id="project.classpath">
@@ -42,7 +43,7 @@
     	
     	<pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${serverjar}"/>
-    	<pathelement location="${bundlesdir}/${xmlBundle}/${jdomjar}"/>
+    	<pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
     			
     	
     </path>
