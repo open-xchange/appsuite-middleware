@@ -152,13 +152,10 @@ public final class Response {
      * @return Returns the errorMessage.
      */
     public String getErrorMessage() {
-        final String retval;
         if (null == exception) {
-            retval = null;
-        } else {
-            retval = exception.getMessage();
+            return null;
         }
-        return retval;
+        return exception.getMessage();
     }
 
     /**
