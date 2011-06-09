@@ -137,10 +137,21 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class);
 
+    /**
+     * Simple interface for providing and closing a connection.
+     */
     private static interface ConnectionProvider {
 
+        /**
+         * Gets the (active) connection.
+         * 
+         * @return The connection
+         */
         Connection getConnection();
 
+        /**
+         * Closes underlying connection.
+         */
         void close();
     }
 
