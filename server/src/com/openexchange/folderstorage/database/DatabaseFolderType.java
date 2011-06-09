@@ -59,7 +59,7 @@ import com.openexchange.folderstorage.FolderType;
  */
 public final class DatabaseFolderType implements FolderType {
 
-    private static final String STRING = "DB";
+    private static final String DB_STORAGE = "DB-Storage";
 
     private static final DatabaseFolderType instance = new DatabaseFolderType();
 
@@ -93,7 +93,7 @@ public final class DatabaseFolderType implements FolderType {
 
     @Override
     public String toString() {
-        return STRING;
+        return DB_STORAGE;
     }
 
 }
