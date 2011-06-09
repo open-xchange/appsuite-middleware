@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.database;
 
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntProcedure;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.oxfolder.OXFolderLoader;
 
 /**
  * {@link DatabaseFolderConverter}
@@ -281,22 +283,36 @@ public final class DatabaseFolderConverter {
                     retval.setCacheable(true);
                     retval.setGlobal(false);
                 } else {
-                    final List<Integer> subfolderIds;
                     if (fo.containsSubfolderIds()) {
-                        subfolderIds = fo.getSubfolderIds();
-                    } else {
-                        subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
-                    }
-                    if (subfolderIds.isEmpty()) {
-                        retval.setSubfolderIDs(new String[0]);
-                        retval.setSubscribedSubfolders(false);
-                    } else {
-                        final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                        for (final Integer id : subfolderIds) {
-                            tmp.add(id.toString());
+                        final List<Integer> subfolderIds = fo.getSubfolderIds();
+                        if (subfolderIds.isEmpty()) {
+                            retval.setSubfolderIDs(new String[0]);
+                            retval.setSubscribedSubfolders(false);
+                        } else {
+                            final List<String> tmp = new ArrayList<String>(subfolderIds.size());
+                            for (final Integer id : subfolderIds) {
+                                tmp.add(id.toString());
+                            }
+                            retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                            retval.setSubscribedSubfolders(true);
                         }
-                        retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                        retval.setSubscribedSubfolders(true);
+                    } else {
+                        final TIntArrayList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
+                        if (subfolderIds.isEmpty()) {
+                            retval.setSubfolderIDs(new String[0]);
+                            retval.setSubscribedSubfolders(false);
+                        } else {
+                            final List<String> tmp = new ArrayList<String>(subfolderIds.size());
+                            subfolderIds.forEach(new TIntProcedure() {
+                                
+                                public boolean execute(final int id) {
+                                    tmp.add(String.valueOf(id));
+                                    return true;
+                                }
+                            });
+                            retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                            retval.setSubscribedSubfolders(true);
+                        }
                     }
                 }
             }
