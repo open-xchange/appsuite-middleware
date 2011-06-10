@@ -131,6 +131,8 @@ public class Activator implements BundleActivator {
         
         PreferencesItemService prefItem = new PreferencesItemService() {
 
+            private static final String UNDEFINED_STRING = "undefined";
+            
             public String[] getPath() {
                 return path;
             }
@@ -145,7 +147,10 @@ public class Activator implements BundleActivator {
                     public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
                         try {
                             Object value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
-                            
+                            if (UNDEFINED_STRING.equals(value)) {
+                                setting.setSingleValue(UNDEFINED);
+                                return;
+                            }
                             try {
                                 // Let's turn this into a nice object, if it conforms to JSON
                                 value = new JSONObject("{value: "+value+"}").get("value");
