@@ -778,10 +778,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
         /*
          * Check shared...
          */
-        if (owner == storageParameters.getUserId() || SharedType.getInstance().equals(folder.getType())) {
-            return folder;
+        if (owner != storageParameters.getUserId() && PrivateType.getInstance().equals(folder.getType())) {
+            return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
         }
-        return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
+        return folder;
     }
 
     public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageParameters storageParameters) throws FolderException {
