@@ -60,6 +60,7 @@ import com.openexchange.session.Session;
 public interface IValueHandler {
 
     int NO_ID = -1;
+    Object UNDEFINED = new Object();
 
     /**
      * @param session Session.

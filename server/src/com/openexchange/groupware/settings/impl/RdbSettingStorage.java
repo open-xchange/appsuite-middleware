@@ -322,6 +322,9 @@ public class RdbSettingStorage extends SettingStorage {
             if (reader.isAvailable(userConfig)) {
                 try {
                     reader.getValue(session, ctx, user, userConfig, setting);
+                    if (setting.getSingleValue() != null && setting.getSingleValue().equals(IValueHandler.UNDEFINED)) {
+                        setting.getParent().removeElement(setting);
+                    }
                 } catch (final SettingException e) {
                     LOG.error("Problem while reading setting value.", e);
                 }
