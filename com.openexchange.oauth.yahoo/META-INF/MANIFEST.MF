@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Social OX Plugin for Yahoo
+Bundle-Name: Social OX Plugin for Yahoo (oauth-part)
 Bundle-SymbolicName: com.openexchange.oauth.yahoo
 Bundle-Version: 6.20.0
 Bundle-Activator: com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator
