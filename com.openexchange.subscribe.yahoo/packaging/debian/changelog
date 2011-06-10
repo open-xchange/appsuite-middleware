@@ -1,0 +1,5 @@
+open-xchange-subscribe-yahoo (6.20.0.0-0) unstable; urgency=low
+
+  * initial version.
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Fri, 10 Jun 2011 10:00:00 +0100
