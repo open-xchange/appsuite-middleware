@@ -81,7 +81,7 @@ Authors:
 %package -n	open-xchange-meta-pubsub
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for Publish and Subscribe
-Requires:	open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-subscribe-linkedin, open-xchange-subscribe-facebook, open-xchange-subscribe-msn
+Requires:	open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-subscribe-linkedin, open-xchange-subscribe-facebook, open-xchange-subscribe-msn, open-xchange-subscribe-yahoo
 
 
 %description -n open-xchange-meta-pubsub

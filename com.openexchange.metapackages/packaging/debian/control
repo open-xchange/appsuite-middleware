@@ -33,7 +33,7 @@ Description: The Open-Xchange Meta package for User/Group Provisioning
 
 Package: open-xchange-meta-pubsub
 Architecture: all
-Depends: open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-subscribe-linkedin, open-xchange-subscribe-facebook, open-xchange-subscribe-msn
+Depends: open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-subscribe-linkedin, open-xchange-subscribe-facebook, open-xchange-subscribe-msn, open-xchange-subscribe-yahoo
 Description: The Open-Xchange Meta package for Publish and Subscribe
 
 Package: open-xchange-meta-messaging
