@@ -41,7 +41,7 @@ BuildRequires:  open-xchange-xerces-sun
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 11
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -86,6 +86,5 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/etc/*/osgi/bundle.d/
 %config(noreplace) /opt/open-xchange/etc/groupware/*.properties
-
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*
