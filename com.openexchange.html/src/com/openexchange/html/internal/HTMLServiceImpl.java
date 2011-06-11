@@ -1028,6 +1028,7 @@ public final class HTMLServiceImpl implements HTMLService {
         props.setPruneTags("script");
         props.setTransSpecialEntitiesToNCR(true);
         props.setTransResCharsToNCR(true);
+        props.setRecognizeUnicodeChars(false);
         HTML_CLEANER = new HtmlCleaner(props);
         SERIALIZER = new PrettyXmlSerializer(props, " ");
     }
