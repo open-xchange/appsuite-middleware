@@ -644,6 +644,9 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     public String prettyPrint(final String htmlContent) {
+        if (null == htmlContent) {
+            return htmlContent;
+        }
         try {
             /*
              * Clean...
