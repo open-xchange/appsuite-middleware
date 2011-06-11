@@ -758,10 +758,11 @@ public final class HTMLServiceImpl implements HTMLService {
              */
             return htmlContent;
         }
+        String html = processDownlevelRevealedConditionalComments(htmlContent);
         /*
          * Validate with JTidy library
          */
-        String html = validate(htmlContent);
+        html = validate(html);
         /*
          * Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
          */
@@ -785,8 +786,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 html = sb.toString();
             }
         }
-        html = processDownlevelRevealedConditionalComments(html);
-        html = removeXHTMLCData(html);
+        // html = removeXHTMLCData(html);
         /*
          * Check URLs
          */
@@ -1041,6 +1041,7 @@ public final class HTMLServiceImpl implements HTMLService {
         props.setRecognizeUnicodeChars(false);
         props.setUseEmptyElementTags(false);
         props.setIgnoreQuestAndExclam(false);
+        props.setUseCdataForScriptAndStyle(false);
         HTML_CLEANER = new HtmlCleaner(props);
         SERIALIZER = new PrettyXmlSerializer(props, " ");
     }
