@@ -758,8 +758,9 @@ public final class HTMLServiceImpl implements HTMLService {
         final int headTagLen = TAG_S_HEAD.length();
         final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
         if (start >= headTagLen) {
-            final Matcher m = PAT_META_CT.matcher(html.substring(start, html.indexOf(TAG_E_HEAD)));
-            if (!m.find()) {
+            final int end = html.indexOf(TAG_E_HEAD);
+            // final Matcher m = PAT_META_CT.matcher(html.substring(start, end));
+            if (!occursWithin(html, start, end, true, "http-equiv=\"content-type\"", "http-equiv=content-type")) {
                 final StringBuilder sb = new StringBuilder(html);
                 final String cs;
                 if (null == charset) {
@@ -785,6 +786,18 @@ public final class HTMLServiceImpl implements HTMLService {
         final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
         HTMLParser.parse(html, handler);
         return handler.getHTML();
+    }
+
+    private static boolean occursWithin(final String str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
+        final String source = ignorecase ? str.toLowerCase(Locale.US) : str;
+        int index;
+        for (final String searchString : searchStrings) {
+            final String searchMe = ignorecase ? searchString.toLowerCase(Locale.US) : searchString;
+            if (((index = source.indexOf(searchMe, start)) >= start) && ((index + searchMe.length()) < end)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static final Pattern PATTERN_XHTML_CDATA;
@@ -1037,6 +1050,14 @@ public final class HTMLServiceImpl implements HTMLService {
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
             final StringBuilder builder = writer.getBuffer();
+            /*
+             * Check head tag
+             */
+            int index;
+            final String emptyHead = "<head />";
+            if ((index = builder.indexOf(emptyHead)) >= 0) {
+                builder.replace(index, index + emptyHead.length(), "<head><head/>");
+            }
             /*
              * Insert DOCTYPE if absent
              */
