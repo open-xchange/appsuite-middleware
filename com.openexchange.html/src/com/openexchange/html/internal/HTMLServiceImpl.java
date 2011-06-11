@@ -616,11 +616,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 key = key.substring(0, lastPos);
             }
         }
-        final Character tmp = htmlEntityMap.get(key);
-        if (tmp != null) {
-            return tmp;
-        }
-        return null;
+        return htmlEntityMap.get(key);
     }
 
     private static final Pattern PAT_HTML_ENTITIES = Pattern.compile("&(?:#([0-9]+)|([a-zA-Z]+));");
@@ -638,7 +634,7 @@ public final class HTMLServiceImpl implements HTMLService {
         while (m.find()) {
             final String numEntity = m.group(1);
             if (null == numEntity) {
-                final Character entity = getHTMLEntity(m.group());
+                final Character entity = getHTMLEntity(m.group(2));
                 if (null != entity) {
                     mr.appendLiteralReplacement(sb, entity.toString());
                 }
