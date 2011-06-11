@@ -1868,6 +1868,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             if (allFetch) {
+                lowCostFields.add(MailField.RECEIVED_DATE);
                 final LowCostItem[] lowCostItems = getLowCostItems(lowCostFields);
                 final long start = System.currentTimeMillis();
                 retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order), imapConfig, session);
