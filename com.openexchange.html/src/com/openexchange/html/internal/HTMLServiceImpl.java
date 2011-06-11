@@ -1030,6 +1030,7 @@ public final class HTMLServiceImpl implements HTMLService {
         props.setTransResCharsToNCR(true);
         props.setRecognizeUnicodeChars(false);
         props.setUseEmptyElementTags(false);
+        props.setIgnoreQuestAndExclam(false);
         HTML_CLEANER = new HtmlCleaner(props);
         SERIALIZER = new PrettyXmlSerializer(props, " ");
     }
