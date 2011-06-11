@@ -181,6 +181,11 @@ public class HTMLServiceActivator extends DeferredActivator {
             final Object[] maps = getHTMLEntityMaps(configurationService.getProperty("HTMLEntities"));
             htmlCharMap = (Map<Character, String>) maps[0];
             htmlEntityMap = (Map<String, Character>) maps[1];
+            /*
+             * Add mapping for '\'' (apos) character
+             */
+            htmlEntityMap.put("apos", Character.valueOf('\''));
+            htmlCharMap.put(Character.valueOf('\''), "apos");
         }
         /*
          * Register HTML service
