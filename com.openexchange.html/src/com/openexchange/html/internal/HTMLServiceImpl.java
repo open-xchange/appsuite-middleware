@@ -50,7 +50,6 @@
 package com.openexchange.html.internal;
 
 import gnu.inet.encoding.IDNAException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -88,8 +87,6 @@ import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyException;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link HTMLServiceImpl}
@@ -648,15 +645,29 @@ public final class HTMLServiceImpl implements HTMLService {
 
     public String prettyPrint(final String htmlContent) {
         try {
-            final Tidy tidy = createNewTidyInstance();
             /*
-             * Pretty print document
+             * Clean...
              */
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
-            tidy.parseDOM(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(CHARSET_US_ASCII)), out);
-            return new String(out.toByteArray(), CHARSET_US_ASCII);
+            final TagNode htmlNode = HTML_CLEANER.clean(htmlContent);
+            /*
+             * Serialize
+             */
+            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
+            SERIALIZER.write(htmlNode, writer, "UTF-8");
+            return writer.toString();
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            // Cannot occur
+            LOG.error("Unsupported encoding: " + e.getMessage(), e);
+            return htmlContent;
+        } catch (final IOException e) {
+            // Cannot occur
+            LOG.error("I/O error: " + e.getMessage(), e);
+            return htmlContent;
+        } catch (final RuntimeException rte) {
+            /*
+             * HtmlCleaner failed horribly...
+             */
+            LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
             return htmlContent;
         }
     }
