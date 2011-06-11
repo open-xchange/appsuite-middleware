@@ -597,10 +597,10 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     /**
-     * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding UNICODE character.
+     * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding unicode character.
      * 
      * @param entity The HTML entity
-     * @return The corresponding UNICODE character or <code>null</code>
+     * @return The corresponding unicode character or <code>null</code>
      */
     public Character getHTMLEntity(final String entity) {
         if (null == entity) {
