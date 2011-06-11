@@ -760,7 +760,7 @@ public final class HTMLServiceImpl implements HTMLService {
         }
         String html = processDownlevelRevealedConditionalComments(htmlContent);
         /*
-         * Validate with JTidy library
+         * Validate
          */
         html = validate(html);
         /*
