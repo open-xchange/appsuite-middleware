@@ -429,7 +429,13 @@ public final class Init {
             Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
             final Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
             final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
-            final HTMLService service = new HTMLServiceImpl(properties, (Map<Character, String>) maps[0], (Map<String, Character>) maps[1]);
+            @SuppressWarnings("unchecked")
+            final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+            htmlEntityMap.put("apos", Character.valueOf('\''));
+            @SuppressWarnings("unchecked")
+            final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+            htmlCharMap.put(Character.valueOf('\''), "apos");
+            final HTMLService service = new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap);
             services.put(HTMLService.class, service);
             ServerServiceRegistry.getInstance().addService(HTMLService.class, service);
         }
@@ -482,8 +488,8 @@ public final class Init {
         final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(2);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
-        ContextService contextService = (ContextService) services.get(ContextService.class);
-        FolderUpdaterRegistry registry = new SubscriptionExecutionServiceImpl(new SimSubscriptionSourceDiscoveryService(), folderUpdaters, contextService);
+        final ContextService contextService = (ContextService) services.get(ContextService.class);
+        final FolderUpdaterRegistry registry = new SubscriptionExecutionServiceImpl(new SimSubscriptionSourceDiscoveryService(), folderUpdaters, contextService);
         ServerServiceRegistry.getInstance().addService(FolderUpdaterRegistry.class, registry);
     }
 
