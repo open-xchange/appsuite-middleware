@@ -1033,7 +1033,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     static {
         final CleanerProperties props = new CleanerProperties();
-        props.setOmitDoctypeDeclaration(false);
+        props.setOmitDoctypeDeclaration(true);
         props.setOmitXmlDeclaration(true);
         props.setPruneTags("script");
         props.setTransSpecialEntitiesToNCR(true);
@@ -1042,6 +1042,7 @@ public final class HTMLServiceImpl implements HTMLService {
         props.setUseEmptyElementTags(false);
         props.setIgnoreQuestAndExclam(false);
         props.setUseCdataForScriptAndStyle(false);
+        props.setIgnoreQuestAndExclam(true);
         HTML_CLEANER = new HtmlCleaner(props);
         SERIALIZER = new PrettyXmlSerializer(props, " ");
     }
