@@ -1074,18 +1074,18 @@ public final class HTMLServiceImpl implements HTMLService {
             return builder.toString();
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            LOG.error("Unsupported encoding: " + e.getMessage(), e);
-            return "";
+            LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: " + e.getMessage(), e);
+            return htmlContent;
         } catch (final IOException e) {
             // Cannot occur
-            LOG.error("I/O error: " + e.getMessage(), e);
-            return "";
+            LOG.error("HtmlCleaner library failed to pretty-print HTML content with I/O error: " + e.getMessage(), e);
+            return htmlContent;
         } catch (final RuntimeException rte) {
             /*
              * HtmlCleaner failed horribly...
              */
             LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
-            return "";
+            return htmlContent;
         }
     }
 
