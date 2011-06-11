@@ -1029,6 +1029,7 @@ public final class HTMLServiceImpl implements HTMLService {
         props.setTransSpecialEntitiesToNCR(true);
         props.setTransResCharsToNCR(true);
         props.setRecognizeUnicodeChars(false);
+        props.setUseEmptyElementTags(false);
         HTML_CLEANER = new HtmlCleaner(props);
         SERIALIZER = new PrettyXmlSerializer(props, " ");
     }
@@ -1053,14 +1054,6 @@ public final class HTMLServiceImpl implements HTMLService {
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
             final StringBuilder builder = writer.getBuffer();
-            /*
-             * Check head tag
-             */
-            int index;
-            final String emptyHead = "<head />";
-            if ((index = builder.indexOf(emptyHead)) >= 0) {
-                builder.replace(index, index + emptyHead.length(), "<head><head/>");
-            }
             /*
              * Insert DOCTYPE if absent
              */
