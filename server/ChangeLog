@@ -1,4 +1,8 @@
-* 2011-06-11 - thorben.betten@open-xchange.co
+* 2011-06-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #19496: Removing CDATA sections with disabling HtmlCleaner's "useCdata" parameter
+
+* 2011-06-11 - thorben.betten@open-xchange.com
 
  - Bugfix #19466: Proper replacement of &apos; HTML entity
 
