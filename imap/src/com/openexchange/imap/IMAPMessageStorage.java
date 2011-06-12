@@ -140,11 +140,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    /**
-     * Serial version UID
-     */
-    private static final long serialVersionUID = 1467121647337217270L;
-
     /*-
      * Flag constants
      */
@@ -379,6 +374,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 mail = MIMEMessageConverter.convertMessage(msg, false);
                 mail.setFolder(fullName);
                 mail.setMailId(String.valueOf(msgUID));
+                mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
             } catch (final MIMEMailException e) {
                 if (MIMEMailException.Code.MESSAGE_REMOVED.getNumber() == e.getDetailNumber()) {
                     /*

@@ -1,6 +1,7 @@
 * 2011-06-12 - thorben.betten@open-xchange.com
 
  - Bugfix #19496: Removing CDATA sections with disabling HtmlCleaner's "useCdata" parameters
+ - Bugfix #19462: Set unread count in returned IMAP mail
 
 * 2011-06-11 - thorben.betten@open-xchange.com
 
