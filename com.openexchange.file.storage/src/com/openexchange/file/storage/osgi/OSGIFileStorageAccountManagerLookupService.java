@@ -51,8 +51,8 @@ package com.openexchange.file.storage.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
@@ -77,7 +77,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     /**
      * The backing list.
      */
-    final List<FileStorageAccountManagerProvider> providers;
+    final Queue<FileStorageAccountManagerProvider> providers;
 
     /**
      * The tracker instance.
@@ -91,7 +91,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
      */
     public OSGIFileStorageAccountManagerLookupService(final OSGIEventAdminLookup eventAdminLookup) {
         super();
-        providers = new CopyOnWriteArrayList<FileStorageAccountManagerProvider>();
+        providers = new ConcurrentLinkedQueue<FileStorageAccountManagerProvider>();
         this.eventAdminLookup = eventAdminLookup;
     }
 
