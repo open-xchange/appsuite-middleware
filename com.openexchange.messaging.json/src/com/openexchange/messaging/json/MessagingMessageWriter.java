@@ -96,11 +96,15 @@ public class MessagingMessageWriter {
 
     private static final class SimpleEntry<K, V> implements Map.Entry<K, V> {
 
+        public static <K, V> SimpleEntry<K, V> valueOf(final K key, final V value) {
+            return new SimpleEntry<K, V>(key, value);
+        }
+
         private final K key;
 
         private V value;
 
-        public SimpleEntry(final K key, final V value) {
+        private SimpleEntry(final K key, final V value) {
             this.key = key;
             this.value = value;
         }
@@ -361,10 +365,8 @@ public class MessagingMessageWriter {
             if (null != knownHeader) {
                 final Collection<MessagingHeader> header = part.getHeader(knownHeader.toString());
                 if (header != null && !header.isEmpty()) {
-                    final SimpleEntry<String, Collection<MessagingHeader>> entry =
-                        new SimpleEntry<String, Collection<MessagingHeader>>(knownHeader.toString(), header);
+                    final SimpleEntry<String, Collection<MessagingHeader>> entry = SimpleEntry.valueOf(knownHeader.toString(), header);
                     final MessagingHeaderWriter writer = selectWriter(entry);
-
                     messageJSON.put(field.toString(), writer.writeValue(entry, session));
                 }
             }
@@ -526,10 +528,10 @@ public class MessagingMessageWriter {
             } else if (messagingField == MessagingField.HEADERS) {
                 value = writeHeaders(message.getHeaders(), session);
             } else if (messagingField.getEquivalentHeader() != null) {
-                @SuppressWarnings("unchecked") final Entry<String, Collection<MessagingHeader>> entry =
-                    new SimpleEntry<String, Collection<MessagingHeader>>(
-                        messagingField.getEquivalentHeader().toString(),
-                        (Collection<MessagingHeader>) value);
+                @SuppressWarnings("unchecked") final Collection<MessagingHeader> collection = (Collection<MessagingHeader>) value;
+                final Entry<String, Collection<MessagingHeader>> entry = SimpleEntry.valueOf(
+                    messagingField.getEquivalentHeader().toString(),
+                    collection);
                 final MessagingHeaderWriter writer = selectWriter(entry);
                 value = writer.writeValue(entry, session);
             } else if (MessagingContent.class.isInstance(value)) {
