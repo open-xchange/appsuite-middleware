@@ -418,7 +418,7 @@ public class MessagingMessageWriter {
             }
         }
 
-        return (candidate != null) ? candidate : getDefaultWriter(entry);
+        return (candidate == null) ? getDefaultWriter(entry) : candidate;
     }
 
     private MessagingHeaderWriter getDefaultWriter(final Entry<String, Collection<MessagingHeader>> entry) {
