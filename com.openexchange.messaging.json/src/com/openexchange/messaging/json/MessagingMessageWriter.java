@@ -391,6 +391,9 @@ public class MessagingMessageWriter {
     private MessagingContentWriter getWriter(final MessagingPart message, final MessagingContent content) {
         int ranking = 0;
         MessagingContentWriter writer = null;
+        /*
+         * Get content writer with highest ranking
+         */
         for (final MessagingContentWriter renderer : contentWriters) {
             if (renderer.handles(message, content) && (writer == null || ranking < renderer.getRanking())) {
                 writer = renderer;
@@ -403,18 +406,19 @@ public class MessagingMessageWriter {
     private MessagingHeaderWriter selectWriter(final Entry<String, Collection<MessagingHeader>> entry) {
         int ranking = 0;
         MessagingHeaderWriter candidate = null;
-
+        /*
+         * Get header writer with highest ranking
+         */
         for (final MessagingHeaderWriter writer : headerWriters) {
             if (writer.handles(entry) && ((candidate == null) || (ranking < writer.getRanking()))) {
                 candidate = writer;
                 ranking = writer.getRanking();
             }
         }
-
         return (candidate == null) ? getDefaultWriter(entry) : candidate;
     }
 
-    private MessagingHeaderWriter getDefaultWriter(final Entry<String, Collection<MessagingHeader>> entry) {
+    private static MessagingHeaderWriter getDefaultWriter(final Entry<String, Collection<MessagingHeader>> entry) {
         return (MULTI_HEADER_WRITER.handles(entry)) ? MULTI_HEADER_WRITER : SINGLE_HEADER_WRITER;
     }
 
@@ -448,7 +452,13 @@ public class MessagingMessageWriter {
             }
         }
 
-        messageJSON.put("size", message.getSize());
+        {
+            final long size = message.getSize();
+            if (size >= 0) {
+                messageJSON.put("size", size);
+            }
+        }
+
         messageJSON.put("threadLevel", message.getThreadLevel());
 
         {
@@ -470,12 +480,14 @@ public class MessagingMessageWriter {
                 messageJSON.put("picture", picture);
             }
         }
+
         {
             final String url = message.getUrl();
             if (url != null) {
-                messageJSON.putOpt("url", url);
+                messageJSON.put("url", url);
             }
         }
+
         return messageJSON;
     }
 
