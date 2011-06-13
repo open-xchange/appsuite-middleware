@@ -51,9 +51,9 @@ package com.openexchange.sessiond.impl;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSpecificContainerRetrievalService.CleanUp;
@@ -72,22 +72,22 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
     protected String name;
     
     protected ConcurrentHashMap<String, T> delegate = new ConcurrentHashMap<String, T>();
-    protected ConcurrentHashMap<String, List<String>> tokensPerSession = new ConcurrentHashMap<String, List<String>>();
+    protected ConcurrentHashMap<String, Queue<String>> tokensPerSession = new ConcurrentHashMap<String, Queue<String>>();
     
-    public RandomTokenContainerImpl(String name, Lifecycle lifecycle, CleanUp<T> cleanUp) {
+    public RandomTokenContainerImpl(final String name, final Lifecycle lifecycle, final CleanUp<T> cleanUp) {
         this.name = name;
         this.lifecycle = lifecycle;
         this.cleanUp = cleanUp;
     }
     
-    public T get(String token) {
+    public T get(final String token) {
         return delegate.get(token);
     }
 
-    public String rememberForSession(Session session, T value) {
+    public String rememberForSession(final Session session, final T value) {
         while(true) {
-            String token = UUIDSessionIdGenerator.randomUUID();
-            T original = delegate.putIfAbsent(token, value);
+            final String token = UUIDSessionIdGenerator.randomUUID();
+            final T original = delegate.putIfAbsent(token, value);
             if(original == null) {
                 associate(session, token);
                 return token;
@@ -97,51 +97,46 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
     }
 
 
-    private void associate(Session session, String token) {
-        String sessionID = session.getSessionID();
-        List<String> tokenList = tokensPerSession.get(sessionID);
+    private void associate(final Session session, final String token) {
+        final String sessionID = session.getSessionID();
+        Queue<String> tokenList = tokensPerSession.get(sessionID);
         if(tokenList == null) {
-            tokenList = new CopyOnWriteArrayList<String>();
-            List<String> other = tokensPerSession.putIfAbsent(sessionID, tokenList);
-            if(other != null) {
-                tokenList = other;
+            final Queue<String> tmp = new ConcurrentLinkedQueue<String>();
+            tokenList = tokensPerSession.putIfAbsent(sessionID, tmp);
+            if(tokenList == null) {
+                tokenList = tmp;
             }
         }
-        
         tokenList.add(token);
     }
 
-    public T remove(String token) {
-        T removed = delegate.remove(token);
+    public T remove(final String token) {
+        final T removed = delegate.remove(token);
         if(removed != null && cleanUp != null) {
             cleanUp.clean(removed);
         }
         return removed;
     }
     
-    public void clear(CleanUp<T> overridingCleanUp) {
-        if(overridingCleanUp == null) {
-            overridingCleanUp = this.cleanUp;
-        }
-        Collection<T> values = delegate.values();
-        
-        Iterator<T> iterator = values.iterator();
+    public void clear(final CleanUp<T> overridingCleanUp) {
+        final CleanUp<T> cleanUp = overridingCleanUp == null ? this.cleanUp : overridingCleanUp;
+        final Collection<T> values = delegate.values();
+        final Iterator<T> iterator = values.iterator();
         while(iterator.hasNext()) {
-            T value = iterator.next();
-            if(overridingCleanUp != null) {
-                overridingCleanUp.clean(value);
+            final T value = iterator.next();
+            if(cleanUp != null) {
+                cleanUp.clean(value);
             }
             iterator.remove();
         }
-        
     }
 
-    public void removeForSession(Session session) {
-        List<String> list = tokensPerSession.remove(session.getSessionID());
+    public void removeForSession(final Session session) {
+        final Queue<String> list = tokensPerSession.remove(session.getSessionID());
         if(list == null) {
             return;
         }
-        for (String token : list) {
+        for (final String token : list) {
             remove(token);
         }
     }
