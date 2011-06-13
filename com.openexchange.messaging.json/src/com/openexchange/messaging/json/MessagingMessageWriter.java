@@ -379,9 +379,7 @@ public class MessagingMessageWriter {
 
     private JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers, final ServerSession session) throws MessagingException, JSONException {
         final JSONObject headerJSON = new JSONObject();
-
         for (final Map.Entry<String, Collection<MessagingHeader>> entry : headers.entrySet()) {
-
             final MessagingHeaderWriter writer = selectWriter(entry);
             headerJSON.put(writer.writeKey(entry), writer.writeValue(entry, session));
 
