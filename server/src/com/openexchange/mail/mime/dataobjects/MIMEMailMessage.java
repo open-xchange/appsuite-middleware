@@ -214,4 +214,18 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
         return unreadMessages;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("MIMEMailMessage [");
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        if (getFolder() != null) {
+            builder.append("getFolder()=").append(getFolder());
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }
