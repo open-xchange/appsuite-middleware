@@ -355,7 +355,7 @@ public class MessagingMessageWriter {
         {
             final MessagingContent content = part.getContent();
             if (content != null) {
-                final MessagingContentWriter writer = getWriter(part, content);
+                final MessagingContentWriter writer = optContentWriter(part, content);
                 if (writer != null) {
                     messageJSON.put("body", writer.write(part, content, session, mode));
                 }
@@ -368,7 +368,7 @@ public class MessagingMessageWriter {
                 final Collection<MessagingHeader> header = part.getHeader(knownHeader.toString());
                 if (header != null && !header.isEmpty()) {
                     final SimpleEntry<String, Collection<MessagingHeader>> entry = SimpleEntry.valueOf(knownHeader.toString(), header);
-                    final MessagingHeaderWriter writer = selectWriter(entry);
+                    final MessagingHeaderWriter writer = getHeaderWriter(entry);
                     messageJSON.put(field.toString(), writer.writeValue(entry, session));
                 }
             }
@@ -380,21 +380,28 @@ public class MessagingMessageWriter {
     private JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers, final ServerSession session) throws MessagingException, JSONException {
         final JSONObject headerJSON = new JSONObject();
         for (final Map.Entry<String, Collection<MessagingHeader>> entry : headers.entrySet()) {
-            final MessagingHeaderWriter writer = selectWriter(entry);
+            final MessagingHeaderWriter writer = getHeaderWriter(entry);
             headerJSON.put(writer.writeKey(entry), writer.writeValue(entry, session));
 
         }
         return headerJSON;
     }
 
-    private MessagingContentWriter getWriter(final MessagingPart message, final MessagingContent content) {
+    /**
+     * Gets the appropriate content writer for specified message part and content.
+     * 
+     * @param part The message part
+     * @param content The content
+     * @return The appropriate content writer or <code>null</code> if none found
+     */
+    private MessagingContentWriter optContentWriter(final MessagingPart part, final MessagingContent content) {
         int ranking = 0;
         MessagingContentWriter writer = null;
         /*
          * Get content writer with highest ranking
          */
         for (final MessagingContentWriter renderer : contentWriters) {
-            if (renderer.handles(message, content) && (writer == null || ranking < renderer.getRanking())) {
+            if (renderer.handles(part, content) && (writer == null || ranking < renderer.getRanking())) {
                 writer = renderer;
                 ranking = renderer.getRanking();
             }
@@ -402,7 +409,13 @@ public class MessagingMessageWriter {
         return writer;
     }
 
-    private MessagingHeaderWriter selectWriter(final Entry<String, Collection<MessagingHeader>> entry) {
+    /**
+     * Gets the appropriate header writer for specified header name and value.
+     * 
+     * @param entry The entry providing header name and value
+     * @return The appropriate header writer (not <code>null</code>)
+     */
+    private MessagingHeaderWriter getHeaderWriter(final Entry<String, Collection<MessagingHeader>> entry) {
         int ranking = 0;
         MessagingHeaderWriter candidate = null;
         /*
@@ -536,11 +549,11 @@ public class MessagingMessageWriter {
                 final Entry<String, Collection<MessagingHeader>> entry = SimpleEntry.valueOf(
                     messagingField.getEquivalentHeader().toString(),
                     collection);
-                final MessagingHeaderWriter writer = selectWriter(entry);
+                final MessagingHeaderWriter writer = getHeaderWriter(entry);
                 value = writer.writeValue(entry, session);
             } else if (MessagingContent.class.isInstance(value)) {
                 final MessagingContent content = (MessagingContent) value;
-                final MessagingContentWriter writer = getWriter(message, content);
+                final MessagingContentWriter writer = optContentWriter(message, content);
                 if (writer != null) {
                     value = writer.write(message, content, session, mode);
                 }
