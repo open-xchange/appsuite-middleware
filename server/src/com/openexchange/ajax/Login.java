@@ -57,9 +57,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.UUID;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -147,8 +146,11 @@ public class Login extends AJAXServlet {
     private int cookieExpiry;
     private boolean cookieForceHTTPS;
     private boolean ipCheck;
-    private List<IPRange> ranges;
+    private Queue<IPRange> ranges;
 
+    /**
+     * Initializes the login servlet.
+     */
     public Login() {
         super();
     }
@@ -162,15 +164,15 @@ public class Login extends AJAXServlet {
         httpAuthAutoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
         defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
         clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
-        String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
+        final String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
         if (null == templateFileLocation) {
             errorPageTemplate = ERROR_PAGE_TEMPLATE;
         } else {
-            File templateFile = new File(templateFileLocation);
+            final File templateFile = new File(templateFileLocation);
             try {
                 errorPageTemplate = IOTools.getFileContents(templateFile);
                 LOG.info("Found an error page template at " + templateFileLocation);
-            } catch (FileNotFoundException e) {
+            } catch (final FileNotFoundException e) {
                 LOG.error("Could not find an error page template at " + templateFileLocation + ", using default.");
                 errorPageTemplate = ERROR_PAGE_TEMPLATE;
             }
@@ -178,11 +180,9 @@ public class Login extends AJAXServlet {
         cookieExpiry = (int) (ConfigTools.parseTimespan(config.getInitParameter(ServerConfig.Property.COOKIE_TTL.getPropertyName())) / 1000);
         cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName())) || Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.FORCE_HTTPS.getPropertyName()));
         ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-        String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
-        if (tmp == null) {
-            ranges = Collections.emptyList();
-        } else {
-            ranges = new ArrayList<IPRange>();
+        ranges = new LinkedList<IPRange>();
+        final String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
+        if (tmp != null) {
             final String[] lines = tmp.split("\n");
             for (String line : lines) {
                 line = line.replaceAll("\\s", "");
@@ -207,7 +207,7 @@ public class Login extends AJAXServlet {
         }
     }
 
-    private void doJSONAuth(HttpServletRequest req, HttpServletResponse resp, String action) throws IOException {
+    private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
         if (ACTION_LOGIN.equals(action)) {
             // Look-up necessary credentials
             try {
@@ -243,7 +243,7 @@ public class Login extends AJAXServlet {
                 return;
             }
             try {
-                Session session = LoginPerformer.getInstance().lookupSession(sessionId);
+                final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                 if (session != null) {
                     final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
 
@@ -463,11 +463,11 @@ public class Login extends AJAXServlet {
             try {
                 doFormLogin(req, resp);
             } catch (final AjaxException e) {
-                String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
+                final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                 resp.setContentType(CONTENTTYPE_HTML);
                 resp.getWriter().write(errorPage);
-            } catch (LoginException e) {
-                String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
+            } catch (final LoginException e) {
+                final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                 resp.setContentType(CONTENTTYPE_HTML);
                 resp.getWriter().write(errorPage);
             }
@@ -476,11 +476,11 @@ public class Login extends AJAXServlet {
         }
     }
 
-    private void doHttpAuth(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void doHttpAuth(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         if (req.getHeader(Header.AUTH_HEADER) != null) {
             try {
                 doAuthHeaderLogin(req, resp);
-            } catch (LoginException e) {
+            } catch (final LoginException e) {
                 resp.setHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             }
@@ -505,7 +505,7 @@ public class Login extends AJAXServlet {
         }
     }
 
-    protected String addFragmentParameter(String usedUIWebPath, final String param, final String value) {
+    protected String addFragmentParameter(final String usedUIWebPath, final String param, final String value) {
         String retval = usedUIWebPath;
         final int fragIndex = retval.indexOf('#');
 
@@ -529,7 +529,7 @@ public class Login extends AJAXServlet {
     /**
      * Writes or rewrites a cookie
      */
-    private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, CookieType type) throws AbstractOXException, JSONException, IOException {
+    private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws AbstractOXException, JSONException, IOException {
         if (!sessiondAutoLogin && CookieType.SESSION == type) {
             throw new AjaxException(AjaxException.Code.DisabledAction, "store");
         }
@@ -592,13 +592,13 @@ public class Login extends AJAXServlet {
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
      */
-    protected void writeSecretCookie(final HttpServletResponse resp, final Session session, String hash, final boolean secure) {
+    protected void writeSecretCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure) {
         final Cookie cookie = new Cookie(SECRET_PREFIX + hash, session.getSecret());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
     }
 
-    protected void writeSessionCookie(final HttpServletResponse resp, final Session session, String hash, final boolean secure) {
+    protected void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure) {
         final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
@@ -667,7 +667,7 @@ public class Login extends AJAXServlet {
         }
     }
 
-    private LoginRequest parseLogin(final HttpServletRequest req, String loginParamName, boolean strict) throws AjaxException {
+    private LoginRequest parseLogin(final HttpServletRequest req, final String loginParamName, final boolean strict) throws AjaxException {
         final String login = req.getParameter(loginParamName);
         if (null == login) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, loginParamName);
@@ -775,7 +775,7 @@ public class Login extends AJAXServlet {
         return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
     }
 
-    private void doFormLogin(HttpServletRequest req, HttpServletResponse resp) throws AjaxException, LoginException, IOException {
+    private void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws AjaxException, LoginException, IOException {
         final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM ,true);
         final LoginResult result = LoginPerformer.getInstance().doLogin(request);
         final Session session = result.getSession();
@@ -788,8 +788,8 @@ public class Login extends AJAXServlet {
             session.getSessionID()));
     }
 
-    private void doAuthHeaderLogin(final HttpServletRequest req, HttpServletResponse resp) throws LoginException, IOException {
-        String auth = req.getHeader(Header.AUTH_HEADER);
+    private void doAuthHeaderLogin(final HttpServletRequest req, final HttpServletResponse resp) throws LoginException, IOException {
+        final String auth = req.getHeader(Header.AUTH_HEADER);
         final Credentials creds;
         if (Authorization.checkForBasicAuthorization(auth)) {
             creds = Authorization.decode(auth);
@@ -838,7 +838,7 @@ public class Login extends AJAXServlet {
         resp.sendRedirect(generateRedirectURL(null, httpAuthAutoLogin, session.getSessionID()));
     }
 
-    private String generateRedirectURL(String uiWebPathParam, String autoLoginParam, String sessionId) {
+    private String generateRedirectURL(final String uiWebPathParam, final String autoLoginParam, final String sessionId) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;
