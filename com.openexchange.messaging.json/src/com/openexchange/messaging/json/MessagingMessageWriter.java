@@ -94,27 +94,27 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class MessagingMessageWriter {
 
-    private static final class SimpleEntry<T1, T2> implements Map.Entry<T1, T2> {
+    private static final class SimpleEntry<K, V> implements Map.Entry<K, V> {
 
-        private final T1 key;
+        private final K key;
 
-        private T2 value;
+        private V value;
 
-        public SimpleEntry(final T1 key, final T2 value) {
+        public SimpleEntry(final K key, final V value) {
             this.key = key;
             this.value = value;
         }
 
-        public T1 getKey() {
+        public K getKey() {
             return key;
         }
 
-        public T2 getValue() {
+        public V getValue() {
             return value;
         }
 
-        public T2 setValue(final T2 value) {
-            final T2 oldValue = this.value;
+        public V setValue(final V value) {
+            final V oldValue = this.value;
             this.value = value;
             return oldValue;
         }
