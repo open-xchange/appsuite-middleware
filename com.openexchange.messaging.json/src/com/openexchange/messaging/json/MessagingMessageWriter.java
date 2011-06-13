@@ -392,11 +392,9 @@ public class MessagingMessageWriter {
         int ranking = 0;
         MessagingContentWriter writer = null;
         for (final MessagingContentWriter renderer : contentWriters) {
-            if (renderer.handles(message, content)) {
-                if (writer == null || ranking < renderer.getRanking()) {
-                    writer = renderer;
-                    ranking = renderer.getRanking();
-                }
+            if (renderer.handles(message, content) && (writer == null || ranking < renderer.getRanking())) {
+                writer = renderer;
+                ranking = renderer.getRanking();
             }
         }
         return writer;
@@ -407,14 +405,9 @@ public class MessagingMessageWriter {
         MessagingHeaderWriter candidate = null;
 
         for (final MessagingHeaderWriter writer : headerWriters) {
-            if (writer.handles(entry)) {
-                if (candidate == null) {
-                    candidate = writer;
-                    ranking = candidate.getRanking();
-                } else if (ranking < candidate.getRanking()) {
-                    candidate = writer;
-                    ranking = candidate.getRanking();
-                }
+            if (writer.handles(entry) && ((candidate == null) || (ranking < writer.getRanking()))) {
+                candidate = writer;
+                ranking = candidate.getRanking();
             }
         }
 
