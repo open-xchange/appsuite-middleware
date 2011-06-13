@@ -52,10 +52,11 @@ package com.openexchange.folderstorage.outlook;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -84,9 +85,9 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
      * Member section
      */
 
-    private final ConcurrentMap<String, List<FolderStorage>> registry;
+    private final ConcurrentMap<String, Queue<FolderStorage>> registry;
 
-    private final List<FolderStorage> genStorages;
+    private final Queue<FolderStorage> genStorages;
 
     private final ConcurrentMap<ContentType, FolderStorage> contentTypes;
 
@@ -95,8 +96,8 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
      */
     private OutlookFolderStorageRegistry() {
         super();
-        registry = new ConcurrentHashMap<String, List<FolderStorage>>();
-        genStorages = new CopyOnWriteArrayList<FolderStorage>();
+        registry = new ConcurrentHashMap<String, Queue<FolderStorage>>();
+        genStorages = new ConcurrentLinkedQueue<FolderStorage>();
         contentTypes = new ConcurrentHashMap<ContentType, FolderStorage>();
     }
 
@@ -141,9 +142,9 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         if (FolderStorage.ALL_TREE_ID.equals(treeId)) {
             genStorages.add(folderStorage);
         } else {
-            List<FolderStorage> storages = registry.get(treeId);
+            Queue<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
-                final List<FolderStorage> tmp = new CopyOnWriteArrayList<FolderStorage>();
+                final Queue<FolderStorage> tmp = new ConcurrentLinkedQueue<FolderStorage>();
                 storages = registry.putIfAbsent(treeId, tmp);
                 if (null == storages) {
                     storages = tmp;
@@ -168,7 +169,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return null;
         }
@@ -191,7 +192,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return null;
         }
@@ -218,7 +219,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
         }
@@ -246,7 +247,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
         }
@@ -268,7 +269,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
         }
@@ -300,7 +301,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         if (FolderStorage.ALL_TREE_ID.equals(treeId)) {
             genStorages.remove(folderStorage);
         } else {
-            final List<FolderStorage> storages = registry.get(treeId);
+            final Queue<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
                 return;
             }

@@ -52,9 +52,10 @@ package com.openexchange.folderstorage.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
@@ -84,17 +85,17 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
      * Member section
      */
 
-    private final ConcurrentMap<String, List<FolderStorage>> registry;
+    private final ConcurrentMap<String, Queue<FolderStorage>> registry;
 
-    private volatile List<FolderStorage> genStorages;
+    private volatile Queue<FolderStorage> genStorages;
 
     /**
      * Initializes a new {@link FolderStorageRegistry}.
      */
     private FolderStorageRegistry() {
         super();
-        registry = new ConcurrentHashMap<String, List<FolderStorage>>();
-        genStorages = new CopyOnWriteArrayList<FolderStorage>();
+        registry = new ConcurrentHashMap<String, Queue<FolderStorage>>();
+        genStorages = new ConcurrentLinkedQueue<FolderStorage>();
     }
 
     /**
@@ -133,11 +134,11 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
              * 1. genStorages.clear();
              * 2. genStorages.addAll(tmp);
              */
-            genStorages = new CopyOnWriteArrayList<FolderStorage>(tmp);
+            genStorages = new ConcurrentLinkedQueue<FolderStorage>(tmp);
         } else {
-            List<FolderStorage> storages = registry.get(treeId);
+            Queue<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
-                final List<FolderStorage> tmp = new CopyOnWriteArrayList<FolderStorage>();
+                final Queue<FolderStorage> tmp = new ConcurrentLinkedQueue<FolderStorage>();
                 storages = registry.putIfAbsent(treeId, tmp);
                 if (null == storages) {
                     storages = tmp;
@@ -149,7 +150,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     }
 
     public FolderStorage getFolderStorage(final String treeId, final String folderId) {
-        final List<FolderStorage> genericStorages = genStorages;
+        final Queue<FolderStorage> genericStorages = genStorages;
         if (!genericStorages.isEmpty()) {
             /*
              * Check general storages first
@@ -164,7 +165,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return null;
         }
@@ -177,7 +178,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     }
 
     public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
-        final List<FolderStorage> genericStorages = genStorages;
+        final Queue<FolderStorage> genericStorages = genStorages;
         if (!genericStorages.isEmpty()) {
             /*
              * Check general storages first
@@ -192,7 +193,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
         }
@@ -206,7 +207,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     }
 
     public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
-        final List<FolderStorage> genericStorages = genStorages;
+        final Queue<FolderStorage> genericStorages = genStorages;
         if (!genericStorages.isEmpty()) {
             /*
              * Check general storages first
@@ -221,7 +222,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
         }
@@ -229,7 +230,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     }
 
     public FolderStorage[] getTreeFolderStorages(final String treeId) {
-        final List<FolderStorage> genericStorages = genStorages;
+        final Queue<FolderStorage> genericStorages = genStorages;
         if (!genericStorages.isEmpty()) {
             /*
              * Check general storages first
@@ -244,7 +245,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(treeId);
+        final Queue<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
         }
@@ -265,7 +266,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         if (FolderStorage.ALL_TREE_ID.equals(treeId)) {
             genStorages.remove(folderStorage);
         } else {
-            final List<FolderStorage> storages = registry.get(treeId);
+            final Queue<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
                 return;
             }

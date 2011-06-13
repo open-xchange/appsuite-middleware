@@ -51,10 +51,12 @@ package com.openexchange.folderstorage.cache;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
@@ -83,24 +85,31 @@ public final class CacheContentTypeRegistry {
 
         private final ConcurrentMap<ContentType, FolderStorage> concreteStorages;
 
-        private volatile List<FolderStorage> generalStorages;
+        private volatile Queue<FolderStorage> generalStorages;
 
         public Element() {
             super();
             concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
-            generalStorages = new CopyOnWriteArrayList<FolderStorage>();
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>();
         }
 
         public ConcurrentMap<ContentType, FolderStorage> getConcreteStorages() {
             return concreteStorages;
         }
 
-        public List<FolderStorage> getGeneralStorages() {
+        public Queue<FolderStorage> getGeneralStorages() {
             return generalStorages;
         }
 
         public void replaceGeneralStorages(final List<FolderStorage> replacement) {
-            generalStorages = new CopyOnWriteArrayList<FolderStorage>(replacement);
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>(replacement);
+        }
+
+        public void removeAndSortGeneralStorages(final FolderStorage toRemove, final Comparator<FolderStorage> comparator) {
+            final List<FolderStorage> sortMe = new ArrayList<FolderStorage>(generalStorages);
+            sortMe.remove(toRemove);
+            Collections.sort(sortMe, comparator);
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>(sortMe);
         }
 
     }
@@ -187,9 +196,9 @@ public final class CacheContentTypeRegistry {
             return null;
         }
         // Look-up in general-purpose folder storages
-        final List<FolderStorage> generalStorages = element.getGeneralStorages();
+        final Queue<FolderStorage> generalStorages = element.getGeneralStorages();
         if (!generalStorages.isEmpty()) {
-            return generalStorages.get(0);
+            return generalStorages.peek();
         }
         final ConcurrentMap<ContentType, FolderStorage> types = element.getConcreteStorages();
         if (null == types) {
@@ -225,9 +234,7 @@ public final class CacheContentTypeRegistry {
             return;
         }
         // Remove from general storages
-        final List<FolderStorage> generalStorages = element.getGeneralStorages();
-        generalStorages.remove(folderStorage);
-        Collections.sort(generalStorages, FolderStorageComparator.getInstance());
+        element.removeAndSortGeneralStorages(folderStorage, FolderStorageComparator.getInstance());
     }
 
     /**

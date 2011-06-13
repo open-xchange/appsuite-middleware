@@ -55,10 +55,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -88,19 +89,19 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
         private final ConcurrentMap<ContentType, FolderStorage> concreteStorages;
 
-        private volatile List<FolderStorage> generalStorages;
+        private volatile Queue<FolderStorage> generalStorages;
 
         public Element() {
             super();
             concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
-            generalStorages = new CopyOnWriteArrayList<FolderStorage>();
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>();
         }
 
         public ConcurrentMap<ContentType, FolderStorage> getConcreteStorages() {
             return concreteStorages;
         }
 
-        public List<FolderStorage> getGeneralStorages() {
+        public Queue<FolderStorage> getGeneralStorages() {
             return generalStorages;
         }
 
@@ -110,7 +111,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
          * @param replacement The replacement
          */
         public void replaceGeneralStorages(final List<FolderStorage> replacement) {
-            generalStorages = new CopyOnWriteArrayList<FolderStorage>(replacement);
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>(replacement);
         }
 
     }
@@ -214,9 +215,9 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
             return null;
         }
         // Look-up in general-purpose folder storages
-        final List<FolderStorage> generalStorages = element.getGeneralStorages();
+        final Queue<FolderStorage> generalStorages = element.getGeneralStorages();
         if (!generalStorages.isEmpty()) {
-            return generalStorages.get(0);
+            return generalStorages.peek();
         }
         final ConcurrentMap<ContentType, FolderStorage> types = element.getConcreteStorages();
         if (null == types) {
@@ -227,7 +228,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     public ContentType getByString(final String contentTypeString) {
         for (final Entry<String, Element> entry : registry.entrySet()) {
-            final List<FolderStorage> generalStorages = entry.getValue().getGeneralStorages();
+            final Queue<FolderStorage> generalStorages = entry.getValue().getGeneralStorages();
             /*
              * Iterate general storages' content types
              */
