@@ -342,21 +342,23 @@ public class MessagingMessageWriter {
     JSONObject write(final MessagingPart part, final ServerSession session, final DisplayMode mode) throws JSONException, MessagingException {
         final JSONObject messageJSON = new JSONObject();
 
-        if (part.getSectionId() != null) {
-            messageJSON.put("sectionId", part.getSectionId());
+        messageJSON.putOpt("sectionId", part.getSectionId());
+
+        {
+            final Map<String, Collection<MessagingHeader>> headers = part.getHeaders();
+            if (null != headers && !headers.isEmpty()) {
+                final JSONObject headerJSON = writeHeaders(headers, session);
+                messageJSON.put("headers", headerJSON);
+            }
         }
-        if (null != part.getHeaders() && !part.getHeaders().isEmpty()) {
-            final JSONObject headerJSON = writeHeaders(part.getHeaders(), session);
 
-            messageJSON.put("headers", headerJSON);
-        }
-
-        final MessagingContent content = part.getContent();
-
-        if (content != null) {
-            final MessagingContentWriter writer = getWriter(part, content);
-            if (writer != null) {
-                messageJSON.put("body", writer.write(part, content, session, mode));
+        {
+            final MessagingContent content = part.getContent();
+            if (content != null) {
+                final MessagingContentWriter writer = getWriter(part, content);
+                if (writer != null) {
+                    messageJSON.put("body", writer.write(part, content, session, mode));
+                }
             }
         }
 
@@ -373,7 +375,6 @@ public class MessagingMessageWriter {
         }
 
         return messageJSON;
-
     }
 
     private JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers, final ServerSession session) throws MessagingException, JSONException {
