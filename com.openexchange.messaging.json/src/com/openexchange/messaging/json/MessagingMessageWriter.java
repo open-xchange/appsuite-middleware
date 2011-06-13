@@ -407,7 +407,7 @@ public class MessagingMessageWriter {
         for (final MessagingHeaderWriter writer : headerWriters) {
             if (writer.handles(entry) && ((candidate == null) || (ranking < writer.getRanking()))) {
                 candidate = writer;
-                ranking = candidate.getRanking();
+                ranking = writer.getRanking();
             }
         }
 
