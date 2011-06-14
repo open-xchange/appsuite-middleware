@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.services;
 
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -59,24 +60,34 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * Lists all known messaging services. No parameters are needed. Returns a JSONArray consisting of the JSON representations of
- * all known MessagingServices.
- *
+ * Lists all known messaging services. No parameters are needed. Returns a JSONArray consisting of the JSON representations of all known
+ * MessagingServices.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllAction extends AbstractMessagingServiceAction {
 
+    /**
+     * Initializes a new {@link AllAction}.
+     * 
+     * @param registry The registry for {@link MessagingService messaging services}
+     */
     public AllAction(final MessagingServiceRegistry registry) {
         super(registry);
     }
 
     @Override
     public AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+        final List<MessagingService> services = registry.getAllServices(session.getUserId(), session.getContextId());
+        if (services.isEmpty()) {
+            return new AJAXRequestResult(new JSONArray());
+        }
         final JSONArray result = new JSONArray();
-        for(final MessagingService service : registry.getAllServices(session.getUserId(), session.getContextId())) {
+        for (final MessagingService service : services) {
             result.put(getWriter(session).write(service));
         }
         return new AJAXRequestResult(result);
     }
+
 }

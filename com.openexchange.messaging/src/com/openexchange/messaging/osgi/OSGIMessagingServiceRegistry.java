@@ -87,7 +87,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     private ServiceTracker tracker;
 
     private ServiceTracker configTracker;
-    
+
     /**
      * Initializes a new {@link OSGIMessagingServiceRegistry}.
      */
@@ -126,73 +126,71 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
     }
 
-    public List<MessagingService> getAllServices(int user, int context) throws MessagingException {
+    public List<MessagingService> getAllServices(final int user, final int context) throws MessagingException {
         return filter(new ArrayList<MessagingService>(map.values()), user, context);
     }
 
-
-    public MessagingService getMessagingService(final String id, int user, int context) throws MessagingException {
+    public MessagingService getMessagingService(final String id, final int user, final int context) throws MessagingException {
         final MessagingService messagingService = map.get(id);
-        if (null == messagingService || ! isAllowed(id, user, context)) {
+        if (null == messagingService || !isAllowed(id, user, context)) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
         }
         return messagingService;
     }
 
-    private boolean isAllowed(String id, int user, int context) throws MessagingException {
+    private boolean isAllowed(final String id, final int user, final int context) throws MessagingException {
         try {
-            ConfigView configView = getView(user, context);
-            if ( !isMessagingEnabled(configView)) {
+            final ConfigView configView = getView(user, context);
+            if (!isMessagingEnabled(configView)) {
                 return false;
             }
-            ComposedConfigProperty<Boolean> configProperty = configView.property(id, boolean.class);
-            return (configProperty.isDefined() && configProperty.get());
-        } catch (ConfigCascadeException e) {
+            final ComposedConfigProperty<Boolean> configProperty = configView.property(id, boolean.class);
+            return (configProperty.isDefined() && configProperty.get().booleanValue());
+        } catch (final ConfigCascadeException e) {
             throw new MessagingException(e);
-        }        
+        }
     }
 
-    private List<MessagingService> filter(ArrayList<MessagingService> arrayList, int user, int context) throws MessagingException {
-        List<MessagingService> filteredList = new ArrayList<MessagingService>(arrayList.size());
+    private List<MessagingService> filter(final ArrayList<MessagingService> arrayList, final int user, final int context) throws MessagingException {
         try {
-            ConfigView configView = getView(user, context);
+            final ConfigView configView = getView(user, context);
             if (!isMessagingEnabled(configView)) {
                 return Collections.emptyList();
             }
-            for (MessagingService messagingService : arrayList) {
-                ComposedConfigProperty<Boolean> configProperty = configView.property(messagingService.getId(), boolean.class);
-                if (configProperty.isDefined() && configProperty.get()) {
+            final List<MessagingService> filteredList = new ArrayList<MessagingService>(arrayList.size());
+            for (final MessagingService messagingService : arrayList) {
+                final ComposedConfigProperty<Boolean> configProperty = configView.property(messagingService.getId(), boolean.class);
+                if (configProperty.isDefined() && configProperty.get().booleanValue()) {
                     filteredList.add(messagingService);
                 }
             }
-        } catch (ConfigCascadeException x) {
+            return filteredList;
+        } catch (final ConfigCascadeException x) {
             throw new MessagingException(x);
         }
-        
-        return filteredList;
     }
 
-    private boolean isMessagingEnabled(ConfigView configView) throws MessagingException {
+    private boolean isMessagingEnabled(final ConfigView configView) throws MessagingException {
         try {
-            ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.messaging.enabled", boolean.class);
-            if (property.isDefined() && property.get()) {
+            final ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.messaging.enabled", boolean.class);
+            if (property.isDefined() && property.get().booleanValue()) {
                 return true;
             }
-        } catch (ConfigCascadeException e) {
+        } catch (final ConfigCascadeException e) {
             throw new MessagingException(e);
         }
         return false;
     }
 
-    private ConfigView getView(int user, int context) throws ConfigCascadeException {
-        ConfigViewFactory service = (ConfigViewFactory) configTracker.getService();
+    private ConfigView getView(final int user, final int context) throws ConfigCascadeException {
+        final ConfigViewFactory service = (ConfigViewFactory) configTracker.getService();
         return service.getView(user, context);
     }
 
-    public boolean containsMessagingService(final String id, int user, int context) {
+    public boolean containsMessagingService(final String id, final int user, final int context) {
         try {
             return null == id ? false : (map.containsKey(id) && isAllowed(id, user, context));
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             return false;
         }
     }
@@ -245,5 +243,4 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
     } // End of Customizer class
 
-    
 }
