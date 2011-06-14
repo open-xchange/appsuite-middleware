@@ -63,8 +63,7 @@ public final class ICalTestSuite {
 	public static Test suite() {
 		final TestSuite tests = new TestSuite();
 		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalAppointmentExportTest.class);
-		tests.addTestSuite(ICalTaskExportTest.class);
+		tests.addTestSuite(ICalExportTest.class);
 		tests.addTestSuite(Bug9840Test.class);
 		tests.addTestSuite(Bug10382Test.class);
 		tests.addTestSuite(Bug11724Test.class);
