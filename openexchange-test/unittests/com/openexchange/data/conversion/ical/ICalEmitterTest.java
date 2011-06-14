@@ -450,7 +450,8 @@ public class ICalEmitterTest extends TestCase {
 
         final ICalFile ical = serialize(app);
 
-        assertProperty(ical, "EXDATE", "20090225T100000Z,20090228T120000Z");
+        assertProperty(ical, "EXDATE", "20090225T100000Z");
+        assertProperty(ical, "EXDATE", "20090228T120000Z");
     }
     
     public void testAppUid() throws IOException {
