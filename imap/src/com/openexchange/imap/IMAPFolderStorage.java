@@ -870,7 +870,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         final ACL[] initialACLs = getACLSafe(createMe);
                         if (initialACLs != null) {
                             final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
-                            final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
+                            final Entity2ACL entity2ACL = getEntity2ACL();
                             final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
                             final Map<String, ACL> m = acl2map(newACLs);
                             if (!equals(initialACLs, m, entity2ACL, args)) {
@@ -1015,6 +1015,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } finally {
             ListLsubCache.clearCache(accountId, session);
         }
+    }
+
+    private Entity2ACL getEntity2ACL() throws Entity2ACLException, MailException {
+        return Entity2ACL.getInstance(imapStore, imapConfig);
     }
 
     @Override
@@ -1540,7 +1544,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     final ACL[] oldACLs = getACLSafe(updateMe);
                     if (oldACLs != null) {
                         final ACL[] newACLs = permissions2ACL(toUpdate.getPermissions(), updateMe);
-                        final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
+                        final Entity2ACL entity2ACL = getEntity2ACL();
                         final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, updateMe, imapConfig);
                         final Map<String, ACL> m = acl2map(newACLs);
                         if (!equals(oldACLs, m, entity2ACL, args)) {
@@ -2264,7 +2268,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         /*
          * Ensure that owner still holds full rights
          */
-        final String ownerACLName = Entity2ACL.getInstance(imapConfig).getACLName(
+        final String ownerACLName = getEntity2ACL().getACLName(
             session.getUserId(),
             ctx,
             IMAPFolderConverter.getEntity2AclArgs(session, defaultFolder, imapConfig));
@@ -2480,7 +2484,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 acls.add(aclPermission.getPermissionACL(
                     IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig),
                     imapConfig,
-                    ctx));
+                    imapStore, ctx));
             } catch (final Entity2ACLException e) {
                 if (Entity2ACLException.Code.UNKNOWN_USER.getNumber() == e.getDetailNumber()) {
                     // Obviously the user is not known, skip

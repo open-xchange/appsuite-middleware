@@ -611,7 +611,7 @@ public final class IMAPFolderConverter {
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();
             try {
-                aclPerm.parseACL(acls[j], args, imapConfig, ctx);
+                aclPerm.parseACL(acls[j], args, (IMAPStore) imapFolder.getStore(), imapConfig, ctx);
                 userPermAdded |= (session.getUserId() == aclPerm.getEntity());
                 mailFolder.addPermission(aclPerm);
             } catch (final AbstractOXException e) {

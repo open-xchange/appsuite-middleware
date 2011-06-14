@@ -59,6 +59,7 @@ import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.ACL;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 
 /**
@@ -184,11 +185,12 @@ public final class ACLPermission extends MailPermission {
      * 
      * @param args The IMAP-server-specific arguments used for mapping
      * @param imapConfig The user's IMAP configuration
+     * @param imapStore The IMAP store
      * @param ctx The context
      * @return An instance of {@link ACL} representing this permission's rights
      * @throws AbstractOXException If this permission cannot be mapped to an instance of {@link ACL}
      */
-    public ACL getPermissionACL(final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
+    public ACL getPermissionACL(final Entity2ACLArgs args, final IMAPConfig imapConfig, IMAPStore imapStore, final Context ctx) throws AbstractOXException {
         if (acl != null) {
             /*
              * Return caches ACL
@@ -196,7 +198,7 @@ public final class ACLPermission extends MailPermission {
             return acl;
         }
         final Rights rights = permission2Rights(this, imapConfig);
-        return (acl = new ACL(Entity2ACL.getInstance(imapConfig).getACLName(getEntity(), ctx, args), rights));
+        return (acl = new ACL(Entity2ACL.getInstance(imapStore, imapConfig).getACLName(getEntity(), ctx, args), rights));
     }
 
     /**
@@ -204,12 +206,13 @@ public final class ACLPermission extends MailPermission {
      * 
      * @param acl The source instance of {@link ACL}
      * @param args The IMAP-server-specific arguments used for mapping
+     * @param imapStore The IMAP store
      * @param imapConfig The user's IMAP configuration
      * @param ctx The context
      * @throws AbstractOXException If given ACL cannot be applied to this permission
      */
-    public void parseACL(final ACL acl, final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
-        final UserGroupID res = Entity2ACL.getInstance(imapConfig).getEntityID(acl.getName(), ctx, args);
+    public void parseACL(final ACL acl, final Entity2ACLArgs args, IMAPStore imapStore, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
+        final UserGroupID res = Entity2ACL.getInstance(imapStore, imapConfig).getEntityID(acl.getName(), ctx, args);
         setEntity(res.getId());
         setGroupPermission(res.isGroup());
         parseRights(acl.getRights(), imapConfig);
