@@ -141,7 +141,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object threadLevel(final Object... args) {
-        return ((MessagingMessage) args[0]).getThreadLevel();
+        return Integer.valueOf(((MessagingMessage) args[0]).getThreadLevel());
     }
 
     public Object to(final Object... args) throws MessagingException {
