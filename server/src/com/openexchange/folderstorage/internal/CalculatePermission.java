@@ -49,12 +49,11 @@
 
 package com.openexchange.folderstorage.internal;
 
+import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.folderstorage.ContentType;
@@ -257,19 +256,17 @@ public final class CalculatePermission {
         if (!userConfig.hasModuleAccess(module)) {
             return false;
         }
-        final Set<Integer> set;
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
-            set = Collections.<Integer> emptySet();
-        } else {
-            set = new HashSet<Integer>(allowedContentTypes.size() + 1);
-            for (final ContentType allowedContentType : allowedContentTypes) {
-                set.add(Integer.valueOf(allowedContentType.getModule()));
-            }
-            // Module SYSTEM is allowed in any case
-            set.add(Integer.valueOf(FolderObject.SYSTEM_MODULE));
-            set.add(Integer.valueOf(FolderObject.UNBOUND));
+            return true;
         }
-        return set.isEmpty() ? true : set.contains(Integer.valueOf(module));
+        final TIntHashSet set = new TIntHashSet(allowedContentTypes.size() + 2);
+        for (final ContentType allowedContentType : allowedContentTypes) {
+            set.add(allowedContentType.getModule());
+        }
+        // Module SYSTEM is allowed in any case
+        set.add(FolderObject.SYSTEM_MODULE);
+        set.add(FolderObject.UNBOUND);
+        return set.isEmpty() ? true : set.contains(module);
     }
 
     private static final int[] mapping = { 0, 2, 4, -1, 8 };
