@@ -266,19 +266,17 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
         }
         /*
-         * Query; Ensure post_id is contained to maintain order
+         * Ensure post_id is contained to maintain order
          */
-        final FQLQuery query;
-        if (fieldSet.contains(MessagingField.ID)) { // Contains post_id
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(fieldSet, messageIds);
-        } else {
-            fieldSet.add(MessagingField.ID);
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(fieldSet, messageIds);
-        }
+        fieldSet.add(MessagingField.ID);
+        /*
+         * Perform FB query
+         */
+        final FQLQuery query = FacebookMessagingUtility.composeFQLStreamQueryFor(fieldSet, messageIds);
         final List<MessagingMessage> messages;
         if (null == query) {
             messages = new ArrayList<MessagingMessage>(messageIds.length);
-            for (final String messageId : messageIds) {
+            for (int i = 0; i < messageIds.length; i++) {
                 final FacebookMessagingMessage message = new FacebookMessagingMessage(getUserLocale());
                 for (final StaticFiller filler : staticFillers) {
                     filler.fill(message);
