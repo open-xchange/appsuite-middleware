@@ -60,6 +60,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link Entity2ACLAutoDetector} - Auto-detects {@link Entity2ACL} implementation.
@@ -109,7 +110,7 @@ public final class Entity2ACLAutoDetector {
         final InetSocketAddress key = new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort());
         Future<Entity2ACL> cached = map.get(key);
         if (null == cached) {
-            final FutureTask<Entity2ACL> ft = new FutureTask<Entity2ACL>(new Entity2ACLCallable(key, imapConfig, LOG));
+            final FutureTask<Entity2ACL> ft = new FutureTask<Entity2ACL>(new Entity2ACLCallable(key, imapConfig));
             cached = map.putIfAbsent(key, ft);
             if (null == cached) {
                 cached = ft;
@@ -148,65 +149,88 @@ public final class Entity2ACLAutoDetector {
 
         private final IMAPConfig imapConfig;
 
-        private final org.apache.commons.logging.Log logger;
-
-        public Entity2ACLCallable(final InetSocketAddress key, final IMAPConfig imapConfig, final org.apache.commons.logging.Log logger) {
+        public Entity2ACLCallable(final InetSocketAddress key, final IMAPConfig imapConfig) {
             super();
             this.imapConfig = imapConfig;
             this.key = key;
-            this.logger = logger;
         }
 
         public Entity2ACL call() throws Exception {
             final String greeting = IMAPCapabilityAndGreetingCache.getGreeting(key, imapConfig.isSecure(), imapConfig.getIMAPProperties());
-            /*
-             * Map greeting to a known IMAP server
-             */
-            final IMAPServer imapServer = mapInfo2IMAPServer(greeting, key, imapConfig);
-            try {
-                final Entity2ACL entity2Acl = Class.forName(imapServer.getImpl()).asSubclass(Entity2ACL.class).newInstance();
-                if (logger.isInfoEnabled()) {
-                    logger.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append("] greeting successfully mapped to: ").append(
-                        imapServer.getName()));
-                }
-                return entity2Acl;
-            } catch (final InstantiationException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
-            } catch (final IllegalAccessException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
-            } catch (final ClassNotFoundException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
-            }
-        }
-
-        private IMAPServer mapInfo2IMAPServer(final String info, final InetSocketAddress address, final IMAPConfig imapConfig) throws Entity2ACLException {
-            final IMAPServer[] imapServers = IMAPServer.values();
-            for (int i = 0; i < imapServers.length; i++) {
-                final IMAPServer imapServer = imapServers[i];
-                if (imapServer.matches(info)) {
-                    return imapServer;
-                }
-            }
-            /*
-             * No known IMAP server found, check if ACLs are disabled anyway. If yes entity2acl is never used and can safely be mapped to
-             * default implementation.
-             */
-            if (!imapConfig.getACLExtension().aclSupport()) {
-                /*
-                 * Return fallback implementation
-                 */
-                if (logger.isWarnEnabled()) {
-                    final StringBuilder warnBuilder = new StringBuilder(512).append("No IMAP server found ").append(
-                        "that corresponds to greeting:\n\"").append(info.replaceAll("\r?\n", "")).append("\" on ").append(address).append(
-                        ".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"").append(
-                        IMAPServer.CYRUS.getName()).append("\" is used as fallback.");
-                    logger.warn(warnBuilder.toString());
-                }
-                return IMAPServer.CYRUS;
-            }
-            throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
+            return impl4(greeting, key, imapConfig);
         }
 
     } // End of Entity2ACLCallable
+
+    /**
+     * Gets the appropriate {@link Entity2ACL} implementation.
+     * 
+     * @param greeting The greeting
+     * @param imapConfig The IMAP configuration
+     * @return The appropriate {@link Entity2ACL} implementation
+     * @throws Entity2ACLException If an error occurs
+     */
+    protected static Entity2ACL impl4(final String greeting, final IMAPConfig imapConfig) throws Entity2ACLException {
+        return impl4(greeting, null, imapConfig);
+    }
+
+    /**
+     * Gets the appropriate {@link Entity2ACL} implementation.
+     * 
+     * @param greeting The greeting
+     * @param address The socket address
+     * @param imapConfig The IMAP configuration
+     * @return The appropriate {@link Entity2ACL} implementation
+     * @throws Entity2ACLException If an error occurs
+     */
+    protected static Entity2ACL impl4(final String greeting, final InetSocketAddress address, final IMAPConfig imapConfig) throws Entity2ACLException {
+        /*
+         * Map greeting to a known IMAP server
+         */
+        final InetSocketAddress key = null == address ? new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()) : address;
+        final IMAPServer imapServer = mapInfo2IMAPServer(greeting, key, imapConfig);
+        try {
+            final Entity2ACL entity2Acl = Class.forName(imapServer.getImpl()).asSubclass(Entity2ACL.class).newInstance();
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(key).append("] greeting successfully mapped to: ").append(
+                    imapServer.getName()));
+            }
+            return entity2Acl;
+        } catch (final InstantiationException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
+        } catch (final IllegalAccessException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
+        } catch (final ClassNotFoundException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
+        }
+    }
+
+    private static IMAPServer mapInfo2IMAPServer(final String info, final InetSocketAddress address, final IMAPConfig imapConfig) throws Entity2ACLException {
+        final IMAPServer[] imapServers = IMAPServer.values();
+        for (int i = 0; i < imapServers.length; i++) {
+            final IMAPServer imapServer = imapServers[i];
+            if (imapServer.matches(info)) {
+                return imapServer;
+            }
+        }
+        /*
+         * No known IMAP server found, check if ACLs are disabled anyway. If yes entity2acl is never used and can safely be mapped to
+         * default implementation.
+         */
+        if (!imapConfig.getACLExtension().aclSupport()) {
+            /*
+             * Return fallback implementation
+             */
+            if (LOG.isWarnEnabled()) {
+                final StringBuilder warnBuilder = new StringBuilder(512).append("No IMAP server found ").append(
+                    "that corresponds to greeting:\n\"").append(info.replaceAll("\r?\n", "")).append("\" on ").append(address).append(
+                    ".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"").append(
+                    IMAPServer.CYRUS.getName()).append("\" is used as fallback.");
+                LOG.warn(warnBuilder.toString());
+            }
+            return IMAPServer.CYRUS;
+        }
+        throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
+    }
 
 }
