@@ -135,7 +135,7 @@ public final class IMAPConfig extends MailConfig {
      * @param clazz The parameter's type
      * @return The value
      */
-    public <V> V getValue(final String name, final Class<? extends V> clazz) {
+    public <V> V getParameter(final String name, final Class<? extends V> clazz) {
         return clazz.cast(params.get(name));
     }
 
