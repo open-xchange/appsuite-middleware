@@ -58,8 +58,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -121,12 +123,14 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class Login extends AJAXServlet {
 
-    private enum CookieType {
-		SESSION,
-		SECRET;
-	}
-	
     private static final long serialVersionUID = 7680745138705836499L;
+
+    static final Log LOG = LogFactory.getLog(Login.class);
+
+    private static interface JSONRequestHandler {
+        
+        void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException;
+    }
 
     public static final String SESSION_PREFIX = "open-xchange-session-";
 
@@ -134,7 +138,10 @@ public class Login extends AJAXServlet {
 
     private static final String ACTION_FORMLOGIN = "formlogin";
 
-    private static final Log LOG = LogFactory.getLog(Login.class);
+    private static enum CookieType {
+        SESSION,
+        SECRET;
+    }
     
     private String uiWebPath;
     private boolean sessiondAutoLogin;
@@ -147,12 +154,364 @@ public class Login extends AJAXServlet {
     private boolean cookieForceHTTPS;
     private boolean ipCheck;
     private Queue<IPRange> ranges;
+    private final Map<String, JSONRequestHandler> handlerMap;
 
     /**
      * Initializes the login servlet.
      */
     public Login() {
         super();
+        final Map<String, JSONRequestHandler> map = new ConcurrentHashMap<String, Login.JSONRequestHandler>(8);
+        map.put(ACTION_LOGIN, new JSONRequestHandler() {
+
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                // Look-up necessary credentials
+                try {
+                    doLogin(req, resp);
+                } catch (final AjaxException e) {
+                    logAndSendException(resp, e);
+                }
+            }
+        });
+        map.put(ACTION_STORE, new JSONRequestHandler() {
+
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                try {
+                    doStore(req, resp);
+                } catch (final AbstractOXException e) {
+                    logAndSendException(resp, e);
+                } catch (final JSONException e) {
+                    log(RESPONSE_ERROR, e);
+                    sendError(resp);
+                }
+            }
+        });
+        map.put(ACTION_REFRESH_SECRET, new JSONRequestHandler() {
+
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                try {
+                    doRefreshSecret(req, resp);
+                } catch (final AbstractOXException e) {
+                    logAndSendException(resp, e);
+                } catch (final JSONException e) {
+                    log(RESPONSE_ERROR, e);
+                    sendError(resp);
+                }
+            }
+        });
+        map.put(ACTION_LOGOUT, new JSONRequestHandler() {
+
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                // The magic spell to disable caching
+                Tools.disableCaching(resp);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final String sessionId = req.getParameter(PARAMETER_SESSION);
+                if (sessionId == null) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    return;
+                }
+                try {
+                    final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
+                    if (session != null) {
+                        final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
+
+                        if (secret == null || !session.getSecret().equals(secret)) {
+                            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                            return;
+                        }
+
+                        LoginPerformer.getInstance().doLogout(sessionId);
+                        // Drop relevant cookies
+                        removeOXCookies(session.getHash(), req, resp);
+                        removeJSESSIONID(req, resp);
+                    }
+                } catch (final LoginException e) {
+                    LOG.error("Logout failed", e);
+                }
+            }
+        });
+        map.put(ACTION_REDIRECT, new JSONRequestHandler() {
+
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                // The magic spell to disable caching
+                Tools.disableCaching(resp);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final String randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
+                if (randomToken == null) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    return;
+                }
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                if (sessiondService == null) {
+                    final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
+                    LOG.error(se.getMessage(), se);
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+                final Session session = sessiondService.getSessionByRandomToken(randomToken, req.getRemoteAddr());
+                if (session == null) {
+                    // Unknown random token; throw error
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
+                    } else if (LOG.isInfoEnabled()) {
+                        LOG.info("No session could be found for random token: " + randomToken);
+                    }
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+                // Remove old cookies to prevent usage of the old autologin cookie
+                SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                try {
+                    final Context context = ContextStorage.getInstance().getContext(session.getContextId());
+                    final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+                    if (!context.isEnabled() || !user.isMailEnabled()) {
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+                } catch (final UndeclaredThrowableException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                } catch (final ContextException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                } catch (final LdapException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+
+                String client = req.getParameter(LoginFields.CLIENT_PARAM);
+                if (null == client) {
+                    client = session.getClient();
+                } else {
+                    session.setClient(client);
+                }
+                final String hash = HashCalculator.getHash(req, client);
+                session.setHash(hash);
+                writeSecretCookie(resp, session, hash, req.isSecure());
+
+                resp.sendRedirect(generateRedirectURL(
+                    req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
+                    req.getParameter("store"),
+                    session.getSessionID()));
+            }
+        });
+        map.put(ACTION_REDEEM, new JSONRequestHandler() {
+
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+             // The magic spell to disable caching
+                Tools.disableCaching(resp);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final String randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
+                if (randomToken == null) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    return;
+                }
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                if (sessiondService == null) {
+                    final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
+                    LOG.error(se.getMessage(), se);
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+                final Session session = sessiondService.getSessionByRandomToken(randomToken, req.getRemoteAddr());
+                if (session == null) {
+                    // Unknown random token; throw error
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
+                    } else if (LOG.isInfoEnabled()) {
+                        LOG.info("No session could be found for random token: " + randomToken);
+                    }
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+                // Remove old cookies to prevent usage of the old autologin cookie
+                SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                try {
+                    final Context context = ContextStorage.getInstance().getContext(session.getContextId());
+                    final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+                    if (!context.isEnabled() || !user.isMailEnabled()) {
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+                } catch (final UndeclaredThrowableException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                } catch (final ContextException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                } catch (final LdapException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+
+                String client = req.getParameter(LoginFields.CLIENT_PARAM);
+                if (null == client) {
+                    client = session.getClient();
+                } else {
+                    session.setClient(client);
+                }
+                final String hash = HashCalculator.getHash(req, client);
+                session.setHash(hash);
+                writeSecretCookie(resp, session, hash, req.isSecure());
+
+                try {
+                    final JSONObject json = new JSONObject();
+                    LoginWriter.write(session, json);
+                    // Append "config/modules"
+                    appendModules(session, json, req);
+                    json.write(resp.getWriter());
+                } catch (final JSONException e) {
+                    log(RESPONSE_ERROR, e);
+                    sendError(resp);
+                }
+            }
+        });
+        map.put(ACTION_AUTOLOGIN, new JSONRequestHandler() {
+
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                Tools.disableCaching(resp);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final Response response = new Response();
+                Session session = null;
+                try {
+                    if (!sessiondAutoLogin) {
+                        throw new AjaxException(AjaxException.Code.DisabledAction, "autologin");
+                    }
+
+                    final Cookie[] cookies = req.getCookies();
+                    if (cookies == null) {
+                        throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
+                    }
+
+                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                    String secret = null;
+                    final String hash = HashCalculator.getHash(req);
+                    final String sessionCookieName = SESSION_PREFIX + hash;
+                    final String secretCookieName = SECRET_PREFIX + hash;
+
+                    NextCookie: for (final Cookie cookie : cookies) {
+                        final String cookieName = cookie.getName();
+                        if (cookieName.startsWith(sessionCookieName)) {
+                            final String sessionId = cookie.getValue();
+                            if (sessiondService.refreshSession(sessionId)) {
+                                session = sessiondService.getSession(sessionId);
+                                // IP check if enabled; otherwise update session's IP address if different to request's IP address
+                                if (!ipCheck) {
+                                    // Update IP address if necessary
+                                    updateIPAddress(req.getRemoteAddr(), session);
+                                } else {
+                                    final String newIP = req.getRemoteAddr();
+                                    SessionServlet.checkIP(true, ranges, session, newIP);
+                                    // IP check passed: update IP address if necessary
+                                    updateIPAddress(newIP, session);
+                                }
+                                try {
+                                    final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
+                                    final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
+                                    if (!ctx.isEnabled() || !user.isMailEnabled()) {
+                                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                                    }
+                                } catch (final UndeclaredThrowableException e) {
+                                    throw LoginExceptionCodes.UNKNOWN.create(e);
+                                }
+                                final JSONObject json = new JSONObject();
+                                LoginWriter.write(session, json);
+                                // Append "config/modules"
+                                appendModules(session, json, req);
+                                response.setData(json);
+                                /*
+                                 * Secret already found?
+                                 */
+                                if (null != secret) {
+                                    break NextCookie;
+                                }
+                            }
+                        } else if (cookieName.startsWith(secretCookieName)) {
+                            secret = cookie.getValue();
+                            /*
+                             * Session already found?
+                             */
+                            if (null != session) {
+                                break NextCookie;
+                            }
+                        }
+                    }
+                    if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
+                        SessionServlet.removeOXCookies(hash, req, resp);
+                        SessionServlet.removeJSESSIONID(req, resp);
+                        throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
+                    }
+                } catch (final SessiondException e) {
+                    LOG.debug(e.getMessage(), e);
+                    if (SessionServlet.isIpCheckError(e) && null != session) {
+                        try {
+                            // Drop Open-Xchange cookies
+                            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                            SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                            SessionServlet.removeJSESSIONID(req, resp);
+                            sessiondService.removeSession(session.getSessionID());
+                        } catch (final Exception e2) {
+                            LOG.error("Cookies could not be removed.", e2);
+                        }
+                    }
+                    response.setException(e);
+                } catch (final AjaxException e) {
+                    LOG.debug(e.getMessage(), e);
+                    response.setException(e);
+                } catch (final OXJSONException e) {
+                    LOG.debug(e.getMessage(), e);
+                    response.setException(e);
+                } catch (final JSONException e) {
+                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                    LOG.error(oje.getMessage(), oje);
+                    response.setException(oje);
+                } catch (final ContextException e) {
+                    LOG.debug(e.getMessage(), e);
+                    response.setException(e);
+                } catch (final LdapException e) {
+                    LOG.debug(e.getMessage(), e);
+                    response.setException(e);
+                } catch (final LoginException e) {
+                    if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
+                        LOG.debug(e.getMessage(), e);
+                    } else {
+                        LOG.error(e.getMessage(), e);
+                    }
+                    response.setException(e);
+                }
+                // The magic spell to disable caching
+                Tools.disableCaching(resp);
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                try {
+                    if (response.hasError()) {
+                        ResponseWriter.write(response, resp.getWriter());
+                    } else {
+                        ((JSONObject) response.getData()).write(resp.getWriter());
+                    }
+                } catch (final JSONException e) {
+                    log(RESPONSE_ERROR, e);
+                    sendError(resp);
+                }
+            }
+        });
+        map.put(ACTION_FORMLOGIN, new JSONRequestHandler() {
+
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                try {
+                    doFormLogin(req, resp);
+                } catch (final AjaxException e) {
+                    final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
+                    resp.setContentType(CONTENTTYPE_HTML);
+                    resp.getWriter().write(errorPage);
+                } catch (final LoginException e) {
+                    final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
+                    resp.setContentType(CONTENTTYPE_HTML);
+                    resp.getWriter().write(errorPage);
+                }
+            }
+        });
+        handlerMap = map;
     }
 
     @Override
@@ -208,272 +567,12 @@ public class Login extends AJAXServlet {
     }
 
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
-        if (ACTION_LOGIN.equals(action)) {
-            // Look-up necessary credentials
-            try {
-                doLogin(req, resp);
-            } catch (final AjaxException e) {
-                logAndSendException(resp, e);
-            }
-        } else if (ACTION_STORE.equals(action)) {
-            try {
-                doStore(req, resp);
-            } catch (final AbstractOXException e) {
-                logAndSendException(resp, e);
-            } catch (final JSONException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
-            }
-        } else if (ACTION_REFRESH_SECRET.equals(action)) {
-            try {
-                doRefreshSecret(req, resp);
-            } catch (final AbstractOXException e) {
-                logAndSendException(resp, e);
-            } catch (final JSONException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
-            }
-        } else if (ACTION_LOGOUT.equals(action)) {
-            // The magic spell to disable caching
-            Tools.disableCaching(resp);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            final String sessionId = req.getParameter(PARAMETER_SESSION);
-            if (sessionId == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-            try {
-                final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
-                if (session != null) {
-                    final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
-
-                    if (secret == null || !session.getSecret().equals(secret)) {
-                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                        return;
-                    }
-
-                    LoginPerformer.getInstance().doLogout(sessionId);
-                    // Drop relevant cookies
-                    removeOXCookies(session.getHash(), req, resp);
-                    removeJSESSIONID(req, resp);
-                }
-            } catch (final LoginException e) {
-                LOG.error("Logout failed", e);
-            }
-        } else if (ACTION_REDIRECT.equals(action) || ACTION_REDEEM.equals(action)) {
-            // The magic spell to disable caching
-            Tools.disableCaching(resp);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            final String randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
-            if (randomToken == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (sessiondService == null) {
-                final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
-                LOG.error(se.getMessage(), se);
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-            final Session session = sessiondService.getSessionByRandomToken(randomToken, req.getRemoteAddr());
-            if (session == null) {
-                // Unknown random token; throw error
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                } else if (LOG.isInfoEnabled()) {
-                    LOG.info("No session could be found for random token: " + randomToken);
-                }
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-            // Remove old cookies to prevent usage of the old autologin cookie
-            SessionServlet.removeOXCookies(session.getHash(), req, resp);
-            try {
-                final Context context = ContextStorage.getInstance().getContext(session.getContextId());
-                final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
-                if (!context.isEnabled() || !user.isMailEnabled()) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
-            } catch (final UndeclaredThrowableException e) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            } catch (final ContextException e) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            } catch (final LdapException e) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-
-            String client = req.getParameter(LoginFields.CLIENT_PARAM);
-            if (null == client) {
-                client = session.getClient();
-            } else {
-                session.setClient(client);
-            }
-            final String hash = HashCalculator.getHash(req, client);
-            session.setHash(hash);
-            writeSecretCookie(resp, session, hash, req.isSecure());
-
-            if (ACTION_REDIRECT.equals(action)) {
-                resp.sendRedirect(generateRedirectURL(
-                    req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
-                    req.getParameter("store"),
-                    session.getSessionID()));
-            } else {
-                try {
-                    final JSONObject json = new JSONObject();
-                    LoginWriter.write(session, json);
-                    // Append "config/modules"
-                    appendModules(session, json, req);
-                    json.write(resp.getWriter());
-                } catch (final JSONException e) {
-                    log(RESPONSE_ERROR, e);
-                    sendError(resp);
-                }
-            }
-        } else if (ACTION_AUTOLOGIN.equals(action)) {
-            Tools.disableCaching(resp);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            final Response response = new Response();
-            Session session = null;
-            try {
-                if (!sessiondAutoLogin) {
-                    throw new AjaxException(AjaxException.Code.DisabledAction, "autologin");
-                }
-
-                final Cookie[] cookies = req.getCookies();
-                if (cookies == null) {
-                    throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
-                }
-
-                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                String secret = null;
-                final String hash = HashCalculator.getHash(req);
-                final String sessionCookieName = SESSION_PREFIX + hash;
-                final String secretCookieName = SECRET_PREFIX + hash;
-
-                NextCookie: for (final Cookie cookie : cookies) {
-                    final String cookieName = cookie.getName();
-                    if (cookieName.startsWith(sessionCookieName)) {
-                        final String sessionId = cookie.getValue();
-                        if (sessiondService.refreshSession(sessionId)) {
-                            session = sessiondService.getSession(sessionId);
-                            // IP check if enabled; otherwise update session's IP address if different to request's IP address
-                            if (!ipCheck) {
-                                // Update IP address if necessary
-                                updateIPAddress(req.getRemoteAddr(), session);
-                            } else {
-                                final String newIP = req.getRemoteAddr();
-                                SessionServlet.checkIP(true, ranges, session, newIP);
-                                // IP check passed: update IP address if necessary
-                                updateIPAddress(newIP, session);
-                            }
-                            try {
-                                final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-                                final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-                                if (!ctx.isEnabled() || !user.isMailEnabled()) {
-                                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                                }
-                            } catch (final UndeclaredThrowableException e) {
-                                throw LoginExceptionCodes.UNKNOWN.create(e);
-                            }
-                            final JSONObject json = new JSONObject();
-                            LoginWriter.write(session, json);
-                            // Append "config/modules"
-                            appendModules(session, json, req);
-                            response.setData(json);
-                            /*
-                             * Secret already found?
-                             */
-                            if (null != secret) {
-                                break NextCookie;
-                            }
-                        }
-                    } else if (cookieName.startsWith(secretCookieName)) {
-                        secret = cookie.getValue();
-                        /*
-                         * Session already found?
-                         */
-                        if (null != session) {
-                            break NextCookie;
-                        }
-                    }
-                }
-                if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
-                    SessionServlet.removeOXCookies(hash, req, resp);
-                    SessionServlet.removeJSESSIONID(req, resp);
-                    throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
-                }
-            } catch (final SessiondException e) {
-                LOG.debug(e.getMessage(), e);
-                if (SessionServlet.isIpCheckError(e) && null != session) {
-                    try {
-                        // Drop Open-Xchange cookies
-                        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                        SessionServlet.removeOXCookies(session.getHash(), req, resp);
-                        SessionServlet.removeJSESSIONID(req, resp);
-                        sessiondService.removeSession(session.getSessionID());
-                    } catch (final Exception e2) {
-                        LOG.error("Cookies could not be removed.", e2);
-                    }
-                }
-                response.setException(e);
-            } catch (final AjaxException e) {
-                LOG.debug(e.getMessage(), e);
-                response.setException(e);
-            } catch (final OXJSONException e) {
-                LOG.debug(e.getMessage(), e);
-                response.setException(e);
-            } catch (final JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
-            } catch (final ContextException e) {
-                LOG.debug(e.getMessage(), e);
-                response.setException(e);
-            } catch (final LdapException e) {
-                LOG.debug(e.getMessage(), e);
-                response.setException(e);
-            } catch (final LoginException e) {
-                if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
-                    LOG.debug(e.getMessage(), e);
-                } else {
-                    LOG.error(e.getMessage(), e);
-                }
-                response.setException(e);
-            }
-            // The magic spell to disable caching
-            Tools.disableCaching(resp);
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            try {
-                if (response.hasError()) {
-                    ResponseWriter.write(response, resp.getWriter());
-                } else {
-                    ((JSONObject) response.getData()).write(resp.getWriter());
-                }
-            } catch (final JSONException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
-            }
-        } else if (ACTION_FORMLOGIN.equals(action)) {
-            try {
-                doFormLogin(req, resp);
-            } catch (final AjaxException e) {
-                final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
-                resp.setContentType(CONTENTTYPE_HTML);
-                resp.getWriter().write(errorPage);
-            } catch (final LoginException e) {
-                final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
-                resp.setContentType(CONTENTTYPE_HTML);
-                resp.getWriter().write(errorPage);
-            }
-        } else {
+        final JSONRequestHandler handler = handlerMap.get(action);
+        if (null == handler) {
             logAndSendException(resp, new AjaxException(AjaxException.Code.UnknownAction, action));
+            return;
         }
+        handler.handleRequest(req, resp);
     }
 
     private void doHttpAuth(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {

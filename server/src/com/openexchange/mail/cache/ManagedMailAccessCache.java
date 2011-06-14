@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.cache;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.mail.MailException;
@@ -62,6 +64,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -73,6 +76,16 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedMailAccessCache {
+
+    /**
+     * The logger instance.
+     */
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagedMailAccessCache.class);
+
+    /**
+     * The flag whether debug logging is enabled.
+     */
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static volatile ManagedMailAccessCache singleton;
 
@@ -100,6 +113,7 @@ public final class ManagedMailAccessCache {
         if (null != singleton) {
             synchronized (ManagedMailAccessCache.class) {
                 if (null != singleton) {
+                    singleton.dispose();
                     singleton = null;
                 }
             }
@@ -124,21 +138,17 @@ public final class ManagedMailAccessCache {
     private ManagedMailAccessCache() throws MailException {
         super();
         try {
-            map = new ConcurrentHashMap<ManagedMailAccessCache.Key, MailAccessQueue>();
+            map = new ConcurrentHashMap<Key, MailAccessQueue>();
             defaultIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
+            /*
+             * Add timer task
+             */
             final TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-            final Runnable task = null;
-            timerTask = service.scheduleWithFixedDelay(task , 1000, MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
+            final int shrinkerMillis = MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() * 1000;
+            timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), shrinkerMillis, shrinkerMillis);
         } catch (final ServiceException e) {
             throw new MailException(e);
         }
-    }
-
-    /**
-     * Disposes this cache.
-     */
-    protected void dispose() {
-        timerTask.cancel(false);
     }
 
     /**
@@ -159,10 +169,10 @@ public final class ManagedMailAccessCache {
             return null;
         }
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
-        if (null == mailAccess) {
-            return null;
-        }
         mailAccess.setCached(false);
+        if (DEBUG) {
+            LOG.debug(new StringBuilder("Remove&Get: ").append(mailAccess).toString());
+        }
         return mailAccess;
     }
 
@@ -190,6 +200,9 @@ public final class ManagedMailAccessCache {
         }
         if (accessQueue.offer(new PooledMailAccess(mailAccess, idleTime))) {
             mailAccess.setCached(true);
+            if (DEBUG) {
+                LOG.debug(new StringBuilder("Queued ").append(accessQueue.size()).append(" mail access(es) with: ").append(mailAccess).toString());
+            }
             return true;
         }
         return false;
@@ -208,6 +221,26 @@ public final class ManagedMailAccessCache {
     }
 
     /**
+     * Disposes this cache.
+     */
+    protected void dispose() {
+        timerTask.cancel(false);
+        for (final Iterator<Entry<Key, MailAccessQueue>> iterator = map.entrySet().iterator(); iterator.hasNext();) {
+            final MailAccessQueue accessQueue = iterator.next().getValue();
+            PooledMailAccess pooledMailAccess;
+            while (null != (pooledMailAccess = accessQueue.poll())) {
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                if (DEBUG) {
+                    LOG.debug(new StringBuilder("Dropping: ").append(mailAccess).toString());
+                }
+                mailAccess.setCached(false);
+                mailAccess.close(false);
+            }
+            iterator.remove();
+        }
+    }
+
+    /**
      * Clears the cache entries kept for specified user.
      * 
      * @param session The session
@@ -215,20 +248,29 @@ public final class ManagedMailAccessCache {
      */
     public void clearUserEntries(final Session session) throws MailException {
         try {
+            /*
+             * Check if last...
+             */
+            final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             final int user = session.getUserId();
             final int cid = session.getContextId();
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
-            for (final MailAccount mailAccount : accounts) {
-                final MailAccessQueue accessQueue = map.get(keyFor(mailAccount.getId(), session));
-                if (null != accessQueue) {
-                    PooledMailAccess pooledMailAccess;
-                    while (null != (pooledMailAccess = accessQueue.poll())) {
-                        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                            pooledMailAccess.getMailAccess();
-                        mailAccess.setCached(false);
-                        mailAccess.close(false);
+            if (null == service || 0 == service.getUserSessions(user, cid)) {
+                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                    MailAccountStorageService.class,
+                    true);
+                final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
+                for (final MailAccount mailAccount : accounts) {
+                    final MailAccessQueue accessQueue = map.remove(keyFor(mailAccount.getId(), session));
+                    if (null != accessQueue) {
+                        PooledMailAccess pooledMailAccess;
+                        while (null != (pooledMailAccess = accessQueue.poll())) {
+                            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                            if (DEBUG) {
+                                LOG.debug(new StringBuilder("Dropping: ").append(mailAccess).toString());
+                            }
+                            mailAccess.setCached(false);
+                            mailAccess.close(false);
+                        }
                     }
                 }
             }
@@ -243,6 +285,29 @@ public final class ManagedMailAccessCache {
         return new Key(accountId, session.getUserId(), session.getContextId());
     }
 
+    private static final class PurgeExpiredRunnable implements Runnable {
+
+        private final ConcurrentMap<Key, MailAccessQueue> map;
+
+        protected PurgeExpiredRunnable(final ConcurrentMap<Key, MailAccessQueue> map) {
+            this.map = map;
+        }
+
+        public void run() {
+            for (final MailAccessQueue accessQueue : map.values()) {
+                PooledMailAccess pooledMailAccess;
+                while (null != (pooledMailAccess = accessQueue.pollDelayed())) {
+                    final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                    mailAccess.setCached(false);
+                    if (DEBUG) {
+                        LOG.debug(new StringBuilder("Timed-out: ").append(mailAccess).toString());
+                    }
+                    mailAccess.close(false);
+                }
+            }
+        }
+    }
+
     private static final class Key {
 
         private final int user;
@@ -253,7 +318,7 @@ public final class ManagedMailAccessCache {
 
         private final int hash;
 
-        public Key(final int accountId, final int user, final int context) {
+        protected Key(final int accountId, final int user, final int context) {
             super();
             this.user = user;
             this.context = context;

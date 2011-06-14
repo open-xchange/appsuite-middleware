@@ -62,7 +62,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mail.cache.ManagedMailAccessCache;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -186,7 +186,7 @@ public abstract class PasswordChangeService {
          */
         final Session session = event.getSession();
         try {
-            MailAccessCache.getInstance().removeMailAccess(session, MailAccount.DEFAULT_ID);
+            ManagedMailAccessCache.getInstance().removeMailAccess(session, MailAccount.DEFAULT_ID);
         } catch (final MailException e) {
             LOG.error("Removing cached mail access failed", e);
             throw new UserException(e);
@@ -225,10 +225,10 @@ public abstract class PasswordChangeService {
                 throw new UserException(UserException.Code.MISSING_PASSWORD_MECH, mech == null ? "" : mech);
             }
             return cryptedPassword;
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.error("Error encrypting password according to CRYPT mechanism", e);
             throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             LOG.error("Error encrypting password according to SHA mechanism", e);
             throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
         }

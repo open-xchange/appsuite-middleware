@@ -62,7 +62,7 @@ import com.openexchange.mail.api.MailAccess;
  */
 public final class PooledMailAccess implements Delayed {
 
-    private volatile long stamp;
+    private final long stamp;
 
     private final long ttlMillis;
 
@@ -97,15 +97,15 @@ public final class PooledMailAccess implements Delayed {
      * @return The mail access
      */
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() {
-        stamp = System.currentTimeMillis();
+        //stamp = System.currentTimeMillis();
         return mailAccess;
     }
 
-    /**
-     * Touches this instance; meaning its last-accessed time stamp is set to now.
-     */
-    public void touch() {
-        stamp = System.currentTimeMillis();
-    }
+    // /**
+    // * Touches this instance; meaning its last-accessed time stamp is set to now.
+    // */
+    // public void touch() {
+    // stamp = System.currentTimeMillis();
+    // }
 
 }

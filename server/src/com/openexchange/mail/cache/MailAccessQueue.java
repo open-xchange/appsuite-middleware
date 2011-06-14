@@ -59,7 +59,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * {@link MailAccessQueue}
+ * {@link MailAccessQueue} - A {@link BlockingQueue} providing behavior similar to {@link java.util.concurrent.DelayQueue} with its
+ * <code>xxxDelayed()</code> methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -69,29 +70,32 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
 
     protected transient final Condition available = lock.newCondition();
 
-    private final PriorityQueue<PooledMailAccess> q;
+    /**
+     * The backing priority queue.
+     */
+    private final PriorityQueue<PooledMailAccess> priorityQueue;
 
     /**
      * Creates a new <tt>MailAccessQueue</tt> that is initially empty.
      */
     public MailAccessQueue() {
         super();
-        q = new PriorityQueue<PooledMailAccess>();
+        priorityQueue = new PriorityQueue<PooledMailAccess>();
     }
 
     /**
-     * Inserts the specified element into this delay queue.
+     * Inserts the specified pooled mail access into this delay queue.
      * 
-     * @param o the element to add
+     * @param pooledMailAccess The pooled mail access to add
      * @return <tt>true</tt>
-     * @throws NullPointerException if the specified element is <tt>null</tt>.
+     * @throws NullPointerException if the specified pooled mail access is <tt>null</tt>.
      */
-    public boolean offer(final PooledMailAccess o) {
+    public boolean offer(final PooledMailAccess pooledMailAccess) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            final PooledMailAccess first = q.peek();
-            q.offer(o);
+            final PooledMailAccess first = priorityQueue.peek();
+            priorityQueue.offer(pooledMailAccess);
             if (first == null) {
                 available.signalAll();
             }
@@ -102,42 +106,42 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
     }
 
     /**
-     * Adds the specified element to this delay queue. As the queue is unbounded this method will never block.
+     * Adds the specified pooled mail access to this delay queue. As the queue is unbounded this method will never block.
      * 
-     * @param o the element to add
-     * @throws NullPointerException if the specified element is <tt>null</tt>.
+     * @param pooledMailAccess The pooled mail access to add
+     * @throws NullPointerException if the specified pooled mail access is <tt>null</tt>.
      */
-    public void put(final PooledMailAccess o) {
-        offer(o);
+    public void put(final PooledMailAccess pooledMailAccess) {
+        offer(pooledMailAccess);
     }
 
     /**
-     * Inserts the specified element into this delay queue. As the queue is unbounded this method will never block.
+     * Inserts the specified pooled mail access into this delay queue. As the queue is unbounded this method will never block.
      * 
-     * @param o the element to add
+     * @param pooledMailAccess the pooled mail access to add
      * @param timeout This parameter is ignored as the method never blocks
      * @param unit This parameter is ignored as the method never blocks
      * @return <tt>true</tt>
-     * @throws NullPointerException if the specified element is <tt>null</tt>.
+     * @throws NullPointerException if the specified pooled mail access is <tt>null</tt>.
      */
-    public boolean offer(final PooledMailAccess o, final long timeout, final TimeUnit unit) {
-        return offer(o);
+    public boolean offer(final PooledMailAccess pooledMailAccess, final long timeout, final TimeUnit unit) {
+        return offer(pooledMailAccess);
     }
 
     /**
-     * Adds the specified element to this queue.
+     * Adds the specified pooled mail access to this queue.
      * 
-     * @param o the element to add
+     * @param pooledMailAccess the pooled mail access to add
      * @return <tt>true</tt> (as per the general contract of <tt>Collection.add</tt>).
-     * @throws NullPointerException if the specified element is <tt>null</tt>.
+     * @throws NullPointerException if the specified pooled mail access is <tt>null</tt>.
      */
     @Override
-    public boolean add(final PooledMailAccess o) {
-        return offer(o);
+    public boolean add(final PooledMailAccess pooledMailAccess) {
+        return offer(pooledMailAccess);
     }
 
     /**
-     * Retrieves and removes the head of this queue, waiting if no elements with an unexpired delay are present on this queue.
+     * Retrieves and removes the head of this queue, waiting if no pooled mail accesses with an unexpired delay are present on this queue.
      * 
      * @return the head of this queue
      * @throws InterruptedException if interrupted while waiting.
@@ -147,13 +151,13 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         lock.lockInterruptibly();
         try {
             for (;;) {
-                final PooledMailAccess first = q.peek();
+                final PooledMailAccess first = priorityQueue.peek();
                 if (first == null) {
                     available.await();
                 } else {
-                    final PooledMailAccess x = q.poll();
+                    final PooledMailAccess x = priorityQueue.poll();
                     assert x != null;
-                    if (q.size() != 0) {
+                    if (priorityQueue.size() != 0) {
                         available.signalAll(); // wake up other takers
                     }
                     return x;
@@ -165,7 +169,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
     }
 
     /**
-     * Retrieves and removes the head of this queue, waiting if no elements with an unexpired delay are present on this queue.
+     * Retrieves and removes the head of this queue, waiting if no pooled mail accesses with an unexpired delay are present on this queue.
      * 
      * @return the head of this queue
      * @throws InterruptedException if interrupted while waiting.
@@ -175,7 +179,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         lock.lockInterruptibly();
         try {
             for (;;) {
-                final PooledMailAccess first = q.peek();
+                final PooledMailAccess first = priorityQueue.peek();
                 if (first == null) {
                     available.await();
                 } else {
@@ -183,9 +187,9 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
                     if (delay > 0) {
                         available.awaitNanos(delay);
                     } else {
-                        final PooledMailAccess x = q.poll();
+                        final PooledMailAccess x = priorityQueue.poll();
                         assert x != null;
-                        if (q.size() != 0) {
+                        if (priorityQueue.size() != 0) {
                             available.signalAll(); // wake up other takers
                         }
                         return x;
@@ -199,13 +203,13 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
     }
 
     /**
-     * Retrieves and removes the head of this queue, waiting if necessary up to the specified wait time if no elements with an unexpired
-     * delay are present on this queue.
+     * Retrieves and removes the head of this queue, waiting if necessary up to the specified wait time if no elements with expired delay
+     * are present on this queue.
      * 
      * @param timeout how long to wait before giving up, in units of <tt>unit</tt>
      * @param unit a <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
-     * @return the head of this queue, or <tt>null</tt> if the specified waiting time elapses before an element with an unexpired delay is
-     *         present.
+     * @return the head of this queue, or <tt>null</tt> if the specified waiting time elapses before an pooled mail access with an unexpired
+     *         delay is present.
      * @throws InterruptedException if interrupted while waiting.
      */
     public PooledMailAccess poll(final long timeout, final TimeUnit unit) throws InterruptedException {
@@ -214,16 +218,16 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         long nanos = unit.toNanos(timeout);
         try {
             for (;;) {
-                final PooledMailAccess first = q.peek();
+                final PooledMailAccess first = priorityQueue.peek();
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
                     }
                     nanos = available.awaitNanos(nanos);
                 } else {
-                    final PooledMailAccess x = q.poll();
+                    final PooledMailAccess x = priorityQueue.poll();
                     assert x != null;
-                    if (q.size() != 0) {
+                    if (priorityQueue.size() != 0) {
                         available.signalAll();
                     }
                     return x;
@@ -240,8 +244,8 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
      * 
      * @param timeout how long to wait before giving up, in units of <tt>unit</tt>
      * @param unit a <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
-     * @return the head of this queue, or <tt>null</tt> if the specified waiting time elapses before an element with an unexpired delay is
-     *         present.
+     * @return the head of this queue, or <tt>null</tt> if the specified waiting time elapses before an pooled mail access with an unexpired
+     *         delay is present.
      * @throws InterruptedException if interrupted while waiting.
      */
     public PooledMailAccess pollDelayed(final long timeout, final TimeUnit unit) throws InterruptedException {
@@ -250,7 +254,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         long nanos = unit.toNanos(timeout);
         try {
             for (;;) {
-                final PooledMailAccess first = q.peek();
+                final PooledMailAccess first = priorityQueue.peek();
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
@@ -268,9 +272,9 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
                         final long timeLeft = available.awaitNanos(delay);
                         nanos -= delay - timeLeft;
                     } else {
-                        final PooledMailAccess x = q.poll();
+                        final PooledMailAccess x = priorityQueue.poll();
                         assert x != null;
-                        if (!q.isEmpty()) {
+                        if (!priorityQueue.isEmpty()) {
                             available.signalAll();
                         }
                         return x;
@@ -283,7 +287,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
     }
 
     /**
-     * Retrieves and removes the head of this queue (<em>least</em> element), or <tt>null</tt> if this queue is empty.
+     * Retrieves and removes the head of this queue (<em>least</em> pooled mail access), or <tt>null</tt> if this queue is empty.
      * 
      * @return the head of this queue, or <tt>null</tt> if this queue is empty
      */
@@ -291,13 +295,13 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            final PooledMailAccess first = q.peek();
+            final PooledMailAccess first = priorityQueue.peek();
             if (first == null) {
                 return null;
             }
-            final PooledMailAccess x = q.poll();
+            final PooledMailAccess x = priorityQueue.poll();
             assert x != null;
-            if (!q.isEmpty()) {
+            if (!priorityQueue.isEmpty()) {
                 available.signalAll();
             }
             return x;
@@ -315,13 +319,13 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            final PooledMailAccess first = q.peek();
+            final PooledMailAccess first = priorityQueue.peek();
             if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                 return null;
             }
-            final PooledMailAccess x = q.poll();
+            final PooledMailAccess x = priorityQueue.poll();
             assert x != null;
-            if (q.size() != 0) {
+            if (priorityQueue.size() != 0) {
                 available.signalAll();
             }
             return x;
@@ -340,7 +344,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.peek();
+            return priorityQueue.peek();
         } finally {
             lock.unlock();
         }
@@ -351,7 +355,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.size();
+            return priorityQueue.size();
         } finally {
             lock.unlock();
         }
@@ -369,11 +373,11 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         try {
             int n = 0;
             for (;;) {
-                final PooledMailAccess first = q.peek();
+                final PooledMailAccess first = priorityQueue.peek();
                 if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                     break;
                 }
-                c.add(q.poll());
+                c.add(priorityQueue.poll());
                 ++n;
             }
             if (n > 0) {
@@ -400,11 +404,11 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         try {
             int n = 0;
             while (n < maxElements) {
-                final PooledMailAccess first = q.peek();
+                final PooledMailAccess first = priorityQueue.peek();
                 if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                     break;
                 }
-                c.add(q.poll());
+                c.add(priorityQueue.poll());
                 ++n;
             }
             if (n > 0) {
@@ -424,7 +428,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            q.clear();
+            priorityQueue.clear();
         } finally {
             lock.unlock();
         }
@@ -444,7 +448,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.toArray();
+            return priorityQueue.toArray();
         } finally {
             lock.unlock();
         }
@@ -455,21 +459,21 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.toArray(array);
+            return priorityQueue.toArray(array);
         } finally {
             lock.unlock();
         }
     }
 
     /**
-     * Removes a single instance of the specified element from this queue, if it is present.
+     * Removes a single instance of the specified pooled mail access from this queue, if it is present.
      */
     @Override
     public boolean remove(final Object o) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.remove(o);
+            return priorityQueue.remove(o);
         } finally {
             lock.unlock();
         }
@@ -487,7 +491,7 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return new Itr(q.iterator());
+            return new Itr(priorityQueue.iterator());
         } finally {
             lock.unlock();
         }
