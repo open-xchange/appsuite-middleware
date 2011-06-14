@@ -58,10 +58,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -99,8 +101,13 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
+/**
+ * @deprecated Use IcalImportRequest/Response or IcalExportRequest/Response
+ * and a normal AbstractAjaxTest or a managed one.
+ *
+ */
+@Deprecated
 public class AbstractICalTest extends AbstractAJAXTest {
 
     protected static final String IMPORT_URL = "/ajax/import";
