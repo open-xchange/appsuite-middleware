@@ -577,7 +577,11 @@ public class MessagingMessageWriter {
         map.put(MessagingField.RECEIVED_DATE, new JSONFieldHandler() {
             
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
-                return Long.valueOf(addTimeZoneOffset(((Long) value).longValue(), session.getUser().getTimeZone()));
+                final long date = ((Long) value).longValue();
+                if (date < 0) {
+                    return null;
+                }
+                return Long.valueOf(addTimeZoneOffset(date, session.getUser().getTimeZone()));
             }
         });
         map.put(MessagingField.FOLDER_ID, new JSONFieldHandler() {
