@@ -317,13 +317,14 @@ public class ICal4JParser implements ICalParser {
             	}
             }
             final StringReader chunkedReader = new StringReader(
+            	workaroundFor19463(
             	workaroundFor16895(
             	workaroundFor16613(
             	workaroundFor16367(
             	workaroundFor17492(
             	workaroundFor17963(
             	removeAnnoyingWhitespaces(chunk.toString()
-                ))))))
+                )))))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader); 
         } catch (final IOException e) {
@@ -341,6 +342,15 @@ public class ICal4JParser implements ICalParser {
 
 	private String workaroundFor17492(String input) {
     	return input.replaceAll(";SCHEDULE-AGENT=", ";X-CALDAV-SCHEDULE-AGENT=");
+	}
+	
+	private String workaroundFor19463(String input) {
+		return input
+			.replaceAll("TZOFFSETFROM:\\s*([\\+-])(\\d\\d\\d\\d)", "TZOFFSETFROM:$1$200")
+			.replaceAll("TZOFFSETTO:\\s*([\\+-])(\\d\\d\\d\\d)",   "TZOFFSETTO:$1$200")
+			.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$100")
+			.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$100")
+			;
 	}
 
 	/**
