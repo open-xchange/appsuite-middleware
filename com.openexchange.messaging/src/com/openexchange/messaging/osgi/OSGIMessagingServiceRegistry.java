@@ -97,7 +97,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     }
 
     /**
-     * Starts the tracker.
+     * Starts the trackers.
      * 
      * @param context The bundle context
      */
@@ -113,7 +113,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     }
 
     /**
-     * Stops the tracker.
+     * Stops the trackers.
      */
     public void stop() {
         if (null != tracker) {
