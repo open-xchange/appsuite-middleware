@@ -164,7 +164,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             /*
              * Initialize a reader on URL connection...
              */
-            reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"), 8192);
             /*
              * ... and read response
              */
