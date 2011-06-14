@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -76,11 +77,35 @@ public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> imple
     private final PriorityQueue<PooledMailAccess> priorityQueue;
 
     /**
+     * The deprecated flag;
+     */
+    private final AtomicBoolean deprecated;
+
+    /**
      * Creates a new <tt>MailAccessQueue</tt> that is initially empty.
      */
     public MailAccessQueue() {
         super();
         priorityQueue = new PriorityQueue<PooledMailAccess>();
+        deprecated = new AtomicBoolean();
+    }
+
+    /**
+     * Marks this queue as deprecated.
+     * 
+     * @return <code>true</code> if queue has been successfully marked as deprecated; otherwise <code>false</code>
+     */
+    public boolean markDeprecated() {
+        return deprecated.compareAndSet(false, true);
+    }
+
+    /**
+     * Checks if this queue is deprecated.
+     * 
+     * @return <code>true</code> if this queue is deprecated; otherwise <code>false</code>
+     */
+    public boolean isDeprecated() {
+        return deprecated.get();
     }
 
     /**
