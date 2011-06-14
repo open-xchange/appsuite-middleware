@@ -50,11 +50,15 @@
 package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
+import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link Entity2ACL} - Maps numeric entity IDs to corresponding IMAP login name (used in ACLs) and vice versa
@@ -96,6 +100,29 @@ public abstract class Entity2ACL {
             return Entity2ACLAutoDetector.getEntity2ACLImpl(imapConfig);
         } catch (final IOException e) {
             throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
+        }
+    }
+
+    /**
+     * Creates a new instance implementing the {@link Entity2ACL} interface.
+     * 
+     * @param imapStore The IMAP store
+     * @param imapConfig The user's IMAP configuration
+     * @return an instance implementing the {@link Entity2ACL} interface.
+     * @throws Entity2ACLException if the instance can't be created.
+     * @throws MailException If a mail error occurs
+     */
+    public static final Entity2ACL getInstance(final IMAPStore imapStore, final IMAPConfig imapConfig) throws Entity2ACLException, MailException {
+        if (instantiated && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
+            /*
+             * Auto-detection is turned off, return configured implementation
+             */
+            return singleton;
+        }
+        try {
+            return Entity2ACLAutoDetector.impl4(imapStore.getGreeting(), imapConfig);
+        } catch (MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
     }
 
