@@ -1,3 +1,7 @@
+* 2011-06-14 - thorben.betten@open-xchange.com
+
+ - Bugfix #19474: Fixed moving a mail folder if altnamespace enabled
+
 * 2011-06-12 - thorben.betten@open-xchange.com
 
  - Bugfix #19496: Removing CDATA sections by disabling HtmlCleaner's "useCdata" parameter

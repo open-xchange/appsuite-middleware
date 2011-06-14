@@ -51,12 +51,14 @@ package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -67,8 +69,12 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -192,6 +198,71 @@ final class MovePerformer extends AbstractPerformer {
             }
         }
         /*
+         * Get subfolders
+         */
+        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+        if (null == realStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+        }
+        checkOpenedStorage(realStorage, openedStorages);
+        /*
+         * Special handling for mail folders on root level
+         */
+        boolean flag = true;
+        if (FolderStorage.PRIVATE_ID.equals(folder.getParentID()) && MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
+            /*
+             * Perform the move in real storage
+             */
+            final String rootId = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+            /*
+             * Check if create is allowed
+             */
+            final Permission rootPermission;
+            {
+                final Folder rootFolder = realStorage.getFolder(folder.getTreeID(), rootId, storageParameters);
+                final List<ContentType> contentTypes = Collections.<ContentType> emptyList();
+                if (null == getSession()) {
+                    rootPermission = CalculatePermission.calculate(rootFolder, getUser(), getContext(), contentTypes);
+                } else {
+                    rootPermission = CalculatePermission.calculate(rootFolder, getSession(), contentTypes);
+                }
+            }
+            if (rootPermission.getFolderPermission() >= Permission.CREATE_SUB_FOLDERS) {
+                /*
+                 * Creation of subfolders is allowed
+                 */
+                final Folder clone4Real = (Folder) folder.clone();
+                clone4Real.setParentID(rootId);
+                realStorage.updateFolder(clone4Real, storageParameters);
+                virtualStorage.deleteFolder(folder.getTreeID(), folder.getID(), storageParameters);
+                folder.setID(clone4Real.getID());
+                /*
+                 * Update parent's last-modified time stamp
+                 */
+                final boolean started = realStorage.startTransaction(storageParameters, true);
+                try {
+                    realStorage.updateLastModified(System.currentTimeMillis(), FolderStorage.REAL_TREE_ID, folder.getParentID(), storageParameters);
+                    if (started) {
+                        realStorage.commitTransaction(storageParameters);
+                    }
+                } catch (final FolderException e) {
+                    if (started) {
+                        realStorage.rollback(storageParameters);
+                    }
+                    throw e;
+                } catch (final Exception e) {
+                    if (started) {
+                        realStorage.rollback(storageParameters);
+                    }
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+                flag = false;
+            }
+        }
+        if (!flag) {
+            return;
+        }
+        /*
          * Check permission on destination folder
          */
         {
@@ -207,10 +278,6 @@ final class MovePerformer extends AbstractPerformer {
         /*
          * Get subfolders
          */
-        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-        if (null == realStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
-        }
         final String oldParent = storageFolder.getParentID();
         if (virtualStorage.equals(realStorage)) {
             virtualStorage.updateFolder(folder, storageParameters);
@@ -304,34 +371,39 @@ final class MovePerformer extends AbstractPerformer {
                  * Move to default location in real storage
                  */
                 checkOpenedStorage(realStorage, openedStorages);
-                final String defaultParentId =
-                    virtualStorage.getDefaultFolderID(
-                        user,
-                        treeId,
-                        realStorage.getDefaultContentType(),
-                        virtualStorage.getTypeByParent(user, treeId, folder.getParentID(), storageParameters),
-                        storageParameters);
-                if (null == defaultParentId) {
-                    /*
-                     * No default folder found
-                     */
-                    throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(
-                        realStorage.getDefaultContentType(),
-                        FolderStorage.REAL_TREE_ID);
+                /*
+                 * Perform the move in virtual storage
+                 */
+                {
+                    final String defaultParentId =
+                        virtualStorage.getDefaultFolderID(
+                            user,
+                            treeId,
+                            realStorage.getDefaultContentType(),
+                            virtualStorage.getTypeByParent(user, treeId, folder.getParentID(), storageParameters),
+                            storageParameters);
+                    if (null == defaultParentId) {
+                        /*
+                         * No default folder found
+                         */
+                        throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(
+                            realStorage.getDefaultContentType(),
+                            FolderStorage.REAL_TREE_ID);
+                    }
+                    // TODO: Check permission for obtained default folder ID?
+                    final Folder clone4Real = (Folder) folder.clone();
+                    clone4Real.setParentID(defaultParentId);
+                    clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId, openedStorages));
+                    realStorage.updateFolder(clone4Real, storageParameters);
+                    final String newId = clone4Real.getID();
+                    if (null != newId) {
+                        /*
+                         * Perform the "move" in virtual storage
+                         */
+                        folder.setID(newId);
+                    }
+                    virtualStorage.createFolder(folder, storageParameters);
                 }
-                // TODO: Check permission for obtained default folder ID?
-                final Folder clone4Real = (Folder) folder.clone();
-                clone4Real.setParentID(defaultParentId);
-                clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId, openedStorages));
-                realStorage.updateFolder(clone4Real, storageParameters);
-                final String newId = clone4Real.getID();
-                if (null != newId) {
-                    /*
-                     * Perform the "move" in virtual storage
-                     */
-                    folder.setID(newId);
-                }
-                virtualStorage.createFolder(folder, storageParameters);
             } else {
                 /*
                  * (!parentChildEquality && !parentEquality) ?
