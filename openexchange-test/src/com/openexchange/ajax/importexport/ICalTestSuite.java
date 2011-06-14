@@ -63,7 +63,8 @@ public final class ICalTestSuite {
 	public static Test suite() {
 		final TestSuite tests = new TestSuite();
 		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
+		tests.addTestSuite(ICalAppointmentExportTest.class);
+		tests.addTestSuite(ICalTaskExportTest.class);
 		tests.addTestSuite(Bug9840Test.class);
 		tests.addTestSuite(Bug10382Test.class);
 		tests.addTestSuite(Bug11724Test.class);
@@ -77,6 +78,7 @@ public final class ICalTestSuite {
 		tests.addTestSuite(ICalSeriesTests.class);
 		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
 		tests.addTestSuite(Bug19089Test.class);
+		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
 		return tests;
 	}
 }
