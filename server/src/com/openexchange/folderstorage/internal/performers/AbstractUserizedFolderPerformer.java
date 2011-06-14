@@ -232,15 +232,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         Folder f = folder;
         final UserizedFolder userizedFolder;
-        /*
+        /*-
          * Type
-         */
-        final int createdBy = f.getCreatedBy();
-        /*
+         * 
          * Create user-sensitive folder dependent on shared flag
          */
         final boolean isShared;
         {
+            final int createdBy = f.getCreatedBy();
             final Type type = f.getType();
             if (SharedType.getInstance().equals(type)) {
                 userizedFolder = new UserizedFolderImpl(f);
