@@ -1,6 +1,7 @@
 * 2011-06-14 - francisco.laguna@open-xchange.com
 
  - Bugfix #19458: Use secret service everywhere.
+ - Bugfix #19484: Calculate correct until date when it occurs after the appointment.
 
 * 2011-06-14 - thorben.betten@open-xchange.com
 
