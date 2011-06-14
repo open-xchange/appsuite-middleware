@@ -574,7 +574,16 @@ public class MessagingMessageWriter {
                 return value;
             }
         });
-        map.put(MessagingField.RECEIVED_DATE, new JSONFieldHandler() {
+        map.put(MessagingField.FOLDER_ID, new JSONFieldHandler() {
+            
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+                return new StringBuilder(folderPrefix).append('/').append(value).toString();
+            }
+        });
+        /*
+         * Date fields
+         */
+        final JSONFieldHandler dateHandler = new JSONFieldHandler() {
             
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
                 final long date = ((Long) value).longValue();
@@ -583,14 +592,13 @@ public class MessagingMessageWriter {
                 }
                 return Long.valueOf(addTimeZoneOffset(date, session.getUser().getTimeZone()));
             }
-        });
-        map.put(MessagingField.FOLDER_ID, new JSONFieldHandler() {
-            
-            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
-                return new StringBuilder(folderPrefix).append('/').append(value).toString();
-            }
-        });
-        map.put(MessagingField.THREAD_LEVEL, new JSONFieldHandler() {
+        };
+        map.put(MessagingField.RECEIVED_DATE, dateHandler);
+        map.put(MessagingField.SENT_DATE, dateHandler);
+        /*
+         * Number fields
+         */
+        final JSONFieldHandler numberHandler = new JSONFieldHandler() {
 
             private final Long longNum = Long.valueOf(-1);
 
@@ -602,7 +610,13 @@ public class MessagingMessageWriter {
                 }
                 return value;
             }
-        });
+        };
+        map.put(MessagingField.THREAD_LEVEL, numberHandler);
+        map.put(MessagingField.SIZE, numberHandler);
+        map.put(MessagingField.PRIORITY, numberHandler);
+        /*
+         * Set constant
+         */
         JSON_FIELD_HANDLERS = map;
     }
 
