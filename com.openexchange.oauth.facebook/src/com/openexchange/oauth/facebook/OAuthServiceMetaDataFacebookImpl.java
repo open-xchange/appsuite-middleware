@@ -75,14 +75,14 @@ import com.openexchange.oauth.OAuthToken;
  */
 public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData {    
     
-    private ConfigurationService configurationService;
-    private DeferringURLService deferrer;
+    private final ConfigurationService configurationService;
+    private final DeferringURLService deferrer;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataFacebookImpl}.
      * @param configurationService
      */
-    public OAuthServiceMetaDataFacebookImpl(ConfigurationService configurationService, DeferringURLService deferrer) {
+    public OAuthServiceMetaDataFacebookImpl(final ConfigurationService configurationService, final DeferringURLService deferrer) {
         super();
         this.configurationService=configurationService;        
         this.deferrer = deferrer;
@@ -108,22 +108,25 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         return configurationService.getProperty("com.openexchange.facebook.secretKey");
     }
 
+    @Override
     public boolean needsRequestToken() {
         return false;
     }
 
+    @Override
     public String getScope() {
         return "offline_access,publish_stream,read_stream,status_update,friends_birthday,friends_work_history,friends_about_me,friends_hometown";
     }
     
     @Override
-    public String modifyCallbackURL(String callbackUrl) {
+    public String modifyCallbackURL(final String callbackUrl) {
         if (deferrer == null) {
             return callbackUrl;
         }
         return deferrer.getDeferredURL(callbackUrl);
     }
 
+    @Override
     public String processAuthorizationURL(final String authUrl) {
         final String removeMe = "response_type=token&";
         final int pos = authUrl.indexOf(removeMe);
@@ -141,27 +144,36 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     @Override
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
         final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
-        String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
+        final String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
 
         BufferedReader reader = null;
         try {
-            callback = URLEncoder.encode(callback, "UTF-8");
-            final URL url = new URL("https://graph.facebook.com/oauth/access_token?client_id="+getAPIKey()+"&redirect_uri="+callback+"&client_secret="+getAPISecret()+"&code=" + code);
+            final StringBuilder builder = new StringBuilder(1024); //1K
+            /*
+             * Compose URL
+             */
+            builder.append("https://graph.facebook.com/oauth/access_token?client_id=").append(getAPIKey());
+            builder.append("&redirect_uri=").append(URLEncoder.encode(callback, "UTF-8"));
+            builder.append("&client_secret=").append(getAPISecret());
+            builder.append("&code=").append(code);
+            final URL url = new URL(builder.toString());
             final URLConnection connection = url.openConnection();
             connection.setConnectTimeout(2500);
             connection.setReadTimeout(2500);
             connection.connect();
-            
+            /*
+             * Initialize a reader on URL connection...
+             */
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-            
-            final StringBuilder response = new StringBuilder();
+            /*
+             * ... and read response
+             */
+            builder.setLength(0);
             String line;
             while((line = reader.readLine()) != null) {
-                response.append(line);
+                builder.append(line);
             }
-            
-            return parseResponse(response.toString());
-            
+            return parseResponse(builder.toString());
         } catch (final MalformedURLException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
