@@ -55,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
@@ -100,6 +101,8 @@ public final class IMAPConfig extends MailConfig {
 
     private InetSocketAddress imapServerSocketAddress;
 
+    private final Map<String, Object> params;
+
     /**
      * Default constructor
      * 
@@ -108,6 +111,32 @@ public final class IMAPConfig extends MailConfig {
     public IMAPConfig(final int accountId) {
         super();
         this.accountId = accountId;
+        params = new ConcurrentHashMap<String, Object>(4);
+    }
+
+    /**
+     * Puts parameter. If value is <code>null</code> a remove is performed
+     * 
+     * @param name The name
+     * @param value The value
+     */
+    public void putParameter(final String name, final Object value) {
+        if (null == value) {
+            params.remove(name);
+        } else {
+            params.put(name, value);
+        }
+    }
+
+    /**
+     * Gets the named parameter.
+     * 
+     * @param name The name
+     * @param clazz The parameter's type
+     * @return The value
+     */
+    public <V> V getValue(final String name, final Class<? extends V> clazz) {
+        return clazz.cast(params.get(name));
     }
 
     @Override
@@ -257,7 +286,7 @@ public final class IMAPConfig extends MailConfig {
         final URI uri;
         try {
             uri = URIParser.parse(serverURL, URIDefaults.IMAP);
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw IMAPException.create(IMAPException.Code.URI_PARSE_FAILED, e, serverURL);
         }
         secure = PROTOCOL_IMAP_SECURE.equals(uri.getScheme());
