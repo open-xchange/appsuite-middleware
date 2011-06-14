@@ -701,6 +701,24 @@ public abstract class MailConfig {
     public abstract String getServer();
 
     @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("{ MailConfig [accountId=").append(accountId).append(", ");
+        if (login != null) {
+            builder.append("login=").append(login).append(", ");
+        }
+        if (password != null) {
+            builder.append("password=").append(password).append(", ");
+        }
+        builder.append("getPort()=").append(getPort()).append(", ");
+        if (getServer() != null) {
+            builder.append("getServer()=").append(getServer()).append(", ");
+        }
+        builder.append("isSecure()=").append(isSecure()).append("] }");
+        return builder.toString();
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

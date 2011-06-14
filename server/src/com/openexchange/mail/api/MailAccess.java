@@ -68,7 +68,7 @@ import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
-import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mail.cache.ManagedMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
@@ -440,7 +440,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          */
         {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                MailAccessCache.getInstance().removeMailAccess(session, accountId);
+                ManagedMailAccessCache.getInstance().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
@@ -467,7 +467,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Re-check cache
          */
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            MailAccessCache.getInstance().removeMailAccess(session, accountId);
+            ManagedMailAccessCache.getInstance().removeMailAccess(session, accountId);
         return null == mailAccess ? mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider) : mailAccess;
     }
 
@@ -773,7 +773,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 /*
                  * Cache connection if desired/possible anymore
                  */
-                if (put && isCacheable() && MailAccessCache.getInstance().putMailAccess(session, accountId, this)) {
+                if (put && isCacheable() && ManagedMailAccessCache.getInstance().putMailAccess(session, accountId, this)) {
                     /*
                      * Successfully cached: return
                      */
@@ -831,6 +831,20 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
         }
         return sBuilder.toString();
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(256);
+        builder.append("{ MailAccess [accountId=").append(accountId).append(", cached=").append(cached).append(", ");
+        if (provider != null) {
+            builder.append("provider=").append(provider).append(", ");
+        }
+        if (mailConfig != null) {
+            builder.append("mailConfig=").append(mailConfig);
+        }
+        builder.append("] }");
+        return builder.toString();
     }
 
     /**
