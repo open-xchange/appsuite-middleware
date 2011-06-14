@@ -49,9 +49,9 @@
 
 package com.openexchange.oauth.facebook;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -141,14 +141,16 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL((String)state.get(OAuthConstants.ARGUMENT_CALLBACK)));
     }
 
+    private static final int BUFSIZE = 8192;
+
     @Override
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
         final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
         final String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
 
-        BufferedReader reader = null;
+        Reader reader = null;
         try {
-            final StringBuilder builder = new StringBuilder(1024); //1K
+            final StringBuilder builder = new StringBuilder(BUFSIZE << 1);
             /*
              * Compose URL
              */
@@ -164,14 +166,15 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             /*
              * Initialize a reader on URL connection...
              */
-            reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"), 8192);
+            reader = new InputStreamReader(connection.getInputStream(), "UTF-8");
             /*
-             * ... and read response
+             * ... and read response using direct buffering
              */
             builder.setLength(0);
-            String line;
-            while((line = reader.readLine()) != null) {
-                builder.append(line);
+            final char[] buf = new char[BUFSIZE];
+            int read;
+            while ((read = reader.read(buf, 0, BUFSIZE)) >= 0) {
+                builder.append(buf, 0, read);
             }
             return parseResponse(builder.toString());
         } catch (final MalformedURLException e) {
