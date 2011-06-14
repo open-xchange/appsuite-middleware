@@ -1,3 +1,7 @@
+* 2011-06-14 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19458: Use secret service everywhere.
+
 * 2011-06-14 - thorben.betten@open-xchange.com
 
  - Bugfix #19474: Fixed moving a mail folder if altnamespace enabled
