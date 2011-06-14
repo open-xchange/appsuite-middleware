@@ -57,6 +57,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -205,7 +206,7 @@ public class MessagingMessageWriter {
      * @param timeZone The time zone
      * @return The UTC time with offset applied
      */
-    private static long addTimeZoneOffset(final long date, final String timeZone) {
+    static long addTimeZoneOffset(final long date, final String timeZone) {
         return Utility.addTimeZoneOffset(date, timeZone);
     }
 
@@ -384,7 +385,16 @@ public class MessagingMessageWriter {
         return messageJSON;
     }
 
-    private JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers, final ServerSession session) throws MessagingException, JSONException {
+    /**
+     * Writes specified headers to its JSON representation.
+     * 
+     * @param headers The headers
+     * @param session The session
+     * @return The resulting JSON representation
+     * @throws MessagingException If a messaging error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers, final ServerSession session) throws MessagingException, JSONException {
         final JSONObject headerJSON = new JSONObject();
         for (final Map.Entry<String, Collection<MessagingHeader>> entry : headers.entrySet()) {
             final MessagingHeaderWriter writer = getHeaderWriter(entry);
@@ -401,7 +411,7 @@ public class MessagingMessageWriter {
      * @param content The content
      * @return The appropriate content writer or <code>null</code> if none found
      */
-    private MessagingContentWriter optContentWriter(final MessagingPart part, final MessagingContent content) {
+    MessagingContentWriter optContentWriter(final MessagingPart part, final MessagingContent content) {
         int ranking = 0;
         MessagingContentWriter writer = null;
         /*
@@ -467,7 +477,11 @@ public class MessagingMessageWriter {
         {
             final long receivedDate = message.getReceivedDate();
             if (receivedDate > 0) {
-                messageJSON.put("receivedDate", addTimeZoneOffset(receivedDate, session.getUser().getTimeZone()));
+                final long dateWithOffset = addTimeZoneOffset(receivedDate, session.getUser().getTimeZone());
+                
+                System.out.println("date: " + receivedDate + ", date-with-offset: " + dateWithOffset);
+                
+                messageJSON.put("receivedDate", dateWithOffset);
             }
         }
 
@@ -534,6 +548,60 @@ public class MessagingMessageWriter {
         contentWriters.remove(contentWriter);
     }
 
+    private static interface JSONFieldHandler {
+        
+        Object handle(Object value, MessagingMessage message, String folderPrefix, ServerSession session, DisplayMode mode, MessagingMessageWriter messageWriter) throws MessagingException, JSONException;
+    }
+
+    private static final EnumMap<MessagingField, JSONFieldHandler> JSON_FIELD_HANDLERS;
+
+    static {
+        final EnumMap<MessagingField, JSONFieldHandler> map = new EnumMap<MessagingField, JSONFieldHandler>(MessagingField.class);
+        map.put(MessagingField.HEADERS, new JSONFieldHandler() {
+            
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+                return messageWriter.writeHeaders(message.getHeaders(), session);
+            }
+        });
+        map.put(MessagingField.BODY, new JSONFieldHandler() {
+            
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+                final MessagingContent content = (MessagingContent) value;
+                final MessagingContentWriter writer = messageWriter.optContentWriter(message, content);
+                if (writer != null) {
+                    return writer.write(message, content, session, mode);
+                }
+                return value;
+            }
+        });
+        map.put(MessagingField.RECEIVED_DATE, new JSONFieldHandler() {
+            
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+                return Long.valueOf(addTimeZoneOffset(((Long) value).longValue(), session.getUser().getTimeZone()));
+            }
+        });
+        map.put(MessagingField.FOLDER_ID, new JSONFieldHandler() {
+            
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+                return new StringBuilder(folderPrefix).append('/').append(value).toString();
+            }
+        });
+        map.put(MessagingField.THREAD_LEVEL, new JSONFieldHandler() {
+
+            private final Long longNum = Long.valueOf(-1);
+
+            private final Integer intNum = Integer.valueOf(-1);
+            
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+                if (longNum.equals(value) || intNum.equals(value)) {
+                    return null;
+                }
+                return value;
+            }
+        });
+        JSON_FIELD_HANDLERS = map;
+    }
+
     /**
      * Renders a message as a list of fields. The fields to be written are given in the MessagingField array. Individual fields are rendered
      * exactly as in the JSONObject representation using custom header writers and content writers.
@@ -546,55 +614,41 @@ public class MessagingMessageWriter {
         final MessagingMessageGetSwitch switcher = new MessagingMessageGetSwitch();
 
         for (final MessagingField messagingField : fields) {
-            Object value = transform(messagingField, messagingField.doSwitch(switcher, message));
+            Object value = messagingField.doSwitch(switcher, message);
             if (value == null) {
-                // Nothing to do...
-            } else if (messagingField == MessagingField.HEADERS) {
-                value = writeHeaders(message.getHeaders(), session);
-            } else if (messagingField.getEquivalentHeader() != null) {
-                @SuppressWarnings("unchecked") final Collection<MessagingHeader> collection = (Collection<MessagingHeader>) value;
-                final Entry<String, Collection<MessagingHeader>> entry = SimpleEntry.valueOf(
-                    messagingField.getEquivalentHeader().toString(),
-                    collection);
-                final MessagingHeaderWriter writer = getHeaderWriter(entry);
-                value = writer.writeValue(entry, session);
-            } else if (MessagingContent.class.isInstance(value)) {
-                final MessagingContent content = (MessagingContent) value;
-                final MessagingContentWriter writer = optContentWriter(message, content);
-                if (writer != null) {
-                    value = writer.write(message, content, session, mode);
+                /*
+                 * Nothing to do...
+                 */
+                fieldJSON.put(value);
+            } else {
+                /*
+                 * Get appropriate handler
+                 */
+                final JSONFieldHandler handler = JSON_FIELD_HANDLERS.get(messagingField);
+                if (null == handler) {
+                    final KnownHeader header = messagingField.getEquivalentHeader();
+                    if (header != null) {
+                        @SuppressWarnings("unchecked") final Collection<MessagingHeader> collection = (Collection<MessagingHeader>) value;
+                        final Entry<String, Collection<MessagingHeader>> entry = SimpleEntry.valueOf(header.toString(), collection);
+                        final MessagingHeaderWriter writer = getHeaderWriter(entry);
+                        value = writer.writeValue(entry, session);
+                    } else if (MessagingContent.class.isInstance(value)) {
+                        final MessagingContent content = (MessagingContent) value;
+                        final MessagingContentWriter writer = optContentWriter(message, content);
+                        if (writer != null) {
+                            value = writer.write(message, content, session, mode);
+                        }
+                    }
+                    /*
+                     * Put value to JSON
+                     */
+                    fieldJSON.put(value);
+                } else {
+                    fieldJSON.put(handler.handle(value, message, folderPrefix, session, mode, this));
                 }
-            } else if (MessagingField.FOLDER_ID == messagingField) {
-                value = new StringBuilder(folderPrefix).append('/').append(value).toString();
             }
-            /*
-             * Put value to JSON
-             */
-            fieldJSON.put(value);
         }
         return fieldJSON;
-    }
-
-    private Object transform(final MessagingField messagingField, final Object value) {
-        switch (messagingField) {
-        case SIZE:
-            // fall-through
-        case PRIORITY:
-            // fall-through
-        case RECEIVED_DATE:
-            // fall-through
-        case SENT_DATE:
-            // fall-through
-        case THREAD_LEVEL: {
-            if (Long.class.isInstance(value) && Long.valueOf(-1) == value) {
-                return null;
-            }
-            if (Integer.class.isInstance(value) && Integer.valueOf(-1) == value) {
-                return null;
-            }
-        }
-        }
-        return value;
     }
 
 }
