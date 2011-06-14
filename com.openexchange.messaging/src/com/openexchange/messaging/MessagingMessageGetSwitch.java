@@ -51,13 +51,21 @@ package com.openexchange.messaging;
 
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
 
-
 /**
  * {@link MessagingMessageGetSwitch}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
+
+    /**
+     * Initializes a new {@link MessagingMessageGetSwitch}.
+     */
+    public MessagingMessageGetSwitch() {
+        super();
+    }
 
     public Object accountName(final Object... args) {
         throw new UnsupportedOperationException(); // TODO
@@ -68,7 +76,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object body(final Object... args) throws MessagingException {
-        final MessagingMessage message = (MessagingMessage)args[0];
+        final MessagingMessage message = (MessagingMessage) args[0];
         return message.getContent();
     }
 
@@ -77,11 +85,11 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object colorLabel(final Object... args) throws MessagingException {
-        return ((MessagingMessage)args[0]).getColorLabel();
+        return Integer.valueOf(((MessagingMessage) args[0]).getColorLabel());
     }
 
     public Object contentType(final Object... args) throws MessagingException {
-        return header(args[0], KnownHeader.CONTENT_TYPE.toString()); 
+        return header(args[0], KnownHeader.CONTENT_TYPE.toString());
     }
 
     public Object dispositionNotificationTo(final Object... args) throws MessagingException {
@@ -89,11 +97,11 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object flags(final Object... args) throws MessagingException {
-        return ((MessagingMessage)args[0]).getFlags();
+        return Integer.valueOf(((MessagingMessage) args[0]).getFlags());
     }
 
     public Object folderId(final Object... args) {
-        return ((MessagingMessage)args[0]).getFolder();
+        return ((MessagingMessage) args[0]).getFolder();
     }
 
     public Object from(final Object... args) throws MessagingException {
@@ -105,11 +113,11 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object headers(final Object... args) throws MessagingException {
-        return ((MessagingMessage)args[0]).getHeaders();
+        return ((MessagingMessage) args[0]).getHeaders();
     }
 
     public Object id(final Object... args) {
-        return ((MessagingMessage)args[0]).getId();
+        return ((MessagingMessage) args[0]).getId();
     }
 
     public Object priority(final Object... args) throws MessagingException {
@@ -117,7 +125,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object receivedDate(final Object... args) {
-        return Long.valueOf(((MessagingMessage)args[0]).getReceivedDate());
+        return Long.valueOf(((MessagingMessage) args[0]).getReceivedDate());
     }
 
     public Object sentDate(final Object... args) throws MessagingException {
@@ -125,7 +133,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object size(final Object... args) throws MessagingException {
-        return Long.valueOf(((MessagingMessage)args[0]).getSize());
+        return Long.valueOf(((MessagingMessage) args[0]).getSize());
     }
 
     public Object subject(final Object... args) throws MessagingException {
@@ -133,7 +141,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object threadLevel(final Object... args) {
-        return ((MessagingMessage)args[0]).getThreadLevel();
+        return ((MessagingMessage) args[0]).getThreadLevel();
     }
 
     public Object to(final Object... args) throws MessagingException {
@@ -141,15 +149,15 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     private Object header(final Object object, final String header) throws MessagingException {
-        return ((MessagingMessage)object).getHeader(header);
+        return ((MessagingMessage) object).getHeader(header);
     }
 
     public Object picture(final Object... args) {
-        return ((MessagingMessage)args[0]).getPicture();
+        return ((MessagingMessage) args[0]).getPicture();
     }
-    
+
     public Object url(final Object... args) throws MessagingException {
-        return ((MessagingMessage)args[0]).getUrl();
+        return ((MessagingMessage) args[0]).getUrl();
     }
 
 }
