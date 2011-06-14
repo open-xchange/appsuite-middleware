@@ -469,9 +469,8 @@ public final class FacebookMessagingUtility {
      * @param fields The fields
      * @param access The messaging access
      * @return The fillers
-     * @throws MessagingException If a messaging error occurs
      */
-    public static List<StaticFiller> getStreamStaticFillers(final Collection<MessagingField> fields, final FacebookMessagingMessageAccess access) throws MessagingException {
+    public static List<StaticFiller> getStreamStaticFillers(final Collection<MessagingField> fields, final FacebookMessagingMessageAccess access) {
         return getStreamStaticFillers(EnumSet.copyOf(fields), access);
     }
 
@@ -481,9 +480,8 @@ public final class FacebookMessagingUtility {
      * @param fields The fields
      * @param access The messaging access
      * @return The fillers
-     * @throws MessagingException If a messaging error occurs
      */
-    public static List<StaticFiller> getStreamStaticFillers(final EnumSet<MessagingField> fieldSet, final FacebookMessagingMessageAccess access) throws MessagingException {
+    public static List<StaticFiller> getStreamStaticFillers(final EnumSet<MessagingField> fieldSet, final FacebookMessagingMessageAccess access) {
         final List<StaticFiller> ret = new ArrayList<StaticFiller>(fieldSet.size());
         if (fieldSet.contains(MessagingField.ACCOUNT_NAME) || fieldSet.contains(MessagingField.FULL)) {
             ret.add(new AccountNameFiller(access.getMessagingAccount().getDisplayName()));
