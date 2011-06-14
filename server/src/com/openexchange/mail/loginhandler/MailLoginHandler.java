@@ -62,6 +62,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mail.cache.ManagedMailAccessCache;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -111,6 +112,7 @@ public final class MailLoginHandler implements LoginHandlerService {
         // Time-out mail access cache
         try {
             MailAccessCache.getInstance().clearUserEntries(logout.getSession());
+            ManagedMailAccessCache.getInstance().clearUserEntries(logout.getSession());
         } catch (final MailException e) {
             throw new LoginException(e);
         }
