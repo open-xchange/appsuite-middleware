@@ -346,10 +346,8 @@ public class ICal4JParser implements ICalParser {
 	
 	private String workaroundFor19463(String input) {
 		return input
-			.replaceAll("TZOFFSETFROM:\\s*([\\+-])(\\d\\d\\d\\d)", "TZOFFSETFROM:$1$200")
-			.replaceAll("TZOFFSETTO:\\s*([\\+-])(\\d\\d\\d\\d)",   "TZOFFSETTO:$1$200")
-			.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$100")
-			.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$100")
+			.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1")
+			.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$1")
 			;
 	}
 
