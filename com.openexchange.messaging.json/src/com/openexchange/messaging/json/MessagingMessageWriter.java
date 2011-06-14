@@ -596,24 +596,17 @@ public class MessagingMessageWriter {
         map.put(MessagingField.RECEIVED_DATE, dateHandler);
         map.put(MessagingField.SENT_DATE, dateHandler);
         /*
-         * Number fields
+         * Unsigned-Number fields
          */
-        final JSONFieldHandler numberHandler = new JSONFieldHandler() {
-
-            private final Long longNum = Long.valueOf(-1);
-
-            private final Integer intNum = Integer.valueOf(-1);
+        final JSONFieldHandler unsignedNumberHandler = new JSONFieldHandler() {
             
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
-                if (longNum.equals(value) || intNum.equals(value)) {
-                    return null;
-                }
-                return value;
+                return ((Number) value).intValue() < 0 ? null : value;
             }
         };
-        map.put(MessagingField.THREAD_LEVEL, numberHandler);
-        map.put(MessagingField.SIZE, numberHandler);
-        map.put(MessagingField.PRIORITY, numberHandler);
+        map.put(MessagingField.THREAD_LEVEL, unsignedNumberHandler);
+        map.put(MessagingField.SIZE, unsignedNumberHandler);
+        map.put(MessagingField.PRIORITY, unsignedNumberHandler);
         /*
          * Set constant
          */
