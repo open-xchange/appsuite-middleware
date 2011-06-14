@@ -66,46 +66,45 @@ import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * Loads a set of requested messages. Parameters are:
  * <dl>
- *  <dt>messagingService</dt><dd>The messaging service id</dd>
- *  <dt>account</dt><dd>The id of the messaging account</dd>
- *  <dt>folder</dt><dd>The folder id to list the content for</dd>
- *  <dt>columns</dt><dd>A comma separated list of MessagingFields that should be loaded.</dd>
+ * <dt>messagingService</dt>
+ * <dd>The messaging service id</dd>
+ * <dt>account</dt>
+ * <dd>The id of the messaging account</dd>
+ * <dt>folder</dt>
+ * <dd>The folder id to list the content for</dd>
+ * <dt>columns</dt>
+ * <dd>A comma separated list of MessagingFields that should be loaded.</dd>
  * </dl>
- * The body of the request must contain a JSONArray with the message IDs that are to be loaded.
- * Returns a JSONArray containing a JSONArray for every message that is to be loaded. The sub arrays consist of one entry for each
- * requested field.
+ * The body of the request must contain a JSONArray with the message IDs that are to be loaded. Returns a JSONArray containing a JSONArray
+ * for every message that is to be loaded. The sub arrays consist of one entry for each requested field.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 
 public class ListAction extends AbstractMessagingAction {
+
     private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
-    
+
     public ListAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
-    
+
     public ListAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }
 
-
-
     @Override
     protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException {
-        final JSONArray list = new JSONArray();
-        
         final MessagingField[] fields = req.getColumns();
 
-       
         MessagingFolderAddress folder = null;
         final List<String> ids = new ArrayList<String>();
         for (final MessageAddress address : req.getMessageAddresses()) {
-            if(folder == null) {
+            if (folder == null) {
                 folder = address.getLongFolder();
                 ids.add(address.getId());
             } else if (folder.equals(address.getLongFolder())) {
@@ -115,17 +114,19 @@ public class ListAction extends AbstractMessagingAction {
             }
         }
 
-        if(folder == null) {
+        if (folder == null) {
             return new AJAXRequestResult(new JSONArray());
         }
-        
-        final MessagingMessageAccess messageAccess = req.getMessageAccess(folder.getMessagingService(), folder.getAccount(), session.getUserId(), session.getContextId());
+
+        final MessagingMessageAccess messageAccess =
+            req.getMessageAccess(folder.getMessagingService(), folder.getAccount(), session.getUserId(), session.getContextId());
         final List<MessagingMessage> messages = messageAccess.getMessages(folder.getFolder(), ids.toArray(new String[ids.size()]), fields);
-        
+
+        final JSONArray list = new JSONArray();
         for (final MessagingMessage messagingMessage : messages) {
             list.put(writer.writeFields(messagingMessage, fields, folder.getAccountAddress(), session, DISPLAY_MODE));
         }
-        
+
         return new AJAXRequestResult(list);
     }
 
