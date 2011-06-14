@@ -3568,16 +3568,18 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-            final Future<MailImportResult[]> future;
+            Future<MailImportResult[]> future = null;
             {
                 final ServletFileUpload servletFileUpload = new ServletFileUpload();
                 if (ServletFileUpload.isMultipartContent(req)) {
                     final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                     final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
                     task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);
-                    future = service.submit(task);
                     try {
                         final FileItemIterator iter = servletFileUpload.getItemIterator(req);
+                        if (iter.hasNext()) {
+                            future = service.submit(task);
+                        }
                         boolean keepgoing = true;
                         while (keepgoing && iter.hasNext()) {
                             final FileItemStream item = iter.next();
@@ -3602,7 +3604,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
 
-            final MailImportResult[] mirs = future.get();
+            final MailImportResult[] mirs;
+            if (null == future) {
+                mirs = new MailImportResult[0];
+            } else {
+                mirs = future.get();
+            }
             final JSONArray respArray = new JSONArray();
             for (final MailImportResult m : mirs) {
                 if (m.hasError()) {
