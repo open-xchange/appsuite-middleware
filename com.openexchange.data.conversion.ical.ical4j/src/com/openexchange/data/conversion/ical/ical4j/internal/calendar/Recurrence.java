@@ -277,8 +277,21 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             cObj.setRecurrenceCount(recurrenceCount);
             setOccurrenceIfNeededRecoveryFIXME(cObj, recurrenceCount);
         } else if (null != rrule.getUntil()) {
-            cObj.setUntil(ParserTools.recalculateMidnight(new Date(rrule.getUntil().getTime()), TimeZone.getTimeZone("UTC"))); // OX always has 00:00 UTC same say as until value
+            Date until = new Date(rrule.getUntil().getTime());
+            if (until.after(cObj.getEndDate())) {
+                cObj.setUntil(ParserTools.recalculateMidnight(plusOneDay(until), TimeZone.getTimeZone("UTC"))); // OX always has 00:00 UTC same say as until value
+                
+            } else {
+                cObj.setUntil(ParserTools.recalculateMidnight(until, TimeZone.getTimeZone("UTC"))); // OX always has 00:00 UTC same say as until value
+            }
         }
+    }
+
+    private Date plusOneDay(Date until) {
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(until);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        return calendar.getTime();
     }
 
     private void setOccurrenceIfNeededRecoveryFIXME(final U cObj, final int recurrenceCount) {
