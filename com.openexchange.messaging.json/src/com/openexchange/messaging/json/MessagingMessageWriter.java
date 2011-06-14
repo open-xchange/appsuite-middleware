@@ -268,7 +268,14 @@ public class MessagingMessageWriter {
 
     }
 
-    protected class MultipartContentRenderer implements MessagingContentWriter {
+    protected static class MultipartContentRenderer implements MessagingContentWriter {
+
+        private final MessagingMessageWriter writer;
+
+        protected MultipartContentRenderer(final MessagingMessageWriter writer) {
+            super();
+            this.writer = writer;
+        }
 
         public boolean handles(final MessagingPart part, final MessagingContent content) {
             return MultipartContent.class.isInstance(content);
@@ -279,7 +286,7 @@ public class MessagingMessageWriter {
             final JSONArray array = new JSONArray();
             for (int i = 0, size = multipart.getCount(); i < size; i++) {
                 final MessagingBodyPart bodyPart = multipart.get(i);
-                final JSONObject partJSON = MessagingMessageWriter.this.write(bodyPart, session, mode);
+                final JSONObject partJSON = writer.write(bodyPart, session, mode);
                 if (null != bodyPart.getDisposition()) {
                     partJSON.put("disposition", bodyPart.getDisposition());
                 }
@@ -326,7 +333,7 @@ public class MessagingMessageWriter {
         contentWriters.add(new StringContentRenderer());
         contentWriters.add(new BinaryContentRenderer());
         contentWriters.add(new ReferenceContentRenderer());
-        contentWriters.add(new MultipartContentRenderer());
+        contentWriters.add(new MultipartContentRenderer(this));
     }
 
     /**
