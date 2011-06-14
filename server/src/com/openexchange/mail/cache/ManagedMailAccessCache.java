@@ -238,6 +238,9 @@ public final class ManagedMailAccessCache {
      * @param accessQueue The queue to clear
      */
     protected static void orderlyClearQueue(final MailAccessQueue accessQueue) {
+        if (null == accessQueue) {
+            return;
+        }
         PooledMailAccess pooledMailAccess;
         while (null != (pooledMailAccess = accessQueue.poll())) {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
@@ -269,10 +272,7 @@ public final class ManagedMailAccessCache {
                     true);
                 final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
                 for (final MailAccount mailAccount : accounts) {
-                    final MailAccessQueue accessQueue = map.remove(keyFor(mailAccount.getId(), session));
-                    if (null != accessQueue) {
-                        orderlyClearQueue(accessQueue);
-                    }
+                    orderlyClearQueue(map.remove(keyFor(mailAccount.getId(), session)));
                 }
             }
         } catch (final ServiceException e) {
