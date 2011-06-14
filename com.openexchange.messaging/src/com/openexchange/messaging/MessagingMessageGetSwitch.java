@@ -117,7 +117,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object receivedDate(final Object... args) {
-        return ((MessagingMessage)args[0]).getReceivedDate();
+        return Long.valueOf(((MessagingMessage)args[0]).getReceivedDate());
     }
 
     public Object sentDate(final Object... args) throws MessagingException {
@@ -125,7 +125,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object size(final Object... args) throws MessagingException {
-        return ((MessagingMessage)args[0]).getSize();
+        return Long.valueOf(((MessagingMessage)args[0]).getSize());
     }
 
     public Object subject(final Object... args) throws MessagingException {
