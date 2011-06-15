@@ -75,8 +75,6 @@ public class Activator extends HousekeepingActivator {
 
     private static final Class[] NEEDED = new Class[] { OAuthService.class, ContextService.class, YahooService.class};
     
-private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-    
     private OAuthServiceMetaData oAuthServiceMetaData;
     
     private YahooService yahooService;
@@ -108,6 +106,7 @@ private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
         rememberTracker(metaDataTracker);
         openTrackers();
         yahooService = getService(YahooService.class);        
+        registerSubscribeService();
     }
 
     
