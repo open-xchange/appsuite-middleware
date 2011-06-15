@@ -99,6 +99,8 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final String CHARSET_US_ASCII = "US-ASCII";
 
+    private static final String CHARSET_UTF_8 = "UTF-8";
+
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
     private static final String RPL_CT = "#CT#";
@@ -775,9 +777,9 @@ public final class HTMLServiceImpl implements HTMLService {
                 final String cs;
                 if (null == charset) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn("Missing charset. Using fallback \"US-ASCII\" instead.");
+                        LOG.warn("Missing charset. Using fallback \"UTF-8\" instead.");
                     }
-                    cs = CHARSET_US_ASCII;
+                    cs = CHARSET_UTF_8;
                 } else {
                     cs = charset;
                 }
