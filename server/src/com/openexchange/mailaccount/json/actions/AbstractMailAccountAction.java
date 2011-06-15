@@ -50,6 +50,8 @@
 package com.openexchange.mailaccount.json.actions;
 
 import static com.openexchange.mailaccount.json.Tools.getUnsignedInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -62,10 +64,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailException.Code;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailFolderStorage;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
@@ -76,7 +82,10 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.secret.SecretService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,6 +95,10 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailAccountAction implements AJAXActionService {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractMailAccountAction.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link AbstractMailAccountAction}.
@@ -192,19 +205,47 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         }
     }
 
-    protected static String getSecret(final ServerSession session) {
-        final SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
-        return secretService.getSecret(session);
+    /**
+     * Gets the secret string for specified session.
+     * 
+     * @param session The session
+     * @return The secret string
+     * @throws MailAccountException If secret string cannot be returned
+     */
+    protected static String getSecret(final ServerSession session) throws MailAccountException {
+        try {
+            return ServerServiceRegistry.getInstance().getService(SecretService.class, true).getSecret(session);
+        } catch (final ServiceException e) {
+            throw new MailAccountException(e);
+        }
     }
 
+    /**
+     * Checks if specified {@link MailAccount} is considered as default aka primary account.
+     * 
+     * @param mailAccount The mail account to examine
+     * @return <code>true</code> if specified {@link MailAccount} is considered as defaul account; otherwise <code>false</code>
+     */
     protected static boolean isDefaultMailAccount(final MailAccount mailAccount) {
         return mailAccount.isDefaultAccount() || MailAccount.DEFAULT_ID == mailAccount.getId();
     }
 
+    /**
+     * Checks if specified {@link MailAccountDescription} is considered as default aka primary account.
+     * 
+     * @param mailAccount The mail account description to examine
+     * @return <code>true</code> if specified {@link MailAccountDescription} is considered as defaul account; otherwise <code>false</code>
+     */
     protected static boolean isDefaultMailAccount(final MailAccountDescription mailAccount) {
         return MailAccount.DEFAULT_ID == mailAccount.getId();
     }
 
+    /**
+     * Parses the attributes from passed comma-separated list.
+     * 
+     * @param colString The comma-separated list
+     * @return The parsed attributes
+     */
     protected static List<Attribute> getColumns(final String colString) {
         List<Attribute> attributes = null;
         if (colString != null && !"".equals(colString.trim())) {
@@ -221,6 +262,63 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         return Arrays.asList(Attribute.values());
     }
 
+    /**
+     * Gets the appropriate {@link MailAccess} instance for specified mail account description and session.
+     * 
+     * @param accountDescription The mail account description
+     * @param session The session providing needed user information
+     * @return The appropriate {@link MailAccess} instance
+     * @throws MailAccountException If appropriate {@link MailAccess} instance cannot be determined
+     */
+    protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session) throws MailAccountException {
+        try {
+            final String mailServerURL = accountDescription.generateMailServerURL();
+            // Get the appropriate mail provider by mail server URL
+            final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
+            if (null == mailProvider) {
+                if (DEBUG) {
+                    LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
+                }
+                return null;
+            }
+            // Set marker
+            session.setParameter("mail-account.request", "validate");
+            try {
+                // Create a mail access instance
+                final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
+                final MailConfig mailConfig = mailAccess.getMailConfig();
+                // Set login and password
+                mailConfig.setLogin(accountDescription.getLogin());
+                mailConfig.setPassword(accountDescription.getPassword());
+                // Set server and port
+                final URI uri;
+                try {
+                    uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
+                } catch (final URISyntaxException e) {
+                    throw new MailException(Code.URI_PARSE_FAILED, e, mailServerURL);
+                }
+                mailConfig.setServer(uri.getHost());
+                mailConfig.setPort(uri.getPort());
+                mailConfig.setSecure(accountDescription.isMailSecure());
+                mailAccess.setCacheable(false);
+                return mailAccess;
+            } finally {
+                // Unset marker
+                session.setParameter("mail-account.request", null);
+            }
+        } catch (final MailException e) {
+            throw new MailAccountException(e);
+        }
+    }
+
+    /**
+     * Checks for presence of default folder full names and creates them if absent.
+     * 
+     * @param account The corresponding account
+     * @param storageService The storage service (needed for update)
+     * @param session The session providing needed user information
+     * @return The mail account with full names present
+     */
     protected static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session) {
         final int accountId = account.getId();
         if (MailAccount.DEFAULT_ID == accountId) {
@@ -418,7 +516,8 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     private static String getPrefix(final int accountId, final ServerSession session) throws MailAccountException {
         try {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = MailAccess.getInstance(session, accountId);
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access =
+                MailAccess.getInstance(session, accountId);
             access.connect(false);
             try {
                 return ((MailFolderStorage) access.getFolderStorage()).getDefaultFolderPrefix();

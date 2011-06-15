@@ -64,10 +64,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailException.Code;
-import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
@@ -187,43 +184,6 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             return Boolean.valueOf(validated);
         } catch (final AbstractOXException e) {
             throw new OXException(e);
-        }
-    }
-
-    private static MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session) throws AbstractOXException {
-        final String mailServerURL = accountDescription.generateMailServerURL();
-        // Get the appropriate mail provider by mail server URL
-        final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
-        if (null == mailProvider) {
-            if (DEBUG) {
-                LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
-            }
-            return null;
-        }
-        // Set marker
-        session.setParameter("mail-account.request", "validate");
-        try {
-            // Create a mail access instance
-            final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
-            final MailConfig mailConfig = mailAccess.getMailConfig();
-            // Set login and password
-            mailConfig.setLogin(accountDescription.getLogin());
-            mailConfig.setPassword(accountDescription.getPassword());
-            // Set server and port
-            final URI uri;
-            try {
-                uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
-            } catch (final URISyntaxException e) {
-                throw new MailException(Code.URI_PARSE_FAILED, e, mailServerURL);
-            }
-            mailConfig.setServer(uri.getHost());
-            mailConfig.setPort(uri.getPort());
-            mailConfig.setSecure(accountDescription.isMailSecure());
-            mailAccess.setCacheable(false);
-            return mailAccess;
-        } finally {
-            // Unset marker
-            session.setParameter("mail-account.request", null);
         }
     }
 
