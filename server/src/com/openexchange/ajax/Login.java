@@ -937,7 +937,7 @@ public class Login extends AJAXServlet {
         resp.sendRedirect(generateRedirectURL(null, httpAuthAutoLogin, session.getSessionID()));
     }
 
-    private String generateRedirectURL(final String uiWebPathParam, final String autoLoginParam, final String sessionId) {
+    private String generateRedirectURL(final String uiWebPathParam, final String shouldStore, final String sessionId) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;
@@ -945,7 +945,6 @@ public class Login extends AJAXServlet {
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = addFragmentParameter(retval, PARAMETER_SESSION, sessionId);
-        final String shouldStore = autoLoginParam;
         if (shouldStore != null) {
             retval = addFragmentParameter(retval, "store", shouldStore);
         }
