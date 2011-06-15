@@ -369,9 +369,12 @@ public abstract class MailConfig {
      * @throws MailException If mail server URL cannot be returned
      */
     public static final String getMailServerURL(final Session session, final int accountId) throws MailException {
+        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
+            return MailProperties.getInstance().getMailServer();
+        }
         try {
             final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            return getMailServerURL(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+            return storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL();
         } catch (final ServiceException e) {
             throw new MailException(e);
         } catch (final MailAccountException e) {
@@ -557,8 +560,7 @@ public abstract class MailConfig {
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
                 if (masterPw == null) {
-                    throw new MailConfigException(
-                        new StringBuilder().append("Property \"").append("masterPassword").append("\" not set").toString());
+                    throw new MailConfigException(new StringBuilder().append("Property \"masterPassword\" not set").toString());
                 }
                 mailConfig.password = masterPw;
             } else {

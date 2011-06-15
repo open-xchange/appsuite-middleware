@@ -758,11 +758,10 @@ public final class HTMLServiceImpl implements HTMLService {
              */
             return htmlContent;
         }
-        String html = processDownlevelRevealedConditionalComments(htmlContent);
         /*
          * Validate
          */
-        html = validate(html);
+        String html = validate(htmlContent);
         /*
          * Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
          */
@@ -786,6 +785,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 html = sb.toString();
             }
         }
+        html = processDownlevelRevealedConditionalComments(htmlContent);
         // html = removeXHTMLCData(html);
         /*
          * Check URLs
