@@ -183,22 +183,22 @@ public final class CapabilitiesCache {
         mailCache.get(entry);
         if (null == entry.getValue()) {
             final IMAPCapabilities imapCaps = new IMAPCapabilities();
-            imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
-            imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));
-            imapCaps.setThreadOrderedSubject(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
-            imapCaps.setQuota(imapStore.hasCapability(IMAPCapabilities.CAP_QUOTA));
-            imapCaps.setSort(imapStore.hasCapability(IMAPCapabilities.CAP_SORT));
-            imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
-            imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
-            imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
-            imapCaps.setNamespace(imapStore.hasCapability(IMAPCapabilities.CAP_NAMESPACE));
-            imapCaps.setIdle(imapStore.hasCapability(IMAPCapabilities.CAP_IDLE));
-            imapCaps.setChildren(imapStore.hasCapability(IMAPCapabilities.CAP_CHILDREN));
-            imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
             /*
-             * Initialize set
+             * Get as map
              */
-            final Map<String, String> map = IMAPCommandsCollection.getCapabilities((IMAPFolder) imapStore.getFolder("INBOX"));
+            @SuppressWarnings("unchecked") final Map<String, String> map = imapStore.getCapabilities();
+            imapCaps.setACL(map.containsKey(IMAPCapabilities.CAP_ACL));
+            imapCaps.setThreadReferences(map.containsKey(IMAPCapabilities.CAP_THREAD_REFERENCES));
+            imapCaps.setThreadOrderedSubject(map.containsKey(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
+            imapCaps.setQuota(map.containsKey(IMAPCapabilities.CAP_QUOTA));
+            imapCaps.setSort(map.containsKey(IMAPCapabilities.CAP_SORT));
+            imapCaps.setIMAP4(map.containsKey(IMAPCapabilities.CAP_IMAP4));
+            imapCaps.setIMAP4rev1(map.containsKey(IMAPCapabilities.CAP_IMAP4_REV1));
+            imapCaps.setUIDPlus(map.containsKey(IMAPCapabilities.CAP_UIDPLUS));
+            imapCaps.setNamespace(map.containsKey(IMAPCapabilities.CAP_NAMESPACE));
+            imapCaps.setIdle(map.containsKey(IMAPCapabilities.CAP_IDLE));
+            imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
+            imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
             /*
              * ACL extension
              */

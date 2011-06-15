@@ -103,6 +103,8 @@ public abstract class Entity2ACL {
         }
     }
 
+    private static final String PARAM_NAME = "Entity2ACL";
+
     /**
      * Creates a new instance implementing the {@link Entity2ACL} interface.
      * 
@@ -120,8 +122,13 @@ public abstract class Entity2ACL {
             return singleton;
         }
         try {
-            return Entity2ACLAutoDetector.impl4(imapStore.getGreeting(), imapConfig);
-        } catch (MessagingException e) {
+            Entity2ACL cached = imapConfig.getParameter(PARAM_NAME, Entity2ACL.class);
+            if (null == cached) {
+                cached = Entity2ACLAutoDetector.impl4(imapStore.getGreeting(), imapConfig);
+                imapConfig.setParameter(PARAM_NAME, cached);
+            }
+            return cached;
+        } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
     }
@@ -129,7 +136,7 @@ public abstract class Entity2ACL {
     /**
      * Resets entity2acl
      */
-    final static void resetEntity2ACL() {
+    protected final static void resetEntity2ACL() {
         singleton = null;
         instantiated = false;
     }
@@ -139,7 +146,7 @@ public abstract class Entity2ACL {
      * 
      * @param singleton The singleton instance of {@link Entity2ACL}
      */
-    final static void setInstance(final Entity2ACL singleton) {
+    protected final static void setInstance(final Entity2ACL singleton) {
         Entity2ACL.singleton = singleton;
         instantiated = true;
     }
