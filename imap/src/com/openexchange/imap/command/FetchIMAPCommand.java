@@ -903,8 +903,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             if (!fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
                 newFetchProfile.add(UIDFolder.FetchProfileItem.UID);
             }
-            final javax.mail.FetchProfile.Item[] items = fetchProfile.getItems();
-            for (final javax.mail.FetchProfile.Item item : items) {
+            for (final javax.mail.FetchProfile.Item item : fetchProfile.getItems()) {
                 if (!FetchProfile.Item.CONTENT_INFO.equals(item)) {
                     newFetchProfile.add(item);
                 }
@@ -916,6 +915,27 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             return newFetchProfile;
         }
         return fetchProfile;
+    }
+
+    /**
+     * Strips header names from given fetch profile.
+     * 
+     * @param fetchProfile The fetch profile
+     * @return The fetch profile with header names stripped
+     */
+    public static final FetchProfile getHeaderlessFetchProfile(final FetchProfile fetchProfile) {
+        final String[] headerNames = fetchProfile.getHeaderNames();
+        if (null == headerNames || headerNames.length <= 0) {
+            return fetchProfile;
+        }
+        /*
+         * Strip header names
+         */
+        final FetchProfile newFetchProfile = new FetchProfile();
+        for (final javax.mail.FetchProfile.Item item : fetchProfile.getItems()) {
+            newFetchProfile.add(item);
+        }
+        return newFetchProfile;
     }
 
 }
