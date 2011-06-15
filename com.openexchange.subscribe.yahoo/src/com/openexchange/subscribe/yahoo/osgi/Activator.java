@@ -49,17 +49,22 @@
 
 package com.openexchange.subscribe.yahoo.osgi;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.yahoo.YahooSubscribeService;
+import com.openexchange.subscribe.yahoo.update.DeleteOldYahooSubscriptions;
 
 /**
  * {@link Activator}
@@ -92,6 +97,13 @@ private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
     @Override
     protected void startBundle() throws Exception {
      // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
+        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+
+            public Collection<? extends UpdateTask> getUpdateTasks() {
+                return Arrays.asList(new DeleteOldYahooSubscriptions());
+            }
+            
+        });
         ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));        
         rememberTracker(metaDataTracker);
         openTrackers();
