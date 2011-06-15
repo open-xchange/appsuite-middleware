@@ -81,7 +81,7 @@ public final class ImapIdlePushListener implements PushListener {
     /**
      * @param debugEnabled the debugEnabled to set
      */
-    public static final void setDebugEnabled(boolean debugEnabled) {
+    public static final void setDebugEnabled(final boolean debugEnabled) {
         DEBUG_ENABLED = debugEnabled;
     }
 
@@ -188,7 +188,7 @@ public final class ImapIdlePushListener implements PushListener {
     /**
      * @param errordelay the errordelay to set
      */
-    public static final void setErrordelay(int errordelay) {
+    public static final void setErrordelay(final int errordelay) {
         ImapIdlePushListener.errordelay = errordelay;
     }
 
@@ -209,7 +209,7 @@ public final class ImapIdlePushListener implements PushListener {
         final ThreadPoolService threadPoolService;
         try {
             threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
-            IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
+            final IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
             if( imcf.isWatcherEnabled() ) {
                 LOG.error("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
@@ -217,7 +217,7 @@ public final class ImapIdlePushListener implements PushListener {
             mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
         } catch (final ServiceException e) {
             throw new PushException(e);
-        } catch (MailException e) {
+        } catch (final MailException e) {
             throw new PushException(e);
         }
         imapIdleFuture = threadPoolService.submit(ThreadPools.task(new ImapIdlePushListenerTask(this)));
@@ -235,7 +235,7 @@ public final class ImapIdlePushListener implements PushListener {
             if( inbox.isOpen() ) {
                 try {
                     inbox.close(false);
-                } catch (MessagingException e) {
+                } catch (final MessagingException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -269,12 +269,16 @@ public final class ImapIdlePushListener implements PushListener {
         try {
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
             mailAccess.connect();
-            Object fstore = mailAccess.getFolderStorage();
-            if( ! (fstore instanceof IMAPFolderStorage) ) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+            
+            final IMAPFolderStorage istore;
+            {
+                final Object fstore = mailAccess.getFolderStorage();
+                if( ! (fstore instanceof IMAPFolderStorage) ) {
+                    throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+                }
+                istore = (IMAPFolderStorage) fstore;
             }
-            IMAPFolderStorage istore = (IMAPFolderStorage) fstore;
-            IMAPStore imapStore = istore.getImapStore();
+            final IMAPStore imapStore = istore.getImapStore();
             inbox = (IMAPFolder) imapStore.getFolder(folder);
             if( ! inbox.isOpen() ) {
                 inbox.open(IMAPFolder.READ_WRITE);
@@ -285,7 +289,7 @@ public final class ImapIdlePushListener implements PushListener {
             inbox.idle(true);
             if( inbox.getNewMessageCount() > 0 ) {
                 if( DEBUG_ENABLED ) {
-                    int nmails = inbox.getNewMessageCount();
+                    final int nmails = inbox.getNewMessageCount();
                     LOG.info("IDLE: " + nmails + " new mail(s) for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
                 }
                 notifyNewMail();
@@ -294,19 +298,19 @@ public final class ImapIdlePushListener implements PushListener {
              * IMAP server is down/busy for a moment or if e.g. cyrus client timeout happens
              * (idling for too long)
              */
-        } catch (MailException e) {
+        } catch (final MailException e) {
             // throw new PushException(e);
             LOG.error("ERROR in IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
             try {
                 Thread.sleep(errordelay);
-            } catch (InterruptedException e1) {
+            } catch (final InterruptedException e1) {
                 LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
             }
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             LOG.error("ERROR in IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
             try {
                 Thread.sleep(errordelay);
-            } catch (InterruptedException e1) {
+            } catch (final InterruptedException e1) {
                 LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
             }
         } finally {
