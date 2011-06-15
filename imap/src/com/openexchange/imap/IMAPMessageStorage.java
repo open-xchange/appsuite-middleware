@@ -66,6 +66,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import javax.mail.FetchProfile;
+import javax.mail.FetchProfile.Item;
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 import javax.mail.Folder;
@@ -120,6 +121,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.user.UserService;
+import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -306,40 +308,52 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private TIntObjectHashMap<MailMessage> fetchValidSeqNumsWithFallback(final int[] seqNums, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MailException, MessagingException {
-        try {
-            return fetchValidSeqNums(seqNums, fetchProfile, isRev1, body, false);
-        } catch (final FolderClosedException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
-        } catch (final StoreClosedException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
-        } catch (final MessagingException e) {
-            if (DEBUG) {
-                LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
+    private TIntObjectHashMap<MailMessage> fetchValidSeqNumsWithFallback(final int[] seqNums, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MailException {
+        FetchProfile fp = fetchProfile;
+        int retry = 0;
+        while (true) {
+            try {
+                return fetchValidSeqNums(seqNums, fp, isRev1, body);
+            } catch (final FolderClosedException e) {
+                throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+            } catch (final StoreClosedException e) {
+                throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+            } catch (final MessagingException e) {
+                final Exception nextException = e.getNextException();
+                if (nextException instanceof BadCommandException) {
+                    if (DEBUG) {
+                        final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch item failed: ");
+                        for (final Item item : fetchProfile.getItems()) {
+                            sb.append(item.getClass().getSimpleName()).append(',');
+                        }
+                        for (final String name : fetchProfile.getHeaderNames()) {
+                            sb.append(name).append(',');
+                        }
+                        sb.deleteCharAt(sb.length() - 1);
+                        LOG.debug(sb.toString(), e);
+                    }
+                    if (0 == retry) {
+                        fp = FetchIMAPCommand.getSafeFetchProfile(fetchProfile);
+                        retry++;
+                    } else if (1 == retry) {
+                        fp = FetchIMAPCommand.getHeaderlessFetchProfile(fetchProfile);
+                        retry++;
+                    } else {
+                        throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+                    }
+                } else {
+                    throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+                }
+            } catch (final RuntimeException e) {
+                throw handleRuntimeException(e);
             }
-            return fetchValidSeqNums(seqNums, fetchProfile, isRev1, body, true);
-        } catch (final RuntimeException e) {
-            throw handleRuntimeException(e);
         }
     }
 
-    private TIntObjectHashMap<MailMessage> fetchValidSeqNums(final int[] seqNums, final FetchProfile fetchProfile, final boolean isRev1, final boolean body, final boolean ignoreBodystructure) throws MessagingException, MailException {
+    private TIntObjectHashMap<MailMessage> fetchValidSeqNums(final int[] seqNums, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MessagingException, MailException {
         final TIntObjectHashMap<MailMessage> map = new TIntObjectHashMap<MailMessage>(seqNums.length);
         final long start = System.currentTimeMillis();
-        final MailMessage[] tmp;
-        if (ignoreBodystructure) {
-            tmp = new NewFetchIMAPCommand(
-                imapFolder,
-                getSeparator(imapFolder),
-                isRev1,
-                seqNums,
-                FetchIMAPCommand.getSafeFetchProfile(fetchProfile),
-                false,
-                false,
-                body).setDetermineAttachmentByHeader(true).doCommand();
-        } else {
-            tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, seqNums, fetchProfile, false, false, body).doCommand();
-        }
+        final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, seqNums, fetchProfile, false, false, body).doCommand();
         final long time = System.currentTimeMillis() - start;
         mailInterfaceMonitor.addUseTime(time);
         if (DEBUG) {
