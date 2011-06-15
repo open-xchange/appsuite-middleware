@@ -777,9 +777,8 @@ public final class HTMLServiceImpl implements HTMLService {
                 }
                 /*-
                  * In reverse order:
-                 * "\r\n    <meta content=\"text/html; charset="
-                 * <charset>
-                 *  " http-equiv="Content-Type" />
+                 * 
+                 * "\r\n    <meta content=\"text/html; charset=" + <charset> + "\" http-equiv=\"Content-Type\" />\r\n "
                  * 
                  */
                 sb.insert(start, "\" http-equiv=\"Content-Type\" />\r\n ");
