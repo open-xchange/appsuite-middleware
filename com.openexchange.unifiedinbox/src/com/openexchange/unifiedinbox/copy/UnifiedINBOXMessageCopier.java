@@ -169,7 +169,7 @@ public final class UnifiedINBOXMessageCopier {
             for (final String mailId : mailIds) {
                 tmp.setUIDString(mailId);
                 // Check if accounts and fullnames are equal
-                if (tmp.getAccountId() == destAccountId && tmp.getFullname().equals(destFullname)) {
+                if (tmp.getAccountId() == destAccountId && tmp.getFullName().equals(destFullname)) {
                     throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
                 }
             }
@@ -198,7 +198,7 @@ public final class UnifiedINBOXMessageCopier {
                     callable = new KF2AFDifferCallable(tmp.getAccountId(), destAccountId, destFullname, fast, move, retval, session);
                     otherCallableMap.put(accountId, callable);
                 }
-                callable.addIdAndFullnameAndIndex(tmp.getId(), tmp.getFullname(), i);
+                callable.addIdAndFullnameAndIndex(tmp.getId(), tmp.getFullName(), i);
             }
         }
         // Perform callables

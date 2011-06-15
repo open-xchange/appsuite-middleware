@@ -49,6 +49,9 @@
 
 package com.openexchange.unifiedinbox;
 
+import static com.openexchange.mail.utils.MailPasswordUtil.decrypt;
+import static com.openexchange.mail.utils.MailPasswordUtil.encrypt;
+import java.security.GeneralSecurityException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 
@@ -59,11 +62,15 @@ import com.openexchange.mail.MailPath;
  */
 public final class UnifiedINBOXUID {
 
+    private static final String KEY = "unifiedm";
+
     private int accountId;
 
     private String fullname;
 
     private String id;
+
+    private String uidl;
 
     /**
      * Initializes an empty {@link UnifiedINBOXUID}.
@@ -107,6 +114,15 @@ public final class UnifiedINBOXUID {
         this.accountId = accountId;
         this.fullname = fullname;
         this.id = id;
+        final String mailPath = MailPath.getMailPath(accountId, fullname, id);
+        try {
+            uidl = encrypt(mailPath, KEY);
+            return this;
+        } catch (final GeneralSecurityException e) {
+            // Must not occur
+            org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXUID.class).warn("\n\tPBE (password-based-encryption) failed.\n", e);
+            uidl = mailPath;
+        }
         return this;
     }
 
@@ -118,10 +134,17 @@ public final class UnifiedINBOXUID {
      * @return This {@link UnifiedINBOXUID} with new UID applied.
      */
     public UnifiedINBOXUID setUIDString(final String unifiedINBOXUID) throws MailException {
-        final MailPath mailPath = new MailPath(unifiedINBOXUID);
+        String decoded;
+        try {
+            decoded = decrypt(unifiedINBOXUID, KEY);
+        } catch (final GeneralSecurityException e) {
+            decoded = unifiedINBOXUID;
+        }
+        final MailPath mailPath = new MailPath(decoded);
         accountId = mailPath.getAccountId();
         fullname = mailPath.getFolder();
         id = mailPath.getMailID();
+        uidl = decoded;
         return this;
     }
 
@@ -135,11 +158,11 @@ public final class UnifiedINBOXUID {
     }
 
     /**
-     * Gets the folder fullname.
+     * Gets the folder full name.
      * 
-     * @return The folder fullname
+     * @return The folder full name
      */
-    public String getFullname() {
+    public String getFullName() {
         return fullname;
     }
 
@@ -154,6 +177,6 @@ public final class UnifiedINBOXUID {
 
     @Override
     public String toString() {
-        return MailPath.getMailPath(accountId, fullname, id);
+        return uidl;
     }
 }

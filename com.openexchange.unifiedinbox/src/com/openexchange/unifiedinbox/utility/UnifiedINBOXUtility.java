@@ -58,11 +58,11 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.tools.stream.UnsynchronizedStringWriter;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
+import com.openexchange.unifiedinbox.UnifiedINBOXUID;
 
 /**
  * {@link UnifiedINBOXUtility} - Utility methods for Unified INBOX.
@@ -88,23 +88,23 @@ public final class UnifiedINBOXUtility {
     public static Map<Integer, Map<String, List<String>>> parseMailIDs(final String[] mailIDs) throws MailException {
         final Map<Integer, Map<String, List<String>>> map = new HashMap<Integer, Map<String, List<String>>>(mailIDs.length);
         // Start parsing
-        final MailPath mailPath = new MailPath();
+        final UnifiedINBOXUID uidl = new UnifiedINBOXUID();
         for (final String mailID : mailIDs) {
-            mailPath.setMailIdentifierString(mailID);
+            uidl.setUIDString(mailID);
 
-            final Integer key = Integer.valueOf(mailPath.getAccountId());
+            final Integer key = Integer.valueOf(uidl.getAccountId());
             Map<String, List<String>> folderUIDMap = map.get(key);
             if (null == folderUIDMap) {
                 folderUIDMap = new HashMap<String, List<String>>(mailIDs.length / 2);
                 map.put(key, folderUIDMap);
             }
-            final String folder = mailPath.getFolder();
+            final String folder = uidl.getFullName();
             List<String> uids = folderUIDMap.get(folder);
             if (null == uids) {
                 uids = new ArrayList<String>();
                 folderUIDMap.put(folder, uids);
             }
-            uids.add(mailPath.getMailID());
+            uids.add(uidl.getId());
         }
         return map;
     }

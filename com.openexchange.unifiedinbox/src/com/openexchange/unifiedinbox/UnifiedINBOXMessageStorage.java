@@ -329,7 +329,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             try {
                 mailAccess.connect();
                 close = true;
-                MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullname(), uid.getId(), markSeen);
+                MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullName(), uid.getId(), markSeen);
                 if (null == mail) {
                     return null;
                 }
@@ -371,18 +371,17 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
         }
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullname)) {
-            final MailAccount[] accounts;
+            final List<MailAccount> accounts;
             try {
                 final MailAccountStorageService storageService =
                     UnifiedINBOXServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                 final MailAccount[] tmp = storageService.getUserMailAccounts(user, cid);
-                final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
+                accounts = new ArrayList<MailAccount>(tmp.length);
                 for (final MailAccount mailAccount : tmp) {
                     if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                        l.add(mailAccount);
+                        accounts.add(mailAccount);
                     }
                 }
-                accounts = l.toArray(new MailAccount[l.size()]);
             } catch (final ServiceException e) {
                 throw new UnifiedINBOXException(e);
             } catch (final MailAccountException e) {
@@ -392,7 +391,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             mfs.add(MailField.getField(sortField.getField()));
             final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
-            final int length = accounts.length;
+            final int length = accounts.size();
             final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedINBOXCompletionService<List<MailMessage>>(executor);
