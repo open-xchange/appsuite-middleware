@@ -103,14 +103,6 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
-    private static final String RPL_CT = "#CT#";
-
-    private static final String HTML_META_TEMPLATE = "\r\n    <meta content=\"" + RPL_CT + "\" http-equiv=\"Content-Type\" />";
-
-    private static final String RPL_CS = "#CS#";
-
-    private static final String CT_TEXT_HTML = "text/html; charset=" + RPL_CS;
-
     private static final String TAG_E_HEAD = "</head>";
 
     private static final String TAG_S_HEAD = "<head>";
@@ -783,7 +775,16 @@ public final class HTMLServiceImpl implements HTMLService {
                 } else {
                     cs = charset;
                 }
-                sb.insert(start, HTML_META_TEMPLATE.replaceFirst(RPL_CT, CT_TEXT_HTML.replaceFirst(RPL_CS, cs)));
+                /*-
+                 * In reverse order:
+                 * "\r\n    <meta content=\"text/html; charset="
+                 * <charset>
+                 *  " http-equiv="Content-Type" />
+                 * 
+                 */
+                sb.insert(start, "\" http-equiv=\"Content-Type\" />\r\n ");
+                sb.insert(start, cs);
+                sb.insert(start, "\r\n    <meta content=\"text/html; charset=");
                 html = sb.toString();
             }
         }
