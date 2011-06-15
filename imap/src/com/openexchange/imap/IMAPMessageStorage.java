@@ -324,20 +324,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private TIntObjectHashMap<MailMessage> fetchValidSeqNums(final int[] seqNums, final FetchProfile fetchProfile, final boolean isRev1, final boolean body, final boolean ignoreBodystructure) throws MessagingException, MailException {
+        final TIntObjectHashMap<MailMessage> map = new TIntObjectHashMap<MailMessage>(seqNums.length);
         final long start = System.currentTimeMillis();
-        final MailMessage[] submessages;
+        final MailMessage[] tmp;
         if (ignoreBodystructure) {
-            submessages = new NewFetchIMAPCommand(
+            tmp = new NewFetchIMAPCommand(
                 imapFolder,
                 getSeparator(imapFolder),
                 isRev1,
                 seqNums,
                 FetchIMAPCommand.getSafeFetchProfile(fetchProfile),
                 false,
-                true,
+                false,
                 body).setDetermineAttachmentByHeader(true).doCommand();
         } else {
-            submessages = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, seqNums, fetchProfile, false, true, body).doCommand();
+            tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, seqNums, fetchProfile, false, false, body).doCommand();
         }
         final long time = System.currentTimeMillis() - start;
         mailInterfaceMonitor.addUseTime(time);
@@ -345,11 +346,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(seqNums.length).append(" messages took ").append(time).append(
                 STR_MSEC).toString());
         }
-        final TIntObjectHashMap<MailMessage> ret = new TIntObjectHashMap<MailMessage>(seqNums.length);
-        for (int i = 0; i < seqNums.length; i++) {
-            ret.put(seqNums[i], submessages[i]);
+        for (final MailMessage mailMessage : tmp) {
+            final IDMailMessage idmm = (IDMailMessage) mailMessage;
+            map.put(idmm.getSeqnum(), idmm);
         }
-        return ret;
+        return map;
     }
 
     @Override
