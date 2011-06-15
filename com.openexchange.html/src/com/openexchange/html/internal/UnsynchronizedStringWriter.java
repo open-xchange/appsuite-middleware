@@ -83,6 +83,19 @@ public class UnsynchronizedStringWriter extends Writer {
     }
 
     /**
+     * Create a new string writer, using the specified string-buffer.
+     * 
+     * @param initialSize The initial buffer.
+     */
+    public UnsynchronizedStringWriter(final StringBuilder builder) {
+        if (null == builder) {
+            throw new IllegalArgumentException("Builder is null.");
+        }
+        buf = builder;
+        lock = buf;
+    }
+
+    /**
      * Write a single character.
      */
     @Override
