@@ -785,7 +785,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 html = sb.toString();
             }
         }
-        html = processDownlevelRevealedConditionalComments(htmlContent);
+        html = processDownlevelRevealedConditionalComments(html);
         // html = removeXHTMLCData(html);
         /*
          * Check URLs
