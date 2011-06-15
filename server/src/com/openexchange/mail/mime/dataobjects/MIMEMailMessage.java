@@ -218,11 +218,17 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append("MIMEMailMessage [");
-        if (id != null) {
-            builder.append("id=").append(id).append(", ");
+        {
+            final String id = getMailId();
+            if (id != null) {
+                builder.append("id=").append(id).append(", ");
+            }
         }
-        if (getFolder() != null) {
-            builder.append("getFolder()=").append(getFolder());
+        {
+            final String folder = getFolder();
+            if (folder != null) {
+                builder.append("getFolder()=").append(folder);
+            }
         }
         builder.append("]");
         return builder.toString();
