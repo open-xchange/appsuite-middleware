@@ -115,12 +115,12 @@ public final class IMAPConfig extends MailConfig {
     }
 
     /**
-     * Puts parameter. If value is <code>null</code> a remove is performed
+     * Sets specified parameter. If value is <code>null</code> a remove is performed.
      * 
      * @param name The name
      * @param value The value
      */
-    public void putParameter(final String name, final Object value) {
+    public void setParameter(final String name, final Object value) {
         if (null == value) {
             params.remove(name);
         } else {
