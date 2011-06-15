@@ -227,7 +227,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
         {
             final String folder = getFolder();
             if (folder != null) {
-                builder.append("getFolder()=").append(folder);
+                builder.append("folder=").append(folder);
             }
         }
         builder.append("]");
