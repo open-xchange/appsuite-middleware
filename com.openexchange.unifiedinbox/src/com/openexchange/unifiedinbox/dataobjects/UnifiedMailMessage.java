@@ -88,6 +88,26 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(32);
+        builder.append("UnifiedMailMessage [");
+        {
+            final String id = getMailId();
+            if (id != null) {
+                builder.append("id=").append(id).append(", ");
+            }
+        }
+        {
+            final String folder = getFolder();
+            if (folder != null) {
+                builder.append("folder=").append(folder);
+            }
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    @Override
     public String getMailId() {
         return mailId == null ? delegatee.getMailId() : mailId;
     }
@@ -150,11 +170,6 @@ public final class UnifiedMailMessage extends MailMessage {
     @Override
     public void setContentDisposition(final String disposition) throws MailException {
         delegatee.setContentDisposition(disposition);
-    }
-
-    @Override
-    public String toString() {
-        return delegatee.toString();
     }
 
     @Override

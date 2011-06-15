@@ -216,7 +216,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder(32);
         builder.append("MIMEMailMessage [");
         {
             final String id = getMailId();
