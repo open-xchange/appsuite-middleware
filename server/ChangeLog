@@ -1,3 +1,7 @@
+* 2011-06-15 - thorben.betten@open-xchange.com
+
+ - Bugfix #19497: Setting proper "msgref" attribute
+
 * 2011-06-14 - francisco.laguna@open-xchange.com
 
  - Bugfix #19458: Use secret service everywhere.

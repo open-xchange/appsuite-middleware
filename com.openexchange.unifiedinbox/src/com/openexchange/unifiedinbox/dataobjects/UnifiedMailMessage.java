@@ -903,11 +903,6 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public MailPath getMailPath() {
-        return delegatee.getMailPath();
-    }
-
-    @Override
     public int getUnreadMessages() {
         return delegatee.getUnreadMessages();
     }

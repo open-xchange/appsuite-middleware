@@ -334,9 +334,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     return null;
                 }
                 mail = new UnifiedMailMessage(mail);
+                mail.loadContent();
                 mail.setMailId(mailId);
                 mail.setFolder(fullname);
-                mail.loadContent();
                 return mail;
             } finally {
                 if (close) {
