@@ -2197,8 +2197,11 @@ public final class IMAPCommandsCollection {
         return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final TLongIntHashMap m = new TLongIntHashMap(length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
+                /*
+                 * Execute command
+                 */
+                final TLongIntHashMap seqNumMap = new TLongIntHashMap(length);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -2221,7 +2224,7 @@ public final class IMAPCommandsCollection {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                m.put(uidItem.uid, fr.getNumber());
+                                seqNumMap.put(uidItem.uid, fr.getNumber());
                                 r[j] = null;
                             }
                         }
@@ -2247,7 +2250,7 @@ public final class IMAPCommandsCollection {
                 }
                 final int[] retval = new int[length];
                 for (int i = 0; i < retval.length; i++) {
-                    final int seqNum = m.get(uids[i]);
+                    final int seqNum = seqNumMap.get(uids[i]);
                     retval[i] = 0 == seqNum ? -1 : seqNum;
                 }
                 return retval;
@@ -2273,8 +2276,8 @@ public final class IMAPCommandsCollection {
         return (TLongIntHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final TLongIntHashMap m = new TLongIntHashMap(uids.length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
+                final TLongIntHashMap uid2seqNum = new TLongIntHashMap(uids.length);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -2297,7 +2300,7 @@ public final class IMAPCommandsCollection {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                m.put(uidItem.uid, fr.getNumber());
+                                uid2seqNum.put(uidItem.uid, fr.getNumber());
                                 r[j] = null;
                             }
                         }
@@ -2321,7 +2324,7 @@ public final class IMAPCommandsCollection {
                         ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
-                return m;
+                return uid2seqNum;
             }
         }));
     }
@@ -2344,8 +2347,8 @@ public final class IMAPCommandsCollection {
         return (TIntLongHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final TIntLongHashMap m = new TIntLongHashMap(uids.length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
+                final TIntLongHashMap seqNum2uid = new TIntLongHashMap(uids.length);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 for (int k = 0; k < args.length; k++) {
                     /*-
                      * Arguments:  sequence set
@@ -2368,7 +2371,7 @@ public final class IMAPCommandsCollection {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr);
                                 if (uidItem != null) {
-                                    m.put(fr.getNumber(), uidItem.uid);
+                                    seqNum2uid.put(fr.getNumber(), uidItem.uid);
                                 }
                                 r[j] = null;
                             }
@@ -2388,7 +2391,7 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                return m;
+                return seqNum2uid;
             }
         }));
     }
