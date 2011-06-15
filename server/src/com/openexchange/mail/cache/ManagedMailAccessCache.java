@@ -295,27 +295,32 @@ public final class ManagedMailAccessCache {
         }
 
         public void run() {
-            for (final Iterator<MailAccessQueue> iterator = map.values().iterator(); iterator.hasNext();) {
-                final MailAccessQueue accessQueue = iterator.next();
-                if (accessQueue.isDeprecated()) {
-                    iterator.remove();
-                    orderlyClearQueue(accessQueue);
-                } else if (accessQueue.isEmpty()) {
-                    /*
-                     * Mark for being removed in the next run to save memory
-                     */
-                    accessQueue.markDeprecated();
-                } else {
-                    PooledMailAccess pooledMailAccess;
-                    while (null != (pooledMailAccess = accessQueue.pollDelayed())) {
-                        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
-                        mailAccess.setCached(false);
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder("Timed-out: ").append(mailAccess).toString());
+            try {
+                for (final Iterator<MailAccessQueue> iterator = map.values().iterator(); iterator.hasNext();) {
+                    final MailAccessQueue accessQueue = iterator.next();
+                    if (accessQueue.isDeprecated()) {
+                        iterator.remove();
+                        orderlyClearQueue(accessQueue);
+                    } else if (accessQueue.isEmpty()) {
+                        /*
+                         * Mark for being removed in the next run to save memory
+                         */
+                        accessQueue.markDeprecated();
+                    } else {
+                        PooledMailAccess pooledMailAccess;
+                        while (null != (pooledMailAccess = accessQueue.pollDelayed())) {
+                            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                            mailAccess.setCached(false);
+                            if (DEBUG) {
+                                LOG.debug(new StringBuilder("Timed-out: ").append(mailAccess).toString());
+                            }
+                            mailAccess.close(false);
                         }
-                        mailAccess.close(false);
                     }
                 }
+            } catch (final RuntimeException e) {
+                // A runtime exception
+                LOG.warn("Purge-expired run failed: " + e.getMessage(), e);
             }
         }
     }
