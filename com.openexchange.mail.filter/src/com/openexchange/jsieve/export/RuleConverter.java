@@ -82,6 +82,13 @@ import com.openexchange.jsieve.commands.TestCommand;
  */
 public class RuleConverter {
 
+    /**
+     * Initializes a new {@link RuleConverter}.
+     */
+    public RuleConverter() {
+        super();
+    }
+
     private static void addArguments(final ASTarguments targuments, final List<Object> argumentslist, final int[] js, final int[] p) {
         for (int k = 0; k < argumentslist.size(); k++) {
             final Object object = argumentslist.get(k);
@@ -245,6 +252,12 @@ public class RuleConverter {
         return token;
     }
 
+    /**
+     * Converts specified rules to an appropriate {@link Node} instance.
+     * 
+     * @param rules The rules to convert
+     * @return The resulting {@link Node} instance
+     */
     public Node rulesToNodes(final ArrayList<Rule> rules) {
         final Node startnode = new ASTstart(0);
         final ASTcommands tcommands = new ASTcommands(1);
