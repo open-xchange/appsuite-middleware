@@ -81,9 +81,9 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
 
     private final Cache cache;
 
-    private final String folderPrefix;
+    // private final String folderPrefix;
 
-    private final Session session;
+    // private final Session session;
 
     /**
      * The prefix for a group name: &lt;context-id&gt; + "/" + &lt;folder-prefix&gt; + "/"
@@ -93,8 +93,8 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
     public CacheingMessageAccess(final MessagingMessageAccess delegate, final Cache cache, final String folderPrefix, final Session session) {
         this.delegate = delegate;
         this.cache = cache;
-        this.folderPrefix = folderPrefix;
-        this.session = session;
+        // this.folderPrefix = folderPrefix;
+        // this.session = session;
         groupNamePrefix = new StringBuilder(session.getContextId()).append('/').append(folderPrefix).append('/').toString();
     }
 
