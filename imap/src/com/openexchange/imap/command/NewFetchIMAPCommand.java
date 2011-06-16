@@ -104,6 +104,8 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]> {
 
+    private static final String[] ARGS_ALL = new String[] { "1:*" };
+
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NewFetchIMAPCommand.class);
 
     private static final boolean WARN = LOG.isWarnEnabled();
