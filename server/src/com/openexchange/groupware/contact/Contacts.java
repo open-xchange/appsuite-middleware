@@ -725,8 +725,9 @@ public final class Contacts {
             }
 
             for (int i = 0; i < modtrim.length; i++) {
-                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
-                    update.append(mapping[modtrim[i]].getDBFieldName()).append(" = ?,");
+                final Mapper mapper = mapping[modtrim[i]];
+                if ((mapper != null) && mapper.containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                    update.append(mapper.getDBFieldName()).append(" = ?,");
                 }
             }
             final int id = co.getObjectID();
@@ -741,8 +742,9 @@ public final class Contacts {
             ps = writecon.prepareStatement(updater.toString());
             int counter = 1;
             for (int i = 0; i < modtrim.length; i++) {
-                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
-                    mapping[modtrim[i]].fillPreparedStatement(ps, counter, co);
+                final Mapper mapper = mapping[modtrim[i]];
+                if ((mapper != null) && mapper.containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                    mapper.fillPreparedStatement(ps, counter, co);
                     counter++;
                 }
             }
