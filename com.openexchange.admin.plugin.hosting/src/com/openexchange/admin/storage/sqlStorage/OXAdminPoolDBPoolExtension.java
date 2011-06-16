@@ -49,51 +49,62 @@
 
 package com.openexchange.admin.storage.sqlStorage;
 
+import java.sql.Connection;
 import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import java.sql.Connection;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
     
-    public OXAdminPoolDBPoolExtension(PropertyHandler prop) {
+    public OXAdminPoolDBPoolExtension(final PropertyHandler prop) {
         super(prop);
     }
 
-    public int getDBPoolIdForContextId(int context_id) throws PoolException {
+    public int getDBPoolIdForContextId(final int context_id) throws PoolException {
         try{
             return Database.resolvePool(context_id,true);
-        }catch(DBPoolingException db){
+        }catch(final DBPoolingException db){
             throw new PoolException(""+db.getMessage());
         }
     }
 
-    public Connection getWRITEConnectionForPoolId(int db_pool_id,String schema_name) throws PoolException {
+    public Connection getWRITEConnectionForPoolId(final int db_pool_id,final String schema_name) throws PoolException {
         try{
             return Database.get(db_pool_id,schema_name);
-        }catch(DBPoolingException db){
+        }catch(final DBPoolingException db){
             throw new PoolException(""+db.getMessage());
         }
     }
 
-    public void pushWRITEConnectionForPoolId(int db_pool_id,Connection conny) throws PoolException {        
+    public void pushWRITEConnectionForPoolId(final int db_pool_id,final Connection conny) throws PoolException {        
         Database.back(db_pool_id,conny);
     }
 
-    public void resetPoolMappingForContext(int context_id) throws PoolException {
+    public Connection getWRITENoTimeoutConnectionForPoolId(final int db_pool_id,final String schema_name) throws PoolException {
+        try{
+            return Database.getNoTimeout(db_pool_id,schema_name);
+        }catch(final DBPoolingException db){
+            throw new PoolException(""+db.getMessage());
+        }
+    }
+
+    public void pushWRITENoTimeoutConnectionForPoolId(final int db_pool_id,final Connection conny) throws PoolException {        
+        Database.backNoTimeoout(db_pool_id,conny);
+    }
+
+    public void resetPoolMappingForContext(final int context_id) throws PoolException {
         try{
             Database.reset(context_id);
-        }catch(DBPoolingException db){
+        }catch(final DBPoolingException db){
             throw new PoolException(""+db.getMessage());
         }
     }
     
-   public String getSchemeForContextId(int context_id) throws PoolException{
+   public String getSchemeForContextId(final int context_id) throws PoolException{
        try{
             return Database.getSchema(context_id);
-        }catch(DBPoolingException db){
+        }catch(final DBPoolingException db){
             throw new PoolException(""+db.getMessage());
         }
    }

@@ -50,9 +50,8 @@
 
 package com.openexchange.admin.storage.sqlStorage;
 
-import com.openexchange.admin.rmi.exceptions.PoolException;
-
 import java.sql.Connection;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 
 /**
  *
@@ -65,5 +64,7 @@ public interface OXAdminPoolInterfaceExtension extends OXAdminPoolInterface {
     public void pushWRITEConnectionForPoolId(int db_pool_id,Connection con) throws PoolException;
     public void resetPoolMappingForContext(int context_id) throws PoolException;
     public String getSchemeForContextId(int context_id) throws PoolException;
-            
+
+    public Connection getWRITENoTimeoutConnectionForPoolId(int db_pool_id, String schema_name) throws PoolException;
+    public void pushWRITENoTimeoutConnectionForPoolId(int db_pool_id, Connection conny) throws PoolException;
 }
