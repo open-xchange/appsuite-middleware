@@ -217,7 +217,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      */
     public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
         super(imapFolder);
-        if (imapFolder.getMessageCount() == 0) {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
             returnDefaultValue = true;
         }
         if (loadBody) {
@@ -225,7 +226,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         }
         this.separator = separator;
         command = getFetchCommand(isRev1, fp, loadBody);
-        set(arr, isSequential, keepOrder);
+        set(arr, isSequential, keepOrder, messageCount);
         fullname = imapFolder.getFullName();
         //recentCount = imapFolder.getNewMessageCount();
     }
@@ -237,13 +238,14 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param isSequential whether the source array values are sequential
      * @param keepOrder whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
      *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
+     * @param messageCount The total message
      * @throws MessagingException
      */
-    public void set(final Object arr, final boolean isSequential, final boolean keepOrder) throws MessagingException {
+    public void set(final Object arr, final boolean isSequential, final boolean keepOrder, final int messageCount) throws MessagingException {
         if (null == arr) {
             returnDefaultValue = true;
         } else {
-            createArgs(arr, isSequential, keepOrder);
+            createArgs(arr, isSequential, keepOrder, messageCount);
         }
         retval = new MailMessage[length];
         index = 0;
@@ -267,7 +269,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
-    private void createArgs(final Object arr, final boolean isSequential, final boolean keepOrder) throws MessagingException {
+    private void createArgs(final Object arr, final boolean isSequential, final boolean keepOrder, final int messageCount) throws MessagingException {
         if (arr instanceof int[]) {
             final int[] seqNums = (int[]) arr;
             uid = false;
@@ -275,12 +277,23 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args =
-                    isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
-                        seqNums,
-                        keepOrder,
-                        LENGTH + command.length());
-                seqNumFetcher = keepOrder ? new IntSeqNumFetcher(seqNums) : null;
+                if (keepOrder) {
+                    seqNumFetcher = new IntSeqNumFetcher(seqNums);
+                    args =
+                        (isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
+                            seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
+                            seqNums,
+                            keepOrder,
+                            LENGTH + command.length()));
+                } else {
+                    args =
+                        length == messageCount ? new String[] { "1:*" } : (isSequential ? new String[] { new StringBuilder(32).append(
+                            seqNums[0]).append(':').append(seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
+                            seqNums,
+                            keepOrder,
+                            LENGTH + command.length()));
+                    seqNumFetcher = null;
+                }
             }
         } else if (arr instanceof long[]) {
             if (keepOrder) {
@@ -308,7 +321,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args =
+                    args = length == messageCount ? new String[] { "1:*" } : 
                         isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
                             uids,
                             false,
@@ -323,13 +336,22 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args =
-                    isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
+                if (keepOrder) {
+                    seqNumFetcher = new MsgSeqNumFetcher(msgs);
+                    args = isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
                         msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
-                        msgs,
-                        keepOrder,
-                        LENGTH + command.length());
-                seqNumFetcher = keepOrder ? new MsgSeqNumFetcher(msgs) : null;
+                            msgs,
+                            keepOrder,
+                            LENGTH + command.length());
+                } else {
+                    args =
+                        length == messageCount ? new String[] { "1:*" } : (isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
+                            msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
+                                msgs,
+                                keepOrder,
+                                LENGTH + command.length()));
+                    seqNumFetcher = null;
+                }
             }
         } else {
             throw new MessagingException(new StringBuilder("Invalid array type! ").append(arr.getClass().getName()).toString());
