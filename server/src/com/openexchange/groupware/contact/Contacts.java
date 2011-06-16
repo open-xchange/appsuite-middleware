@@ -705,20 +705,23 @@ public final class Contacts {
 
         try {
             boolean modifiedDisplayName = false;
-            final int[] mod = new int[650];
-            int cnt = 0;
-            for (int i = 0; i < 650; i++) {
-                final Mapper mapper = mapping[i];
-                if ((mapper != null) && !mapper.compare(co, original)) {
-                    // Check if modified field is DISPLAY-NAME and contact denotes a system user
-                    if (i == Contact.DISPLAY_NAME && original.getInternalUserId() > 0) {
-                        modifiedDisplayName = true;
+            final int[] modtrim;
+            {
+                final int[] mod = new int[650];
+                int cnt = 0;
+                for (int i = 0; i < 650; i++) {
+                    final Mapper mapper = mapping[i];
+                    if ((mapper != null) && !mapper.compare(co, original)) {
+                        // Check if modified field is DISPLAY-NAME and contact denotes a system user
+                        if (i == Contact.DISPLAY_NAME && original.getInternalUserId() > 0) {
+                            modifiedDisplayName = true;
+                        }
+                        mod[cnt++] = i;
                     }
-                    mod[cnt++] = i;
                 }
+                modtrim = new int[cnt];
+                System.arraycopy(mod, 0, modtrim, 0, cnt);
             }
-            final int[] modtrim = new int[cnt];
-            System.arraycopy(mod, 0, modtrim, 0, cnt);
 
             if (modtrim.length <= 0) {
                 throw ContactExceptionCodes.NO_CHANGES.create(I(ctx.getContextId()), I(co.getObjectID()));
