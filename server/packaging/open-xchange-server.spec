@@ -149,6 +149,14 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-748
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/common/excludedupdatetasks.properties
+   if ! grep -E "^com.openexchange.subscribe.yahoo.update.DeleteOldYahooSubscriptions" >/dev/null $pfile; then
+      echo "# Remove crawler-style yahoo subscriptions. ENABLE THIS IF YOU WANT TO USE open-xchange-subscribe-yahoo. DISABLE IT OTHERWISE!" >> $pfile
+      echo "com.openexchange.subscribe.yahoo.update.DeleteOldYahooSubscriptions" >> $pfile
+   fi
+
    # SoftwareChange_Request-711
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/imap.properties
