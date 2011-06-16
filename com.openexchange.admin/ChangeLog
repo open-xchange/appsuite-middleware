@@ -1,6 +1,6 @@
 * 2011-06-16 - thorben.betten@open-xchange.com
 
- - Bugfix #19492: Enhanced DatabaseService with a method to get a no-timeout conncetion for administrative access to contexts
+ - Bugfix #19492: Enhanced DatabaseService with a method to get a no-timeout connection for administrative access to contexts
 
 * 2011-06-09 - thorben.betten@open-xchange.com
 
