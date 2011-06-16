@@ -56,6 +56,7 @@ import java.net.URI;
 import java.sql.Connection;
 import java.util.Random;
 import junit.framework.TestCase;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -220,12 +221,12 @@ public class QuotaFileStorageTest extends TestCase {
             return usage;
         }
 
-        protected void setUsage(long usage) {
+        protected void setUsage(final long usage) {
             this.usage = usage;
         }
 
         @Override
-        protected boolean incUsage(long added) {
+        protected boolean incUsage(final long added) {
             boolean full = false;
             if (this.usage + added <= this.quota) {
                 this.usage += added;
@@ -236,7 +237,7 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
-        protected void decUsage(long removed) {
+        protected void decUsage(final long removed) {
             this.usage -= removed;
         }
     }
@@ -292,75 +293,75 @@ public class QuotaFileStorageTest extends TestCase {
 
     static final class DummyDatabaseService implements DatabaseService {
 
-        public void back(int poolId, Connection con) {
+        public void back(final int poolId, final Connection con) {
             // Nothing to do.
         }
 
-        public void backForUpdateTask(int contextId, Connection con) {
+        public void backForUpdateTask(final int contextId, final Connection con) {
             // Nothing to do.
         }
 
-        public void backReadOnly(Context ctx, Connection con) {
+        public void backReadOnly(final Context ctx, final Connection con) {
             // Nothing to do.
         }
 
-        public void backReadOnly(int contextId, Connection con) {
+        public void backReadOnly(final int contextId, final Connection con) {
             // Nothing to do.
         }
 
-        public void backWritable(Context ctx, Connection con) {
+        public void backWritable(final Context ctx, final Connection con) {
             // Nothing to do.
         }
 
-        public void backWritable(int contextId, Connection con) {
+        public void backWritable(final int contextId, final Connection con) {
             // Nothing to do.
         }
 
-        public Connection get(int poolId, String schema) {
+        public Connection get(final int poolId, final String schema) {
             return null;
         }
 
-        public int[] getContextsInSameSchema(int contextId) {
+        public int[] getContextsInSameSchema(final int contextId) {
             return null;
         }
 
-        public Connection getForUpdateTask(int contextId) {
+        public Connection getForUpdateTask(final int contextId) {
             return null;
         }
 
-        public Connection getReadOnly(Context ctx) {
+        public Connection getReadOnly(final Context ctx) {
             return null;
         }
 
-        public Connection getReadOnly(int contextId) {
+        public Connection getReadOnly(final int contextId) {
             return null;
         }
 
-        public String getSchemaName(int contextId) {
+        public String getSchemaName(final int contextId) {
             return null;
         }
 
-        public Connection getWritable(Context ctx) {
+        public Connection getWritable(final Context ctx) {
             return null;
         }
 
-        public Connection getWritable(int contextId) {
+        public Connection getWritable(final int contextId) {
             return null;
         }
 
-        public int getWritablePool(int contextId) {
+        public int getWritablePool(final int contextId) {
             return 0;
         }
 
-        public void invalidate(int contextId) {
+        public void invalidate(final int contextId) {
             // Nothing to do.
         }
 
-        public void backReadOnly(Connection con) {
+        public void backReadOnly(final Connection con) {
             // Nothing to do.
         }
 
-        public void backWritable(Connection con) {
+        public void backWritable(final Connection con) {
             // Nothing to do.
         }
 
@@ -372,8 +373,16 @@ public class QuotaFileStorageTest extends TestCase {
             return null;
         }
 
-        public int[] listContexts(int poolId) {
+        public int[] listContexts(final int poolId) {
             return null;
+        }
+
+        public Connection getNoTimeout(final int poolId, final String schema) throws DBPoolingException {
+            return null;
+        }
+
+        public void backNoTimeoout(final int poolId, final Connection con) {
+            // Nothing to do
         }
     }
 
