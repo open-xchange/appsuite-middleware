@@ -72,10 +72,9 @@ public final class Check {
      * characters or a message what is wrong with the data.
      */
     public static String containsInvalidChars(final String check) {
-        String retval = null;
-        if (null != check) {
-            retval = Verifier.checkCharacterData(check);
+        if (null == check) {
+            return check;
         }
-        return retval;
+        return Verifier.checkCharacterData(check);
     }
 }

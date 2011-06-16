@@ -382,8 +382,9 @@ public final class Contacts {
             checkCharacters(contact);
 
             for (int i = 0; i < 650; i++) {
-                if ((mapping[i] != null) && mapping[i].containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != Contact.LINKS) && (i != Contact.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
-                    insert_fields.append(mapping[i].getDBFieldName()).append(',');
+                final Mapper mapper = mapping[i];
+                if ((mapper != null) && mapper.containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != Contact.LINKS) && (i != Contact.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                    insert_fields.append(mapper.getDBFieldName()).append(',');
                     insert_values.append("?,");
                 }
             }
@@ -440,7 +441,7 @@ public final class Contacts {
             contact.setLastModified(ddd);
 
             if (DEBUG) {
-                LOG.debug(new StringBuilder(64).append("INFO: YOU WANT TO INSERT THIS: cid=").append(session.getContextId()).append(" oid=").append(
+                LOG.debug(new StringBuilder(64).append("DEBUG: YOU WANT TO INSERT THIS: cid=").append(session.getContextId()).append(" oid=").append(
                     contact.getObjectID()).append(" -> ").append(ps.toString()).toString());
             }
 
