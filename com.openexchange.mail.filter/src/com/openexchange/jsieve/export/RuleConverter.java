@@ -85,7 +85,7 @@ public class RuleConverter {
     /**
      * Initializes a new {@link RuleConverter}.
      */
-    public RuleConverter() {
+    private RuleConverter() {
         super();
     }
 
@@ -258,7 +258,7 @@ public class RuleConverter {
      * @param rules The rules to convert
      * @return The resulting {@link Node} instance
      */
-    public Node rulesToNodes(final ArrayList<Rule> rules) {
+    public static Node rulesToNodes(final ArrayList<Rule> rules) {
         final Node startnode = new ASTstart(0);
         final ASTcommands tcommands = new ASTcommands(1);
         startnode.jjtAddChild(tcommands, 0);

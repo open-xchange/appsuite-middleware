@@ -57,21 +57,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.SieveParser;
-
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.Command;
 import com.openexchange.jsieve.commands.IfStructureCommand;
 import com.openexchange.jsieve.commands.RequireCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
@@ -266,11 +264,10 @@ public final class SieveTextFilter {
 
         // Convert the rules to jjTree form but only if they are filled
         Node noncommentednode = null;
-        final RuleConverter ruleConverter = new RuleConverter();
         if (!noncommented.isEmpty()) {
-            noncommentednode = ruleConverter.rulesToNodes(noncommented);
+            noncommentednode = RuleConverter.rulesToNodes(noncommented);
         }
-        final Node commentednode = ruleConverter.rulesToNodes(commented);
+        final Node commentednode = RuleConverter.rulesToNodes(commented);
 
         // and convert this to a writeable form
         List<OwnType> noncommentedoutput = new ArrayList<OwnType>();
@@ -507,7 +504,7 @@ public final class SieveTextFilter {
         }
     }
 
-    private int getActionCommandSize(List<ActionCommand> actioncommands) {
+    private int getActionCommandSize(final List<ActionCommand> actioncommands) {
         int size = 0;
         for (final ActionCommand actionCommand : actioncommands) {
             if (Commands.VACATION.equals(actionCommand.getCommand())) {
