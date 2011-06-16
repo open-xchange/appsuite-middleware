@@ -2181,7 +2181,8 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If a messaging error occurs
      */
     public static int[] uids2SeqNums(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
             /*
              * Empty folder...
              */
@@ -2201,7 +2202,7 @@ public final class IMAPCommandsCollection {
                  * Execute command
                  */
                 final TLongIntHashMap seqNumMap = new TLongIntHashMap(length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                final String[] args = messageCount == length ? new String[] { "1:*" } : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -2267,7 +2268,8 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If a messaging error occurs
      */
     public static TLongIntHashMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
             /*
              * Empty folder...
              */
@@ -2277,7 +2279,7 @@ public final class IMAPCommandsCollection {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final TLongIntHashMap uid2seqNum = new TLongIntHashMap(uids.length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                final String[] args = messageCount == uids.length ? new String[] { "1:*" } : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-

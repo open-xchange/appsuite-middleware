@@ -267,6 +267,41 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     }
 
     /**
+     * Initializes a new {@link NewFetchIMAPCommand}.
+     * 
+     * @param imapFolder The IMAP folder providing connected protocol
+     * @param separator The separator character
+     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
+     * @param seqNums The sequence numbers
+     * @param fp The fetch profile to use
+     * @throws MessagingException If initialization fails
+     */
+    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
+        super(imapFolder);
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
+            returnDefaultValue = true;
+        }
+        this.separator = separator;
+        command = getFetchCommand(isRev1, fp, false);
+        uid = false;
+        length = seqNums.length;
+        if (0 == length) {
+            returnDefaultValue = true;
+        } else {
+            args =
+                length == messageCount ? new String[] { "1:*" } : IMAPNumArgSplitter.splitSeqNumArg(
+                    seqNums,
+                    false,
+                    LENGTH_WITH_UID + command.length());
+            seqNumFetcher = null;
+        }
+        fullname = imapFolder.getFullName();
+        retval = new MailMessage[length];
+        // recentCount = imapFolder.getNewMessageCount();
+    }
+
+    /**
      * Apply a new numeric argument to this IMAP <i>FETCH</i> command
      * 
      * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
