@@ -9,5 +9,6 @@ Standards-Version: 3.6.1
 Package: open-xchange-spamhandler-cloudmark
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre|java6-runtime, open-xchange-common (>= @OXVERSION@), open-xchange-global (>=@OXVERSION@), open-xchange-server (>=@OXVERSION@), open-xchange-configread (>=@OXVERSION@)
-Provides: open-xchange-cloudmark
+Provides: open-xchange-spamhandler
+Conflicts: open-xchange-spamhandler-default
 Description: The Open-Xchange Cloudmark Spam Handler
