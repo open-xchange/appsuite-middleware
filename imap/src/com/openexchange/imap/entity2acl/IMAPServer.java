@@ -60,7 +60,7 @@ public enum IMAPServer {
     /**
      * Courier
      */
-    COURIER("Courier", CourierEntity2ACL.class.getName(), new ArgumentGenerator() {
+    COURIER("Courier", CourierEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] {
@@ -76,7 +76,7 @@ public enum IMAPServer {
     /**
      * Cyrus
      */
-    CYRUS("Cyrus", CyrusEntity2ACL.class.getName(), new ArgumentGenerator() {
+    CYRUS("Cyrus", CyrusEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
@@ -91,7 +91,7 @@ public enum IMAPServer {
     /**
      * Dovecot
      */
-    DOVECOT("Dovecot", DovecotEntity2ACL.class.getName(), new ArgumentGenerator() {
+    DOVECOT("Dovecot", DovecotEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] {
@@ -107,7 +107,7 @@ public enum IMAPServer {
     /**
      * Sun Java(tm) System Messaging Server
      */
-    SUN_MESSAGING_SERVER("Sun", SUNMessagingServerEntity2ACL.class.getName(), new ArgumentGenerator() {
+    SUN_MESSAGING_SERVER("Sun", SUNMessagingServerEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
@@ -122,7 +122,7 @@ public enum IMAPServer {
     /**
      * MDaemon
      */
-    MDAEMON("MDaemon", MDaemonEntity2ACL.class.getName(), new ArgumentGenerator() {
+    MDAEMON("MDaemon", MDaemonEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
@@ -137,7 +137,7 @@ public enum IMAPServer {
     
     ;
 
-    private final String impl;
+    private final Entity2ACL impl;
 
     private final String name;
 
@@ -145,7 +145,7 @@ public enum IMAPServer {
 
     private final GreetingMatcher greetingMatcher;
 
-    private IMAPServer(final String name, final String impl, final ArgumentGenerator argumentGenerator, final GreetingMatcher greetingMatcher) {
+    private IMAPServer(final String name, final Entity2ACL impl, final ArgumentGenerator argumentGenerator, final GreetingMatcher greetingMatcher) {
         this.name = name;
         this.impl = impl;
         this.argumentGenerator = argumentGenerator;
@@ -153,11 +153,11 @@ public enum IMAPServer {
     }
 
     /**
-     * Gets the class name of {@link Entity2ACL} implementation.
+     * Gets the {@link Entity2ACL} implementation.
      * 
-     * @return The class name of {@link Entity2ACL} implementation
+     * @return The {@link Entity2ACL} implementation
      */
-    public String getImpl() {
+    public Entity2ACL getImpl() {
         return impl;
     }
 
@@ -200,7 +200,7 @@ public enum IMAPServer {
      * @param name The IMAP server name
      * @return The class name of {@link Entity2ACL} implementation or <code>null</code> if none matches.
      */
-    public static final String getIMAPServerImpl(final String name) {
+    public static final Entity2ACL getIMAPServerImpl(final String name) {
         final IMAPServer[] imapServers = IMAPServer.values();
         for (int i = 0; i < imapServers.length; i++) {
             if (imapServers[i].getName().equalsIgnoreCase(name)) {

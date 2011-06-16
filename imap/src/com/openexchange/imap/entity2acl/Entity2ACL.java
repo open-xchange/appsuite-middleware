@@ -124,7 +124,7 @@ public abstract class Entity2ACL {
         try {
             Entity2ACL cached = imapConfig.getParameter(PARAM_NAME, Entity2ACL.class);
             if (null == cached) {
-                cached = Entity2ACLAutoDetector.impl4(imapStore.getGreeting(), imapConfig);
+                cached = Entity2ACLAutoDetector.implFor(imapStore.getGreeting(), imapConfig);
                 imapConfig.setParameter(PARAM_NAME, cached);
             }
             return cached;

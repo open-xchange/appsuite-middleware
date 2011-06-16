@@ -935,6 +935,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         for (final javax.mail.FetchProfile.Item item : fetchProfile.getItems()) {
             newFetchProfile.add(item);
         }
+        newFetchProfile.add(IMAPFolder.FetchProfileItem.HEADERS);
         return newFetchProfile;
     }
 

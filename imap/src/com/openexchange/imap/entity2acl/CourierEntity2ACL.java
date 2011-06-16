@@ -93,6 +93,17 @@ public class CourierEntity2ACL extends Entity2ACL {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CourierEntity2ACL.class);
 
+    private static final CourierEntity2ACL INSTANCE = new CourierEntity2ACL();
+
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance
+     */
+    public static CourierEntity2ACL getInstance() {
+        return INSTANCE;
+    }
+
     private static final String ALIAS_OWNER = "owner";
 
     private static final String ALIAS_ANYONE = "anyone";
@@ -118,7 +129,7 @@ public class CourierEntity2ACL extends Entity2ACL {
     /**
      * Default constructor
      */
-    public CourierEntity2ACL() {
+    private CourierEntity2ACL() {
         super();
     }
 

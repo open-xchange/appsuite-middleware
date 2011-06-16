@@ -91,12 +91,23 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SUNMessagingServerEntity2ACL.class);
 
+    private static final SUNMessagingServerEntity2ACL INSTANCE = new SUNMessagingServerEntity2ACL();
+
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance
+     */
+    public static SUNMessagingServerEntity2ACL getInstance() {
+        return INSTANCE;
+    }
+
     private static final String ALIAS_ANYONE = "anyone";
 
     /**
      * Default constructor
      */
-    public SUNMessagingServerEntity2ACL() {
+    private SUNMessagingServerEntity2ACL() {
         super();
     }
 

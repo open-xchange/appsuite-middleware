@@ -93,6 +93,17 @@ public class DovecotEntity2ACL extends Entity2ACL {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DovecotEntity2ACL.class);
 
+    private static final DovecotEntity2ACL INSTANCE = new DovecotEntity2ACL();
+
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance
+     */
+    public static DovecotEntity2ACL getInstance() {
+        return INSTANCE;
+    }
+
     private static final String ALIAS_OWNER = "owner";
 
     private static final String ALIAS_ANYONE = "anyone";
@@ -118,7 +129,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
     /**
      * Default constructor
      */
-    public DovecotEntity2ACL() {
+    private DovecotEntity2ACL() {
         super();
     }
 

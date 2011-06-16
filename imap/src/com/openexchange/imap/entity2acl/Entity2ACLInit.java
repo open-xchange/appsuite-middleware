@@ -73,7 +73,7 @@ public final class Entity2ACLInit implements Initialization {
         return instance;
     }
 
-    private Class<? extends Entity2ACL> implementingClass;
+    private volatile Class<? extends Entity2ACL> implementingClass;
 
     private final AtomicBoolean started;
 
@@ -107,13 +107,16 @@ public final class Entity2ACLInit implements Initialization {
                     implementingClass = null;
                     return;
                 }
-                final String className = IMAPServer.getIMAPServerImpl(classNameProp);
-                implementingClass = className == null ? Class.forName(classNameProp).asSubclass(Entity2ACL.class) : Class.forName(
-                    className).asSubclass(Entity2ACL.class);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(MessageFormat.format("Used IMAP server implementation: {0}", implementingClass.getName()));
+                final Entity2ACL className = IMAPServer.getIMAPServerImpl(classNameProp);
+                if (null != className) {
+                    Entity2ACL.setInstance(className);
+                } else {
+                    implementingClass = Class.forName(classNameProp).asSubclass(Entity2ACL.class);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(MessageFormat.format("Used IMAP server implementation: {0}", implementingClass.getName()));
+                    }
+                    Entity2ACL.setInstance(implementingClass.newInstance());
                 }
-                Entity2ACL.setInstance(implementingClass.newInstance());
             }
         } catch (final ClassNotFoundException e) {
             throw new Entity2ACLException(Entity2ACLException.Code.CLASS_NOT_FOUND, e, new Object[0]);

@@ -158,7 +158,7 @@ public final class Entity2ACLAutoDetector {
 
         public Entity2ACL call() throws Exception {
             final String greeting = IMAPCapabilityAndGreetingCache.getGreeting(key, imapConfig.isSecure(), imapConfig.getIMAPProperties());
-            return impl4(greeting, imapConfig);
+            return implFor(greeting, imapConfig);
         }
 
     } // End of Entity2ACLCallable
@@ -171,7 +171,7 @@ public final class Entity2ACLAutoDetector {
      * @return The appropriate {@link Entity2ACL} implementation
      * @throws Entity2ACLException If an error occurs
      */
-    protected static Entity2ACL impl4(final String greeting, final IMAPConfig imapConfig) throws Entity2ACLException {
+    protected static Entity2ACL implFor(final String greeting, final IMAPConfig imapConfig) throws Entity2ACLException {
         /*
          * Map greeting to a known IMAP server
          */
