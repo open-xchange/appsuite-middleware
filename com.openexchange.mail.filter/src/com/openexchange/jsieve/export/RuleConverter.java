@@ -50,7 +50,6 @@ package com.openexchange.jsieve.export;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.jsieve.NumberArgument;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.ASTargument;
@@ -65,7 +64,6 @@ import org.apache.jsieve.parser.generated.ASTtest;
 import org.apache.jsieve.parser.generated.ASTtest_list;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.Token;
-
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Command;
 import com.openexchange.jsieve.commands.ElseCommand;
@@ -209,10 +207,12 @@ public class RuleConverter {
             tstring_list.setFirstToken(getDummyToken("["));
             tstring_list.setLastToken(getDummyToken("]"));
         }
-        for (int o = 0; o < size; o++) {
+        final StringBuilder builder = new StringBuilder(128);
+        for (int k = 0; k < size; k++) {
             final ASTstring tstring = new ASTstring(i++);
-            tstring.setValue('\"' + arrayList.get(o).replace("\\", "\\\\").replace("\"", "\\\"") + '\"');
-            tstring_list.jjtAddChild(tstring, o);
+            builder.setLength(0);
+            tstring.setValue(builder.append('\"').append(arrayList.get(k).replace("\\", "\\\\").replace("\"", "\\\"")).append('\"').toString());
+            tstring_list.jjtAddChild(tstring, k);
         }
         iarray[0] = i;
         return tstring_list;
