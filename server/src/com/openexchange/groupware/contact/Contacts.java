@@ -145,6 +145,18 @@ public final class Contacts {
         super();
     }
 
+    /**
+     * Gets the SQL statement from specified {@link Statement} instance.
+     * 
+     * @param statement The statement
+     * @return The extracted SQL string
+     */
+    private static String getStatementString(final Statement statement) {
+        final String str = statement.toString();
+        final int pos = str.indexOf(": ");
+        return pos < 0 ? str : str.substring(pos + 2);
+    }
+
     private static void validateEmailAddress(final Contact co) throws ContactException {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
@@ -442,7 +454,7 @@ public final class Contacts {
 
             if (DEBUG) {
                 LOG.debug(new StringBuilder(64).append("DEBUG: YOU WANT TO INSERT THIS: cid=").append(session.getContextId()).append(" oid=").append(
-                    contact.getObjectID()).append(" -> ").append(ps.toString()).toString());
+                    contact.getObjectID()).append(" -> ").append(getStatementString(ps)).toString());
             }
 
             ps.execute();
@@ -742,7 +754,7 @@ public final class Contacts {
 
             if (DEBUG) {
                 LOG.debug(new StringBuilder(
-                    "INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + ps.toString()));
+                    "INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + getStatementString(ps)));
             }
 
             if (co.getParentFolderID() != fid) {
@@ -998,7 +1010,7 @@ public final class Contacts {
             writecon.setAutoCommit(false);
 
             if (DEBUG) {
-                LOG.debug("INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + contact.getObjectID() + " -> " + ps.toString());
+                LOG.debug("INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + contact.getObjectID() + " -> " + getStatementString(ps));
             }
             ps.execute();
 
@@ -1374,7 +1386,7 @@ public final class Contacts {
                 ps.setInt(8, cid);
 
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder("WRITE DLIST ").append(ps.toString()));
+                    LOG.debug(new StringBuilder("WRITE DLIST ").append(getStatementString(ps)));
                 }
 
                 ps.execute();
@@ -1524,7 +1536,7 @@ public final class Contacts {
                     ps.setInt(12, cid);
 
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder("UPDATE DLIST ").append(ps.toString()));
+                        LOG.debug(new StringBuilder("UPDATE DLIST ").append(getStatementString(ps)));
                     }
 
                     ps.execute();
@@ -1550,7 +1562,7 @@ public final class Contacts {
             ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
             ps.setInt(1, id);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
+                LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)));
             }
             ps.execute();
         } catch (final ContextException d) {
@@ -1575,7 +1587,7 @@ public final class Contacts {
                     }
                     ps.setInt(4, cid);
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
+                        LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)));
                     }
                     ps.execute();
                 }
@@ -1661,7 +1673,7 @@ public final class Contacts {
                 ps.setString(4, leo.getLinkDisplayname());
                 ps.setInt(5, cid);
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder("INSERT LINKAGE ").append(ps.toString()));
+                    LOG.debug(new StringBuilder("INSERT LINKAGE ").append(getStatementString(ps)));
                 }
                 ps.execute();
             }
@@ -1740,7 +1752,7 @@ public final class Contacts {
                     ps.setInt(2, leo.getLinkID());
                     ps.setInt(3, cid);
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(ps.toString()));
+                        LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(getStatementString(ps)));
                     }
                     ps.execute();
                 }
@@ -1834,7 +1846,7 @@ public final class Contacts {
             ps.setString(3, mime);
             ps.setInt(4, cid);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("INSERT IMAGE ").append(ps.toString()));
+                LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)));
             }
             ps.execute();
         } catch (final ContextException d) {
@@ -1861,7 +1873,7 @@ public final class Contacts {
             ps.setInt(5, contact_id);
             ps.setInt(6, cid);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("UPDATE IMAGE ").append(ps.toString()));
+                LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)));
             }
             ps.execute();
         } catch (final ContextException d) {
