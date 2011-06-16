@@ -332,18 +332,18 @@ public final class Contacts {
         Connection writecon = null;
         Connection readcon = null;
 
-        Context ct = null;
+        Context context = null;
 
         try {
             cs = new ContactMySql(so);
-            ct = ContextStorage.getStorageContext(so.getContextId());
+            context = ContextStorage.getStorageContext(so.getContextId());
 
-            readcon = DBPool.pickup(ct);
+            readcon = DBPool.pickup(context);
             validateEmailAddress(co);
 
             final int fid = co.getParentFolderID();
 
-            final OXFolderAccess oxfs = new OXFolderAccess(readcon, ct);
+            final OXFolderAccess oxfs = new OXFolderAccess(readcon, context);
 
             final FolderObject contactFolder = oxfs.getFolderObject(fid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
@@ -353,7 +353,7 @@ public final class Contacts {
             final EffectivePermission oclPerm = oxfs.getFolderPermission(
                 fid,
                 user,
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
+                UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), context));
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
                 throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(so.getContextId()), I(user)));
@@ -397,7 +397,7 @@ public final class Contacts {
             throw new ContactException(e);
         } finally {
             try {
-                DBPool.closeReaderSilent(ct, readcon);
+                DBPool.closeReaderSilent(context, readcon);
             } catch (final Exception ex) {
                 LOG.error("Unable to close READ Connection");
             }
@@ -409,10 +409,10 @@ public final class Contacts {
             /*
              * AutoCommit false for the IDGenerator!
              */
-            writecon = DBPool.pickupWriteable(ct);
+            writecon = DBPool.pickupWriteable(context);
             writecon.setAutoCommit(false);
 
-            final int id = IDGenerator.getId(ct, Types.CONTACT, writecon);
+            final int id = IDGenerator.getId(context, Types.CONTACT, writecon);
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Got ID from Generator -> " + id);
             }
@@ -481,7 +481,7 @@ public final class Contacts {
             if (null != writecon) {
                 autocommit(writecon);
                 try {
-                    DBPool.closeWriterSilent(ct, writecon);
+                    DBPool.closeWriterSilent(context, writecon);
                 } catch (final Exception ex) {
                     LOG.error("Unable to close WRITE Connection");
                 }
