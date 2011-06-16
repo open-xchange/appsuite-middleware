@@ -753,7 +753,7 @@ public final class Contacts {
 
             if (DEBUG) {
                 LOG.debug(new StringBuilder(
-                    "INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + getStatementString(ps)));
+                    "DEBUG: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + getStatementString(ps)));
             }
 
             if (co.getParentFolderID() != fid) {
