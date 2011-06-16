@@ -60,7 +60,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
-import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link Entity2ACLAutoDetector} - Auto-detects {@link Entity2ACL} implementation.
@@ -70,6 +69,8 @@ import com.sun.mail.imap.IMAPStore;
 public final class Entity2ACLAutoDetector {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Entity2ACLAutoDetector.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static ConcurrentMap<InetSocketAddress, Future<Entity2ACL>> map;
 
@@ -175,20 +176,12 @@ public final class Entity2ACLAutoDetector {
          * Map greeting to a known IMAP server
          */
         final IMAPServer imapServer = mapInfo2IMAPServer(greeting, imapConfig);
-        try {
-            final Entity2ACL entity2Acl = Class.forName(imapServer.getImpl()).asSubclass(Entity2ACL.class).newInstance();
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(imapConfig.getServer()).append(
-                    "] greeting successfully mapped to: ").append(imapServer.getName()));
-            }
-            return entity2Acl;
-        } catch (final InstantiationException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
-        } catch (final IllegalAccessException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
-        } catch (final ClassNotFoundException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
+        final Entity2ACL entity2Acl = imapServer.getImpl();
+        if (DEBUG) {
+            LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(imapConfig.getServer()).append(
+                "] greeting successfully mapped to: ").append(imapServer.getName()));
         }
+        return entity2Acl;
     }
 
     private static IMAPServer mapInfo2IMAPServer(final String info, final IMAPConfig imapConfig) throws Entity2ACLException {
@@ -208,11 +201,11 @@ public final class Entity2ACLAutoDetector {
              * Return fallback implementation
              */
             if (LOG.isWarnEnabled()) {
-                final StringBuilder warnBuilder = new StringBuilder(512).append("No IMAP server found ").append(
-                    "that corresponds to greeting:\n\"").append(info.replaceAll("\r?\n", "")).append("\" on ").append(
-                    imapConfig.getServer()).append(
-                    ".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"").append(
-                    IMAPServer.CYRUS.getName()).append("\" is used as fallback.");
+                final StringBuilder warnBuilder =
+                    new StringBuilder(512).append("No IMAP server found ").append("that corresponds to greeting:\n\"").append(
+                        info.replaceAll("\r?\n", "")).append("\" on ").append(imapConfig.getServer()).append(
+                        ".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"").append(
+                        IMAPServer.CYRUS.getName()).append("\" is used as fallback.");
                 LOG.warn(warnBuilder.toString());
             }
             return IMAPServer.CYRUS;
