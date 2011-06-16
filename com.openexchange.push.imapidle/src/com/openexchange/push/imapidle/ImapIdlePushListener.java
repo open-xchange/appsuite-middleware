@@ -301,6 +301,9 @@ public final class ImapIdlePushListener implements PushListener {
         } catch (final MailException e) {
             // throw new PushException(e);
             LOG.error("ERROR in IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
+            if( DEBUG_ENABLED ) {
+                LOG.error(e);
+            }
             try {
                 Thread.sleep(errordelay);
             } catch (final InterruptedException e1) {
@@ -308,6 +311,9 @@ public final class ImapIdlePushListener implements PushListener {
             }
         } catch (final MessagingException e) {
             LOG.error("ERROR in IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
+            if( DEBUG_ENABLED ) {
+                LOG.error(e);
+            }
             try {
                 Thread.sleep(errordelay);
             } catch (final InterruptedException e1) {
