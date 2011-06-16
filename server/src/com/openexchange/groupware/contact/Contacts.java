@@ -713,8 +713,7 @@ public final class Contacts {
                     if (i == Contact.DISPLAY_NAME && original.getInternalUserId() > 0) {
                         modifiedDisplayName = true;
                     }
-                    mod[cnt] = i;
-                    cnt++;
+                    mod[cnt++] = i;
                 }
             }
             final int[] modtrim = new int[cnt];
