@@ -1,0 +1,5 @@
+open-xchange-spamhandler-cloudmark (6.20.0-0) unstable; urgency=low
+
+  * Initial package.
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Wed, 15 Jun 2011 13:31:00 +0200
