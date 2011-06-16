@@ -970,7 +970,8 @@ public final class Contacts {
             final int[] mod = new int[650];
             int cnt = 0;
             for (int i = 0; i < 650; i++) {
-                if ((mapping[i] != null) && !mapping[i].compare(contact, original)) {
+                final Mapper mapper = mapping[i];
+                if ((mapper != null) && !mapper.compare(contact, original)) {
                     // Check if modified field is DISPLAY-NAME and contact denotes a system user
                     if (i == Contact.DISPLAY_NAME && original.getInternalUserId() > 0) {
                         modifiedDisplayName = true;
@@ -987,8 +988,9 @@ public final class Contacts {
             }
 
             for (int i = 0; i < modtrim.length; i++) {
-                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(contact) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
-                    update.append(mapping[modtrim[i]].getDBFieldName()).append(" = ?,");
+                final Mapper mapper = mapping[modtrim[i]];
+                if ((mapper != null) && mapper.containsElement(contact) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                    update.append(mapper.getDBFieldName()).append(" = ?,");
                 }
             }
             final int id = contact.getObjectID();
@@ -1003,8 +1005,9 @@ public final class Contacts {
             ps = writecon.prepareStatement(updater.toString());
             int counter = 1;
             for (int i = 0; i < modtrim.length; i++) {
-                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(contact) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
-                    mapping[modtrim[i]].fillPreparedStatement(ps, counter, contact);
+                final Mapper mapper = mapping[modtrim[i]];
+                if ((mapper != null) && mapper.containsElement(contact) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                    mapper.fillPreparedStatement(ps, counter, contact);
                     counter++;
                 }
             }
