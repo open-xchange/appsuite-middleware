@@ -2524,6 +2524,25 @@ public final class Contacts {
 
     }
 
+    /**
+     * Checks if specified strings are equal
+     * 
+     * @param x The first string
+     * @param y The second string
+     * @return <code>true</code> if both strings are considered equal; otherwise <code>false</code>
+     */
+    protected static boolean equalStrings(final String x, final String y) {
+        if (null == x) {
+            if (null == y) {
+                return true;
+            }
+            return false;
+        } else if (null == y) {
+            return false;
+        }
+        return (x.equals(y));
+    }
+
     public static interface Mapper {
 
         boolean containsElement(Contact co);
@@ -2570,15 +2589,7 @@ public final class Contacts {
                 final String x = co.getDisplayName();
                 final String y = original.getDisplayName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2615,15 +2626,7 @@ public final class Contacts {
                 final String x = co.getSurName();
                 final String y = original.getSurName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2660,15 +2663,7 @@ public final class Contacts {
                 final String x = co.getGivenName();
                 final String y = original.getGivenName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2705,15 +2700,7 @@ public final class Contacts {
                 final String x = co.getMiddleName();
                 final String y = original.getMiddleName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2752,15 +2739,7 @@ public final class Contacts {
                 final String x = co.getSuffix();
                 final String y = original.getSuffix();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2797,15 +2776,7 @@ public final class Contacts {
                 final String x = co.getTitle();
                 final String y = original.getTitle();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2842,15 +2813,7 @@ public final class Contacts {
                 final String x = co.getStreetHome();
                 final String y = original.getStreetHome();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2887,15 +2850,7 @@ public final class Contacts {
                 final String x = co.getPostalCodeHome();
                 final String y = original.getPostalCodeHome();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2932,15 +2887,7 @@ public final class Contacts {
                 final String x = co.getCityHome();
                 final String y = original.getCityHome();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -2977,15 +2924,7 @@ public final class Contacts {
                 final String x = co.getStateHome();
                 final String y = original.getStateHome();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3022,15 +2961,7 @@ public final class Contacts {
                 final String x = co.getCountryHome();
                 final String y = original.getCountryHome();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3068,15 +2999,7 @@ public final class Contacts {
                 final String x = co.getMaritalStatus();
                 final String y = original.getMaritalStatus();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3113,15 +3036,7 @@ public final class Contacts {
                 final String x = co.getNumberOfChildren();
                 final String y = original.getNumberOfChildren();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3158,15 +3073,7 @@ public final class Contacts {
                 final String x = co.getProfession();
                 final String y = original.getProfession();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3203,15 +3110,7 @@ public final class Contacts {
                 final String x = co.getNickname();
                 final String y = original.getNickname();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3248,15 +3147,7 @@ public final class Contacts {
                 final String x = co.getSpouseName();
                 final String y = original.getSpouseName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3293,15 +3184,7 @@ public final class Contacts {
                 final String x = co.getNote();
                 final String y = original.getNote();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3338,15 +3221,7 @@ public final class Contacts {
                 final String x = co.getCompany();
                 final String y = original.getCompany();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3383,15 +3258,7 @@ public final class Contacts {
                 final String x = co.getDepartment();
                 final String y = original.getDepartment();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3428,15 +3295,7 @@ public final class Contacts {
                 final String x = co.getPosition();
                 final String y = original.getPosition();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3473,15 +3332,7 @@ public final class Contacts {
                 final String x = co.getEmployeeType();
                 final String y = original.getEmployeeType();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3518,15 +3369,7 @@ public final class Contacts {
                 final String x = co.getRoomNumber();
                 final String y = original.getRoomNumber();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3563,15 +3406,7 @@ public final class Contacts {
                 final String x = co.getStreetBusiness();
                 final String y = original.getStreetBusiness();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3608,15 +3443,7 @@ public final class Contacts {
                 final String x = co.getPostalCodeBusiness();
                 final String y = original.getPostalCodeBusiness();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3653,15 +3480,7 @@ public final class Contacts {
                 final String x = co.getCityBusiness();
                 final String y = original.getCityBusiness();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3698,15 +3517,7 @@ public final class Contacts {
                 final String x = co.getStateBusiness();
                 final String y = original.getStateBusiness();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3743,15 +3554,7 @@ public final class Contacts {
                 final String x = co.getCountryBusiness();
                 final String y = original.getCountryBusiness();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3788,15 +3591,7 @@ public final class Contacts {
                 final String x = co.getNumberOfEmployee();
                 final String y = original.getNumberOfEmployee();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3833,15 +3628,7 @@ public final class Contacts {
                 final String x = co.getSalesVolume();
                 final String y = original.getSalesVolume();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3878,15 +3665,7 @@ public final class Contacts {
                 final String x = co.getTaxID();
                 final String y = original.getTaxID();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3923,15 +3702,7 @@ public final class Contacts {
                 final String x = co.getCommercialRegister();
                 final String y = original.getCommercialRegister();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -3968,15 +3739,7 @@ public final class Contacts {
                 final String x = co.getBranches();
                 final String y = original.getBranches();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4013,15 +3776,7 @@ public final class Contacts {
                 final String x = co.getBusinessCategory();
                 final String y = original.getBusinessCategory();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4058,15 +3813,7 @@ public final class Contacts {
                 final String x = co.getInfo();
                 final String y = original.getInfo();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4103,15 +3850,7 @@ public final class Contacts {
                 final String x = co.getManagerName();
                 final String y = original.getManagerName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4148,15 +3887,7 @@ public final class Contacts {
                 final String x = co.getAssistantName();
                 final String y = original.getAssistantName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4193,15 +3924,7 @@ public final class Contacts {
                 final String x = co.getStreetOther();
                 final String y = original.getStreetOther();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4238,15 +3961,7 @@ public final class Contacts {
                 final String x = co.getPostalCodeOther();
                 final String y = original.getPostalCodeOther();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4283,15 +3998,7 @@ public final class Contacts {
                 final String x = co.getCityOther();
                 final String y = original.getCityOther();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4328,15 +4035,7 @@ public final class Contacts {
                 final String x = co.getStateOther();
                 final String y = original.getStateOther();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4373,15 +4072,7 @@ public final class Contacts {
                 final String x = co.getCountryOther();
                 final String y = original.getCountryOther();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4418,15 +4109,7 @@ public final class Contacts {
                 final String x = co.getTelephoneAssistant();
                 final String y = original.getTelephoneAssistant();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4463,15 +4146,7 @@ public final class Contacts {
                 final String x = co.getTelephoneBusiness1();
                 final String y = original.getTelephoneBusiness1();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4508,15 +4183,7 @@ public final class Contacts {
                 final String x = co.getTelephoneBusiness2();
                 final String y = original.getTelephoneBusiness2();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4553,15 +4220,7 @@ public final class Contacts {
                 final String x = co.getFaxBusiness();
                 final String y = original.getFaxBusiness();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4598,15 +4257,7 @@ public final class Contacts {
                 final String x = co.getTelephoneCallback();
                 final String y = original.getTelephoneCallback();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4643,15 +4294,7 @@ public final class Contacts {
                 final String x = co.getTelephoneCar();
                 final String y = original.getTelephoneCar();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4688,15 +4331,7 @@ public final class Contacts {
                 final String x = co.getTelephoneCompany();
                 final String y = original.getTelephoneCompany();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4733,15 +4368,7 @@ public final class Contacts {
                 final String x = co.getTelephoneHome1();
                 final String y = original.getTelephoneHome1();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4778,15 +4405,7 @@ public final class Contacts {
                 final String x = co.getTelephoneHome2();
                 final String y = original.getTelephoneHome2();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4823,15 +4442,7 @@ public final class Contacts {
                 final String x = co.getFaxHome();
                 final String y = original.getFaxHome();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4868,15 +4479,7 @@ public final class Contacts {
                 final String x = co.getTelephoneISDN();
                 final String y = original.getTelephoneISDN();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4913,15 +4516,7 @@ public final class Contacts {
                 final String x = co.getCellularTelephone1();
                 final String y = original.getCellularTelephone1();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -4958,15 +4553,7 @@ public final class Contacts {
                 final String x = co.getCellularTelephone2();
                 final String y = original.getCellularTelephone2();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5003,15 +4590,7 @@ public final class Contacts {
                 final String x = co.getTelephoneOther();
                 final String y = original.getTelephoneOther();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5048,15 +4627,7 @@ public final class Contacts {
                 final String x = co.getFaxOther();
                 final String y = original.getFaxOther();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5093,15 +4664,7 @@ public final class Contacts {
                 final String x = co.getTelephonePager();
                 final String y = original.getTelephonePager();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5138,15 +4701,7 @@ public final class Contacts {
                 final String x = co.getTelephonePrimary();
                 final String y = original.getTelephonePrimary();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5183,15 +4738,7 @@ public final class Contacts {
                 final String x = co.getTelephoneRadio();
                 final String y = original.getTelephoneRadio();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5228,15 +4775,7 @@ public final class Contacts {
                 final String x = co.getTelephoneTelex();
                 final String y = original.getTelephoneTelex();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5273,15 +4812,7 @@ public final class Contacts {
                 final String x = co.getTelephoneTTYTTD();
                 final String y = original.getTelephoneTTYTTD();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5318,15 +4849,7 @@ public final class Contacts {
                 final String x = co.getInstantMessenger1();
                 final String y = original.getInstantMessenger1();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5364,15 +4887,7 @@ public final class Contacts {
                 final String x = co.getInstantMessenger2();
                 final String y = original.getInstantMessenger2();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5410,15 +4925,7 @@ public final class Contacts {
                 final String x = co.getTelephoneIP();
                 final String y = original.getTelephoneIP();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5455,15 +4962,7 @@ public final class Contacts {
                 final String x = co.getEmail1();
                 final String y = original.getEmail1();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5500,15 +4999,7 @@ public final class Contacts {
                 final String x = co.getEmail2();
                 final String y = original.getEmail2();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5545,15 +5036,7 @@ public final class Contacts {
                 final String x = co.getEmail3();
                 final String y = original.getEmail3();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5590,15 +5073,7 @@ public final class Contacts {
                 final String x = co.getURL();
                 final String y = original.getURL();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5635,15 +5110,7 @@ public final class Contacts {
                 final String x = co.getCategories();
                 final String y = original.getCategories();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5680,15 +5147,7 @@ public final class Contacts {
                 final String x = co.getUserField01();
                 final String y = original.getUserField01();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5725,15 +5184,7 @@ public final class Contacts {
                 final String x = co.getUserField02();
                 final String y = original.getUserField02();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5770,15 +5221,7 @@ public final class Contacts {
                 final String x = co.getUserField03();
                 final String y = original.getUserField03();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5815,15 +5258,7 @@ public final class Contacts {
                 final String x = co.getUserField04();
                 final String y = original.getUserField04();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5860,15 +5295,7 @@ public final class Contacts {
                 final String x = co.getUserField05();
                 final String y = original.getUserField05();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5905,15 +5332,7 @@ public final class Contacts {
                 final String x = co.getUserField06();
                 final String y = original.getUserField06();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5950,15 +5369,7 @@ public final class Contacts {
                 final String x = co.getUserField07();
                 final String y = original.getUserField07();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -5995,15 +5406,7 @@ public final class Contacts {
                 final String x = co.getUserField08();
                 final String y = original.getUserField08();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6040,15 +5443,7 @@ public final class Contacts {
                 final String x = co.getUserField09();
                 final String y = original.getUserField09();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6085,15 +5480,7 @@ public final class Contacts {
                 final String x = co.getUserField10();
                 final String y = original.getUserField10();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6130,15 +5517,7 @@ public final class Contacts {
                 final String x = co.getUserField11();
                 final String y = original.getUserField11();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6175,15 +5554,7 @@ public final class Contacts {
                 final String x = co.getUserField12();
                 final String y = original.getUserField12();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6220,15 +5591,7 @@ public final class Contacts {
                 final String x = co.getUserField13();
                 final String y = original.getUserField13();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6265,15 +5628,7 @@ public final class Contacts {
                 final String x = co.getUserField14();
                 final String y = original.getUserField14();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6310,15 +5665,7 @@ public final class Contacts {
                 final String x = co.getUserField15();
                 final String y = original.getUserField15();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6355,15 +5702,7 @@ public final class Contacts {
                 final String x = co.getUserField16();
                 final String y = original.getUserField16();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6400,15 +5739,7 @@ public final class Contacts {
                 final String x = co.getUserField17();
                 final String y = original.getUserField17();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6445,15 +5776,7 @@ public final class Contacts {
                 final String x = co.getUserField18();
                 final String y = original.getUserField18();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6490,15 +5813,7 @@ public final class Contacts {
                 final String x = co.getUserField19();
                 final String y = original.getUserField19();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -6535,15 +5850,7 @@ public final class Contacts {
                 final String x = co.getUserField20();
                 final String y = original.getUserField20();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -7315,15 +6622,7 @@ public final class Contacts {
                 final String x = co.getFileAs();
                 final String y = original.getFileAs();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -7524,15 +6823,7 @@ public final class Contacts {
                 final String x = co.getYomiFirstName();
                 final String y = original.getYomiFirstName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -7569,15 +6860,7 @@ public final class Contacts {
                 final String x = co.getYomiLastName();
                 final String y = original.getYomiLastName();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
@@ -7614,15 +6897,7 @@ public final class Contacts {
                 final String x = co.getYomiCompany();
                 final String y = original.getYomiCompany();
 
-                if (null == x) {
-                    if (null == y) {
-                        return true;
-                    }
-                    return false;
-                } else if (null == y) {
-                    return false;
-                }
-                return (x.equals(y));
+                return equalStrings(x, y);
             }
 
             public String getValueAsString(final Contact co) {
