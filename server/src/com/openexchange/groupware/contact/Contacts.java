@@ -1116,10 +1116,11 @@ public final class Contacts {
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 650; i++) {
-            if (mapping[i] != null) {
+            final Mapper mapper = mapping[i];
+            if (mapper != null) {
                 sb.append(',');
                 sb.append("co.");
-                sb.append(mapping[i].getDBFieldName());
+                sb.append(mapper.getDBFieldName());
             }
         }
         sb.deleteCharAt(0);
@@ -1135,10 +1136,11 @@ public final class Contacts {
         final ContactSql contactSQL = new ContactMySql(ctx, user);
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 650; i++) {
-            if (mapping[i] != null) {
+            final Mapper mapper = mapping[i];
+            if (mapper != null) {
                 sb.append(',');
                 sb.append("co.");
-                sb.append(mapping[i].getDBFieldName());
+                sb.append(mapper.getDBFieldName());
             }
         }
         sb.deleteCharAt(0);
@@ -1180,10 +1182,11 @@ public final class Contacts {
 
         StringBuilder sb = new StringBuilder(512);
         for (int i = 0; i < 650; i++) {
-            if (mapping[i] != null) {
+            final Mapper mapper = mapping[i];
+            if (mapper != null) {
                 sb.append(',');
                 sb.append("co.");
-                sb.append(mapping[i].getDBFieldName());
+                sb.append(mapper.getDBFieldName());
             }
         }
         sb.deleteCharAt(0);
@@ -1205,8 +1208,9 @@ public final class Contacts {
             if (rs.next()) {
                 int cnt = 1;
                 for (int i = 0; i < 650; i++) {
-                    if (mapping[i] != null) {
-                        mapping[i].addToContactObject(rs, cnt, co, con, user, group, ctx, uc);
+                    final Mapper mapper = mapping[i];
+                    if (mapper != null) {
+                        mapper.addToContactObject(rs, cnt, co, con, user, group, ctx, uc);
                         cnt++;
                     }
                 }
@@ -1232,8 +1236,9 @@ public final class Contacts {
                 final Contact contact = new Contact();
                 int cnt = 1;
                 for (int i = 0; i < 650; i++) {
-                    if (mapping[i] != null) {
-                        mapping[i].addToContactObject(result, cnt, contact, con, user, group, ctx, uc);
+                    final Mapper mapper = mapping[i];
+                    if (mapper != null) {
+                        mapper.addToContactObject(result, cnt, contact, con, user, group, ctx, uc);
                         cnt++;
                     }
                 }
@@ -2485,7 +2490,8 @@ public final class Contacts {
         final OXException.Truncated[] truncateds = new OXException.Truncated[fields.length];
         for (int i = 0; i < fields.length; i++) {
             for (int j = 0; j < 650; j++) {
-                if ((mapping[j] != null) && mapping[j].getDBFieldName().equals(fields[i])) {
+                final Mapper mapper = mapping[j];
+                if ((mapper != null) && mapper.getDBFieldName().equals(fields[i])) {
                     int tmp = 0;
                     try {
                         tmp = DBUtils.getColumnSize(con, table, fields[i]);
