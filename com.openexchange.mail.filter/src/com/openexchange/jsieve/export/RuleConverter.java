@@ -82,7 +82,7 @@ import com.openexchange.jsieve.commands.TestCommand;
  */
 public class RuleConverter {
 
-    private void addArguments(final ASTarguments targuments, final List<Object> argumentslist, final int[] js, final int[] p) {
+    private static void addArguments(final ASTarguments targuments, final List<Object> argumentslist, final int[] js, final int[] p) {
         for (int k = 0; k < argumentslist.size(); k++) {
             final Object object = argumentslist.get(k);
             if (object instanceof List) {
@@ -102,7 +102,7 @@ public class RuleConverter {
         }
     }
 
-    private void addTagArgument(final ASTarguments targuments2, final String text, final int[] js, final int[] p) {
+    private static void addTagArgument(final ASTarguments targuments2, final String text, final int[] js, final int[] p) {
         final Token token = new Token();
         token.image = text;
         final ASTargument targument = new ASTargument(js[0]++);
@@ -110,7 +110,7 @@ public class RuleConverter {
         targuments2.jjtAddChild(targument, p[0]++);
     }
 
-    private ASTblock createActionBlockForTest(final List<ActionCommand> actioncommands, final int[] js, final int linenumber) {
+    private static ASTblock createActionBlockForTest(final List<ActionCommand> actioncommands, final int[] js, final int linenumber) {
         final ASTblock tblock = new ASTblock(js[0]++);
         tblock.setFirstToken(getDummyToken("{"));
         tblock.setLastToken(getDummyToken("}"));
@@ -118,7 +118,7 @@ public class RuleConverter {
         return tblock;
     }
 
-    private ASTcommand createActionCommand(final ArrayList<Object> arguments, final String commandname, final int[] js, final int line) {
+    private static ASTcommand createActionCommand(final ArrayList<Object> arguments, final String commandname, final int[] js, final int line) {
         final ASTcommand tcommand = createCommand(commandname, js, line);
         if (!arguments.isEmpty()) {
             tcommand.jjtAddChild(createArguments(arguments, js), 0);
@@ -126,7 +126,7 @@ public class RuleConverter {
         return tcommand;
     }
 
-    private ASTcommands createActionCommands(final List<ActionCommand> actioncommands, final int[] js, final int linenumber) {
+    private static ASTcommands createActionCommands(final List<ActionCommand> actioncommands, final int[] js, final int linenumber) {
         final ASTcommands tcommands = new ASTcommands(js[0]++);
         for (int k = 0; k < actioncommands.size(); k++) {
             final ActionCommand actionCommand = actioncommands.get(k);
@@ -137,7 +137,7 @@ public class RuleConverter {
         return tcommands;
     }
 
-    private ASTarguments createArguments(final ArrayList<Object> arguments, final int[] iarray) {
+    private static ASTarguments createArguments(final ArrayList<Object> arguments, final int[] iarray) {
         final ASTarguments targuments = new ASTarguments(iarray[0]++);
         for (int i = 0; i < arguments.size(); i++) {
             final Object obj = arguments.get(i);
@@ -160,7 +160,7 @@ public class RuleConverter {
         return targuments;
     }
 
-    private ASTcommand createCommand(final String commandname, final int[] iarray, final int line) {
+    private static ASTcommand createCommand(final String commandname, final int[] iarray, final int line) {
         int i = iarray[0];
         final ASTcommand tcommand = new ASTcommand(i++);
         tcommand.setName(commandname);
@@ -170,7 +170,7 @@ public class RuleConverter {
         return tcommand;
     }
 
-    private ASTtest createCompleteTestPart(final TestCommand testcommand, final int[] js) {
+    private static ASTtest createCompleteTestPart(final TestCommand testcommand, final int[] js) {
         final ASTtest ttest = new ASTtest(js[0]++);
         final List<TestCommand> testcommands = testcommand.getTestcommands();
         final String commandname = testcommand.getCommand().getCommandname();
@@ -197,7 +197,7 @@ public class RuleConverter {
         return ttest;
     }
 
-    private ASTstring_list createStringList(final List<String> arrayList, final int[] iarray) {
+    private static ASTstring_list createStringList(final List<String> arrayList, final int[] iarray) {
         int i = iarray[0];
         final ASTstring_list tstring_list = new ASTstring_list(i++);
         final int size = arrayList.size();
@@ -218,14 +218,14 @@ public class RuleConverter {
         return tstring_list;
     }
 
-    private ASTarguments createTagAndNormalArgumentsForTest(final TestCommand testcommand, final int[] js) {
+    private static ASTarguments createTagAndNormalArgumentsForTest(final TestCommand testcommand, final int[] js) {
         final ASTarguments targuments2 = new ASTarguments(js[0]++);
         final int[] p = new int[] { 0 };
         addArguments(targuments2, testcommand.getArguments(), js, p);
         return targuments2;
     }
 
-    private Token getDummyToken(final String string) {
+    private static Token getDummyToken(final String string) {
         final Token token = new Token();
         token.image = string;
         token.beginColumn = 0;
@@ -235,7 +235,7 @@ public class RuleConverter {
         return token;
     }
 
-    private Token getDummyToken(final String string, final int beginLine) {
+    private static Token getDummyToken(final String string, final int beginLine) {
         final Token token = new Token();
         token.image = string;
         token.beginColumn = 0;
