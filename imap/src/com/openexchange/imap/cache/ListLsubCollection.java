@@ -555,7 +555,7 @@ final class ListLsubCollection {
         if (DEBUG) {
             final String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
             r = protocol.command(sCmd, null);
-            LOG.debug((lsub ? "LSUB" : "LIST") + " cache filled with >>" + sCmd + "<< which returned " + r.length + " response line(s).");
+            LOG.debug((command) + " cache filled with >>" + sCmd + "<< which returned " + r.length + " response line(s).");
         } else {
             r = protocol.command(new StringBuilder(command).append(" \"\" \"*\"").toString(), null);
         }
