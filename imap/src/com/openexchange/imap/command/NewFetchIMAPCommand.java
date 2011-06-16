@@ -234,15 +234,12 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     /**
      * Initializes a new {@link NewFetchIMAPCommand}.
      * 
-     * @param imapFolder - the IMAP folder
+     * @param imapFolder The IMAP folder providing connected protocol
+     * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
-     * @param fp - the fetch profile
-     * @param isSequential - whether the source array values are sequential
-     * @param keepOrder - whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
-     *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
-     * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
-     * @throws MessagingException
+     * @param uids The UIDs
+     * @param fp The fetch profile to use
+     * @throws MessagingException If initialization fails
      */
     public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
