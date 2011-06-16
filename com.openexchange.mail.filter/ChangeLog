@@ -1,3 +1,7 @@
+* 2011-06-16 - dennis.sieben@open-xchange.com
+
+ - Bugfix #19454 - [L3] Using '"' character in mail filter condition removes vacation message
+ 
 * 2011-04-11 - dennis.sieben@open-xchange.com
 
  - Bugfix #18918 - OXSieveHandlerInvalidCredentialsException must be moved to the export package

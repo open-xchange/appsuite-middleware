@@ -693,6 +693,9 @@ public final class SieveTextFilter {
                 comment = false;
                 commentremoved = false;
                 i++;
+            } else if (dontparse && c == '\\') {
+                //Ignore next char
+                i+=2;
             } else if (!commentremoved && !comment && c == '"') { 
                 // The comment flag is important because otherwise
                 // you could struggle about '"' in comments
