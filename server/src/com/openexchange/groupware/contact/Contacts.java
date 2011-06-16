@@ -2532,15 +2532,7 @@ public final class Contacts {
      * @return <code>true</code> if both strings are considered equal; otherwise <code>false</code>
      */
     protected static boolean equalStrings(final String x, final String y) {
-        if (null == x) {
-            if (null == y) {
-                return true;
-            }
-            return false;
-        } else if (null == y) {
-            return false;
-        }
-        return (x.equals(y));
+        return null == x ? null == y : null == y ? false : x.equals(y);
     }
 
     public static interface Mapper {
