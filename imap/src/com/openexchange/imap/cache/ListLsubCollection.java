@@ -97,6 +97,8 @@ final class ListLsubCollection {
 
     private static final String ROOT_FULL_NAME = "";
 
+    private static final String INBOX = "INBOX";
+
     private final ConcurrentMap<String, ListLsubEntryImpl> listMap;
 
     private final ConcurrentMap<String, ListLsubEntryImpl> lsubMap;
@@ -438,97 +440,97 @@ final class ListLsubCollection {
          */
         init(imapFolder, doStatus, doGetAcl);
         return;
-        
-//        try {
-//            final long st = DEBUG ? System.currentTimeMillis() : 0L;
-//            /*
-//             * Perform LIST "<full-name>" "*"
-//             */
-//            final Set<String> fullNames = new HashSet<String>(8);
-//            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-//
-//                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-//                    doFolderListLsubCommand(fullName, protocol, false, fullNames);
-//                    return null;
-//                }
-//
-//            });
-//            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-//
-//                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-//                    doFolderListLsubCommand(fullName, protocol, true, fullNames);
-//                    return null;
-//                }
-//
-//            });
-//            if (doStatus) {
-//                /*
-//                 * Gather STATUS for each entry
-//                 */
-//                for (final String fn : fullNames) {
-//                    final ListLsubEntryImpl listEntry = listMap.get(fn);
-//                    if (null != listEntry && listEntry.canOpen()) {
-//                        try {
-//                            final int[] status = IMAPCommandsCollection.getStatus(fn, imapFolder);
-//                            if (null != status) {
-//                                listEntry.setStatus(status);
-//                                final ListLsubEntryImpl lsubEntry = lsubMap.get(fn);
-//                                if (null != lsubEntry) {
-//                                    lsubEntry.setStatus(status);
-//                                }
-//                            }
-//                        } catch (final Exception e) {
-//                            // Swallow failed STATUS command
-//                            org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
-//                                "STATUS command failed for " + imapFolder.getStore().toString(),
-//                                e);
-//                        }
-//                    }
-//                }
-//            }
-//            if (doGetAcl && ((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
-//                /*
-//                 * Perform GETACL command for each entry
-//                 */
-//                for (final String fn : fullNames) {
-//                    final ListLsubEntryImpl listEntry = listMap.get(fn);
-//                    if (null != listEntry && listEntry.canOpen()) {
-//                        try {
-//                            final List<ACL> aclList = IMAPCommandsCollection.getAcl(fn, imapFolder, false);
-//                            listEntry.setAcls(aclList);
-//                            final ListLsubEntryImpl lsubEntry = lsubMap.get(fn);
-//                            if (null != lsubEntry) {
-//                                lsubEntry.setAcls(aclList);
-//                            }
-//                        } catch (final Exception e) {
-//                            // Swallow failed ACL command
-//                            org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
-//                                "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
-//                                e);
-//                        }
-//                    }
-//                }
-//            }
-//            if (DEBUG) {
-//                final long dur = System.currentTimeMillis() - st;
-//                final StringBuilder sb = new StringBuilder(128);
-//                sb.append("LIST/LSUB cache");
-//                if (doStatus || doGetAcl) {
-//                    sb.append(" ( ");
-//                    if (doStatus) {
-//                        sb.append("including STATUS");
-//                    }
-//                    if (doGetAcl) {
-//                        sb.append("including GETACL");
-//                    }
-//                    sb.append(" )");
-//                }
-//                sb.append(" updated in ").append(dur).append("msec.");
-//                LOG.debug(sb.toString());
-//            }
-//        } catch (final MessagingException e) {
-//            throw MIMEMailException.handleMessagingException(e);
-//        }
+
+        // try {
+        // final long st = DEBUG ? System.currentTimeMillis() : 0L;
+        // /*
+        // * Perform LIST "<full-name>" "*"
+        // */
+        // final Set<String> fullNames = new HashSet<String>(8);
+        // imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        //
+        // public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+        // doFolderListLsubCommand(fullName, protocol, false, fullNames);
+        // return null;
+        // }
+        //
+        // });
+        // imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        //
+        // public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+        // doFolderListLsubCommand(fullName, protocol, true, fullNames);
+        // return null;
+        // }
+        //
+        // });
+        // if (doStatus) {
+        // /*
+        // * Gather STATUS for each entry
+        // */
+        // for (final String fn : fullNames) {
+        // final ListLsubEntryImpl listEntry = listMap.get(fn);
+        // if (null != listEntry && listEntry.canOpen()) {
+        // try {
+        // final int[] status = IMAPCommandsCollection.getStatus(fn, imapFolder);
+        // if (null != status) {
+        // listEntry.setStatus(status);
+        // final ListLsubEntryImpl lsubEntry = lsubMap.get(fn);
+        // if (null != lsubEntry) {
+        // lsubEntry.setStatus(status);
+        // }
+        // }
+        // } catch (final Exception e) {
+        // // Swallow failed STATUS command
+        // org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
+        // "STATUS command failed for " + imapFolder.getStore().toString(),
+        // e);
+        // }
+        // }
+        // }
+        // }
+        // if (doGetAcl && ((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
+        // /*
+        // * Perform GETACL command for each entry
+        // */
+        // for (final String fn : fullNames) {
+        // final ListLsubEntryImpl listEntry = listMap.get(fn);
+        // if (null != listEntry && listEntry.canOpen()) {
+        // try {
+        // final List<ACL> aclList = IMAPCommandsCollection.getAcl(fn, imapFolder, false);
+        // listEntry.setAcls(aclList);
+        // final ListLsubEntryImpl lsubEntry = lsubMap.get(fn);
+        // if (null != lsubEntry) {
+        // lsubEntry.setAcls(aclList);
+        // }
+        // } catch (final Exception e) {
+        // // Swallow failed ACL command
+        // org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class).debug(
+        // "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
+        // e);
+        // }
+        // }
+        // }
+        // }
+        // if (DEBUG) {
+        // final long dur = System.currentTimeMillis() - st;
+        // final StringBuilder sb = new StringBuilder(128);
+        // sb.append("LIST/LSUB cache");
+        // if (doStatus || doGetAcl) {
+        // sb.append(" ( ");
+        // if (doStatus) {
+        // sb.append("including STATUS");
+        // }
+        // if (doGetAcl) {
+        // sb.append("including GETACL");
+        // }
+        // sb.append(" )");
+        // }
+        // sb.append(" updated in ").append(dur).append("msec.");
+        // LOG.debug(sb.toString());
+        // }
+        // } catch (final MessagingException e) {
+        // throw MIMEMailException.handleMessagingException(e);
+        // }
     }
 
     private static final Set<String> ATTRIBUTES_NON_EXISTING_PARENT = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
@@ -646,16 +648,15 @@ final class ListLsubCollection {
             if (!lsub) {
                 for (final String sharedNamespace : shared) {
                     if (!map.containsKey(sharedNamespace)) {
-                        final ListLsubEntryImpl namespaceFolder =
-                            new ListLsubEntryImpl(
-                                sharedNamespace,
-                                ATTRIBUTES_NON_EXISTING_NAMESPACE,
-                                separator,
-                                ChangeState.UNDEFINED,
-                                true,
-                                false,
-                                Boolean.FALSE,
-                                lsub ? null : lsubMap).setNamespace(true);
+                        final ListLsubEntryImpl namespaceFolder = new ListLsubEntryImpl(
+                            sharedNamespace,
+                            ATTRIBUTES_NON_EXISTING_NAMESPACE,
+                            separator,
+                            ChangeState.UNDEFINED,
+                            true,
+                            false,
+                            Boolean.FALSE,
+                            lsub ? null : lsubMap).setNamespace(true);
                         namespaceFolder.setParent(rootEntry);
                         rootEntry.addChildIfAbsent(namespaceFolder);
                         map.put(sharedNamespace, namespaceFolder);
@@ -663,16 +664,15 @@ final class ListLsubCollection {
                 }
                 for (final String userNamespace : user) {
                     if (!map.containsKey(userNamespace)) {
-                        final ListLsubEntryImpl namespaceFolder =
-                            new ListLsubEntryImpl(
-                                userNamespace,
-                                ATTRIBUTES_NON_EXISTING_NAMESPACE,
-                                separator,
-                                ChangeState.UNDEFINED,
-                                true,
-                                false,
-                                Boolean.FALSE,
-                                lsub ? null : lsubMap).setNamespace(true);
+                        final ListLsubEntryImpl namespaceFolder = new ListLsubEntryImpl(
+                            userNamespace,
+                            ATTRIBUTES_NON_EXISTING_NAMESPACE,
+                            separator,
+                            ChangeState.UNDEFINED,
+                            true,
+                            false,
+                            Boolean.FALSE,
+                            lsub ? null : lsubMap).setNamespace(true);
                         namespaceFolder.setParent(rootEntry);
                         rootEntry.addChildIfAbsent(namespaceFolder);
                         map.put(userNamespace, namespaceFolder);
@@ -1069,7 +1069,7 @@ final class ListLsubCollection {
                                 parent = null == tmp ? doSingleListCommand(parentFullName, protocol, lsub) : tmp;
                             } else {
                                 parent = map.get(ROOT_FULL_NAME);
-                            } 
+                            }
                         }
                         if (null != parent) {
                             listLsubEntry.setParent(parent);
@@ -1445,7 +1445,7 @@ final class ListLsubCollection {
 
         ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
-            this.fullName = String.valueOf(separator).equals(fullName) ? ROOT_FULL_NAME : fullName;
+            this.fullName = String.valueOf(separator).equals(fullName) ? ROOT_FULL_NAME : (INBOX.equalsIgnoreCase(fullName) ? INBOX : fullName);
             this.attributes = attributes;
             this.separator = separator;
             this.changeState = changeState;
