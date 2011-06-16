@@ -2527,12 +2527,12 @@ public final class Contacts {
     /**
      * Checks if specified strings are equal
      * 
-     * @param x The first string
-     * @param y The second string
+     * @param string The first string
+     * @param other The second string
      * @return <code>true</code> if both strings are considered equal; otherwise <code>false</code>
      */
-    protected static boolean areEqual(final String x, final String y) {
-        return null == x ? null == y : null == y ? false : x.equals(y);
+    protected static boolean areEqual(final String string, final String other) {
+        return null == string ? null == other : null == other ? false : string.equals(other);
     }
 
     public static interface Mapper {
