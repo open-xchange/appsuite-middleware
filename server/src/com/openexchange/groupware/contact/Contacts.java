@@ -335,11 +335,11 @@ public final class Contacts {
         Context context = null;
 
         try {
+            validateEmailAddress(contact);
             contactSql = new ContactMySql(session);
             context = ContextStorage.getStorageContext(session.getContextId());
 
             readcon = DBPool.pickup(context);
-            validateEmailAddress(contact);
 
             final int fid = contact.getParentFolderID();
 
