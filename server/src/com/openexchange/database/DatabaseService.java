@@ -109,6 +109,22 @@ public interface DatabaseService extends ConfigDatabaseService {
     Connection get(int poolId, String schema) throws DBPoolingException;
 
     /**
+     * This method is only for administrative access to contexts.
+     * @param poolId identifier of the database pool.
+     * @param schema schema name.
+     * @return a connection to the database without a time-out from the given pool directed to the given schema.
+     * @throws DBPoolingException if no connection can be obtained.
+     */
+    Connection getNoTimeout(int poolId, String schema) throws DBPoolingException;
+
+    /**
+     * This method is only for administrative access to contexts.
+     * @param poolId identifier of the pool the connection should be returned to.
+     * @param con connection to return.
+     */
+    void backNoTimeoout(int poolId, Connection con);
+
+    /**
      * Returns a read only connection to the database of the specified context to the pool.
      * @param ctx Context.
      * @param con Read only connection to return.

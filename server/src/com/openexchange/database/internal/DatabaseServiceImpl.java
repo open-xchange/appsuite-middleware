@@ -81,7 +81,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     /**
      * Default constructor.
      */
-    public DatabaseServiceImpl(boolean forceWriteOnly, Pools pools, ConfigDatabaseService configDatabaseService, ContextDatabaseAssignmentService assignmentService) {
+    public DatabaseServiceImpl(final boolean forceWriteOnly, final Pools pools, final ConfigDatabaseService configDatabaseService, final ContextDatabaseAssignmentService assignmentService) {
         super();
         this.forceWriteOnly = forceWriteOnly;
         this.pools = pools;
@@ -89,21 +89,21 @@ public final class DatabaseServiceImpl implements DatabaseService {
         this.assignmentService = assignmentService;
     }
 
-    private Connection get(int contextId, boolean write, boolean noTimeout) throws DBPoolingException {
+    private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws DBPoolingException {
         final Assignment assign = assignmentService.getAssignment(contextId);
         return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write || forceWriteOnly);
     }
 
-    private void back(Connection con) {
+    private void back(final Connection con) {
         try {
             con.close();
-        } catch (SQLException e) {
-            DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final SQLException e) {
+            final DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
         }
     }
 
-    public void invalidate(int contextId) throws DBPoolingException {
+    public void invalidate(final int contextId) throws DBPoolingException {
         assignmentService.removeAssignments(contextId);
     }
 
@@ -117,56 +117,55 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return configDatabaseService.getWritable();
     }
 
-    public void backReadOnly(Connection con) {
+    public void backReadOnly(final Connection con) {
         configDatabaseService.backReadOnly(con);
     }
 
-    public void backWritable(Connection con) {
+    public void backWritable(final Connection con) {
         configDatabaseService.backWritable(con);
     }
 
-    public int[] listContexts(int poolId) throws DBPoolingException {
+    public int[] listContexts(final int poolId) throws DBPoolingException {
         return configDatabaseService.listContexts(poolId);
     }
 
     // Implemented database service methods.
 
-    public Connection getReadOnly(Context ctx) throws DBPoolingException {
+    public Connection getReadOnly(final Context ctx) throws DBPoolingException {
         return get(ctx.getContextId(), false, false);
     }
 
-    public Connection getReadOnly(int contextId) throws DBPoolingException {
+    public Connection getReadOnly(final int contextId) throws DBPoolingException {
         return get(contextId, false, false);
     }
 
-    public Connection getWritable(Context ctx) throws DBPoolingException {
+    public Connection getWritable(final Context ctx) throws DBPoolingException {
         return get(ctx.getContextId(), true, false);
     }
 
-    public Connection getWritable(int contextId) throws DBPoolingException {
+    public Connection getWritable(final int contextId) throws DBPoolingException {
         return get(contextId, true, false);
     }
 
-    public Connection getForUpdateTask(int contextId) throws DBPoolingException {
+    public Connection getForUpdateTask(final int contextId) throws DBPoolingException {
         return get(contextId, true, true);
     }
 
-    public Connection get(int poolId, String schema) throws DBPoolingException {
+    public Connection get(final int poolId, final String schema) throws DBPoolingException {
         final Connection con;
         try {
             con = pools.getPool(poolId).get();
-        } catch (PoolingException e) {
+        } catch (final PoolingException e) {
             throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
         }
         try {
-            String oldSchema = con.getCatalog();
-            if (!oldSchema.equals(schema)) {
+            if (!con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
-            } catch (PoolingException e1) {
+            } catch (final PoolingException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
@@ -174,49 +173,79 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return con;
     }
 
-    public void backReadOnly(Context ctx, Connection con) {
+    public Connection getNoTimeout(final int poolId, final String schema) throws DBPoolingException {
+        final Connection con;
+        try {
+            con = pools.getPool(poolId).getWithoutTimeout();
+        } catch (final PoolingException e) {
+            throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
+        }
+        try {
+            if (!con.getCatalog().equals(schema)) {
+                con.setCatalog(schema);
+            }
+        } catch (final SQLException e) {
+            try {
+                pools.getPool(poolId).back(con);
+            } catch (final PoolingException e1) {
+                LOG.error(e1.getMessage(), e1);
+            }
+            throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
+        }
+        return con;
+    }
+
+    public void backReadOnly(final Context ctx, final Connection con) {
         back(con);
     }
 
-    public void backReadOnly(int contextId, Connection con) {
+    public void backReadOnly(final int contextId, final Connection con) {
         back(con);
     }
 
-    public void backWritable(Context ctx, Connection con) {
+    public void backWritable(final Context ctx, final Connection con) {
         back(con);
     }
 
-    public void backWritable(int contextId, Connection con) {
+    public void backWritable(final int contextId, final Connection con) {
         back(con);
     }
 
-    public void backForUpdateTask(int contextId, Connection con) {
+    public void backForUpdateTask(final int contextId, final Connection con) {
         back(con);
     }
 
-    public void back(int poolId, Connection con) {
+    public void back(final int poolId, final Connection con) {
         try {
             pools.getPool(poolId).back(con);
-        } catch (PoolingException e) {
+        } catch (final PoolingException e) {
             final DBPoolingException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
             LOG.error(e2.getMessage(), e2);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    public int getWritablePool(int contextId) throws DBPoolingException {
-        Assignment assign = assignmentService.getAssignment(contextId);
+    public void backNoTimeoout(final int poolId, final Connection con) {
+        try {
+            pools.getPool(poolId).backWithoutTimeout(con);
+        } catch (final DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    public int getWritablePool(final int contextId) throws DBPoolingException {
+        final Assignment assign = assignmentService.getAssignment(contextId);
         return assign.getWritePoolId();
     }
 
-    public String getSchemaName(int contextId) throws DBPoolingException {
+    public String getSchemaName(final int contextId) throws DBPoolingException {
         return assignmentService.getAssignment(contextId).getSchema();
     }
 
-    public int[] getContextsInSameSchema(int contextId) throws DBPoolingException {
-        Assignment assign = assignmentService.getAssignment(contextId);
-        ConfigDBStorage configDBStorage = new ConfigDBStorage(configDatabaseService);
+    public int[] getContextsInSameSchema(final int contextId) throws DBPoolingException {
+        final Assignment assign = assignmentService.getAssignment(contextId);
+        final ConfigDBStorage configDBStorage = new ConfigDBStorage(configDatabaseService);
         return configDBStorage.getContextsFromSchema(assign.getSchema(), assign.getWritePoolId());
     }
 }
