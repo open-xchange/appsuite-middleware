@@ -62,6 +62,8 @@ public final class IDMailMessage extends MailMessage {
 
     private static final long serialVersionUID = -8945006270321242506L;
 
+    private long uid;
+
     private String mailId;
 
     private char separator;
@@ -74,6 +76,15 @@ public final class IDMailMessage extends MailMessage {
     public IDMailMessage(final String mailId, final String folder) {
         super();
         this.mailId = mailId;
+        if (null == mailId) {
+            uid = -1L;
+        } else {
+            try {
+                uid = Long.parseLong(mailId);
+            } catch (final NumberFormatException e) {
+                uid = -1L;
+            }
+        }
         setFolder(folder);
     }
 
@@ -90,6 +101,33 @@ public final class IDMailMessage extends MailMessage {
     @Override
     public void setMailId(final String id) {
         mailId = id;
+        if (null == id) {
+            uid = -1L;
+        } else {
+            try {
+                uid = Long.parseLong(id);
+            } catch (final NumberFormatException e) {
+                uid = -1L;
+            }
+        }
+    }
+
+    /**
+     * Gets the UID
+     * 
+     * @return The UID or <code>-1</code> if absent
+     */
+    public long getUid() {
+        return uid;
+    }
+
+    /**
+     * Sets the UID
+     * 
+     * @param uid The UID to set or <code>-1</code> to indicate absence
+     */
+    public void setUid(final long uid) {
+        this.uid = uid;
     }
 
     /**

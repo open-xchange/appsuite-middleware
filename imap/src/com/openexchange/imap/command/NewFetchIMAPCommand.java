@@ -958,7 +958,9 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
 
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) {
-            msg.setMailId(String.valueOf(((UID) item).uid));
+            final long id = ((UID) item).uid;
+            msg.setMailId(String.valueOf(id));
+            msg.setUid(id);
         }
     };
 
