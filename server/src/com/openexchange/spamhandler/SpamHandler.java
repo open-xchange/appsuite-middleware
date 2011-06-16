@@ -167,9 +167,10 @@ public abstract class SpamHandler {
         final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
         mailAccess.connect();
         try {
-
-            final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
-            mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
+            if (isCreateConfirmedSpam()) {
+                final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
+                mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
+            }
             if (move) {
                 /*
                  * Move to spam folder

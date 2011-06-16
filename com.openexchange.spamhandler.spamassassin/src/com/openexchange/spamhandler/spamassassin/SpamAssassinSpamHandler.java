@@ -218,9 +218,10 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, accountId);
         mailAccess.connect();
         try {
-
-            final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
-            mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
+            if (isCreateConfirmedSpam()) {
+                final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
+                mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
+            }
             final SpamdSettings spamdSettings = getSpamdSettings(session, PropertyHandler.getInstance());
             if (null != spamdSettings) {
                 final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullname, mailIDs, new MailField[]{MailField.FULL});
@@ -241,7 +242,9 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     private void copyMessagesToConfirmedHamAndInbox(final UnwrapParameter paramObject, final String[] plainIDsArr, final String confirmedHamFullname, final SpamdSettings spamdSettings) throws MailException {
         final MailAccess<?, ?> mailAccess = paramObject.getMailAccess();
         final String spamFullname = paramObject.getSpamFullname();
-        mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, plainIDsArr, false);
+        if (isCreateConfirmedHam()) {
+            mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, plainIDsArr, false);
+        }
         if (null != spamdSettings) {
             final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(spamFullname, plainIDsArr, new MailField[]{MailField.FULL});
             spamdMessageProcessing(mails, spamdSettings, false);
