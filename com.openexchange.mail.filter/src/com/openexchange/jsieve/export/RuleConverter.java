@@ -207,11 +207,11 @@ public class RuleConverter {
             tstring_list.setFirstToken(getDummyToken("["));
             tstring_list.setLastToken(getDummyToken("]"));
         }
-        final StringBuilder builder = new StringBuilder(128);
+        final StringBuilder builder = new StringBuilder(128).append('"');
         for (int k = 0; k < size; k++) {
             final ASTstring tstring = new ASTstring(i++);
-            builder.setLength(0);
-            tstring.setValue(builder.append('\"').append(arrayList.get(k).replace("\\", "\\\\").replace("\"", "\\\"")).append('\"').toString());
+            builder.setLength(1);
+            tstring.setValue(builder.append(arrayList.get(k).replace("\\", "\\\\").replace("\"", "\\\"")).append('"').toString());
             tstring_list.jjtAddChild(tstring, k);
         }
         iarray[0] = i;
