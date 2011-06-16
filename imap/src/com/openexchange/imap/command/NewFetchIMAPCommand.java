@@ -262,6 +262,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             seqNumFetcher = null;
         }
         fullname = imapFolder.getFullName();
+        retval = new MailMessage[length];
         // recentCount = imapFolder.getNewMessageCount();
     }
 
