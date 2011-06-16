@@ -126,6 +126,8 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class IMAPCommandsCollection {
 
+    private static final String[] ARGS_ALL = new String[] { "1:*" };
+
     private static final String STR_UID = "UID";
 
     private static final String STR_FETCH = "FETCH";
@@ -1254,7 +1256,7 @@ public final class IMAPCommandsCollection {
                 final String[] args;
                 final String format;
                 if (null == msgUIDs) {
-                    args = new String[] { "1:*" };
+                    args = ARGS_ALL;
                     format = TEMPL_STORE_FLAGS;
                 } else {
                     args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 160);
@@ -1311,7 +1313,7 @@ public final class IMAPCommandsCollection {
                 final String[] args;
                 final String format;
                 if (null == msgUIDs) {
-                    args = new String[] { "1:*" };
+                    args = ARGS_ALL;
                     format = TEMPL_STORE_FLAGS;
                 } else {
                     args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 32 + colorLabelFlag.length());
@@ -2202,7 +2204,7 @@ public final class IMAPCommandsCollection {
                  * Execute command
                  */
                 final TLongIntHashMap seqNumMap = new TLongIntHashMap(length);
-                final String[] args = messageCount == length ? new String[] { "1:*" } : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                final String[] args = messageCount == length ? ARGS_ALL : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -2279,7 +2281,7 @@ public final class IMAPCommandsCollection {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final TLongIntHashMap uid2seqNum = new TLongIntHashMap(uids.length);
-                final String[] args = messageCount == uids.length ? new String[] { "1:*" } : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                final String[] args = messageCount == uids.length ? ARGS_ALL : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-

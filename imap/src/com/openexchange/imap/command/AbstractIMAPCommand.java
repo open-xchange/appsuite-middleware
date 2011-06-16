@@ -68,9 +68,9 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
  */
 public abstract class AbstractIMAPCommand<T> {
 
-    static final String[] ARGS_EMPTY = { "" };
+    protected static final String[] ARGS_EMPTY = { "" };
 
-    static final String[] ARGS_ALL = { "1:*" };
+    protected static final String[] ARGS_ALL = { "1:*" };
 
     /**
      * The IMAP folder associated with the command to execute

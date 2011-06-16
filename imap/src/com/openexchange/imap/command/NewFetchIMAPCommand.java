@@ -254,11 +254,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (0 == length) {
             returnDefaultValue = true;
         } else {
-            args =
-                length == messageCount ? new String[] { "1:*" } : IMAPNumArgSplitter.splitUIDArg(
-                    uids,
-                    false,
-                    LENGTH_WITH_UID + command.length());
+            args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             seqNumFetcher = null;
         }
         fullname = imapFolder.getFullName();
@@ -290,10 +286,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             returnDefaultValue = true;
         } else {
             args =
-                length == messageCount ? new String[] { "1:*" } : IMAPNumArgSplitter.splitSeqNumArg(
-                    seqNums,
-                    false,
-                    LENGTH_WITH_UID + command.length());
+                length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH_WITH_UID + command.length());
             seqNumFetcher = null;
         }
         fullname = imapFolder.getFullName();
@@ -357,8 +350,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                             LENGTH + command.length()));
                 } else {
                     args =
-                        length == messageCount ? new String[] { "1:*" } : (isSequential ? new String[] { new StringBuilder(32).append(
-                            seqNums[0]).append(':').append(seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
+                        length == messageCount ? ARGS_ALL : (isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(
+                            ':').append(seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
                             seqNums,
                             keepOrder,
                             LENGTH + command.length()));
@@ -392,8 +385,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     returnDefaultValue = true;
                 } else {
                     args =
-                        length == messageCount ? new String[] { "1:*" } : isSequential ? new String[] { new StringBuilder(32).append(
-                            uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                        length == messageCount ? ARGS_ALL : isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(
+                            uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
                             uids,
                             false,
                             LENGTH_WITH_UID + command.length());
@@ -417,7 +410,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                             LENGTH + command.length());
                 } else {
                     args =
-                        length == messageCount ? new String[] { "1:*" } : (isSequential ? new String[] { new StringBuilder(64).append(
+                        length == messageCount ? ARGS_ALL : (isSequential ? new String[] { new StringBuilder(64).append(
                             msgs[0].getMessageNumber()).append(':').append(msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
                             msgs,
                             keepOrder,
