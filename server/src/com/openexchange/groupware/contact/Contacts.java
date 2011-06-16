@@ -708,7 +708,8 @@ public final class Contacts {
             final int[] mod = new int[650];
             int cnt = 0;
             for (int i = 0; i < 650; i++) {
-                if ((mapping[i] != null) && !mapping[i].compare(co, original)) {
+                final Mapper mapper = mapping[i];
+                if ((mapper != null) && !mapper.compare(co, original)) {
                     // Check if modified field is DISPLAY-NAME and contact denotes a system user
                     if (i == Contact.DISPLAY_NAME && original.getInternalUserId() > 0) {
                         modifiedDisplayName = true;
