@@ -110,7 +110,7 @@ public class MessagingRequestData {
         this(request, session, registry, parser, null);
     }
 
-    public MessagingMessageAccess getMessageAccess(final String messagingService, final int account, int user, int cid) throws MessagingException {
+    public MessagingMessageAccess getMessageAccess(final String messagingService, final int account, final int user, final int cid) throws MessagingException {
         final MessagingAccountAccess access = registry.getMessagingService(messagingService, user, cid).getAccountAccess(account, session);
         if (!access.isConnected()) {
             access.connect();
@@ -131,7 +131,7 @@ public class MessagingRequestData {
      * 
      * @throws MessagingException If parameters 'messagingService' or 'account' are missing
      */
-    public MessagingMessageAccess getMessageAccess(int user, int cid) throws MessagingException {
+    public MessagingMessageAccess getMessageAccess(final int user, final int cid) throws MessagingException {
         if (messageAccess != null) {
             return messageAccess;
         }
@@ -139,7 +139,7 @@ public class MessagingRequestData {
         return messageAccess = wrap(access, getMessagingServiceId(), getAccountID());
     }
 
-    public MessagingAccountAccess getAccountAccess(int user, int cid) throws MessagingException {
+    public MessagingAccountAccess getAccountAccess(final int user, final int cid) throws MessagingException {
         if (accountAccess != null) {
             return accountAccess;
         }
@@ -337,7 +337,7 @@ public class MessagingRequestData {
      * @param user 
      * @param cid 
      */
-    public MessagingAccountTransport getTransport(int user, int cid) throws MessagingException {
+    public MessagingAccountTransport getTransport(final int user, final int cid) throws MessagingException {
         return registry.getMessagingService(getMessagingServiceId(), user, cid).getAccountTransport(getAccountID(), session);
     }
 
@@ -404,7 +404,7 @@ public class MessagingRequestData {
         if (cache == null) {
             return messageAccess2;
         }
-        return new CacheingMessageAccess(messageAccess2, cache, service + "://" + account, session);
+        return new CacheingMessageAccess(messageAccess2, cache, new StringBuilder(service).append("://").append(account).toString(), session);
     }
 
     public void cleanUp() {
