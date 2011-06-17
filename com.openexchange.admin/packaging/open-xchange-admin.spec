@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 11
+%define		ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -405,6 +405,15 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Jun 16 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19492: Enhanced DatabaseService with a method to get a no-timeout connection for administrative access to contexts
+* Thu Jun 09 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18481: Introduced config parameter to signal whether POP3 bundle is enabled or not
+ - Bugfix #19438: Properly cleaning system-wide known folders from virtual tree tables
+* Wed Jun 08 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19455: Introduced command-line parameter to switch off portal (--access-denied-portal)
+* Fri Jun 03 2011 - marcus.klein@open-xchange.com
+ - Added Czech and Hungarian translations for default mail folders.
 * Tue May 24 2011 - marcus.klein@open-xchange.com
  - Bugfix #17858: Writing now a stack trace if a runtime exception occurs.
 * Fri May 20 2011 - marcus.klein@open-xchange.com
