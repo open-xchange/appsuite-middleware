@@ -541,6 +541,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Increments the global access counter.
+     * <p>
+     * <b>Does nothing at all since v6.20.</b>
      */
     protected static final void incrementCounter() {
         // No-op
@@ -548,6 +550,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Decrements the global access counter.
+     * <p>
+     * <b>Does nothing at all since v6.20.</b>
      */
     protected static final void decrementCounter() {
         // No-op
