@@ -88,6 +88,22 @@ public final class Authentication {
      */
     public static Authenticated login(final String login, final String pass)
         throws LoginException, ServiceException {
+        return login(login, pass, Collections.<String, Object> emptyMap());
+    }
+
+    /**
+     * Performs a login using an authentication service.
+     * @param login entered login.
+     * @param pass entered password.
+     * @param properties The optional properties
+     * @return a string array with two elements in which the first contains the
+     * login info for the context and the second contains the login info for the
+     * user.
+     * @throws LoginException if something with the login info is wrong.
+     * @throws ServiceException if the authentication service is not available.
+     */
+    public static Authenticated login(final String login, final String pass, final Map<String, Object> properties)
+        throws LoginException, ServiceException {
         final AuthenticationService auth = SERVICE_REF.get();
         if (null == auth) {
             throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, AuthenticationService.class.getName());
