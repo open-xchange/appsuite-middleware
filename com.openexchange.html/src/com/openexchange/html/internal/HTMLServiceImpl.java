@@ -69,7 +69,6 @@ import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.Serializer;
 import org.htmlcleaner.TagNode;
-import org.w3c.tidy.Tidy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.parser.HTMLParser;
@@ -198,8 +197,10 @@ public final class HTMLServiceImpl implements HTMLService {
                      * Add proxy registration
                      */
                     final URL imageUrl = new URL(urlStr);
-                    final URI uri =
-                        proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance()));
+                    final URI uri = proxyRegistry.register(new ProxyRegistration(
+                        imageUrl,
+                        sessionId,
+                        ImageContentTypeRestriction.getInstance()));
                     /*
                      * Compose replacement
                      */
@@ -359,9 +360,8 @@ public final class HTMLServiceImpl implements HTMLService {
         /*
          * Get the host part of URL. Ensure scheme is present before creating a java.net.URL instance
          */
-        final String host =
-            new URL(
-                urlStr.startsWith("www.") || urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
+        final String host = new URL(
+            urlStr.startsWith("www.") || urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
         if (null != host && !isAscii(host)) {
             final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
             urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
@@ -468,7 +468,9 @@ public final class HTMLServiceImpl implements HTMLService {
         /*
          * Specify pattern & matcher
          */
-        final Pattern p = Pattern.compile(sb.append(Pattern.quote("<!--" + commentId + " ")).append("(.+?)").append(Pattern.quote("-->")).toString(), Pattern.DOTALL);
+        final Pattern p = Pattern.compile(
+            sb.append(Pattern.quote("<!--" + commentId + " ")).append("(.+?)").append(Pattern.quote("-->")).toString(),
+            Pattern.DOTALL);
         sb.setLength(0);
         final Matcher m = p.matcher(s);
         if (!m.find()) {
@@ -530,8 +532,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return htmlFormat(plainText, true);
     }
 
-    private static final String REGEX_URL_SOLE =
-        "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
 
     /**
      * The regular expression to match URLs inside text:<br>
@@ -694,10 +695,12 @@ public final class HTMLServiceImpl implements HTMLService {
          * The <base> tag must be between the document's <head> tags. Also, there must be no more than one base element per document.
          */
         final Matcher m1 = PATTERN_BODY_START.matcher(htmlContent);
-        return checkBaseTag(htmlContent,externalImagesAllowed,  m1.find() ? m1.start() : htmlContent.length());
+        return checkBaseTag(htmlContent, externalImagesAllowed, m1.find() ? m1.start() : htmlContent.length());
     }
 
-    private static final Pattern PATTERN_BASE_TAG = Pattern.compile("<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BASE_TAG = Pattern.compile(
+        "<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?",
+        Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
         final Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
@@ -727,7 +730,8 @@ public final class HTMLServiceImpl implements HTMLService {
          */
         while (m.find() && m.end() < end) {
             mr.appendLiteralReplacement(sb, "");
-        };
+        }
+        ;
         mr.appendTail(sb);
         return sb.toString();
     }
@@ -740,7 +744,9 @@ public final class HTMLServiceImpl implements HTMLService {
         return dropScriptTagsInHeader(htmlContent, m1.find() ? m1.start() : htmlContent.length());
     }
 
-    private static final Pattern PATTERN_SCRIPT_TAG = Pattern.compile("<script[^>]*>" + ".*?" + "</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SCRIPT_TAG = Pattern.compile(
+        "<script[^>]*>" + ".*?" + "</script>",
+        Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static String dropScriptTagsInHeader(final String htmlContent, final int end) {
         final Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
@@ -755,7 +761,7 @@ public final class HTMLServiceImpl implements HTMLService {
         mr.appendTail(sb);
         return sb.toString();
     }
-    
+
     public String getConformHTML(final String htmlContent, final String charset) {
         return getConformHTML(htmlContent, charset, true);
     }
@@ -770,17 +776,17 @@ public final class HTMLServiceImpl implements HTMLService {
         /*
          * Validate
          */
-        String html = validate(htmlContent);
+        final StringBuilder sb = new StringBuilder(htmlContent);
+        validate(sb);
         /*
          * Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
          */
         final int headTagLen = TAG_S_HEAD.length();
-        final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
+        final int start = sb.indexOf(TAG_S_HEAD) + headTagLen;
         if (start >= headTagLen) {
-            final int end = html.indexOf(TAG_E_HEAD);
+            final int end = sb.indexOf(TAG_E_HEAD);
             // final Matcher m = PAT_META_CT.matcher(html.substring(start, end));
-            if (!occursWithin(html, start, end, true, "http-equiv=\"content-type\"", "http-equiv=content-type")) {
-                final StringBuilder sb = new StringBuilder(html);
+            if (!occursWithin(sb, start, end, true, "http-equiv=\"Content-Type\"", "http-equiv=Content-Type", "http-equiv=\"content-type\"", "http-equiv=content-type")) {
                 final String cs;
                 if (null == charset) {
                     if (LOG.isWarnEnabled()) {
@@ -799,10 +805,9 @@ public final class HTMLServiceImpl implements HTMLService {
                 sb.insert(start, "\" http-equiv=\"Content-Type\" />\r\n ");
                 sb.insert(start, cs);
                 sb.insert(start, "\r\n    <meta content=\"text/html; charset=");
-                html = sb.toString();
             }
         }
-        html = processDownlevelRevealedConditionalComments(html);
+        final String html = processDownlevelRevealedConditionalComments(sb.toString());
         // html = removeXHTMLCData(html);
         /*
          * Check URLs
@@ -815,12 +820,10 @@ public final class HTMLServiceImpl implements HTMLService {
         return handler.getHTML();
     }
 
-    private static boolean occursWithin(final String str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
-        final String source = ignorecase ? str.toLowerCase(Locale.US) : str;
+    private static boolean occursWithin(final StringBuilder str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
         int index;
         for (final String searchString : searchStrings) {
-            final String searchMe = ignorecase ? searchString.toLowerCase(Locale.US) : searchString;
-            if (((index = source.indexOf(searchMe, start)) >= start) && ((index + searchMe.length()) < end)) {
+            if (((index = str.indexOf(searchString, start)) >= start) && ((index + searchString.length()) < end)) {
                 return true;
             }
         }
@@ -842,8 +845,9 @@ public final class HTMLServiceImpl implements HTMLService {
 
         final String commentStart = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("<!--"), RegexUtility.quote("&lt;!--")), false);
 
-        final String commentEnd =
-            RegexUtility.concat(RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false), "\\s*");
+        final String commentEnd = RegexUtility.concat(
+            RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false),
+            "\\s*");
 
         final String group2 = RegexUtility.group(RegexUtility.concat(commentStart, ".*?", commentEnd), true);
 
@@ -899,9 +903,8 @@ public final class HTMLServiceImpl implements HTMLService {
             StringBuilder tmp = null;
             do {
                 // Un-quote
-                final String match =
-                    Matcher.quoteReplacement(PATTERN_UNQUOTE2.matcher(PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll(
-                        "-->"));
+                final String match = Matcher.quoteReplacement(PATTERN_UNQUOTE2.matcher(
+                    PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->"));
                 // Check for additional HTML comments
                 if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {
                     // No additional HTML comments
@@ -987,25 +990,26 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     /**
-     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
-     * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
+     * Validates specified HTML content using <a href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a>.
      * 
      * @param htmlContent The HTML content
      * @return The validated HTML content
      */
-    private String validate(final String htmlContent) {
-        return validate(htmlContent, true);
+    private void validate(final StringBuilder htmlContent) {
+        replaceHexEntities(htmlContent);
+        validateWithHtmlCleaner(htmlContent);
     }
 
     private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
 
-    private static String replaceHexEntities(final String validated) {
-        final Matcher m = PAT_HEX_ENTITIES.matcher(validated);
+    private static void replaceHexEntities(final StringBuilder htmlContent) {
+        final Matcher m = PAT_HEX_ENTITIES.matcher(htmlContent);
         if (!m.find()) {
-            return validated;
+            return;
         }
-        final MatcherReplacer mr = new MatcherReplacer(m, validated);
-        final StringBuilder builder = new StringBuilder(validated.length());
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent.toString());
+        final StringBuilder builder = htmlContent;
+        builder.setLength(0);
         final StringBuilder tmp = new StringBuilder(8).append("&#");
         do {
             try {
@@ -1021,47 +1025,6 @@ public final class HTMLServiceImpl implements HTMLService {
             }
         } while (m.find());
         mr.appendTail(builder);
-        return builder.toString();
-    }
-
-    /**
-     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
-     * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
-     * 
-     * @param htmlContent The HTML content
-     * @return The validated HTML content
-     */
-    private String validate(final String htmlContent, final boolean forceHtmlCleaner) {
-        final String hexEntitiesReplaced = replaceHexEntities(htmlContent);
-        if (forceHtmlCleaner) {
-            return validateWithHtmlCleaner(hexEntitiesReplaced);
-        }
-        /*
-         * Obtain a new Tidy instance
-         */
-        final Tidy tidy = createNewTidyInstance();
-        /*
-         * Run tidy, providing a reader and writer
-         */
-        String validatedHtml;
-        try {
-            final Writer writer = new UnsynchronizedStringWriter(hexEntitiesReplaced.length());
-            tidy.parse(new UnsynchronizedStringReader(hexEntitiesReplaced), writer);
-            validatedHtml = writer.toString();
-        } catch (final RuntimeException rte) {
-            /*
-             * Tidy failed horribly...
-             */
-            LOG.warn("JTidy library failed to pretty-print HTML content. Using HtmlCleaner library as fall-back.", rte);
-            validatedHtml = null;
-        }
-        /*
-         * Check Tidy output
-         */
-        if (null == validatedHtml || 0 == validatedHtml.length()) {
-            validatedHtml = validateWithHtmlCleaner(hexEntitiesReplaced);
-        }
-        return validatedHtml;
     }
 
     /**
@@ -1094,12 +1057,12 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
 
-    private String validateWithHtmlCleaner(final String htmlContent) {
+    private void validateWithHtmlCleaner(final StringBuilder htmlContent) {
         try {
             /*
              * Clean...
              */
-            final TagNode htmlNode = HTML_CLEANER.clean(htmlContent);
+            final TagNode htmlNode = HTML_CLEANER.clean(htmlContent.toString());
             /*
              * Check for presence of HTML namespace
              */
@@ -1107,60 +1070,56 @@ public final class HTMLServiceImpl implements HTMLService {
                 htmlNode.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
             }
             /*
-             * Serialize
+             * Serialize to writer
              */
-            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
+            htmlContent.setLength(0);
+            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent);
             SERIALIZER.write(htmlNode, writer, "UTF-8");
-            final StringBuilder builder = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */
-            if (builder.indexOf("<!DOCTYPE") < 0) {
-                builder.insert(0, DOCTYPE_DECL);
+            if (htmlContent.indexOf("<!DOCTYPE") < 0) {
+                htmlContent.insert(0, DOCTYPE_DECL);
             }
-            return builder.toString();
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: " + e.getMessage(), e);
-            return htmlContent;
         } catch (final IOException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with I/O error: " + e.getMessage(), e);
-            return htmlContent;
         } catch (final RuntimeException rte) {
             /*
              * HtmlCleaner failed horribly...
              */
             LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
-            return htmlContent;
         }
     }
 
-    private Tidy createNewTidyInstance() {
-        final Tidy tidy = new Tidy();
-        /*
-         * Set desired configuration options using tidy setters
-         */
-        tidy.setXHTML(true);
-        tidy.setConfigurationFromProps(tidyConfiguration);
-        tidy.setMakeClean(false);
-        tidy.setForceOutput(true);
-        tidy.setOutputEncoding(CHARSET_US_ASCII);
-        tidy.setTidyMark(false);
-        tidy.setXmlOut(true);
-        tidy.setNumEntities(true);
-        tidy.setDropEmptyParas(false);
-        tidy.setDropFontTags(false);
-        tidy.setDropProprietaryAttributes(false);
-        tidy.setTrimEmptyElements(false);
-        /*
-         * Suppress tidy outputs
-         */
-        tidy.setShowErrors(0);
-        tidy.setShowWarnings(false);
-        tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
-        return tidy;
-    }
+//    private Tidy createNewTidyInstance() {
+//        final Tidy tidy = new Tidy();
+//        /*
+//         * Set desired configuration options using tidy setters
+//         */
+//        tidy.setXHTML(true);
+//        tidy.setConfigurationFromProps(tidyConfiguration);
+//        tidy.setMakeClean(false);
+//        tidy.setForceOutput(true);
+//        tidy.setOutputEncoding(CHARSET_US_ASCII);
+//        tidy.setTidyMark(false);
+//        tidy.setXmlOut(true);
+//        tidy.setNumEntities(true);
+//        tidy.setDropEmptyParas(false);
+//        tidy.setDropFontTags(false);
+//        tidy.setDropProprietaryAttributes(false);
+//        tidy.setTrimEmptyElements(false);
+//        /*
+//         * Suppress tidy outputs
+//         */
+//        tidy.setShowErrors(0);
+//        tidy.setShowWarnings(false);
+//        tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
+//        return tidy;
+//    }
 
     private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new Writer() {
 
