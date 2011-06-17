@@ -1016,6 +1016,9 @@ public final class HTMLServiceImpl implements HTMLService {
      * @param htmlContent The HTML content with hexadecimal entities replaced
      */
     private static void replaceHexEntities(final StringBuilder htmlContent) {
+        if (htmlContent.indexOf("&#x") < 0) {
+            return;
+        }
         final Matcher m = PAT_HEX_ENTITIES.matcher(htmlContent);
         if (!m.find()) {
             return;
