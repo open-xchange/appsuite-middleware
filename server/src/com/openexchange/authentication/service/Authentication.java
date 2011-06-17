@@ -49,6 +49,8 @@
 
 package com.openexchange.authentication.service;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
@@ -96,6 +98,9 @@ public final class Authentication {
             }
             public String getUsername() {
                 return login;
+            }
+            public Map<String, Object> getProperties() {
+                return Collections.emptyMap();
             }
         });
     }

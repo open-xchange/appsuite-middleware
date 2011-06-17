@@ -49,6 +49,8 @@
 
 package com.openexchange.authentication;
 
+import java.util.Map;
+
 /**
  * This information can be retrieved from the login screen for authenticating a user.
  * 
@@ -65,5 +67,12 @@ public interface LoginInfo {
      * @return the password from the login screen.
      */
     String getPassword();
+
+    /**
+     * Gets additional properties possibly needed for authentication.
+     * 
+     * @return The properties as a (possibly empty) unmodifiable {@link Map map}
+     */
+    Map<String, Object> getProperties();
 
 }

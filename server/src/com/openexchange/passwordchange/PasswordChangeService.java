@@ -51,6 +51,8 @@ package com.openexchange.passwordchange;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.regex.Pattern;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
@@ -267,6 +269,10 @@ public abstract class PasswordChangeService {
 
         public String getUsername() {
             return loginInfo;
+        }
+
+        public Map<String, Object> getProperties() {
+            return Collections.emptyMap();
         }
 
     }
