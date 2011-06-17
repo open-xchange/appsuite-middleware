@@ -65,7 +65,7 @@ public final class MatcherReplacer {
 
     private Matcher matcher;
 
-    private String input;
+    private CharSequence input;
 
     private int lastPos;
 
@@ -82,7 +82,7 @@ public final class MatcherReplacer {
      * @param matcher The matcher
      * @param input The input string from which the matcher was created
      */
-    public MatcherReplacer(final Matcher matcher, final String input) {
+    public MatcherReplacer(final Matcher matcher, final CharSequence input) {
         super();
         if (null == matcher) {
             throw new IllegalArgumentException("matcher is null");
@@ -165,7 +165,7 @@ public final class MatcherReplacer {
      * @see #appendReplacement(StringBuilder, String)
      */
     public void appendLiteralReplacement(final StringBuilder sb, final String replacement) {
-        sb.append(input.substring(lastPos, matcher.start()));
+        sb.append(input.subSequence(lastPos, matcher.start()));
         sb.append(replacement);
         lastPos = matcher.end();
     }
@@ -236,7 +236,7 @@ public final class MatcherReplacer {
      * @see #appendLiteralReplacement(StringBuilder, String)
      */
     public void appendReplacement(final StringBuilder sb, final String replacement) {
-        sb.append(input.substring(lastPos, matcher.start()));
+        sb.append(input.subSequence(lastPos, matcher.start()));
         int cursor = 0;
         final int rlen = replacement.length();
         while (cursor < rlen) {
@@ -299,7 +299,7 @@ public final class MatcherReplacer {
      * @param sb The target string builder
      */
     public void appendTail(final StringBuilder sb) {
-        sb.append(input.substring(lastPos));
+        sb.append(input.subSequence(lastPos, input.length()));
     }
 
 }
