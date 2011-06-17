@@ -610,7 +610,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return htmlEntityMap.get(key);
     }
 
-    private static final Pattern PAT_HTML_ENTITIES = Pattern.compile("&(?:#([0-9]+)|([a-zA-Z]+));");
+    private static final Pattern PAT_ENTITIES = Pattern.compile("&(?:#([0-9]+)|#x([0-9a-fA-F]+)|([a-zA-Z]+));");
 
     /**
      * Replaces all HTML entities occurring in specified HTML content.
@@ -619,22 +619,53 @@ public final class HTMLServiceImpl implements HTMLService {
      * @return The content with HTML entities replaced
      */
     public String replaceHTMLEntities(final String content) {
-        final Matcher m = PAT_HTML_ENTITIES.matcher(content);
+        final Matcher m = PAT_ENTITIES.matcher(content);
         final MatcherReplacer mr = new MatcherReplacer(m, content);
         final StringBuilder sb = new StringBuilder(content.length());
         while (m.find()) {
-            final String numEntity = m.group(1);
-            if (null == numEntity) {
-                final Character entity = getHTMLEntity(m.group(2));
-                if (null != entity) {
-                    mr.appendLiteralReplacement(sb, entity.toString());
-                }
+            /*
+             * Try decimal syntax; e.g. &#39; (single-quote)
+             */
+            int numEntity = numOf(m.group(1), 10);
+            if (numEntity >= 0) {
+                /*
+                 * Detected decimal value
+                 */
+                mr.appendLiteralReplacement(sb, String.valueOf((char) numEntity));
             } else {
-                mr.appendLiteralReplacement(sb, String.valueOf((char) Integer.parseInt(numEntity)));
+                /*
+                 * Try hexadecimal syntax; e.g. &#xFC;
+                 */
+                numEntity = numOf(m.group(2), 16);
+                if (numEntity >= 0) {
+                    /*
+                     * Detected hexadecimal value
+                     */
+                    mr.appendLiteralReplacement(sb, String.valueOf((char) numEntity));
+                } else {
+                    /*
+                     * No numeric entity syntax, assume a non-numeric entity like &quot; or &nbsp;
+                     */
+                    final Character entity = getHTMLEntity(m.group(3));
+                    if (null != entity) {
+                        mr.appendLiteralReplacement(sb, entity.toString());
+                    }
+                }
             }
         }
         mr.appendTail(sb);
         return sb.toString();
+    }
+
+    private static int numOf(final String possibleNum, final int radix) {
+        if (null == possibleNum) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(possibleNum, radix);
+        } catch (final NumberFormatException e) {
+            return -1;
+        }
     }
 
     public String prettyPrint(final String htmlContent) {
@@ -982,6 +1013,33 @@ public final class HTMLServiceImpl implements HTMLService {
         return validate(htmlContent, true);
     }
 
+    private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
+
+    private static String replaceHexEntities(final String validated) {
+        final Matcher m = PAT_HEX_ENTITIES.matcher(validated);
+        if (!m.find()) {
+            return validated;
+        }
+        final MatcherReplacer mr = new MatcherReplacer(m, validated);
+        final StringBuilder builder = new StringBuilder(validated.length());
+        final StringBuilder tmp = new StringBuilder(8).append("&#");
+        do {
+            try {
+                tmp.setLength(2);
+                tmp.append(Integer.parseInt(m.group(1), 16)).append(';');
+                mr.appendLiteralReplacement(builder, tmp.toString());
+            } catch (final NumberFormatException e) {
+                tmp.setLength(0);
+                tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
+                mr.appendLiteralReplacement(builder, tmp.toString());
+                tmp.setLength(0);
+                tmp.append("&#");
+            }
+        } while (m.find());
+        mr.appendTail(builder);
+        return builder.toString();
+    }
+
     /**
      * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
      * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
@@ -990,8 +1048,9 @@ public final class HTMLServiceImpl implements HTMLService {
      * @return The validated HTML content
      */
     private String validate(final String htmlContent, final boolean forceHtmlCleaner) {
+        final String hexEntitiesReplaced = replaceHexEntities(htmlContent);
         if (forceHtmlCleaner) {
-            return validateWithHtmlCleaner(htmlContent);
+            return validateWithHtmlCleaner(hexEntitiesReplaced);
         }
         /*
          * Obtain a new Tidy instance
@@ -1002,8 +1061,8 @@ public final class HTMLServiceImpl implements HTMLService {
          */
         String validatedHtml;
         try {
-            final Writer writer = new UnsynchronizedStringWriter(htmlContent.length());
-            tidy.parse(new UnsynchronizedStringReader(htmlContent), writer);
+            final Writer writer = new UnsynchronizedStringWriter(hexEntitiesReplaced.length());
+            tidy.parse(new UnsynchronizedStringReader(hexEntitiesReplaced), writer);
             validatedHtml = writer.toString();
         } catch (final RuntimeException rte) {
             /*
@@ -1016,7 +1075,7 @@ public final class HTMLServiceImpl implements HTMLService {
          * Check Tidy output
          */
         if (null == validatedHtml || 0 == validatedHtml.length()) {
-            validatedHtml = validateWithHtmlCleaner(htmlContent);
+            validatedHtml = validateWithHtmlCleaner(hexEntitiesReplaced);
         }
         return validatedHtml;
     }
