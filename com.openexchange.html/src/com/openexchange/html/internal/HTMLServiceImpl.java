@@ -470,12 +470,16 @@ public final class HTMLServiceImpl implements HTMLService {
          */
         final Pattern p = Pattern.compile(Pattern.quote("<!--" + commentId + " ") + "(.+?)" + Pattern.quote("-->"), Pattern.DOTALL);
         final Matcher m = p.matcher(s);
+        if (!m.find()) {
+            escapePlain(s, withQuote, sb);
+            return sb.toString();
+        }
         int lastMatch = 0;
-        while (m.find()) {
+        do {
             escapePlain(s.substring(lastMatch, m.start()), withQuote, sb);
             sb.append(m.group(1));
             lastMatch = m.end();
-        }
+        } while (m.find());
         escapePlain(s.substring(lastMatch), withQuote, sb);
         return sb.toString();
     }
