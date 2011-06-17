@@ -1011,7 +1011,7 @@ public final class HTMLServiceImpl implements HTMLService {
     private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
 
     /**
-     * Replaces hexadecimal entities with corresponding decimal entities; e.g. <code>&amp;#xFC</code> -gt; <code>&amp;#252</code>.
+     * Replaces hexadecimal entities with corresponding decimal entities; e.g. <code>"&amp;#xFC"</code> -&gt; <code>"&amp;#252"</code>.
      * 
      * @param htmlContent The HTML content with hexadecimal entities replaced
      */
