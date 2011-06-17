@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -91,7 +92,15 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class AllFetch {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AllFetch.class);
+    /**
+     * The logger constant.
+     */
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AllFetch.class);
+
+    /**
+     * Whether debug logging is enabled.
+     */
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link AllFetch}.
@@ -297,10 +306,9 @@ public final class AllFetch {
              */
             return new MailMessage[0];
         }
-        final org.apache.commons.logging.Log logger = LOG;
         return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
@@ -320,21 +328,10 @@ public final class AllFetch {
                 /*
                  * Enable tracer
                  */
-                final SBOutputStream sbout = new SBOutputStream();
-                TracerState tracerState = null;
+                final SBOutputStream sbout = DEBUG ? new SBOutputStream() : null;
+                final TracerState tracerState = DEBUG ? traceStateFor(protocol, sbout) : null;
                 try {
-                    tracerState = IMAPTracer.enableTrace(p, sbout);
-                } catch (final SecurityException e) {
-                    logger.error(e.getMessage(), e);
-                } catch (final IllegalArgumentException e) {
-                    logger.error(e.getMessage(), e);
-                } catch (final NoSuchFieldException e) {
-                    logger.error(e.getMessage(), e);
-                } catch (final IllegalAccessException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                try {
-                    final Response[] r = p.command(command, null);
+                    final Response[] r = protocol.command(command, null);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     final List<MailMessage> l = new ArrayList<MailMessage>(len);
@@ -352,9 +349,9 @@ public final class AllFetch {
                                         final Item item =
                                             getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
                                         try {
-                                            lowCostItem.getItemHandler().handleItem(item, m, logger);
+                                            lowCostItem.getItemHandler().handleItem(item, m, LOG);
                                         } catch (final MailException e) {
-                                            logger.error(e.getMessage(), e);
+                                            LOG.error(e.getMessage(), e);
                                         }
                                     }
                                     l.add(m);
@@ -364,15 +361,15 @@ public final class AllFetch {
                                         sb.insert(0, "\nIMAP trace:\n");
                                         sb.insert(0, e.getMessage());
                                         sb.insert(0, "Detected invalid FETCH response which will be ignored. Error:\n");
-                                        logger.warn(sb.toString(), e);
+                                        LOG.warn(sb.toString(), e);
                                     } else {
-                                        logger.warn(e.getMessage(), e);
+                                        LOG.warn(e.getMessage(), e);
                                     }
                                 }
                                 r[j] = null;
                             }
                         }
-                        p.notifyResponseHandlers(r);
+                        protocol.notifyResponseHandlers(r);
                     } else if (response.isBAD()) {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
@@ -384,36 +381,91 @@ public final class AllFetch {
                             command,
                             response.toString()));
                     } else {
-                        p.handleResult(response);
+                        protocol.handleResult(response);
                     }
                     Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
                     return l.toArray(new MailMessage[l.size()]);
-                //} catch (final MessagingException e) {
-                //    throw new ProtocolException(e.getMessage(), e);
+                    // } catch (final MessagingException e) {
+                    // throw new ProtocolException(e.getMessage(), e);
                 } finally {
-                    if (null != tracerState) {
-                        try {
-                            IMAPTracer.restoreTraceState(p, tracerState);
-                        } catch (final SecurityException e) {
-                            logger.error(e.getMessage(), e);
-                        } catch (final IllegalArgumentException e) {
-                            logger.error(e.getMessage(), e);
-                        } catch (final NoSuchFieldException e) {
-                            logger.error(e.getMessage(), e);
-                        } catch (final IllegalAccessException e) {
-                            logger.error(e.getMessage(), e);
-                        }
+                    if (DEBUG) {
+                        restoreTracerFor(protocol, sbout, tracerState);
                     }
                 }
             }
-
         }));
+    }
+
+    /**
+     * Restores trace state for specified IMAP protocol.
+     * 
+     * @param protocol The protocol whose trace state shall be restored
+     * @param sbout The output stream written to in the meantime
+     * @param tracerState The trace state
+     */
+    protected static void restoreTracerFor(final IMAPProtocol protocol, final SBOutputStream sbout, final TracerState tracerState) {
+        if (null == tracerState) {
+            return;
+        }
+        try {
+            IMAPTracer.restoreTraceState(protocol, tracerState);
+            if (tracerState.isTrace()) {
+                /*
+                 * Trace was enabled...
+                 */
+                final StringBuilder sb = sbout.getTrace();
+                try {
+                    /*
+                     * DON'T CLOSE THE WRITER BECAUSE IT CLOSES UNDERLYING STREAM, TOO!!!
+                     */
+                    final OutputStreamWriter writer = new OutputStreamWriter(tracerState.getOut(), "UTF-8");
+                    writer.write(sb.toString());
+                    writer.flush();
+                } catch (final IOException e) {
+                    // Writing trace to stream failed...
+                }
+            }
+        } catch (final SecurityException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final IllegalArgumentException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final NoSuchFieldException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final IllegalAccessException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Gets the trace state for specified IMAP protocol.
+     * 
+     * @param protocol The protocol whose trace state shall be returned
+     * @param sbout The output stream to write to
+     * @return The trace state
+     */
+    protected static TracerState traceStateFor(final IMAPProtocol protocol, final SBOutputStream sbout) {
+        try {
+            return IMAPTracer.enableTrace(protocol, sbout);
+        } catch (final SecurityException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final IllegalArgumentException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final NoSuchFieldException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final IllegalAccessException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
     }
 
     /**
      * A {@link Comparator} comparing instances of {@link MailMessage} by their received date in ascending order.
      */
-    static final Comparator<MailMessage> ASC_COMP = new Comparator<MailMessage>() {
+    protected static final Comparator<MailMessage> ASC_COMP = new Comparator<MailMessage>() {
 
         public int compare(final MailMessage m1, final MailMessage m2) {
             final Date d1 = m1.getReceivedDate();
@@ -426,7 +478,7 @@ public final class AllFetch {
     /**
      * A {@link Comparator} comparing instances of {@link MailMessage} by their received date in descending order.
      */
-    static final Comparator<MailMessage> DESC_COMP = new Comparator<MailMessage>() {
+    protected static final Comparator<MailMessage> DESC_COMP = new Comparator<MailMessage>() {
 
         public int compare(final MailMessage m1, final MailMessage m2) {
             final Date d1 = m1.getReceivedDateDirect();
@@ -445,11 +497,11 @@ public final class AllFetch {
      *         <code>1</code> if first reference is not <code>null</code> but the second is, an {@link Integer} of <code>0</code> if both
      *         references are <code>null</code>, or returns <code>null</code> if both references are not <code>null</code>
      */
-    static Integer compareReferences(final Object o1, final Object o2) {
+    protected static Integer compareReferences(final Object o1, final Object o2) {
         if ((o1 == null)) {
-            return (o2 == null) ? /*both null*/Integer.valueOf(0) : Integer.valueOf(-1);
+            return (o2 == null) ? /* both null */Integer.valueOf(0) : Integer.valueOf(-1);
         }
-        return (o2 == null) ? Integer.valueOf(1) : /*both not null*/null;
+        return (o2 == null) ? Integer.valueOf(1) : /* both not null */null;
     }
 
     /**
