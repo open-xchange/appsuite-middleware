@@ -411,7 +411,7 @@ public final class AllFetch {
             IMAPTracer.restoreTraceState(protocol, tracerState);
             if (tracerState.isTrace()) {
                 /*
-                 * Trace was enabled...
+                 * Trace was enabled before, thus write trace to previous output stream to maintain debug logs properly.
                  */
                 final StringBuilder sb = sbout.getTrace();
                 try {
