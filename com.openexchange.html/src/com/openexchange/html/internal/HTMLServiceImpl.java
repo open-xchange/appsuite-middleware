@@ -969,6 +969,9 @@ public final class HTMLServiceImpl implements HTMLService {
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
     private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
+        if (htmlContent.indexOf("[if") < 0) {
+            return htmlContent;
+        }
         final Matcher m = PATTERN_CC.matcher(htmlContent);
         if (!m.find()) {
             /*
