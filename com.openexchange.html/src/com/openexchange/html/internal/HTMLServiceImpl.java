@@ -1023,7 +1023,8 @@ public final class HTMLServiceImpl implements HTMLService {
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent.toString());
         final StringBuilder builder = htmlContent;
         builder.setLength(0);
-        final StringBuilder tmp = new StringBuilder(8).append("&#");
+        final String prefix = "&#";
+        final StringBuilder tmp = new StringBuilder(8).append(prefix);
         do {
             try {
                 tmp.setLength(2);
@@ -1033,8 +1034,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 tmp.setLength(0);
                 tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
                 mr.appendLiteralReplacement(builder, tmp.toString());
-                tmp.setLength(0);
-                tmp.append("&#");
+                tmp.insert(0, prefix); // Restore expected StringBuilder content
             }
         } while (m.find());
         mr.appendTail(builder);
