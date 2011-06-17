@@ -612,12 +612,6 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PAT_ENTITIES = Pattern.compile("&(?:#([0-9]+)|#x([0-9a-fA-F]+)|([a-zA-Z]+));");
 
-    /**
-     * Replaces all HTML entities occurring in specified HTML content.
-     * 
-     * @param content The content
-     * @return The content with HTML entities replaced
-     */
     public String replaceHTMLEntities(final String content) {
         final Matcher m = PAT_ENTITIES.matcher(content);
         final MatcherReplacer mr = new MatcherReplacer(m, content);
