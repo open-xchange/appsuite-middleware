@@ -233,8 +233,10 @@ public final class HTMLParser {
         } catch (final IOException e) {
             LOG.error(composeErrorMessage(e, html), e);
             handler.handleError(e.getMessage());
+        } catch (final RuntimeException e) {
+            LOG.error(composeErrorMessage(e, html), e);
+            handler.handleError(e.getMessage());
         }
-
     }
 
     private static final String ERR01 = "Parsing of HTML content failed: ";

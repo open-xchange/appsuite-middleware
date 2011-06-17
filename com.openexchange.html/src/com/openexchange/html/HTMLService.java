@@ -49,7 +49,6 @@
 
 package com.openexchange.html;
 
-import java.util.List;
 
 /**
  * {@link HTMLService} - The HTML service provides several methods concerning processing of HTML content.
@@ -71,10 +70,11 @@ public interface HTMLService {
      * Converts found URLs inside specified content to valid links.
      * 
      * @param content The content
-     * @param links a initialized range list that gets extended with the added links.
+     * @param commentId The identifier wrapped in a comment prepended to each formatted URL:<br>
+     *            <code>"&lt;!--" + &lt;<i>comment</i>&gt; + " " + <i>&lt;anchor-tag&gt;</i> + "--&gt;"</code>
      * @return The content with URLs turned to links
      */
-    String formatURLs(String content, List<Range> links);
+    String formatURLs(String content, String commentId);
 
     /**
      * Searches for non-HTML links and convert them to valid HTML links.
@@ -145,7 +145,7 @@ public interface HTMLService {
      * @param ignoreRanges The ranges to ignore; leave to <code>null</code> to format whole text
      * @return properly escaped HTML content
      */
-    String htmlFormat(String plainText, boolean withQuote, List<Range> ignoreRanges);
+    String htmlFormat(String plainText, boolean withQuote, String commentId);
 
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
@@ -199,8 +199,8 @@ public interface HTMLService {
 
     /**
      * Checks for existence of a <code>&lt;base&gt;</code> tag. Allowing it if an absolute URL is specified in <code><i>href</i></code>
-     * attribute <b><small>AND</small></b> <code>externalImagesAllowed</code> is set to <code>true</code>; otherwise the <code>&lt;base&gt;</code> tag is
-     * removed.
+     * attribute <b><small>AND</small></b> <code>externalImagesAllowed</code> is set to <code>true</code>; otherwise the
+     * <code>&lt;base&gt;</code> tag is removed.
      * 
      * @param htmlContent The HTML content
      * @param externalImagesAllowed <code>true</code> if external images are allowed; otherwise <code>false</code>

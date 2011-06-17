@@ -55,8 +55,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -73,7 +71,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.html.HTMLService;
-import com.openexchange.html.Range;
 import com.openexchange.image.ImageService;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
@@ -125,6 +122,8 @@ public final class HTMLProcessing {
     public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {
         return formatContentForDisplay(content, charset, true, session, mailPath, usm, modified, mode);
     }
+
+    private static final String COMMENT_ID = "anchor-5fd15ca8-a027-4b14-93ea-35de1747419e:";
 
     /**
      * Performs all the formatting for both text and HTML content for a proper display according to specified user's mail settings.
@@ -197,9 +196,8 @@ public final class HTMLProcessing {
             retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
-                    final List<Range> addedLinks = new ArrayList<Range>();
-                    retval = htmlService.formatURLs(retval, addedLinks);
-                    retval = htmlService.htmlFormat(retval, true, addedLinks);
+                    retval = htmlService.formatURLs(retval, COMMENT_ID);
+                    retval = htmlService.htmlFormat(retval, true, COMMENT_ID);
                     if (usm.isUseColorQuote()) {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }

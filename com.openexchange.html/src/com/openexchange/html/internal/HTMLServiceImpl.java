@@ -59,13 +59,9 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.htmlcleaner.CleanerProperties;
@@ -76,7 +72,6 @@ import org.htmlcleaner.TagNode;
 import org.w3c.tidy.Tidy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
-import com.openexchange.html.Range;
 import com.openexchange.html.internal.parser.HTMLParser;
 import com.openexchange.html.internal.parser.handler.HTML2TextHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
@@ -284,29 +279,19 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(anchorTag.substring(pos)).toString();
     }
 
-    public String formatURLs(final String content, final List<Range> links) {
+    public String formatURLs(final String content, final String comment) {
         try {
             final Matcher m = PATTERN_URL.matcher(content);
             final StringBuilder targetBuilder = new StringBuilder(content.length());
             final StringBuilder sb = new StringBuilder(256);
             int lastMatch = 0;
-            // Adding links shift the positions compared to the original mail text. This must be added.
-            int shift = 0;
             while (m.find()) {
                 final int startOpeningPos = m.start();
                 targetBuilder.append(content.substring(lastMatch, startOpeningPos));
                 sb.setLength(0);
                 appendLink(m.group(), sb);
-                targetBuilder.append(sb.toString());
+                targetBuilder.append("<!--").append(comment).append(" ").append(sb.toString()).append("-->");
                 lastMatch = m.end();
-                final int endOpeningPos = sb.indexOf(">");
-                final Range range1 = new Range(startOpeningPos + shift, startOpeningPos + endOpeningPos + 1 + shift);
-                links.add(range1);
-                final int startClosingPos = sb.indexOf("<", endOpeningPos);
-                final Range range2 = new Range(startOpeningPos + startClosingPos + shift, startOpeningPos + sb.length() + shift);
-                links.add(range2);
-                shift += range1.end - range1.start;
-                shift += range2.end - range2.start;
             }
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
@@ -326,8 +311,8 @@ public final class HTMLServiceImpl implements HTMLService {
                  * Keep starting parenthesis if present
                  */
                 if ('(' == url.charAt(0)) { // Starts with a parenthesis
-                    appendAnchor(url.substring(1, mlen), builder);
                     builder.append('(');
+                    appendAnchor(url.substring(1, mlen), builder);
                 } else {
                     appendAnchor(url.substring(0, mlen), builder);
                 }
@@ -465,52 +450,53 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
 
-    public String htmlFormat(final String plainText, final boolean withQuote, final List<Range> ignoreRanges) {
-        return PATTERN_CRLF.matcher(escape(plainText, withQuote, ignoreRanges)).replaceAll(HTML_BR);
+    public String htmlFormat(final String plainText, final boolean withQuote, final String commentId) {
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
     }
 
     public String htmlFormat(final String plainText, final boolean withQuote) {
-        return PATTERN_CRLF.matcher(escape(plainText, withQuote, Collections.<Range> emptyList())).replaceAll(HTML_BR);
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
     }
 
-    private String escape(final String s, final boolean withQuote, final List<Range> ignoreRanges) {
+    private String escape(final String s, final boolean withQuote, final String commentId) {
         final int len = s.length();
         final StringBuilder sb = new StringBuilder(len);
-        /*
-         * Escape
-         */
-        final Set<Integer> ignorePositions;
-        if (null == ignoreRanges || ignoreRanges.isEmpty()) {
-            ignorePositions = new HashSet<Integer>(0);
-        } else {
-            ignorePositions = new HashSet<Integer>(ignoreRanges.size() * 16);
-            for (final Range ignoreRange : ignoreRanges) {
-                final int end = ignoreRange.end;
-                for (int i = ignoreRange.start; i < end; i++) {
-                    ignorePositions.add(Integer.valueOf(i));
-                }
-            }
+        if (null == commentId) {
+            escapePlain(s, withQuote, sb);
+            return sb.toString();
         }
+        /*
+         * Specify pattern & matcher
+         */
+        final Pattern p = Pattern.compile(Pattern.quote("<!--" + commentId + " ") + "(.+?)" + Pattern.quote("-->"), Pattern.DOTALL);
+        final Matcher m = p.matcher(s);
+        int lastMatch = 0;
+        while (m.find()) {
+            escapePlain(s.substring(lastMatch, m.start()), withQuote, sb);
+            sb.append(m.group(1));
+            lastMatch = m.end();
+        }
+        escapePlain(s.substring(lastMatch), withQuote, sb);
+        return sb.toString();
+    }
+
+    private void escapePlain(final String s, final boolean withQuote, final StringBuilder sb) {
         final char[] chars = s.toCharArray();
         final Map<Character, String> htmlChar2EntityMap = htmlCharMap;
         if (withQuote) {
             for (int i = 0; i < chars.length; i++) {
                 final char c = chars[i];
-                if (ignorePositions.contains(Integer.valueOf(i))) {
+                final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
+                if (entity == null) {
                     sb.append(c);
                 } else {
-                    final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
-                    if (entity == null) {
-                        sb.append(c);
-                    } else {
-                        sb.append('&').append(entity).append(';');
-                    }
+                    sb.append('&').append(entity).append(';');
                 }
             }
         } else {
             for (int i = 0; i < chars.length; i++) {
                 final char c = chars[i];
-                if (ignorePositions.contains(Integer.valueOf(i)) || ('"' == c)) {
+                if ('"' == c) {
                     sb.append(c);
                 } else {
                     final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
@@ -522,7 +508,6 @@ public final class HTMLServiceImpl implements HTMLService {
                 }
             }
         }
-        return sb.toString();
     }
 
     /**
