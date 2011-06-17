@@ -234,9 +234,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected void closeInternal() {
         try {
+            if (folderStorage != null) {
+                try {
+                    folderStorage.releaseResources();
+                } catch (final MailException e) {
+                    LOG.error("Error while closing IMAP folder storage,", e);
+                }
+            }
             if (null != messageStorage) {
                 try {
-                    messageStorage.closeIMAPFolder();
+                    messageStorage.releaseResources();
                 } catch (final MailException e) {
                     LOG.error("Error while closing IMAP message storage.", e);
                 }

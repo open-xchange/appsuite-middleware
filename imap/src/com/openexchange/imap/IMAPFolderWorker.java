@@ -144,12 +144,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     @Override
     public void releaseResources() throws MailException {
-        /*-
-         * 
-        if (null != imapFolder) {
-            closeIMAPFolder();
-        }
-        */
+        closeIMAPFolder();
     }
 
     /**
@@ -198,7 +193,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * 
      * @throws MailException If closing remembered IMAP folder fails
      */
-    public void closeIMAPFolder() throws MailException {
+    private void closeIMAPFolder() throws MailException {
         try {
             if (null != imapFolder) {
                 /*
