@@ -126,7 +126,10 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class IMAPCommandsCollection {
 
-    private static final String[] ARGS_ALL = new String[] { "1:*" };
+    /**
+     * The constant for all.
+     */
+    protected static final String[] ARGS_ALL = new String[] { "1:*" };
 
     private static final String STR_UID = "UID";
 

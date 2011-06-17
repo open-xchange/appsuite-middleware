@@ -257,9 +257,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapStore = null;
             }
         } finally {
-            /*
-             * Reset
-             */
             reset();
         }
     }
