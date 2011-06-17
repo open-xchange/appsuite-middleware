@@ -1022,11 +1022,12 @@ public final class HTMLServiceImpl implements HTMLService {
         if (htmlContent.indexOf("&#x") < 0) {
             return;
         }
-        final Matcher m = PAT_HEX_ENTITIES.matcher(htmlContent);
+        final String toString = htmlContent.toString();
+        final Matcher m = PAT_HEX_ENTITIES.matcher(toString);
         if (!m.find()) {
             return;
         }
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent.toString());
+        final MatcherReplacer mr = new MatcherReplacer(m, toString);
         final StringBuilder builder = htmlContent;
         builder.setLength(0);
         final String prefix = "&#";
