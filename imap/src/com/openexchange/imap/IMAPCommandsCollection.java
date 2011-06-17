@@ -314,7 +314,7 @@ public final class IMAPCommandsCollection {
         }))).charValue();
     }
 
-    static char getSeparator(final IMAPProtocol p) throws ProtocolException {
+    protected static char getSeparator(final IMAPProtocol p) throws ProtocolException {
         final String dummyFullname = String.valueOf(System.currentTimeMillis());
         final ListInfo[] li;
         if (p.isREV1()) {
@@ -775,7 +775,7 @@ public final class IMAPCommandsCollection {
      *         <code>1</code>) and unread (index <code>2</code>) messages
      * @throws ParsingException If parsing STATUS response fails
      */
-    static int[] parseStatusResponse(final Response statusResponse) throws ParsingException {
+    protected static int[] parseStatusResponse(final Response statusResponse) throws ParsingException {
         /*
          * Read until opening parenthesis or EOF
          */
@@ -815,7 +815,7 @@ public final class IMAPCommandsCollection {
      * @return The  number of total messages
      * @throws ParsingException If parsing STATUS response fails
      */
-    static int[] parseStatusResponse(final Response statusResponse, final String... counterTypes) throws ParsingException {
+    protected static int[] parseStatusResponse(final Response statusResponse, final String... counterTypes) throws ParsingException {
         if (null == counterTypes || counterTypes.length == 0) {
             return new int[0];
         }
@@ -939,7 +939,7 @@ public final class IMAPCommandsCollection {
      * @return The parsed instance of {@link Quota}
      * @throws ParsingException If parsing QUOTA response fails
      */
-    static Quota parseQuota(final IMAPResponse r) throws ParsingException {
+    protected static Quota parseQuota(final IMAPResponse r) throws ParsingException {
         final String quotaRoot = r.readAtomString();
         final Quota q = new Quota(quotaRoot);
         r.skipSpaces();
@@ -1946,7 +1946,7 @@ public final class IMAPCommandsCollection {
         }));
     }
 
-    static String getResponseType(final Response response) {
+    protected static String getResponseType(final Response response) {
         if (response.isBAD()) {
             return "BAD";
         }
@@ -2425,7 +2425,7 @@ public final class IMAPCommandsCollection {
      * @param flags The flags to parse
      * @return The parsed system flags
      */
-    static int parseSystemFlags(final Flags flags) {
+    protected static int parseSystemFlags(final Flags flags) {
         int retval = 0;
         if (flags.contains(Flags.Flag.ANSWERED)) {
             retval |= MailMessage.FLAG_ANSWERED;
@@ -2457,7 +2457,7 @@ public final class IMAPCommandsCollection {
      * @param flags The flags to parse
      * @return The parsed user flags
      */
-    static Set<String> parseUserFlags(final Flags flags) {
+    protected static Set<String> parseUserFlags(final Flags flags) {
         final String[] userFlags = flags.getUserFlags();
         if (userFlags == null) {
             return Collections.emptySet();
@@ -2477,7 +2477,7 @@ public final class IMAPCommandsCollection {
      *         <code>1</code> if first reference is not <code>null</code> but the second is, an {@link Integer} of <code>0</code> if both
      *         references are <code>null</code>, or returns <code>null</code> if both references are not <code>null</code>
      */
-    static Integer compareReferences(final Object o1, final Object o2) {
+    protected static Integer compareReferences(final Object o1, final Object o2) {
         if ((o1 == null) && (o2 != null)) {
             return Integer.valueOf(-1);
         } else if ((o1 != null) && (o2 == null)) {
@@ -2658,7 +2658,7 @@ public final class IMAPCommandsCollection {
         }
     };
 
-    static HeaderString getHeaderStream(final boolean isREV1) {
+    protected static HeaderString getHeaderStream(final boolean isREV1) {
         if (isREV1) {
             return REV1HeaderStream;
         }
@@ -2869,7 +2869,7 @@ public final class IMAPCommandsCollection {
      * @param itemName The item name to generate appropriate error message on absence
      * @return The item associated with given class in specified <i>FETCH</i> response.
      */
-    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName) throws ProtocolException {
+    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName) throws ProtocolException {
         final I retval = getItemOf(clazz, fetchResponse);
         if (null == retval) {
             throw missingFetchItem(itemName);
@@ -2886,7 +2886,7 @@ public final class IMAPCommandsCollection {
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      * @see #getItemOf(Class, FetchResponse, String)
      */
-    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
             final Item item = fetchResponse.getItem(i);
@@ -2904,7 +2904,7 @@ public final class IMAPCommandsCollection {
      * @param itemName The item name; e.g. <code>UID</code>, <code>FLAGS</code>, etc.
      * @return A new protocol exception with appropriate message.
      */
-    static ProtocolException missingFetchItem(final String itemName) {
+    protected static ProtocolException missingFetchItem(final String itemName) {
         return new ProtocolException(
             new StringBuilder(48).append("Missing ").append(itemName).append(" item in FETCH response.").toString());
     }
@@ -2916,7 +2916,7 @@ public final class IMAPCommandsCollection {
      * @param causeMessage An optional individual error message; leave to <code>null</code> to pass specified exception's message
      * @return A new protocol exception wrapping specified exception.
      */
-    static ProtocolException wrapException(final Exception e, final String causeMessage) {
+    protected static ProtocolException wrapException(final Exception e, final String causeMessage) {
         final ProtocolException pe = new ProtocolException(causeMessage == null ? e.getMessage() : causeMessage);
         pe.initCause(e);
         return pe;
