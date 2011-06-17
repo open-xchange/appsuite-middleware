@@ -1034,13 +1034,14 @@ public final class HTMLServiceImpl implements HTMLService {
         int lastMatch = 0;
         do {
             builder.append(toString.substring(lastMatch, m.start()));
+            final String hexVal = m.group(1);
             try {
                 tmp.setLength(2);
-                tmp.append(Integer.parseInt(m.group(1), 16)).append(';');
+                tmp.append(Integer.parseInt(hexVal, 16)).append(';');
                 builder.append(tmp.toString());
             } catch (final NumberFormatException e) {
                 tmp.setLength(0);
-                tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
+                tmp.append("&amp;#x").append(hexVal).append("&#59;");
                 builder.append(tmp.toString());
                 tmp.insert(0, prefix); // Restore expected StringBuilder content
             }
