@@ -77,14 +77,14 @@ public final class POP3CapabilityCache {
     /**
      * The logger.
      */
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3CapabilityCache.class);
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3CapabilityCache.class);
 
     /**
      * The default capabilities providing only mandatory POP3 commands.
      */
-    static final String DEFAULT_CAPABILITIES = "USER\r\nPASS\r\nSTAT\r\nLIST\r\nRETR\r\nDELE\r\nNOOP\r\nRSET\r\nQUIT";
+    protected static final String DEFAULT_CAPABILITIES = "USER\r\nPASS\r\nSTAT\r\nLIST\r\nRETR\r\nDELE\r\nNOOP\r\nRSET\r\nQUIT";
 
-    private static ConcurrentMap<InetSocketAddress, Future<String>> MAP;
+    private static volatile ConcurrentMap<InetSocketAddress, Future<String>> MAP;
 
     /**
      * Initializes a new {@link POP3CapabilityCache}.
@@ -98,8 +98,12 @@ public final class POP3CapabilityCache {
      */
     public static void init() {
         if (MAP == null) {
-            MAP = new ConcurrentHashMap<InetSocketAddress, Future<String>>();
-            // TODO: Probably pre-load CAPABILITY and greeting from common POP3 servers like GMail, etc.
+            synchronized (POP3CapabilityCache.class) {
+                if (MAP == null) {
+                    MAP = new ConcurrentHashMap<InetSocketAddress, Future<String>>();
+                    // TODO: Probably pre-load CAPABILITY and greeting from common POP3 servers like GMail, etc.
+                }
+            }
         }
     }
 
@@ -108,8 +112,12 @@ public final class POP3CapabilityCache {
      */
     public static void tearDown() {
         if (MAP != null) {
-            clear();
-            MAP = null;
+            synchronized (POP3CapabilityCache.class) {
+                if (MAP != null) {
+                    clear();
+                    MAP = null;
+                }
+            }
         }
     }
 
@@ -181,7 +189,7 @@ public final class POP3CapabilityCache {
                 caller = true;
             }
         }
-        String ret = getFrom(f, address, login, caller);
+        final String ret = getFrom(f, address, login, caller);
         if (null != ret) {
             return ret;
         }

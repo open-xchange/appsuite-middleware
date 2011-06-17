@@ -165,9 +165,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * Members
      */
 
-    private transient POP3Storage pop3Storage;
+    private POP3Storage pop3Storage;
 
-    private transient POP3StorageProperties pop3StorageProperties;
+    private POP3StorageProperties pop3StorageProperties;
 
     private transient POP3FolderStorage folderStorage;
 

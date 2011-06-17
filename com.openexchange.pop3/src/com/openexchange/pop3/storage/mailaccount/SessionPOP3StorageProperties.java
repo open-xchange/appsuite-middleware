@@ -74,9 +74,8 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
      * 
      * @param pop3Access The POP3 access
      * @return The storage properties bound to specified POP3 access
-     * @throws MailException If instance cannot be returned
      */
-    public static SessionPOP3StorageProperties getInstance(final POP3Access pop3Access) throws MailException {
+    public static SessionPOP3StorageProperties getInstance(final POP3Access pop3Access) {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getStorageProperties(pop3Access.getAccountId());
         SessionPOP3StorageProperties cached;

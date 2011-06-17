@@ -69,7 +69,7 @@ public final class POP3Config extends MailConfig {
 
     private static final String PROTOCOL_POP3_SECURE = "pop3s";
 
-    private volatile POP3Capabilities pop3Capabilities;
+    // private volatile POP3Capabilities pop3Capabilities;
 
     private int pop3Port;
 

@@ -70,9 +70,8 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
      * 
      * @param pop3Access The POP3 access
      * @return The storage properties bound to specified POP3 access
-     * @throws MailException If instance cannot be returned
      */
-    public static CASSessionPOP3StorageProperties getInstance(final POP3Access pop3Access) throws MailException {
+    public static CASSessionPOP3StorageProperties getInstance(final POP3Access pop3Access) {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getStorageProperties(pop3Access.getAccountId());
         CASSessionPOP3StorageProperties cached;

@@ -369,7 +369,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param mailAccess An instance of {@link MailAccess}
      * @throws MailException If implementation-specific startup fails
      */
-    static void startupImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
+    protected static void startupImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
         mailAccess.startup();
     }
 
@@ -379,7 +379,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param mailAccess An instance of {@link MailAccess}
      * @throws MailException If implementation-specific shutdown fails
      */
-    static void shutdownImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
+    protected static void shutdownImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
         mailAccess.shutdown();
     }
 
