@@ -349,10 +349,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.debug(sb.toString(), e);
                     }
                     if (0 == retry) {
-                        fp = FetchIMAPCommand.getSafeFetchProfile(fetchProfile);
+                        fp = FetchIMAPCommand.getHeaderlessFetchProfile(fetchProfile);
                         retry++;
                     } else if (1 == retry) {
-                        fp = FetchIMAPCommand.getHeaderlessFetchProfile(fetchProfile);
+                        fp = FetchIMAPCommand.getSafeFetchProfile(fetchProfile);
                         retry++;
                     } else {
                         throw MIMEMailException.handleMessagingException(e, imapConfig, session);
