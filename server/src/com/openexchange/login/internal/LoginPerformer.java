@@ -50,7 +50,9 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
@@ -114,10 +116,21 @@ public final class LoginPerformer {
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request) throws LoginException {
+        return doLogin(request, Collections.<String, Object> emptyMap());
+    }
+
+    /**
+     * Performs the login for specified login request.
+     * 
+     * @param request The login request
+     * @return The login providing login information
+     * @throws LoginException If login fails
+     */
+    public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws LoginException {
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
-            final Authenticated authed = Authentication.login(request.getLogin(), request.getPassword());
+            final Authenticated authed = Authentication.login(request.getLogin(), request.getPassword(), properties);
             final Context ctx = findContext(authed.getContextInfo());
             retval.setContext(ctx);
             final String username = authed.getUserInfo();

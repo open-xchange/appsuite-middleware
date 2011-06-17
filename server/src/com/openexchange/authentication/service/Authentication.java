@@ -116,7 +116,7 @@ public final class Authentication {
                 return login;
             }
             public Map<String, Object> getProperties() {
-                return Collections.emptyMap();
+                return properties;
             }
         });
     }
