@@ -217,10 +217,10 @@ public interface HTMLService {
     String prettyPrint(final String htmlContent);
 
     /**
-     * Replaces all HTML entities occurring in specified HTML content.
+     * Replaces all HTML entities occurring in specified HTML content with corresponding unicode character.
      * 
      * @param content The content
-     * @return The content with HTML entities replaced
+     * @return The content with HTML entities replaced with corresponding unicode character
      */
     String replaceHTMLEntities(String content);
 
