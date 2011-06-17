@@ -786,7 +786,15 @@ public final class HTMLServiceImpl implements HTMLService {
         if (start >= headTagLen) {
             final int end = sb.indexOf(TAG_E_HEAD);
             // final Matcher m = PAT_META_CT.matcher(html.substring(start, end));
-            if (!occursWithin(sb, start, end, true, "http-equiv=\"Content-Type\"", "http-equiv=Content-Type", "http-equiv=\"content-type\"", "http-equiv=content-type")) {
+            if (!occursWithin(
+                sb,
+                start,
+                end,
+                true,
+                "http-equiv=\"Content-Type\"",
+                "http-equiv=Content-Type",
+                "http-equiv=\"content-type\"",
+                "http-equiv=content-type")) {
                 final String cs;
                 if (null == charset) {
                     if (LOG.isWarnEnabled()) {
@@ -1002,6 +1010,11 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
 
+    /**
+     * Replaces hexadecimal entities with corresponding decimal entities; e.g. <code>&amp;#xFC</code> -gt; <code>&amp;#252</code>.
+     * 
+     * @param htmlContent The HTML content with hexadecimal entities replaced
+     */
     private static void replaceHexEntities(final StringBuilder htmlContent) {
         final Matcher m = PAT_HEX_ENTITIES.matcher(htmlContent);
         if (!m.find()) {
@@ -1095,31 +1108,31 @@ public final class HTMLServiceImpl implements HTMLService {
         }
     }
 
-//    private Tidy createNewTidyInstance() {
-//        final Tidy tidy = new Tidy();
-//        /*
-//         * Set desired configuration options using tidy setters
-//         */
-//        tidy.setXHTML(true);
-//        tidy.setConfigurationFromProps(tidyConfiguration);
-//        tidy.setMakeClean(false);
-//        tidy.setForceOutput(true);
-//        tidy.setOutputEncoding(CHARSET_US_ASCII);
-//        tidy.setTidyMark(false);
-//        tidy.setXmlOut(true);
-//        tidy.setNumEntities(true);
-//        tidy.setDropEmptyParas(false);
-//        tidy.setDropFontTags(false);
-//        tidy.setDropProprietaryAttributes(false);
-//        tidy.setTrimEmptyElements(false);
-//        /*
-//         * Suppress tidy outputs
-//         */
-//        tidy.setShowErrors(0);
-//        tidy.setShowWarnings(false);
-//        tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
-//        return tidy;
-//    }
+    // private Tidy createNewTidyInstance() {
+    // final Tidy tidy = new Tidy();
+    // /*
+    // * Set desired configuration options using tidy setters
+    // */
+    // tidy.setXHTML(true);
+    // tidy.setConfigurationFromProps(tidyConfiguration);
+    // tidy.setMakeClean(false);
+    // tidy.setForceOutput(true);
+    // tidy.setOutputEncoding(CHARSET_US_ASCII);
+    // tidy.setTidyMark(false);
+    // tidy.setXmlOut(true);
+    // tidy.setNumEntities(true);
+    // tidy.setDropEmptyParas(false);
+    // tidy.setDropFontTags(false);
+    // tidy.setDropProprietaryAttributes(false);
+    // tidy.setTrimEmptyElements(false);
+    // /*
+    // * Suppress tidy outputs
+    // */
+    // tidy.setShowErrors(0);
+    // tidy.setShowWarnings(false);
+    // tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
+    // return tidy;
+    // }
 
     private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new Writer() {
 
