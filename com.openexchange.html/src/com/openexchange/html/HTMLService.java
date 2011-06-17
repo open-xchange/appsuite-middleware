@@ -142,7 +142,8 @@ public interface HTMLService {
      * 
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
-     * @param ignoreRanges The ranges to ignore; leave to <code>null</code> to format whole text
+     * @param commentId The identifier wrapped in a comment prepended to each formatted URL:<br>
+     *            <code>"&lt;!--" + &lt;<i>comment</i>&gt; + " " + <i>&lt;anchor-tag&gt;</i> + "--&gt;"</code>
      * @return properly escaped HTML content
      */
     String htmlFormat(String plainText, boolean withQuote, String commentId);
