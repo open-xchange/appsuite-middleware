@@ -815,16 +815,16 @@ public final class HTMLServiceImpl implements HTMLService {
                 sb.insert(start, "\r\n    <meta content=\"text/html; charset=");
             }
         }
-        final String html = processDownlevelRevealedConditionalComments(sb.toString());
+        processDownlevelRevealedConditionalComments(sb);
         // html = removeXHTMLCData(html);
         /*
          * Check URLs
          */
         if (!replaceUrls) {
-            return html;
+            return sb.toString();
         }
-        final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
-        HTMLParser.parse(html, handler);
+        final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, sb.length());
+        HTMLParser.parse(sb.toString(), handler);
         return handler.getHTML();
     }
 
@@ -968,19 +968,20 @@ public final class HTMLServiceImpl implements HTMLService {
      * @param htmlContent The HTML content possibly containing downlevel-revealed conditional comments
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
-    private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
+    private static void processDownlevelRevealedConditionalComments(final StringBuilder htmlContent) {
         if (htmlContent.indexOf("[if") < 0) {
-            return htmlContent;
+            return;
         }
-        final Matcher m = PATTERN_CC.matcher(htmlContent);
+        final Matcher m = PATTERN_CC.matcher(htmlContent.toString());
         if (!m.find()) {
             /*
              * No conditional comments found
              */
-            return htmlContent;
+            return;
         }
         int lastMatch = 0;
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
+        final StringBuilder sb = htmlContent;
+        sb.setLength(0);
         do {
             sb.append(htmlContent.substring(lastMatch, m.start()));
             sb.append(CC_START_IF).append(m.group(2));
@@ -997,7 +998,6 @@ public final class HTMLServiceImpl implements HTMLService {
             lastMatch = m.end();
         } while (m.find());
         sb.append(htmlContent.substring(lastMatch));
-        return sb.toString();
     }
 
     /**
