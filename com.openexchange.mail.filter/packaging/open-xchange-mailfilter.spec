@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 11
+%define		ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -138,6 +138,8 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
+* Thu Jun 16 2011 - dennis.sieben@open-xchange.com
+ - Bugfix #19454 - [L3] Using '"' character in mail filter condition removes vacation message
 * Mon Apr 11 2011 - dennis.sieben@open-xchange.com
  - Bugfix #18918 - OXSieveHandlerInvalidCredentialsException must be moved to the export package
 * Tue Mar 01 2011 - marcus.klein@open-xchange.com

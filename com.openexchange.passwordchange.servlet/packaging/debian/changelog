@@ -1,3 +1,9 @@
+open-xchange-passwordchange-servlet (6.20.0.0-12) unstable; urgency=low
+
+  * build for public ptf 2011-06-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 17 Jun 2011 13:40:24 +0000
+
 open-xchange-passwordchange-servlet (6.20.0.0-11) unstable; urgency=low
 
   * Public PTF 2011-05-31
