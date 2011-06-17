@@ -104,8 +104,6 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]> {
 
-    private static final String[] ARGS_ALL = new String[] { "1:*" };
-
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NewFetchIMAPCommand.class);
 
     private static final boolean WARN = LOG.isWarnEnabled();
@@ -239,57 +237,34 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param imapFolder The IMAP folder providing connected protocol
      * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param uids The UIDs
+     * @param array The array (either <code>long</code> for UIDs or <code>int</code> for sequence numbers)
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
+    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final Object array, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount == 0) {
             returnDefaultValue = true;
         }
+        seqNumFetcher = null;
         this.separator = separator;
         command = getFetchCommand(isRev1, fp, false);
-        uid = true;
-        length = uids.length;
-        if (0 == length) {
-            returnDefaultValue = true;
-        } else {
+        if (array instanceof int[]) {
+            final int[] seqNums = (int[]) array;
+            uid = false;
+            length = seqNums.length;
+            args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
+        } else if (array instanceof long[]) {
+            final long[] uids = (long[]) array;
+            uid = true;
+            length = uids.length;
             args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
-            seqNumFetcher = null;
+        } else {
+            throw new MessagingException("Illegal array argument: " + array.getClass().getSimpleName());
         }
-        fullname = imapFolder.getFullName();
-        retval = new MailMessage[length];
-        // recentCount = imapFolder.getNewMessageCount();
-    }
-
-    /**
-     * Initializes a new {@link NewFetchIMAPCommand}.
-     * 
-     * @param imapFolder The IMAP folder providing connected protocol
-     * @param separator The separator character
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param seqNums The sequence numbers
-     * @param fp The fetch profile to use
-     * @throws MessagingException If initialization fails
-     */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
-        super(imapFolder);
-        final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
-            returnDefaultValue = true;
-        }
-        this.separator = separator;
-        command = getFetchCommand(isRev1, fp, false);
-        uid = false;
-        length = seqNums.length;
         if (0 == length) {
             returnDefaultValue = true;
-        } else {
-            args =
-                length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH_WITH_UID + command.length());
-            seqNumFetcher = null;
         }
         fullname = imapFolder.getFullName();
         retval = new MailMessage[length];
