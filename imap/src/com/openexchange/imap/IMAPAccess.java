@@ -80,7 +80,6 @@ import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -92,7 +91,6 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -171,8 +169,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private boolean connected;
 
-    private boolean decrement;
-
     /**
      * Initializes a new {@link IMAPAccess IMAP access} for default IMAP account.
      * 
@@ -202,11 +198,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         imapStore = null;
         imapSession = null;
         connected = false;
-        decrement = false;
     }
 
     @Override
     protected void releaseResources() {
+        /*-
+         * 
+         * Don't need to close when cached!
+         * 
         if (folderStorage != null) {
             try {
                 folderStorage.releaseResources();
@@ -229,28 +228,28 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (logicTools != null) {
             logicTools = null;
         }
+        */
     }
 
     @Override
     protected void closeInternal() {
         try {
+            if (null != messageStorage) {
+                try {
+                    messageStorage.closeIMAPFolder();
+                } catch (final MailException e) {
+                    LOG.error("Error while closing IMAP message storage.", e);
+                }
+            }
             if (imapStore != null) {
                 try {
                     imapStore.close();
                 } catch (final MessagingException e) {
-                    LOG.error("Error while closing IMAPStore", e);
+                    LOG.error("Error while closing IMAP store.", e);
                 }
                 imapStore = null;
             }
         } finally {
-            if (decrement) {
-                /*
-                 * Decrease counters
-                 */
-                MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
-                MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-                decrementCounter();
-            }
             /*
              * Reset
              */
@@ -522,16 +521,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Add server's capabilities
              */
             config.initializeCapabilities(imapStore, session);
-            /*
-             * Increase counter
-             */
-            MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
-            MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-            incrementCounter();
-            /*
-             * Remember to decrement
-             */
-            decrement = true;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, config, session);
         }

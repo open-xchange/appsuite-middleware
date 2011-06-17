@@ -158,10 +158,16 @@ public class MonitoringInfo {
         return numberOfOpenAJPSockets.get();
     }
 
+    /**
+     * Omit call to this method if <code>connectionType</code> is {@link #IMAP}.
+     */
     public static void incrementNumberOfConnections(final int connectionType) {
         changeNumberOfConnections(connectionType, true);
     }
 
+    /**
+     * Omit call to this method if <code>connectionType</code> is {@link #IMAP}.
+     */
     public static void decrementNumberOfConnections(final int connectionType) {
         changeNumberOfConnections(connectionType, false);
     }

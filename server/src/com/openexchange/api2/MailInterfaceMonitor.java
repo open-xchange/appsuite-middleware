@@ -101,6 +101,9 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         return MailAccess.getCounter();
     }
 
+    /**
+     * Omit call to this method. It does nothing at all...
+     */
     public void changeNumActive(final boolean increment) {
         // Delete this method
     }
