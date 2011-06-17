@@ -194,54 +194,6 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Updates specified IMAP folder's internal <code>total</code> and <code>recent</code> counters through executing an
-     * <code>EXAMINE</code> or <code>SELECT</code> command dependent on IMAP folder's open mode.
-     * 
-     * @param imapFolder The IMAP folder to update
-     * @throws MessagingException If a messaging error occurs
-     */
-    public static void updateIMAPFolder(final IMAPFolder imapFolder) throws MessagingException {
-        updateIMAPFolder(imapFolder, imapFolder.getMode());
-    }
-
-    /**
-     * Updates specified IMAP folder's internal <code>total</code> and <code>recent</code> counters through executing an
-     * <code>EXAMINE</code> or <code>SELECT</code> command dependent on specified mode.
-     * 
-     * @param imapFolder The IMAP folder to update
-     * @param mode The mode in which the folder is opened
-     * @throws MessagingException If a messaging error occurs
-     */
-    public static void updateIMAPFolder(final IMAPFolder imapFolder, final int mode) throws MessagingException {
-        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            /*
-             * (non-Javadoc)
-             * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun .mail.imap.protocol.IMAPProtocol)
-             */
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                /*
-                 * Encode the mbox as per RFC2060
-                 */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
-                /*
-                 * Perform command
-                 */
-                final Response[] tmp = mode == Folder.READ_ONLY ? p.command("EXAMINE", args) : p.command("SELECT", args);
-                final Response[] r = new Response[tmp.length - 1];
-                System.arraycopy(tmp, 0, r, 0, r.length);
-                /*
-                 * Dispatch responses and thus update folder when handling untagged responses of EXISTS and RECENT
-                 */
-                p.notifyResponseHandlers(r);
-                p.handleResult(tmp[tmp.length - 1]);
-                return null;
-            }
-        });
-    }
-
-    /**
      * Checks if IMAP root folder allows subfolder creation.
      * 
      * @param rootFolder The IMAP root folder

@@ -114,6 +114,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     protected IMAPFolder imapFolder;
 
+    protected int mode;
+
     protected int holdsMessages = -1;
 
     /**
@@ -190,7 +192,10 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     private void closeIMAPFolder() throws MailException {
         try {
-            imapFolder.close(false);
+            /*
+             * If we are opened in read-write mode, JavaMail performs an extra EXAMINE when closing IMAP folder with expunge flag set to false. Thus check IMAP folder's mode to avoid this extra EXAMINE command.
+             */
+            imapFolder.close(Folder.READ_WRITE == mode);
         } catch (final IllegalStateException e) {
             LOG.warn("Invoked close() on a closed folder", e);
         } catch (final MessagingException e) {
@@ -206,6 +211,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected void resetIMAPFolder() {
         holdsMessages = -1;
         imapFolder = null;
+        mode = 0;
     }
 
     /**

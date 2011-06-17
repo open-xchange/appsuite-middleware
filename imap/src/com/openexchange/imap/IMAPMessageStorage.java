@@ -268,7 +268,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          * Get messages with given fields filled
          */
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             /*
              * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
              * ignore the order of UIDs provided in a "UID FETCH" command.
@@ -389,6 +390,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             final IMAPMessage msg;
             {
                 final long start = System.currentTimeMillis();
@@ -485,7 +487,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws MailException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             if (imapFolder.getMessageCount() == 0) {
                 return EMPTY_RETVAL;
             }
@@ -655,7 +658,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             /*
              * Shall a search be performed?
              */
@@ -784,7 +788,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] getUnreadMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final int limit) throws MailException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             MailMessage[] mails;
             {
                 /*
@@ -833,6 +838,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     public void deleteMessagesLong(final String fullName, final long[] msgUIDs, final boolean hardDelete) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -1025,6 +1031,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Open and check user rights on source folder
              */
             imapFolder = setAndOpenFolder(imapFolder, sourceFullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -1276,6 +1283,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Open and check user rights on source folder
              */
             imapFolder = setAndOpenFolder(imapFolder, destFullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -1383,6 +1391,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             /*
              * Remove non user-alterable system flags
              */
@@ -1503,6 +1512,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             /*
              * Remove non user-alterable system flags
              */
@@ -1633,6 +1643,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return;
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -1698,6 +1709,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return;
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            mode = Folder.READ_WRITE;
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -1828,6 +1840,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private MailMessage[] getChangedMessages(final String folder, final MailField[] fields, final int index) throws MailException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, folder, Folder.READ_ONLY);
+            mode = Folder.READ_ONLY;
             if (!holdsMessages()) {
                 throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
             }
@@ -2014,7 +2027,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          */
         final long[] retval = new long[msgUIDs.length];
         Arrays.fill(retval, -1L);
-        if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullName, Folder.READ_ONLY)) {
+        if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullName, Folder.READ_WRITE)) {
             // No look-up possible
             return retval;
         }
@@ -2086,6 +2099,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      */
                     resetIMAPFolder();
                     imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
+                    mode = desiredMode;
                 } catch (final MailException e) {
                     throw new IMAPException(e);
                 }
@@ -2112,6 +2126,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 resetIMAPFolder();
                 imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
+                mode = desiredMode;
             } catch (final MailException e) {
                 throw new IMAPException(e);
             }
