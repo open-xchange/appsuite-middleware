@@ -355,7 +355,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Resets this access' settings.
+     * Resets this access' settings. Should be called when {@link #closeInternal()} is invoked.
      */
     protected final void resetFields() {
         mailProperties = null;

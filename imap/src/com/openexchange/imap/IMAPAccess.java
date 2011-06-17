@@ -157,16 +157,34 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Member section
      */
 
+    /**
+     * The folder storage.
+     */
     private transient IMAPFolderStorage folderStorage;
 
+    /**
+     * The message storage.
+     */
     private transient IMAPMessageStorage messageStorage;
 
+    /**
+     * The mail logic tools.
+     */
     private transient MailLogicTools logicTools;
 
+    /**
+     * The IMAP store.
+     */
     private transient IMAPStore imapStore;
 
+    /**
+     * The IMAP session.
+     */
     private transient javax.mail.Session imapSession;
 
+    /**
+     * The connected flag.
+     */
     private boolean connected;
 
     /**
