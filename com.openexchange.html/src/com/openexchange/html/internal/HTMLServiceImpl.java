@@ -51,14 +51,10 @@ package com.openexchange.html.internal;
 
 import gnu.inet.encoding.IDNAException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -69,7 +65,6 @@ import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.Serializer;
 import org.htmlcleaner.TagNode;
-import org.w3c.tidy.Tidy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.parser.HTMLParser;
@@ -993,8 +988,8 @@ public final class HTMLServiceImpl implements HTMLService {
      * @param htmlContent The HTML content
      * @return The validated HTML content
      */
-    private String validate(final String htmlContent) {
-        return validate(htmlContent, true);
+    private static String validate(final String htmlContent) {
+        return validateWithHtmlCleaner(replaceHexEntities(htmlContent));
     }
 
     private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
@@ -1022,46 +1017,6 @@ public final class HTMLServiceImpl implements HTMLService {
         } while (m.find());
         mr.appendTail(builder);
         return builder.toString();
-    }
-
-    /**
-     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
-     * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
-     * 
-     * @param htmlContent The HTML content
-     * @return The validated HTML content
-     */
-    private String validate(final String htmlContent, final boolean forceHtmlCleaner) {
-        final String hexEntitiesReplaced = replaceHexEntities(htmlContent);
-        if (forceHtmlCleaner) {
-            return validateWithHtmlCleaner(hexEntitiesReplaced);
-        }
-        /*
-         * Obtain a new Tidy instance
-         */
-        final Tidy tidy = createNewTidyInstance();
-        /*
-         * Run tidy, providing a reader and writer
-         */
-        String validatedHtml;
-        try {
-            final Writer writer = new UnsynchronizedStringWriter(hexEntitiesReplaced.length());
-            tidy.parse(new UnsynchronizedStringReader(hexEntitiesReplaced), writer);
-            validatedHtml = writer.toString();
-        } catch (final RuntimeException rte) {
-            /*
-             * Tidy failed horribly...
-             */
-            LOG.warn("JTidy library failed to pretty-print HTML content. Using HtmlCleaner library as fall-back.", rte);
-            validatedHtml = null;
-        }
-        /*
-         * Check Tidy output
-         */
-        if (null == validatedHtml || 0 == validatedHtml.length()) {
-            validatedHtml = validateWithHtmlCleaner(hexEntitiesReplaced);
-        }
-        return validatedHtml;
     }
 
     /**
@@ -1094,7 +1049,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
 
-    private String validateWithHtmlCleaner(final String htmlContent) {
+    private static String validateWithHtmlCleaner(final String htmlContent) {
         try {
             /*
              * Clean...
@@ -1136,98 +1091,4 @@ public final class HTMLServiceImpl implements HTMLService {
         }
     }
 
-    private Tidy createNewTidyInstance() {
-        final Tidy tidy = new Tidy();
-        /*
-         * Set desired configuration options using tidy setters
-         */
-        tidy.setXHTML(true);
-        tidy.setConfigurationFromProps(tidyConfiguration);
-        tidy.setMakeClean(false);
-        tidy.setForceOutput(true);
-        tidy.setOutputEncoding(CHARSET_US_ASCII);
-        tidy.setTidyMark(false);
-        tidy.setXmlOut(true);
-        tidy.setNumEntities(true);
-        tidy.setDropEmptyParas(false);
-        tidy.setDropFontTags(false);
-        tidy.setDropProprietaryAttributes(false);
-        tidy.setTrimEmptyElements(false);
-        /*
-         * Suppress tidy outputs
-         */
-        tidy.setShowErrors(0);
-        tidy.setShowWarnings(false);
-        tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
-        return tidy;
-    }
-
-    private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new Writer() {
-
-        @Override
-        public void close() throws IOException {
-            // Nothing to do
-        }
-
-        @Override
-        public void flush() throws IOException {
-            // Nothing to do
-        }
-
-        @Override
-        public void write(final int c) throws IOException {
-            // Nothing to do
-        }
-
-        @Override
-        public void write(final char cbuf[]) throws IOException {
-            // Nothing to do
-        }
-
-        @Override
-        public void write(final String str) throws IOException {
-            // Nothing to do
-        }
-
-        @Override
-        public void write(final String str, final int off, final int len) throws IOException {
-            // Nothing to do
-        }
-
-        @Override
-        public Writer append(final CharSequence csq) throws IOException {
-            return this;
-        }
-
-        @Override
-        public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
-            return this;
-        }
-
-        @Override
-        public Writer append(final char c) throws IOException {
-            return this;
-        }
-
-        @Override
-        public void write(final char[] cbuf, final int off, final int len) throws IOException {
-            // Nothing to do
-        }
-    });
-
-    private static String urlEncode(final String s) {
-        try {
-            return URLEncoder.encode(s, "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return s;
-        }
-    }
-
-    private static String urlDecode(final String s) {
-        try {
-            return URLDecoder.decode(s, "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return s;
-        }
-    }
 }
