@@ -1006,7 +1006,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * @param htmlContent The HTML content
      * @return The validated HTML content
      */
-    private void validate(final StringBuilder htmlContent) {
+    private static void validate(final StringBuilder htmlContent) {
         replaceHexEntities(htmlContent);
         validateWithHtmlCleaner(htmlContent);
     }
@@ -1077,7 +1077,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
 
-    private void validateWithHtmlCleaner(final StringBuilder htmlContent) {
+    private static void validateWithHtmlCleaner(final StringBuilder htmlContent) {
         try {
             /*
              * Clean...
