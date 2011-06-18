@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.mail;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
@@ -389,9 +390,9 @@ public final class MailFolderImpl extends AbstractFolder {
         try {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                return ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(fullName);
+                return ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(ensureFullName(fullName));
             }
-            return mailAccess.getMessageStorage().getUnreadMessages(fullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
+            return mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
         } catch (final MailException e) {
             if (DEBUG) {
                 LOG.debug("Cannot return up-to-date unread counter.", e);
@@ -422,9 +423,9 @@ public final class MailFolderImpl extends AbstractFolder {
         try {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(fullName);
+                return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(ensureFullName(fullName));
             }
-            return mailAccess.getMessageStorage().searchMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
+            return mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
         } catch (final MailException e) {
             if (DEBUG) {
                 LOG.debug("Cannot return up-to-date total counter.", e);
@@ -438,6 +439,10 @@ public final class MailFolderImpl extends AbstractFolder {
         } finally {
             mailAccess.close(true);
         }
+    }
+
+    private static String ensureFullName(final String fullName) {
+        return prepareMailFolderParam(fullName).getFullname();
     }
 
     @Override
