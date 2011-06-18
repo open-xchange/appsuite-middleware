@@ -49,6 +49,8 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -58,6 +60,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -97,6 +100,7 @@ public final class ClearAction extends AbstractFolderAction {
          * Delete
          */
         try {
+            final List<AbstractOXException> warnings = new LinkedList<AbstractOXException>();
             final JSONArray responseArray = new JSONArray();
             final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
             for (int i = 0; i < len; i++) {
@@ -104,13 +108,17 @@ public final class ClearAction extends AbstractFolderAction {
                 try {
                     folderService.clearFolder(treeId, folderId, session);
                 } catch (final FolderException e) {
+                    final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ClearAction.class);
+                    log.error(e.getMessage(), e);
                     responseArray.put(folderId);
+                    e.setCategory(Category.WARNING);
+                    warnings.add(e);
                 }
             }
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(responseArray);
+            return new AJAXRequestResult(responseArray).addWarnings(warnings);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
