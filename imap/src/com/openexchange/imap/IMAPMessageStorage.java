@@ -329,11 +329,29 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1) throws MailException {
+        final String key = new StringBuilder(16).append(accountId).append(".imap.retry").toString();
         FetchProfile fp = fetchProfile;
         int retry = 0;
         while (true) {
             try {
-                return fetchValidFor(array, len, fp, isRev1);
+                if (0 == retry) {
+                    final Integer iRetry = (Integer) session.getParameter(key);
+                    final int tmp;
+                    if (null == iRetry || (tmp = iRetry.intValue()) == 0) {
+                        session.setParameter(key, Integer.valueOf(retry));
+                        return fetchValidFor(array, len, fp, isRev1);
+                    }
+                    if (1 == tmp) {
+                        return fetchValidFor(array, len, FetchIMAPCommand.getHeaderlessFetchProfile(fp), isRev1);
+                    }
+                    return fetchValidFor(array, len, FetchIMAPCommand.getSafeFetchProfile(fp), isRev1);
+                }
+                /*
+                 * Retry...
+                 */
+                final TLongObjectHashMap<MailMessage> map = fetchValidFor(array, len, fp, isRev1);
+                session.setParameter(key, Integer.valueOf(retry));
+                return map;
             } catch (final FolderClosedException e) {
                 throw MIMEMailException.handleMessagingException(e, imapConfig, session);
             } catch (final StoreClosedException e) {
