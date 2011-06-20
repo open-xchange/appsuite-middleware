@@ -335,12 +335,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         int retry = 0;
         while (true) {
             try {
-                FetchProfileModifier tmp = (FetchProfileModifier) session.getParameter(key);
-                if (null == tmp) {
-                    tmp = FetchIMAPCommand.DEFAULT_PROFILE_MODIFIER;
-                    session.setParameter(key, tmp);
+                FetchProfileModifier modifier = (FetchProfileModifier) session.getParameter(key);
+                if (null == modifier) {
+                    modifier = FetchIMAPCommand.DEFAULT_PROFILE_MODIFIER;
+                    session.setParameter(key, modifier);
                 }
-                return fetchValidFor(array, len, tmp.modify(fp), isRev1);
+                return fetchValidFor(array, len, modifier.modify(fp), isRev1);
             } catch (final FolderClosedException e) {
                 throw MIMEMailException.handleMessagingException(e, imapConfig, session);
             } catch (final StoreClosedException e) {
