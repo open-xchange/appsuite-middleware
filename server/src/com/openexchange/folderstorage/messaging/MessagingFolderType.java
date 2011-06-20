@@ -111,7 +111,7 @@ public final class MessagingFolderType implements FolderType {
         if (null == registry) {
             return false;
         }
-        if (!registry.containsMessagingService(pfi.getServiceId(), -1, -1)) {
+        if (!registry.containsMessagingService(pfi.getServiceId(), -1, -1)) { // FIXME: Please pass user and context
             return false;
         }
         return true;
