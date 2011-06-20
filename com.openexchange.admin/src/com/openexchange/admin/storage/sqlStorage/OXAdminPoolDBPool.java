@@ -140,4 +140,15 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         }
         return true;
     }
+
+    public int getServerId() throws PoolException {
+        final int serverId;
+        try {
+            serverId = Database.getServerId();
+        } catch (DBPoolingException e) {
+            log.error("Error getting the identifier of the server! This is normal until at least one server is configured.", e);
+            throw new PoolException(e.getMessage());
+        }
+        return serverId;
+    }
 }

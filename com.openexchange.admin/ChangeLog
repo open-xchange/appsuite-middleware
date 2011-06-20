@@ -1,3 +1,7 @@
+* 2011-06-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #19495: listfilestore now works again if server_id something else than 2.
+
 * 2011-06-16 - thorben.betten@open-xchange.com
 
  - Bugfix #19492: Enhanced DatabaseService with a method to get a no-timeout connection for administrative access to contexts
