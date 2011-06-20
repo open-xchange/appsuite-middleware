@@ -184,7 +184,11 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             }
 
             public String generateTransportServerURL() {
-                return acc.generateTransportServerURL();
+                try {
+                    return acc.generateTransportServerURL();
+                } catch (final MailAccountException e) {
+                    throw new IllegalStateException(e);
+                }
             }
             
             public int getTransportPort() {
