@@ -83,6 +83,7 @@ import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
+import com.openexchange.imap.command.FetchIMAPCommand.FetchProfileModifier;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.NewFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
@@ -329,29 +330,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1) throws MailException {
-        final String key = new StringBuilder(16).append(accountId).append(".imap.retry").toString();
-        FetchProfile fp = fetchProfile;
+        final String key = new StringBuilder(16).append(accountId).append(".imap.fetch.modifier").toString();
+        final FetchProfile fp = fetchProfile;
         int retry = 0;
         while (true) {
             try {
-                if (0 == retry) {
-                    final Integer iRetry = (Integer) session.getParameter(key);
-                    final int tmp;
-                    if (null == iRetry || (tmp = iRetry.intValue()) == 0) {
-                        session.setParameter(key, Integer.valueOf(retry));
-                        return fetchValidFor(array, len, fp, isRev1);
-                    }
-                    if (1 == tmp) {
-                        return fetchValidFor(array, len, FetchIMAPCommand.getHeaderlessFetchProfile(fp), isRev1);
-                    }
-                    return fetchValidFor(array, len, FetchIMAPCommand.getSafeFetchProfile(fp), isRev1);
+                FetchProfileModifier tmp = (FetchProfileModifier) session.getParameter(key);
+                if (null == tmp) {
+                    tmp = FetchIMAPCommand.DEFAULT_PROFILE_MODIFIER;
+                    session.setParameter(key, tmp);
                 }
-                /*
-                 * Retry...
-                 */
-                final TLongObjectHashMap<MailMessage> map = fetchValidFor(array, len, fp, isRev1);
-                session.setParameter(key, Integer.valueOf(retry));
-                return map;
+                return fetchValidFor(array, len, tmp.modify(fp), isRev1);
             } catch (final FolderClosedException e) {
                 throw MIMEMailException.handleMessagingException(e, imapConfig, session);
             } catch (final StoreClosedException e) {
@@ -360,7 +349,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final Exception nextException = e.getNextException();
                 if (nextException instanceof BadCommandException) {
                     if (DEBUG) {
-                        final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch item failed: ");
+                        final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
                         for (final Item item : fetchProfile.getItems()) {
                             sb.append(item.getClass().getSimpleName()).append(',');
                         }
@@ -371,10 +360,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.debug(sb.toString(), e);
                     }
                     if (0 == retry) {
-                        fp = FetchIMAPCommand.getHeaderlessFetchProfile(fetchProfile);
+                        session.setParameter(key, FetchIMAPCommand.HEADERLESS_PROFILE_MODIFIER);
                         retry++;
                     } else if (1 == retry) {
-                        fp = FetchIMAPCommand.getSafeFetchProfile(fetchProfile);
+                        session.setParameter(key, FetchIMAPCommand.NO_BODYSTRUCTURE_PROFILE_MODIFIER);
                         retry++;
                     } else {
                         throw MIMEMailException.handleMessagingException(e, imapConfig, session);
