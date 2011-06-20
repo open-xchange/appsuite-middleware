@@ -74,6 +74,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPFolder.FetchProfileItem;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
@@ -889,6 +890,53 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         }
         return command.toString();
     }
+
+    /**
+     * Possibly modifies a {@link FetchProfile}.
+     */
+    public static interface FetchProfileModifier {
+        
+        /**
+         * Modifies specified {@link FetchProfile} instance.
+         * 
+         * @param fetchProfile The fetch profile
+         * @return The modified fetch profile
+         */
+        FetchProfile modify(FetchProfile fetchProfile);
+    }
+
+    /**
+     * Default modifier which returns the fetch profile unchanged.
+     */
+    public static final FetchProfileModifier DEFAULT_PROFILE_MODIFIER = new FetchProfileModifier() {
+        
+        public FetchProfile modify(final FetchProfile fetchProfile) {
+            /*
+             * Return unchanged
+             */
+            return fetchProfile;
+        }
+    };
+
+    /**
+     * Strips individual header names from fetch profile, but inserts {@link FetchProfileItem#HEADERS}.
+     */
+    public static final FetchProfileModifier HEADERLESS_PROFILE_MODIFIER = new FetchProfileModifier() {
+        
+        public FetchProfile modify(final FetchProfile fetchProfile) {
+            return getHeaderlessFetchProfile(fetchProfile);
+        }
+    };
+
+    /**
+     * Strips BODYSTRUCTURE fetch item and inserts "Content-Type" header name.
+     */
+    public static final FetchProfileModifier NO_BODYSTRUCTURE_PROFILE_MODIFIER = new FetchProfileModifier() {
+        
+        public FetchProfile modify(final FetchProfile fetchProfile) {
+            return getSafeFetchProfile(fetchProfile);
+        }
+    };
 
     /**
      * Strips BODYSTRUCTURE item from given fetch profile.
