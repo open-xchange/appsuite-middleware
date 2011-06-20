@@ -178,4 +178,8 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         }
         return retval;
     }
+
+    public int getServerId() throws DBPoolingException {
+        return Server.getServerId();
+    }
 }

@@ -129,6 +129,10 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return configDatabaseService.listContexts(poolId);
     }
 
+    public int getServerId() throws DBPoolingException {
+        return configDatabaseService.getServerId();
+    }
+
     // Implemented database service methods.
 
     public Connection getReadOnly(final Context ctx) throws DBPoolingException {

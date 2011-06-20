@@ -264,4 +264,8 @@ public final class Database {
     public static int[] getContextsInSameSchema(final int contextId) throws DBPoolingException {
         return getDatabaseService().getContextsInSameSchema(contextId);
     }
+
+    public static int getServerId() throws DBPoolingException {
+        return getDatabaseService().getServerId();
+    }
 }

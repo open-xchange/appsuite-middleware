@@ -86,4 +86,6 @@ public interface ConfigDatabaseService {
 
     int[] listContexts(int poolId) throws DBPoolingException;
 
+    int getServerId() throws DBPoolingException;
+
 }
