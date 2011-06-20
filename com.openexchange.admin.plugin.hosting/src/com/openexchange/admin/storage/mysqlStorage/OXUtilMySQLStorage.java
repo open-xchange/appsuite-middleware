@@ -1271,6 +1271,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @return all filestore information
      * @throws StorageException if loading the filestore information fails.
      */
+    @Override
     public Filestore getFilestore(int id, boolean loadRealUsage) throws StorageException {
         final Connection con;
         try {
@@ -1394,7 +1395,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         Connection con = null;
         try {
             con = cache.getConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT d.cid,d.write_db_pool_id, d.db_schema, c.filestore_id FROM context c JOIN context_server2db_pool d ON c.cid=d.cid WHERE d.server_id=2 ORDER BY d.write_db_pool_id,d.db_schema,c.filestore_id ASC;");
+            stmt = con.prepareStatement("SELECT d.cid,d.write_db_pool_id, d.db_schema, c.filestore_id FROM context c JOIN context_server2db_pool d ON c.cid=d.cid WHERE d.server_id=? ORDER BY d.write_db_pool_id,d.db_schema,c.filestore_id ASC;");
+            stmt.setInt(1, cache.getServerId());
             result = stmt.executeQuery();
 
             LinkedList<FilestoreContextBlock> blocks = new LinkedList<FilestoreContextBlock>();
