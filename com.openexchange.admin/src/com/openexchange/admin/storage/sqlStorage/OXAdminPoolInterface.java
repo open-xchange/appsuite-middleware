@@ -66,4 +66,6 @@ public interface OXAdminPoolInterface {
     boolean pushConnectionForContext(int contextId, Connection con) throws PoolException;
 
     boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException;
+
+    int getServerId() throws PoolException;
 }

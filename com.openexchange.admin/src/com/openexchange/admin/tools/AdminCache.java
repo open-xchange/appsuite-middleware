@@ -185,16 +185,15 @@ public class AdminCache {
             Iterator<String> names = named_access_combinations.keySet().iterator();
             String retval = null;
             while(names.hasNext()){
-                String combi_name = (String) names.next();
+                String combi_name = names.next();
                 if(named_access_combinations.get(combi_name).equals(access_combination)){
                     retval =  combi_name;
                     break;
                 }
             }
             return retval;
-        } else {
-            return null;
         }
+        return null;
     }
 
     public void initAccessCombinations() throws ClassNotFoundException, OXGenericException  {
@@ -235,18 +234,16 @@ public class AdminCache {
 
                         // TODO: Lets stop the admin daemon
                         throw new OXGenericException("Invalid access combinations found in config file!");
-                    } else {
-                        Method meth = module_method_mapping.get(module);
-                        try {
-                            meth.invoke(us, true);
-                        } catch (IllegalArgumentException e) {
-                            log.error("Illegal argument passed to method!", e);
-                        } catch (IllegalAccessException e) {
-                            log.error("Illegal access!", e);
-                        } catch (InvocationTargetException e) {
-                            log.error("Invocation target error!", e);
-                        }
-
+                    }
+                    Method meth = module_method_mapping.get(module);
+                    try {
+                        meth.invoke(us, true);
+                    } catch (IllegalArgumentException e) {
+                        log.error("Illegal argument passed to method!", e);
+                    } catch (IllegalAccessException e) {
+                        log.error("Illegal access!", e);
+                    } catch (InvocationTargetException e) {
+                        log.error("Invocation target error!", e);
                     }
                 }
                 // add moduleaccess object to hashmap/list identified by
@@ -278,7 +275,7 @@ public class AdminCache {
                 if (meth_name.startsWith("set")) {
                     // remember all valid modules and its set methods
                     String module_name = meth_name.substring(3, meth_name.length()).toLowerCase();
-                    if (BLACKLIST != null && !BLACKLIST.contains(module_name)) {
+                    if (!BLACKLIST.contains(module_name)) {
                         module_method_mapping.put(module_name, method);
                         log.debug(module_name);
                     }
@@ -362,6 +359,10 @@ public class AdminCache {
 
     public boolean pushConnectionForConfigDB(final Connection con) throws PoolException {
         return this.pool.pushConnectionForConfigDB(con);
+    }
+
+    public int getServerId() throws PoolException {
+        return this.pool.getServerId();
     }
 
     /**
