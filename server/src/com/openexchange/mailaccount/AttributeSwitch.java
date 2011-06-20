@@ -61,7 +61,7 @@ public interface AttributeSwitch {
     public Object login();
     public Object password();
     public Object mailURL() throws MailAccountException;
-    public Object transportURL();
+    public Object transportURL() throws MailAccountException;
     public Object name();
     public Object primaryAddress();
     public Object personal();

@@ -140,7 +140,7 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
-    public Object transportURL() {
+    public Object transportURL() throws MailAccountException {
         desc.parseTransportServerURL((String) value);
         return null;
     }

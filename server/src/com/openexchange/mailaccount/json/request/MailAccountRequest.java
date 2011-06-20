@@ -488,7 +488,7 @@ public final class MailAccountRequest {
         return mailAccess.ping();
     }
 
-    private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException {
+    private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException, MailAccountException {
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);

@@ -120,7 +120,7 @@ public class GetSwitch implements AttributeSwitch {
         return desc.getSpamHandler();
     }
 
-    public Object transportURL() {
+    public Object transportURL() throws MailAccountException {
         return desc.generateTransportServerURL();
     }
 

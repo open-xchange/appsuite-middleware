@@ -197,7 +197,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return mailAccess.ping();
     }
 
-    private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws MailException {
+    private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws AbstractOXException {
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);

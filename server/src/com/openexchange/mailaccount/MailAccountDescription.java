@@ -55,7 +55,6 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
@@ -480,8 +479,9 @@ public final class MailAccountDescription implements Serializable {
      * Parses specified transport server URL
      * 
      * @param mailServerURL The transport server URL to parse
+     * @throws MailAccountException If URL cannot be parsed
      */
-    public void parseTransportServerURL(final String transportServerURL) {
+    public void parseTransportServerURL(final String transportServerURL) throws MailAccountException {
         if (null == transportServerURL) {
             setTransportServer((String) null);
             return;
@@ -489,28 +489,7 @@ public final class MailAccountDescription implements Serializable {
         try {
             setTransportServer(URIParser.parse(transportServerURL, URIDefaults.SMTP));
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e);
-            // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
-            // instead now.
-            // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, transportServerURL);
-            final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
-            final String prot;
-            final Object[] parsed;
-            if (tmp != null) {
-                prot = tmp[0];
-                parsed = parseServerAndPort(tmp[1], getTransportPort());
-            } else {
-                prot = getTransportProtocol();
-                parsed = parseServerAndPort(transportServerURL, getTransportPort());
-            }
-            if (prot.endsWith("s")) {
-                setTransportSecure(true);
-                setTransportProtocol(prot.substring(0, prot.length() - 1));
-            } else {
-                setTransportProtocol(prot);
-            }
-            setTransportServer(parsed[0].toString());
-            setTransportPort(((Integer) parsed[1]).intValue());
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_HOST_NAME, e, transportServerURL);
         }
     }
 
@@ -532,7 +511,13 @@ public final class MailAccountDescription implements Serializable {
         }
     }
 
-    public String generateTransportServerURL() {
+    /**
+     * Generates transport server URL
+     * 
+     * @return The transport server URL
+     * @throws MailAccountException If URL cannot be parsed
+     */
+    public String generateTransportServerURL() throws MailAccountException {
         if (null != transportUrl) {
             return transportUrl;
         }
@@ -543,14 +528,15 @@ public final class MailAccountDescription implements Serializable {
         try {
             return transportUrl = URITools.generateURI(protocol, transportServer, transportPort).toString();
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e);
-            // Old implementation is not capable of handling IPv6 addresses.
             final StringBuilder sb = new StringBuilder(32);
             sb.append(transportProtocol);
             if (transportSecure) {
                 sb.append('s');
             }
-            return transportUrl = sb.append("://").append(transportServer).append(':').append(transportPort).toString();
+            throw MailAccountExceptionFactory.getInstance().create(
+                MailAccountExceptionMessages.INVALID_HOST_NAME,
+                e,
+                sb.append("://").append(transportServer).append(':').append(mailPort).toString());
         }
     }
 
