@@ -49,9 +49,8 @@
 
 package com.openexchange.subscribe.yahoo.osgi;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Stack;
+import java.util.Collections;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
@@ -98,11 +97,11 @@ public class Activator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             public Collection<? extends UpdateTask> getUpdateTasks() {
-                return Arrays.asList(new DeleteOldYahooSubscriptions());
+                return Collections.<UpdateTask> singletonList(new DeleteOldYahooSubscriptions());
             }
             
         });
-        ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));        
+        final ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));        
         rememberTracker(metaDataTracker);
         openTrackers();
         yahooService = getService(YahooService.class);        
@@ -126,7 +125,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     
-    public void setOAuthServiceMetaData(OAuthServiceMetaData authServiceMetaData) {
+    public void setOAuthServiceMetaData(final OAuthServiceMetaData authServiceMetaData) {
         oAuthServiceMetaData = authServiceMetaData;
     }
 
@@ -136,7 +135,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     
-    public void setYahooService(YahooService yahooService) {
+    public void setYahooService(final YahooService yahooService) {
         this.yahooService = yahooService;
     }
 
