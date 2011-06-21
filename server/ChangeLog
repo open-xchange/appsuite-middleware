@@ -1,6 +1,7 @@
 * 2011-06-21 - thorben.betten@open-xchange.com
 
  - Bugfix #19540: Applying proper flag to contact instance if considered as distribution list
+ - Bugfix #19471: Adapted to MS invitation mails
 
 * 2011-06-20 - thorben.betten@open-xchange.com
 
