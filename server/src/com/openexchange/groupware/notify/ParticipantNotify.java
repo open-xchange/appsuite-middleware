@@ -1076,11 +1076,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
             final BodyPart iCalPart = new MimeBodyPart();
 
-            final String contentType = b.append("text/calendar; ").append(method.getMethod()).toString();
+            final String contentType = b.append("text/calendar; ").append(method.getMethod()).append("; charset=\"utf-8\"").toString();
             b.setLength(0);
             iCalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
             iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType));
-            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
             /*
              * Add the parts to parental multipart & return
              */
