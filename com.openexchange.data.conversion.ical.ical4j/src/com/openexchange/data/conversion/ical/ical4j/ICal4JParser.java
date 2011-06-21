@@ -215,8 +215,9 @@ public class ICal4JParser implements ICalParser {
 
     public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         final List<Task> tasks = new ArrayList<Task>();
+        BufferedReader reader = null;
         try {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(ical, UTF8));
+            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
             while(true) {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
@@ -233,9 +234,15 @@ public class ICal4JParser implements ICalParser {
 
         } catch (final UnsupportedEncodingException e) {
             // IGNORE
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
         }
-
-
         return tasks;
     }
 
