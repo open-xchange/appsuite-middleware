@@ -384,6 +384,11 @@ public class QuotaFileStorageTest extends TestCase {
         public void backNoTimeoout(final int poolId, final Connection con) {
             // Nothing to do
         }
+
+        public int getServerId() throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
     }
 
     private static void rmdir(final File tempFile) {
