@@ -492,20 +492,5 @@ public class ICalParserBugTests extends AbstractICalParserTest {
     	assertEquals("Should find a user, not an external participant" , Participant.USER, participant.getType()); 
     }
     
-    // bug 19484
-    
-    public void testUntilAfterAppointmentWindsUpOnMidnightTheNextDay() throws ConversionError {
-        final Date start = D("24/02/1981 10:00");
-        final Date end =   D("24/02/1981 12:00");
-
-        // DAILY
-
-        Appointment appointment = appointmentWithRecurrence("FREQ=DAILY;INTERVAL=2;UNTIL=19810227T215959Z", start, end);
-
-        // UNTIL is after the end date, so we need to move this to the next midnight to get the desired result.
-        Date until = appointment.getUntil();
-        assertEquals(D("28/02/1981 00:00"), until);
-            
-    }
 
 }
