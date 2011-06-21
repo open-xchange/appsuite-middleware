@@ -57,7 +57,7 @@ package com.openexchange.folderstorage;
 public interface FolderType {
 
     /**
-     * The folder type to store global parameters.
+     * The folder type to store global parameters to {@link StorageParameters storage parameters}.
      */
     public static final FolderType GLOBAL = new FolderType() {
         
