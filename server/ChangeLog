@@ -9,6 +9,7 @@
  - Bugfix #19270: Proper order of contacts for special sort field (607)
  - Bugfix #19560: Added missing tags to 'whitelist.properties' file
  - Bugfix #19562: Showing proper TNEF attachments if present
+ - Bugfix #19566: Proper detection if a global folder is deleted
 
 * 2011-06-20 - thorben.betten@open-xchange.com
 
