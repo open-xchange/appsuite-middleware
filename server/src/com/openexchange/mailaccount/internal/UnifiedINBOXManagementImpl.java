@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -71,6 +72,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 /**
@@ -258,23 +260,39 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
 
     public int getUnifiedINBOXAccountID(final int userId, final int contextId, final Connection con) throws MailAccountException {
         try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            // Look-up the Unified INBOX account for given user
-            final MailAccount[] existingAccounts;
+            final DatabaseService databaseService;
+            final Connection connection;
+            final boolean releaseConnection;
             if (null == con) {
-                existingAccounts = storageService.getUserMailAccounts(userId, contextId);
+                try {
+                    databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+                    connection = databaseService.getReadOnly(contextId);
+                    releaseConnection = true;
+                } catch (final ServiceException e) {
+                    throw new MailAccountException(e);
+                } catch (final DBPoolingException e) {
+                    throw new MailAccountException(e);
+                }
             } else {
-                existingAccounts = storageService.getUserMailAccounts(userId, contextId, con);
+                databaseService = null;
+                connection = con;
+                releaseConnection = false;
             }
-            for (final MailAccount mailAccount : existingAccounts) {
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                    return mailAccount.getId();
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = connection.prepareStatement("SELECT id FROM user_mail_account WHERE cid = 1337 AND user = 17 AND url LIKE ?");
+                stmt.setString(1, UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX + '%');
+                rs = stmt.executeQuery();
+                return rs.next() ? rs.getInt(1) : -1;
+            } catch (final SQLException e) {
+                throw MailAccountExceptionMessages.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+                if (releaseConnection && null != databaseService) {
+                    databaseService.backReadOnly(contextId, connection);
                 }
             }
-            return -1;
-        } catch (final ServiceException e) {
-            throw new MailAccountException(e);
         } catch (final MailAccountException e) {
             throw new MailAccountException(e);
         }
