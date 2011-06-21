@@ -578,12 +578,13 @@ public final class MailMessageParser {
                 /*
                  * Check for possible RTF content
                  */
+                TNEFBodyPart rtfPart = null;
                 {
                     final MAPIProps mapiProps = message.getMAPIProps();
                     if (mapiProps != null) {
                         final RawInputStream ris = (RawInputStream) mapiProps.getPropValue(MAPIProp.PR_RTF_COMPRESSED);
                         if (ris != null) {
-                            final TNEFBodyPart bodyPart = new TNEFBodyPart();
+                            rtfPart = new TNEFBodyPart();
                             /*
                              * De-compress RTF body
                              */
@@ -597,25 +598,22 @@ public final class MailMessageParser {
                             /*
                              * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
                              */
-                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
-                            bodyPart.setSize(decompressedBytes.length);
-                            final MailPart convertedPart = MIMEMessageConverter.convertPart(bodyPart);
-                            convertedPart.setFileName(new StringBuilder(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
-                            parseMailContent(convertedPart, handler, prefix, partCount++);
+                            rtfPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
+                            rtfPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+                            rtfPart.setSize(decompressedBytes.length);
                             /*
-                             * Stop to further process TNEF attachment
+                             * Further process TNEF attachment
                              */
-                            return;
                         }
                     }
                 }
                 /*
                  * Iterate TNEF attachments and nested messages
                  */
-                final int s = message.getAttachments().size();
+                final List<?> attachments = message.getAttachments();
+                final int s = attachments.size();
                 if (s > 0) {
-                    final Iterator<?> iter = message.getAttachments().iterator();
+                    final Iterator<?> iter = attachments.iterator();
                     final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
                     for (int i = 0; i < s; i++) {
                         final Attachment attachment = (Attachment) iter.next();
@@ -669,6 +667,12 @@ public final class MailMessageParser {
                         }
                     }
                 } else {
+                    // Check RTF part
+                    if (null != rtfPart) {
+                        final MailPart convertedPart = MIMEMessageConverter.convertPart(rtfPart);
+                        convertedPart.setFileName(new StringBuilder(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
+                        parseMailContent(convertedPart, handler, prefix, partCount++);
+                    }
                     // As attachment
                     if (null == messageClass) {
                         if (!mailPart.containsSequenceId()) {
