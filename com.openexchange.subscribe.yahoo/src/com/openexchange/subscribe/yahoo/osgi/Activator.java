@@ -49,14 +49,15 @@
 
 package com.openexchange.subscribe.yahoo.osgi;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooService;
@@ -97,7 +98,7 @@ public class Activator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             public Collection<? extends UpdateTask> getUpdateTasks() {
-                return Collections.<UpdateTask> singletonList(new DeleteOldYahooSubscriptions());
+                return Arrays.asList(((UpdateTaskV2) new DeleteOldYahooSubscriptions()));
             }
             
         });
