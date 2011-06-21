@@ -658,6 +658,7 @@ public class OXContainerConverter {
             final Property oxCtype = object.getProperty(P_OPEN_XCHANGE_CTYPE);
             if (oxCtype != null && CTYPE_DISTRIBUTION_LIST.equalsIgnoreCase(oxCtype.getValue().toString())) {
                 dlist = true;
+                contactContainer.setMarkAsDistributionlist(true);
             }
         }
 
@@ -1477,8 +1478,7 @@ public class OXContainerConverter {
         // NICKNAME
         addProperty(object, "NICKNAME", getList(contact.getNickname(), ','));
         // Distribution list?
-        final DistributionListEntryObject[] distributionList = contact.getDistributionList();
-        if (null == distributionList || 0 == distributionList.length) {
+        if (!contact.containsMarkAsDistributionlist() || !contact.getMarkAsDistribtuionlist()) {
             addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_CONTACT);
             // PHOTO
             if (contact.getImage1() != null) {
@@ -1595,25 +1595,28 @@ public class OXContainerConverter {
             }
         } else {
             addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_DISTRIBUTION_LIST);
-            for (final DistributionListEntryObject distributionListEntry : distributionList) {
-                final String address = distributionListEntry.getEmailaddress();
-                if (address != null) {
-                    final Property property = new Property(P_EMAIL);
-                    property.setValue(address);
-                    {
-                        final Parameter parameter = new Parameter(P_TYPE);
-                        parameter.addValue(new ParameterValue("INTERNET"));
-                        property.addParameter(parameter);
-                    }
-                    if (addDisplayName4DList) {
-                        final String displayName = distributionListEntry.getDisplayname();
-                        if (null != displayName) {
-                            final Parameter parameter = new Parameter("FN");
-                            parameter.addValue(new ParameterValue(encodeQP(displayName)));
+            final DistributionListEntryObject[] distributionList = contact.getDistributionList();
+            if (null != distributionList && 0 < distributionList.length) {
+                for (final DistributionListEntryObject distributionListEntry : distributionList) {
+                    final String address = distributionListEntry.getEmailaddress();
+                    if (address != null) {
+                        final Property property = new Property(P_EMAIL);
+                        property.setValue(address);
+                        {
+                            final Parameter parameter = new Parameter(P_TYPE);
+                            parameter.addValue(new ParameterValue("INTERNET"));
                             property.addParameter(parameter);
                         }
+                        if (addDisplayName4DList) {
+                            final String displayName = distributionListEntry.getDisplayname();
+                            if (null != displayName) {
+                                final Parameter parameter = new Parameter("FN");
+                                parameter.addValue(new ParameterValue(encodeQP(displayName)));
+                                property.addParameter(parameter);
+                            }
+                        }
+                        object.addProperty(property);
                     }
-                    object.addProperty(property);
                 }
             }
         }

@@ -1,3 +1,7 @@
+* 2011-06-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #19540: Applying proper flag to contact instance if considered as distribution list
+
 * 2011-06-20 - thorben.betten@open-xchange.com
 
  - Bugfix #19534: Fail for invalid transport server, too
