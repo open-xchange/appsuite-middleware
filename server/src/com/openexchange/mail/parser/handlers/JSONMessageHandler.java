@@ -72,6 +72,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -882,11 +883,36 @@ public final class JSONMessageHandler implements MailMessageHandler {
             }
         }
          */
+        if (isVCalendar(baseContentType)) {
+            /*
+             * Check ICal part for a valid UID and presence of method=RESPONSE parameter
+             */
+            final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
+            if (iCalParser != null) {
+                try {
+                    if (null != iCalParser.parseUID(part.getInputStream())) {
+                        /*
+                         * Assume an invitation response
+                         */
+                        final ContentType contentType = part.getContentType();
+                        if (null == contentType.getParameter("method")) {
+                            contentType.setParameter("method", "RESPONSE");
+                        }
+                    }
+                } catch (final RuntimeException e) {
+                    LOG.warn("A runtime error occurred.", e);
+                }
+            }
+        }
         /*
          * When creating a JSON message object from a message we do not distinguish special parts or image parts from "usual" attachments.
          * Therefore invoke the handleAttachment method. Maybe we need a separate handling in the future for vcards.
          */
         return handleAttachment(part, false, baseContentType, fileName, id);
+    }
+
+    private static boolean isVCalendar(final String baseContentType) {
+        return "text/calendar".equalsIgnoreCase(baseContentType) || "text/x-vcalendar".equalsIgnoreCase(baseContentType);
     }
 
     public boolean handleSubject(final String subject) throws MailException {
