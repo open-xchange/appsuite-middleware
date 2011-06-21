@@ -286,12 +286,6 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         }
     }
 
-    private Date plusOneDay(Date until) {
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(until);
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-        return calendar.getTime();
-    }
 
     private void setOccurrenceIfNeededRecoveryFIXME(final U cObj, final int recurrenceCount) {
         if (Appointment.class.isAssignableFrom(cObj.getClass())) {
