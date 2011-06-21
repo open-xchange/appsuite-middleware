@@ -377,7 +377,7 @@ public class QuotaFileStorageTest extends TestCase {
             return null;
         }
 
-        public Connection getNoTimeout(final int poolId, final String schema) throws DBPoolingException {
+        public Connection getNoTimeout(final int poolId, final String schema) {
             return null;
         }
 
@@ -385,8 +385,7 @@ public class QuotaFileStorageTest extends TestCase {
             // Nothing to do
         }
 
-        public int getServerId() throws DBPoolingException {
-            // TODO Auto-generated method stub
+        public int getServerId() {
             return 0;
         }
     }
