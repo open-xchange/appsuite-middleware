@@ -50,8 +50,6 @@
 package com.openexchange.groupware.notify;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -157,7 +155,6 @@ import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class ParticipantNotify implements AppointmentEventInterface2, TaskEventInterface2 {
@@ -198,7 +195,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             String message;
             if (Multipart.class.isInstance(msg.message)) {
                 try {
-                    message = ((Multipart) msg.message).getBodyPart(0).getContent().toString();
+                    message = ((Multipart) msg.message).getBodyPart(0).getContent().toString() + "\n\n(With ICal attached)";
                 } catch (final Exception e) {
                     message = "";
                 }
@@ -1067,11 +1064,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             /*
              * Copy stream
              */
-            final InputStream icalFile;
+            final byte[] icalFile;
+            final boolean isAscii;
             {
                 final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
                 emitter.writeSession(icalSession, byteArrayOutputStream);
-                icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                icalFile = byteArrayOutputStream.toByteArray();
+                isAscii = isAscii(icalFile);
             }
 
             final BodyPart iCalPart = new MimeBodyPart();
@@ -1080,7 +1079,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             b.setLength(0);
             iCalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
             iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType));
-            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
+            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii ? "7bit" : "quoted-printable");
             /*
              * Add the parts to parental multipart & return
              */
@@ -1091,8 +1090,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             LOG.error("Unable to compose message", e);
         } catch (final ConversionError e) {
             LOG.error("Unable to compose message", e);
-        } catch (final IOException e) {
-            LOG.error("Unable to compose message", e);
         } catch (final OXException e) {
             LOG.error("Unable to compose message", e);
         }
@@ -1100,6 +1097,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
          * Failed to create multipart
          */
         return text;
+    }
+
+    private static boolean isAscii(final byte[] bytes) {
+        boolean isAscci = true;
+        for (int i = 0; isAscci && (i < bytes.length); i++) {
+            isAscci &= (bytes[i] < 128);
+        }
+        return isAscci;
     }
 
     private static String getTaskCreateMessage(final EmailableParticipant p, final boolean canRead) {
