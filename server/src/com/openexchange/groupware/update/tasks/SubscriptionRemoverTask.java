@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.tablesExist;
 import java.sql.Connection;
@@ -56,6 +56,16 @@ import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateConcurrency;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 

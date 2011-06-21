@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.subscribe.yahoo.update;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.groupware.update.SubscriptionRemoverTask;
 
 
 /**

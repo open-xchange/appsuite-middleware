@@ -368,6 +368,9 @@ public final class InternalList {
 
         // Remove linkedin subscriptions to force use of new oauth
         new com.openexchange.groupware.update.tasks.LinkedInCrawlerSubscriptionsRemoverTask(),
+
+        // Remove yahoo subscriptions to force use of new oauth
+        new com.openexchange.groupware.update.tasks.DeleteOldYahooSubscriptions(),
         
         // Switch the column type of 'value' in contextAttribute to TEXT
         new AllowTextInValuesOfDynamicContextAttributesTask(),
