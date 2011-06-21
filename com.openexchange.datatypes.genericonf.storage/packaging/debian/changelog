@@ -1,3 +1,9 @@
+open-xchange-genconf-mysql (6.20.0.0-13) unstable; urgency=low
+
+  * Public PTF 2011-06-22
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue, 21 Jun 2011 14:40:59 +0000
+
 open-xchange-genconf-mysql (6.20.0.0-12) unstable; urgency=low
 
   * build for public ptf 2011-06-22

@@ -1,3 +1,9 @@
+open-xchange-spamhandler-cloudmark (6.20.0.0-1) unstable; urgency=low
+
+  * Public PTF 2011-06-22
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue, 21 Jun 2011 14:42:27 +0000
+
 open-xchange-spamhandler-cloudmark (6.20.0.0-0) unstable; urgency=low
 
   * Initial package.

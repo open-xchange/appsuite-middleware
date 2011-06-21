@@ -1,3 +1,9 @@
+open-xchange-config-cascade-context (6.20.0.0-13) unstable; urgency=low
+
+  * Public PTF 2011-06-22
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue, 21 Jun 2011 14:39:20 +0000
+
 open-xchange-config-cascade-context (6.20.0.0-12) unstable; urgency=low
 
   * build for public ptf 2011-06-22
