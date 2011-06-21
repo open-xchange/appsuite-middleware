@@ -57,6 +57,7 @@ import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
@@ -186,6 +187,7 @@ public final class DeletePerformer extends AbstractPerformer {
 
     private void deleteVirtualFolder(final String folderId, final String treeId, final FolderStorage folderStorage, final List<FolderStorage> openedStorages) throws FolderException {
         final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
+        storageParameters.putParameter(FolderType.GLOBAL, "global", Boolean.valueOf(folder.isGlobalID()));
         {
             final Permission permission;
             if (null == getSession()) {

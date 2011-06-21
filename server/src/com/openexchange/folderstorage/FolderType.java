@@ -57,6 +57,24 @@ package com.openexchange.folderstorage;
 public interface FolderType {
 
     /**
+     * The folder type to store global parameters.
+     */
+    public static final FolderType GLOBAL = new FolderType() {
+        
+        public boolean servesTreeId(final String treeId) {
+            return false;
+        }
+        
+        public boolean servesParentId(final String parentId) {
+            return false;
+        }
+        
+        public boolean servesFolderId(final String folderId) {
+            return false;
+        }
+    };
+
+    /**
      * Indicates if this folder type serves specified tree identifier.
      * 
      * @param treeId The tree identifier

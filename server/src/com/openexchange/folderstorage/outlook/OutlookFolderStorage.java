@@ -541,7 +541,11 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         TCM.clear();
-        final boolean global = getFolder(treeId, folderId, storageParameters).isGlobalID();
+        final boolean global;
+        {
+            final Boolean b = storageParameters.getParameter(FolderType.GLOBAL, "global");
+            global = null == b ? true : b.booleanValue();
+        }
         final Session session = storageParameters.getSession();
         final int tree = Tools.getUnsignedInteger(treeId);
         {
