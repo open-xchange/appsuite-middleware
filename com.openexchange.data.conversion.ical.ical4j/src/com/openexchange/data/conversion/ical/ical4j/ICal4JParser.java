@@ -66,6 +66,7 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
@@ -154,13 +155,54 @@ public class ICal4JParser implements ICalParser {
             
         } catch (final UnsupportedEncodingException e) {
             // IGNORE
-        } catch (ConversionError e){
+        } catch (final ConversionError e){
         	errors.add(e);
+        } finally {
+            if (null != reader) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
         }
 
 
 
         return appointments;
+    }
+
+    public String parseUID(final InputStream ical) {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
+            final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
+            if (calendar == null) {
+                return null;
+            }
+            final int i = 0;
+            for (final Object componentObj : calendar.getComponents("VEVENT")) {
+                final Component vevent = (Component) componentObj;
+                final Property property = vevent.getProperty(Property.UID);
+                return null == property ? null : property.getValue();
+            }
+            return null;
+        } catch (final UnsupportedEncodingException e) {
+            // IGNORE
+            return null;
+        } catch (final ConversionError e){
+            return null;
+        } catch (final RuntimeException e){
+            return null;
+        } finally {
+            if (null != reader) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
@@ -336,15 +378,15 @@ public class ICal4JParser implements ICalParser {
         return null;
     }
 
-    private String workaroundFor17963(String input) {
+    private String workaroundFor17963(final String input) {
     	return input.replaceAll("EXDATE:(\\d+)([\\n\\r])", "EXDATE:$1T000000$2");
 	}
 
-	private String workaroundFor17492(String input) {
+	private String workaroundFor17492(final String input) {
     	return input.replaceAll(";SCHEDULE-AGENT=", ";X-CALDAV-SCHEDULE-AGENT=");
 	}
 	
-	private String workaroundFor19463(String input) {
+	private String workaroundFor19463(final String input) {
 		return input
 			.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1")
 			.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$1")
@@ -359,11 +401,11 @@ public class ICal4JParser implements ICalParser {
      * allowed. Since spreading just makes it nicer to read for humans, this method
      * strips those newline+whitespace elements so we can use simple regexps.
      */
-    private String removeAnnoyingWhitespaces(String input) {
+    private String removeAnnoyingWhitespaces(final String input) {
 		return input.replaceAll("\n\\s+", "");
 	}
 
-	private String workaroundFor16895(String input) {
+	private String workaroundFor16895(final String input) {
 		/* Bug in Zimbra: They like to use an EMAIL element for the 
 		 * ATTENDEE property, though there is none.
 		 */
