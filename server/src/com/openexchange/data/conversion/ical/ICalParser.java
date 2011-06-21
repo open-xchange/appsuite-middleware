@@ -68,4 +68,12 @@ public interface ICalParser {
     List<CalendarDataObject> parseAppointments(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     List<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
+    /**
+     * Parses the first UID possibly contained in specified ICal stream.
+     * 
+     * @param ical The ICal stream
+     * @return The detected UID or <code>null</code>
+     */
+    String parseUID(final InputStream ical);
 }

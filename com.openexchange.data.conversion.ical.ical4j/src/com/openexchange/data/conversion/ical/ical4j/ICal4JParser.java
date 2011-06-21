@@ -180,7 +180,6 @@ public class ICal4JParser implements ICalParser {
             if (calendar == null) {
                 return null;
             }
-            final int i = 0;
             for (final Object componentObj : calendar.getComponents("VEVENT")) {
                 final Component vevent = (Component) componentObj;
                 final Property property = vevent.getProperty(Property.UID);

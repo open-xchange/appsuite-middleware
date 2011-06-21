@@ -72,34 +72,34 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
 
-    private ICalParser delegate;
-    private ServerServiceRegistry registry;
+    private final ICalParser delegate;
+    private final ServerServiceRegistry registry;
     
-    public ExtraneousSeriesMasterRecoveryParser(ICalParser delegate, ServerServiceRegistry registry) {
+    public ExtraneousSeriesMasterRecoveryParser(final ICalParser delegate, final ServerServiceRegistry registry) {
         this.delegate = delegate;
         this.registry = registry;
     }
 
-    public List<CalendarDataObject> parseAppointments(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return splitIfNeeded(delegate.parseAppointments(ical, defaultTZ, ctx, errors, warnings));
     }
 
-    public List<CalendarDataObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return splitIfNeeded(delegate.parseAppointments(icalText, defaultTZ, ctx, errors, warnings));
     }
 
-    private List<CalendarDataObject> splitIfNeeded(List<CalendarDataObject> appointments) throws ConversionError {
-        CalendarCollectionService tools = registry.getService(CalendarCollectionService.class);
+    private List<CalendarDataObject> splitIfNeeded(final List<CalendarDataObject> appointments) throws ConversionError {
+        final CalendarCollectionService tools = registry.getService(CalendarCollectionService.class);
         int index = 0;
-        LinkedList<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);
-        for (CalendarDataObject appointment : appointments) {
+        final LinkedList<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);
+        for (final CalendarDataObject appointment : appointments) {
             try {
                 if(appointment.isSequence() && !tools.isOccurrenceDate(appointment.getStartDate().getTime(), -1, appointment, new long[0])) {
-                    CalendarDataObject clone = (CalendarDataObject) appointment.clone();
+                    final CalendarDataObject clone = appointment.clone();
                     tools.removeRecurringType(appointment);
                     copy.add(clone);
                 }
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 throw new ConversionError(index, e);
             }
             index++;
@@ -108,14 +108,16 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
         return copy;
     }
 
-    public List<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return delegate.parseTasks(ical, defaultTZ, context, errors, warnings);
     }
 
-    public List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return delegate.parseTasks(icalText, defaultTZ, context, errors, warnings);
     }
 
-    
+    public String parseUID(final InputStream ical) {
+        return delegate.parseUID(ical);
+    }
     
 }
