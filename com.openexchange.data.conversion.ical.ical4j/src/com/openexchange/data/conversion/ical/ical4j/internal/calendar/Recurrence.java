@@ -80,11 +80,14 @@ import com.openexchange.groupware.contexts.Context;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Recurrence<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+public class Recurrence<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
     private static final Map<String, Integer> weekdays = new HashMap<String, Integer>();
+
     private static final Map<Integer, String> reverseDays = new HashMap<Integer, String>();
+
     private static final List<Integer> allDays = new LinkedList<Integer>();
+
     private static final SimpleDateFormat date;
     static {
         weekdays.put("MO", Integer.valueOf(Appointment.MONDAY));
@@ -95,7 +98,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         weekdays.put("SA", Integer.valueOf(Appointment.SATURDAY));
         weekdays.put("SU", Integer.valueOf(Appointment.SUNDAY));
 
-        for(final Map.Entry<String, Integer> entry : weekdays.entrySet()) {
+        for (final Map.Entry<String, Integer> entry : weekdays.entrySet()) {
             allDays.add(entry.getValue());
             reverseDays.put(entry.getValue(), entry.getKey());
         }
@@ -119,24 +122,24 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     }
 
     public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
-        if(calendar.isException()) {
+        if (calendar.isException()) {
             return;
         }
         switch (calendar.getRecurrenceType()) {
-            case CalendarObject.DAILY:
-                addDailyRecurrence(calendar, component);
-                break;
-            case CalendarObject.WEEKLY:
-                addWeeklyRecurrence(index, calendar, component);
-                break;
-            case CalendarObject.MONTHLY:
-                addMonthlyRecurrence(index, calendar, component);
-                break;
-            case CalendarObject.YEARLY:
-                addYearlyRecurrence(index, calendar, component);
-                break;
-            default:
-                return;
+        case CalendarObject.DAILY:
+            addDailyRecurrence(calendar, component);
+            break;
+        case CalendarObject.WEEKLY:
+            addWeeklyRecurrence(index, calendar, component);
+            break;
+        case CalendarObject.MONTHLY:
+            addMonthlyRecurrence(index, calendar, component);
+            break;
+        case CalendarObject.YEARLY:
+            addYearlyRecurrence(index, calendar, component);
+            break;
+        default:
+            return;
         }
     }
 
@@ -181,7 +184,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             final RRule rrule = new RRule(new Recur(recur.toString()));
             component.getProperties().add(rrule);
         } catch (final ParseException e) {
-            throw new ConversionError(index,ConversionError.Code.CANT_CREATE_RRULE, e, recur.toString());
+            throw new ConversionError(index, ConversionError.Code.CANT_CREATE_RRULE, e, recur.toString());
         }
     }
 
@@ -278,12 +281,8 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             setOccurrenceIfNeededRecoveryFIXME(cObj, recurrenceCount);
         } else if (null != rrule.getUntil()) {
             Date until = new Date(rrule.getUntil().getTime());
-            if (until.after(cObj.getEndDate())) {
-                cObj.setUntil(ParserTools.recalculateMidnight(plusOneDay(until), TimeZone.getTimeZone("UTC"))); // OX always has 00:00 UTC same say as until value
-                
-            } else {
-                cObj.setUntil(ParserTools.recalculateMidnight(until, TimeZone.getTimeZone("UTC"))); // OX always has 00:00 UTC same say as until value
-            }
+            cObj.setUntil(ParserTools.recalculateMidnight(until, TimeZone.getTimeZone("UTC"))); // OX always has 00:00 UTC same say as until
+                                                                                                // value
         }
     }
 
@@ -324,9 +323,9 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     }
 
     private void setDayInMonthFromSetPos(final int index, final CalendarObject obj, final Recur rrule) {
-        if(!rrule.getSetPosList().isEmpty()) {
+        if (!rrule.getSetPosList().isEmpty()) {
             int firstPos = (Integer) rrule.getSetPosList().get(0);
-            if(firstPos == -1) {
+            if (firstPos == -1) {
                 firstPos = 5;
             }
             obj.setDayInMonth(firstPos);
@@ -345,13 +344,13 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
                     throw new ConversionError(index, "Unknown day: %s", weekday.getDay());
                 }
                 int offset = weekday.getOffset();
-                if(offset != 0) {
-                    if(offset == -1) {
+                if (offset != 0) {
+                    if (offset == -1) {
                         offset = 5;
                     }
                     cObj.setDayInMonth(offset);
                 }
-                
+
                 days |= day.intValue();
             }
             cObj.setDays(days);
