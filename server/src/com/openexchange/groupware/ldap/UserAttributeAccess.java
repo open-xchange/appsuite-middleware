@@ -220,19 +220,11 @@ public final class UserAttributeAccess {
      */
     public void setAttribute(final String name, final String value, final User user, final Context context) throws LdapException {
         final Map<String, Set<String>> attributes = user.getAttributes();
-        /*
-         * Create a modifiable map from existing unmodifiable map
-         */
-        final int size = attributes.size();
-        final Map<String, Set<String>> newAttributes = new HashMap<String, Set<String>>(size);
-        final Iterator<Entry<String, Set<String>>> iter = attributes.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final Entry<String, Set<String>> entry = iter.next();
+        final Map<String, Set<String>> newAttributes = new HashMap<String, Set<String>>(attributes.size());
+        for (Map.Entry<String, Set<String>> entry : attributes.entrySet()) {
             newAttributes.put(entry.getKey(), new HashSet<String>(entry.getValue()));
         }
-        /*
-         * Add specified boolean value
-         */
+        // Add specified boolean value
         Set<String> set = newAttributes.get(name);
         if (null == set) {
             set = new HashSet<String>();
@@ -241,13 +233,9 @@ public final class UserAttributeAccess {
             set.clear();
         }
         set.add(value);
-        /*
-         * Save modification
-         */
+        // Save modification
         final UserImpl userImpl = new UserImpl();
         userImpl.setId(user.getId());
-        // userImpl.setTimeZone(user.getTimeZone());
-        // userImpl.setPreferredLanguage(user.getPreferredLanguage());
         userImpl.setAttributes(newAttributes);
         userStorage.updateUser(userImpl, context);
     }

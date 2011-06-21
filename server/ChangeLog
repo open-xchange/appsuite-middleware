@@ -1,3 +1,7 @@
+* 2011-06-21 - marcus.klein@open-xchange.com
+
+ - TA7369 of US6559: Changed user attributes now go through a diff algorithm and then only real changes are applied to database.
+
 * 2011-06-21 - thorben.betten@open-xchange.com
 
  - Bugfix #19540: Applying proper flag to contact instance if considered as distribution list

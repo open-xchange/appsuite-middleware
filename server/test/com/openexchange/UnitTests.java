@@ -54,6 +54,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
 import com.openexchange.ajax.parser.TaskLastModifiedTest;
+import com.openexchange.groupware.ldap.UserAttributeDiffTest;
 import com.openexchange.tools.collections.OXCollectionsTest;
 import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
 import com.openexchange.tools.net.URIParserTest;
@@ -76,6 +77,7 @@ public class UnitTests {
         tests.addTestSuite(OXCollectionsTest.class);
         tests.addTestSuite(ContactSearchtermSqlConverterTest.class);
         tests.addTest(new JUnit4TestAdapter(URIParserTest.class));
+        tests.addTest(new JUnit4TestAdapter(UserAttributeDiffTest.class));
         return tests;
     }
 }

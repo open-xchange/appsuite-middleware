@@ -69,7 +69,7 @@ public class Protocol {
 	public static final String DEFAULT_NAMESPACE = "DAV:";
 	public static final String COLLECTION = "<D:collection />";
 	
-	public static enum WEBDAV_METHOD {GET, PUT, MKCOL, DELETE, HEAD, OPTIONS, TRACE, PROPPATCH, PROPFIND, MOVE, COPY, LOCK, UNLOCK}
+	public static enum WEBDAV_METHOD {GET, PUT, MKCOL, DELETE, HEAD, OPTIONS, TRACE, PROPPATCH, PROPFIND, MOVE, COPY, LOCK, UNLOCK, REPORT, ACL, MKCALENDAR}
 	
 	public static final class Property {
 		private final int id;

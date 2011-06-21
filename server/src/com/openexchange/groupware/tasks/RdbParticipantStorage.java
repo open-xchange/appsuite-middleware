@@ -159,6 +159,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         final StorageType type) throws TaskException {
         PreparedStatement stmt = null;
         try {
+            // UPDATE table SET group_id=?, accepted=?, description=? WHERE cid=? AND task=? AND user=?
             stmt = con.prepareStatement(SQL.UPDATE_PARTS.get(type));
             for (final InternalParticipant participant : participants) {
                 int pos = 1;

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.ldap;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
@@ -216,7 +217,11 @@ public class UserException extends AbstractOXException {
          /**
           * Loading one or more users failed.
           */
-         LOAD_FAILED("Loading one or more users failed.", Category.CODE_ERROR, Detail.ERROR, 17);
+         LOAD_FAILED("Loading one or more users failed.", Category.CODE_ERROR, Detail.ERROR, 17),
+         /** Alias entries are missing for user %1$d in context %2$d. */
+         ALIASES_MISSING("Alias entries are missing for user %1$d in context %2$d.", Category.SETUP_ERROR, Detail.ERROR, 18),
+         /** Updating attributes failed in context %1$d for user %2$d. */
+         UPDATE_ATTRIBUTES_FAILED("Updating attributes failed in context %1$d for user %2$d.", Category.CODE_ERROR, Detail.ERROR, 19);
 
         /**
          * Message of the exception.

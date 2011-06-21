@@ -73,7 +73,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -481,6 +480,9 @@ public class RdbUserStorage extends UserStorage {
         } catch (SQLException e) {
             rollback(con);
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+        } catch (UserException e) {
+            rollback(con);
+            throw new LdapException(e);
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(context, con);
@@ -587,46 +589,178 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updateAttributes(Context ctx, User user, Connection con) throws SQLException {
-        // Update attributes
+    private void updateAttributes(Context ctx, User user, Connection con) throws SQLException, UserException {
         int contextId = ctx.getContextId();
         int userId = user.getId();
+        UserImpl load = new UserImpl();
+        load.setId(userId);
+        Map<Integer, UserImpl> loadMap = new HashMap<Integer, UserImpl>(1);
+        loadMap.put(I(userId), load);
+        loadAttributes(ctx, con, loadMap);
+        Map<String, Set<String>> oldAttributes = load.getAttributes();
         Map<String, Set<String>> attributes = user.getAttributes();
-        // Clear all attributes
+        Map<String, Set<String>> added = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> removed = new HashMap<String, Set<String>>();
+        Map<String, Set<String[]>> changed = new HashMap<String, Set<String[]>>();
+        calculateDifferences(oldAttributes, attributes, added, removed, changed);
         PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
-        }
-        // Insert new ones
-        if (!attributes.isEmpty()) {
-            // Batch update them
-            stmt = null;
+        // Add new attributes
+        if (!added.isEmpty()) {
             try {
                 stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
-                for (final Entry<String, Set<String>> entry : attributes.entrySet()) {
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                int size = 0;
+                for (Map.Entry<String, Set<String>> entry : added.entrySet()) {
                     for (final String value : entry.getValue()) {
-                        int pos = 1;
-                        stmt.setInt(pos++, contextId);
-                        stmt.setInt(pos++, userId);
-                        stmt.setString(pos++, entry.getKey());
-                        stmt.setString(pos++, value);
+                        stmt.setString(3, entry.getKey());
+                        stmt.setString(4, value);
                         stmt.addBatch();
+                        size++;
                     }
                 }
-                stmt.executeBatch();
+                int[] mLines = stmt.executeBatch();
+                int lines = 0;
+                for (int mLine : mLines) {
+                    lines += mLine;
+                }
+                if (size != lines) {
+                    UserException e = new UserException(UserException.Code.UPDATE_ATTRIBUTES_FAILED, I(contextId), I(userId));
+                    LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                    throw e;
+                }
             } finally {
                 closeSQLStuff(stmt);
             }
-        } else {
-            UserException e = new UserException(UserException.Code.ERASED_ATTRIBUTES, I(contextId), I(userId));
-            LOG.warn(e.getMessage(), e);
         }
+        // Remove attributes
+        if (!removed.isEmpty()) {
+            try {
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                int size = 0;
+                for (Map.Entry<String, Set<String>> entry : removed.entrySet()) {
+                    for (final String value : entry.getValue()) {
+                        stmt.setString(3, entry.getKey());
+                        stmt.setString(4, value);
+                        stmt.addBatch();
+                        size++;
+                    }
+                }
+                int[] mLines = stmt.executeBatch();
+                int lines = 0;
+                for (int mLine : mLines) {
+                    lines += mLine;
+                }
+                if (size != lines) {
+                    UserException e = new UserException(UserException.Code.UPDATE_ATTRIBUTES_FAILED, I(contextId), I(userId));
+                    LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                    throw e;
+                }
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        }
+        // Update attributes
+        if (!changed.isEmpty()) {
+            try {
+                stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=? AND value=?");
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
+                int size = 0;
+                for (Map.Entry<String, Set<String[]>> entry : changed.entrySet()) {
+                    for (String[] value : entry.getValue()) {
+                        stmt.setString(4, entry.getKey());
+                        stmt.setString(5, value[0]);
+                        stmt.setString(1, value[1]);
+                        stmt.addBatch();
+                        size++;
+                    }
+                }
+                int[] mLines = stmt.executeBatch();
+                int lines = 0;
+                for (int mLine : mLines) {
+                    lines += mLine;
+                }
+                if (size != lines) {
+                    UserException e = new UserException(UserException.Code.UPDATE_ATTRIBUTES_FAILED, I(contextId), I(userId));
+                    LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                    throw e;
+                }
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        }
+    }
+
+    private String toString(Map<String, Set<String[]>> changed) {
+        StringBuilder sb = new StringBuilder("{");
+        for (Map.Entry<String, Set<String[]>> entry : changed.entrySet()) {
+            sb.append(entry.getKey());
+            sb.append("=[");
+            for (String[] value : entry.getValue()) {
+                sb.append(value[0]);
+                sb.append("=>");
+                sb.append(value[1]);
+                sb.append(',');
+            }
+            sb.setCharAt(sb.length() - 1, ']');
+            sb.append(',');
+        }
+        sb.setCharAt(sb.length() - 1, '}');
+        return sb.toString();
+    }
+
+    static void calculateDifferences(Map<String, Set<String>> oldAttributes, Map<String, Set<String>> newAttributes, Map<String, Set<String>> added, Map<String, Set<String>> removed, Map<String, Set<String[]>> changed) {
+        // Find added keys
+        added.putAll(newAttributes);
+        for (String key : oldAttributes.keySet()) { added.remove(key); }
+        // Find removed keys
+        removed.putAll(oldAttributes);
+        for (String key : newAttributes.keySet()) { removed.remove(key); }
+        // Now the keys that are contained in old and new attributes.
+        for (String key : newAttributes.keySet()) {
+            if (oldAttributes.containsKey(key)) {
+                compareValues(key, oldAttributes.get(key), newAttributes.get(key), added, removed, changed);
+            }
+        }
+    }
+
+    private static void compareValues(String name, Set<String> oldSet, Set<String> newSet, Map<String, Set<String>> added, Map<String, Set<String>> removed, Map<String, Set<String[]>> changed) {
+        Set<String> addedValues = new HashSet<String>();
+        Set<String> removedValues = new HashSet<String>();
+        // Find added values for a key.
+        addedValues.addAll(newSet);
+        addedValues.removeAll(oldSet);
+        // Find removed values for a key.
+        removedValues.addAll(oldSet);
+        removedValues.removeAll(newSet);
+        Iterator<String> addedIter = addedValues.iterator();
+        Iterator<String> removedIter = removedValues.iterator();
+        while (addedIter.hasNext() && removedIter.hasNext()) {
+            Set<String[]> values = changed.get(name);
+            if (null == values) {
+                values = new HashSet<String[]>();
+                changed.put(name, values);
+            }
+            values.add(new String[] { removedIter.next(), addedIter.next() });
+        }
+        while (addedIter.hasNext()) {
+            add(added, name, addedIter.next());
+        }
+        while (removedIter.hasNext()) {
+            add(removed, name, removedIter.next());
+        }
+    }
+
+    private static void add(Map<String, Set<String>> attributes, String name, String value) {
+        Set<String> values = attributes.get(name);
+        if (null == values) {
+            values = new HashSet<String>();
+            attributes.put(name, values);
+        }
+        values.add(value);
     }
 
     @Override
