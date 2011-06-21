@@ -972,7 +972,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
             }
         }
-        return SearchIteratorAdapter.createEmptyIterator();
+        return SearchIteratorAdapter.emptyIterator();
     }
 
     public SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final Order orderDir, final int cols[]) throws OXException, SQLException {
@@ -1165,7 +1165,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         PreparedStatement private_folder_information = null;
         try {
             if (!userConfig.hasFreeBusy()) {
-                return SearchIteratorAdapter.createEmptyIterator();
+                return SearchIteratorAdapter.emptyIterator();
             }
             readcon = DBPool.pickup(ctx);
             switch(type) {

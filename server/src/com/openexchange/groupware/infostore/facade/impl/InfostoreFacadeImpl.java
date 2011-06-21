@@ -1491,7 +1491,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         final SearchIterator<DocumentMetadata> it;
         if (ignoreDeleted) {
-            it = SearchIteratorAdapter.createEmptyIterator();
+            it = SearchIteratorAdapter.emptyIterator();
         } else {
             it = delIter;
         }

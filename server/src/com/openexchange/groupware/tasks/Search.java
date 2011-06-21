@@ -111,7 +111,7 @@ public class Search {
         checkConditions();
         prepareFolder();
         if (all.size() + own.size() + shared.size() == 0) {
-            return SearchIteratorAdapter.createEmptyIterator();
+            return SearchIteratorAdapter.emptyIterator();
         }
         return TaskStorage.getInstance().search(ctx, getUserId(), search, orderBy, order, columns, all, own, shared);
     }

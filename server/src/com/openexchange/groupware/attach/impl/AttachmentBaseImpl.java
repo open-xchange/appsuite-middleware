@@ -331,7 +331,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             Integer.valueOf(ctx.getContextId()),
             Long.valueOf(ts));
 
-        SearchIterator<AttachmentMetadata> deletedIterator = SearchIteratorAdapter.createEmptyIterator();
+        SearchIterator<AttachmentMetadata> deletedIterator = SearchIteratorAdapter.emptyIterator();
 
         if (!ignoreDeleted) {
             deletedIterator = new AttachmentIterator(
@@ -348,7 +348,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         return new DeltaImpl<AttachmentMetadata>(
             newIterator,
-            SearchIteratorAdapter.<AttachmentMetadata> createEmptyIterator(),
+            SearchIteratorAdapter.<AttachmentMetadata> emptyIterator(),
             deletedIterator,
             System.currentTimeMillis());
     }

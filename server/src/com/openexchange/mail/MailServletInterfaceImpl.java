@@ -636,7 +636,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String parentFullname = argument.getFullname();
         final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(parentFullname, all)));
         if (children.isEmpty()) {
-            return SearchIteratorAdapter.createEmptyIterator();
+            return SearchIteratorAdapter.emptyIterator();
         }
         /*
          * Filter against possible POP3 storage folders
@@ -1183,7 +1183,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Proceed
          */
         if ((mails == null) || (mails.length == 0)) {
-            return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
+            return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
         final boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
         final MailField[] useFields;
@@ -1233,7 +1233,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             LOG.error(e.getMessage(), e);
         }
         if (null == mails) {
-            return SearchIteratorAdapter.createEmptyIterator();
+            return SearchIteratorAdapter.emptyIterator();
         }
         final List<MailMessage> l = new ArrayList<MailMessage>(mails.length);
         for (int i = 0; i < mails.length; i++) {
@@ -1488,7 +1488,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 searchTerm,
                 FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
-            return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
+            return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
         final MailField[] useFields;
         final boolean onlyFolderAndID;

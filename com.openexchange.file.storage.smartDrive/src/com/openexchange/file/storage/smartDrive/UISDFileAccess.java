@@ -117,8 +117,8 @@ public class UISDFileAccess implements FileStorageFileAccess {
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws FileStorageException {
         try {
             SearchIterator<File> i1 = getDocuments(folderId).results();
-            SearchIterator<File> i2 = SearchIteratorAdapter.createEmptyIterator();
-            SearchIterator<File> i3 = SearchIteratorAdapter.createEmptyIterator();
+            SearchIterator<File> i2 = SearchIteratorAdapter.emptyIterator();
+            SearchIterator<File> i3 = SearchIteratorAdapter.emptyIterator();
 
             return new FileDelta(i1, i2, i3, 0);
         } catch (FileStorageException x) {

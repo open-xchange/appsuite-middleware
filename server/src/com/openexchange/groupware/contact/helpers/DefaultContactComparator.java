@@ -49,9 +49,8 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 
@@ -64,39 +63,34 @@ import com.openexchange.groupware.search.Order;
  */
 public class DefaultContactComparator implements Comparator<Contact>{
 
-    private Map<Integer, Comparator<Contact>> SPECIAL_COMPARATORS = new HashMap<Integer, Comparator<Contact>>() {{
+    private static final TIntObjectHashMap<Comparator<Contact>> SPECIAL_COMPARATORS = new TIntObjectHashMap<Comparator<Contact>>() {{
         put(Contact.SPECIAL_SORTING, new ContactComparator());
         put(Contact.USE_COUNT_GLOBAL_FIRST, new UseCountGlobalFirstComparator());
     }};
     
-    private int field;
-    private Order order;
+    private final int field;
+    private final Order order;
 
-    public DefaultContactComparator(int field, Order order) {
+    public DefaultContactComparator(final int field, final Order order) {
         super();
         this.field = field;
         this.order = order;
     }
 
-    public int compare(Contact o1, Contact o2) {
-        if(field <= 0 || Order.NO_ORDER.equals(order)) {
+    public int compare(final Contact o1, final Contact o2) {
+        if (field <= 0 || Order.NO_ORDER.equals(order)) {
             return 0;
         }
-        int rating;
-        if(SPECIAL_COMPARATORS.containsKey(field)) {
-            rating = SPECIAL_COMPARATORS.get(field).compare(o1, o2);
-        } else {
-            Object v1 = o1.get(field);
-            Object v2 = o2.get(field);
-            rating = internalCompare(v1, v2);
+        final Comparator<Contact> specialComparator = SPECIAL_COMPARATORS.get(field);
+        if (null != specialComparator) {
+            return Order.DESCENDING.equals(order) ? -1 * specialComparator.compare(o1, o2) : specialComparator.compare(o1, o2);
         }
-        if(Order.DESCENDING.equals(order)) {
-            rating = -rating;
-        }
-        return  rating;
+        final Object v1 = o1.get(field);
+        final Object v2 = o2.get(field);
+        return Order.DESCENDING.equals(order) ? -1 * internalCompare(v1, v2) : internalCompare(v1, v2);
     }
     
-    private int internalCompare(Object v1, Object v2) {
+    private int internalCompare(final Object v1, final Object v2) {
         if(v1 == v2) {
             return 0;
         }

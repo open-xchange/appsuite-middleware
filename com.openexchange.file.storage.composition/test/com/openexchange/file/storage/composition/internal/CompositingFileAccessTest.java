@@ -390,7 +390,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
             File.Field.TITLE,
             SortDirection.DESC,
             10,
-            20).andReturn(SearchIteratorAdapter.createEmptyIterator());
+            20).andReturn(SearchIteratorAdapter.emptyIterator());
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall(
             "search",
@@ -400,7 +400,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
             File.Field.TITLE,
             SortDirection.DESC,
             10,
-            20).andReturn(SearchIteratorAdapter.createEmptyIterator());
+            20).andReturn(SearchIteratorAdapter.emptyIterator());
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
         search("query", Arrays.asList(File.Field.TITLE), FileStorageFileAccess.ALL_FOLDERS, File.Field.TITLE, SortDirection.DESC, 10, 20);

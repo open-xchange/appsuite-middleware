@@ -665,7 +665,7 @@ public class OXFolderTools {
             final FolderObject parentFolder = new OXFolderAccess(ctx).getFolderObject(parentFolderId);
             final OCLPermission effectivePerm = parentFolder.getEffectiveUserPermission(userId, userConfig);
             if (effectivePerm.getFolderPermission() < OCLPermission.READ_FOLDER) {
-                return SearchIteratorAdapter.createEmptyIterator();
+                return SearchIteratorAdapter.emptyIterator();
             }
             return getVisibleSubfoldersIterator(parentFolder, userId, groups, userConfig.getAccessibleModules(), ctx, since);
         }

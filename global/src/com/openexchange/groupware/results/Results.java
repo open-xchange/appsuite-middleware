@@ -60,7 +60,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 public class Results {
 
     public static <T> SearchIterator<T> emptyIterator() {
-        return SearchIteratorAdapter.createEmptyIterator();
+        return SearchIteratorAdapter.emptyIterator();
     }
 
     public static <T> TimedResult<T> emptyTimedResult() {

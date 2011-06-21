@@ -88,7 +88,7 @@ public class SearchTest extends FileActionTest {
             .param("timezone", "Europe/Berlin");
         
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
-        fileAccess().expectCall("search", "someSearch", columns, "12", File.Field.TITLE, SortDirection.DESC, 10, 12).andReturn(SearchIteratorAdapter.createEmptyIterator()); 
+        fileAccess().expectCall("search", "someSearch", columns, "12", File.Field.TITLE, SortDirection.DESC, 10, 12).andReturn(SearchIteratorAdapter.emptyIterator()); 
         
         perform();
         

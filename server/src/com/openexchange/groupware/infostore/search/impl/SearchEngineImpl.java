@@ -152,7 +152,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 } else if (perm.canReadAllObjects()) {
                     all.add(Integer.valueOf(folderId));
                 } else {
-                    return SearchIteratorAdapter.createEmptyIterator();
+                    return SearchIteratorAdapter.emptyIterator();
                 }
             }
             all = Collections.unmodifiableList(all);
@@ -162,7 +162,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
 
         if (all.isEmpty() && own.isEmpty()) {
-            return SearchIteratorAdapter.createEmptyIterator();
+            return SearchIteratorAdapter.emptyIterator();
         }
 
         final StringBuilder SQL_QUERY = new StringBuilder();

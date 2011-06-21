@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException;
  * {@link SearchIteratorAdapter} - An implementation of {@link SearchIterator} backed by a common instance of {@link Iterator} to which
  * calls are delegated.
  * <p>
- * Moreover this class provides several convenience implementations of {@link SearchIterator} accessible via {@link #createEmptyIterator()},
+ * Moreover this class provides several convenience implementations of {@link SearchIterator} accessible via {@link #emptyIterator()},
  * {@link #createArrayIterator(Object)} and {@link #toIterable(SearchIterator)}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -68,6 +68,46 @@ import com.openexchange.groupware.AbstractOXException;
 public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     private static final Log LOG = LogFactory.getLog(SearchIteratorAdapter.class);
+
+    private static final class EmptySearchIterator<T> implements SearchIterator<T> {
+
+        /**
+         * Initializes a new {@link EmptySearchIterator}.
+         */
+        protected EmptySearchIterator() {
+            super();
+        }
+
+        public boolean hasNext() {
+            return false;
+        }
+
+        public T next() {
+            return null;
+        }
+
+        public void close() {
+            // empty must not be closed.
+        }
+
+        public int size() {
+            return 0;
+        }
+
+        public void addWarning(final AbstractOXException warning) {
+            throw new UnsupportedOperationException("Method is not implemented");
+        }
+
+        public AbstractOXException[] getWarnings() {
+            return null;
+        }
+
+        public boolean hasWarnings() {
+            return false;
+        }
+    }
+
+    private static final SearchIterator EMPTY = new EmptySearchIterator();
 
     private final Iterator<T> delegate;
 
@@ -145,37 +185,8 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
      * @param <T> The iterator's type
      * @return An empty iterator
      */
-    public static <T> SearchIterator<T> createEmptyIterator() {
-        return new SearchIterator<T>() {
-
-            public boolean hasNext() {
-                return false;
-            }
-
-            public T next() {
-                return null;
-            }
-
-            public void close() {
-                // empty must not be closed.
-            }
-
-            public int size() {
-                return 0;
-            }
-
-            public void addWarning(final AbstractOXException warning) {
-                throw new UnsupportedOperationException("Method is not implemented");
-            }
-
-            public AbstractOXException[] getWarnings() {
-                return null;
-            }
-
-            public boolean hasWarnings() {
-                return false;
-            }
-        };
+    public static <T> SearchIterator<T> emptyIterator() {
+        return (SearchIterator<T>) EMPTY;
     }
 
     /**
@@ -187,7 +198,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
      */
     public static <T> SearchIterator<T> createArrayIterator(final T[] array) {
         if (null == array) {
-            return createEmptyIterator();
+            return emptyIterator();
         }
         return new ArrayIterator<T>(array);
     }
@@ -205,7 +216,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             public boolean hasNext() {
                 try {
                     return iterator.hasNext();
-                } catch (AbstractOXException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error(e.getMessage(), e);
                     return false;
                 }

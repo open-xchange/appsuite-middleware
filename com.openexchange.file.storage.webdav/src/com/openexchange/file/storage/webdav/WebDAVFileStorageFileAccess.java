@@ -1025,7 +1025,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return  new FileTimedResult(list);
     }
 
-    private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.createEmptyIterator();
+    private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
 
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws FileStorageException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
@@ -1062,7 +1062,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
          * Empty?
          */
         if (results.isEmpty()) {
-            return SearchIteratorAdapter.createEmptyIterator();
+            return SearchIteratorAdapter.emptyIterator();
         }
         /*
          * Sort
@@ -1079,7 +1079,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 /*
                  * Return empty iterator if start is out of range
                  */
-                return SearchIteratorAdapter.createEmptyIterator();
+                return SearchIteratorAdapter.emptyIterator();
             }
             /*
              * Reset end index if out of range
