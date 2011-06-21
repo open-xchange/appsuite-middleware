@@ -195,8 +195,18 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     protected void sendMessage(final MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
         if (DEBUG) {
+            String message;
+            if (Multipart.class.isInstance(msg.message)) {
+                try {
+                    message = ((Multipart) msg.message).getBodyPart(0).getContent().toString();
+                } catch (final Exception e) {
+                    message = "";
+                }
+            } else {
+                message = msg.message.toString();
+            }
             LOG.debug(new StringBuilder().append("Sending message to: ").append(msg.addresses).append("\n=====[").append(msg.title).append(
-                "]====\n\n").append(msg.message).append("\n\n"));
+                "]====\n\n").append(message).append("\n\n"));
         }
 
         int fuid = msg.folderId;
