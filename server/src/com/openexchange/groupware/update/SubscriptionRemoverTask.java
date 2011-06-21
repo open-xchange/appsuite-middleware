@@ -49,15 +49,14 @@
 
 package com.openexchange.groupware.update;
 
+import static com.openexchange.tools.sql.DBUtils.tablesExist;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.SortableId.Priority;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.services.ServerServiceRegistry;
-import static com.openexchange.tools.sql.DBUtils.*;
 
 
 /**
@@ -67,12 +66,12 @@ import static com.openexchange.tools.sql.DBUtils.*;
  */
 public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
-    private String subscriptionSourceId;
+    private final String subscriptionSourceId;
     
     private static final String DELETE = "DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;";
     
     
-    public SubscriptionRemoverTask(String subscriptionSourceId) {
+    public SubscriptionRemoverTask(final String subscriptionSourceId) {
         this.subscriptionSourceId = subscriptionSourceId;
     }
     
@@ -84,7 +83,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
         return new String[0];
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws AbstractOXException {
         perform(params.getSchema(), params.getContextId());
     }
 
@@ -93,10 +92,10 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
     }
 
     public int getPriority() {
-        return Priority.NORMAL.ordinal();
+        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection con = null;
         
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
@@ -118,13 +117,13 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
             stmt.setString(1, subscriptionSourceId);
             
             stmt.executeUpdate();
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
         } finally {
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     // IGNORE
                 }
             }

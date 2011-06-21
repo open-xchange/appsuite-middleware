@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import com.openexchange.groupware.update.SubscriptionRemoverTask;
+
 
 /**
  * {@link LinkedInCrawlerSubscriptionsRemoverTask}
