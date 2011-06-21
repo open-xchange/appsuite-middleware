@@ -150,7 +150,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
 
     private void resurrectFromShelf(String identifier) {
         SortedSet<SubscribeService> set = shelvedServices.get(identifier);
-        if(set != null) {
+        if(set != null && ! set.isEmpty()) {
             services.put(identifier, set.first());
             set.remove(set.first());
         }
