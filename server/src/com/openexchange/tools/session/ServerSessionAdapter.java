@@ -72,6 +72,20 @@ public class ServerSessionAdapter implements ServerSession {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServerSessionAdapter.class);
 
+    /**
+     * Gets the server session for specified session.
+     * 
+     * @param session The session
+     * @return The appropriate server session
+     * @throws ContextException If context cannot be resolved
+     */
+    public static ServerSession valueOf(final Session session) throws ContextException {
+        if (ServerSession.class.isInstance(session)) {
+            return (ServerSession) session;
+        }
+        return new ServerSessionAdapter(session);
+    }
+
     private Session session;
 
     private Context ctx;
@@ -161,7 +175,7 @@ public class ServerSessionAdapter implements ServerSession {
         return session().getLocalIp();
     }
 
-    public void setLocalIp(String ip) {
+    public void setLocalIp(final String ip) {
         session().setLocalIp(ip);
     }
 
@@ -232,7 +246,7 @@ public class ServerSessionAdapter implements ServerSession {
         return session.getClient();
     }
 
-    public void setClient(String client) {
+    public void setClient(final String client) {
         session.setClient(client);
     }
 
@@ -295,7 +309,7 @@ public class ServerSessionAdapter implements ServerSession {
         return session;
     }
 
-    public void setHash(String hash) {
+    public void setHash(final String hash) {
         session().setHash(hash);
     }
 
