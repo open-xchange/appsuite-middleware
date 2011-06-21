@@ -61,7 +61,7 @@ import com.openexchange.groupware.search.Order;
  */
 public class ContactComparator implements Comparator<Contact> {
 
-	private Comparator comparator;
+	private final Comparator comparator;
 	private int weight = 1;
 
     /**
@@ -72,11 +72,12 @@ public class ContactComparator implements Comparator<Contact> {
         this.comparator = new AlphanumComparator();
     }
     
-    public ContactComparator(Comparator comp, Order sortOrder) {
-        this();
+    public ContactComparator(final Comparator comp, final Order sortOrder) {
+        super();
         this.comparator = comp;
-        if(sortOrder == Order.DESCENDING)
-        	this.weight = -1;
+        if(sortOrder == Order.DESCENDING) {
+            this.weight = -1;
+        }
     }
 
     public int compare(final Contact contact1, final Contact contact2) {
