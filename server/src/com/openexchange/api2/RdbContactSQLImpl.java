@@ -54,8 +54,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.getStatement;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
+import static com.openexchange.tools.sql.DBUtils.getStatement;
 import gnu.trove.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -186,7 +186,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (final OXConflictException ce) {
             LOG.debug("Unable to insert contact", ce);
             throw ce;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.debug("Problem while inserting contact.", e);
             throw new ContactException(e);
         }
@@ -213,14 +213,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw oonfee;
         } catch (final DBPoolingException e) {
             throw new ContactException(e);
-        } catch (OXPermissionException e) {
+        } catch (final OXPermissionException e) {
             throw e;
         } catch (final OXException e) {
             throw new ContactException(e);
         }
     }
 
-    public void updateUserContact(Contact contact, java.util.Date lastModified) throws ContactException, OXObjectNotFoundException, OXPermissionException, OXConflictException, OXConcurrentModificationException {
+    public void updateUserContact(final Contact contact, final java.util.Date lastModified) throws ContactException, OXObjectNotFoundException, OXPermissionException, OXConflictException, OXConcurrentModificationException {
         try {
             final Contact storageVersion = Contacts.getContactById(contact.getObjectID(), session);
             Contacts.performUserContactStorageUpdate(contact, lastModified, userId, memberInGroups, ctx, userConfiguration);
@@ -232,15 +232,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(contact.getParentFolderID()));
         } catch (final DBPoolingException e) {
             throw new ContactException(e);
-        } catch (OXObjectNotFoundException e) {
+        } catch (final OXObjectNotFoundException e) {
             throw e;
-        } catch (OXPermissionException e) {
+        } catch (final OXPermissionException e) {
             throw e;
-        } catch (OXConflictException e) {
+        } catch (final OXConflictException e) {
             throw e;
-        } catch (OXConcurrentModificationException e) {
+        } catch (final OXConcurrentModificationException e) {
             throw e;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new ContactException(e);
         }
     }
@@ -249,7 +249,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final Connection readCon;
         try {
             readCon = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         }
         try {
@@ -287,9 +287,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 closeSQLStuff(rs, stmt);
             }
             return retval;
-        } catch (OXConflictException e) {
+        } catch (final OXConflictException e) {
             throw e;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new ContactException(e);
         } finally {
             DBPool.closeReaderSilent(ctx, readCon);
@@ -321,7 +321,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final SuperCollator collation = SuperCollator.get(collation2);
         final StringBuilder order = new StringBuilder();
         if (order_field > 0 && order_field != Contact.USE_COUNT_GLOBAL_FIRST) {
-            String orderSQL = generateOrder(order_field, orderMechanism, collation);
+            final String orderSQL = generateOrder(order_field, orderMechanism, collation);
             if (null != orderSQL) {
                 order.append(orderSQL);
             }
@@ -374,23 +374,33 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
 	public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final Order order, final String collation, final int[] cols) throws ContactException, OXException {
         final ContactSql cs = new ContactMySql(session, ctx);
-        ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
+        final ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
         conv.setCharset(collation);
         conv.parse(searchterm);
         
         //generate parts of query
-        String select = generateSelect(cols);
-        String whereFolder = checkFolderRights(conv, cs);
-        String whereConditions = conv.getPreparedWhereString();
-        String sqlOrder = generateOrder(order_field, order, SuperCollator.get(collation));
+        int[] extendedCols = cols;
+        final boolean specialSort;
+        if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING || Order.NO_ORDER.equals(order)) {
+            extendedCols = Arrays.addUniquely(extendedCols, new int[] {
+                Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
+            specialSort = true;
+        } else {
+            specialSort = false;
+        }
+        final String select = generateSelect(extendedCols);
+        final String whereFolder = checkFolderRights(conv, cs);
+        final String whereConditions = conv.getPreparedWhereString();
+        final String sqlOrder = specialSort ? null : generateOrder(order_field, order, SuperCollator.get(collation));
         
         //build query
-        StringBuilder query = new StringBuilder(select);
+        final StringBuilder query = new StringBuilder(select);
 
         query.append("WHERE (co.cid=").append(ctx.getContextId()).append(") "); //never forget the context
         
-       	if(whereConditions != null && whereConditions.length() > 0)
-       		query.append(" AND ").append(whereConditions);
+       	if(whereConditions != null && whereConditions.length() > 0) {
+            query.append(" AND ").append(whereConditions);
+        }
         if(whereFolder != null && !conv.hasFolders()){ //if the filter does not check for folders...
         	query.append(" AND ").append(whereFolder).append(" "); //...search all folders you have access rights to
         }
@@ -398,7 +408,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         	query.append(sqlOrder).append(" ");
         }
 
-        String queryStr = query.toString();
+        final String queryStr = query.toString();
         
         final Connection con;
         try {
@@ -412,7 +422,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         PreparedStatement stmt = null;
         try {
 			stmt = con.prepareStatement(queryStr);
-			List<SQLInjector> injectors = conv.getInjectors();
+			final List<SQLInjector> injectors = conv.getInjectors();
             for (int i = 0; i < injectors.size(); i++) {
             	injectors.get(i).inject(stmt, i+1);
             }
@@ -420,10 +430,22 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             result = stmt.executeQuery();
             final List<Contact> tmp = new ArrayList<Contact>();
             while (result.next()) {
-                final Contact contact = convertResultSet2ContactObject(result, cols, false, con);
+                final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
                 tmp.add(contact);
             }
-            sortByCollation(tmp, order_field, order, collation);
+            if (tmp.isEmpty()) {
+                return SearchIteratorAdapter.<Contact> emptyIterator();
+            }
+            /*
+             * Sort manually according to following conditions
+             */
+            if (null != collation) {
+                sortByCollation(tmp, order_field, order, collation);
+            } else if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
+                java.util.Collections.sort(tmp, new UseCountComparator(specialSort));
+            } else if (specialSort) {
+                java.util.Collections.sort(tmp, new ContactComparator());
+            }
             contacts = tmp.toArray(new Contact[tmp.size()]);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -435,12 +457,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     }
   
 
-	private void sortByCollation(List<Contact> tmp, int orderField, Order order, String collation) {
-		if(collation == null)
-			return;
+	private void sortByCollation(final List<Contact> tmp, final int orderField, final Order order, final String collation) {
+		if(collation == null) {
+            return;
+        }
 		
-		ContactField field = ContactField.getByValue(orderField);
-		SuperCollator mapping = SuperCollator.get(collation);
+		final ContactField field = ContactField.getByValue(orderField);
+		final SuperCollator mapping = SuperCollator.get(collation);
 		if(field == null){
 			LOG.error("Sorting of requested contacts failed, because field #"+orderField+" could not be mapped to a contact field");
 			return;
@@ -449,11 +472,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 			LOG.error("Sorting of requested contacts failed, because no collation could be founf for "+orderField);
 			return;
 		}
-		CollationContactComparator comparator = new CollationContactComparator(field, order, mapping.getJavaLocale());
+		final CollationContactComparator comparator = new CollationContactComparator(field, order, mapping.getJavaLocale());
 		Collections.sort(tmp, comparator);
 	}
 
-	private String generateSelect(int[] cols) {
+	private String generateSelect(final int[] cols) {
         final StringBuilder fieldsBuilder = new StringBuilder();
         for (int a = 0; a < cols.length; a++) {
             final Mapper m = Contacts.mapping[cols[a]];
@@ -462,9 +485,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
         int len = fieldsBuilder.length();
-        if(len > 0)
-        	fieldsBuilder.deleteCharAt(len - 1);
-        String fields = fieldsBuilder.toString();
+        if(len > 0) {
+            fieldsBuilder.deleteCharAt(len - 1);
+        }
+        final String fields = fieldsBuilder.toString();
         
         len = fields.length();
         final StringBuilder sb = new StringBuilder(len + 256).append("SELECT ");
@@ -482,7 +506,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final ContactSql cs = new ContactMySql(session, ctx);
         boolean considerUsersAliases = false;
         if (searchobject.isEmailAutoComplete()) {
-            boolean allFolders = b(ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE));
+            final boolean allFolders = b(ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE));
             if (!searchobject.hasFolders() && !allFolders) {
                 searchobject.addFolder(oxfs.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID());
                 try {
@@ -731,7 +755,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
         try {
             return new PrefetchIterator<Contact>(si);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new OXException(e);
         }
     }
@@ -743,7 +767,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final FolderObject contactFolder;
         try {
             contactFolder = new OXFolderAccess(ctx).getFolderObject(fid);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new ContactException(e);
         }
         if (contactFolder.getModule() != FolderObject.CONTACT) {
@@ -780,11 +804,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return getUsersById(new int[] { userid }, true)[0];
     }
 
-    public Contact getUserById(int userId, boolean performReadCheck) throws OXException {
+    public Contact getUserById(final int userId, final boolean performReadCheck) throws OXException {
         return getUsersById(new int[] { userId }, performReadCheck)[0];
     }
 
-    public Contact[] getUsersById(int[] userIds, final boolean performReadCheck) throws OXException {
+    public Contact[] getUsersById(final int[] userIds, final boolean performReadCheck) throws OXException {
         Connection readCon = null;
         final Contact[] contacts;
         final int fid = FolderObject.SYSTEM_LDAP_FOLDER_ID;
@@ -795,7 +819,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
             contacts = Contacts.getUsersById(userIds, userId, memberInGroups, ctx, userConfiguration, readCon);
-            for (Contact contact : contacts) {
+            for (final Contact contact : contacts) {
                 if (contact.getParentFolderID() != fid) {
                     throw new OXConflictException(ContactExceptionCodes.USER_OUTSIDE_GLOBAL.create(I(contact.getParentFolderID()), I(ctx.getContextId())));
                 }
@@ -892,7 +916,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (final SQLException e) {
             error = true;
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (OXConflictException e) {
+        } catch (final OXConflictException e) {
             error = true;
             throw e;
         } catch (final OXException e) {
@@ -912,7 +936,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         try {
             return new PrefetchIterator<Contact>(si);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new ContactException(e);
         }
     }
@@ -960,7 +984,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         try {
             return new PrefetchIterator<Contact>(si);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new ContactException(e);
         }
     }
@@ -1025,11 +1049,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw xe;
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (OXConflictException e) {
+        } catch (final OXConflictException e) {
             throw e;
-        } catch (OXPermissionException e) {
+        } catch (final OXPermissionException e) {
             throw e;
-        } catch (OXConcurrentModificationException e) {
+        } catch (final OXConcurrentModificationException e) {
             throw e;
         } catch (final OXException e) {
             throw new ContactException(e);
@@ -1249,33 +1273,34 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (AttachmentException e) {
+        } catch (final AttachmentException e) {
             throw new ContactException(e);
         }
 
         return co;
     }
 
-    protected List<Contact> convertResultsetsToContactsLikeAGrownup(ResultSet rs) throws SQLException, ContactException {
-        List<Contact> results = new LinkedList<Contact>();
+    protected List<Contact> convertResultsetsToContactsLikeAGrownup(final ResultSet rs) throws SQLException, ContactException {
+        final List<Contact> results = new LinkedList<Contact>();
 
-        ResultSetMetaData metaData = rs.getMetaData();
-        List<ContactField> header = new LinkedList<ContactField>();
-        int limit = metaData.getColumnCount();
+        final ResultSetMetaData metaData = rs.getMetaData();
+        final List<ContactField> header = new LinkedList<ContactField>();
+        final int limit = metaData.getColumnCount();
 
         for (int i = 0; i < limit; i++) {
-            ContactField field = ContactField.getByFieldName(metaData.getColumnName(i + 1));
+            final ContactField field = ContactField.getByFieldName(metaData.getColumnName(i + 1));
             header.add(field);
         }
 
-        ContactSwitcher setter = new ContactSwitcherForTimestamp(){{setDelegate(new ContactSetter());}};
+        final ContactSwitcher setter = new ContactSwitcherForTimestamp(){{setDelegate(new ContactSetter());}};
 
         while (rs.next()) {
-            Contact contact = new Contact();
+            final Contact contact = new Contact();
             for (int i = 0; i < limit; i++) {
-                ContactField field = header.get(i);
-                if (field == null)
+                final ContactField field = header.get(i);
+                if (field == null) {
                     continue;
+                }
                 field.doSwitch(setter, contact, rs.getObject(i+1));
             }
         }
@@ -1322,7 +1347,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e));
             } catch (final ContactException e) {
                 throw new SearchIteratorException(e);
-            } catch (OXConflictException e) {
+            } catch (final OXConflictException e) {
                 throw new SearchIteratorException(e);
             }
         }
@@ -1352,7 +1377,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                         }
                     } catch (final ContactException e) {
                         throw new SearchIteratorException(e);
-                    } catch (OXConflictException e) {
+                    } catch (final OXConflictException e) {
                         throw new SearchIteratorException(e);
                     }
                 } else {
@@ -1397,27 +1422,28 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return null;
     }
 
-    public void setUnificationStateForContacts(Contact aggregator, Contact contributor, ContactUnificationState state) throws OXException{
+    public void setUnificationStateForContacts(final Contact aggregator, final Contact contributor, final ContactUnificationState state) throws OXException{
         Connection con = null;
         PreparedStatement stmt = null;
         try {
             con = DBPool.pickupWriteable(ctx);
             boolean contacsAlreadyHadUUID = true;
 
-            for (Contact c : new Contact[] { aggregator, contributor }) {
+            for (final Contact c : new Contact[] { aggregator, contributor }) {
                 if (!c.containsUserField20()) {
                     c.setUserField20(UUID.randomUUID().toString());
                     updateContactObject(c, c.getParentFolderID(), new Date());
                     contacsAlreadyHadUUID = false;
                 }
             }
-            ContactUnificationState prevState = getAssociationBetween(aggregator, contributor);
+            final ContactUnificationState prevState = getAssociationBetween(aggregator, contributor);
             
             // no change in status => no change in DB:
-            if(prevState == state)
+            if(prevState == state) {
                 return;
+            }
             
-            boolean contactsHaveDefinedState = (prevState != ContactUnificationState.UNDEFINED);
+            final boolean contactsHaveDefinedState = (prevState != ContactUnificationState.UNDEFINED);
             
 			// state == undefined => remove all possible entries
             if(contacsAlreadyHadUUID && ContactUnificationState.UNDEFINED == state){
@@ -1443,44 +1469,47 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
             stmt.execute();
             
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
-        } catch (OXConcurrentModificationException e) {
+        } catch (final OXConcurrentModificationException e) {
             LOG.error(e.getMessage(), e);
-        } catch (ContactException e) {
+        } catch (final ContactException e) {
             LOG.error(e.getMessage(), e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            if (stmt != null)
+            if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     e.printStackTrace(); /* won't happen */
                 }
-            if (con != null)
+            }
+            if (con != null) {
                 DBPool.closeWriterSilent(ctx,con);
+            }
         }
     }
     
-    private byte[] dbUUID(Contact c){
+    private byte[] dbUUID(final Contact c){
         return UUIDs.toByteArray(UUID.fromString(c.getUserField20()));
     }
 
-    public void associateTwoContacts(Contact aggregator, Contact contributor) throws OXException {
+    public void associateTwoContacts(final Contact aggregator, final Contact contributor) throws OXException {
         setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.GREEN);
     }
 
-    public void separateTwoContacts(Contact aggregator, Contact contributor) throws OXException {
+    public void separateTwoContacts(final Contact aggregator, final Contact contributor) throws OXException {
         setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.RED);
     }
 
-    public List<UUID> getAssociatedContacts(Contact contact) throws ContactException{
-        if(!contact.containsUserField20())
+    public List<UUID> getAssociatedContacts(final Contact contact) throws ContactException{
+        if(!contact.containsUserField20()) {
             return new LinkedList<UUID>();
+        }
             
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1493,7 +1522,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             stmt.setBytes(2, dbUUID(contact));
             res = stmt.executeQuery();
 
-            Set<UUID> uuids = new HashSet<UUID>();
+            final Set<UUID> uuids = new HashSet<UUID>();
             while (res.next()) {
                 uuids.add(UUIDs.toUUID(res.getBytes(1)));
                 uuids.add(UUIDs.toUUID(res.getBytes(2)));
@@ -1502,26 +1531,28 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             stmt.close();
             uuids.remove(UUID.fromString(contact.getUserField20()));
             return new LinkedList<UUID>(uuids);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
         } finally {
             closeSQLStuff(res, stmt);
-            if (con != null)
+            if (con != null) {
                 DBPool.push(ctx, con);
+            }
         }
         return new LinkedList<UUID>();
     }
 
 
-    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws ContactException{
-        if(! c1.containsUserField20() || ! c2.containsUserField20())
+    public ContactUnificationState getAssociationBetween(final Contact c1, final Contact c2) throws ContactException{
+        if(! c1.containsUserField20() || ! c2.containsUserField20()) {
             return ContactUnificationState.UNDEFINED;
+        }
         
-        UUID uuid1 = UUID.fromString(c1.getUserField20());
-        UUID uuid2 = UUID.fromString(c2.getUserField20());
+        final UUID uuid1 = UUID.fromString(c1.getUserField20());
+        final UUID uuid2 = UUID.fromString(c2.getUserField20());
         
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1529,36 +1560,39 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             con = DBPool.pickup(ctx);
 
             stmt = con.prepareStatement("SELECT state FROM aggregatingContacts WHERE aggregator IN (?,?) AND contributor IN (?,?) AND aggregator != contributor");
-            byte[] val1 = UUIDs.toByteArray(uuid1);
-            byte[] val2 = UUIDs.toByteArray(uuid2);
+            final byte[] val1 = UUIDs.toByteArray(uuid1);
+            final byte[] val2 = UUIDs.toByteArray(uuid2);
             stmt.setBytes(1, val1);
             stmt.setBytes(2, val2);
             stmt.setBytes(3, val1);
             stmt.setBytes(4, val2);
-            ResultSet resultSet = stmt.executeQuery();
-            if(resultSet.next())
+            final ResultSet resultSet = stmt.executeQuery();
+            if(resultSet.next()) {
                 return ContactUnificationState.getByNumber(resultSet.getInt("state"));
+            }
             return ContactUnificationState.UNDEFINED;
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
         } finally {
-            if (stmt != null)
+            if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     e.printStackTrace(); /* won't happen */
                 }
-            if (con != null)
+            }
+            if (con != null) {
                 DBPool.push(ctx, con);
+            }
         }
         return null; // TODO: Throw exception
     }
 
-    public Contact getContactByUUID(UUID uuid) throws ContactException, OXObjectNotFoundException, OXConflictException {
-        Contact contact = null;
+    public Contact getContactByUUID(final UUID uuid) throws ContactException, OXObjectNotFoundException, OXConflictException {
+        final Contact contact = null;
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1568,49 +1602,55 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             stmt = con.prepareStatement("SELECT fid,intfield01 FROM prg_contacts WHERE "+ ContactField.USERFIELD20.getFieldName() +" = ?");
             stmt.setString(1, uuid.toString());
             res = stmt.executeQuery();
-            boolean found = res.next();
-            if(! found)
+            final boolean found = res.next();
+            if(! found) {
                 return null;
-            int fid = res.getInt("fid");
-            int id = res.getInt("intfield01");
+            }
+            final int fid = res.getInt("fid");
+            final int id = res.getInt("intfield01");
             return getObjectById(id, fid);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
         } finally {
             closeSQLStuff(res, stmt);
-            if (con != null)
+            if (con != null) {
                 DBPool.push(ctx, con);
+            }
         }
         return contact;
     }
 
 
-    private void handleUnsupportedAggregatingContactModule(SQLException e) throws ContactException {
-        if(e.getSQLState().equals("42S02"))
+    private void handleUnsupportedAggregatingContactModule(final SQLException e) throws ContactException {
+        if(e.getSQLState().equals("42S02")) {
             throw ContactExceptionCodes.AGGREGATING_CONTACTS_NOT_ENABLED.create();
+        }
     }
 
-    private String generateOrder(int order_field, Order order, SuperCollator collation) {
-    	if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING || order.equals(Order.NO_ORDER))
-    		return null;
+    private String generateOrder(final int order_field, final Order order, final SuperCollator collation) {
+    	if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING || order.equals(Order.NO_ORDER)) {
+            return null;
+        }
 
-    	boolean addCollation = collation != null && collation != SuperCollator.DEFAULT; 
+    	final boolean addCollation = collation != null && collation != SuperCollator.DEFAULT; 
     	
-    	StringBuilder sqlOrder = new StringBuilder();
+    	final StringBuilder sqlOrder = new StringBuilder();
         sqlOrder.append(" ORDER BY ");
         final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
-        if(addCollation)
-        	sqlOrder.append(" CONVERT(");
+        if(addCollation) {
+            sqlOrder.append(" CONVERT(");
+        }
         sqlOrder.append(generateFieldPart(realOrderField));
-        if(addCollation)
-        	sqlOrder.append(" USING '")
+        if(addCollation) {
+            sqlOrder.append(" USING '")
         		.append(collation.getSqlCharset())
         		.append("') COLLATE '")
         		.append(collation.getSqlCollation())
         		.append("'");
+        }
 
         sqlOrder.append(' ');
         final String realOrderMechanism = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? "DESC" : forSQLCommand(order);
@@ -1622,22 +1662,25 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return sqlOrder.append(' ').toString();
 	}
     
-    private String generateFieldPart(int fieldNum){
-    	if(Contact.SPECIAL_SORTING != fieldNum)
-    		return "co." + Contacts.mapping[fieldNum].getDBFieldName();
+    private String generateFieldPart(final int fieldNum){
+    	if(Contact.SPECIAL_SORTING != fieldNum) {
+            return "co." + Contacts.mapping[fieldNum].getDBFieldName();
+        }
 
-    	String prefix = "co.";
-    	StringBuffer buffy = new StringBuffer();
-    	List<ContactField> fieldsToCheck = java.util.Arrays.asList(ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2 );
-    	for(ContactField field: fieldsToCheck)
-    		buffy.append("IFNULL(").append(prefix).append(field.getFieldName()).append(',');
+    	final String prefix = "co.";
+    	final StringBuffer buffy = new StringBuffer();
+    	final List<ContactField> fieldsToCheck = java.util.Arrays.asList(ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2 );
+    	for(final ContactField field: fieldsToCheck) {
+            buffy.append("IFNULL(").append(prefix).append(field.getFieldName()).append(',');
+        }
     	buffy.append("NULL");
-    	for(ContactField field: fieldsToCheck)
-    		buffy.append(')');
+    	for(final ContactField field: fieldsToCheck) {
+            buffy.append(')');
+        }
     	return buffy.toString();
     }
 
-	private String checkFolderRights(ContactSearchtermSqlConverter conv, ContactSql cs) throws OXException {
+	private String checkFolderRights(final ContactSearchtermSqlConverter conv, final ContactSql cs) throws OXException {
         
         if(! conv.hasFolders() ){
         	try {
@@ -1649,14 +1692,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
         final OXFolderAccess oxfa = new OXFolderAccess(ctx);
         
-        List<String> folders = conv.getFolders();
-        int[] folders2 = new int[folders.size()]; int i = 0;
+        final List<String> folders = conv.getFolders();
+        final int[] folders2 = new int[folders.size()]; int i = 0;
         final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
-        for (String folderStr : folders) {
+        for (final String folderStr : folders) {
         	int folderId;
         	try {
         		folderId = Integer.parseInt(folderStr);
-        	} catch(NumberFormatException e){
+        	} catch(final NumberFormatException e){
         		throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(folderStr, I(ctx.getContextId()), I(userId)));            		
         	}
             final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
