@@ -7,6 +7,7 @@
  - Bugfix #19540: Applying proper flag to contact instance if considered as distribution list
  - Bugfix #19471: Adapted to MS invitation mails
  - Bugfix #19270: Proper order of contacts for special sort field (607)
+ - Bugfix #19560: Added missing tags to 'whitelist.properties' file
 
 * 2011-06-20 - thorben.betten@open-xchange.com
 
