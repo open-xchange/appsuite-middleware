@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -192,7 +193,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         messageSender.sendMessage(mmsg, session, obj, state, false);
     }
 
-    protected void sendMessage(MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
+    protected void sendMessage(final MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
         if (DEBUG) {
             LOG.debug(new StringBuilder().append("Sending message to: ").append(msg.addresses).append("\n=====[").append(msg.title).append(
                 "]====\n\n").append(msg.message).append("\n\n"));
@@ -206,15 +207,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (suppressOXReminderHeader) {
             fuid = MailObject.DONT_SET;
         }
-        String type = (msg.overrideType != null) ? msg.overrideType.toString() : state.getType().toString();
+        final String type = (msg.overrideType != null) ? msg.overrideType.toString() : state.getType().toString();
         final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), type);
 
         String fromAddr;
-        String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+        final String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
         if (senderSource.equals("defaultSenderAddress")) {
             try {
                 fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
             }
@@ -222,7 +223,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
         }
 
-        User sender = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+        final User sender = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 
         if (sender != null) {
             mail.setFromAddr("\"" + sender.getDisplayName() + "\"" + " <" + fromAddr + ">");
@@ -306,7 +307,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         int folderOwner = session.getUserId();
         try {
             folderOwner = getFolderOwner(appointmentObj, new ServerSessionAdapter(session));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             LL.log(e);
         }
         sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
@@ -531,7 +532,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
                             (CalendarDataObject) oldApp);
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     if (e instanceof ServiceException || e instanceof OXException) {
                         final StringBuilder builder = new StringBuilder(256).append(
                             "Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
@@ -583,7 +584,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private boolean onlyIrrelevantFieldsChanged(Session session, final CalendarObject oldObj, final CalendarObject newObj, final State state) {
+    private boolean onlyIrrelevantFieldsChanged(final Session session, final CalendarObject oldObj, final CalendarObject newObj, final State state) {
         if (oldObj == null || newObj == null) {
             return false;
         }
@@ -784,7 +785,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @param b A string builder
      * @return The created message
      */
-    protected static MailMessage createUserMessage(ServerSession session, CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+    protected static MailMessage createUserMessage(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         return createParticipantMessage0(session, cal, p, canRead, title, actionRepl, state, locale, renderMap, isUpdate, b);
     }
 
@@ -802,11 +803,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @param b A string builder
      * @return The created message
      */
-    protected static MailMessage createParticipantMessage(ServerSession session, CalendarObject cal, final EmailableParticipant p, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+    protected static MailMessage createParticipantMessage(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         return createParticipantMessage0(session, cal, p, true, title, actionRepl, state, locale, renderMap, isUpdate, b);
     }
 
-    private static MailMessage createParticipantMessage0(ServerSession session, CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+    private static MailMessage createParticipantMessage0(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         final MailMessage msg = new MailMessage();
         final Template createTemplate = state.getTemplate();
         final StringHelper strings = new StringHelper(locale);
@@ -861,7 +862,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                      * Render proper message for removed participant
                      */
                     final String message = getAppointmentCreateTemplate(p, canRead, cal, session);
-                    String textMessage = new StringTemplate(message).render(p.getLocale(), clone);
+                    final String textMessage = new StringTemplate(message).render(p.getLocale(), clone);
                     if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
                         msg.message = textMessage;
                     } else {
@@ -897,8 +898,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         } else {
             if (State.Type.NEW.equals(state.getType())) {
-                int owner = getFolderOwner(cal, session);
-                boolean isOnBehalf = owner != session.getUserId();
+                final int owner = getFolderOwner(cal, session);
+                final boolean isOnBehalf = owner != session.getUserId();
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
                     final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? (isOnBehalf ? Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF_EXT : Notifications.APPOINTMENT_CREATE_MAIL_EXT) : Notifications.TASK_CREATE_MAIL_EXT);
@@ -998,7 +999,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * 
      * @return The multipart object or given text if building failed
      */
-    private static Object generateMessageMultipart(ServerSession session, CalendarObject cal, String text, int module, State.Type type, ITipMethod method, EmailableParticipant p, final StringHelper strings, final StringBuilder b) {
+    private static Object generateMessageMultipart(final ServerSession session, final CalendarObject cal, final String text, final int module, final State.Type type, final ITipMethod method, final EmailableParticipant p, final StringHelper strings, final StringBuilder b) {
         if (module == Types.TASK) {
             return text;
         }
@@ -1053,9 +1054,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             if (hasAlarm) {
                 app.setAlarm(alarm);
             }
-            final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-            emitter.writeSession(icalSession, byteArrayOutputStream);
-            final InputStream icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            /*
+             * Copy stream
+             */
+            final InputStream icalFile;
+            {
+                final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+                emitter.writeSession(icalSession, byteArrayOutputStream);
+                icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            }
 
             final BodyPart iCalPart = new MimeBodyPart();
 
@@ -1095,8 +1102,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private static String getAppointmentCreateTemplate(final EmailableParticipant p, final boolean canRead, CalendarObject cal, ServerSession session) {
-        int folderOwner = getFolderOwner(cal, session);
+    private static String getAppointmentCreateTemplate(final EmailableParticipant p, final boolean canRead, final CalendarObject cal, final ServerSession session) {
+        final int folderOwner = getFolderOwner(cal, session);
         if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
             if (folderOwner == session.getUserId()) {
                 return Notifications.APPOINTMENT_CREATE_MAIL_EXT;
@@ -1115,11 +1122,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
     
-    private static int getFolderOwner(CalendarObject cal, ServerSession session) {
-        OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
+    private static int getFolderOwner(final CalendarObject cal, final ServerSession session) {
+        final OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
         try {
             return oxfa.getFolderOwner(cal.getParentFolderID());
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LL.log(e);
             return session.getUserId();
         }
@@ -1197,12 +1204,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
 
             String onBehalfDisplayName = STR_UNKNOWN;
-            OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
+            final OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
             try {
                 onBehalfDisplayName = resolveUsers(ctx, oxfa.getFolderOwner(newObj.getParentFolderID()))[0].getDisplayName();
-            } catch (LdapException e) {
+            } catch (final LdapException e) {
                 LL.log(e);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LL.log(e);
             }
             renderMap.put(new StringReplacement(TemplateToken.CREATED_BY, createdByDisplayName));
@@ -1420,7 +1427,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, String organizer) {
+    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer) {
         sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
         sortOldExternalParticipantsAndResources(
             oldParticipants,
@@ -1433,7 +1440,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             organizer);
     }
 
-    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, String organizer) {
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer) {
         if (oldParticipants == null) {
             return;
         }
@@ -1845,12 +1852,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     }
 
-    private void addTaskOwner(CalendarObject task, Map<Locale, List<EmailableParticipant>> receivers, Map<String, EmailableParticipant> all, ServerSession session) {
-        Context ctx = session.getContext();
-        int creatorId = task.getCreatedBy();
+    private void addTaskOwner(final CalendarObject task, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session) {
+        final Context ctx = session.getContext();
+        final int creatorId = task.getCreatedBy();
         try {
-            User user = resolveUsers(ctx, creatorId)[0];
-            EmailableParticipant emailable =  new EmailableParticipant(
+            final User user = resolveUsers(ctx, creatorId)[0];
+            final EmailableParticipant emailable =  new EmailableParticipant(
                 ctx.getContextId(),
                 Participant.USER,
                 creatorId,
@@ -2138,10 +2145,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return cal.getTime();
     }
 
-    private static Date computeFirstOccurrenceEnd(CalendarObject app) throws OXException {
-        CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        RecurringResultsInterface recurrences = service.calculateFirstRecurring(app);
-        RecurringResultInterface recurringResult = recurrences.getRecurringResult(0);
+    private static Date computeFirstOccurrenceEnd(final CalendarObject app) throws OXException {
+        final CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        final RecurringResultsInterface recurrences = service.calculateFirstRecurring(app);
+        final RecurringResultInterface recurringResult = recurrences.getRecurringResult(0);
         return new Date(recurringResult.getEnd());
     }
 

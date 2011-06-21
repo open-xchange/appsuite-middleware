@@ -49,25 +49,38 @@
 
 package com.openexchange.data.conversion.ical;
 
+import java.util.Locale;
+
 /**
  * {@link ITipMethod}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public enum ITipMethod {
+
     NO_METHOD(""), REQUEST("request"), REPLY("reply"), CANCEL("cancel");
 
-    private String keyword;
+    private final String keyword;
 
-    ITipMethod(String keyword) {
+    private ITipMethod(final String keyword) {
         this.keyword = keyword;
     }
 
+    /**
+     * Gets the keyword.
+     * 
+     * @return The keyword
+     */
     public String getKeyword() {
         return this.keyword;
     }
-    
+
+    /**
+     * Gets the method parameter read to append to "Content-Type" header: <code>"method=" + &lt;keyword&gt;</code>
+     * 
+     * @return The method parameter; <code>"method=" + &lt;keyword&gt;</code>
+     */
     public String getMethod() {
-        return "method=" + keyword;
+        return "method=" + keyword.toUpperCase(Locale.US);
     }
 }
