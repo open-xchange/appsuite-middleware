@@ -56,7 +56,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.mail.cache.MailAccessQueue;
 import com.openexchange.mail.cache.PooledMailAccess;
 
 /**

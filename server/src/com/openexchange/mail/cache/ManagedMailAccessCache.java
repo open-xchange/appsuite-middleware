@@ -58,6 +58,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.cache.queue.MailAccessQueue;
 import com.openexchange.mail.cache.queue.MailAccessQueueImpl;
 import com.openexchange.mail.cache.queue.SingletonMailAccessQueue;
 import com.openexchange.mail.config.MailProperties;

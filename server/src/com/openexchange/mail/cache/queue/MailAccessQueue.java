@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.mail.cache;
+package com.openexchange.mail.cache.queue;
 
 import java.util.Queue;
+import com.openexchange.mail.cache.PooledMailAccess;
 
 /**
  * {@link MailAccessQueue} - A {@link Queue} additionally providing {@link #pollDelayed()} method to obtain expired elements.
