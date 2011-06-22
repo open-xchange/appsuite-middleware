@@ -895,7 +895,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                          * Assume an invitation response
                          */
                         final ContentType contentType = part.getContentType();
-                        if (null == contentType.getParameter("method")) {
+                        if (!contentType.containsParameter("method")) {
                             contentType.setParameter("method", "RESPONSE");
                         }
                     }
