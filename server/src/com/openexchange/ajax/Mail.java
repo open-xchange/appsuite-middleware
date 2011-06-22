@@ -4055,7 +4055,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * measure the size.
                  */
                 file.setFileSize(0);
-                if (!set.contains(Metadata.TITLE_LITERAL)) {
+                if (!set.contains(Field.TITLE)) {
                     file.setTitle(mailPart.getFileName());
                 }
                 file.setFolderId(destFolderID);
