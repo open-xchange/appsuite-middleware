@@ -77,7 +77,9 @@ public class Bug17261Test extends AbstractAJAXSession {
         assertNotNull("Inserting second folder should cause an exception.", insertSecondFolderResp.getException());
         insertSecondFolderResp.fillObject(secondFolder);
         
-        ftm1.deleteFolderOnServer(secondFolder);
+        if (secondFolder.getObjectID() > 0) {
+            ftm1.deleteFolderOnServer(secondFolder);
+        }
     }
 
     @Override
