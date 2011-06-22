@@ -114,7 +114,7 @@ public final class MailAccessQueue implements Queue<PooledMailAccess> {
      */
     public PooledMailAccess pollDelayed() {
         final PooledMailAccess first = priorityQueue.peek();
-        if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
+        if (first == null || first.getDelay(TimeUnit.MILLISECONDS) > 0) {
             return null;
         }
         return priorityQueue.poll();

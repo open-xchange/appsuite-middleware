@@ -90,7 +90,9 @@ public final class PooledMailAccess implements Delayed {
     }
 
     public long getDelay(final TimeUnit unit) {
-        return unit.convert(timeoutStamp - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        return TimeUnit.MILLISECONDS.equals(unit) ? (timeoutStamp - System.currentTimeMillis()) : unit.convert(
+            timeoutStamp - System.currentTimeMillis(),
+            TimeUnit.MILLISECONDS);
     }
 
     public int compareTo(final Delayed o) {
