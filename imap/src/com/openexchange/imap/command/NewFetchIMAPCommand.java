@@ -850,7 +850,13 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                         headerHandler.handle(hdr, msg);
                     }
                 }
-                msg.addHeader(name, hdr.getValue());
+                try {
+                    msg.addHeader(name, hdr.getValue());
+                } catch (final IllegalArgumentException illegalArgumentExc) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Ignoring invalid header.", illegalArgumentExc);
+                    }
+                }
                 /*-
                  * 
                 final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
