@@ -289,10 +289,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 messages = new MailMessage[uids.length];
                 for (int i = 0; i < uids.length; i++) {
-                    final long uid = uids[i];
-                    if (uid > 0) {
-                        messages[i] = fetchedMsgs.get(uid);
-                    }
+                    messages[i] = fetchedMsgs.get(uids[i]);
                 }
             } else {
                 final TLongIntHashMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
@@ -307,11 +304,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 messages = new MailMessage[uids.length];
                 for (int i = 0; i < uids.length; i++) {
-                    final long uid = uids[i];
-                    final int seqNum = seqNumsMap.get(uid);
-                    if (seqNum > 0) {
-                        messages[i] = fetchedMsgs.get(seqNum);
-                    }
+                    messages[i] = fetchedMsgs.get(seqNumsMap.get(uids[i]));
                 }
             }
             /*
