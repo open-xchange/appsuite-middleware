@@ -94,8 +94,7 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
     }
 
     public int getManuallyCountedIMAPConnections() {
-        // TODO: Add a member to trace MailAccess.getCounter();
-        return 0;
+        return MonitoringInfo.getNumberOfConnections(MonitoringInfo.IMAP);
     }
 
     public int getNumberOfActiveSessions() {
