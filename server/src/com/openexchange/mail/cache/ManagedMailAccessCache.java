@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.cache;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,6 +87,16 @@ public final class ManagedMailAccessCache {
      * The flag whether debug logging is enabled.
      */
     protected static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /**
+     * The number of {@link MailAccess} instances which may be concurrently active/opened per account for a user.
+     */
+    private static final int QUEUE_CAPACITY = 2;
+
+    /**
+     * Drop those queues of which all elements timed-out.
+     */
+    private static final boolean DROP_TIMED_OUT_QUEUES = false;
 
     private static volatile ManagedMailAccessCache singleton;
 
@@ -139,12 +150,14 @@ public final class ManagedMailAccessCache {
         super();
         try {
             map = new ConcurrentHashMap<Key, MailAccessQueue>();
-            defaultIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
+            final int configuredIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
+            defaultIdleSeconds = configuredIdleSeconds <= 0 ? 7 : configuredIdleSeconds;
             /*
              * Add timer task
              */
             final TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-            final int shrinkerMillis = MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() * 1000;
+            final int configuredShrinkerSeconds = MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
+            final int shrinkerMillis = (configuredShrinkerSeconds <= 0 ? 3 : configuredShrinkerSeconds) * 1000;
             timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), shrinkerMillis, shrinkerMillis);
         } catch (final ServiceException e) {
             throw new MailException(e);
@@ -164,16 +177,21 @@ public final class ManagedMailAccessCache {
         if (null == accessQueue) {
             return null;
         }
-        final PooledMailAccess pooledMailAccess = accessQueue.poll();
-        if (null == pooledMailAccess) {
-            return null;
+        synchronized (accessQueue) {
+            if (accessQueue.isDeprecated()) {
+                return null;
+            }
+            final PooledMailAccess pooledMailAccess = accessQueue.poll();
+            if (null == pooledMailAccess) {
+                return null;
+            }
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+            mailAccess.setCached(false);
+            if (DEBUG) {
+                LOG.debug(new StringBuilder("Remove&Get for ").append(key).toString());
+            }
+            return mailAccess;
         }
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
-        mailAccess.setCached(false);
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("Remove&Get: ").append(mailAccess).toString());
-        }
-        return mailAccess;
     }
 
     /**
@@ -185,27 +203,47 @@ public final class ManagedMailAccessCache {
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      */
     public boolean putMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
-        int idleTime = mailAccess.getCacheIdleSeconds();
-        if (idleTime <= 0) {
-            idleTime = defaultIdleSeconds;
+        int idleSeconds = mailAccess.getCacheIdleSeconds();
+        if (idleSeconds <= 0) {
+            idleSeconds = defaultIdleSeconds;
         }
         final Key key = keyFor(accountId, session);
         MailAccessQueue accessQueue = map.get(key);
         if (null == accessQueue || accessQueue.isDeprecated()) {
-            final MailAccessQueue tmp = new MailAccessQueue();
+            final MailAccessQueue tmp = new MailAccessQueue(QUEUE_CAPACITY);
             accessQueue = map.putIfAbsent(key, tmp);
             if (null == accessQueue) {
                 accessQueue = tmp;
             }
         }
-        if (accessQueue.offer(new PooledMailAccess(mailAccess, idleTime))) {
-            mailAccess.setCached(true);
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("Queued ").append(accessQueue.size()).append(" mail access(es) with: ").append(mailAccess).toString());
+        synchronized (accessQueue) {
+            if (accessQueue.isDeprecated()) {
+                return false;
             }
-            return true;
+            /*
+             * Insert subsequent MailAccess instances with halved time-to-live seconds
+             */
+            idleSeconds = accessQueue.isEmpty() ? idleSeconds : (idleSeconds >> 1);
+            if (accessQueue.offer(PooledMailAccess.valueFor(mailAccess, idleSeconds * 1000L))) {
+                mailAccess.setCached(true);
+                if (DEBUG) {
+                    final int size = accessQueue.size();
+                    if (size == 1) {
+                        LOG.debug(new StringBuilder("Queued ONE mail access for ").append(key).toString());
+                    } else if (size > QUEUE_CAPACITY) {
+                        LOG.debug(new StringBuilder("\n\tExceeded queue capacity! Detected ").append(size).append(" mail access(es) for ").append(
+                            key).append('\n').toString());
+                    } else if (size == QUEUE_CAPACITY) {
+                        LOG.debug(new StringBuilder("\n\tReached queue capacity! Queued ").append(size).append(" mail access(es) for ").append(
+                            key).append('\n').toString());
+                    } else {
+                        LOG.debug(new StringBuilder("Queued ").append(size).append(" mail access(es) for ").append(key).toString());
+                    }
+                }
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
     /**
@@ -217,7 +255,12 @@ public final class ManagedMailAccessCache {
      */
     public boolean containsMailAccess(final Session session, final int accountId) {
         final MailAccessQueue accessQueue = map.get(keyFor(accountId, session));
-        return null != accessQueue && !accessQueue.isEmpty();
+        if (null == accessQueue) {
+            return false;
+        }
+        synchronized (accessQueue) {
+            return !accessQueue.isDeprecated() && !accessQueue.isEmpty();
+        }
     }
 
     /**
@@ -225,30 +268,32 @@ public final class ManagedMailAccessCache {
      */
     protected void dispose() {
         timerTask.cancel(false);
-        for (final Iterator<Entry<Key, MailAccessQueue>> iterator = map.entrySet().iterator(); iterator.hasNext();) {
-            final MailAccessQueue accessQueue = iterator.next().getValue();
-            orderlyClearQueue(accessQueue);
-            iterator.remove();
+        for (final Key key : new HashSet<Key>(map.keySet())) {
+            orderlyClearQueue(key);
         }
     }
 
     /**
      * Clears specified queue orderly.
      * 
-     * @param accessQueue The queue to clear
+     * @param key The key associated with the queue
      */
-    protected static void orderlyClearQueue(final MailAccessQueue accessQueue) {
+    protected void orderlyClearQueue(final Key key) {
+        final MailAccessQueue accessQueue = map.remove(key);
         if (null == accessQueue) {
             return;
         }
-        PooledMailAccess pooledMailAccess;
-        while (null != (pooledMailAccess = accessQueue.poll())) {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("Dropping: ").append(mailAccess).toString());
+        synchronized (accessQueue) {
+            accessQueue.markDeprecated();
+            PooledMailAccess pooledMailAccess;
+            while (null != (pooledMailAccess = accessQueue.poll())) {
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                if (DEBUG) {
+                    LOG.debug(new StringBuilder("Dropping: ").append(mailAccess).toString());
+                }
+                mailAccess.setCached(false);
+                mailAccess.close(false);
             }
-            mailAccess.setCached(false);
-            mailAccess.close(false);
         }
     }
 
@@ -267,12 +312,11 @@ public final class ManagedMailAccessCache {
             final int user = session.getUserId();
             final int cid = session.getContextId();
             if (null == service || 0 == service.getUserSessions(user, cid)) {
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storageService =
+                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                 final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
                 for (final MailAccount mailAccount : accounts) {
-                    orderlyClearQueue(map.remove(keyFor(mailAccount.getId(), session)));
+                    orderlyClearQueue(keyFor(mailAccount.getId(), session));
                 }
             }
         } catch (final ServiceException e) {
@@ -291,30 +335,42 @@ public final class ManagedMailAccessCache {
         private final ConcurrentMap<Key, MailAccessQueue> map;
 
         protected PurgeExpiredRunnable(final ConcurrentMap<Key, MailAccessQueue> map) {
+            super();
             this.map = map;
         }
 
         public void run() {
             try {
-                for (final Iterator<MailAccessQueue> iterator = map.values().iterator(); iterator.hasNext();) {
-                    final MailAccessQueue accessQueue = iterator.next();
-                    if (accessQueue.isDeprecated()) {
-                        iterator.remove();
-                        orderlyClearQueue(accessQueue);
-                    } else if (accessQueue.isEmpty()) {
-                        /*
-                         * Mark for being removed in the next run to save memory
-                         */
-                        accessQueue.markDeprecated();
-                    } else {
+                /*
+                 * Shall timed-out queues be removed from mapping?
+                 */
+                final boolean dropQueue = isDropQueue();
+                /*
+                 * Iterate mapping
+                 */
+                for (final Iterator<Entry<Key, MailAccessQueue>> iterator = map.entrySet().iterator(); iterator.hasNext();) {
+                    final Entry<Key, MailAccessQueue> entry = iterator.next();
+                    final MailAccessQueue accessQueue = entry.getValue();
+                    synchronized (accessQueue) {
                         PooledMailAccess pooledMailAccess;
                         while (null != (pooledMailAccess = accessQueue.pollDelayed())) {
-                            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+                                pooledMailAccess.getMailAccess();
                             mailAccess.setCached(false);
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("Timed-out: ").append(mailAccess).toString());
+                                LOG.debug(new StringBuilder("Timed-out mail access for ").append(entry.getKey()).toString());
                             }
                             mailAccess.close(false);
+                        }
+                        if (dropQueue && accessQueue.isEmpty()) {
+                            /*
+                             * Current queue is empty. Mark as deprecated
+                             */
+                            accessQueue.markDeprecated();
+                            if (DEBUG) {
+                                LOG.debug(new StringBuilder("Dropped queue for ").append(entry.getKey()).toString());
+                            }
+                            iterator.remove();
                         }
                     }
                 }
@@ -322,6 +378,10 @@ public final class ManagedMailAccessCache {
                 // A runtime exception
                 LOG.warn("Purge-expired run failed: " + e.getMessage(), e);
             }
+        }
+
+        private boolean isDropQueue() {
+            return DROP_TIMED_OUT_QUEUES;
         }
     }
 
@@ -379,6 +439,14 @@ public final class ManagedMailAccessCache {
                 return false;
             }
             return true;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder builder = new StringBuilder(16);
+            builder.append("{ Key [accountId=").append(accountId).append(", user=").append(user).append(", context=").append(context).append(
+                "] }");
+            return builder.toString();
         }
 
     }
