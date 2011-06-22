@@ -504,7 +504,21 @@ public final class CacheFolderStorage implements FolderStorage {
         final boolean cacheable;
         final boolean global;
         {
-            final Folder deleteMe = getFolder(treeId, folderId, storageParameters);
+            final Folder deleteMe;
+            try {
+                deleteMe = getFolder(treeId, folderId, storageParameters);
+            } catch (final FolderException e) {
+                /*
+                 * Obviously folder does not exist
+                 */
+                final Session session = storageParameters.getSession();
+                globalCache.removeFromGroup(newCacheKey(folderId, treeId), String.valueOf(storageParameters.getContextId()));
+                final FolderMap folderMap = optFolderMapFrom(session);
+                if (null != folderMap) {
+                    folderMap.remove(folderId, treeId);
+                }
+                return;
+            }
             cacheable = deleteMe.isCacheable();
             global = deleteMe.isGlobalID();
             parentId = deleteMe.getParentID();
