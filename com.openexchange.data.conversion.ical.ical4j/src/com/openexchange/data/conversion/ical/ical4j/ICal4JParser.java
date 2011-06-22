@@ -102,15 +102,15 @@ public class ICal4JParser implements ICalParser {
 
     private static final Log LOG = LogFactory.getLog(ICal4JParser.class);
 
-    private static final Map<String, Integer> weekdays = new HashMap<String, Integer>();
+    private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {
-        weekdays.put("MO", Integer.valueOf(Appointment.MONDAY));
-        weekdays.put("TU", Integer.valueOf(Appointment.TUESDAY));
-        weekdays.put("WE", Integer.valueOf(Appointment.WEDNESDAY));
-        weekdays.put("TH", Integer.valueOf(Appointment.THURSDAY));
-        weekdays.put("FR", Integer.valueOf(Appointment.FRIDAY));
-        weekdays.put("SA", Integer.valueOf(Appointment.SATURDAY));
-        weekdays.put("SO", Integer.valueOf(Appointment.SUNDAY));
+        WEEKDAYS.put("MO", Integer.valueOf(Appointment.MONDAY));
+        WEEKDAYS.put("TU", Integer.valueOf(Appointment.TUESDAY));
+        WEEKDAYS.put("WE", Integer.valueOf(Appointment.WEDNESDAY));
+        WEEKDAYS.put("TH", Integer.valueOf(Appointment.THURSDAY));
+        WEEKDAYS.put("FR", Integer.valueOf(Appointment.FRIDAY));
+        WEEKDAYS.put("SA", Integer.valueOf(Appointment.SATURDAY));
+        WEEKDAYS.put("SO", Integer.valueOf(Appointment.SUNDAY));
     }
 
     public ICal4JParser() {
