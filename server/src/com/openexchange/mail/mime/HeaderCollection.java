@@ -53,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,10 +63,8 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
-import javax.mail.internet.MimeUtility;
 import org.apache.commons.logging.Log;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -384,17 +381,11 @@ public class HeaderCollection implements Serializable {
             // Do nothing...
             return;
         }
-        String val = value;
-        if (isInvalid(val, false)) {
-            if (isEmpty(val)) {
-                return;
-            }
-            try {
-                val = MimeUtility.encodeText(val, MailProperties.getInstance().getDefaultMimeCharset(), "Q");
-            } catch (final UnsupportedEncodingException e) {
-                // Cannot occur
-                throw new IllegalArgumentException(new StringBuilder(32).append("Header value is invalid: ").append(val).toString());
-            }
+        if (isInvalid(value, false)) {
+            /*
+             * Ignore an empty value
+             */
+            return;
         }
         final HeaderName headerName = HeaderName.valueOf(name);
         List<String> values = map.get(headerName);
@@ -408,12 +399,12 @@ public class HeaderCollection implements Serializable {
             /*
              * Append
              */
-            values.add(val);
+            values.add(value);
         } else {
             /*
              * Prepend
              */
-            values.add(0, val);
+            values.add(0, value);
         }
         count++;
     }
@@ -835,15 +826,10 @@ public class HeaderCollection implements Serializable {
              */
             return false;
         }
-        if (str.length() == 0) {
-            return false;
-        }
-        for (int i = 0; i < chars.length; i++) {
-            if (!Character.isWhitespace(chars[i])) {
-                return false/* !isAscii(str) */;
-            }
-        }
-        return true;
+        /*
+         * A header value must not be empty
+         */
+        return !isEmpty(str);
     }
 
     /**
