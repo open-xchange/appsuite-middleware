@@ -51,6 +51,7 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -90,6 +91,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
 /**
+ * {@link ICal4JParser} - The {@link ICalParser} using <a href="http://ical4j.sourceforge.net/">ICal4j</a> library.
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author Tobias Prinz <tobias.prinz@open-xchange.com> (bug workarounds)
  */
@@ -158,13 +161,7 @@ public class ICal4JParser implements ICalParser {
         } catch (final ConversionError e){
         	errors.add(e);
         } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    // Ignore
-                }
-            }
+            closeSafe(reader);
         }
 
 
@@ -194,13 +191,7 @@ public class ICal4JParser implements ICalParser {
         } catch (final RuntimeException e){
             return null;
         } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    // Ignore
-                }
-            }
+            closeSafe(reader);
         }
     }
 
@@ -240,10 +231,10 @@ public class ICal4JParser implements ICalParser {
         return tasks;
     }
 
-    private static void closeSafe(final BufferedReader reader) {
-        if (reader != null) {
+    private static void closeSafe(final Closeable closeable) {
+        if (closeable != null) {
             try {
-                reader.close();
+                closeable.close();
             } catch (final IOException e) {
                 // Ignore
             }
