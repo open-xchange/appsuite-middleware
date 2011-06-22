@@ -21,7 +21,7 @@ public class OptionsTest extends ActionTestCase {
 		
 		assertEquals("0", res.getHeader("content-length"));
 		
-		final Set<String> expected = new HashSet<String>(Arrays.asList("GET","PUT","DELETE","HEAD","OPTIONS","TRACE","PROPPATCH", "PROPFIND","MOVE","COPY","LOCK","UNLOCK"));
+		final Set<String> expected = new HashSet<String>(Arrays.asList("GET","PUT","DELETE","HEAD","OPTIONS","TRACE","PROPPATCH", "PROPFIND","MOVE","COPY","LOCK","UNLOCK", "REPORT"));
 		
 		final String[] got = res.getHeader("Allow").split("\\s*,\\s*");
 		
