@@ -67,9 +67,9 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class MailAccessQueue extends AbstractQueue<PooledMailAccess> implements BlockingQueue<PooledMailAccess> {
 
-    protected transient final ReentrantLock lock = new ReentrantLock();
+    private transient final ReentrantLock lock = new ReentrantLock();
 
-    protected transient final Condition available = lock.newCondition();
+    private transient final Condition available = lock.newCondition();
 
     /**
      * The backing priority queue.
