@@ -391,17 +391,26 @@ final class MovePerformer extends AbstractPerformer {
                             FolderStorage.REAL_TREE_ID);
                     }
                     // TODO: Check permission for obtained default folder ID?
-                    final Folder clone4Real = (Folder) folder.clone();
-                    clone4Real.setParentID(defaultParentId);
-                    clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId, openedStorages));
-                    realStorage.updateFolder(clone4Real, storageParameters);
-                    final String newId = clone4Real.getID();
-                    if (null != newId) {
-                        /*
-                         * Perform the "move" in virtual storage
-                         */
-                        folder.setID(newId);
+                    /*
+                     * Is real folder already located below default folder localtion?
+                     */
+                    final String realParentID = realStorage.getFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters).getParentID();
+                    if (!defaultParentId.equals(realParentID)) {
+                        final Folder clone4Real = (Folder) folder.clone();
+                        clone4Real.setParentID(defaultParentId);
+                        clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId, openedStorages));
+                        realStorage.updateFolder(clone4Real, storageParameters);
+                        final String newId = clone4Real.getID();
+                        if (null != newId) {
+                            /*
+                             * Perform the "move" in virtual storage
+                             */
+                            folder.setID(newId);
+                        }
                     }
+                    /*
+                     * Perform the "move" in virtual storage
+                     */
                     virtualStorage.createFolder(folder, storageParameters);
                 }
             } else {
