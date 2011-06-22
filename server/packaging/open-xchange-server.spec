@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 14
+%define		ox_release 15
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -800,6 +800,170 @@ fi
 %doc doc/examples
 
 %changelog
+* Wed Jun 22 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19571: Resolved warnings when creating a POP3 account
+* Tue Jun 21 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19540: Applying proper flag to contact instance if considered as distribution list
+ - Bugfix #19471: Adapted to MS invitation mails
+ - Bugfix #19270: Proper order of contacts for special sort field (607)
+ - Bugfix #19560: Added missing tags to 'whitelist.properties' file
+ - Bugfix #19562: Showing proper TNEF attachments if present
+ - Bugfix #19566: Proper detection if a global folder is deleted
+* Tue Jun 21 2011 - marcus.klein@open-xchange.com
+ - TA7369 of US6559: Changed user attributes now go through a diff algorithm and then only real changes are applied to database.
+* Mon Jun 20 2011 - francisco.laguna@open-xchange.com
+ - Bugfix 19220: Show goodwill when user and context is not known.
+* Mon Jun 20 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19495: listfilestore now works again if server_id something else than 2.
+* Mon Jun 20 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19534: Fail for invalid transport server, too
+* Fri Jun 17 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19522: Added support for hexadecimal entities like &#xFC;
+* Wed Jun 15 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19497: Setting proper "msgref" attribute
+ - Bugfix #19512: Fixed mail composal
+* Tue Jun 14 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19474: Fixed moving a mail folder if altnamespace enabled
+* Tue Jun 14 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19458: Use secret service everywhere.
+ - Bugfix #19484: Calculate correct until date when it occurs after the appointment.
+* Sun Jun 12 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19496: Removing CDATA sections by disabling HtmlCleaner's "useCdata" parameter
+ - Bugfix #19462: Set unread count in returned IMAP mail
+* Sat Jun 11 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19466: Proper replacement of &apos; HTML entity
+* Wed Jun 08 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19374: Hierarchical-wise display of shared folders
+* Wed Jun 08 2011 - steffen.templin@open-xchange.com
+ - Bugfix #19442: The OXUpdater now provides a fallback mechanism that delivers files in en_US if the users preferred language is not available.
+* Tue Jun 07 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19410: No stack trace in publications on error.
+ - Bugfix #18646: Better equality check for network interfaces in use in UDP push.
+* Tue Jun 07 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19428: Using HtmlCleaner library to generate a well-formed and pretty-printed HTML because JTidy fails to do so
+ - Bugfix #19459: Changed session-bound LIST/LSUB cache to user-bound one. Thus changes are available for all active sessions without the
+                  need for propagating throughout sessions.
+* Mon Jun 06 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19358: Ignoring invalid date strings and generate an appropriate warning
+* Fri Jun 03 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19373: Not presenting OXtender for Outlook 1 if Outlook 2010 is installed.
+* Fri Jun 03 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19418: Adding user's time zone offset to a message's date headers and its received date
+* Thu Jun 02 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19291: Throwing proper error if an invalid host name is entered
+ - Bugfix #19305: Disabled caching for Unified Mail folders
+ - Bugfix #19335: Fixed NPE when converting TNEF to ICal
+ - Bugfix #19084: Honor tab character when parsing ENVELOPE's subject
+* Wed Jun 01 2011 - steffen.templin@open-xchange.com
+ - Bugfix #19373 - The outlook updater should not display OXtender1 if outlook 2010 is installed
+ - Bugfix #19226 - OutlookUpdater bundle now provides two settings to indicate if module is available and if the user has all necessary permissions to see it
+* Wed Jun 01 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19407: Checking for forbidden subscribe operation on a default folder
+ - Bugfix #19155: Introduced create-if-absent mechanism for external accounts' default folder full names
+* Wed Jun 01 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19391: Check publication permission before delivering publication
+ - Bugfix #18899: Don't lose title when saving a mail attachment in the infostore
+* Tue May 31 2011 - francisco.laguna@open-xchange.com
+  - Bugfix 18630: Improved logging of UDP send errors.
+  - Bugfix 18875: Stricter filtering of server side templates.
+* Tue May 31 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19400: Fixed possible IllegalArgumentException
+* Mon May 30 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19362: Throwing a meaningful error if folder creation returns an invalid folder identifier
+ - Bugfix #19377: Introduced listener for folder events in IMAP bundle to clear LIST/LSUB cache if necessary
+* Fri May 27 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19372: Removing MS Word tags in a mail's HTML content
+* Thu May 26 2011 - francisco.laguna@open-xchange.com
+  - Bugfix 19140: Improved error message, improved reauthorization
+  - Bugfix 19220: Make messaging configurable.
+* Thu May 26 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19315: Converting distribution list to an appropriate VCard attachment
+* Wed May 25 2011 - steffen.templin@open-xchange.com
+ - Bugfix #18983: Changed the 7zip module of the outlook updater bundle and the installer name of the OXUpdater to support installing without administrator privileges
+* Tue May 24 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18846: Fixed handling of nested mail in JSON mail structure
+* Mon May 23 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19214: Fixed mail connection counter
+ - Bugfix #19312: Applying proper server and port setting if SMTP authentication is disabled
+ - Bugfix #19299: Allowing an empty subject in MAL API
+* Mon May 23 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19317: Pay attention to https switch in infostore publications
+* Fri May 20 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19142: Introduced more reliable/precise check if an AJP keep-alive needs to be performed
+ - Bugfix #18885: Fixed display of winmail.dat attachments
+ - Bugfix #19289: Disabled JSON message cache for external accounts
+ - Bugfix #19228: Disabled admin permission on Unified Mail folders
+ - Bugfix #19269: Applying proper fields on fast FETCH
+* Wed May 18 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19281: Fixed a NullPointerException when testing transport connection.
+ - Bugfix #19127: Not hiding image too large exception behind a broken picture exception anymore.
+* Wed May 18 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19179: Probing for '�' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
+* Tue May 17 2011 - marcus.klein@open-xchange.com
+ - Bugfix #18953: Checking for folder visible permissions on shared tasks folders. This solves a problem when a user is downgraded to PIM.
+* Tue May 17 2011 - dennis.sieben@open-xchange.com
+ - Bugfix #18656: Corrected order of headers and message when transferring a message to spamassassin for learning.
+* Tue May 17 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19259: Checking for possible null elements before sorting list
+* Mon May 16 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18836: Dealing with possible runtime exception
+ - Bugfix #19247: Fixed display of Japanese-encoded mail text
+* Mon May 16 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19235: Improved some exception message to make it more understandable for end users.
+* Sun May 15 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19175: Fixed access to POP3Folder's Protocol instance
+ - Bugfix #19167: Perform an unsubscribe before renaming a folder
+ - Bugfix #18742: Lowered log level to WARNING if a requested mail could not be found
+ - Bugfix #19185: Fixed IllegalStateException on shut-down
+* Thu May 12 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19140: Better error messages for facebook messaging, when a token was invalidated.
+* Wed May 11 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19195: Fixed NPE when exporting iCal.
+* Wed May 11 2011 - tobias.prinz@open-xchange.com
+ - Updated ical4j from v1.0-beta to 1.0-release
+* Tue May 10 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #18558: Appointments which are visible through several folders contain correct folder id.
+ - Bugfix #19089: Added VTimZone Objects to ical exporter.
+* Mon May 09 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19169: Switch for UWA Widgets.
+ - Bugfix #19024: Avoid NPEs when trying to download file that doesn't exist.
+* Mon May 09 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #18875: Consider more than one .properties file in the templates directory.
+ - Bugfix #19069: Merge contacts on CSV import.
+* Sat May 07 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19088: Add possibility to use a deferrer step in multidomain setups even when API keys are configured to use a single domain.
+* Sat May 07 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19156: Introduced batch-wise processing of a POP3 account's messages
+* Thu May 05 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19119: Corrected drive letter parameter for OXUpdater installer.
+* Thu May 05 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19146: Fix NPE on shutdown.
+* Wed May 04 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19124: Fixed NPE on IMAP bundle start
+* Mon May 02 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19030: Changed wording
+* Sat Apr 30 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19083: Reduced execution of avoidable POP3 commands while importing POP3 messages to backing storage to avoid possibly exceeding
+                  provider restrictions regarding number of executed POP3 command
+ - Bugfix #18784: Trying to recover from a MySQL integrity constraint violation while deleting an external IMAP account
+* Thu Apr 28 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19065: Fixed body search for IMAP
+* Wed Apr 27 2011 - steffen.templin@open-xchange.com
+ - Bugfix #19028: RSS messages now contain unique ids and urls to their origin.
+ - Bugfix #18469: Fixed NPE for mailfilter request with missing session parameter.
+* Wed Apr 27 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19038: Using Netscape's date format for "expires" attribute: Wdy, DD-Mon-YY HH:MM:SS GMT
+* Tue Apr 26 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #19046: ICal appointment series with a start date that is not part of the series (e.g. weekly series on Wednesday, starts Monday) now have a separate starting appointment.
+* Tue Apr 26 2011 - thorben.betten@open-xchange.com
+ - Bugfix #18981: Ignoring empty addresses occurring in RFC822 address header
+ - Bugfix #18974: Introduced possibility to restrict number of concurrent connections to a subscribed/external IMAP account
+* Thu Apr 21 2011 - choeger@open-xchange.com
+ - Bugfix #19010: NullPointerException in IMAP Idle bundle
+* Thu Apr 21 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19018: Added missing import for javax.xml.transform.stream to server bundle.
+* Thu Apr 21 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #18866: Allow regular users to be granted administrative access to the three root public folders.
 * Wed Apr 20 2011 - marcus.klein@open-xchange.com
  - Bugfix #18997: Added an update task that fixes the wrong definitions for table oauthAccounts.
  - Bugfix #18868: Added timeout to apache balancer member configuration to not inherit this from the global apache timeout.
