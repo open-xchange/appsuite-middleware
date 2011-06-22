@@ -64,10 +64,20 @@ public class MonitoringInfo {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MonitoringInfo.class);
 
     // Constants for connection types
+
+    /**
+     * The connection type constant for open AJP socket connections.
+     */
     public static final int AJP_SOCKET = 0;
 
+    /**
+     * The connection type constant for open connections/requests to AJAX interface.
+     */
     public static final int AJAX = 1;
 
+    /**
+     * The connection type constant for open connections/requests to Outlook WebDAV/XML interface.
+     */
     public static final int OUTLOOK = 2;
 
     public static final int WEBDAV_STORAGE = 3;
@@ -76,8 +86,14 @@ public class MonitoringInfo {
 
     public static final int SYNCML = 5;
 
+    /**
+     * The connection type constant for open connections to mail back-ends.
+     */
     public static final int IMAP = 6;
 
+    /**
+     * The connection type constant for the number of open sessions.
+     */
     private static final int SESSION = 7;
 
     /**
