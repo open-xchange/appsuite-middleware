@@ -232,7 +232,7 @@
 
  - Bugfix #19088: Add possibility to use a deferrer step in multidomain setups even when API keys are configured to use a single domain.
  
- * 2011-05-05 - francisco.laguna@open-xchange.com
+* 2011-05-05 - francisco.laguna@open-xchange.com
 
  - Bugfix #19146: Fix NPE on shutdown.
 
