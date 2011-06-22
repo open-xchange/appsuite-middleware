@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,8 +64,10 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.mail.internet.MimeUtility;
 import org.apache.commons.logging.Log;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -380,8 +383,18 @@ public class HeaderCollection implements Serializable {
             }
             // Do nothing...
             return;
-        } else if (isInvalid(value, false)) {
-            throw new IllegalArgumentException(new StringBuilder(32).append("Header value is invalid: ").append(value).toString());
+        }
+        String val = value;
+        if (isInvalid(val, false)) {
+            if (isEmpty(val)) {
+                return;
+            }
+            try {
+                val = MimeUtility.encodeText(val, MailProperties.getInstance().getDefaultMimeCharset(), "Q");
+            } catch (final UnsupportedEncodingException e) {
+                // Cannot occur
+                throw new IllegalArgumentException(new StringBuilder(32).append("Header value is invalid: ").append(val).toString());
+            }
         }
         final HeaderName headerName = HeaderName.valueOf(name);
         List<String> values = map.get(headerName);
@@ -395,12 +408,12 @@ public class HeaderCollection implements Serializable {
             /*
              * Append
              */
-            values.add(value);
+            values.add(val);
         } else {
             /*
              * Prepend
              */
-            values.add(0, value);
+            values.add(0, val);
         }
         count++;
     }
@@ -846,6 +859,24 @@ public class HeaderCollection implements Serializable {
             isAscci &= (chars[i] < 128);
         }
         return isAscci;
+    }
+
+    /**
+     * Checks whether the specified string is empty
+     * 
+     * @param s The string to check
+     * @return <code>true</code> if string is empty; otherwise <code>false</code>
+     */
+    private static final boolean isEmpty(final String s) {
+        if (null == s) {
+            return true;
+        }
+        final char[] chars = s.toCharArray();
+        boolean empty = true;
+        for (int i = 0; empty && i < chars.length; i++) {
+            empty = Character.isWhitespace(chars[i]);
+        }
+        return empty;
     }
 
     /**
