@@ -75,6 +75,10 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class HeaderCollection implements Serializable {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final String ERR_HEADER_NAME_IS_INVALID = "Header name is invalid";
 
     private static final long serialVersionUID = 6939560514144351286L;
@@ -369,7 +373,13 @@ public class HeaderCollection implements Serializable {
 
     private final void putHeader(final String name, final String value, final boolean clear) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            if (DEBUG) {
+                final IllegalArgumentException tmp =
+                    new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+                LOG.debug(tmp.getMessage(), tmp);
+            }
+            // Do nothing...
+            return;
         } else if (isInvalid(value, false)) {
             throw new IllegalArgumentException(new StringBuilder(32).append("Header value is invalid: ").append(value).toString());
         }
