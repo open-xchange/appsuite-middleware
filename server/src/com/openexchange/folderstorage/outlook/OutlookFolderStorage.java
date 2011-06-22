@@ -567,8 +567,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final Set<String> disposed = new HashSet<String>(sessions.size());
                 disposed.add(session.getSessionID());
                 for (final Session current : sessions) {
-                    final String sessionID = current.getSessionID();
-                    if (disposed.add(sessionID)) {
+                    if (disposed.add(current.getSessionID())) {
                         final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
                         if (null != memoryTable) {
                             final MemoryTree memoryTree = memoryTable.getTree(tree);
