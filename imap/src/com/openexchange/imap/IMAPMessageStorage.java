@@ -347,7 +347,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw MIMEMailException.handleMessagingException(e, imapConfig, session);
             } catch (final MessagingException e) {
                 final Exception nextException = e.getNextException();
-                if (nextException instanceof BadCommandException) {
+                if ((nextException instanceof BadCommandException) || (nextException instanceof CommandFailedException)) {
                     if (DEBUG) {
                         final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
                         for (final Item item : fetchProfile.getItems()) {
