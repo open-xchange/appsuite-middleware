@@ -49,175 +49,32 @@
 
 package com.openexchange.mail.cache;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@link MailAccessQueue} - A {@link Queue} additionally providing {@link #pollDelayed()} method to obtain expired elements.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccessQueue implements Queue<PooledMailAccess> {
-
-    /**
-     * The backing priority queue.
-     */
-    private final PriorityQueue<PooledMailAccess> priorityQueue;
-
-    /**
-     * The queue's capacity or <code>-1</code> if unbounded.
-     */
-    private final int capacity;
-
-    /**
-     * The atomic boolean for deprecated flag.
-     */
-    private final AtomicBoolean deprecated;
-
-    /**
-     * Creates a new <tt>MailAccessQueue</tt> that is initially empty.
-     * 
-     * @param capacity The queue's capacity or <code>-1</code> if unbounded
-     */
-    public MailAccessQueue(final int capacity) {
-        super();
-        deprecated = new AtomicBoolean();
-        this.capacity = capacity;
-        priorityQueue = new PriorityQueue<PooledMailAccess>();
-    }
+public interface MailAccessQueue extends Queue<PooledMailAccess> {
 
     /**
      * Marks this queue as deprecated.
      */
-    public void markDeprecated() {
-        deprecated.set(true);
-    }
+    void markDeprecated();
 
     /**
      * Checks if this queue is marked as deprecated.
      * 
      * @return <code>true</code> if this queue is marked as deprecated; otherwise <code>false</code>
      */
-    public boolean isDeprecated() {
-        return deprecated.get();
-    }
+    boolean isDeprecated();
 
     /**
      * Retrieves and removes the head of this queue, or <tt>null</tt> if head has not expired, yet.
      * 
      * @return The head of this queue or <tt>null</tt> if head has not expired, yet.
      */
-    public PooledMailAccess pollDelayed() {
-        final PooledMailAccess first = priorityQueue.peek();
-        if (first == null || first.getDelay(TimeUnit.MILLISECONDS) > 0) {
-            return null;
-        }
-        return priorityQueue.poll();
-    }
-
-    @Override
-    public int hashCode() {
-        return priorityQueue.hashCode();
-    }
-
-    public PooledMailAccess remove() {
-        return priorityQueue.remove();
-    }
-
-    public boolean isEmpty() {
-        return priorityQueue.isEmpty();
-    }
-
-    public boolean contains(final Object o) {
-        return priorityQueue.contains(o);
-    }
-
-    public PooledMailAccess element() {
-        return priorityQueue.element();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return priorityQueue.equals(obj);
-    }
-
-    public boolean addAll(final Collection<? extends PooledMailAccess> c) {
-        if ((capacity > 0) && ((capacity - priorityQueue.size()) < c.size())) {
-            return false;
-        }
-        return priorityQueue.addAll(c);
-    }
-
-    public Object[] toArray() {
-        return priorityQueue.toArray();
-    }
-
-    public <T> T[] toArray(final T[] a) {
-        return priorityQueue.toArray(a);
-    }
-
-    public boolean containsAll(final Collection<?> c) {
-        return priorityQueue.containsAll(c);
-    }
-
-    public boolean offer(final PooledMailAccess o) {
-        if ((capacity > 0) && (capacity <= priorityQueue.size())) {
-            return false;
-        }
-        return priorityQueue.offer(o);
-    }
-
-    public PooledMailAccess peek() {
-        return priorityQueue.peek();
-    }
-
-    public boolean add(final PooledMailAccess o) {
-        if ((capacity > 0) && (capacity <= priorityQueue.size())) {
-            return false;
-        }
-        return priorityQueue.add(o);
-    }
-
-    public boolean removeAll(final Collection<?> c) {
-        return priorityQueue.removeAll(c);
-    }
-
-    public boolean remove(final Object o) {
-        return priorityQueue.remove(o);
-    }
-
-    public Iterator<PooledMailAccess> iterator() {
-        return priorityQueue.iterator();
-    }
-
-    public boolean retainAll(final Collection<?> c) {
-        return priorityQueue.retainAll(c);
-    }
-
-    @Override
-    public String toString() {
-        return priorityQueue.toString();
-    }
-
-    public int size() {
-        return priorityQueue.size();
-    }
-
-    public void clear() {
-        priorityQueue.clear();
-    }
-
-    public PooledMailAccess poll() {
-        return priorityQueue.poll();
-    }
-
-    public Comparator<? super PooledMailAccess> comparator() {
-        return priorityQueue.comparator();
-    }
+    public PooledMailAccess pollDelayed();
 
 }
