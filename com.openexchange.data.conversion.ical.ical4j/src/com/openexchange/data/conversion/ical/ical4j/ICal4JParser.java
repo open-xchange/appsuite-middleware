@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -159,7 +158,13 @@ public class ICal4JParser implements ICalParser {
         } catch (final ConversionError e){
         	errors.add(e);
         } finally {
-            closeSafe(reader);
+            if (null != reader) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
         }
 
 
@@ -189,7 +194,13 @@ public class ICal4JParser implements ICalParser {
         } catch (final RuntimeException e){
             return null;
         } finally {
-            closeSafe(reader);
+            if (null != reader) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
         }
     }
 
@@ -229,10 +240,10 @@ public class ICal4JParser implements ICalParser {
         return tasks;
     }
 
-    private static void closeSafe(final Closeable closeable) {
-        if (closeable != null) {
+    private static void closeSafe(final BufferedReader reader) {
+        if (reader != null) {
             try {
-                closeable.close();
+                reader.close();
             } catch (final IOException e) {
                 // Ignore
             }
