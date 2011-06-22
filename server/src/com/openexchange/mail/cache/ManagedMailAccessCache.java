@@ -59,6 +59,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.queue.MailAccessQueueImpl;
+import com.openexchange.mail.cache.queue.SingletonMailAccessQueue;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
@@ -211,7 +212,7 @@ public final class ManagedMailAccessCache {
         final Key key = keyFor(accountId, session);
         MailAccessQueue accessQueue = map.get(key);
         if (null == accessQueue || accessQueue.isDeprecated()) {
-            final MailAccessQueue tmp = new MailAccessQueueImpl(QUEUE_CAPACITY);
+            final MailAccessQueue tmp = 1 == QUEUE_CAPACITY ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(QUEUE_CAPACITY);
             accessQueue = map.putIfAbsent(key, tmp);
             if (null == accessQueue) {
                 accessQueue = tmp;
