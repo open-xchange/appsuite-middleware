@@ -122,6 +122,11 @@ public final class POP3FolderStorage extends MailFolderStorage {
     }
 
     @Override
+    public String getDefaultFolderPrefix() throws MailException {
+        return pop3FolderStorage.getDefaultFolderPrefix();
+    }
+
+    @Override
     public String getConfirmedHamFolder() throws MailException {
         return pop3FolderStorage.getConfirmedHamFolder();
     }

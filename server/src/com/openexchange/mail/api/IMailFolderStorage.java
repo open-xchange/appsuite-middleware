@@ -107,6 +107,14 @@ public interface IMailFolderStorage {
     public MailFolder getRootFolder() throws MailException;
 
     /**
+     * Gets the prefix (incl. separator character) for default folders.
+     * 
+     * @return The prefix
+     * @throws MailException If a mail error occurs
+     */
+    public String getDefaultFolderPrefix() throws MailException;
+
+    /**
      * Checks user's default folder as defined in user's mail settings and creates them if any is missing.
      * <p>
      * See also {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedSpam() createConfirmedSpam()},

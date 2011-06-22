@@ -200,6 +200,10 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return null == lock ? session : lock;
     }
 
+    public String getDefaultFolderPrefix() throws MailException {
+        return "";
+    }
+
     public void checkDefaultFolders() throws MailException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         if (!isDefaultFoldersChecked(mailSessionCache)) {

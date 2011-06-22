@@ -59,7 +59,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -304,7 +303,7 @@ public final class NewAction extends AbstractMailAccountAction {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = getMailAccess(description, session);
             access.connect(false);
             try {
-                return ((MailFolderStorage) access.getFolderStorage()).getDefaultFolderPrefix();
+                return access.getFolderStorage().getDefaultFolderPrefix();
             } finally {
                 access.close(true);
             }

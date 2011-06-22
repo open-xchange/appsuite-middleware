@@ -433,32 +433,14 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public void releaseResources() {
         try {
-            IMailFolderStorage folderStorage = getFolderStorage();
-            if (folderStorage != null) {
-                try {
-                    folderStorage.releaseResources();
-                } catch (final MailException e) {
-                    LOG.error(new StringBuilder("Error while closing POP3 folder storage: ").append(e.getMessage()).toString(), e);
-                } finally {
-                    folderStorage = null;
-                }
-            }
+            getFolderStorage().releaseResources();
         } catch (final MailException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.debug(new StringBuilder("Error while closing POP3 folder storage: ").append(e.getMessage()).toString(), e);
         }
         try {
-            IMailMessageStorage messageStorage = getMessageStorage();
-            if (messageStorage != null) {
-                try {
-                    messageStorage.releaseResources();
-                } catch (final MailException e) {
-                    LOG.error(new StringBuilder("Error while closing POP3 message storage: ").append(e.getMessage()).toString(), e);
-                } finally {
-                    messageStorage = null;
-                }
-            }
+            getMessageStorage().releaseResources();
         } catch (final MailException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.debug(new StringBuilder("Error while closing POP3 message storage: ").append(e.getMessage()).toString(), e);
         }
         /*-
          * TODO:

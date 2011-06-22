@@ -70,7 +70,6 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
@@ -520,7 +519,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 MailAccess.getInstance(session, accountId);
             access.connect(false);
             try {
-                return ((MailFolderStorage) access.getFolderStorage()).getDefaultFolderPrefix();
+                return access.getFolderStorage().getDefaultFolderPrefix();
             } finally {
                 access.close(true);
             }
