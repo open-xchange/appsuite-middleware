@@ -61,6 +61,8 @@ import com.openexchange.mail.cache.PooledMailAccess;
 
 /**
  * {@link MailAccessQueueImpl} - A {@link Queue} additionally providing {@link #pollDelayed()} method to obtain expired elements.
+ * <p>
+ * <b>Note</b>: This queue is not thread-safe!
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
