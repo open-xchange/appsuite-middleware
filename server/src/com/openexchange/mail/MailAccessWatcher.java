@@ -169,16 +169,7 @@ public final class MailAccessWatcher {
      * @return The number of currently tracked mail accesses
      */
     public static int getNumberOfMailAccesses() {
-        int count = 0;
-        for (final Iterator<MailAccess<?, ?>> iterator = MAIL_ACCESSES.keySet().iterator(); iterator.hasNext();) {
-            final MailAccess<?, ?> mailAccess = iterator.next();
-            if (mailAccess.isConnectedUnsafe()) {
-                count++;
-            } else {
-               iterator.remove();
-            }
-        }
-        return count;
+        return MAIL_ACCESSES.size();
     }
 
     /**
@@ -211,7 +202,7 @@ public final class MailAccessWatcher {
 
         private final org.apache.commons.logging.Log logger;
 
-        private final boolean traceEnabled;
+        private boolean traceEnabled;
 
         public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses, final org.apache.commons.logging.Log logger) {
             super();
