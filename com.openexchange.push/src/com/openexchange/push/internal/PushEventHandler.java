@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.session.Session;
@@ -111,32 +112,43 @@ public final class PushEventHandler implements EventHandler {
                     // Iterate push managers
                     final PushManagerRegistry registry = PushManagerRegistry.getInstance();
                     for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
-                        final PushManagerService pushManager = pushManagersIterator.next();
-                        // Stop listener for session
-                        final boolean stopped = pushManager.stopListener(session);
-                        if (DEBUG && stopped) {
-                            LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
-                                " in context ").append(session.getContextId()).append(" by push manager \"").append(pushManager.toString()).append(
-                                '"').toString());
-                        }
-                    }
-
-                } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                    @SuppressWarnings("unchecked")
-                    final Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                    // Iterate push managers
-                    final PushManagerRegistry registry = PushManagerRegistry.getInstance();
-                    for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
-                        final PushManagerService pushManager = pushManagersIterator.next();
-                        // Stop listener for sessions
-                        final Collection<Session> sessions = sessionContainer.values();
-                        for (final Session session : sessions) {
+                        try {
+                            final PushManagerService pushManager = pushManagersIterator.next();
+                            // Stop listener for session
                             final boolean stopped = pushManager.stopListener(session);
                             if (DEBUG && stopped) {
                                 LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
                                     " in context ").append(session.getContextId()).append(" by push manager \"").append(
                                     pushManager.toString()).append('"').toString());
                             }
+                        } catch (final PushException e) {
+                            LOG.error("Push error while stopping push listener.", e);
+                        } catch (final RuntimeException e) {
+                            LOG.error("Runtime error while stopping push listener.", e);
+                        }
+                    }
+                } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                    @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
+                        (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                    // Iterate push managers
+                    final PushManagerRegistry registry = PushManagerRegistry.getInstance();
+                    for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
+                        try {
+                            final PushManagerService pushManager = pushManagersIterator.next();
+                            // Stop listener for sessions
+                            final Collection<Session> sessions = sessionContainer.values();
+                            for (final Session session : sessions) {
+                                final boolean stopped = pushManager.stopListener(session);
+                                if (DEBUG && stopped) {
+                                    LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
+                                        " in context ").append(session.getContextId()).append(" by push manager \"").append(
+                                        pushManager.toString()).append('"').toString());
+                                }
+                            }
+                        } catch (final PushException e) {
+                            LOG.error("Push error while stopping push listener.", e);
+                        } catch (final RuntimeException e) {
+                            LOG.error("Runtime error while stopping push listener.", e);
                         }
                     }
                 } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
@@ -144,13 +156,19 @@ public final class PushEventHandler implements EventHandler {
                     // Iterate push managers
                     final PushManagerRegistry registry = PushManagerRegistry.getInstance();
                     for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
-                        final PushManagerService pushManager = pushManagersIterator.next();
-                        // Initialize a new push listener for session
-                        final PushListener pl = pushManager.startListener(session);
-                        if (DEBUG && null != pl) {
-                            LOG.debug(new StringBuilder(64).append("Started push listener for user ").append(session.getUserId()).append(
-                                " in context ").append(session.getContextId()).append(" by push manager \"").append(pushManager.toString()).append(
-                                '"').toString());
+                        try {
+                            final PushManagerService pushManager = pushManagersIterator.next();
+                            // Initialize a new push listener for session
+                            final PushListener pl = pushManager.startListener(session);
+                            if (DEBUG && null != pl) {
+                                LOG.debug(new StringBuilder(64).append("Started push listener for user ").append(session.getUserId()).append(
+                                    " in context ").append(session.getContextId()).append(" by push manager \"").append(
+                                    pushManager.toString()).append('"').toString());
+                            }
+                        } catch (final PushException e) {
+                            LOG.error("Push error while starting push listener.", e);
+                        } catch (final RuntimeException e) {
+                            LOG.error("Runtime error while starting push listener.", e);
                         }
                     }
                 }
