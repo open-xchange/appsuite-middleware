@@ -74,6 +74,8 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3SyncMessagesCallable.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private final POP3Access pop3Access;
 
     private final POP3Storage pop3Storage;
@@ -136,7 +138,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
             } catch (final IOException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("\n\tSynchronizing messages with POP3 account: " + server, new Throwable());
             }
             /*
@@ -147,6 +149,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
              * Sync messages
              */
             try {
+                final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 /*
                  * Access POP3 account and synchronize
                  */
@@ -157,8 +160,9 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 pop3StorageProperties.addProperty(
                     POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED,
                     String.valueOf(System.currentTimeMillis()));
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("\n\tSynchronization successfully performed for POP3 account: " + server);
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("\n\tSynchronization successfully performed for POP3 account \"" + server + "\" in: " + dur + "msec");
                 }
             } catch (final MailException e) {
                 throw e;
