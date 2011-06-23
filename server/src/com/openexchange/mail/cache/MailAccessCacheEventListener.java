@@ -83,19 +83,28 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         final String topic = event.getTopic();
         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
             final @SuppressWarnings("unchecked") Map<String, Session> sessions = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-            final ManagedMailAccessCache mmac;
-            final MailAccessCache mac;
+            ManagedMailAccessCache mmac;
+            MailAccessCache mac;
             try {
                 mmac = ManagedMailAccessCache.getInstance();
+            } catch (final MailException e) {
+                LOG.warn("Managed mail access cache could not be obtained.", e);
+                mmac = null;
+            }
+            try {
                 mac = MailAccessCache.getInstance();
             } catch (final MailException e) {
-                LOG.error("Mail access cache could not be obtained.", e);
-                return;
+                LOG.warn("Mail access cache could not be obtained.", e);
+                mac = null;
             }
             for (final Session session : sessions.values()) {
                 try {
-                    mmac.clearUserEntries(session);
-                    mac.clearUserEntries(session);
+                    if (null != mmac) {
+                        mmac.clearUserEntries(session);
+                    }
+                    if (null != mac) {
+                        mac.clearUserEntries(session);
+                    }
                     if (LOG.isInfoEnabled()) {
                         LOG.info(new StringBuilder(128).append("Detected a removed session: ").append(session.getSessionID()).append(
                             ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
@@ -107,18 +116,27 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             }
         } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-            final ManagedMailAccessCache mmac;
-            final MailAccessCache mac;
+            ManagedMailAccessCache mmac;
+            MailAccessCache mac;
             try {
                 mmac = ManagedMailAccessCache.getInstance();
-                mac = MailAccessCache.getInstance();
             } catch (final MailException e) {
-                LOG.error("Mail access cache could not be obtained.", e);
-                return;
+                LOG.warn("Managed mail access cache could not be obtained.", e);
+                mmac = null;
             }
             try {
-                mmac.clearUserEntries(session);
-                mac.clearUserEntries(session);
+                mac = MailAccessCache.getInstance();
+            } catch (final MailException e) {
+                LOG.warn("Mail access cache could not be obtained.", e);
+                mac = null;
+            }
+            try {
+                if (null != mmac) {
+                    mmac.clearUserEntries(session);
+                }
+                if (null != mac) {
+                    mac.clearUserEntries(session);
+                }
                 if (LOG.isInfoEnabled()) {
                     LOG.info(new StringBuilder(128).append("Detected a removed session: ").append(session.getSessionID()).append(
                         ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(" in context ").append(
