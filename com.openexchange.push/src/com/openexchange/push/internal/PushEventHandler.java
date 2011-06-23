@@ -109,7 +109,8 @@ public final class PushEventHandler implements EventHandler {
                 if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                     final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                     // Iterate push managers
-                    for (final Iterator<PushManagerService> pushManagersIterator = PushManagerRegistry.getInstance().getPushManagers(); pushManagersIterator.hasNext();) {
+                    final PushManagerRegistry registry = PushManagerRegistry.getInstance();
+                    for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
                         final PushManagerService pushManager = pushManagersIterator.next();
                         // Stop listener for session
                         final boolean stopped = pushManager.stopListener(session);
@@ -124,7 +125,8 @@ public final class PushEventHandler implements EventHandler {
                     @SuppressWarnings("unchecked")
                     final Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                     // Iterate push managers
-                    for (final Iterator<PushManagerService> pushManagersIterator = PushManagerRegistry.getInstance().getPushManagers(); pushManagersIterator.hasNext();) {
+                    final PushManagerRegistry registry = PushManagerRegistry.getInstance();
+                    for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
                         final PushManagerService pushManager = pushManagersIterator.next();
                         // Stop listener for sessions
                         final Collection<Session> sessions = sessionContainer.values();
@@ -140,7 +142,8 @@ public final class PushEventHandler implements EventHandler {
                 } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
                     final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                     // Iterate push managers
-                    for (final Iterator<PushManagerService> pushManagersIterator = PushManagerRegistry.getInstance().getPushManagers(); pushManagersIterator.hasNext();) {
+                    final PushManagerRegistry registry = PushManagerRegistry.getInstance();
+                    for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
                         final PushManagerService pushManager = pushManagersIterator.next();
                         // Initialize a new push listener for session
                         final PushListener pl = pushManager.startListener(session);
