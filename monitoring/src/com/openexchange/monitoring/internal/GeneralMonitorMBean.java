@@ -72,7 +72,5 @@ public interface GeneralMonitorMBean {
 
     public int getNumberOfRunningAJPListeners();
 
-    public int getManuallyCountedIMAPConnections();
-
     public Integer getNbObjects();
 }

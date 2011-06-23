@@ -97,10 +97,6 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
         return MonitoringInfo.getNumberOfConnections(MonitoringInfo.MAIL_IDLE);
     }
 
-    public int getManuallyCountedIMAPConnections() {
-        return MonitoringInfo.getNumberOfConnections(MonitoringInfo.IMAP);
-    }
-
     public int getNumberOfActiveSessions() {
         final SessiondService sessiondService = MonitoringServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         if (sessiondService != null) {
