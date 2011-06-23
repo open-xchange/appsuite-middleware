@@ -224,7 +224,9 @@ public final class MailAccessWatcher {
                     final Entry<MailAccess<?, ?>, Long> e = iter.next();
                     final MailAccess<?, ?> mailAccess = e.getKey();
                     if (mailAccess.isConnectedUnsafe()) {
-                        if (!mailAccess.isWaiting()) {
+                        if (mailAccess.isWaiting()) {
+                            logger.debug(new StringBuilder("Idling/waiting mail connection:\n").append(mailAccess.getTrace()).toString());
+                        } else {
                             final Long val = e.getValue();
                             if ((null != val)) {
                                 final long duration = (now - l(val));
