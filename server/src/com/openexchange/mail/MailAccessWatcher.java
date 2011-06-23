@@ -226,20 +226,22 @@ public final class MailAccessWatcher {
                 for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = map.entrySet().iterator(); iter.hasNext();) {
                     final Entry<MailAccess<?, ?>, Long> e = iter.next();
                     final MailAccess<?, ?> mailAccess = e.getKey();
-                    if (mailAccess.isConnectedUnsafe() && !mailAccess.isWaiting()) {
-                        final Long val = e.getValue();
-                        if ((null != val)) {
-                            final long duration = (now - l(val));
-                            if (duration > watcherTime) {
-                                sb.setLength(0);
-                                logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration))).append(mailAccess.getTrace()).toString());
-                                exceededAcesses.add(mailAccess);
+                    if (mailAccess.isConnectedUnsafe()) {
+                        if (!mailAccess.isWaiting()) {
+                            final Long val = e.getValue();
+                            if ((null != val)) {
+                                final long duration = (now - l(val));
+                                if (duration > watcherTime) {
+                                    sb.setLength(0);
+                                    logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration))).append(mailAccess.getTrace()).toString());
+                                    exceededAcesses.add(mailAccess);
+                                }
+                                
                             }
-                            
                         }
                     } else {
                         /*
-                         * Remove closed or idling connection from watcher
+                         * Remove closed connection from watcher
                          */
                         iter.remove();
                     }
