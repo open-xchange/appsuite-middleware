@@ -385,6 +385,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         mailAccess.shutdown();
     }
 
+    /**
+     * The max. number of {@link MailAccess} instanced allowed being cached concurrently for a user's account.
+     */
     private static final int MAX_PER_USER = 1;
 
     /**
