@@ -272,7 +272,7 @@ public final class ImapIdlePushListener implements PushListener {
         }
         try {
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
-            mailAccess.connect();
+            mailAccess.connect(false);
             
             final IMAPFolderStorage istore;
             {
