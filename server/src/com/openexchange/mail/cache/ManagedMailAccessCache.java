@@ -79,7 +79,7 @@ import com.openexchange.timer.TimerService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagedMailAccessCache {
+public final class ManagedMailAccessCache implements IMailAccessCache {
 
     /**
      * The logger instance.
@@ -92,11 +92,6 @@ public final class ManagedMailAccessCache {
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
-     * The number of {@link MailAccess} instances which may be concurrently active/opened per account for a user.
-     */
-    private static final int QUEUE_CAPACITY = 2;
-
-    /**
      * Drop those queues of which all elements timed-out.
      */
     private static final boolean DROP_TIMED_OUT_QUEUES = false;
@@ -106,14 +101,15 @@ public final class ManagedMailAccessCache {
     /**
      * Gets the singleton instance.
      * 
+     * @queueCapacity The max. queue capacity
      * @return The singleton instance
      * @throws MailException If instance initialization fails
      */
-    public static ManagedMailAccessCache getInstance() throws MailException {
+    public static ManagedMailAccessCache getInstance(final int queueCapacity) throws MailException {
         if (null == singleton) {
             synchronized (ManagedMailAccessCache.class) {
                 if (null == singleton) {
-                    singleton = new ManagedMailAccessCache();
+                    singleton = new ManagedMailAccessCache(queueCapacity);
                 }
             }
         }
@@ -145,12 +141,19 @@ public final class ManagedMailAccessCache {
     private final ScheduledTimerTask timerTask;
 
     /**
+     * The number of {@link MailAccess} instances which may be concurrently active/opened per account for a user.
+     */
+    private final int queueCapacity;
+
+    /**
      * Prevent instantiation.
+     * @queueCapacity The max. queue capacity
      * 
      * @throws MailException If an error occurs
      */
-    private ManagedMailAccessCache() throws MailException {
+    private ManagedMailAccessCache(final int queueCapacity) throws MailException {
         super();
+        this.queueCapacity = queueCapacity;
         try {
             map = new ConcurrentHashMap<Key, MailAccessQueue>();
             final int configuredIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
@@ -213,7 +216,7 @@ public final class ManagedMailAccessCache {
         final Key key = keyFor(accountId, session);
         MailAccessQueue accessQueue = map.get(key);
         if (null == accessQueue || accessQueue.isDeprecated()) {
-            final MailAccessQueue tmp = 1 == QUEUE_CAPACITY ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(QUEUE_CAPACITY);
+            final MailAccessQueue tmp = 1 == queueCapacity ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(queueCapacity);
             accessQueue = map.putIfAbsent(key, tmp);
             if (null == accessQueue) {
                 accessQueue = tmp;
@@ -233,10 +236,10 @@ public final class ManagedMailAccessCache {
                     final int size = accessQueue.size();
                     if (size == 1) {
                         LOG.debug(new StringBuilder("Queued ONE mail access for ").append(key).toString());
-                    } else if (size > QUEUE_CAPACITY) {
+                    } else if (size > queueCapacity) {
                         LOG.debug(new StringBuilder("\n\tExceeded queue capacity! Detected ").append(size).append(" mail access(es) for ").append(
                             key).append('\n').toString());
-                    } else if (size == QUEUE_CAPACITY) {
+                    } else if (size == queueCapacity) {
                         LOG.debug(new StringBuilder("\n\tReached queue capacity! Queued ").append(size).append(" mail access(es) for ").append(
                             key).append('\n').toString());
                     } else {

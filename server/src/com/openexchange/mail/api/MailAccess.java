@@ -69,7 +69,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.cache.IMailAccessCache;
-import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.cache.ManagedMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -83,7 +83,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link MailAccess} - Handles connecting to the mailing system while using an internal cache for connected access objects (see
- * {@link MailAccessCache}).
+ * {@link SingletonMailAccessCache}).
  * <p>
  * Moreover it provides access to either message storage, folder storage and logic tools.
  * 
@@ -272,7 +272,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected boolean cacheable;
 
     /**
-     * Indicates if {@link MailAccess} is currently held in {@link MailAccessCache}.
+     * Indicates if {@link MailAccess} is currently held in {@link SingletonMailAccessCache}.
      */
     protected boolean cached;
 
@@ -388,7 +388,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * The max. number of {@link MailAccess} instanced allowed being cached concurrently for a user's account.
      */
-    private static final int MAX_PER_USER = 1;
+    private static final int MAX_PER_USER = 2;
 
     /**
      * Gets the appropriate {@link IMailAccessCache mail access cache} instance.
@@ -397,7 +397,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If cache cannot be initialized
      */
     public static IMailAccessCache getMailAccessCache() throws MailException {
-        return 1 == MAX_PER_USER ? MailAccessCache.getInstance() : ManagedMailAccessCache.getInstance();
+        return 1 == MAX_PER_USER ? SingletonMailAccessCache.getInstance() : ManagedMailAccessCache.getInstance(MAX_PER_USER);
     }
 
     /**
@@ -937,7 +937,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets the number of seconds this mail access is allowed to remain idle in {@link MailAccessCache cache} before being removed and
+     * Gets the number of seconds this mail access is allowed to remain idle in {@link SingletonMailAccessCache cache} before being removed and
      * closed. If the default value shall be used for this mail access, return <code>-1</code>.
      * 
      * @return The number of allowed idle seconds or <code>-1</code> to signal using default value.
@@ -965,7 +965,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Indicates if this mail access is currently cached in {@link MailAccessCache}.
+     * Indicates if this mail access is currently cached in {@link SingletonMailAccessCache}.
      * 
      * @return <code>true</code> if this mail access is cached; otherwise <code>false</code>
      */
