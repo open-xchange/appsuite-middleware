@@ -87,7 +87,6 @@ import com.openexchange.pop3.connect.POP3StoreConnector;
 import com.openexchange.pop3.connect.POP3StoreConnector.POP3StoreResult;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
-import com.openexchange.pop3.storage.POP3StorageConnectCounter;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
@@ -460,7 +459,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    public void syncMessages(final boolean expunge, final POP3StorageConnectCounter connectCounter) throws MailException {
+    public void syncMessages(final boolean expunge) throws MailException {
         POP3Store pop3Store = null;
         try {
             final POP3StoreResult result = POP3StoreConnector.getPOP3Store(
@@ -477,7 +476,6 @@ public class MailAccountPOP3Storage implements POP3Storage {
             /*
              * Increase counter
              */
-            connectCounter.incrementCounter();
             final POP3Folder inbox = (POP3Folder) pop3Store.getFolder("INBOX");
             boolean doExpunge = false;
             /*
@@ -595,8 +593,6 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 }
             } catch (final MessagingException e) {
                 LOG.error(e.getMessage(), e);
-            } finally {
-                connectCounter.decrementCounter();
             }
         }
     }

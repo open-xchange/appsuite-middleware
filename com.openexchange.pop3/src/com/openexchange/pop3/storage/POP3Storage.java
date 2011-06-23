@@ -102,10 +102,9 @@ public interface POP3Storage {
      * {@link POP3StorageConnectCounter#decrementCounter() decrementCounter()}.
      * 
      * @param expunge Whether to expunge messages from actual POP3 account after their retrieval
-     * @param connectCounter The connect counter
      * @throws MailException If synchronizing messages fails
      */
-    public void syncMessages(boolean expunge, POP3StorageConnectCounter connectCounter) throws MailException;
+    public void syncMessages(boolean expunge) throws MailException;
 
     /**
      * Drops resources for associated user.

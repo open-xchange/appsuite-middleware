@@ -61,7 +61,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -70,7 +69,6 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.pop3.config.MailAccountPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3SessionProperties;
@@ -78,7 +76,6 @@ import com.openexchange.pop3.connect.POP3StoreConnector;
 import com.openexchange.pop3.connect.POP3SyncMessagesCallable;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
-import com.openexchange.pop3.storage.POP3StorageConnectCounter;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
@@ -165,9 +162,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * Members
      */
 
-    private POP3Storage pop3Storage;
+    private transient POP3Storage pop3Storage;
 
-    private POP3StorageProperties pop3StorageProperties;
+    private transient POP3StorageProperties pop3StorageProperties;
 
     private transient POP3FolderStorage folderStorage;
 
@@ -433,21 +430,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                     this,
                     pop3Storage,
                     pop3StorageProperties,
-                    getFolderStorage(),
-                    new POP3StorageConnectCounter() {
-
-                        public void decrementCounter() {
-                            MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
-                            MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-                            pop3DecrementCounter();
-                        }
-
-                        public void incrementCounter() {
-                            MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
-                            MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-                            pop3IncrementCounter();
-                        }
-                    }));
+                    getFolderStorage()));
             f = SYNCHRONIZER_MAP.putIfAbsent(key, ft);
             if (f == null) {
                 /*
@@ -490,20 +473,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 SYNCHRONIZER_MAP.remove(key);
             }
         }
-    }
-
-    /**
-     * Increments the global access counter.
-     */
-    static void pop3IncrementCounter() {
-        incrementCounter();
-    }
-
-    /**
-     * Decrements the global access counter.
-     */
-    static void pop3DecrementCounter() {
-        decrementCounter();
     }
 
     @Override

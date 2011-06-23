@@ -61,7 +61,6 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.storage.POP3Storage;
-import com.openexchange.pop3.storage.POP3StorageConnectCounter;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.util.POP3CapabilityCache;
@@ -83,8 +82,6 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
 
     private final IMailFolderStorage folderStorage;
 
-    private final POP3StorageConnectCounter connectCounter;
-
     /**
      * Initializes a new {@link POP3SyncMessagesCallable}.
      * 
@@ -94,13 +91,12 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
      * @param folderStorage The POP3 storage's folder storage instance
      * @param server Either the host name or textual representation of the IP address of the POP3 server
      */
-    public POP3SyncMessagesCallable(final POP3Access pop3Access, final POP3Storage pop3Storage, final POP3StorageProperties pop3StorageProperties, final IMailFolderStorage folderStorage, final POP3StorageConnectCounter connectCounter) {
+    public POP3SyncMessagesCallable(final POP3Access pop3Access, final POP3Storage pop3Storage, final POP3StorageProperties pop3StorageProperties, final IMailFolderStorage folderStorage) {
         super();
         this.pop3Access = pop3Access;
         this.pop3Storage = pop3Storage;
         this.pop3StorageProperties = pop3StorageProperties;
         this.folderStorage = folderStorage;
-        this.connectCounter = connectCounter;
     }
 
     public Object call() throws Exception {
@@ -154,7 +150,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 /*
                  * Access POP3 account and synchronize
                  */
-                pop3Storage.syncMessages(isExpungeOnQuit(), connectCounter);
+                pop3Storage.syncMessages(isExpungeOnQuit());
                 /*
                  * Update last-accessed time stamp
                  */
