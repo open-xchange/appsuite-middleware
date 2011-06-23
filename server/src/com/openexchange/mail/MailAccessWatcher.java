@@ -202,10 +202,13 @@ public final class MailAccessWatcher {
 
         private final org.apache.commons.logging.Log logger;
 
+        private final boolean traceEnabled;
+
         public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses, final org.apache.commons.logging.Log logger) {
             super();
             map = mailAccesses;
             this.logger = logger;
+            traceEnabled = logger.isTraceEnabled();
         }
 
         public void run() {
@@ -225,7 +228,9 @@ public final class MailAccessWatcher {
                     final MailAccess<?, ?> mailAccess = e.getKey();
                     if (mailAccess.isConnectedUnsafe()) {
                         if (mailAccess.isWaiting()) {
-                            logger.debug(new StringBuilder("Idling/waiting mail connection:\n").append(mailAccess.getTrace()).toString());
+                            if (traceEnabled) {
+                                logger.trace(new StringBuilder("Idling/waiting mail connection:\n").append(mailAccess.getTrace()).toString());
+                            }
                         } else {
                             final Long val = e.getValue();
                             if ((null != val)) {
