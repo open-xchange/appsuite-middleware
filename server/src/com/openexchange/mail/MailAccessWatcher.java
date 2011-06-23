@@ -169,7 +169,16 @@ public final class MailAccessWatcher {
      * @return The number of currently tracked mail accesses
      */
     public static int getNumberOfMailAccesses() {
-        return MAIL_ACCESSES.size();
+        int count = 0;
+        for (final Iterator<MailAccess<?, ?>> iterator = MAIL_ACCESSES.keySet().iterator(); iterator.hasNext();) {
+            final MailAccess<?, ?> mailAccess = iterator.next();
+            if (mailAccess.isConnectedUnsafe()) {
+                count++;
+            } else {
+               iterator.remove();
+            }
+        }
+        return count;
     }
 
     /**
