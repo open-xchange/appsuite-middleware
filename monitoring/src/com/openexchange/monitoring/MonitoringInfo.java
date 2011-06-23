@@ -279,6 +279,9 @@ public class MonitoringInfo {
                 numberOfActiveSessions.decrementAndGet();
             }
             break;
+        case MAIL_IDLE:
+            // Nothing to do
+            break;
         default:
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ").append(connectionType).toString());
