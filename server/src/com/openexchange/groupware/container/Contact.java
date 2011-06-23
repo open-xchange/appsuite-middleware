@@ -4404,43 +4404,49 @@ public class Contact extends CommonObject implements Serializable {
 
 
     @Override
-    public String toString(){
-        final StringBuilder name = new StringBuilder();
-        if(containsTitle()){
+    public String toString() {
+        final StringBuilder name = new StringBuilder(32);
+        if (containsTitle()) {
             name.append(getTitle());
             name.append(" ");
         }
-        if(containsGivenName()){
+        if (containsYomiFirstName()) {
+            name.append(getYomiFirstName());
+            name.append(" ");
+        } else if (containsGivenName()) {
             name.append(getGivenName());
             name.append(" ");
         }
-        if(containsMiddleName()){
+        if (containsMiddleName()) {
             name.append(getMiddleName());
             name.append(" ");
         }
-        if( containsSurName() ){
+        if (containsYomiLastName()) {
+            name.append(getYomiLastName());
+            name.append(" ");
+        } else if (containsSurName()) {
             name.append(getSurName());
             name.append(" ");
         }
-        if( containsSuffix() ){
-            name.append( getSuffix() );
+        if (containsSuffix()) {
+            name.append(getSuffix());
             name.append(" ");
         }
-        if( containsEmail1() ){
-            if( name.length() > 0){
-                name.append( "(" );
-                name.append( getEmail1());
-                name.append( ") " );
+        if (containsEmail1()) {
+            if (name.length() > 0) {
+                name.append("(");
+                name.append(getEmail1());
+                name.append(") ");
             } else {
-                name.append( getEmail1() );
+                name.append(getEmail1());
             }
         }
-        //final preparations
-        if( name.length() == 0 && containsDisplayName()){
-            name.append( getDisplayName() );
+        // final preparations
+        if (name.length() == 0 && containsDisplayName()) {
+            name.append(getDisplayName());
         }
         name.insert(0, "] ");
-        if( containsObjectID() ){
+        if (containsObjectID()) {
             name.insert(0, getObjectID());
         } else {
             name.insert(0, "new");
