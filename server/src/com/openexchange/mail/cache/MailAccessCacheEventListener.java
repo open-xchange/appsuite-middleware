@@ -84,8 +84,10 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
             final @SuppressWarnings("unchecked") Map<String, Session> sessions = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
             final ManagedMailAccessCache mmac;
+            final MailAccessCache mac;
             try {
                 mmac = ManagedMailAccessCache.getInstance();
+                mac = MailAccessCache.getInstance();
             } catch (final MailException e) {
                 LOG.error("Mail access cache could not be obtained.", e);
                 return;
@@ -93,6 +95,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             for (final Session session : sessions.values()) {
                 try {
                     mmac.clearUserEntries(session);
+                    mac.clearUserEntries(session);
                     if (LOG.isInfoEnabled()) {
                         LOG.info(new StringBuilder(128).append("Detected a removed session: ").append(session.getSessionID()).append(
                             ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
@@ -105,14 +108,17 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
             final ManagedMailAccessCache mmac;
+            final MailAccessCache mac;
             try {
                 mmac = ManagedMailAccessCache.getInstance();
+                mac = MailAccessCache.getInstance();
             } catch (final MailException e) {
                 LOG.error("Mail access cache could not be obtained.", e);
                 return;
             }
             try {
                 mmac.clearUserEntries(session);
+                mac.clearUserEntries(session);
                 if (LOG.isInfoEnabled()) {
                     LOG.info(new StringBuilder(128).append("Detected a removed session: ").append(session.getSessionID()).append(
                         ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(" in context ").append(
