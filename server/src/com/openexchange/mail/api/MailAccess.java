@@ -68,9 +68,9 @@ import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
-import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
@@ -385,8 +385,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         mailAccess.shutdown();
     }
 
-    /**
+    /**-
      * The max. number of {@link MailAccess} instanced allowed being cached concurrently for a user's account.
+     * 
+     * TODO: Add to configuration?
      */
     private static final int MAX_PER_USER = 2;
 
