@@ -68,6 +68,8 @@ import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.cache.IMailAccessCache;
+import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.cache.ManagedMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -383,6 +385,18 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         mailAccess.shutdown();
     }
 
+    private static final int MAX_PER_USER = 1;
+
+    /**
+     * Gets the appropriate {@link IMailAccessCache mail access cache} instance.
+     * 
+     * @return The mail access cache
+     * @throws MailException If cache cannot be initialized
+     */
+    public static IMailAccessCache getMailAccessCache() throws MailException {
+        return 1 == MAX_PER_USER ? MailAccessCache.getInstance() : ManagedMailAccessCache.getInstance();
+    }
+
     /**
      * Gets the proper instance of {@link MailAccess} for session user's default mail account.
      * <p>
@@ -440,7 +454,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          */
         {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                ManagedMailAccessCache.getInstance().removeMailAccess(session, accountId);
+                getMailAccessCache().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
@@ -777,7 +791,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 /*
                  * Cache connection if desired/possible anymore
                  */
-                if (put && isCacheable() && ManagedMailAccessCache.getInstance().putMailAccess(session, accountId, this)) {
+                if (put && isCacheable() && getMailAccessCache().putMailAccess(session, accountId, this)) {
                     /*
                      * Successfully cached: return
                      */
