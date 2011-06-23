@@ -200,7 +200,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 final String pre = fullname;
                 final SecureRandom secureRandom = new SecureRandom();
                 do {
-                    fullname = pre + stripSpecials(String.valueOf(secureRandom.nextLong()));
+                    fullname = pre + stripSpecials(String.valueOf(secureRandom.nextInt(1000)));
                 } while (defaultMailAccess.getFolderStorage().exists(fullname));
             }
             /*
