@@ -1,3 +1,7 @@
+* 2011-06-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #19591: Dealing with failing retrieval of a POP3 server's capabilities (through CAPA command)
+
 * 2011-06-22 - thorben.betten@open-xchange.com
 
  - Bugfix #19571: Resolved warnings when creating a POP3 account

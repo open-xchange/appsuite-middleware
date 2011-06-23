@@ -50,14 +50,10 @@
 package com.openexchange.pop3.connect;
 
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
-import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.storage.POP3Storage;
@@ -112,32 +108,39 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
             /*
              * Check refresh rate setting
              */
-            try {
+            {
                 final POP3Config pop3Config = pop3Access.getPOP3Config();
                 server = pop3Config.getServer();
                 final int port = pop3Config.getPort();
-                final String capabilities =
-                    POP3CapabilityCache.getCapability(
-                        InetAddress.getByName(server),
-                        port,
-                        pop3Config.isSecure(),
-                        pop3Config.getPOP3Properties(),
-                        pop3Config.getLogin());
+                String capabilities;
+                try {
+                    capabilities =
+                        POP3CapabilityCache.getCapability(
+                            InetAddress.getByName(server),
+                            port,
+                            pop3Config.isSecure(),
+                            pop3Config.getPOP3Properties(),
+                            pop3Config.getLogin());
+                } catch (final Exception e) {
+                    final Session ses = pop3Access.getSession();
+                    final StringBuilder sb = new StringBuilder("Couldn't detect capabilities from POP3 server \"");
+                    sb.append(server).append("\" with login \"");
+                    sb.append(pop3Config.getLogin()).append("\" (user=");
+                    sb.append(ses.getUserId()).append(", context=");
+                    sb.append(ses.getContextId()).append("):\n");
+                    sb.append(e.getMessage());
+                    LOG.warn(sb.toString(), e);
+                    capabilities = null;
+                }
                 /*
                  * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in
                  * capabilities
                  */
                 final int min = parseLoginDelaySeconds(capabilities);
-                if (min >= 0) {
-                    if ((min * 1000) > refreshRate) {
-                        LOG.warn(new StringBuilder(64).append("Refresh rate of ").append(refreshRate / 1000).append(
-                            "sec is lower than minimum allowed seconds between logins (").append(min).append("sec)"));
-                    }
+                if (min >= 0 && (min * 1000) > refreshRate) {
+                    LOG.warn(new StringBuilder(64).append("Refresh rate of ").append(refreshRate / 1000).append(
+                        "sec is lower than minimum allowed seconds between logins (").append(min).append("sec)"));
                 }
-            } catch (final UnknownHostException e) {
-                throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e));
-            } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
             if (DEBUG) {
                 LOG.debug("\n\tSynchronizing messages with POP3 account: " + server, new Throwable());
