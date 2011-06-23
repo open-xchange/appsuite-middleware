@@ -56,7 +56,6 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -236,7 +235,7 @@ public final class POP3StoreConnector {
             final IPOP3Properties pop3ConfProps = (IPOP3Properties) pop3Config.getMailProperties();
             final String server = pop3Config.getServer();
             final int port = pop3Config.getPort();
-            final String capabilities;
+            String capabilities;
             try {
                 capabilities =
                     POP3CapabilityCache.getCapability(
@@ -245,10 +244,15 @@ public final class POP3StoreConnector {
                         pop3Config.isSecure(),
                         pop3ConfProps,
                         pop3Config.getLogin());
-            } catch (final UnknownHostException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            } catch (final Exception e) {
+                final StringBuilder sb = new StringBuilder("Couldn't detect capabilities from POP3 server \"");
+                sb.append(server).append("\" with login \"");
+                sb.append(pop3Config.getLogin()).append("\" (user=");
+                sb.append(session.getUserId()).append(", context=");
+                sb.append(session.getContextId()).append("):\n");
+                sb.append(e.getMessage());
+                LOG.warn(sb.toString(), e);
+                capabilities = "";
             }
             /*
              * JavaMail POP3 implementation requires capabilities "UIDL" and "TOP"

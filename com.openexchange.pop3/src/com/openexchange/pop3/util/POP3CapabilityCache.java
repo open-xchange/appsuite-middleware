@@ -201,7 +201,7 @@ public final class POP3CapabilityCache {
          * Create own callable for this thread
          */
         try {
-            return new CapabilityCallable(address, isSecure, pop3Properties).call();
+            return new CapabilityCallable(address, isSecure, 3000, 5000).call();
         } catch (final java.net.SocketTimeoutException e) {
             throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, e, address, login);
         }
