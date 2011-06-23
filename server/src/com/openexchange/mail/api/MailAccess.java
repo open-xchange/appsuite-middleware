@@ -481,7 +481,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Re-check cache
          */
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            ManagedMailAccessCache.getInstance().removeMailAccess(session, accountId);
+            getMailAccessCache().removeMailAccess(session, accountId);
         return null == mailAccess ? mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider) : mailAccess;
     }
 
