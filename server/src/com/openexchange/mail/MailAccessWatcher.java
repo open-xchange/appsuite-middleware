@@ -50,8 +50,8 @@
 package com.openexchange.mail;
 
 import static com.openexchange.java.Autoboxing.l;
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -214,20 +214,20 @@ public final class MailAccessWatcher {
         public void run() {
             try {
                 final StringBuilder sb = new StringBuilder(512);
-                final List<MailAccess<?, ?>> exceededCons = new ArrayList<MailAccess<?, ?>>();
+                final List<MailAccess<?, ?>> exceededAcesses = new LinkedList<MailAccess<?, ?>>();
                 final int watcherTime = MailProperties.getInstance().getWatcherTime();
                 final long now = System.currentTimeMillis();
                 for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = map.entrySet().iterator(); iter.hasNext();) {
                     final Entry<MailAccess<?, ?>, Long> e = iter.next();
                     final MailAccess<?, ?> mailAccess = e.getKey();
-                    if (mailAccess.isConnectedUnsafe()) {
+                    if (mailAccess.isConnectedUnsafe() && !mailAccess.isWaiting()) {
                         final Long val = e.getValue();
                         if ((null != val)) {
                             final long duration = (now - l(val));
                             if (duration > watcherTime) {
                                 sb.setLength(0);
                                 logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration))).append(mailAccess.getTrace()).toString());
-                                exceededCons.add(mailAccess);
+                                exceededAcesses.add(mailAccess);
                             }
                             
                         }
@@ -238,12 +238,12 @@ public final class MailAccessWatcher {
                         iter.remove();
                     }
                 }
-                if (!exceededCons.isEmpty()) {
-                    /*
-                     * Remove/Close exceeded accesses
-                     */
+                /*
+                 * Remove/Close exceeded accesses if allowed to
+                 */
+                if (!exceededAcesses.isEmpty()) {
                     if (MailProperties.getInstance().isWatcherShallClose()) {
-                        for (final MailAccess<?, ?> mailAccess : exceededCons) {
+                        for (final MailAccess<?, ?> mailAccess : exceededAcesses) {
                             try {
                                 sb.setLength(0);
                                 sb.append(INFO_PREFIX2).append(mailAccess.toString());
@@ -255,7 +255,7 @@ public final class MailAccessWatcher {
                             }
                         }
                     } else {
-                        for (final MailAccess<?, ?> mailAccess : exceededCons) {
+                        for (final MailAccess<?, ?> mailAccess : exceededAcesses) {
                             map.remove(mailAccess);
                         }
                     }
