@@ -64,6 +64,7 @@ import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.util.POP3CapabilityCache;
+import com.openexchange.session.Session;
 
 /**
  * {@link POP3SyncMessagesCallable} - {@link Callable} to connect to POP3 account and synchronize its messages with POP3 storage.
@@ -157,16 +158,16 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 /*
                  * Update last-accessed time stamp
                  */
-                pop3StorageProperties.addProperty(
-                    POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED,
-                    String.valueOf(System.currentTimeMillis()));
+                final long stamp = System.currentTimeMillis();
+                pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, String.valueOf(stamp));
                 if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("\n\tSynchronization successfully performed for POP3 account \"" + server + "\" in: " + dur + "msec");
+                    final long dur = stamp - st;
+                    final Session session = pop3Access.getSession();
+                    LOG.debug("\n\tSynchronization successfully performed for POP3 account \"" + server + "\" (user=" + session.getUserId() + ", context=" + session.getContextId() + ")in: " + dur + "msec");
                 }
             } catch (final MailException e) {
                 throw e;
-                //LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+                // LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             }
         }
         return null;
@@ -206,9 +207,11 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         try {
             minutes = Integer.parseInt(frequencyStr);
         } catch (final NumberFormatException e) {
-            LOG.warn(new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
-                "\" is not a number: ``").append(frequencyStr).append("''. Using fallback of ").append(FALLBACK_MINUTES).append(
-                " minutes."), e);
+            LOG.warn(
+                new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
+                    "\" is not a number: ``").append(frequencyStr).append("''. Using fallback of ").append(FALLBACK_MINUTES).append(
+                    " minutes."),
+                e);
             minutes = FALLBACK_MINUTES;
         }
         return minutes * 60L * 1000L;
