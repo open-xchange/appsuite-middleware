@@ -70,7 +70,7 @@ import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
-import com.openexchange.mail.cache.ManagedMailAccessCache;
+import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
@@ -397,7 +397,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If cache cannot be initialized
      */
     public static IMailAccessCache getMailAccessCache() throws MailException {
-        return 1 == MAX_PER_USER ? SingletonMailAccessCache.getInstance() : ManagedMailAccessCache.getInstance(MAX_PER_USER);
+        return 1 == MAX_PER_USER ? SingletonMailAccessCache.getInstance() : EnqueueingMailAccessCache.getInstance(MAX_PER_USER);
     }
 
     /**

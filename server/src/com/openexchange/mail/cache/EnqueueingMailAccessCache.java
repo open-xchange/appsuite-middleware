@@ -52,6 +52,7 @@ package com.openexchange.mail.cache;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.mail.MailException;
@@ -73,18 +74,18 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link ManagedMailAccessCache} - A very volatile cache for already connected instances of {@link MailAccess}.
+ * {@link EnqueueingMailAccessCache} - A very volatile cache for already connected instances of {@link MailAccess}.
  * <p>
- * Only one mail access can be cached per user and is dedicated to fasten sequential mail requests<br>
+ * A bounded {@link Queue} is used to store {@link MailAccess} instances to improve subsequent mail requests.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagedMailAccessCache implements IMailAccessCache {
+public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     /**
      * The logger instance.
      */
-    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagedMailAccessCache.class);
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(EnqueueingMailAccessCache.class);
 
     /**
      * The flag whether debug logging is enabled.
@@ -96,7 +97,7 @@ public final class ManagedMailAccessCache implements IMailAccessCache {
      */
     private static final boolean DROP_TIMED_OUT_QUEUES = false;
 
-    private static volatile ManagedMailAccessCache singleton;
+    private static volatile EnqueueingMailAccessCache singleton;
 
     /**
      * Gets the singleton instance.
@@ -105,11 +106,11 @@ public final class ManagedMailAccessCache implements IMailAccessCache {
      * @return The singleton instance
      * @throws MailException If instance initialization fails
      */
-    public static ManagedMailAccessCache getInstance(final int queueCapacity) throws MailException {
+    public static EnqueueingMailAccessCache getInstance(final int queueCapacity) throws MailException {
         if (null == singleton) {
-            synchronized (ManagedMailAccessCache.class) {
+            synchronized (EnqueueingMailAccessCache.class) {
                 if (null == singleton) {
-                    singleton = new ManagedMailAccessCache(queueCapacity);
+                    singleton = new EnqueueingMailAccessCache(queueCapacity);
                 }
             }
         }
@@ -121,7 +122,7 @@ public final class ManagedMailAccessCache implements IMailAccessCache {
      */
     public static void releaseInstance() {
         if (null != singleton) {
-            synchronized (ManagedMailAccessCache.class) {
+            synchronized (EnqueueingMailAccessCache.class) {
                 if (null != singleton) {
                     singleton.dispose();
                     singleton = null;
@@ -151,7 +152,7 @@ public final class ManagedMailAccessCache implements IMailAccessCache {
      * 
      * @throws MailException If an error occurs
      */
-    private ManagedMailAccessCache(final int queueCapacity) throws MailException {
+    private EnqueueingMailAccessCache(final int queueCapacity) throws MailException {
         super();
         this.queueCapacity = queueCapacity;
         try {

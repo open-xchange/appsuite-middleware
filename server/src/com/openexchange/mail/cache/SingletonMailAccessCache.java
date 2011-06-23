@@ -63,15 +63,15 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAccessCache} - A very volatile cache for already connected instances of {@link MailAccess}.
+ * {@link SingletonMailAccessCache} - A very volatile cache for already connected instances of {@link MailAccess}.
  * <p>
  * Only one mail access can be cached per user and is dedicated to fasten sequential mail requests<br>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccessCache {
+public final class SingletonMailAccessCache implements IMailAccessCache {
 
-    private static volatile MailAccessCache singleton;
+    private static volatile SingletonMailAccessCache singleton;
 
     /**
      * Gets the singleton instance.
@@ -79,11 +79,11 @@ public final class MailAccessCache {
      * @return The singleton instance
      * @throws MailException If instance initialization fails
      */
-    public static MailAccessCache getInstance() throws MailException {
+    public static SingletonMailAccessCache getInstance() throws MailException {
         if (null == singleton) {
-            synchronized (MailAccessCache.class) {
+            synchronized (SingletonMailAccessCache.class) {
                 if (null == singleton) {
-                    singleton = new MailAccessCache();
+                    singleton = new SingletonMailAccessCache();
                     singleton.initCache();
                 }
             }
@@ -96,7 +96,7 @@ public final class MailAccessCache {
      */
     public static void releaseInstance() {
         if (null != singleton) {
-            synchronized (MailAccessCache.class) {
+            synchronized (SingletonMailAccessCache.class) {
                 if (null != singleton) {
                     singleton.releaseCache();
                     singleton = null;
@@ -117,7 +117,7 @@ public final class MailAccessCache {
      * 
      * @throws MailException If initialization fails
      */
-    private MailAccessCache() throws MailException {
+    private SingletonMailAccessCache() throws MailException {
         super();
         initCache();
     }
