@@ -52,10 +52,8 @@ package com.openexchange.push.imapidle;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -209,17 +207,23 @@ public final class ImapIdlePushListener implements PushListener {
         final ThreadPoolService threadPoolService;
         try {
             threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
+            /*-
+             * No more needed because watcher recognizes IDLE state if properly set via MailAccess.setWaiting(boolean).
+             * 
+             * 
             final IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
             if( imcf.isWatcherEnabled() ) {
                 LOG.error("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
             }
+            */
             mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
         } catch (final ServiceException e) {
             throw new PushException(e);
-        } catch (final MailException e) {
-            throw new PushException(e);
         }
+//        catch (final MailException e) {
+//            throw new PushException(e);
+//        }
         imapIdleFuture = threadPoolService.submit(ThreadPools.task(new ImapIdlePushListenerTask(this)));
     }
 
