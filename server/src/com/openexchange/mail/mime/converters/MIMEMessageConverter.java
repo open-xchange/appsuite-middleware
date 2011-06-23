@@ -58,6 +58,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -78,9 +79,9 @@ import javax.mail.Part;
 import javax.mail.UIDFolder;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimePart;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -102,6 +103,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.pop3.POP3Folder;
@@ -1467,15 +1469,15 @@ public final class MIMEMessageConverter {
             /*
              * From
              */
-            mail.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, msg));
+            mail.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, mail));
             /*
              * To, Cc, and Bcc
              */
-            mail.addTo(getAddressHeader(MessageHeaders.HDR_TO, msg));
-            mail.addCc(getAddressHeader(MessageHeaders.HDR_CC, msg));
-            mail.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, msg));
+            mail.addTo(getAddressHeader(MessageHeaders.HDR_TO, mail));
+            mail.addCc(getAddressHeader(MessageHeaders.HDR_CC, mail));
+            mail.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, mail));
             {
-                final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+                final String[] tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
                 if ((tmp != null) && (tmp.length > 0)) {
                     mail.setContentType(tmp[0]);
                 } else {
@@ -1505,7 +1507,7 @@ public final class MIMEMessageConverter {
                 }
             }
             {
-                final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_ID);
+                final String[] tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_ID);
                 if ((tmp != null) && (tmp.length > 0)) {
                     mail.setContentId(tmp[0]);
                 } else {
@@ -1513,7 +1515,7 @@ public final class MIMEMessageConverter {
                 }
             }
             {
-                final String tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+                final String tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
                 if ((tmp != null) && (tmp.length() > 0)) {
                     mail.setContentDisposition(tmp);
                 } else {
@@ -1521,7 +1523,7 @@ public final class MIMEMessageConverter {
                 }
             }
             {
-                final String dispNot = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
+                final String dispNot = mail.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
                 if (dispNot == null) {
                     mail.setDispositionNotification(null);
                 } else {
@@ -1530,13 +1532,18 @@ public final class MIMEMessageConverter {
                 }
             }
             {
-                final String msgrefStr = msg.getHeader(MessageHeaders.HDR_X_OXMSGREF, null);
+                final String msgrefStr = mail.getHeader(MessageHeaders.HDR_X_OXMSGREF, null);
                 if (msgrefStr == null) {
                     mail.setMsgref(null);
                 } else {
                     mail.setMsgref(new MailPath(msgrefStr));
-                    msg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                     mail.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+                    try {
+                        msg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+                    } catch (final Exception e) {
+                        // Ignore...
+                        LOG.debug(e.getMessage(), e);
+                    }
                 }
             }
             mail.setFileName(getFileName(mail));
@@ -1584,8 +1591,14 @@ public final class MIMEMessageConverter {
                     mail.setReceivedDate(receivedDate);
                 }
             }
-            mail.setSentDate(msg.getSentDate());
-            mail.setSize(msg.getSize());
+            mail.setSentDate(getSentDate(mail));
+            try {
+                mail.setSize(msg.getSize());
+            } catch (final Exception e) {
+                // Size unavailable
+                LOG.debug("Message's size could not be obtained.", e);
+                mail.setSize(-1);
+            }
             /*-
              * Fetch subject from mail headers since JavaMail fails to return a
              * possibly empty subject and then returns the next header line as
@@ -1597,7 +1610,7 @@ public final class MIMEMessageConverter {
              * Date: Thu, 18 Sep 1997 10:49:08 +0200
              * </pre>
              */
-            mail.setSubject(getSubject(msg));
+            mail.setSubject(getSubject(mail));
             mail.setThreadLevel(0);
             return mail;
         } catch (final MessagingException e) {
@@ -1706,41 +1719,52 @@ public final class MIMEMessageConverter {
              */
             setHeaders(part, mailPart);
             {
-                final String[] contentTypeHdr = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+                final String[] contentTypeHdr = mailPart.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
                 if (null != contentTypeHdr && contentTypeHdr.length > 0) {
                     mailPart.setContentType(unfold(contentTypeHdr[0]));
                 }
             }
             {
-                final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_ID);
+                final String[] tmp = mailPart.getHeader(MessageHeaders.HDR_CONTENT_ID);
                 if ((tmp != null) && (tmp.length > 0)) {
                     mailPart.setContentId(tmp[0]);
                 }
             }
             {
-                final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
+                final String[] tmp = mailPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
                 if ((tmp != null) && (tmp.length > 0)) {
                     mailPart.setContentDisposition(tmp[0]);
                 }
             }
             {
-                final String[] msgrefStr = part.getHeader(MessageHeaders.HDR_X_OXMSGREF);
+                final String[] msgrefStr = mailPart.getHeader(MessageHeaders.HDR_X_OXMSGREF);
                 if (msgrefStr != null && msgrefStr.length > 0) {
                     mailPart.setMsgref(new MailPath(msgrefStr[0]));
-                    part.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                     mailPart.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+                    try {
+                        part.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+                    } catch (final Exception e) {
+                        // Ignore...
+                        LOG.debug(e.getMessage(), e);
+                    }
                 } else {
                     mailPart.setMsgref(null);
                 }
             }
             mailPart.setFileName(getFileName(mailPart));
-            int size = part.getSize();
+            int size;
+            try {
+                size = part.getSize();
+            } catch (final Exception e) {
+                // Ignore
+                size = -1;
+            }
             if (size == -1 && enforeSize) {
                 /*
                  * Estimate unknown size: The encoded form of the file is expanded by 37% for UU encoding and by 35% for base64 encoding (3
                  * bytes become 4 plus control information).
                  */
-                final String tansferEnc = (((MimePart) part).getHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, null));
+                final String tansferEnc = mailPart.getHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, null);
                 try {
                     size = estimateSize(part.getInputStream(), tansferEnc);
                 } catch (final IOException e) {
@@ -2057,7 +2081,40 @@ public final class MIMEMessageConverter {
      * @return The decoded header
      * @throws MessagingException If a messaging error occurs
      */
+    public static String getSubject(final MailMessage message) throws MessagingException {
+        final String subject = getStringHeader(MessageHeaders.HDR_SUBJECT, message, '\0');
+        return null == subject ? "" : subject;
+    }
+
+    /**
+     * Gets the first header denoted by specified header name and decodes its value to a unicode string if necessary.
+     * 
+     * <pre>
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot;    is decoded to    &quot;&amp;uumlber&quot;
+     * </pre>
+     * 
+     * @param name The header name
+     * @param message The message providing the header
+     * @return The decoded header
+     * @throws MessagingException If a messaging error occurs
+     */
     public static String getStringHeader(final String name, final Message message) throws MessagingException {
+        return getStringHeader(name, message, '\0');
+    }
+
+    /**
+     * Gets the first header denoted by specified header name and decodes its value to a unicode string if necessary.
+     * 
+     * <pre>
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot;    is decoded to    &quot;&amp;uumlber&quot;
+     * </pre>
+     * 
+     * @param name The header name
+     * @param message The message providing the header
+     * @return The decoded header
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static String getStringHeader(final String name, final MailMessage message) throws MessagingException {
         return getStringHeader(name, message, '\0');
     }
 
@@ -2094,6 +2151,37 @@ public final class MIMEMessageConverter {
     }
 
     /**
+     * Gets the headers denoted by specified header name and decodes its value to a unicode string if necessary.
+     * 
+     * <pre>
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot;    is decoded to    &quot;&#252;ber&quot;
+     * </pre>
+     * 
+     * @param name The header name
+     * @param message The message providing the header
+     * @param delimiter The delimiter character if message contains multiple header values; set to <code>'\0'</code> to only consider first
+     *            one
+     * @return The decoded header
+     */
+    public static String getStringHeader(final String name, final MailMessage message, final char delimiter) {
+        final String[] valueArr = message.getHeader(name);
+        if (null == valueArr || valueArr.length == 0) {
+            return null;
+        }
+        final String values;
+        if ('\0' != delimiter && valueArr.length > 1) {
+            final StringBuilder sb = new StringBuilder(checkNonAscii(valueArr[0]));
+            for (int i = 1; i < valueArr.length; i++) {
+                sb.append(delimiter).append(checkNonAscii(valueArr[i]));
+            }
+            values = sb.toString();
+        } else {
+            values = checkNonAscii(valueArr[0]);
+        }
+        return decodeMultiEncodedHeader(values);
+    }
+
+    /**
      * Gets the address headers denoted by specified header name in a safe manner.
      * <p>
      * If strict parsing of address headers yields a {@link AddressException}, then a plain-text version is generated to display broken
@@ -2105,6 +2193,38 @@ public final class MIMEMessageConverter {
      * @throws MessagingException If a messaging error occurs
      */
     public static InternetAddress[] getAddressHeader(final String name, final Message message) throws MessagingException {
+        final String[] addressArray = message.getHeader(name);
+        if (null == addressArray || addressArray.length == 0) {
+            return null;
+        }
+        final String addresses;
+        if (addressArray.length > 1) {
+            final StringBuilder sb = new StringBuilder(addressArray[0]);
+            for (int i = 1; i < addressArray.length; i++) {
+                sb.append(',').append(addressArray[i]);
+            }
+            addresses = sb.toString();
+        } else {
+            addresses = addressArray[0];
+        }
+        try {
+            return QuotedInternetAddress.parseHeader(addresses, true);
+        } catch (final AddressException e) {
+            return getAddressHeaderNonStrict(addresses, addressArray);
+        }
+    }
+
+    /**
+     * Gets the address headers denoted by specified header name in a safe manner.
+     * <p>
+     * If strict parsing of address headers yields a {@link AddressException}, then a plain-text version is generated to display broken
+     * address header as it is.
+     * 
+     * @param name The address header name
+     * @param message The message providing the address header
+     * @return The parsed address headers as an array of {@link InternetAddress} instances
+     */
+    public static InternetAddress[] getAddressHeader(final String name, final MailMessage message) {
         final String[] addressArray = message.getHeader(name);
         if (null == addressArray || addressArray.length == 0) {
             return null;
@@ -2175,6 +2295,29 @@ public final class MIMEMessageConverter {
             retval[i] = new PlainTextAddress(addrs[i]);
         }
         return retval;
+    }
+
+    /**
+     * Returns the value of the RFC 822 "Date" field. This is the date on which this message was sent. Returns <code>null</code> if this
+     * field is unavailable or its value is absent.
+     * 
+     * @param part The mail part
+     * @return The sent Date
+     */
+    public static Date getSentDate(final MailPart part) {
+        final String s = part.getHeader("Date", null);
+        if (s != null) {
+            try {
+                final MailDateFormat mailDateFormat = MIMEMessageUtility.getDefaultMailDateFormat();
+                synchronized (mailDateFormat) {
+                    return mailDateFormat.parse(s);
+                }
+            } catch (final ParseException pex) {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     /**
