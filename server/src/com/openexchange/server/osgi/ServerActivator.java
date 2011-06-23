@@ -147,8 +147,8 @@ import com.openexchange.id.IDGeneratorService;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageSessionEventHandler;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailCounterImpl;
+import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
@@ -555,6 +555,7 @@ public final class ServerActivator extends DeferredActivator {
             serviceProperties.put(EventConstants.EVENT_TOPIC, MailSessionEventHandler.getTopics());
             registrationList.add(context.registerService(EventHandler.class.getName(), new MailSessionEventHandler(), serviceProperties));
             registrationList.add(context.registerService(MailCounter.class.getName(), new MailCounterImpl(), null));
+            registrationList.add(context.registerService(MailCounter.class.getName(), new MailIdleCounterImpl(), null));
         }
         registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ImageService.class), null));
