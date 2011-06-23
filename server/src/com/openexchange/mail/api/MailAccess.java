@@ -276,6 +276,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     protected boolean cached;
 
+    /**
+     * A flag to check if this {@link MailAccess} is connected, but in IDLE mode, waiting for any server notifications.
+     */
+    protected boolean waiting;
+
     protected MailProvider provider;
 
     private transient MailConfig mailConfig;
@@ -967,7 +972,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Indicates if this mail access is currently cached in {@link SingletonMailAccessCache}.
+     * Indicates if this mail access is currently cached in {@link IMailAccessCache}.
      * 
      * @return <code>true</code> if this mail access is cached; otherwise <code>false</code>
      */
@@ -982,6 +987,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public void setCached(final boolean cached) {
         this.cached = cached;
+    }
+
+    /**
+     * Indicates if this mail access is currently waiting for any server notifications (idle mode).
+     * 
+     * @return <code>true</code> if this mail access is waiting; otherwise <code>false</code>
+     */
+    public boolean isWaiting() {
+        return waiting;
+    }
+
+    /**
+     * Sets whether this mail access is currently waiting or not.
+     * 
+     * @param cacheable <code>true</code> if this mail access is waiitng; otherwise <code>false</code>
+     */
+    public void setWaiting(final boolean waiting) {
+        this.waiting = waiting;
     }
 
     /**

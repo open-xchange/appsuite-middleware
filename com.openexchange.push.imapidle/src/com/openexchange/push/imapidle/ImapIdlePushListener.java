@@ -286,7 +286,12 @@ public final class ImapIdlePushListener implements PushListener {
             if( DEBUG_ENABLED ) {
                 LOG.info("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
             }
-            inbox.idle(true);
+            mailAccess.setWaiting(true);
+            try {
+                inbox.idle(true);
+            } finally {
+                mailAccess.setWaiting(false);
+            }
             if( inbox.getNewMessageCount() > 0 ) {
                 if( DEBUG_ENABLED ) {
                     final int nmails = inbox.getNewMessageCount();

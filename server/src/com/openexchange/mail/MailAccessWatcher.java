@@ -175,6 +175,21 @@ public final class MailAccessWatcher {
         return MAIL_ACCESSES.size();
     }
 
+    /**
+     * Gets the number of currently tracked idling mail accesses.
+     * 
+     * @return The number of currently tracked idling mail accesses
+     */
+    public static int getNumberOfIdlingMailAccesses() {
+        int count = 0;
+        for (final MailAccess<?, ?> mailAccess : MAIL_ACCESSES.keySet()) {
+            if (mailAccess.isWaiting()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private static final String INFO_PREFIX = "UNCLOSED MAIL CONNECTION AFTER #N#msec:\n";
 
     private static final String INFO_PREFIX2 = "CLOSING MAIL CONNECTION BY WATCHER:\n";
