@@ -94,7 +94,12 @@ public class MonitoringInfo {
     /**
      * The connection type constant for the number of open sessions.
      */
-    private static final int SESSION = 7;
+    public static final int SESSION = 7;
+
+    /**
+     * The connection type constant for the number of idling mail connections waiting for server notifications.
+     */
+    public static final int MAIL_IDLE = 8;
 
     /**
      * Unknown connection type
