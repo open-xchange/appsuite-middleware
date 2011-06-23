@@ -233,7 +233,7 @@ public final class MailAccessWatcher {
                         }
                     } else {
                         /*
-                         * Remove closed connection from watcher
+                         * Remove closed or idling connection from watcher
                          */
                         iter.remove();
                     }
