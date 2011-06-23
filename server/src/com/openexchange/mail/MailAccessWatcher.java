@@ -94,11 +94,8 @@ public final class MailAccessWatcher {
                      */
                     final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     if (null != timer) {
-                        watcherTask =
-                            timer.scheduleWithFixedDelay(
-                                new WatcherTask(MAIL_ACCESSES, LOG),
-                                1000,
-                                MailProperties.getInstance().getWatcherFrequency());
+                        final int frequencyMillis = MailProperties.getInstance().getWatcherFrequency();
+                        watcherTask = timer.scheduleWithFixedDelay(new WatcherTask(MAIL_ACCESSES, LOG), 1000, frequencyMillis);
                     }
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Mail connection watcher successfully established and ready for tracing");
@@ -233,10 +230,11 @@ public final class MailAccessWatcher {
                                 final long duration = (now - l(val));
                                 if (duration > watcherTime) {
                                     sb.setLength(0);
-                                    logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration))).append(mailAccess.getTrace()).toString());
+                                    logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration))).append(
+                                        mailAccess.getTrace()).toString());
                                     exceededAcesses.add(mailAccess);
                                 }
-                                
+
                             }
                         }
                     } else {
