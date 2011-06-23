@@ -60,21 +60,21 @@ public class UseCountComparator implements Comparator<Contact> {
 
     private Comparator contactComparator;
 
-    private boolean specialSort;
+    private final boolean specialSort;
 
-    public UseCountComparator(boolean specialSort) {
+    public UseCountComparator(final boolean specialSort) {
         super();
         this.specialSort = specialSort;
-        this.contactComparator = new ContactComparator();
+        this.contactComparator = new SpecialAlphanumSortContactComparator();
     }
     
-    public UseCountComparator(boolean specialSort, Comparator comp) {
+    public UseCountComparator(final boolean specialSort, final Comparator comp) {
         this(specialSort);
         this.contactComparator = comp;
     }
 
 
-    public int compare(Contact o1, Contact o2) {
+    public int compare(final Contact o1, final Contact o2) {
         if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
             if (specialSort) {
                 return contactComparator.compare(o1, o2);

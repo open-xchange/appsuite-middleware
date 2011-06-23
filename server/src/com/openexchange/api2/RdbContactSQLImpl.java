@@ -98,11 +98,11 @@ import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.helpers.CollationContactComparator;
-import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
+import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.groupware.container.Contact;
@@ -320,14 +320,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
         final SuperCollator collation = SuperCollator.get(collation2);
         final StringBuilder order = new StringBuilder();
-        if (order_field > 0 && order_field != Contact.USE_COUNT_GLOBAL_FIRST) {
+        if (order_field > 0 && order_field != Contact.USE_COUNT_GLOBAL_FIRST && order_field != Contact.SPECIAL_SORTING && !Order.NO_ORDER.equals(orderMechanism)) {
             final String orderSQL = generateOrder(order_field, orderMechanism, collation);
             if (null != orderSQL) {
                 order.append(orderSQL);
             }
         } else {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
-                Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2 });
+                Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME, Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
         }
         
         if (from != 0 || to != 0) {
@@ -366,7 +366,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
             java.util.Arrays.sort(contacts, new UseCountComparator(false));
         } else if(collation == null) {
-        	java.util.Arrays.sort(contacts, new ContactComparator());
+        	java.util.Arrays.sort(contacts, new SpecialAlphanumSortContactComparator());
         }
 
         return new ArrayIterator<Contact>(contacts);
@@ -381,9 +381,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         //generate parts of query
         int[] extendedCols = cols;
         final boolean specialSort;
-        if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING || Order.NO_ORDER.equals(order)) {
+        if (order_field <= 0 || order_field == Contact.SPECIAL_SORTING || order_field == Contact.USE_COUNT_GLOBAL_FIRST || Order.NO_ORDER.equals(order)) {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
-                Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
+                Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME, Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
             specialSort = true;
         } else {
             specialSort = false;
@@ -444,7 +444,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             } else if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
                 java.util.Collections.sort(tmp, new UseCountComparator(specialSort));
             } else if (specialSort) {
-                java.util.Collections.sort(tmp, new ContactComparator());
+                java.util.Collections.sort(tmp, new SpecialAlphanumSortContactComparator());
             }
             contacts = tmp.toArray(new Contact[tmp.size()]);
         } catch (final SQLException e) {
@@ -553,7 +553,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         Search.checkPatternLength(searchobject);
         final StringBuilder sqlOrder = new StringBuilder();
         final boolean specialSort;
-        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING && !Order.NO_ORDER.equals(order)) {
+        if (order_field > 0 && order_field != Contact.SPECIAL_SORTING && order_field != Contact.USE_COUNT_GLOBAL_FIRST && !Order.NO_ORDER.equals(order)) {
             specialSort = false;
             sqlOrder.append(" ORDER BY co.");
             final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
@@ -568,7 +568,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             sqlOrder.append(' ');
         } else {
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
-                Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
+                Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME, Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
             specialSort = true;
         }
         cs.setOrder(sqlOrder.toString());
@@ -655,7 +655,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
             java.util.Collections.sort(contacts, new UseCountComparator(specialSort));
         } else if (specialSort) {
-            java.util.Collections.sort(contacts, new ContactComparator());
+            java.util.Collections.sort(contacts, new SpecialAlphanumSortContactComparator());
         }
         return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }

@@ -58,26 +58,38 @@ import com.openexchange.groupware.search.Order;
  * A special implementation of a comparator that uses the first not null attribute of a contact in order of surname, display name, company,
  * business email address, private email address.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @deprecated Use {@link SpecialAlphanumSortContactComparator} instead!!!
  */
+@Deprecated
 public class ContactComparator implements Comparator<Contact> {
 
-	private final Comparator comparator;
-	private int weight = 1;
+	private final Comparator<String> comparator;
+	private final int weight;
 
     /**
      * Default constructor.
+     * 
+     * @deprecated Use {@link SpecialAlphanumSortContactComparator} instead!!!
      */
+    @Deprecated
     public ContactComparator() {
         super();
         this.comparator = new AlphanumComparator();
+        weight = 1;
     }
     
-    public ContactComparator(final Comparator comp, final Order sortOrder) {
+    /**
+     * Initializes a new {@link ContactComparator}.
+     * 
+     * @param comp The string comparator
+     * @param sortOrder The sort order
+     * @deprecated Use {@link SpecialAlphanumSortContactComparator} instead!!!
+     */
+    @Deprecated
+    public ContactComparator(final Comparator<String> comp, final Order sortOrder) {
         super();
         this.comparator = comp;
-        if(sortOrder == Order.DESCENDING) {
-            this.weight = -1;
-        }
+        this.weight = sortOrder == Order.DESCENDING ? -1 : 1;
     }
 
     public int compare(final Contact contact1, final Contact contact2) {
@@ -89,9 +101,27 @@ public class ContactComparator implements Comparator<Contact> {
     private String getFirstNotNull(final Contact contact) {
         final String retval;
         if (contact.containsYomiLastName()) {
-            retval = contact.getYomiLastName();
+            /*
+             * Consider (yomi) given name, too
+             */
+            String appendix = contact.getYomiFirstName();
+            if (null == appendix) {
+                appendix = contact.getGivenName();
+            }
+            retval =
+                null == appendix ? contact.getYomiLastName() : new StringBuilder(contact.getYomiLastName()).append(' ').append(appendix).toString();
         } else if (contact.containsSurName()) {
-            retval = contact.getSurName();
+            /*-
+             * Consider (yomi) given name, too
+             * 
+             * TODO: Prefer normal given name when sorting by normal surname?
+             */
+            String appendix = contact.getYomiFirstName();
+            if (null == appendix) {
+                appendix = contact.getGivenName();
+            }
+            retval =
+                null == appendix ? contact.getSurName() : new StringBuilder(contact.getSurName()).append(' ').append(appendix).toString();
         } else if (contact.containsDisplayName()) {
             retval = contact.getDisplayName();
         } else if (contact.containsYomiCompany()) {

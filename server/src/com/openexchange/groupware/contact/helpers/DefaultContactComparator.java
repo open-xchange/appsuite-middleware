@@ -64,7 +64,7 @@ import com.openexchange.groupware.search.Order;
 public class DefaultContactComparator implements Comparator<Contact>{
 
     private static final TIntObjectHashMap<Comparator<Contact>> SPECIAL_COMPARATORS = new TIntObjectHashMap<Comparator<Contact>>() {{
-        put(Contact.SPECIAL_SORTING, new ContactComparator());
+        put(Contact.SPECIAL_SORTING, new SpecialAlphanumSortContactComparator());
         put(Contact.USE_COUNT_GLOBAL_FIRST, new UseCountGlobalFirstComparator());
     }};
     
