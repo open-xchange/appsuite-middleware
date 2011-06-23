@@ -213,6 +213,12 @@ public final class MailAccessWatcher {
 
         public void run() {
             try {
+                if (map.isEmpty()) {
+                    /*
+                     * Nothing to trace...
+                     */
+                    return;
+                }
                 final StringBuilder sb = new StringBuilder(512);
                 final List<MailAccess<?, ?>> exceededAcesses = new LinkedList<MailAccess<?, ?>>();
                 final int watcherTime = MailProperties.getInstance().getWatcherTime();
