@@ -66,6 +66,8 @@ public interface GeneralMonitorMBean {
 
     public int getNumberOfIMAPConnections();
 
+    public int getNumberOfIdleMailConnections();
+
     public int getNumberOfActiveSessions();
 
     public int getNumberOfRunningAJPListeners();

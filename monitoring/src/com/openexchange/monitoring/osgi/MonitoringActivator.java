@@ -125,6 +125,7 @@ public final class MonitoringActivator extends DeferredActivator {
 
             trackers = new ArrayList<ServiceTracker>(2);
             trackers.add(new MailCounterServiceTracker(context));
+            trackers.add(new MailIdleCounterServiceTracker(context));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }

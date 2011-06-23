@@ -223,6 +223,9 @@ public class MonitoringInfo {
         case SESSION:
             retval = numberOfActiveSessions.get();
             break;
+        case MAIL_IDLE:
+            retval = getCounter(connectionType).getCount();
+            break;
         default:
             LOG.error(new StringBuilder("MonitoringInfo.getNumberOfConnections(): Unknown connection type: ").append(connectionType).toString());
         }
