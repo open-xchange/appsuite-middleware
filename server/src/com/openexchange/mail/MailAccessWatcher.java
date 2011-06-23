@@ -183,7 +183,7 @@ public final class MailAccessWatcher {
     public static int getNumberOfIdlingMailAccesses() {
         int count = 0;
         for (final MailAccess<?, ?> mailAccess : MAIL_ACCESSES.keySet()) {
-            if (mailAccess.isWaiting()) {
+            if (mailAccess.isConnectedUnsafe() && mailAccess.isWaiting()) {
                 count++;
             }
         }
