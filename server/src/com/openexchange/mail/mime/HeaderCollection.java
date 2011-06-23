@@ -808,11 +808,11 @@ public class HeaderCollection implements Serializable {
         if (str == null) {
             return true;
         }
-        final char[] chars = str.toCharArray();
         if (isName) {
             if (str.length() == 0) {
                 return true;
             }
+            final char[] chars = str.toCharArray();
             for (int i = 0; i < chars.length; i++) {
                 if (Character.isWhitespace(chars[i]) || (chars[i] >= 128)) {
                     /*
@@ -829,7 +829,7 @@ public class HeaderCollection implements Serializable {
         /*
          * A header value must not be empty
          */
-        return !isEmpty(str);
+        return isEmpty(str);
     }
 
     /**
