@@ -98,7 +98,7 @@ public final class PushEventHandler implements EventHandler {
 
         private final Event event;
 
-        PushEventHandlerRunnable(final Event event) {
+        protected PushEventHandlerRunnable(final Event event) {
             super();
             this.event = event;
         }
