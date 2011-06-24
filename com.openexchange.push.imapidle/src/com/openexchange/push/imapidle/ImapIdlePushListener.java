@@ -56,8 +56,6 @@ import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -213,7 +211,7 @@ public final class ImapIdlePushListener implements PushListener {
             /*
              * Get access
              */
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+            final MailAccess<?, ?> access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             /*
              * Check protocol
              */
