@@ -52,11 +52,16 @@ package com.openexchange.push.imapidle;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
+import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPFolderStorage;
+import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
@@ -152,8 +157,6 @@ public final class ImapIdlePushListener implements PushListener {
 
     private MailService mailService;
     
-    private IMAPFolder inbox;
-    
     private boolean shutdown;
     
     /**
@@ -170,7 +173,6 @@ public final class ImapIdlePushListener implements PushListener {
         mailAccess = null;
         mailService = null;
         errordelay = 1000;
-        inbox = null;
         shutdown = false;
     }
 
@@ -207,23 +209,44 @@ public final class ImapIdlePushListener implements PushListener {
         final ThreadPoolService threadPoolService;
         try {
             threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
-            /*-
-             * No more needed because watcher recognizes IDLE state if properly set via MailAccess.setWaiting(boolean).
-             * 
-             * 
-            final IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
-            if( imcf.isWatcherEnabled() ) {
-                LOG.error("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
-            }
-            */
             mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
+            /*
+             * Get access
+             */
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+            /*
+             * Check protocol
+             */
+            if (!IMAPProvider.PROTOCOL_IMAP.equals(access.getProvider().getProtocol())) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary mail account is not IMAP!");
+            }
+            /*
+             * Check for IDLE capability
+             */
+            final IMAPAccess imapAccess = (IMAPAccess) access;
+            imapAccess.connect(false);
+            try {
+                if (!imapAccess.getIMAPConfig().asMap().containsKey("IDLE")) {
+                    throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
+                }
+                /*-
+                 * No more needed because watcher recognizes IDLE state if properly set via MailAccess.setWaiting(boolean).
+                 * 
+                 * 
+                final IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
+                if( imcf.isWatcherEnabled() ) {
+                    LOG.error("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
+                    throw PushExceptionCodes.UNEXPECTED_ERROR.create("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
+                }
+                 */
+            } finally {
+                imapAccess.close(true);
+            }
         } catch (final ServiceException e) {
             throw new PushException(e);
+        } catch (final MailException e) {
+            throw new PushException(e);
         }
-//        catch (final MailException e) {
-//            throw new PushException(e);
-//        }
         imapIdleFuture = threadPoolService.submit(ThreadPools.task(new ImapIdlePushListenerTask(this)));
     }
 
@@ -235,16 +258,6 @@ public final class ImapIdlePushListener implements PushListener {
             LOG.info("stopping IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
         }
         shutdown = true;
-        if( null != inbox ) {
-            if( inbox.isOpen() ) {
-                try {
-                    inbox.close(false);
-                } catch (final MessagingException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-            inbox = null;
-        }
         if( null != imapIdleFuture ) {
             imapIdleFuture.cancel(true);
             imapIdleFuture = null;
@@ -273,7 +286,6 @@ public final class ImapIdlePushListener implements PushListener {
         try {
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
             mailAccess.connect(false);
-            
             final IMAPFolderStorage istore;
             {
                 final Object fstore = mailAccess.getFolderStorage();
@@ -283,30 +295,32 @@ public final class ImapIdlePushListener implements PushListener {
                 istore = (IMAPFolderStorage) fstore;
             }
             final IMAPStore imapStore = istore.getImapStore();
-            inbox = (IMAPFolder) imapStore.getFolder(folder);
-            if( ! inbox.isOpen() ) {
-                inbox.open(IMAPFolder.READ_WRITE);
-            }
-            if( DEBUG_ENABLED ) {
-                LOG.info("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
-            }
-            mailAccess.setWaiting(true);
+            final IMAPFolder inbox = (IMAPFolder) imapStore.getFolder(folder);
             try {
-                inbox.idle(true);
-            } finally {
-                mailAccess.setWaiting(false);
-            }
-            if( inbox.getNewMessageCount() > 0 ) {
-                if( DEBUG_ENABLED ) {
-                    final int nmails = inbox.getNewMessageCount();
-                    LOG.info("IDLE: " + nmails + " new mail(s) for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                inbox.open(IMAPFolder.READ_WRITE);
+                if (DEBUG_ENABLED) {
+                    LOG.info("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
                 }
-                notifyNewMail();
+                mailAccess.setWaiting(true);
+                try {
+                    inbox.idle(true);
+                } finally {
+                    mailAccess.setWaiting(false);
+                }
+                if (inbox.getNewMessageCount() > 0) {
+                    if (DEBUG_ENABLED) {
+                        final int nmails = inbox.getNewMessageCount();
+                        LOG.info("IDLE: " + nmails + " new mail(s) for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                    }
+                    notifyNewMail();
+                }
+                /* NOTE: we cannot throw Exceptions because that would stop the IDLE'ing when e.g.
+                 * IMAP server is down/busy for a moment or if e.g. cyrus client timeout happens
+                 * (idling for too long)
+                 */
+            } finally {
+                inbox.close(false);
             }
-            /* NOTE: we cannot throw Exceptions because that would stop the IDLE'ing when e.g.
-             * IMAP server is down/busy for a moment or if e.g. cyrus client timeout happens
-             * (idling for too long)
-             */
         } catch (final MailException e) {
             // throw new PushException(e);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
@@ -331,6 +345,7 @@ public final class ImapIdlePushListener implements PushListener {
         } finally {
             if( null != mailAccess ) {
                 mailAccess.close(false);
+                mailAccess = null;
             }
             running.set(false);
         }
