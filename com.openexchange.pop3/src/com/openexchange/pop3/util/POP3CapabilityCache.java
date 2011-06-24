@@ -200,15 +200,21 @@ public final class POP3CapabilityCache {
 
     private static final int MAX_TIMEOUT = 5000;
 
+    private static int getMaxTimeout(final IPOP3Properties pop3Properties) {
+        return Math.min(pop3Properties.getPOP3Timeout(), MAX_TIMEOUT);
+    }
+
     private static final int MAX_CONNECT_TIMEOUT = 2500;
+
+    private static int getMaxConnectTimeout(final IPOP3Properties pop3Properties) {
+        return Math.min(pop3Properties.getPOP3ConnectionTimeout(), MAX_CONNECT_TIMEOUT);
+    }
 
     private static String getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
         boolean caller = false;
         Future<String> f = MAP.get(address);
-        final int connectTimeout = Math.min(pop3Properties.getPOP3ConnectionTimeout(), MAX_CONNECT_TIMEOUT);
-        final int timeout = Math.min(pop3Properties.getPOP3Timeout(), MAX_TIMEOUT);
         if (null == f) {
-            final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, connectTimeout, timeout));
+            final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -231,7 +237,7 @@ public final class POP3CapabilityCache {
             /*
              * Intended for fast capabilities look-up. Use individual timeout value to ensure fast return from call.
              */
-            return new CapabilityCallable(address, isSecure, connectTimeout, timeout).call();
+            return new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)).call();
         } catch (final java.net.SocketTimeoutException e) {
             throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, e, address, login);
         }
