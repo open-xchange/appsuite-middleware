@@ -52,7 +52,7 @@ package com.openexchange.push.imapidle;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPAccess;
+import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.MailException;
@@ -221,10 +221,10 @@ public final class ImapIdlePushListener implements PushListener {
             /*
              * Check for IDLE capability
              */
-            final IMAPAccess imapAccess = (IMAPAccess) access;
-            imapAccess.connect(false);
+            access.connect(false);
             try {
-                if (!imapAccess.getIMAPConfig().asMap().containsKey("IDLE")) {
+                final IMAPCapabilities capabilities = (IMAPCapabilities) access.getMailConfig().getCapabilities();
+                if (!capabilities.hasIdle()) {
                     throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
                 }
                 /*-
@@ -238,7 +238,7 @@ public final class ImapIdlePushListener implements PushListener {
                 }
                  */
             } finally {
-                imapAccess.close(true);
+                access.close(true);
             }
         } catch (final ServiceException e) {
             throw new PushException(e);
