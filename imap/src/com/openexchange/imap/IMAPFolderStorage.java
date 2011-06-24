@@ -375,6 +375,33 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
+    public int getNewCounter(final String fullName) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            return 0;
+        }
+        try {
+            IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
+            final ListLsubEntry entry = getLISTEntry(fullName, f);
+            synchronized (f) {
+                if (!doesExist(entry)) {
+                    f = checkForNamespaceFolder(fullName);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                    return 0;
+                }
+                if (!entry.canOpen()) {
+                    return 0;
+                }
+                return IMAPCommandsCollection.getRecent(f);
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
     public int getTotalCounter(final String fullName) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return 0;
