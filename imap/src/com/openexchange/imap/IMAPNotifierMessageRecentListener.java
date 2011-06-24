@@ -128,7 +128,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                 MailFolderUtility.prepareFullname(accountId, fullName.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : fullName),
                 session);
             if (INFO_ENABLED) {
-                LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(fullName).append("\" in account ").append(
+                LOG.debug(new StringBuilder(64).append("\n\tNotified new mails in folder \"").append(fullName).append("\" in account ").append(
                     accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
             }
         } catch (final PushException e) {
