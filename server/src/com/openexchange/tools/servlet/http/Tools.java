@@ -54,8 +54,13 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -328,5 +333,22 @@ public final class Tools {
             }
         }
         return req.isSecure();
+    }
+
+    public static final Map<String, List<String>> copyHeaders(final HttpServletRequest req) {
+        final Map<String, List<String>> headers = new HashMap<String, List<String>>();
+        for (Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements(); ) {
+            String name = (String) e.nextElement();
+            List<String> values = headers.get(name);
+            if (null == values) {
+                values = new ArrayList<String>();
+                headers.put(name, values);
+            }
+            for (Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements(); ) {
+                values.add((String) valueEnum.nextElement());
+            }
+            
+        }
+        return headers;
     }
 }

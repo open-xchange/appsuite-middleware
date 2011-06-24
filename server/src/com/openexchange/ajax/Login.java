@@ -53,11 +53,13 @@ import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.ajax.SessionServlet.removeJSESSIONID;
 import static com.openexchange.ajax.SessionServlet.removeOXCookies;
 import static com.openexchange.login.Interface.HTTP_JSON;
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
@@ -111,8 +113,8 @@ import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Authorization;
-import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -802,6 +804,7 @@ public class Login extends AJAXServlet {
         } else {
             version = req.getParameter(LoginFields.VERSION_PARAM);
         }
+        final Map<String, List<String>> headers = copyHeaders(req);
         final LoginRequest loginRequest = new LoginRequest() {
 
             private String hash = null;
@@ -843,6 +846,10 @@ public class Login extends AJAXServlet {
                     return hash;
                 }
                 return hash = HashCalculator.getHash(req);
+            }
+
+            public Map<String, List<String>> getHeaders() {
+                return headers;
             }
         };
         return loginRequest;
@@ -897,6 +904,7 @@ public class Login extends AJAXServlet {
         }
         final String client = defaultClient;
         final String version = clientVersion;
+        final Map<String, List<String>> headers = copyHeaders(req);
         final LoginRequest request = new LoginRequest() {
             private String hash;
             public String getVersion() {
@@ -928,6 +936,9 @@ public class Login extends AJAXServlet {
             }
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
+            }
+            public Map<String, List<String>> getHeaders() {
+                return headers;
             }
         };
         final LoginResult result = LoginPerformer.getInstance().doLogin(request);

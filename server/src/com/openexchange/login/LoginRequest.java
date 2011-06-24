@@ -49,6 +49,9 @@
 
 package com.openexchange.login;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Data to process a login request.
  *
@@ -73,4 +76,6 @@ public interface LoginRequest {
     String getHash();
 
     Interface getInterface();
+
+    Map<String, List<String>> getHeaders();
 }

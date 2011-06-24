@@ -49,11 +49,14 @@
 
 package com.openexchange.easylogin;
 
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -288,6 +291,7 @@ public class EasyLogin extends HttpServlet {
     private void doJavaLogin(final HttpServletRequest req, HttpServletResponse resp, final String authID, final String login, final String password) throws IOException {
         final LoginResult result;
         final String client = getClient(req);
+        final Map<String, List<String>> headers = copyHeaders(req);
         try {
             result = LoginPerformer.getInstance().doLogin(new LoginRequest() {
 
@@ -330,6 +334,10 @@ public class EasyLogin extends HttpServlet {
                         return hash;
                     }
                     return hash = HashCalculator.getHash(req, client);
+                }
+
+                public Map<String, List<String>> getHeaders() {
+                    return headers;
                 }
             });
         } catch (LoginException e) {

@@ -49,9 +49,11 @@
 
 package com.openexchange.tools.webdav;
 
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -61,7 +63,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.JDOMException;
-import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -145,6 +146,10 @@ public abstract class OXServlet extends WebDavServlet {
 
         public String getHash() {
             return null;
+        }
+
+        public Map<String, List<String>> getHeaders() {
+            return copyHeaders(req);
         }
     }
 

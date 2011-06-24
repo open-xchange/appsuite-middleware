@@ -1,3 +1,7 @@
+* 2011-06-24 - marcus.klein@open-xchange.com
+
+ - TA7380 of US6578: Passing HTTP headers to authentication implementation.
+
 * 2011-06-23 - thorben.betten@open-xchange.com
 
  - Bugfix #19591: Dealing with failing retrieval of a POP3 server's capabilities (through CAPA command)
