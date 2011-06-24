@@ -575,10 +575,10 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Gets total message count from given IMAP folder
+     * Gets unread/unseen message count from given IMAP folder
      * 
      * @param imapFolder The IMAP folder
-     * @return The total message count
+     * @return The unread message count
      * @throws MessagingException If determining counts fails
      */
     public static int getUnread(final IMAPFolder imapFolder) throws MessagingException {
@@ -622,6 +622,71 @@ public final class IMAPCommandsCollection {
                         final IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals("STATUS")) {
                             final int status = parseStatusResponse(ir, "UNSEEN")[0];
+                            if (status != -1) {
+                                unread = status;
+                            }
+                            r[i] = null;
+                        }
+                    }
+                }
+                /*
+                 * Dispatch remaining untagged responses
+                 */
+                protocol.notifyResponseHandlers(r);
+                protocol.handleResult(response);
+                return Integer.valueOf(unread);
+            }
+        })).intValue();
+    }
+
+    /**
+     * Gets recent message count from given IMAP folder
+     * 
+     * @param imapFolder The IMAP folder
+     * @return The recent message count
+     * @throws MessagingException If determining counts fails
+     */
+    public static int getRecent(final IMAPFolder imapFolder) throws MessagingException {
+        return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
+                    /*
+                     * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
+                     */
+                    throw new com.sun.mail.iap.BadCommandException("STATUS not supported");
+                }
+                /*
+                 * Encode the mbox as per RFC2060
+                 */
+                final Argument args = new Argument();
+                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                /*
+                 * Item arguments
+                 */
+                final Argument itemArgs = new Argument();
+                final String[] items = { "RECENT" };
+                for (int i = 0, len = items.length; i < len; i++) {
+                    itemArgs.writeAtom(items[i]);
+                }
+                args.writeArgument(itemArgs);
+                /*
+                 * Perform command
+                 */
+                final Response[] r = protocol.command("STATUS", args);
+                final Response response = r[r.length - 1];
+                /*
+                 * Look for STATUS responses
+                 */
+                int unread = -1;
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals("STATUS")) {
+                            final int status = parseStatusResponse(ir, "RECENT")[0];
                             if (status != -1) {
                                 unread = status;
                             }

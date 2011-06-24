@@ -68,6 +68,15 @@ public interface IMailFolderStorageEnhanced extends IMailFolderStorage {
     int getUnreadCounter(String fullName) throws MailException;
 
     /**
+     * Gets the number of new mails for specified folder (since last access to folder).
+     * 
+     * @param fullName The folder's full name
+     * @return The new counter
+     * @throws MailException If an error occurs
+     */
+    int getNewCounter(String fullName) throws MailException;
+
+    /**
      * Gets the total number of mails for specified folder.
      * 
      * @param fullName The folder's full name
