@@ -130,7 +130,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                     sb.append(ses.getContextId()).append("):\n");
                     sb.append(e.getMessage());
                     LOG.warn(sb.toString(), e);
-                    capabilities = null;
+                    capabilities = POP3CapabilityCache.getDeaultCapabilities();
                 }
                 /*
                  * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in

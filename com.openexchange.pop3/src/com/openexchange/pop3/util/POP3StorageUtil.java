@@ -525,6 +525,9 @@ public class POP3StorageUtil {
      * @return The minimum allowed seconds between logins or <code>-1</code> on absence
      */
     public static int parseLoginDelaySeconds(final String capabilities) {
+        if (null == capabilities) {
+            return -1;
+        }
         int pos = capabilities.indexOf(LOGIN_DELAY);
         if (-1 == pos) {
             // No LOGIN-DELAY capability found

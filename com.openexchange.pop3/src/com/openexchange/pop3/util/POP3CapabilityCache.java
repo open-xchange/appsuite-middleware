@@ -129,6 +129,27 @@ public final class POP3CapabilityCache {
     }
 
     /**
+     * Gets the default capabilities:
+     * 
+     * <pre>
+     * USER
+     * PASS
+     * STATS
+     * LIST
+     * RETR
+     * DELE
+     * NOOP
+     * RSET
+     * QUIT
+     * </pre>
+     * 
+     * @return The default capabilities
+     */
+    public static String getDeaultCapabilities() {
+        return DEFAULT_CAPABILITIES;
+    }
+
+    /**
      * Gets the cached CAPABILITY from POP3 server denoted by specified parameters.<br>
      * Example:
      * 

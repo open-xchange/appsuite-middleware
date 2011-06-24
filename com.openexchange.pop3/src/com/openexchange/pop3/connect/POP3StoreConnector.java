@@ -252,7 +252,7 @@ public final class POP3StoreConnector {
                 sb.append(session.getContextId()).append("):\n");
                 sb.append(e.getMessage());
                 LOG.warn(sb.toString(), e);
-                capabilities = "";
+                capabilities = POP3CapabilityCache.getDeaultCapabilities();
             }
             /*
              * JavaMail POP3 implementation requires capabilities "UIDL" and "TOP"
