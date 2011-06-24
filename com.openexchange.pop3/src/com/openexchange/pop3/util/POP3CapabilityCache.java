@@ -181,7 +181,7 @@ public final class POP3CapabilityCache {
         boolean caller = false;
         Future<String> f = MAP.get(address);
         if (null == f) {
-            final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, pop3Properties));
+            final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, 3000, 5000));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
