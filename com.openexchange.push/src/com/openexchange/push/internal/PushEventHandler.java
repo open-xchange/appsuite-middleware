@@ -97,6 +97,8 @@ public final class PushEventHandler implements EventHandler {
 
     private static final class PushEventHandlerRunnable implements Runnable {
 
+        private static final String CLIENT_OX_GUI = "com.openexchange.ox.gui.dhtml";
+
         private final Event event;
 
         protected PushEventHandlerRunnable(final Event event) {
@@ -153,7 +155,19 @@ public final class PushEventHandler implements EventHandler {
                     }
                 } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
                     final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                    // Iterate push managers
+                    /*
+                     * Check session's client identifier
+                     */
+                    final String client = session.getClient();
+                    if (CLIENT_OX_GUI.equals(client)) {
+                        /*
+                         * No push listener for OX web front-end
+                         */
+                        return;
+                    }
+                    /*
+                     * Iterate push managers
+                     */
                     final PushManagerRegistry registry = PushManagerRegistry.getInstance();
                     for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
                         try {
