@@ -242,36 +242,36 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /**
      * Sets and opens (only if exists) the folder in a safe manner, checks if selectable and for right {@link Right#READ}
      * 
-     * @param fullname The folder full name
+     * @param fullName The folder full name
      * @param desiredMode The desired opening mode (either {@link Folder#READ_ONLY} or {@link Folder#READ_WRITE})
      * @return The properly opened IMAP folder
      * @throws MessagingException If a messaging error occurs
      * @throws MailException If user does not hold sufficient rights to open the IMAP folder in desired mode
      */
-    protected final IMAPFolder setAndOpenFolder(final String fullname, final int desiredMode) throws MessagingException, MailException {
-        return setAndOpenFolder(null, fullname, desiredMode);
+    protected final IMAPFolder setAndOpenFolder(final String fullName, final int desiredMode) throws MessagingException, MailException {
+        return setAndOpenFolder(null, fullName, desiredMode);
     }
 
     /**
      * Sets and opens (only if exists) the folder in a safe manner, checks if selectable and for right {@link Right#READ}
      * 
      * @param imapFolder The IMAP folder to check against
-     * @param fullname The folder full name
+     * @param fullName The folder full name
      * @param desiredMode The desired opening mode (either {@link Folder#READ_ONLY} or {@link Folder#READ_WRITE})
      * @return The properly opened IMAP folder
      * @throws MessagingException If a messaging error occurs
      * @throws MailException If user does not hold sufficient rights to open the IMAP folder in desired mode
      */
-    protected final IMAPFolder setAndOpenFolder(final IMAPFolder imapFolder, final String fullname, final int desiredMode) throws MessagingException, MailException {
-        if (null == fullname) {
+    protected final IMAPFolder setAndOpenFolder(final IMAPFolder imapFolder, final String fullName, final int desiredMode) throws MessagingException, MailException {
+        if (null == fullName) {
             throw new MailException(MailException.Code.MISSING_FULLNAME);
         }
-        final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullname);
+        final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
         final boolean isIdenticalFolder;
         if (isDefaultFolder) {
             isIdenticalFolder = (imapFolder == null ? false : imapFolder instanceof DefaultFolder);
         } else {
-            isIdenticalFolder = (imapFolder == null ? false : imapFolder.getFullName().equals(fullname));
+            isIdenticalFolder = (imapFolder == null ? false : imapFolder.getFullName().equals(fullName));
         }
         if (imapFolder != null) {
             /*
@@ -337,6 +337,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         STR_FALSE)) && IMAPCommandsCollection.isReadOnly(imapFolder)) {
                         throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolderFullname);
                     }
+                    IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session);
                     /*
                      * Open identical folder in right mode
                      */
@@ -345,18 +346,22 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 }
             }
         }
-        final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullname));
+        final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
+        /*
+         * Add listener
+         */
+        IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session);
         /*
          * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
          */
         synchronized (retval) {
-            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullname, accountId, retval, session);
-            if (!isDefaultFolder && !STR_INBOX.equals(fullname) && (!listEntry.exists())) {
+            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session);
+            if (!isDefaultFolder && !STR_INBOX.equals(fullName) && (!listEntry.exists())) {
                 throw IMAPException.create(
                     IMAPException.Code.FOLDER_NOT_FOUND,
                     imapConfig,
                     session,
-                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
             if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
                 throw IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, imapConfig, session, Integer.valueOf(desiredMode));
@@ -367,7 +372,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
                     imapConfig,
                     session,
-                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
             try {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
@@ -375,7 +380,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         IMAPException.Code.NO_FOLDER_OPEN,
                         imapConfig,
                         session,
-                        isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                        isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
                 }
             } catch (final MessagingException e) {
                 throw IMAPException.create(
@@ -383,7 +388,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     imapConfig,
                     session,
                     e,
-                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
             if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
                 MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
@@ -392,7 +397,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     IMAPException.Code.READ_ONLY_FOLDER,
                     imapConfig,
                     session,
-                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullname);
+                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
             retval.open(desiredMode);
         }

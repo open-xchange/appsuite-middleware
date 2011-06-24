@@ -1055,6 +1055,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Open and check user rights on destination folder
                  */
                 final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
+                IMAPNotifierMessageRecentListener.addNotifierFor(destFolder, destFullName, accountId, session);
                 {
                     final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session);
                     if (!STR_INBOX.equals(destFullName) && !listEntry.exists()) {
@@ -2053,6 +2054,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         if (messageId != null) {
             final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
+            IMAPNotifierMessageRecentListener.addNotifierFor(destFolder, destFullName, accountId, session);
             destFolder.open(Folder.READ_ONLY);
             try {
                 /*
