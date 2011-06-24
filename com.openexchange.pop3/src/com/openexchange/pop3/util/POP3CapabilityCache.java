@@ -198,17 +198,15 @@ public final class POP3CapabilityCache {
         return getCapability0(address, isSecure, pop3Properties, login);
     }
 
+    private static final int MAX_TIMEOUT = 5000;
+
+    private static final int MAX_CONNECT_TIMEOUT = 2500;
+
     private static String getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
         boolean caller = false;
         Future<String> f = MAP.get(address);
-        int connectTimeout = pop3Properties.getPOP3ConnectionTimeout();
-        if (connectTimeout > 2500) { // fail fast
-            connectTimeout = 2500;
-        }
-        int timeout = pop3Properties.getPOP3Timeout();
-        if (timeout > 5000) { // fail fast
-            timeout = 5000;
-        }
+        final int connectTimeout = Math.min(pop3Properties.getPOP3ConnectionTimeout(), MAX_CONNECT_TIMEOUT);
+        final int timeout = Math.min(pop3Properties.getPOP3Timeout(), MAX_TIMEOUT);
         if (null == f) {
             final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, connectTimeout, timeout));
             f = MAP.putIfAbsent(address, ft);
