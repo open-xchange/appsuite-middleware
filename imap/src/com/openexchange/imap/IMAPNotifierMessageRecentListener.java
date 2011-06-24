@@ -67,6 +67,11 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public final class IMAPNotifierMessageRecentListener implements MessageRecentListener {
 
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(IMAPNotifierMessageRecentListener.class);
+
+    private static final boolean INFO_ENABLED = LOG.isInfoEnabled();
+
     private static final String INBOX = "INBOX";
 
     private static final boolean INBOX_ONLY = true;
@@ -122,6 +127,10 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
             PushUtility.triggerOSGiEvent(
                 MailFolderUtility.prepareFullname(accountId, fullName.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : fullName),
                 session);
+            if (INFO_ENABLED) {
+                LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(fullName).append("\" in account ").append(
+                    accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+            }
         } catch (final PushException e) {
             LogFactory.getLog(IMAPNotifierMessageRecentListener.class).warn("Couldn't notofy about possible recent message.", e);
         }
