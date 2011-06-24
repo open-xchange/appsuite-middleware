@@ -100,6 +100,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean fastFetch;
 
+    private boolean notifyRecent;
+
     private BoolCapVal supportsACLs;
 
     private int imapTimeout;
@@ -140,6 +142,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         logBuilder.append("\nLoading global IMAP properties...\n");
 
         final ConfigurationService configuration = IMAPServiceRegistry.getService(ConfigurationService.class);
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.notifyRecent", STR_TRUE).trim();
+            notifyRecent = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tNotify Recent: ").append(notifyRecent).append('\n');
+        }
+        
         {
             final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application").trim();
             imapSort = "imap".equalsIgnoreCase(imapSortStr);
@@ -335,10 +343,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         entity2AclImpl = null;
         blockSize = 0;
         spamHandlerName = null;
+        notifyRecent = true;
     }
 
     public boolean isFastFetch() {
         return fastFetch;
+    }
+
+    public boolean notifyRecent() {
+        return notifyRecent;
     }
 
     public boolean isPropagateClientIPAddress() {
