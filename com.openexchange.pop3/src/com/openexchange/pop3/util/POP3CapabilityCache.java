@@ -295,6 +295,7 @@ public final class POP3CapabilityCache {
 
         public String call() throws IOException {
             Socket s = null;
+            final StringBuilder sb = new StringBuilder(512);
             try {
                 try {
                     if (isSecure) {
@@ -324,7 +325,6 @@ public final class POP3CapabilityCache {
                 }
                 final InputStream in = s.getInputStream();
                 final OutputStream out = s.getOutputStream();
-                final StringBuilder sb = new StringBuilder(512);
                 /*
                  * Read POP3 server greeting on connect
                  */
@@ -471,6 +471,14 @@ public final class POP3CapabilityCache {
                  * Create new object
                  */
                 return capabilities;
+            } catch (final IOException e) {
+                LOG.warn("Failed reading capabilities from POP3 server \"" + key.getHostName() + "\". Read so far:" + sb.toString());
+                throw e;
+            } catch (final RuntimeException e) {
+                LOG.warn("Fatally failed reading capabilities from POP3 server \"" + key.getHostName() + "\". Read so far:" + sb.toString());
+                final IOException ioException = new IOException(e.getMessage());
+                ioException.initCause(e);
+                throw ioException;
             } finally {
                 if (s != null) {
                     try {
