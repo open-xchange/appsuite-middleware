@@ -201,8 +201,16 @@ public final class POP3CapabilityCache {
     private static String getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
         boolean caller = false;
         Future<String> f = MAP.get(address);
+        int connectTimeout = pop3Properties.getPOP3ConnectionTimeout();
+        if (connectTimeout > 2500) { // fail fast
+            connectTimeout = 2500;
+        }
+        int timeout = pop3Properties.getPOP3Timeout();
+        if (timeout > 5000) { // fail fast
+            timeout = 5000;
+        }
         if (null == f) {
-            final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, 3000, 5000));
+            final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, connectTimeout, timeout));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -225,7 +233,7 @@ public final class POP3CapabilityCache {
             /*
              * Intended for fast capabilities look-up. Use individual timeout value to ensure fast return from call.
              */
-            return new CapabilityCallable(address, isSecure, 3000, 5000).call();
+            return new CapabilityCallable(address, isSecure, connectTimeout, timeout).call();
         } catch (final java.net.SocketTimeoutException e) {
             throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, e, address, login);
         }
@@ -280,10 +288,6 @@ public final class POP3CapabilityCache {
         private final int connectionTimeout;
 
         private final int timeout;
-
-        public CapabilityCallable(final InetSocketAddress key, final boolean isSecure, final IPOP3Properties pop3Properties) {
-            this(key, isSecure, pop3Properties.getPOP3ConnectionTimeout(), pop3Properties.getPOP3Timeout());
-        }
 
         public CapabilityCallable(final InetSocketAddress key, final boolean isSecure, final int connectionTimeout, final int timeout) {
             super();
