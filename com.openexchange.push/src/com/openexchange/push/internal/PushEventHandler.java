@@ -74,9 +74,9 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class PushEventHandler implements EventHandler {
 
-    static final Log LOG = LogFactory.getLog(PushEventHandler.class);
+    protected static final Log LOG = LogFactory.getLog(PushEventHandler.class);
 
-    static final boolean DEBUG = LOG.isDebugEnabled();
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     public PushEventHandler() {
         super();
