@@ -49,6 +49,11 @@
 
 package com.openexchange.imap.notify;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Pattern;
 import javax.mail.event.MessageRecentEvent;
 import javax.mail.event.MessageRecentListener;
 import org.apache.commons.logging.LogFactory;
@@ -59,22 +64,52 @@ import com.openexchange.push.PushException;
 import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 /**
  * {@link IMAPNotifierMessageRecentListener}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPNotifierMessageRecentListener implements MessageRecentListener {
+public final class IMAPNotifierMessageRecentListener implements MessageRecentListener, IMAPNotifierConstants {
 
     private static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(IMAPNotifierMessageRecentListener.class);
 
     private static final boolean INFO_ENABLED = LOG.isInfoEnabled();
 
-    private static final String INBOX = "INBOX";
+    private static final Set<String> FULL_NAMES_SET = Collections.unmodifiableSet(new HashSet<String>() {
 
-    private static final boolean INBOX_ONLY = true;
+        private static final long serialVersionUID = 3400972419735028508L;
+
+        {
+            final String notifierFullNames = NOTIFIER_FULL_NAMES;
+            if (!isEmptyString(notifierFullNames)) {
+                final String[] fullNames = Pattern.compile(" *, *").split(notifierFullNames);
+                for (final String fn : fullNames) {
+                    add(BASE64MailboxEncoder.encode(fn).toUpperCase(Locale.US));
+                }
+            }
+        }
+    });
+
+    /**
+     * Checks if specified string is empty.
+     * 
+     * @param str The string to check
+     * @return <code>true</code> if string is considered empty; otherwise <code>false</code>
+     */
+    protected static boolean isEmptyString(final String str) {
+        if (null == str) {
+            return true;
+        }
+        final char[] chars = str.toCharArray();
+        boolean empty = true;
+        for (int i = 0; empty && i < chars.length; i++) {
+            empty = Character.isWhitespace(chars[i]);
+        }
+        return empty;
+    }
 
     /**
      * Adds the recent-notifier for specified IMAP folder if allowed to.
@@ -96,8 +131,22 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
      * @param session The session
      */
     public static void addNotifierFor(final IMAPFolder imapFolder, final String optFullName, final int accountId, final Session session) {
+        addNotifierFor(imapFolder, optFullName, accountId, session, false);
+    }
+
+    /**
+     * Adds the recent-notifier for specified IMAP folder if allowed to.
+     * 
+     * @param imapFolder The IMAP folder
+     * @param optFullName The optional full name
+     * @param accountId The account identifier
+     * @param session The session
+     * @param force <code>true</code> to enforce adding recent-notifier; otherwise <code>false</code>
+     */
+    public static void addNotifierFor(final IMAPFolder imapFolder, final String optFullName, final int accountId, final Session session, final boolean force) {
         final String fullName = optFullName == null ? imapFolder.getFullName() : optFullName;
-        if (IMAPProperties.getInstance().notifyRecent() && (!INBOX_ONLY || INBOX.equalsIgnoreCase(fullName))) {
+        if ((force || IMAPProperties.getInstance().notifyRecent()) && FULL_NAMES_SET.contains(BASE64MailboxEncoder.encode(fullName).toUpperCase(
+            Locale.US))) {
             imapFolder.addMessageRecentListener(new IMAPNotifierMessageRecentListener(fullName, accountId, session));
         }
     }
