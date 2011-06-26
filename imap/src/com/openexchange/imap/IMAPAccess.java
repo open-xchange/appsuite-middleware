@@ -211,7 +211,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * Gets the underlying IMAP store.
      * 
-     * @return The IMAP store
+     * @return The IMAP store or <code>null</code> if this IMAP access is not connected
      */
     public IMAPStore getIMAPStore() {
         return imapStore;
