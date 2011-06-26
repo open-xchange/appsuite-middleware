@@ -60,7 +60,7 @@ public interface IMAPNotifierConstants {
     /**
      * The frequency for notifier runs.
      */
-    public static final int NOTIFIER_FREQUENCY = 300000;
+    public static final int NOTIFIER_FREQUENCY = 3000;
 
     /**
      * The comma-separated list of full names to consider in a notifier run.

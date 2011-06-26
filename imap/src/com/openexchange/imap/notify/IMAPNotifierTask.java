@@ -54,7 +54,9 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.mail.FetchProfile;
 import javax.mail.MessagingException;
+import javax.mail.UIDFolder.FetchProfileItem;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailAccess;
@@ -185,6 +187,16 @@ public final class IMAPNotifierTask implements IMAPNotifierConstants {
         return true;
     }
 
+    /**
+     * The fetch profile carrying only UID fetch item.
+     */
+    protected static final FetchProfile UID_FETCH_PROFILE = new FetchProfile() {
+
+        {
+            add(FetchProfileItem.UID);
+        }
+    };
+
     private static final class IMAPNotifierTaskRunnable implements Runnable {
 
         private final ConcurrentMap<String, String> fullNames;
@@ -225,8 +237,11 @@ public final class IMAPNotifierTask implements IMAPNotifierConstants {
                      */
                     do {
                         final IMAPFolder imapFolder = getIMAPFolder(iter.next(), imapStore, session);
-                        imapFolder.open(IMAPFolder.READ_ONLY);
-                        imapFolder.close(false);
+                        /*
+                         * Open in read-write mode to clear \Recent flag(s) to not notify multiple times for the same recent messages
+                         */
+                        imapFolder.open(IMAPFolder.READ_WRITE);
+                        imapFolder.close(true);
                     } while (iter.hasNext());
                 } finally {
                     imapAccess.close(true);
