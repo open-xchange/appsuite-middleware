@@ -59,6 +59,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.push.PushManagerService;
@@ -75,7 +76,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link ImapIdleActivator} - The IMAP IDLE activator.
- * 
  */
 public final class ImapIdleActivator extends DeferredActivator {
 
@@ -84,10 +84,10 @@ public final class ImapIdleActivator extends DeferredActivator {
     private List<ServiceRegistration> serviceRegistrations;
 
     private String folder;
-    
+
     private int errordelay;
 
-    private ServiceTracker sessiondTracker;
+    private List<ServiceTracker> serviceTrackers;
 
     /**
      * Initializes a new {@link ImapIdleActivator}.
@@ -144,11 +144,15 @@ public final class ImapIdleActivator extends DeferredActivator {
             /*
              * Initialize & open tracker for SessionD service
              */
+            serviceTrackers = new ArrayList<ServiceTracker>(2);
             {
                 final ServiceTrackerCustomizer trackerCustomizer =
                     new RegistryServiceTrackerCustomizer<SessiondService>(context, getServiceRegistry(), SessiondService.class);
-                sessiondTracker = new ServiceTracker(context, SessiondService.class.getName(), trackerCustomizer);
-                sessiondTracker.open();
+                serviceTrackers.add(new ServiceTracker(context, SessiondService.class.getName(), trackerCustomizer));
+            }
+            serviceTrackers.add(new ServiceTracker(context, IMAPNotifierRegistryService.class.getName(), new IMAPNotifierTracker(context)));
+            for (final ServiceTracker tracker : serviceTrackers) {
+                tracker.open();
             }
             /*
              * Read configuration
@@ -162,12 +166,12 @@ public final class ImapIdleActivator extends DeferredActivator {
                 }
             }
 
-            errordelay = configurationService.getIntProperty("com.openexchange.push.imapidle.errordelay",1000);
+            errordelay = configurationService.getIntProperty("com.openexchange.push.imapidle.errordelay", 1000);
 
-            boolean debug = configurationService.getBoolProperty("com.openexchange.push.imapidle.debug", true);
+            final boolean debug = configurationService.getBoolProperty("com.openexchange.push.imapidle.debug", true);
             ImapIdlePushListener.setFolder(folder);
             ImapIdlePushListener.setDebugEnabled(debug);
-            
+
             /*
              * Start-up
              */
@@ -207,9 +211,11 @@ public final class ImapIdleActivator extends DeferredActivator {
             /*
              * Close tracker
              */
-            if (null != sessiondTracker) {
-                sessiondTracker.close();
-                sessiondTracker = null;
+            if (null != serviceTrackers) {
+                while (!serviceTrackers.isEmpty()) {
+                    serviceTrackers.remove(0).close();
+                }
+                serviceTrackers = null;
             }
             /*
              * Clear all running listeners

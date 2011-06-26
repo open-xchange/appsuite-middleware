@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
@@ -62,7 +63,6 @@ import com.openexchange.tools.Collections;
 
 /**
  * {@link ImapIdlePushListenerRegistry} - The registry for IMAP IDLE {@link PushListener}s.
- * 
  */
 public final class ImapIdlePushListenerRegistry {
 
@@ -79,12 +79,35 @@ public final class ImapIdlePushListenerRegistry {
 
     private final ConcurrentMap<SimpleKey, ImapIdlePushListener> map;
 
+    private final AtomicBoolean enabled;
+
     /**
      * Initializes a new {@link ImapIdlePushListenerRegistry}.
      */
     private ImapIdlePushListenerRegistry() {
         super();
+        enabled = new AtomicBoolean(true);
         map = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>();
+    }
+
+    /**
+     * Sets the enabled flag to specified <code>newEnabledFlag</code> if current value equals <code>expectedEnabledFlag</code>.
+     * 
+     * @param expectedEnabledFlag The expected enabled flag
+     * @param newEnabledFlag The new enabled flags
+     * @return <code>true</code> if compare-and-set was successful; otherwise <code>false</code>
+     */
+    public final boolean compareAndSetEnabled(final boolean expectedEnabledFlag, final boolean newEnabledFlag) {
+        return this.enabled.compareAndSet(expectedEnabledFlag, newEnabledFlag);
+    }
+
+    /**
+     * Sets the enabled flag.
+     * 
+     * @param enabled The flag
+     */
+    public final void setEnabled(final boolean enabled) {
+        this.enabled.set(enabled);
     }
 
     /**
@@ -112,6 +135,9 @@ public final class ImapIdlePushListenerRegistry {
      * Opens all listeners contained in this registry.
      */
     public void openAll() {
+        if (!enabled.get()) {
+            return;
+        }
         for (final Iterator<ImapIdlePushListener> i = map.values().iterator(); i.hasNext();) {
             final ImapIdlePushListener l = i.next();
             try {
@@ -134,7 +160,7 @@ public final class ImapIdlePushListenerRegistry {
      * @return <code>true</code> if push listener service could be successfully added; otherwise <code>false</code>
      */
     public boolean addPushListener(final int contextId, final int userId, final ImapIdlePushListener pushListener) {
-        return (null == map.putIfAbsent(SimpleKey.valueOf(contextId, userId), pushListener));
+        return (enabled.get() && null == map.putIfAbsent(SimpleKey.valueOf(contextId, userId), pushListener));
     }
 
     /**
@@ -176,6 +202,7 @@ public final class ImapIdlePushListenerRegistry {
             if (null != listener) {
                 listener.close();
             }
+            iterator.remove();
         }
         return true;
     }

@@ -74,11 +74,9 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link ImapIdlePushListener} - The IMAP IDLE {@link PushListener}.
- * 
  */
 public final class ImapIdlePushListener implements PushListener {
 
-    
     /**
      * @param debugEnabled the debugEnabled to set
      */
@@ -96,7 +94,7 @@ public final class ImapIdlePushListener implements PushListener {
     private static final int ACCOUNT_ID = 0;
 
     private static volatile String folder;
-    
+
     private static int errordelay;
 
     /**
@@ -154,9 +152,9 @@ public final class ImapIdlePushListener implements PushListener {
     private MailAccess<?, ?> mailAccess;
 
     private MailService mailService;
-    
+
     private boolean shutdown;
-    
+
     /**
      * Initializes a new {@link ImapIdlePushListener}.
      * 
@@ -174,7 +172,6 @@ public final class ImapIdlePushListener implements PushListener {
         shutdown = false;
     }
 
-    
     /**
      * @return the errordelay
      */
@@ -182,7 +179,6 @@ public final class ImapIdlePushListener implements PushListener {
         return errordelay;
     }
 
-    
     /**
      * @param errordelay the errordelay to set
      */
@@ -196,6 +192,15 @@ public final class ImapIdlePushListener implements PushListener {
         sb.append(", user=").append(userId).append(", context=").append(contextId);
         sb.append(", imapIdleFuture=").append(imapIdleFuture);
         return sb.toString();
+    }
+
+    /**
+     * Gets the session
+     * 
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
     }
 
     /**
@@ -252,11 +257,11 @@ public final class ImapIdlePushListener implements PushListener {
      * Closes this listener.
      */
     public void close() {
-        if( DEBUG_ENABLED ) {
+        if (DEBUG_ENABLED) {
             LOG.info("stopping IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
         }
         shutdown = true;
-        if( null != imapIdleFuture ) {
+        if (null != imapIdleFuture) {
             imapIdleFuture.cancel(true);
             imapIdleFuture = null;
         }
@@ -268,7 +273,7 @@ public final class ImapIdlePushListener implements PushListener {
      * @throws PushException If check for new mails fails
      */
     public boolean checkNewMail() throws PushException {
-        if( shutdown ) {
+        if (shutdown) {
             return false;
         }
         if (!running.compareAndSet(false, true)) {
@@ -287,7 +292,7 @@ public final class ImapIdlePushListener implements PushListener {
             final IMAPFolderStorage istore;
             {
                 final Object fstore = mailAccess.getFolderStorage();
-                if( ! (fstore instanceof IMAPFolderStorage) ) {
+                if (!(fstore instanceof IMAPFolderStorage)) {
                     throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
                 }
                 istore = (IMAPFolderStorage) fstore;
@@ -312,9 +317,9 @@ public final class ImapIdlePushListener implements PushListener {
                     }
                     notifyNewMail();
                 }
-                /* NOTE: we cannot throw Exceptions because that would stop the IDLE'ing when e.g.
-                 * IMAP server is down/busy for a moment or if e.g. cyrus client timeout happens
-                 * (idling for too long)
+                /*
+                 * NOTE: we cannot throw Exceptions because that would stop the IDLE'ing when e.g. IMAP server is down/busy for a moment or
+                 * if e.g. cyrus client timeout happens (idling for too long)
                  */
             } finally {
                 inbox.close(false);
@@ -322,7 +327,7 @@ public final class ImapIdlePushListener implements PushListener {
         } catch (final MailException e) {
             // throw new PushException(e);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
-            if( DEBUG_ENABLED ) {
+            if (DEBUG_ENABLED) {
                 LOG.error(e);
             }
             try {
@@ -332,7 +337,7 @@ public final class ImapIdlePushListener implements PushListener {
             }
         } catch (final MessagingException e) {
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
-            if( DEBUG_ENABLED ) {
+            if (DEBUG_ENABLED) {
                 LOG.error(e);
             }
             try {
@@ -341,7 +346,7 @@ public final class ImapIdlePushListener implements PushListener {
                 LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
             }
         } finally {
-            if( null != mailAccess ) {
+            if (null != mailAccess) {
                 mailAccess.close(false);
                 mailAccess = null;
             }
