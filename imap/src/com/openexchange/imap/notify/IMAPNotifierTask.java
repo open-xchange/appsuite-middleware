@@ -233,7 +233,7 @@ public final class IMAPNotifierTask implements IMAPNotifierConstants {
                     final IMAPStore imapStore = imapAccess.getIMAPStore();
                     final Session session = imapAccess.getSession();
                     /*
-                     * Touch folders to possibly trigger recent listener
+                     * Open folders to trigger recent listener if any recent message are available
                      */
                     do {
                         final IMAPFolder imapFolder = getIMAPFolder(iter.next(), imapStore, session);
