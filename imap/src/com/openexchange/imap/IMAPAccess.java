@@ -72,7 +72,6 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
@@ -555,7 +554,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Register notifier task if enabled
              */
-            if (IMAPProperties.getInstance().notifyRecent()) {
+            if (config.getIMAPProperties().notifyRecent()) {
                 /*
                  * This call is re-invoked during IMAPNotifierTask's run
                  */
