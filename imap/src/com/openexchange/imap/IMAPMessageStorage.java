@@ -130,7 +130,6 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
-import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 
 /**
@@ -195,7 +194,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param session The session providing needed user data
      * @throws MailException If initialization fails
      */
-    public IMAPMessageStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws MailException {
+    public IMAPMessageStorage(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws MailException {
         super(imapStore, imapAccess, session);
         imapFolderStorage = imapAccess.getFolderStorage();
     }
@@ -1056,7 +1055,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Open and check user rights on destination folder
                  */
                 final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
-                IMAPNotifierMessageRecentListener.addNotifierFor(destFolder, destFullName, accountId, session);
+                if (imapStore.notifyRecent()) {
+                    IMAPNotifierMessageRecentListener.addNotifierFor(destFolder, destFullName, accountId, session, true);
+                }
                 {
                     final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session);
                     if (!STR_INBOX.equals(destFullName) && !listEntry.exists()) {
@@ -2055,7 +2056,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         if (messageId != null) {
             final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
-            IMAPNotifierMessageRecentListener.addNotifierFor(destFolder, destFullName, accountId, session);
+            if (imapStore.notifyRecent()) {
+                IMAPNotifierMessageRecentListener.addNotifierFor(destFolder, destFullName, accountId, session, true);
+            }
             destFolder.open(Folder.READ_ONLY);
             try {
                 /*

@@ -131,7 +131,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static final String STR_MSEC = "msec";
 
-    private final IMAPStore imapStore;
+    private final AccessedIMAPStore imapStore;
 
     private final IMAPAccess imapAccess;
 
@@ -155,7 +155,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * @param session The session providing needed user data
      * @throws IMAPException If context loading fails
      */
-    public IMAPFolderStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws IMAPException {
+    public IMAPFolderStorage(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws IMAPException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
@@ -275,7 +275,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (null != mailFolder) {
             try {
                 IMAPFolder folder = (IMAPFolder) (DEFAULT_FOLDER_ID.equals(fullName) ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
-                IMAPNotifierMessageRecentListener.addNotifierFor(folder, fullName, accountId, session);
+                if (imapStore.notifyRecent()) {
+                    IMAPNotifierMessageRecentListener.addNotifierFor(folder, fullName, accountId, session, true);
+                }
                 if (!doesExist(folder, true)) {
                     folder = checkForNamespaceFolder(fullName);
                 }
@@ -1720,7 +1722,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } else {
                     final String trashFullName = getTrashFolder();
                     final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(trashFullName);
-                    IMAPNotifierMessageRecentListener.addNotifierFor(trashFolder, trashFullName, accountId, session);
+                    if (imapStore.notifyRecent()) {
+                        IMAPNotifierMessageRecentListener.addNotifierFor(trashFolder, trashFullName, accountId, session, true);
+                    }
                     if (deleteMe.getParent().getFullName().startsWith(trashFolder.getFullName()) || !inferiors(trashFolder)) {
                         /*
                          * Delete permanently

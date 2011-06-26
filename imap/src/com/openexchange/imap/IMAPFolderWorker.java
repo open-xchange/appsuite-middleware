@@ -75,7 +75,6 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights.Right;
 
 /**
@@ -97,7 +96,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /*
      * Fields
      */
-    protected final IMAPStore imapStore;
+    protected final AccessedIMAPStore imapStore;
 
     protected final Session session;
 
@@ -127,7 +126,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param session The session providing needed user data
      * @throws IMAPException If context lading fails
      */
-    public IMAPFolderWorker(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws IMAPException {
+    public IMAPFolderWorker(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws IMAPException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
@@ -338,7 +337,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         STR_FALSE)) && IMAPCommandsCollection.isReadOnly(imapFolder)) {
                         throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolderFullname);
                     }
-                    IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session);
+                    if (imapStore.notifyRecent()) {
+                        IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session, true);
+                    }
                     /*
                      * Open identical folder in right mode
                      */

@@ -226,7 +226,9 @@ public final class IMAPDefaultFolderChecker {
                     final IMAPFolder inboxFolder;
                     {
                         final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
-                        IMAPNotifierMessageRecentListener.addNotifierFor(tmp, INBOX, accountId, session);
+                        if (((AccessedIMAPStore) imapStore).notifyRecent()) {
+                            IMAPNotifierMessageRecentListener.addNotifierFor(tmp, INBOX, accountId, session, true);
+                        }
                         ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session);
                         if (entry.exists()) {
                             inboxFolder = tmp;
@@ -242,7 +244,9 @@ public final class IMAPDefaultFolderChecker {
                             }
                             ListLsubCache.addSingle(INBOX, accountId, tmp, session);
                             inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-                            IMAPNotifierMessageRecentListener.addNotifierFor(inboxFolder, INBOX, accountId, session);
+                            if (((AccessedIMAPStore) imapStore).notifyRecent()) {
+                                IMAPNotifierMessageRecentListener.addNotifierFor(inboxFolder, INBOX, accountId, session, true);
+                            }
                             entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
                         }
                         inboxListEntry = entry;
@@ -560,7 +564,9 @@ public final class IMAPDefaultFolderChecker {
             if (entry.exists()) {
                 if (checkSubscribed) {
                     final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
-                    IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session);
+                    if (((AccessedIMAPStore) imapStore).notifyRecent()) {
+                        IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session, true);
+                    }
                     if (1 == subscribe) {
                         if (!entry.isSubscribed()) {
                             try {
@@ -595,7 +601,9 @@ public final class IMAPDefaultFolderChecker {
             }
         }
         IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
-        IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session);
+        if (((AccessedIMAPStore) imapStore).notifyRecent()) {
+            IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session, true);
+        }
         tmp.setLength(0);
         {
             if (isFullname) {
@@ -626,7 +634,9 @@ public final class IMAPDefaultFolderChecker {
                      */
                     final String parentFullName = prefix.substring(0, len - 1);
                     parent = (IMAPFolder) imapStore.getFolder(parentFullName);
-                    IMAPNotifierMessageRecentListener.addNotifierFor(parent, parentFullName, accountId, session);
+                    if (((AccessedIMAPStore) imapStore).notifyRecent()) {
+                        IMAPNotifierMessageRecentListener.addNotifierFor(parent, parentFullName, accountId, session, true);
+                    }
                 }
                 final Folder[] folders = parent.list();
                 final List<String> candidates = new ArrayList<String>(2);
@@ -720,7 +730,9 @@ public final class IMAPDefaultFolderChecker {
                         final String fn = tmp.append(prefix).append(candidate).toString();
                         tmp.setLength(0);
                         f = (IMAPFolder) imapStore.getFolder(fn);
-                        IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session);
+                        if (((AccessedIMAPStore) imapStore).notifyRecent()) {
+                            IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session, true);
+                        }
                     }
                 }
             }

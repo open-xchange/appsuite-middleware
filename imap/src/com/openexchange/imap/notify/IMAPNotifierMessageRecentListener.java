@@ -141,11 +141,11 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
      * @param optFullName The optional full name
      * @param accountId The account identifier
      * @param session The session
-     * @param force <code>true</code> to enforce adding recent-notifier; otherwise <code>false</code>
+     * @param knownGranted <code>true</code> to indicate known granted recent-notifier; otherwise <code>false</code>
      */
-    public static void addNotifierFor(final IMAPFolder imapFolder, final String optFullName, final int accountId, final Session session, final boolean force) {
+    public static void addNotifierFor(final IMAPFolder imapFolder, final String optFullName, final int accountId, final Session session, final boolean knownGranted) {
         final String fullName = optFullName == null ? imapFolder.getFullName() : optFullName;
-        if ((force || IMAPProperties.getInstance().notifyRecent()) && FULL_NAMES_SET.contains(BASE64MailboxEncoder.encode(fullName).toUpperCase(
+        if ((knownGranted || IMAPProperties.getInstance().notifyRecent()) && FULL_NAMES_SET.contains(BASE64MailboxEncoder.encode(fullName).toUpperCase(
             Locale.US))) {
             imapFolder.addMessageRecentListener(new IMAPNotifierMessageRecentListener(fullName, accountId, session));
         }

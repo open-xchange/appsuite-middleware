@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import com.openexchange.imap.AccessedIMAPStore;
 import com.openexchange.imap.notify.IMAPNotifierMessageRecentListener;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -330,7 +331,7 @@ public final class ListLsubCache {
 
     private static IMAPFolder getIMAPFolder(final IMAPStore imapStore, final int accountId, final Session session) throws MessagingException {
         final IMAPFolder ret = (IMAPFolder) imapStore.getFolder(INBOX);
-        IMAPNotifierMessageRecentListener.addNotifierFor(ret, INBOX, accountId, session);
+        IMAPNotifierMessageRecentListener.addNotifierFor(ret, INBOX, accountId, session, ((imapStore instanceof AccessedIMAPStore) && ((AccessedIMAPStore) imapStore).notifyRecent()));
         return ret;
     }
 
