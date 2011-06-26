@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.notify;
 
 import javax.mail.event.MessageRecentEvent;
 import javax.mail.event.MessageRecentListener;

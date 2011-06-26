@@ -91,6 +91,7 @@ import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.UserGroupID;
+import com.openexchange.imap.notify.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.MailException;

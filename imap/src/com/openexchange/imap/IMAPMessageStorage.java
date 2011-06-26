@@ -87,6 +87,7 @@ import com.openexchange.imap.command.FetchIMAPCommand.FetchProfileModifier;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.NewFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
+import com.openexchange.imap.notify.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;

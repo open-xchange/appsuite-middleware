@@ -72,11 +72,13 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
+import com.openexchange.imap.notify.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailException;
@@ -125,6 +127,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The logger instance for {@link IMAPAccess} class.
      */
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPAccess.class);
+
+    /**
+     * Whether info logging is enabled for this class.
+     */
+    private static final boolean INFO = LOG.isInfoEnabled();
 
     /**
      * Whether debug logging is enabled for this class.
@@ -545,6 +552,21 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 throw e;
             }
             connected = true;
+            /*
+             * Register notifier task if enabled
+             */
+            if (IMAPProperties.getInstance().notifyRecent()) {
+                /*
+                 * This call is re-invoked during IMAPNotifierTask's run
+                 */
+                if (IMAPNotifierRegistry.getInstance().addTaskFor(accountId, session) && INFO) {
+                    final StringBuilder tmp = new StringBuilder("\n\tStarted IMAP notifier for server \"").append(config.getServer());
+                    tmp.append("\" with login \"").append(user);
+                    tmp.append("\" (user=").append(session.getUserId());
+                    tmp.append(", context=").append(session.getContextId()).append(").");
+                    LOG.info(tmp.toString());
+                }
+            }
             /*
              * Add folder listener
              */

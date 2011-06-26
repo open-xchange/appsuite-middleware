@@ -64,6 +64,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
+import com.openexchange.imap.notify.IMAPNotifierRegistry;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -85,7 +86,7 @@ import com.openexchange.user.UserService;
  */
 public final class IMAPActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class);
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class);
 
     private List<ServiceRegistration> registrations;
 
@@ -163,23 +164,34 @@ public final class IMAPActivator extends DeferredActivator {
                         final String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
                             @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            final IMAPNotifierRegistry notifierRegistry = IMAPNotifierRegistry.getInstance();
                             for (final Session session : container.values()) {
                                 handleSession(session);
+                                notifierRegistry.handleRemovedSession(session);
                             }
                         } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                            handleSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                            handleSession(session);
+                            IMAPNotifierRegistry.getInstance().handleRemovedSession(session);
                         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                             @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            final IMAPNotifierRegistry notifierRegistry = IMAPNotifierRegistry.getInstance();
                             for (final Session session : container.values()) {
                                 handleSession(session);
+                                notifierRegistry.handleRemovedSession(session);
                             }
                         }
                     }
 
                     private void handleSession(final Session session) {
-                        final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
-                        if (null != service && service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {
-                            ListLsubCache.dropFor(session);
+                        try {
+                            final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
+                            if (null != service && service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {
+                                ListLsubCache.dropFor(session);
+                            }
+                        } catch (final Exception e) {
+                            // Failed handling session
+                            LOG.warn("Failed handling tracked removed session for LIST/LSUB cache.", e);
                         }
                     }
 

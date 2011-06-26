@@ -63,6 +63,7 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.notify.IMAPNotifierMessageRecentListener;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
