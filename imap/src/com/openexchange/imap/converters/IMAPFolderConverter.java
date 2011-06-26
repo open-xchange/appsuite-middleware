@@ -61,6 +61,8 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.imap.ACLPermission;
+import com.openexchange.imap.AccessedIMAPStore;
+import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -228,13 +230,14 @@ public final class IMAPFolderConverter {
      * @return An instance of <code>{@link IMAPMailFolder}</code> containing the attributes from given IMAP folder
      * @throws MailException If conversion fails
      */
-    public static IMAPMailFolder convertFolder(final IMAPFolder imapFolder, final Session session, final IMAPConfig imapConfig, final Context ctx) throws MailException {
+    public static IMAPMailFolder convertFolder(final IMAPFolder imapFolder, final Session session, final IMAPAccess imapAccess, final Context ctx) throws MailException {
         try {
             synchronized (imapFolder) {
                 final String imapFullName = imapFolder.getFullName();
                 if (imapFolder instanceof DefaultFolder) {
-                    return convertRootFolder((DefaultFolder) imapFolder, session, imapConfig);
+                    return convertRootFolder((DefaultFolder) imapFolder, session, imapAccess.getIMAPConfig());
                 }
+                final IMAPConfig imapConfig = imapAccess.getIMAPConfig();
                 final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 // Convert non-root folder
                 final IMAPMailFolder mailFolder = new IMAPMailFolder();
@@ -378,7 +381,7 @@ public final class IMAPFolderConverter {
                              * This is the tricky case: Allow subfolder creation for a common imap folder but deny it for imap server's
                              * namespace folders
                              */
-                            if (checkForNamespaceFolder(imapFullName, (IMAPStore) imapFolder.getStore(), session, accountId)) {
+                            if (checkForNamespaceFolder(imapFullName, imapAccess.getIMAPStore(), session, accountId)) {
                                 ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
                             } else {
                                 ownPermission.setAllPermission(
@@ -664,7 +667,7 @@ public final class IMAPFolderConverter {
         return (EnumComponent.ACL_ERROR.equals(component) && (Entity2ACLException.Code.RESOLVE_USER_FAILED.getNumber() == detailNumber)) || (EnumComponent.USER.equals(component) && (LdapException.Code.USER_NOT_FOUND.getDetailNumber() == detailNumber));
     }
 
-    private static boolean checkForNamespaceFolder(final String fullName, final IMAPStore imapStore, final Session session, final int accountId) throws MessagingException, MailException {
+    private static boolean checkForNamespaceFolder(final String fullName, final AccessedIMAPStore imapStore, final Session session, final int accountId) throws MessagingException, MailException {
         /*
          * Check for namespace folder
          */

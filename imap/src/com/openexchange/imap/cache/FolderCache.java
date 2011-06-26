@@ -257,7 +257,7 @@ public final class FolderCache {
 
     private static final MailFolder loadFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
         if (null != imapFolder) {
-            return IMAPFolderConverter.convertFolder(imapFolder, folderStorage.getSession(), folderStorage.getImapConfig(), folderStorage.getContext());
+            return IMAPFolderConverter.convertFolder(imapFolder, folderStorage.getSession(), folderStorage.getImapAccess(), folderStorage.getContext());
         }
         final Session session = folderStorage.getSession();
         final IMAPConfig imapConfig = folderStorage.getImapConfig();
@@ -278,7 +278,7 @@ public final class FolderCache {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
             }
-            return IMAPFolderConverter.convertFolder(f, session, imapConfig, folderStorage.getContext());
+            return IMAPFolderConverter.convertFolder(f, session, folderStorage.getImapAccess(), folderStorage.getContext());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }

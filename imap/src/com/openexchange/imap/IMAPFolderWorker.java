@@ -352,7 +352,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         /*
          * Add listener
          */
-        IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session);
+        if (imapStore.notifyRecent()) {
+            IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session, true);
+        }
         /*
          * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
          */

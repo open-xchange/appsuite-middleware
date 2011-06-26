@@ -237,7 +237,7 @@ public final class ListLsubCache {
      * @return The separator
      * @throws MailException If a mail error occurs
      */
-    public static char getSeparator(final int accountId, final IMAPStore imapStore, final Session session) throws MailException {
+    public static char getSeparator(final int accountId, final AccessedIMAPStore imapStore, final Session session) throws MailException {
         try {
             return getSeparator(accountId, getIMAPFolder(imapStore, accountId, session), session);
         } catch (final MessagingException e) {
@@ -301,7 +301,7 @@ public final class ListLsubCache {
      * @return The cached LIST entry
      * @throws MailException If loading the entry fails
      */
-    public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final IMAPStore imapStore, final Session session) throws MailException {
+    public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final AccessedIMAPStore imapStore, final Session session) throws MailException {
         try {
             final IMAPFolder imapFolder = getIMAPFolder(imapStore, accountId, session);
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
@@ -329,9 +329,9 @@ public final class ListLsubCache {
         }
     }
 
-    private static IMAPFolder getIMAPFolder(final IMAPStore imapStore, final int accountId, final Session session) throws MessagingException {
+    private static IMAPFolder getIMAPFolder(final AccessedIMAPStore imapStore, final int accountId, final Session session) throws MessagingException {
         final IMAPFolder ret = (IMAPFolder) imapStore.getFolder(INBOX);
-        IMAPNotifierMessageRecentListener.addNotifierFor(ret, INBOX, accountId, session, ((imapStore instanceof AccessedIMAPStore) && ((AccessedIMAPStore) imapStore).notifyRecent()));
+        IMAPNotifierMessageRecentListener.addNotifierFor(ret, INBOX, accountId, session, imapStore.notifyRecent());
         return ret;
     }
 
