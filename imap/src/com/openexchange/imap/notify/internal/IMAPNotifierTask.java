@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.notify;
+package com.openexchange.imap.notify.internal;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.util.Iterator;

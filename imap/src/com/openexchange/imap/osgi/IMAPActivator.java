@@ -64,7 +64,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
-import com.openexchange.imap.notify.IMAPNotifierRegistry;
+import com.openexchange.imap.notify.IMAPNotifierRegistryService;
+import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -152,6 +153,7 @@ public final class IMAPActivator extends DeferredActivator {
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
             registrations.add(context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary));
+            registrations.add(context.registerService(IMAPNotifierRegistryService.class.getName(), IMAPNotifierRegistry.getInstance(), null));
             /*
              * Register event handle
              */
@@ -164,7 +166,7 @@ public final class IMAPActivator extends DeferredActivator {
                         final String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
                             @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            final IMAPNotifierRegistry notifierRegistry = IMAPNotifierRegistry.getInstance();
+                            final IMAPNotifierRegistryService notifierRegistry = IMAPNotifierRegistry.getInstance();
                             for (final Session session : container.values()) {
                                 handleSession(session);
                                 notifierRegistry.handleRemovedSession(session);
@@ -175,7 +177,7 @@ public final class IMAPActivator extends DeferredActivator {
                             IMAPNotifierRegistry.getInstance().handleRemovedSession(session);
                         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                             @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            final IMAPNotifierRegistry notifierRegistry = IMAPNotifierRegistry.getInstance();
+                            final IMAPNotifierRegistryService notifierRegistry = IMAPNotifierRegistry.getInstance();
                             for (final Session session : container.values()) {
                                 handleSession(session);
                                 notifierRegistry.handleRemovedSession(session);

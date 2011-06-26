@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.notify;
+package com.openexchange.imap.notify.internal;
 
 import java.util.HashSet;
 import java.util.Locale;

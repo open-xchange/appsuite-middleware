@@ -59,7 +59,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import com.openexchange.imap.AccessedIMAPStore;
-import com.openexchange.imap.notify.IMAPNotifierMessageRecentListener;
+import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.session.Session;

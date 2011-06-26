@@ -77,7 +77,7 @@ import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
-import com.openexchange.imap.notify.IMAPNotifierRegistry;
+import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailException;

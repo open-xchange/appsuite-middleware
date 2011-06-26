@@ -64,7 +64,7 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.notify.IMAPNotifierMessageRecentListener;
+import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionCache;

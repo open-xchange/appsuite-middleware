@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.imap.notify;
+package com.openexchange.imap.notify.internal;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -62,16 +63,16 @@ import com.openexchange.sessiond.SessiondService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPNotifierRegistry implements IMAPNotifierConstants {
+public final class IMAPNotifierRegistry implements IMAPNotifierConstants, IMAPNotifierRegistryService {
 
-    private static final IMAPNotifierRegistry INSTANCE = new IMAPNotifierRegistry();
+    private static final IMAPNotifierRegistryService INSTANCE = new IMAPNotifierRegistry();
 
     /**
      * Gets the registry instance.
      * 
      * @return The instance
      */
-    public static IMAPNotifierRegistry getInstance() {
+    public static IMAPNotifierRegistryService getInstance() {
         return INSTANCE;
     }
 
@@ -91,13 +92,6 @@ public final class IMAPNotifierRegistry implements IMAPNotifierConstants {
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
-    /**
-     * Adds (and starts) a new notifier task for specified account.
-     * 
-     * @param accountId The account identifier
-     * @param session The session providing user information
-     * @return <code>true</code> for successful insertion and start-up of a new notifier task; otherwise <code>false</code>
-     */
     public boolean addTaskFor(final int accountId, final Session session) {
         /*
          * Check for available full names
@@ -154,11 +148,10 @@ public final class IMAPNotifierRegistry implements IMAPNotifierConstants {
         return empty;
     }
 
-    /**
-     * Removes and shuts down all notifier tasks for specified session's user.
-     * 
-     * @param session The session providing user information
-     */
+    public boolean containsTaskFor(final Session session) {
+        return map.containsKey(keyFor(session));
+    }
+
     public void removeTaskFor(final Session session) {
         final ConcurrentMap<Integer, IMAPNotifierTask> tasks = map.remove(keyFor(session));
         if (null == tasks) {
@@ -173,11 +166,6 @@ public final class IMAPNotifierRegistry implements IMAPNotifierConstants {
      * ------------------------------ EventHandler stuff ------------------------------
      */
 
-    /**
-     * Handles tracked removal of specified session
-     * 
-     * @param session The removed session
-     */
     public void handleRemovedSession(final Session session) {
         final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
         if (null == service || service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.notify;
+package com.openexchange.imap.notify.internal;
 
 
 /**
