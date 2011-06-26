@@ -181,7 +181,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The IMAP store.
      */
-    private transient IMAPStore imapStore;
+    private transient AccessedIMAPStore imapStore;
 
     /**
      * The IMAP session.
@@ -219,7 +219,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * 
      * @return The IMAP store or <code>null</code> if this IMAP access is not connected
      */
-    public IMAPStore getIMAPStore() {
+    public AccessedIMAPStore getIMAPStore() {
         return imapStore;
     }
 
@@ -496,7 +496,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     imapConfProps.getImapTimeout(),
                     imapConfProps.getImapConnectionTimeout(),
                     imapProps);
-            imapSession.getProperties().put("imapAccess", this);
             /*
              * Check if debug should be enabled
              */
@@ -525,11 +524,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Get connected store
              */
             try {
-                if (isProxyAuth) {
-                    imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), proxyUser, tmpPass, clientIp);
-                } else {
-                    imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), user, tmpPass, clientIp);
-                }
+                imapStore =
+                    new AccessedIMAPStore(this, connectIMAPStore(
+                        imapSession,
+                        config.getServer(),
+                        config.getPort(),
+                        isProxyAuth ? proxyUser : user,
+                        tmpPass,
+                        clientIp), imapSession);
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to quicken subsequent connect trials
@@ -621,7 +623,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-            imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+            imapStore = (AccessedIMAPStore) imapSession.getStore(PROTOCOL);
             imapStore.connect(server, port, login, pw);
         }
         /*
