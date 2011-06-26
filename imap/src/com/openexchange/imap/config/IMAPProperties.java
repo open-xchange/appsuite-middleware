@@ -143,7 +143,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         final ConfigurationService configuration = IMAPServiceRegistry.getService(ConfigurationService.class);
         {
-            final String tmp = configuration.getProperty("com.openexchange.imap.notifyRecent", STR_TRUE).trim();
+            final String tmp = configuration.getProperty("com.openexchange.imap.notifyRecent", STR_FALSE).trim();
             notifyRecent = Boolean.parseBoolean(tmp);
             logBuilder.append("\tNotify Recent: ").append(notifyRecent).append('\n');
         }
@@ -343,7 +343,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         entity2AclImpl = null;
         blockSize = 0;
         spamHandlerName = null;
-        notifyRecent = true;
+        notifyRecent = false;
     }
 
     public boolean isFastFetch() {
