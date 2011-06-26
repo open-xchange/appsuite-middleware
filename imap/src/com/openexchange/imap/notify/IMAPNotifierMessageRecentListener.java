@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.notify;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -78,20 +77,53 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
     private static final boolean INFO_ENABLED = LOG.isInfoEnabled();
 
-    private static final Set<String> FULL_NAMES_SET = Collections.unmodifiableSet(new HashSet<String>() {
+    private static interface FullNameChecker {
 
-        private static final long serialVersionUID = 3400972419735028508L;
+        boolean check(String fullName);
+    }
 
-        {
-            final String notifierFullNames = NOTIFIER_FULL_NAMES;
-            if (!isEmptyString(notifierFullNames)) {
-                final String[] fullNames = Pattern.compile(" *, *").split(notifierFullNames);
-                for (final String fn : fullNames) {
-                    add(BASE64MailboxEncoder.encode(fn).toUpperCase(Locale.US));
+    private static final FullNameChecker CHECKER;
+
+    static {
+        final String notifierFullNames = NOTIFIER_FULL_NAMES;
+        if (isEmptyString(notifierFullNames)) {
+            CHECKER = new FullNameChecker() {
+
+                public boolean check(final String fullName) {
+                    return false;
                 }
+            };
+        } else {
+            final String[] fullNames = Pattern.compile(" *, *").split(notifierFullNames);
+            final int length = fullNames.length;
+            if (1 == length) {
+                final String fn = BASE64MailboxEncoder.encode(fullNames[0]).toUpperCase(Locale.US);
+                CHECKER = new FullNameChecker() {
+
+                    public boolean check(final String fullName) {
+                        if (null == fullName) {
+                            return false;
+                        }
+                        return fn.equals(BASE64MailboxEncoder.encode(fullName).toUpperCase(Locale.US));
+                    }
+                };
+            } else {
+                final Set<String> set = new HashSet<String>(length);
+                for (final String fn : fullNames) {
+                    set.add(BASE64MailboxEncoder.encode(fn).toUpperCase(Locale.US));
+                }
+                CHECKER = new FullNameChecker() {
+
+                    public boolean check(final String fullName) {
+                        if (null == fullName) {
+                            return false;
+                        }
+                        return set.contains(BASE64MailboxEncoder.encode(fullName).toUpperCase(Locale.US));
+                    }
+                };
             }
         }
-    });
+    }
 
     /**
      * Checks if specified string is empty.
@@ -138,16 +170,17 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
      * Adds the recent-notifier for specified IMAP folder if allowed to.
      * 
      * @param imapFolder The IMAP folder
-     * @param optFullName The optional full name
+     * @param optFullName The optional full name (if <code>null</code> gets from {@link IMAPFolder#getFullName()})
      * @param accountId The account identifier
      * @param session The session
      * @param knownGranted <code>true</code> to indicate known granted recent-notifier; otherwise <code>false</code>
      */
     public static void addNotifierFor(final IMAPFolder imapFolder, final String optFullName, final int accountId, final Session session, final boolean knownGranted) {
-        final String fullName = optFullName == null ? imapFolder.getFullName() : optFullName;
-        if ((knownGranted || IMAPProperties.getInstance().notifyRecent()) && FULL_NAMES_SET.contains(BASE64MailboxEncoder.encode(fullName).toUpperCase(
-            Locale.US))) {
-            imapFolder.addMessageRecentListener(new IMAPNotifierMessageRecentListener(fullName, accountId, session));
+        if (knownGranted || IMAPProperties.getInstance().notifyRecent()) {
+            final String fullName = optFullName == null ? imapFolder.getFullName() : optFullName;
+            if (CHECKER.check(fullName)) {
+                imapFolder.addMessageRecentListener(new IMAPNotifierMessageRecentListener(fullName, accountId, session));
+            }
         }
     }
 
