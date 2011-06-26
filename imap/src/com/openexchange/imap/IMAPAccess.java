@@ -984,7 +984,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private static javax.mail.Session setConnectProperties(final int port, final boolean isSecure, final int timeout, final int connectionTimeout, final Properties imapProps) {
+    private javax.mail.Session setConnectProperties(final int port, final boolean isSecure, final int timeout, final int connectionTimeout, final Properties imapProps) {
         /*
          * Set timeouts
          */
@@ -1037,6 +1037,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
         }
+        imapProps.put("imapAccess", this);
         /*
          * Create new IMAP session from initialized properties
          */
