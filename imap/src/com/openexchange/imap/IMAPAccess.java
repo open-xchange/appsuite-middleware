@@ -208,6 +208,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         setMailProperties((Properties) System.getProperties().clone());
     }
 
+    /**
+     * Gets the underlying IMAP store.
+     * 
+     * @return The IMAP store
+     */
+    public IMAPStore getIMAPStore() {
+        return imapStore;
+    }
+
     private void reset() {
         super.resetFields();
         folderStorage = null;
@@ -246,7 +255,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (logicTools != null) {
             logicTools = null;
         }
-        */
+         */
     }
 
     @Override
@@ -484,7 +493,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false;//("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = false;// ("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
@@ -559,7 +568,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return false;
         }
         try {
-            final int[] ids = storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
+            final int[] ids =
+                storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
             return Arrays.binarySearch(ids, accountId) >= 0;
         } catch (final MailAccountException e) {
             throw new MailException(e);
@@ -632,7 +642,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public IMAPFolderStorage getFolderStorage() throws MailException {
-        //connected = ((imapStore != null) && imapStore.isConnected());
+        // connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
@@ -644,7 +654,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public IMAPMessageStorage getMessageStorage() throws MailException {
-        //connected = ((imapStore != null) && imapStore.isConnected());
+        // connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
@@ -656,7 +666,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public MailLogicTools getLogicTools() throws MailException {
-        //connected = ((imapStore != null) && imapStore.isConnected());
+        // connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
@@ -674,7 +684,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return false;
         }
         return (connected = ((imapStore != null) && imapStore.isConnected()));
-        */
+         */
         return connected;
     }
 
