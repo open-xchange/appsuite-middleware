@@ -2079,9 +2079,8 @@ public final class MIMEMessageConverter {
      * @param name The header name
      * @param message The message providing the header
      * @return The decoded header
-     * @throws MessagingException If a messaging error occurs
      */
-    public static String getSubject(final MailMessage message) throws MessagingException {
+    public static String getSubject(final MailMessage message) {
         final String subject = getStringHeader(MessageHeaders.HDR_SUBJECT, message, '\0');
         return null == subject ? "" : subject;
     }
@@ -2112,9 +2111,8 @@ public final class MIMEMessageConverter {
      * @param name The header name
      * @param message The message providing the header
      * @return The decoded header
-     * @throws MessagingException If a messaging error occurs
      */
-    public static String getStringHeader(final String name, final MailMessage message) throws MessagingException {
+    public static String getStringHeader(final String name, final MailMessage message) {
         return getStringHeader(name, message, '\0');
     }
 
