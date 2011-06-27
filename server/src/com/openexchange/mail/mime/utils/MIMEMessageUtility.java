@@ -1256,15 +1256,13 @@ public final class MIMEMessageUtility {
      * <p>
      * 
      * <pre>
-     * Subject: =?UTF-8?Q?Re:_Hardware_Kombatibilit=C3=A4t?=
-     *  =?UTF-8?Q?sliste_f=C3=BCr_den_OXAE/OXSE4UCS?=
+     * Subject: =?UTF-8?Q?Kombatibilit=C3=A4t?=\r\n =?UTF-8?Q?sliste?=
      * </pre>
      * 
      * Should be unfolded to:
      * 
      * <pre>
-     * Subject: =?UTF-8?Q?Re:_Hardware_Kombatibilit=C3=A4t?==?UTF-8?Q?sliste_f=C3=BCr_den_OXAE/OXSE4UCS?=
-     *                                                     &circ;&circ; SPACE removed
+     * Subject: =?UTF-8?Q?Kombatibilit=C3=A4t?==?UTF-8?Q?sliste?=
      * </pre>
      * 
      * @param encodedWords The possibly folded encoded-words
