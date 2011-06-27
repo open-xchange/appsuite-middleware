@@ -50,71 +50,12 @@
 package com.openexchange.exception;
 
 /**
- * {@link OXExceptionConstants} - Provides access to constants for <a href="http://www.open-xchange.com">Open-Xchange</a> exceptions.
+ * {@link CategoryType} - The interface for category type.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OXExceptionConstants {
+public interface CategoryType {
 
-    /*-
-     * ------------------------------- Constants for categories -----------------------------------
-     */
-
-    /**
-     * The default category.
-     */
-    public static final Category CATEGORY_DEFAULT = new Category() {
-
-        public LogLevel getLogLevel() {
-            return LogLevel.ERROR;
-        }
-
-        public CategoryType getType() {
-            return Category.EnumType.ERROR;
-        }
-    };
-
-    /*-
-     * ------------------------------- Constants for prefixes -----------------------------------
-     */
-
-    /**
-     * The general, all-prupose error code prefix with no certain affiliation.
-     */
-    public static final String PREFIX_GENERAL = "OX";
-
-    /*-
-     * ------------------------------- Constants for property names -------------------------------
-     */
-
-    /**
-     * The property name for session identifier.
-     */
-    public static final String PROPERTY_SESSION = "com.openexchange.exception.session";
-
-    /**
-     * The property name for user identifier.
-     */
-    public static final String PROPERTY_USER = "com.openexchange.exception.user";
-
-    /**
-     * The property name for context identifier.
-     */
-    public static final String PROPERTY_CONTEXT = "com.openexchange.exception.context";
-
-    /**
-     * The property name for request (without body).
-     */
-    public static final String PROPERTY_REQUEST = "com.openexchange.exception.request";
-
-    /**
-     * The property name for request body.
-     */
-    public static final String PROPERTY_REQUEST_BODY = "com.openexchange.exception.requestBody";
-
-    /**
-     * The property name for response (without body).
-     */
-    public static final String PROPERTY_RESPONSE = "com.openexchange.exception.response";
+    // Empty interface
 
 }

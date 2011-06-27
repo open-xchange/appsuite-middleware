@@ -49,11 +49,18 @@
 
 package com.openexchange.exception;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.exception.internal.I18n;
 
 /**
@@ -65,7 +72,30 @@ public class OXException extends RuntimeException implements OXExceptionConstant
 
     private static final long serialVersionUID = 2058371531364916608L;
 
+    private static final Random RANDOM = new SecureRandom();
+
+    private static final int SERVER_ID = RANDOM.nextInt();
+
+    private static final AtomicInteger COUNTER = new AtomicInteger(0);
+
+    /**
+     * Gets the server identifier.
+     * 
+     * @return The server identifier
+     */
+    public static int getServerId() {
+        return SERVER_ID;
+    }
+
+    /*-
+     * ------------------------------------- Member stuff -------------------------------------
+     */
+
+    private final int count;
+
     private final Map<String, String> properties;
+
+    private final List<Category> categories;
 
     private int code;
 
@@ -73,12 +103,77 @@ public class OXException extends RuntimeException implements OXExceptionConstant
 
     private String detailedMessage;
 
+    private String exceptionId;
+
     /**
      * Initializes a new {@link OXException}.
      */
     public OXException() {
         super();
+        count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
+        categories = new LinkedList<Category>();
+        categories.add(CATEGORY_DEFAULT);
+    }
+
+    public String getDetailedMessage() {
+        // TODO: Compose it!
+        return null;
+    }
+
+    /**
+     * Gets an {@link Iterator} for specified categories.
+     * 
+     * @return The {@link Iterator} for specified categories
+     */
+    public Iterator<Category> getCategories() {
+        return new ArrayList<Category>(categories).iterator();
+    }
+
+    /**
+     * Adds specified category.
+     * 
+     * @param category The category to add
+     */
+    public void addCategory(final Category category) {
+        categories.add(category);
+    }
+
+    /**
+     * Removes specified category.
+     * 
+     * @param category The category to remove
+     */
+    public void removeCategory(final Category category) {
+        categories.remove(category);
+    }
+
+    /**
+     * Gets this exception's identifier.
+     * 
+     * @return The exception identifier
+     */
+    public String getExceptionId() {
+        if (exceptionId == null) {
+            final StringBuilder builder = new StringBuilder();
+            builder.append(SERVER_ID);
+            builder.append('-');
+            builder.append(count);
+            exceptionId = builder.toString();
+        }
+        return exceptionId;
+    }
+
+    /**
+     * Sets this exception's identifier.
+     * <p>
+     * <b>Note</b>: The identifier is calculated when invoking {@link #getExceptionId()}. When setting the identifier, the calculated value
+     * is overridden.
+     * 
+     * @param exceptionId The identifier
+     */
+    public void setExceptionId(final String exceptionId) {
+        this.exceptionId = exceptionId;
     }
 
     /**
@@ -112,7 +207,12 @@ public class OXException extends RuntimeException implements OXExceptionConstant
 
     @Override
     public String getMessage() {
-        return detailedMessage;
+        return getDetailedMessage();
+    }
+
+    @Override
+    public String toString() {
+        return getDetailedMessage();
     }
 
     /*-

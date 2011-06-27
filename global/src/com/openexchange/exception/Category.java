@@ -50,71 +50,38 @@
 package com.openexchange.exception;
 
 /**
- * {@link OXExceptionConstants} - Provides access to constants for <a href="http://www.open-xchange.com">Open-Xchange</a> exceptions.
+ * {@link Category} - The category for an {@link OXException} determines its behavior during exception handling and logging.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OXExceptionConstants {
-
-    /*-
-     * ------------------------------- Constants for categories -----------------------------------
-     */
+public interface Category {
 
     /**
-     * The default category.
+     * An enumeration for log levels.
      */
-    public static final Category CATEGORY_DEFAULT = new Category() {
-
-        public LogLevel getLogLevel() {
-            return LogLevel.ERROR;
-        }
-
-        public CategoryType getType() {
-            return Category.EnumType.ERROR;
-        }
-    };
-
-    /*-
-     * ------------------------------- Constants for prefixes -----------------------------------
-     */
+    public static enum LogLevel {
+        TRACE, DEBUG, INFO, WARNING, ERROR;
+    }
 
     /**
-     * The general, all-prupose error code prefix with no certain affiliation.
+     * An enumeration for common types.
      */
-    public static final String PREFIX_GENERAL = "OX";
-
-    /*-
-     * ------------------------------- Constants for property names -------------------------------
-     */
+    public static enum EnumType implements CategoryType {
+        ERROR, TRY_AGAIN, USER_INPUT, PERMISSION_DENIED;
+    }
 
     /**
-     * The property name for session identifier.
+     * Gets the log level in which associated exception shall be logged.
+     * 
+     * @return The log level
      */
-    public static final String PROPERTY_SESSION = "com.openexchange.exception.session";
+    LogLevel getLogLevel();
 
     /**
-     * The property name for user identifier.
+     * Gets this category's type.
+     * 
+     * @return The type
      */
-    public static final String PROPERTY_USER = "com.openexchange.exception.user";
-
-    /**
-     * The property name for context identifier.
-     */
-    public static final String PROPERTY_CONTEXT = "com.openexchange.exception.context";
-
-    /**
-     * The property name for request (without body).
-     */
-    public static final String PROPERTY_REQUEST = "com.openexchange.exception.request";
-
-    /**
-     * The property name for request body.
-     */
-    public static final String PROPERTY_REQUEST_BODY = "com.openexchange.exception.requestBody";
-
-    /**
-     * The property name for response (without body).
-     */
-    public static final String PROPERTY_RESPONSE = "com.openexchange.exception.response";
+    CategoryType getType();
 
 }
