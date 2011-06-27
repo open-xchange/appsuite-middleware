@@ -58,6 +58,7 @@ import javax.mail.URLName;
 import javax.mail.event.ConnectionListener;
 import javax.mail.event.FolderListener;
 import javax.mail.event.StoreListener;
+import com.openexchange.mailaccount.MailAccount;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPStore;
 
@@ -91,7 +92,7 @@ public final class AccessedIMAPStore extends IMAPStore {
      * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
      */
     public boolean notifyRecent() {
-        return imapAccess.getIMAPConfig().getIMAPProperties().notifyRecent();
+        return MailAccount.DEFAULT_ID == imapAccess.getAccountId() && imapAccess.getIMAPConfig().getIMAPProperties().notifyRecent();
     }
 
     /**
