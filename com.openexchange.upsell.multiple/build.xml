@@ -39,7 +39,7 @@
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
 	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
-	<property name="mailjar" value="mail-1.4.2.jar" />
+	<property name="mailjar" value="mail-1.4.3.jar" />
 	<property name="activationjar" value="activation-1.1.1.jar" />
 	<property name="jsonjar" value="json.jar" />
 	<property name="httpclientjar" value="commons-httpclient-3.1.jar" />
