@@ -772,7 +772,8 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         } catch (final ServiceException e) {
             throw new OAuthException(e);
         } catch (final CryptoException e) {
-            throw new OAuthException(e);
+            LOG.error(e.getMessage(), e);
+            return null;
         }
     }
 

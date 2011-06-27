@@ -1,5 +1,9 @@
 * 2011-06-24 - marcus.klein@open-xchange.com
 
+ - Bug #19598: Don't die on decryption errors so users can remove their OAuth accounts
+
+* 2011-06-24 - marcus.klein@open-xchange.com
+
  - TA7380 of US6578: Passing HTTP headers to authentication implementation.
 
 * 2011-06-23 - thorben.betten@open-xchange.com
