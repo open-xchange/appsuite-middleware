@@ -557,7 +557,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Register notifier task if enabled
              */
-            if (config.getIMAPProperties().notifyRecent()) {
+            if (MailAccount.DEFAULT_ID == accountId && config.getIMAPProperties().notifyRecent()) {
                 /*
                  * This call is re-invoked during IMAPNotifierTask's run
                  */

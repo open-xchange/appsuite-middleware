@@ -59,6 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;
@@ -176,7 +177,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
      * @param knownGranted <code>true</code> to indicate known granted recent-notifier; otherwise <code>false</code>
      */
     public static void addNotifierFor(final IMAPFolder imapFolder, final String optFullName, final int accountId, final Session session, final boolean knownGranted) {
-        if (knownGranted || IMAPProperties.getInstance().notifyRecent()) {
+        if (knownGranted || (MailAccount.DEFAULT_ID == accountId && IMAPProperties.getInstance().notifyRecent())) {
             final String fullName = optFullName == null ? imapFolder.getFullName() : optFullName;
             if (CHECKER.check(fullName)) {
                 imapFolder.addMessageRecentListener(new IMAPNotifierMessageRecentListener(fullName, accountId, session));

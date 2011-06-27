@@ -2732,7 +2732,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private IMAPFolder getIMAPFolder(final String fullName) throws MessagingException {
         final IMAPFolder ret =
             DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
-        if (imapConfig.getIMAPProperties().notifyRecent()) {
+        if (MailAccount.DEFAULT_ID == accountId && imapConfig.getIMAPProperties().notifyRecent()) {
             IMAPNotifierMessageRecentListener.addNotifierFor(ret, fullName, accountId, session, true);
         }
         return ret;
