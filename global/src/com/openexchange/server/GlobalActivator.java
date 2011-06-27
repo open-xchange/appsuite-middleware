@@ -62,10 +62,12 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.authentication.exception.LoginExceptionFactory;
+import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDException;
 import com.openexchange.id.exception.IDExceptionFactory;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
@@ -98,6 +100,8 @@ public final class GlobalActivator implements BundleActivator {
 
     private ServiceRegistration parserRegistration;
 
+    private List<ServiceTracker> trackers;
+
     /**
      * Initializes a new {@link GlobalActivator}
      */
@@ -122,17 +126,21 @@ public final class GlobalActivator implements BundleActivator {
             sessionComponent = new ComponentRegistration(context, EnumComponent.SESSION, "com.openexchange.sessiond", SessionExceptionFactory.getInstance());
             idRegistration = new ComponentRegistration(context, IDException.COMPONENT, "com.openexchange.id", IDExceptionFactory.getInstance());
             initStringParsers(context);
-            
+
+            trackers = new ArrayList<ServiceTracker>(2);
+            trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
+
             LOG.debug("Global bundle successfully started");
-            
-        
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
         }
     }
 
-    private void initStringParsers(BundleContext context) {
+    private void initStringParsers(final BundleContext context) {
         parserTracker = new ServiceTracker(context, StringParser.class.getName(), null);
         final List<StringParser> standardParsers = new ArrayList<StringParser>(3);
         final StringParser standardParsersComposite = new CompositeParser() {
@@ -144,17 +152,17 @@ public final class GlobalActivator implements BundleActivator {
             
         };
         
-        StringParser allParsers = new CompositeParser() {
+        final StringParser allParsers = new CompositeParser() {
 
             @Override
             protected Collection<StringParser> getParsers() {
-                Object[] services = parserTracker.getServices();
+                final Object[] services = parserTracker.getServices();
                 if(services == null) {
                     return Arrays.asList(standardParsersComposite);
                 }
-                List<StringParser> parsers = new ArrayList<StringParser>(services.length);
+                final List<StringParser> parsers = new ArrayList<StringParser>(services.length);
                 
-                for (Object object : services) {
+                for (final Object object : services) {
                     if (object != this) {
                         parsers.add((StringParser) object);
                     }
@@ -169,7 +177,7 @@ public final class GlobalActivator implements BundleActivator {
         standardParsers.add(new DateStringParser(allParsers));
         standardParsers.add(new TimeSpanParser());
         
-        Hashtable<String, Object> properties = new Hashtable<String, Object>();
+        final Hashtable<String, Object> properties = new Hashtable<String, Object>();
         properties.put(Constants.SERVICE_RANKING, 100);
         
         parserTracker.open();
@@ -180,6 +188,12 @@ public final class GlobalActivator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         try {
+            if (null != trackers) {
+                while (!trackers.isEmpty()) {
+                    trackers.remove(0).close();
+                }
+                trackers = null;
+            }
             idRegistration.unregister();
             idRegistration = null;
             sessionComponent.unregister();
