@@ -78,8 +78,17 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
     private static final boolean INFO_ENABLED = LOG.isInfoEnabled();
 
+    /**
+     * Checks validity of a specified IMAP folder's full name
+     */
     private static interface FullNameChecker {
 
+        /**
+         * Checks validity of specified IMAP folder's full name
+         * 
+         * @param fullName The full name
+         * @return <code>true</code> if valid; otherwise <code>false</code>
+         */
         boolean check(String fullName);
     }
 
