@@ -83,45 +83,70 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
         boolean check(String fullName);
     }
 
-    private static final FullNameChecker CHECKER;
+    private static volatile FullNameChecker fullNameChecker;
 
-    static {
-        final String notifierFullNames = NOTIFIER_FULL_NAMES;
-        if (isEmptyString(notifierFullNames)) {
-            CHECKER = new FullNameChecker() {
+    /**
+     * Gets the full name checker.
+     * 
+     * @return The full name checker
+     */
+    private static FullNameChecker getFullNameChecker() {
+        if (null == fullNameChecker) {
+            synchronized (LOG) {
+                if (null == fullNameChecker) {
+                    final String notifierFullNames = IMAPProperties.getInstance().getNotifyFullNames();
+                    if (isEmptyString(notifierFullNames)) {
+                        fullNameChecker = new FullNameChecker() {
 
-                public boolean check(final String fullName) {
-                    return false;
-                }
-            };
-        } else {
-            final String[] fullNames = Pattern.compile(" *, *").split(notifierFullNames);
-            final int length = fullNames.length;
-            if (1 == length) {
-                final String fn = BASE64MailboxEncoder.encode(fullNames[0]).toUpperCase(Locale.US);
-                CHECKER = new FullNameChecker() {
+                            public boolean check(final String fullName) {
+                                return false;
+                            }
+                        };
+                    } else {
+                        final String[] fullNames = Pattern.compile(" *, *").split(notifierFullNames);
+                        final int length = fullNames.length;
+                        if (1 == length) {
+                            final String fn = BASE64MailboxEncoder.encode(fullNames[0]).toUpperCase(Locale.US);
+                            fullNameChecker = new FullNameChecker() {
 
-                    public boolean check(final String fullName) {
-                        if (null == fullName) {
-                            return false;
+                                public boolean check(final String fullName) {
+                                    if (null == fullName) {
+                                        return false;
+                                    }
+                                    return fn.equals(BASE64MailboxEncoder.encode(fullName).toUpperCase(Locale.US));
+                                }
+                            };
+                        } else {
+                            final Set<String> set = new HashSet<String>(length);
+                            for (final String fn : fullNames) {
+                                set.add(BASE64MailboxEncoder.encode(fn).toUpperCase(Locale.US));
+                            }
+                            fullNameChecker = new FullNameChecker() {
+
+                                public boolean check(final String fullName) {
+                                    if (null == fullName) {
+                                        return false;
+                                    }
+                                    return set.contains(BASE64MailboxEncoder.encode(fullName).toUpperCase(Locale.US));
+                                }
+                            };
                         }
-                        return fn.equals(BASE64MailboxEncoder.encode(fullName).toUpperCase(Locale.US));
                     }
-                };
-            } else {
-                final Set<String> set = new HashSet<String>(length);
-                for (final String fn : fullNames) {
-                    set.add(BASE64MailboxEncoder.encode(fn).toUpperCase(Locale.US));
                 }
-                CHECKER = new FullNameChecker() {
+            }
+        }
+        return fullNameChecker;
+    }
 
-                    public boolean check(final String fullName) {
-                        if (null == fullName) {
-                            return false;
-                        }
-                        return set.contains(BASE64MailboxEncoder.encode(fullName).toUpperCase(Locale.US));
-                    }
-                };
+    /**
+     * Drops full name checker instance.
+     */
+    public static void dropFullNameChecker() {
+        if (null != fullNameChecker) {
+            synchronized (LOG) {
+                if (null != fullNameChecker) {
+                    fullNameChecker = null;
+                }
             }
         }
     }
@@ -179,7 +204,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
     public static void addNotifierFor(final IMAPFolder imapFolder, final String optFullName, final int accountId, final Session session, final boolean knownGranted) {
         if (knownGranted || (MailAccount.DEFAULT_ID == accountId && IMAPProperties.getInstance().notifyRecent())) {
             final String fullName = optFullName == null ? imapFolder.getFullName() : optFullName;
-            if (CHECKER.check(fullName)) {
+            if (getFullNameChecker().check(fullName)) {
                 imapFolder.addMessageRecentListener(new IMAPNotifierMessageRecentListener(fullName, accountId, session));
             }
         }

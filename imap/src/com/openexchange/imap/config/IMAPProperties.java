@@ -102,6 +102,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean notifyRecent;
 
+    private int notifyFrequencySeconds;
+
+    private String notifyFullNames;
+
     private BoolCapVal supportsACLs;
 
     private int imapTimeout;
@@ -147,7 +151,24 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             notifyRecent = Boolean.parseBoolean(tmp);
             logBuilder.append("\tNotify Recent: ").append(notifyRecent).append('\n');
         }
-        
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.notifyFrequencySeconds", "300").trim();
+            try {
+                notifyFrequencySeconds = Integer.parseInt(tmp);
+                logBuilder.append("\tNotify Frequency Seconds: ").append(notifyFrequencySeconds).append('\n');
+            } catch (final NumberFormatException e) {
+                notifyFrequencySeconds = 300;
+                logBuilder.append("\tNotify Frequency Seconds: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
+                    notifyFrequencySeconds).append('\n');
+            }
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.notifyFullNames", "INBOX").trim();
+            notifyFullNames = tmp;
+        }
+
         {
             final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application").trim();
             imapSort = "imap".equalsIgnoreCase(imapSortStr);
@@ -179,7 +200,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             } else {
                 propagateHostNames = Collections.emptySet();
             }
-            logBuilder.append("\tPropagate Host Names: ").append(propagateHostNames.isEmpty() ? "<none>" : propagateHostNames.toString()).append('\n');
+            logBuilder.append("\tPropagate Host Names: ").append(propagateHostNames.isEmpty() ? "<none>" : propagateHostNames.toString()).append(
+                '\n');
         }
 
         {
@@ -299,20 +321,24 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             logBuilder.append(sb).append('\n');
                         } catch (final NumberFormatException e) {
                             IMAPProtocol.getInstance().setOverallMaxCount(-1);
-                            logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append("\". Setting to fallback: No restrictions").append('\n');
+                            logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
+                                "\". Setting to fallback: No restrictions").append('\n');
                         } catch (final MailException e) {
                             IMAPProtocol.getInstance().setOverallMaxCount(-1);
-                            logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append("\". Setting to fallback: No restrictions").append('\n');
+                            logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
+                                "\". Setting to fallback: No restrictions").append('\n');
                         }
                     }
                 } else {
                     // Expect a single integer value
                     try {
                         IMAPProtocol.getInstance().setOverallMaxCount(Integer.parseInt(tmp));
-                        logBuilder.append("\tMax. Number of External Connections: ").append(tmp).append(" (applied to all external IMAP accounts)").append('\n');
+                        logBuilder.append("\tMax. Number of External Connections: ").append(tmp).append(
+                            " (applied to all external IMAP accounts)").append('\n');
                     } catch (final NumberFormatException e) {
                         IMAPProtocol.getInstance().setOverallMaxCount(-1);
-                        logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append("\". Setting to fallback: No restrictions").append('\n');
+                        logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
+                            "\". Setting to fallback: No restrictions").append('\n');
                     }
                 }
             }
@@ -344,6 +370,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         blockSize = 0;
         spamHandlerName = null;
         notifyRecent = false;
+        notifyFrequencySeconds = 300;
+        notifyFullNames = "INBOX";
     }
 
     public boolean isFastFetch() {
@@ -352,6 +380,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     public boolean notifyRecent() {
         return notifyRecent;
+    }
+
+    public int getNotifyFrequencySeconds() {
+        return notifyFrequencySeconds;
+    }
+
+    public String getNotifyFullNames() {
+        return notifyFullNames;
     }
 
     public boolean isPropagateClientIPAddress() {

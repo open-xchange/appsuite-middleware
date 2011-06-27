@@ -58,6 +58,7 @@ import javax.mail.FetchProfile;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder.FetchProfileItem;
 import com.openexchange.imap.IMAPAccess;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
@@ -182,8 +183,9 @@ public final class IMAPNotifierTask implements IMAPNotifierConstants {
         if (null == timerService) {
             return false;
         }
-        final int freq = NOTIFIER_FREQUENCY;
-        scheduledTask = timerService.scheduleWithFixedDelay(new IMAPNotifierTaskRunnable(accountId, user, context, fullNames), freq, freq);
+
+        final int freqMillis = IMAPProperties.getInstance().getNotifyFrequencySeconds() * 1000;
+        scheduledTask = timerService.scheduleWithFixedDelay(new IMAPNotifierTaskRunnable(accountId, user, context, fullNames), freqMillis, freqMillis);
         return true;
     }
 

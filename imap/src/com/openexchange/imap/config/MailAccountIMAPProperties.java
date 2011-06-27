@@ -150,6 +150,29 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
     }
 
+    public int getNotifyFrequencySeconds() {
+        final String tmp = properties.get("com.openexchange.imap.notifyFrequencySeconds");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().getNotifyFrequencySeconds();
+        }
+
+        try {
+            return Integer.parseInt(tmp.trim());
+        } catch (final NumberFormatException e) {
+            LOG.error("Notify Frequency Seconds: Invalid value.", e);
+            return IMAPProperties.getInstance().getNotifyFrequencySeconds();
+        }
+    }
+
+    public String getNotifyFullNames() {
+        final String tmp = properties.get("com.openexchange.imap.notifyFullNames");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().getNotifyFullNames();
+        }
+
+        return tmp.trim();
+    }
+
     public int getImapTimeout() {
         final String tmp = properties.get("com.openexchange.imap.imapTimeout");
         if (null == tmp) {

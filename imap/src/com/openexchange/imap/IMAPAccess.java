@@ -77,6 +77,7 @@ import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
+import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -813,6 +814,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         IMAPCapabilityAndGreetingCache.tearDown();
         MBoxEnabledCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
+        IMAPNotifierMessageRecentListener.dropFullNameChecker();
         dropMaps();
     }
 

@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.session.Session;
@@ -98,7 +99,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierConstants, IMAPNo
          */
         final String[] fullNames;
         {
-            final String notifierFullNames = NOTIFIER_FULL_NAMES;
+            final String notifierFullNames = IMAPProperties.getInstance().getNotifyFullNames();
             if (isEmpty(notifierFullNames)) {
                 return false;
             }
