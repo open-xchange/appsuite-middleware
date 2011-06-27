@@ -87,7 +87,8 @@ public final class AccessedIMAPStore extends IMAPStore {
     }
 
     /**
-     * Whether to notify about recent messages.
+     * Whether to notify about recent messages. Notification is enabled if both conditions are met:<br>
+     * It's the primary account's IMAP store <b>AND</b> notify-recent has been enabled by configuration.
      * 
      * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
      */

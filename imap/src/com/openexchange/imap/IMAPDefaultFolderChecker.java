@@ -225,7 +225,7 @@ public final class IMAPDefaultFolderChecker {
                     final IMAPFolder inboxFolder;
                     {
                         final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
-                        if ((imapStore).notifyRecent()) {
+                        if (imapStore.notifyRecent()) {
                             IMAPNotifierMessageRecentListener.addNotifierFor(tmp, INBOX, accountId, session, true);
                         }
                         ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session);
@@ -243,7 +243,7 @@ public final class IMAPDefaultFolderChecker {
                             }
                             ListLsubCache.addSingle(INBOX, accountId, tmp, session);
                             inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-                            if ((imapStore).notifyRecent()) {
+                            if (imapStore.notifyRecent()) {
                                 IMAPNotifierMessageRecentListener.addNotifierFor(inboxFolder, INBOX, accountId, session, true);
                             }
                             entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
@@ -563,7 +563,7 @@ public final class IMAPDefaultFolderChecker {
             if (entry.exists()) {
                 if (checkSubscribed) {
                     final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
-                    if ((imapStore).notifyRecent()) {
+                    if (imapStore.notifyRecent()) {
                         IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session, true);
                     }
                     if (1 == subscribe) {
@@ -600,7 +600,7 @@ public final class IMAPDefaultFolderChecker {
             }
         }
         IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
-        if ((imapStore).notifyRecent()) {
+        if (imapStore.notifyRecent()) {
             IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session, true);
         }
         tmp.setLength(0);
@@ -633,7 +633,7 @@ public final class IMAPDefaultFolderChecker {
                      */
                     final String parentFullName = prefix.substring(0, len - 1);
                     parent = (IMAPFolder) imapStore.getFolder(parentFullName);
-                    if ((imapStore).notifyRecent()) {
+                    if (imapStore.notifyRecent()) {
                         IMAPNotifierMessageRecentListener.addNotifierFor(parent, parentFullName, accountId, session, true);
                     }
                 }
@@ -729,7 +729,7 @@ public final class IMAPDefaultFolderChecker {
                         final String fn = tmp.append(prefix).append(candidate).toString();
                         tmp.setLength(0);
                         f = (IMAPFolder) imapStore.getFolder(fn);
-                        if ((imapStore).notifyRecent()) {
+                        if (imapStore.notifyRecent()) {
                             IMAPNotifierMessageRecentListener.addNotifierFor(f, fullName, accountId, session, true);
                         }
                     }
