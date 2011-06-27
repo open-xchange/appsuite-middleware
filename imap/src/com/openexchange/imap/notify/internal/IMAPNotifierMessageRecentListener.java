@@ -71,7 +71,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPNotifierMessageRecentListener implements MessageRecentListener, IMAPNotifierConstants {
+public final class IMAPNotifierMessageRecentListener implements MessageRecentListener {
 
     private static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(IMAPNotifierMessageRecentListener.class);

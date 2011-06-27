@@ -73,7 +73,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPNotifierTask implements IMAPNotifierConstants {
+public final class IMAPNotifierTask {
 
     protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPNotifierTask.class);
 
