@@ -154,8 +154,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             HttpClient httpClient = new HttpClient();
             Protocol protocol = new Protocol("https", new TrustAllAdapter(), 443);
             httpClient.getHostConfiguration().setHost("live.com", 443, protocol);
-            String urlString = accessTokenGrabber;
-            System.out.println(urlString + params);
+            String urlString = accessTokenGrabber;            
             PostMethod postMethod = new PostMethod(urlString + params);
             postMethod.addParameter("wrap_client_id", getAPIKey());
             postMethod.addParameter("wrap_client_secret", getAPISecret());
