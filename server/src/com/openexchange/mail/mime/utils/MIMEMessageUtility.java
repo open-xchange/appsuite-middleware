@@ -1238,7 +1238,12 @@ public final class MIMEMessageUtility {
         return headerLine;
     }
 
-    private static final Pattern PAT_ENC_WORDS = Pattern.compile("(\\?=)(?:\r?\n(?:\t| +))(=\\?\\S+?\\?\\S+?\\?.+?\\?=)");
+    private static final Pattern PAT_ENC_WORDS;
+
+    static {
+        final String regexEncodedWord = "(=\\?\\S+?\\?\\S+?\\?.+?\\?=)";
+        PAT_ENC_WORDS = Pattern.compile(regexEncodedWord + "(?:\r?\n(?:\t| +))" + regexEncodedWord);
+    }
 
     /**
      * Unfolds encoded-words as per RFC 2047. When unfolding a non-encoded-word the preceding space character should not be stripped out,
@@ -1266,7 +1271,7 @@ public final class MIMEMessageUtility {
      * @return The unfolded encoded-words
      */
     private static String unfoldEncodedWords(final String encodedWords) {
-        return PAT_ENC_WORDS.matcher(encodedWords).replaceAll("$2");
+        return PAT_ENC_WORDS.matcher(encodedWords).replaceAll("$1$2");
     }
 
     private static final int BUFSIZE = 8192; // 8K
