@@ -1238,7 +1238,7 @@ public final class MIMEMessageUtility {
         return headerLine;
     }
 
-    private static final Pattern PAT_ENC_WORDS = Pattern.compile("(\r?\n(?:\t| +))(=\\?\\S+?\\?\\S+?\\?.+?\\?=)");
+    private static final Pattern PAT_ENC_WORDS = Pattern.compile("(\\?=)(?:\r?\n(?:\t| +))(=\\?\\S+?\\?\\S+?\\?.+?\\?=)");
 
     /**
      * Unfolds encoded-words as per RFC 2047. When unfolding a non-encoded-word the preceding space character should not be stripped out,
