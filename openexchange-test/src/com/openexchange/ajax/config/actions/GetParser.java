@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.config.actions;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -63,16 +61,15 @@ class GetParser extends AbstractAJAXParser<GetResponse> {
     /**
      * Default constructor.
      */
-    public GetParser() {
-        super(true);
+    public GetParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected GetResponse createResponse(final Response response)
-        throws JSONException {
+    protected GetResponse createResponse(final Response response) {
         return new GetResponse(response);
     }
 }

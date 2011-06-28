@@ -56,15 +56,31 @@ package com.openexchange.ajax.config.actions;
 public class GetRequest extends AbstractConfigRequest<GetResponse> {
 
     private final String path;
+    
+    private final boolean failOnError;
 
     public GetRequest(final Tree param) {
         super();
         this.path = param.getPath();
+        this.failOnError = true;
+    }
+    
+    public GetRequest(final Tree param, final boolean failOnError) {
+        super();
+        this.path = param.getPath();
+        this.failOnError = failOnError;
     }
 
-    public GetRequest(String path) {
+    public GetRequest(final String path) {
         super();
         this.path = path;
+        this.failOnError = true;
+    }
+    
+    public GetRequest(final String path, final boolean failOnError) {
+        super();
+        this.path = path;
+        this.failOnError = failOnError;
     }
 
     @Override
@@ -85,6 +101,6 @@ public class GetRequest extends AbstractConfigRequest<GetResponse> {
     }
 
     public GetParser getParser() {
-        return new GetParser();
+        return new GetParser(failOnError);
     }
 }
