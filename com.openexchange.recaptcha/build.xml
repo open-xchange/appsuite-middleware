@@ -35,6 +35,7 @@
 	<property name="serverjar" value="com.openexchange.server.jar"/>
 	<property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
+	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar"/>
 		
 
     <fileset dir="." id="metainf">
@@ -56,6 +57,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${configreadBundle}/${configjar}"/>
     	<pathelement location="${bundlesdir}/${serverjar}"/>
+		<pathelement location="${bundlesdir}/${servletjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
