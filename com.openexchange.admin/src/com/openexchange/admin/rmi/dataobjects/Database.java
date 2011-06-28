@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.Field;
 
 /**
@@ -136,7 +135,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     public Database(final int id) {
         super();
         init();
-        this.id = I(id);
+        this.id = Integer.valueOf(id);
     }
 
     /**
@@ -146,7 +145,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     public Database(final int id, final String schema) {
         super();
         init();
-        this.id = I(id);
+        this.id = Integer.valueOf(id);
         this.scheme = schema;
     }
 
@@ -164,7 +163,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         this.password = password;
         this.driver = driver;
         this.url = url;
-        this.id = I(id);
+        this.id = Integer.valueOf(id);
         this.name = displayname;
     }
 
