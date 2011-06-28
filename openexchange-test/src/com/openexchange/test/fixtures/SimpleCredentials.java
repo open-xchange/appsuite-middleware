@@ -165,7 +165,11 @@ public class SimpleCredentials implements Cloneable {
 
     public String getPrivateInfostoreFolderId() {
         if (null == privateInfostoreFolderId) {
-            privateInfostoreFolderId = getConfig().getString(Tree.PrivateInfostoreFolder);
+            try {
+                privateInfostoreFolderId = getConfig().getString(Tree.PrivateInfostoreFolder);
+            } catch (Exception e) {
+                privateInfostoreFolderId = "";
+            }
         }
         return privateInfostoreFolderId;
     }
