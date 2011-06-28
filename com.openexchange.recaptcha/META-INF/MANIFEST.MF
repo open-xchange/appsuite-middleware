@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Recaptcha
+Bundle-SymbolicName: com.openexchange.recaptcha
+Bundle-Version: 6.20.0
+Bundle-Activator: com.openexchange.recaptcha.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.api,
+ com.openexchange.config,
+ com.openexchange.exceptions.osgi,
+ com.openexchange.groupware,
+ com.openexchange.server.osgiservice,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.apache.commons.logging.impl,
+ org.osgi.framework,
+ org.osgi.service.http
+Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.recaptcha
