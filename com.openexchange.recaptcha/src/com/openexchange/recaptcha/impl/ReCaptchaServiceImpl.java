@@ -51,6 +51,7 @@ package com.openexchange.recaptcha.impl;
 
 import java.util.Properties;
 import net.tanesha.recaptcha.ReCaptcha;
+import net.tanesha.recaptcha.ReCaptchaException;
 import net.tanesha.recaptcha.ReCaptchaFactory;
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
@@ -80,11 +81,15 @@ public class ReCaptchaServiceImpl implements ReCaptchaService {
     public boolean check(String address, String challenge, String response, boolean strict) {
         ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
         reCaptcha.setPrivateKey(props.getProperty("privateKey"));
-        ReCaptchaResponse answer = reCaptcha.checkAnswer(address, challenge, response);
-        if (answer.getErrorMessage() != null && !answer.getErrorMessage().equals(INVALID_CAPTCHA_ERROR) && !strict) {
-            return true;
+        try {
+            ReCaptchaResponse answer = reCaptcha.checkAnswer(address, challenge, response);
+            if (answer.getErrorMessage() != null && !answer.getErrorMessage().equals(INVALID_CAPTCHA_ERROR) && !strict) {
+                return true;
+            }
+            return answer.isValid();
+        } catch (ReCaptchaException e) {
+            return !strict;
         }
-        return answer.isValid();
     }
 
     public String getHTML() {
