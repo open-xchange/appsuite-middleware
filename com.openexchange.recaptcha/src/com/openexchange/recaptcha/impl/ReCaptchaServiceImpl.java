@@ -65,6 +65,8 @@ public class ReCaptchaServiceImpl implements ReCaptchaService {
 
     private Properties props;
     private Properties options;
+    
+    private static final String INVALID_CAPTCHA_ERROR = "incorrect-captcha-sol";
 
     /**
      * Initializes a new {@link ReCaptchaServiceImpl}.
@@ -79,7 +81,7 @@ public class ReCaptchaServiceImpl implements ReCaptchaService {
         ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
         reCaptcha.setPrivateKey(props.getProperty("privateKey"));
         ReCaptchaResponse answer = reCaptcha.checkAnswer(address, challenge, response);
-        if (answer.getErrorMessage() != null && !strict) {
+        if (answer.getErrorMessage() != null && !answer.getErrorMessage().equals(INVALID_CAPTCHA_ERROR) && !strict) {
             return true;
         }
         return answer.isValid();
