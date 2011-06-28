@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.recaptcha.osgi.ReCaptchaServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -70,6 +71,8 @@ public class ReCaptchaServlet extends DataServlet {
     private static final transient Log LOG = LogFactory.getLog(ReCaptchaServlet.class);
 
     private static final String ACTION_HTML = "html";
+    
+    private static final String ACTION_KEY = "key";
 
     @Override
     protected boolean hasModulePermission(ServerSession session) {
@@ -84,6 +87,8 @@ public class ReCaptchaServlet extends DataServlet {
 
             if (action.equalsIgnoreCase(ACTION_HTML)) {
                 doGetHtml(response);
+            } else if (action.equalsIgnoreCase(ACTION_KEY)) {
+                doGetPublicKey(response);
             }
         } catch (OXMandatoryFieldException e) {
             LOG.error(e.getMessage(), e);
@@ -91,6 +96,10 @@ public class ReCaptchaServlet extends DataServlet {
         }
 
         writeResponse(response, resp);
+    }
+
+    private void doGetPublicKey(Response response) {
+        response.setData(ReCaptchaServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("publicKey"));
     }
 
     private void doGetHtml(Response response) {
