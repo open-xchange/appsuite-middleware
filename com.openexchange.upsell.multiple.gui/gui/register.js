@@ -191,7 +191,7 @@ upsell = {
       
       //feature outlook
       outlook: {
-        name: ["modules/outlook", "sidepanel/sync.outlook"],
+        name: ["modules/outlook", "sidepanel/sync.outlook", "modules/outlook.updater"],
         title: _("Enhance your system with &#8222;Outlook Oxtender&#8220;"),
         intro: _("If Outlook&copy; is your preferred choice,<br>use it as your local Groupware Client."),
         list: {

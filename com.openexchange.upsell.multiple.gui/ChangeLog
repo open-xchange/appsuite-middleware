@@ -1,3 +1,7 @@
+* 2011-06-28 - dennis.sieben@open-xchange.com
+
+ - Bugfix #19626 - Upsell multiple should listen for new oxupdater event
+
 * 2011-03-21 - dennis.sieben@open-xchange.com
 
  - Bugfix #18556 - [L3] Upsell Multiple doesn't hide flash UWA widgets
