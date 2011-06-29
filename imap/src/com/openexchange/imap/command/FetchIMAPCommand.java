@@ -903,6 +903,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
          * @return The modified fetch profile
          */
         FetchProfile modify(FetchProfile fetchProfile);
+        
+        boolean byContentTypeHeader();
     }
 
     /**
@@ -916,6 +918,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
              */
             return fetchProfile;
         }
+
+        public boolean byContentTypeHeader() {
+            return false;
+        }
     };
 
     /**
@@ -926,6 +932,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         public FetchProfile modify(final FetchProfile fetchProfile) {
             return getHeaderlessFetchProfile(fetchProfile);
         }
+
+        public boolean byContentTypeHeader() {
+            return false;
+        }
     };
 
     /**
@@ -935,6 +945,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         
         public FetchProfile modify(final FetchProfile fetchProfile) {
             return getSafeFetchProfile(fetchProfile);
+        }
+
+        public boolean byContentTypeHeader() {
+            return true;
         }
     };
 
