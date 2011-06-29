@@ -1,0 +1,668 @@
+<?xml version="1.0"?>
+<definitions xmlns:import7="http://4psa.com/HeaderData.xsd/2.5.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:import0="http://4psa.com/ChannelMessages.xsd/2.5.1" xmlns:tns="http://4psa.com/Channel/2.5.1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://schemas.xmlsoap.org/soap/encoding/" name="Channel" targetNamespace="http://4psa.com/Channel/2.5.1">
+	<types>
+		<xsd:schema>
+			<xsd:import schemaLocation="ChannelMessages.xsd" namespace="http://4psa.com/ChannelMessages.xsd/2.5.1"/>
+			<xsd:import schemaLocation="../HeaderData.xsd" namespace="http://4psa.com/HeaderData.xsd/2.5.1"/>
+		</xsd:schema>
+	</types>
+	<message name="getPublicNoPollIn">
+		<part name="messagePart" element="import0:GetPublicNoPollRequest"/>
+	</message>
+	<message name="getPublicNoPollOut">
+		<part name="messagePart" element="import0:GetPublicNoPollResponse"/>
+	</message>
+	<message name="getPublicNoPollInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getPublicNoPollOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="assignPublicNoIn">
+		<part name="messagePart" element="import0:AssignPublicNoRequest"/>
+	</message>
+	<message name="assignPublicNoOut">
+		<part name="messagePart" element="import0:AssignPublicNoResponse"/>
+	</message>
+	<message name="assignPublicNoInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="assignPublicNoOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="unassignPublicNoIn">
+		<part name="messagePart" element="import0:UnassignPublicNoRequest"/>
+	</message>
+	<message name="unassignPublicNoOut">
+		<part name="messagePart" element="import0:UnassignPublicNoResponse"/>
+	</message>
+	<message name="unassignPublicNoInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="unassignPublicNoOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addPublicNoIn">
+		<part name="messagePart" element="import0:AddPublicNoRequest"/>
+	</message>
+	<message name="addPublicNoOut">
+		<part name="messagePart" element="import0:AddPublicNoResponse"/>
+	</message>
+	<message name="addPublicNoInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addPublicNoOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editPublicNoIn">
+		<part name="messagePart" element="import0:EditPublicNoRequest"/>
+	</message>
+	<message name="editPublicNoOut">
+		<part name="messagePart" element="import0:EditPublicNoResponse"/>
+	</message>
+	<message name="editPublicNoInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editPublicNoOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addChannelIn">
+		<part name="messagePart" element="import0:AddChannelRequest"/>
+	</message>
+	<message name="addChannelOut">
+		<part name="messagePart" element="import0:AddChannelResponse"/>
+	</message>
+	<message name="addChannelInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addChannelOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editChannelIn">
+		<part name="messagePart" element="import0:EditChannelRequest"/>
+	</message>
+	<message name="editChannelOut">
+		<part name="messagePart" element="import0:EditChannelResponse"/>
+	</message>
+	<message name="editChannelInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editChannelOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getCodecsIn">
+		<part name="messagePart" element="import0:GetCodecsRequest"/>
+	</message>
+	<message name="getCodecsOut">
+		<part name="messagePart" element="import0:GetCodecsResponse"/>
+	</message>
+	<message name="getCodecsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getCodecsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getChannelGroupPollIn">
+		<part name="messagePart" element="import0:GetChannelGroupPollRequest"/>
+	</message>
+	<message name="getChannelGroupPollOut">
+		<part name="messagePart" element="import0:GetChannelGroupPollResponse"/>
+	</message>
+	<message name="getChannelGroupPollInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getChannelGroupPollOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addChannelGroupIn">
+		<part name="messagePart" element="import0:AddChannelGroupRequest"/>
+	</message>
+	<message name="addChannelGroupOut">
+		<part name="messagePart" element="import0:AddChannelGroupResponse"/>
+	</message>
+	<message name="addChannelGroupInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addChannelGroupOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editChannelGroupIn">
+		<part name="messagePart" element="import0:EditChannelGroupRequest"/>
+	</message>
+	<message name="editChannelGroupOut">
+		<part name="messagePart" element="import0:EditChannelGroupResponse"/>
+	</message>
+	<message name="editChannelGroupInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editChannelGroupOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getChannelsIn">
+		<part name="messagePart" element="import0:GetChannelsRequest"/>
+	</message>
+	<message name="getChannelsOut">
+		<part name="messagePart" element="import0:GetChannelsResponse"/>
+	</message>
+	<message name="getChannelsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getChannelsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getPublicNoIn">
+		<part name="messagePart" element="import0:GetPublicNoRequest"/>
+	</message>
+	<message name="getPublicNoOut">
+		<part name="messagePart" element="import0:GetPublicNoResponse"/>
+	</message>
+	<message name="getPublicNoInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getPublicNoOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getChannelGroupsIn">
+		<part name="messagePart" element="import0:GetChannelGroupsRequest"/>
+	</message>
+	<message name="getChannelGroupsOut">
+		<part name="messagePart" element="import0:GetChannelGroupsResponse"/>
+	</message>
+	<message name="getChannelGroupsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getChannelGroupsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delChannelIn">
+		<part name="messagePart" element="import0:DelChannelRequest"/>
+	</message>
+	<message name="delChannelOut">
+		<part name="messagePart" element="import0:DelChannelResponse"/>
+	</message>
+	<message name="delChannelInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delChannelOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delPublicNoIn">
+		<part name="messagePart" element="import0:DelPublicNoRequest"/>
+	</message>
+	<message name="delPublicNoOut">
+		<part name="messagePart" element="import0:DelPublicNoResponse"/>
+	</message>
+	<message name="delPublicNoInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delPublicNoOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delChannelGroupIn">
+		<part name="messagePart" element="import0:DelChannelGroupRequest"/>
+	</message>
+	<message name="delChannelGroupOut">
+		<part name="messagePart" element="import0:DelChannelGroupResponse"/>
+	</message>
+	<message name="delChannelGroupInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delChannelGroupOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addCallRulesOutGroupIn">
+		<part name="messagePart" element="import0:AddCallRulesOutGroupRequest"/>
+	</message>
+	<message name="addCallRulesOutGroupOut">
+		<part name="messagePart" element="import0:AddCallRulesOutGroupResponse"/>
+	</message>
+	<message name="addCallRulesOutGroupInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addCallRulesOutGroupOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getCallRulesOutGroupIn">
+		<part name="messagePart" element="import0:GetCallRulesOutGroupRequest"/>
+	</message>
+	<message name="getCallRulesOutGroupOut">
+		<part name="messagePart" element="import0:GetCallRulesOutGroupResponse"/>
+	</message>
+	<message name="getCallRulesOutGroupInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getCallRulesOutGroupOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editCallRulesOutGroupIn">
+		<part name="messagePart" element="import0:EditCallRulesOutGroupRequest"/>
+	</message>
+	<message name="editCallRulesOutGroupOut">
+		<part name="messagePart" element="import0:EditCallRulesOutGroupResponse"/>
+	</message>
+	<message name="editCallRulesOutGroupInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editCallRulesOutGroupOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delCallRulesOutGroupIn">
+		<part name="messagePart" element="import0:DelCallRulesOutGroupRequest"/>
+	</message>
+	<message name="delCallRulesOutGroupOut">
+		<part name="messagePart" element="import0:DelCallRulesOutGroupResponse"/>
+	</message>
+	<message name="delCallRulesOutGroupInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delCallRulesOutGroupOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addCallRulesOutIn">
+		<part name="messagePart" element="import0:AddCallRulesOutRequest"/>
+	</message>
+	<message name="addCallRulesOutOut">
+		<part name="messagePart" element="import0:AddCallRulesOutResponse"/>
+	</message>
+	<message name="addCallRulesOutInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addCallRulesOutOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getCallRulesOutIn">
+		<part name="messagePart" element="import0:GetCallRulesOutRequest"/>
+	</message>
+	<message name="getCallRulesOutOut">
+		<part name="messagePart" element="import0:GetCallRulesOutResponse"/>
+	</message>
+	<message name="getCallRulesOutInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getCallRulesOutOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delCallRulesOutIn">
+		<part name="messagePart" element="import0:DelCallRulesOutRequest"/>
+	</message>
+	<message name="delCallRulesOutOut">
+		<part name="messagePart" element="import0:DelCallRulesOutResponse"/>
+	</message>
+	<message name="delCallRulesOutInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delCallRulesOutOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<portType name="ChannelInterface">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new channels, delete the old ones, edit or query the desired channels.</documentation>
+		<operation name="AddChannelGroup">
+			<input message="tns:addChannelGroupIn"/>
+			<output message="tns:addChannelGroupOut"/>
+		</operation>
+		<operation name="EditChannelGroup">
+			<input message="tns:editChannelGroupIn"/>
+			<output message="tns:editChannelGroupOut"/>
+		</operation>
+		<operation name="GetChannelGroups">
+			<input message="tns:getChannelGroupsIn"/>
+			<output message="tns:getChannelGroupsOut"/>
+		</operation>
+		<operation name="DelChannelGroup">
+			<input message="tns:delChannelGroupIn"/>
+			<output message="tns:delChannelGroupOut"/>
+		</operation>
+		<operation name="GetPublicNoPoll">
+			<input message="tns:getPublicNoPollIn"/>
+			<output message="tns:getPublicNoPollOut"/>
+		</operation>
+		<operation name="AssignPublicNo">
+			<input message="tns:assignPublicNoIn"/>
+			<output message="tns:assignPublicNoOut"/>
+		</operation>
+		<operation name="UnassignPublicNo">
+			<input message="tns:unassignPublicNoIn"/>
+			<output message="tns:unassignPublicNoOut"/>
+		</operation>
+		<operation name="AddPublicNo">
+			<input message="tns:addPublicNoIn"/>
+			<output message="tns:addPublicNoOut"/>
+		</operation>
+		<operation name="EditPublicNo">
+			<input message="tns:editPublicNoIn"/>
+			<output message="tns:editPublicNoOut"/>
+		</operation>
+		<operation name="AddChannel">
+			<input message="tns:addChannelIn"/>
+			<output message="tns:addChannelOut"/>
+		</operation>
+		<operation name="EditChannel">
+			<input message="tns:editChannelIn"/>
+			<output message="tns:editChannelOut"/>
+		</operation>
+		<operation name="GetCodecs">
+			<input message="tns:getCodecsIn"/>
+			<output message="tns:getCodecsOut"/>
+		</operation>
+		<operation name="GetChannelGroupPoll">
+			<input message="tns:getChannelGroupPollIn"/>
+			<output message="tns:getChannelGroupPollOut"/>
+		</operation>
+		<operation name="GetChannels">
+			<input message="tns:getChannelsIn"/>
+			<output message="tns:getChannelsOut"/>
+		</operation>
+		<operation name="GetPublicNo">
+			<input message="tns:getPublicNoIn"/>
+			<output message="tns:getPublicNoOut"/>
+		</operation>
+		<operation name="DelChannel">
+			<input message="tns:delChannelIn"/>
+			<output message="tns:delChannelOut"/>
+		</operation>
+		<operation name="DelPublicNo">
+			<input message="tns:delPublicNoIn"/>
+			<output message="tns:delPublicNoOut"/>
+		</operation>
+		<operation name="AddCallRulesOutGroup">
+			<input message="tns:addCallRulesOutGroupIn"/>
+			<output message="tns:addCallRulesOutGroupOut"/>
+		</operation>
+		<operation name="GetCallRulesOutGroup">
+			<input message="tns:getCallRulesOutGroupIn"/>
+			<output message="tns:getCallRulesOutGroupOut"/>
+		</operation>
+		<operation name="DelCallRulesOutGroup">
+			<input message="tns:delCallRulesOutGroupIn"/>
+			<output message="tns:delCallRulesOutGroupOut"/>
+		</operation>
+		<operation name="EditCallRulesOutGroup">
+			<input message="tns:editCallRulesOutGroupIn"/>
+			<output message="tns:editCallRulesOutGroupOut"/>
+		</operation>
+		<operation name="AddCallRulesOut">
+			<input message="tns:addCallRulesOutIn"/>
+			<output message="tns:addCallRulesOutOut"/>
+		</operation>
+		<operation name="GetCallRulesOut">
+			<input message="tns:getCallRulesOutIn"/>
+			<output message="tns:getCallRulesOutOut"/>
+		</operation>
+		<operation name="DelCallRulesOut">
+			<input message="tns:delCallRulesOutIn"/>
+			<output message="tns:delCallRulesOutOut"/>
+		</operation>
+	</portType>
+	<binding name="Channel" type="tns:ChannelInterface">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="GetPublicNoPoll">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:getPublicNoPollIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getPublicNoPollInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getPublicNoPollOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AssignPublicNo">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:assignPublicNoIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:assignPublicNoInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:assignPublicNoOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="UnassignPublicNo">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:unassignPublicNoIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:unassignPublicNoInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:unassignPublicNoOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddPublicNo">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:addPublicNoIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addPublicNoInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addPublicNoOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditPublicNo">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:editPublicNoIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editPublicNoInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editPublicNoOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddChannel">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:addChannelIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addChannelInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addChannelOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditChannel">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:editChannelIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editChannelInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editChannelOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCodecs">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:getCodecsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCodecsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCodecsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetChannelGroupPoll">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:getChannelGroupPollIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChannelGroupPollInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChannelGroupPollOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddChannelGroup">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:addChannelGroupIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addChannelGroupInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addChannelGroupOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditChannelGroup">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:editChannelGroupIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editChannelGroupInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editChannelGroupOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetChannels">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:getChannelsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChannelsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChannelsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetPublicNo">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:getPublicNoIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getPublicNoInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getPublicNoOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetChannelGroups">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:getChannelGroupsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChannelGroupsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChannelGroupsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelChannel">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:delChannelIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delChannelInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delChannelOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelPublicNo">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:delPublicNoIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delPublicNoInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delPublicNoOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelChannelGroup">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:delChannelGroupIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delChannelGroupInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delChannelGroupOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddCallRulesOutGroup">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:addCallRulesOutGroupIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCallRulesOutGroupInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCallRulesOutGroupOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCallRulesOutGroup">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:getCallOutRulesGroupIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallRulesOutGroupInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallRulesOutGroupOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelCallRulesOutGroup">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:delCallRulesOutGroupIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCallRulesOutGroupInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCallRulesOutGroupOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditCallRulesOutGroup">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:editCallRulesOutGroupIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCallRulesOutGroupInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCallRulesOutGroupOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddCallRulesOut">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:addCallRulesOutIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCallRulesOutInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCallRulesOutOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCallRulesOut">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:getCallRulesOutIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallRulesOutInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallRulesOutOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelCallRulesOut">
+			<soap:operation soapAction="http://4psa.com/Channel/2.5.1:delCallRulesOutIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCallRulesOutInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCallRulesOutOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="ChannelPort">
+		<port name="ChannelPort" binding="tns:Channel">
+			<soap:address location="https://192.168.32.222:443/soap2/channel_agent.php"/>
+		</port>
+	</service>
+</definitions>

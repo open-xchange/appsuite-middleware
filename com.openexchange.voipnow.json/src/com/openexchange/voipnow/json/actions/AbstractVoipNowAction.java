@@ -49,6 +49,7 @@
 
 package com.openexchange.voipnow.json.actions;
 
+import java.math.BigInteger;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -118,7 +119,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @return The numeric identifier of given session user's main extension
      * @throws VoipNowException If numeric identifier cannot be returned
      */
-    protected int getMainExtensionIDOfSessionUser(final User sessionUser, final int contextId) throws VoipNowException {
+    protected BigInteger getMainExtensionIDOfSessionUser(final User sessionUser, final int contextId) throws VoipNowException {
         final String attrName = ATTR_MAIN_EXTENSION;
         final Set<String> set = sessionUser.getAttributes().get(attrName);
         if (null == set || set.isEmpty()) {
@@ -137,7 +138,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         if (id < 0) {
             throw VoipNowExceptionCodes.INVALID_PROPERTY.create(attrName, mainExtAttr);
         }
-        return id;
+        return BigInteger.valueOf(id);
     }
 
     /**

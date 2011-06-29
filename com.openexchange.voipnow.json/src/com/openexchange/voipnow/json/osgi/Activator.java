@@ -68,6 +68,7 @@ import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.user.UserService;
 import com.openexchange.voipnow.json.VoipNowException;
+import com.openexchange.voipnow.json.actions.VoipNowActionFactory;
 import com.openexchange.voipnow.json.exception.VoipNowExceptionFactory;
 import com.openexchange.voipnow.json.multiple.VoipNowMultipleHandlerFactory;
 import com.openexchange.voipnow.json.preferences.GUI;
@@ -144,6 +145,7 @@ public class Activator implements BundleActivator {
             /*
              * HTTP service tracker
              */
+            VoipNowActionFactory.getInstance();
             trackers.push(new SessionServletRegistration(context, new VoipNowServlet(), com.openexchange.voipnow.json.Constants.SERVLET_PATH));
             trackers.push(new ServiceTracker(
                 context,
@@ -155,10 +157,10 @@ public class Activator implements BundleActivator {
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
             LOG.error(e.getMessage(), e);
-            throw e;
+            //throw e;
         }
     }
 

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/ReportMessagesInfo.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:common="http://4psa.com/Common.xsd/2.5.1" xmlns:CallCostData="http://4psa.com/ReportData.xsd/2.5.1" targetNamespace="http://4psa.com/ReportMessagesInfo.xsd/2.5.1" elementFormDefault="qualified" id="ReportMessagesInfo">
+	<xs:import namespace="http://4psa.com/ReportData.xsd/2.5.1" schemaLocation="ReportData.xsd"/>
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:complexType name="CallReportResponseType">
+		<xs:annotation>
+			<xs:documentation>Get the call report: response type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="CallCostData:CallReport">
+				<xs:sequence>
+					<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="CallCostsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get the call costs: response type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="CallCostData:CallCostInfo">
+				<xs:sequence>
+					<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="QuickStatsResponseType">
+		<xs:annotation>
+			<xs:documentation>Quick statistics: response type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="CallCostData:QuickStats">
+				<xs:sequence>
+					<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+</xs:schema>

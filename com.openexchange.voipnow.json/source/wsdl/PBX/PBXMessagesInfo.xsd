@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/PBXMessagesInfo.xsd/2.5.1"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:common="http://4psa.com/Common.xsd/2.5.1"
+	xmlns:PBXData="http://4psa.com/PBXData.xsd/2.5.1"
+	xmlns:extensionData="http://4psa.com/ExtensionData.xsd/2.5.1"
+	targetNamespace="http://4psa.com/PBXMessagesInfo.xsd/2.5.1" elementFormDefault="qualified"
+	id="PBXMessagesInfo">
+	<xs:import namespace="http://4psa.com/PBXData.xsd/2.5.1" schemaLocation="PBXData.xsd"/>
+	<xs:import namespace="http://4psa.com/ExtensionData.xsd/2.5.1"
+		schemaLocation="../Extension/ExtensionData.xsd"/>
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:complexType name="PingResponseType">
+		<xs:annotation>
+			<xs:documentation>Ping 4PSA VoipNow server: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="title" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Default application title</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="version" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>4PSA VoipNow version</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="buildNo" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>4PSA VoipNow build number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resellers" type="common:integer" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The number of resellers on the 4PSA VoipNow server</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="clients" type="common:integer" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The number of clients on the 4PSA VoipNow server</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="extensions" type="common:integer" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The number of extension accounts on the 4PSA VoipNow server</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="activSSO" type="common:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>SSO enabled</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="availableUpdate" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Available updates to VoipNow</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="in progress"/>
+						<xs:enumeration value="YES"/>
+						<xs:enumeration value="NO"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="api" minOccurs="0" maxOccurs="5">
+				<xs:annotation>
+					<xs:documentation>Third party API</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="protocol" type="common:string"/>
+						<xs:element name="version" type="common:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="infrastructureID" type="common:string" minOccurs="0"/>
+			<xs:element name="currency" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Default system currency</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="charging" type="common:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Charging enabled</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="automationAgent" type="common:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>VoipNow node can be enrolled by VoipNow Automation</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="UpgradeVoipNowResponseType">
+		<xs:annotation>
+			<xs:documentation>Upgrade 4PSA VoipNow to latest release: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="result" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Operation result: started/failure</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="in progress"/>
+						<xs:enumeration value="failure"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="UpgradeHistoryResponseType">
+		<xs:annotation>
+			<xs:documentation>Upgrade 4PSA VoipNow history report: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="upgrade" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="started" type="xs:dateTime" minOccurs="0"/>
+						<xs:element name="completed" type="xs:dateTime" minOccurs="0"/>
+						<xs:element name="components" type="common:integer" minOccurs="0"/>
+						<xs:element name="status" type="common:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetSchemaVersionsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get SOAP schema version: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="versions" type="common:string" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A list with available SOAP schema versions on the 4PSA VoipNow server</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetInterfaceLangResponseType">
+		<xs:annotation>
+			<xs:documentation>Get available interface language packs: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="interfaceLang" type="PBXData:Language" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available interface  languages on success</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetPhoneLangResponseType">
+		<xs:annotation>
+			<xs:documentation>Get available phone languages: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="phoneLang" type="PBXData:Language" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A list with available phone languages on success</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetTemplatesResponseType">
+		<xs:annotation>
+			<xs:documentation>Get user templates: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="template" type="PBXData:Template" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Template data</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetAdvertisingTemplatesResponseType">
+		<xs:annotation>
+			<xs:documentation>Get user templates: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="template" type="PBXData:AdvertisingTemplate" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Template data</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="UpdateObjectResponseType">
+		<xs:annotation>
+			<xs:documentation>Update object: reponse type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="common:updateObject"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="GetIndustriesResponseType">
+		<xs:sequence>
+			<xs:element name="industry" type="PBXData:Industry" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetTimeIntervalsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get time intervals: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="timeInterval" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available time intervals</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="PBXData:TimeInterval">
+							<xs:sequence>
+								<xs:element name="intervalID" type="common:positiveInteger"
+									minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Time interval ID</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Time interval block ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="name" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Time interval block name</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="type" default="interval" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The available values for the matching algorithm values are: 'day', 'interval'. Default value: interval.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="interval"/>
+						<xs:enumeration value="day"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Time interval owner ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetTimeIntervalBlocksResponseType">
+		<xs:annotation>
+			<xs:documentation>Get time interval blocks: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="timeIntervalBlock" type="PBXData:TimeIntervalBlock" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available time interval blocks</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetSoundsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get owned/shared sounds: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="sounds" type="PBXData:Sounds" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Sounds</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>User ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetFileLanguagesResponseType">
+		<xs:annotation>
+			<xs:documentation>Get sound file languages: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="languages" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available languages for sound file</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="code" type="common:code">
+							<xs:annotation>
+								<xs:documentation>Language code</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="name" type="common:string">
+							<xs:annotation>
+								<xs:documentation>Language name</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetFoldersResponseType">
+		<xs:annotation>
+			<xs:documentation>Get client list of folders: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="folders" type="PBXData:Folders" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available client folders</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetCustomButtonsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get custom buttons list: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="button" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available custom buttons</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="PBXData:CustomButton">
+							<xs:sequence>
+								<xs:element name="status" type="common:boolean" minOccurs="0"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Custom alert owner ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="userIdentifier" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Custom alert owner identifier</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetCustomAlertsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get custom alerts list: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="button" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available custom buttons</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="PBXData:CustomAlert">
+							<xs:sequence>
+								<xs:element name="status" type="common:boolean" minOccurs="0"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Custom alert owner ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="userIdentifier" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Custom alert owner identifier</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EnrollmentResponseType">
+		<xs:annotation>
+			<xs:documentation>Enroll 4PSA VoipNow in third-party applications: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="enrollmentID" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Enrollment unique identifier</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="result" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Operation result</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="success"/>
+						<xs:enumeration value="partial"/>
+						<xs:enumeration value="failure"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetDevicesResponseType">
+		<xs:annotation>
+			<xs:documentation>Get time intervals: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="devices" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="deviceID" type="common:positiveInteger" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>ID of the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="status" minOccurs="0" type="common:integer">
+							<xs:annotation>
+								<xs:documentation>Status of the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="name" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Name of the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="serial" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Serial of the equipment associated with the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="manufacturer" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Manufacturer of the equipment associated with the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="model" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Model of the equipment associated with the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="firmware" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Brand of the equipment associated with the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="firmwareVersion" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Firmware version</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="mac" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Mac of the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ownerID" type="common:positiveInteger" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>ID of the owner of the device</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="assignedClientID" type="common:positiveInteger"
+							minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>ID of the assigned user to the device  </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="assignedExtensions" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Extensions assiged to the device</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:complexContent>
+									<xs:extension base="PBXData:DeviceExtension">
+										<xs:sequence>
+											<xs:element name="number" minOccurs="0">
+												<xs:annotation>
+												<xs:documentation>Number of the extension</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+										</xs:sequence>
+									</xs:extension>
+								</xs:complexContent>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="tplID" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Provision template ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetEquipmentListResponseType">
+		<xs:annotation>
+			<xs:documentation>Get equipment list: response data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="equipment" type="extensionData:Equipments" minOccurs="0"
+				maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

@@ -1,0 +1,808 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/ChannelData.xsd/2.5.1"
+	xmlns:mstns="http://4psa.com/ChannelData.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:common="http://4psa.com/Common.xsd/2.5.1"
+	targetNamespace="http://4psa.com/ChannelData.xsd/2.5.1" elementFormDefault="qualified"
+	id="ChannelData">
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:complexType name="SIPChannelInfo">
+		<xs:annotation>
+			<xs:documentation>SIP channel definition data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name" type="common:string">
+				<xs:annotation>
+					<xs:documentation>Channel name</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="hostname" type="common:ip" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Send calls to</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="inviteIP" type="common:ip" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Accept calls from IPs/network </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="login" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Username</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="password" type="common:password" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Password</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="register" type="xs:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Do not register</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="authUsername" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Authorization username</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="concurentCalls" type="xs:decimal" default="10" nillable="true"
+				minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Concurrent calls (outgoing+incoming)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paid" type="common:boolean" default="1" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Charging plan: paid(1) or free(0). Default paid.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="flow" default="both" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel capabilities. Default both.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="in"/>
+						<xs:enumeration value="out"/>
+						<xs:enumeration value="both"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="dtmf" default="rfc2833" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>DTMF mode. Default rfc2833.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="rfc2833"/>
+						<xs:enumeration value="inband"/>
+						<xs:enumeration value="info"/>
+						<xs:enumeration value="auto"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="behindNAT" type="common:boolean" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Behind NAT</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="callerID" type="xs:decimal" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Caller ID for outgoing calls </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="fromUser" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>From user</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="fromDomain" type="common:domain" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>From domain</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="authExt" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Authorization extension </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="didFromInvite" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Get DID from custom header</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="qualify" type="xs:decimal" nillable="true" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Qualify value. Default: none.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="prefixCalls" type="xs:decimal" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Prefix all calls with</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="trusted" type="common:boolean" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Trusted channel</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="trustRemotePartyID" type="common:boolean" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Trust Remote-Party-ID SIP header</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sendRemotePartyID" type="common:boolean" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Send Remote-Party-ID SIP header</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sessionTimers" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Session timer: 0 for Accept, 1 for Originate, 2 for Refuse. Default 0 (Accept)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="0"/>
+						<xs:enumeration value="1"/>
+						<xs:enumeration value="2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="sessionExpire" type="common:integer" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Session refresh interval. Default 1800.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sessionMinExpire" type="common:integer" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Minimum session refresh interval. Default 1800.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sessionRefresher" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Session refresh source.  0 for UAS, 1 for UAC. Default UAC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="0"/>
+						<xs:enumeration value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="codecs" type="common:positiveInteger" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Channel codec ids</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="useMD5" type="common:boolean" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Use MD5 </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notes" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel notes </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ChannelList">
+		<xs:annotation>
+			<xs:documentation>Channel list data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ID" type="common:positiveInteger">
+				<xs:annotation>
+					<xs:documentation>Channel ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="name" type="common:string">
+				<xs:annotation>
+					<xs:documentation>Channel name</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="type" default="sip" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel type: SIP, Dahdi, IAX</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="sip"/>
+						<xs:enumeration value="dahdi"/>
+						<xs:enumeration value="iax"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="status" type="common:boolean">
+				<xs:annotation>
+					<xs:documentation>Channel status</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paid" type="common:boolean">
+				<xs:annotation>
+					<xs:documentation>Charging plan: paid(1), peer(0)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="flow" default="both" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel capabilities. Default both.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="in"/>
+						<xs:enumeration value="out"/>
+						<xs:enumeration value="both"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="crDate" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Creation date</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Codecs">
+		<xs:annotation>
+			<xs:documentation>Codecs data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ID" type="common:positiveInteger">
+				<xs:annotation>
+					<xs:documentation>Codec ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="name" type="common:string">
+				<xs:annotation>
+					<xs:documentation>Codec name</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="type" type="common:string">
+				<xs:annotation>
+					<xs:documentation>Codec type</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PublicNoInfo">
+		<xs:annotation>
+			<xs:documentation>Public phone number data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="phoneNo" type="common:string">
+				<xs:annotation>
+					<xs:documentation>Public phone number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="did" type="common:string">
+				<xs:annotation>
+					<xs:documentation>DID (Direct Inward Dialing) number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="location" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Location</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="cost" type="common:float" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Monthly amount paid to provider</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="incomingCost" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Incoming calls cost: {cost} money_unit every {interval} seconds</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="cost" type="common:float" minOccurs="0"/>
+						<xs:element name="interval" type="common:integer" nillable="0" minOccurs="0"
+						/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="type" default="exclusive" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Assignation method: stacked or exclusive</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="exclusive"/>
+						<xs:enumeration value="stacked"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PublicNoList">
+		<xs:annotation>
+			<xs:documentation>Public phone number list data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="channelID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="channel" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel name</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="didID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Public phone number ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="did" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>DID (Direct Inward Dialing) number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="location" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Location</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="type" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Assignation method: 'stacked', 'exclusive'</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="exclusive"/>
+						<xs:enumeration value="stacked"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="cost" type="common:float" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Monthly cost</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="flow" default="both" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Possible values: 'in', 'out', 'both'.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="in"/>
+						<xs:enumeration value="out"/>
+						<xs:enumeration value="both"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="phoneNo" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Public phone number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="callbackExt" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Callback extension</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="callbackExtID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Callback extension ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="crDate" type="xs:dateTime" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Creation date</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PublicNoSelection">
+		<xs:annotation>
+			<xs:documentation>Public phone numbers selection list: available and assigned phone numbers for a certain user</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="available" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available public phone numbers</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Public phone number ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="channel" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>The channel name</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="externalNo" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Public phone number</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="assigned" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Assigned public phone numbers</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Public phone number ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="channelID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Channel ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="channel" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Channel name</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="externalNo" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Public phone number</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="did" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>DID (Direct Inward Dialing) number</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="cost" type="common:float" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Monthly amount paid to provider</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="callbackExt" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>The extension that uses this public phone number</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="callbackExtID" type="common:positiveInteger" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>The extension id of the extension that uses this public phone number</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="flow" default="both" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Channel capabilities: 'in', 'out', 'both'. Default both.</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="in"/>
+									<xs:enumeration value="out"/>
+									<xs:enumeration value="both"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="crDate" type="xs:dateTime" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Creation date</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ChannelGroupInfo">
+		<xs:annotation>
+			<xs:documentation>Channel group data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel group name</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notes" type="common:text" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel group notes</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="channelID" type="common:positiveInteger" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Channels for the group</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ChannelGroupList">
+		<xs:annotation>
+			<xs:documentation>Channel group list data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel group ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="name" type="common:string" minOccurs="0"/>
+			<xs:element name="notes" type="common:text" minOccurs="0"/>
+			<xs:element name="channels" type="common:integer" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Number of channels in the group</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="crDate" type="xs:dateTime" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Creation date</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RoutingRuleInfo">
+		<xs:annotation>
+			<xs:documentation>Rule definition: {action} number {number} if time interval {intervalId} and coming from {comingFrom} transfer through {channelId} and {prefixOperation} with /prefixOperation: prefix {prefix}/ prefixOperation: replace {prefix}/prefixOperation: delete  {digits} digits starting from {digitsAfter}/prefixOperation: add {digitsAfter} after {digitsAfterAdd}/ add in position {position}</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="action" default="block" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Action: 'block', 'transfer', 'process', 'portability'. Default block</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="block"/>
+						<xs:enumeration value="transfer"/>
+						<xs:enumeration value="process"/>
+						<xs:enumeration value="portability"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="engine" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Portability engine</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="number">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:whiteSpace value="collapse"/>
+						<xs:pattern value="[*XZN\-\.\[\]\d]+"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="intervalID" type="common:positiveInteger" nillable="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Time interval ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="comingFrom" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:whiteSpace value="collapse"/>
+						<xs:pattern value="[0-9\*\.]+"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="channelID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Channel ID. Default: Best cost</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:sequence minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Operation executed on the callerID.</xs:documentation>
+				</xs:annotation>
+				<xs:element name="callerIDPrefixOperation" default="prefix" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Prefix operation for callerID, required just for {action: transfer, process}: 'prefix','replace','add' or 'substract'. Default prefix</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="prefix"/>
+							<xs:enumeration value="replace"/>
+							<xs:enumeration value="add"/>
+							<xs:enumeration value="substract"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="callerIDPrefix" type="xs:decimal" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Required for callerIDPrefixOperation:replace, prefix.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="callerIDDigits" type="common:integer" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>For callerIDPrefixOperation:substract only</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="callerIDDigitsAfter" type="common:integer" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>For callerIDPrefixOperation:substract only</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="callerIDNumberAdd" type="common:integer" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>For callerIDPrefixOperation:add only</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="callerIDDigitsAfterAdd" type="xs:decimal" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>For callerIDPrefixOperation:add only</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element minOccurs="0" name="callerIDMatch" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>Perform operation only when CallerID matches
+</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+			<xs:sequence minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Operation executed on the number.</xs:documentation>
+				</xs:annotation>
+				<xs:element name="prefixOperation" default="prefix" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Prefix operation, required just for {action: transfer, process}: 'prefix','replace','add' or 'substract'. Default prefix</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="prefix"/>
+							<xs:enumeration value="replace"/>
+							<xs:enumeration value="add"/>
+							<xs:enumeration value="substract"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="prefix" type="xs:decimal" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Required for prefixOperation:replace, prefix.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="digits" type="common:integer" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>For prefixOperation:substract only</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="numberAdd" type="common:integer" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>For prefixOperation:add only</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="digitsAfterAdd" type="xs:decimal" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>For prefixOperation:add only</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="digitsAfter" type="common:integer" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>For prefixOperation:substract only</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+			<xs:element name="position" type="common:unsignedInt" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Default: first position</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="final" type="common:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Final transfer rule</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RoutingRuleGroupInfo">
+		<xs:annotation>
+			<xs:documentation>Outgoing routing rule group definition</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Routing rule name</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Client ID for the outgoing routing rule</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="default" type="common:boolean" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Set as default routing group</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rules" type="RoutingRuleInfo" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Outgoing routing rules in group</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ChannelGroupSelection">
+		<xs:annotation>
+			<xs:documentation>Channel group selection list: available and assigned channel groups for a certain channel</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="available" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available channel groups</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Channel group ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="name" type="common:string">
+							<xs:annotation>
+								<xs:documentation>Channel group name</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="assigned" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Assigned channel groups</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Channel group ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="name" type="common:string">
+							<xs:annotation>
+								<xs:documentation>Channel group name</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CallRulesOutGroupList">
+		<xs:annotation>
+			<xs:documentation>Outgoing routing rules group list</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ID" type="common:positiveInteger">
+				<xs:annotation>
+					<xs:documentation>Outgoing routing rules group ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="name" type="common:string">
+				<xs:annotation>
+					<xs:documentation>Outgoing routing rules group name</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="status" type="common:boolean">
+				<xs:annotation>
+					<xs:documentation>Rules group status</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rulesNo" type="common:unsignedInt">
+				<xs:annotation>
+					<xs:documentation>Number of outgoing routing rules in group</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="inUse" type="common:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Used in charging plan </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="crDate" type="xs:dateTime" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Creation date</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="default" type="common:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Default outgoing routing rule group</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

@@ -49,19 +49,17 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.rmi.RemoteException;
-import org.apache.axis2.AxisFault;
-import com._4psa.clientmessages_xsd._2_0_4.GetClientDetailsRequest;
-import com._4psa.clientmessages_xsd._2_0_4.GetClientDetailsResponse;
-import com._4psa.clientmessagesinfo_xsd._2_0_4.GetClientDetailsResponseType;
-import com._4psa.common_xsd._2_0_4.PositiveInteger;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.voipnowservice._2_0_4.ClientPortStub;
+import javax.xml.ws.Holder;
+
+import com._4psa.client._2_5_1.ClientInterface;
+import com._4psa.client._2_5_1.ClientPort;
+import com._4psa.clientmessages_xsd._2_5.GetClientDetailsRequest;
+import com._4psa.clientmessages_xsd._2_5.GetClientDetailsResponse;
+import com._4psa.headerdata_xsd._2_5.ServerInfo;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
  * {@link ClientDetailsAction} - Maps the action to a <tt>clientdetails</tt> action.
@@ -70,17 +68,17 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientPortStub> {
+public class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientInterface> {
 
     /**
      * The SOAP path.
      */
-    private static final String SOAP_PATH = "/soap2/client_agent.php";
+    private static String SOAP_PATH = "/soap2/client_agent.php";
 
     /**
      * The <tt>clientdetails</tt> action string.
      */
-    public static final String ACTION = "clientdetails";
+    public static String ACTION = "clientdetails";
 
     /**
      * Initializes a new {@link ClientDetailsAction}.
@@ -89,57 +87,21 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final String clientId = checkStringParameter(request, "id");
-            final String identifier = checkStringParameter(request, "identifier");
-            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
-            /*
-             * The SOAP stub
-             */
-            final ClientPortStub stub = configureStub(setting);
-            /*
-             * Call client detail request
-             */
-            final com._4psa.clientmessages_xsd._2_0_4.GetClientDetailsRequest detailRequest = new GetClientDetailsRequest();
-            /*
-             * Create "ID" and apply to request
-             */
-            final PositiveInteger clientIdInt = new PositiveInteger();
-            final org.apache.axis2.databinding.types.PositiveInteger pi = new org.apache.axis2.databinding.types.PositiveInteger(clientId);
-            clientIdInt.setPositiveInteger(pi);
-            detailRequest.setID(clientIdInt);
-            /*
-             * Create "identifier" and apply to request
-             */
-            final com._4psa.common_xsd._2_0_4.String identifierString = new com._4psa.common_xsd._2_0_4.String();
-            identifierString.setString(/* identifier */clientId);
-            // detailRequest.setIdentifier(identifierString);
-            final UserCredentials userCredentials = getUserCredentials(setting);
-            /*
-             * Perform request and retrieve response
-             */
-            final GetClientDetailsResponse clientDetailsResponse = stub.getClientDetails(detailRequest, userCredentials);
-            /*
-             * Get response type
-             */
-            final GetClientDetailsResponseType clientDetailsResponseType = clientDetailsResponse.getGetClientDetailsResponse();
-            /*
-             * Get some data from response type; e.g client's address
-             */
-            final com._4psa.common_xsd._2_0_4.Email emailString = clientDetailsResponseType.getEmail();
-            /*
-             * Return client data
-             */
-            return new AJAXRequestResult(emailString.getEmail());
-        } catch (final AxisFault e) {
-            throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
-        } catch (final RemoteException e) {
-            throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
-        }
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        String clientId = checkStringParameter(request, "id");
+
+		GetClientDetailsRequest detailRequest = new GetClientDetailsRequest();
+
+		detailRequest.setIdentifier(clientId);
+
+		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
+		ClientInterface port = configureStub(setting);
+		GetClientDetailsResponse response = port.getClientDetails(detailRequest, getUserCredentials(setting), new Holder<ServerInfo>());
+		
+
+		String email = response.getEmail();
+
+		return new AJAXRequestResult(email);
     }
 
     @Override
@@ -153,8 +115,8 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
     }
 
     @Override
-    protected ClientPortStub newSOAPStub() throws AxisFault {
-        return new ClientPortStub();
+    protected ClientInterface newSOAPStub(){
+        return new ClientPort(getWsdlLocation()).getClientPort();
     }
 
 }

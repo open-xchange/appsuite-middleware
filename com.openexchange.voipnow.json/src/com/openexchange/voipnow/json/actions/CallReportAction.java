@@ -49,260 +49,209 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.rmi.RemoteException;
-import java.util.Date;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
-import org.apache.axis2.AxisFault;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.ws.Holder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com._4psa.common_xsd._2_0_4.DateTime;
-import com._4psa.common_xsd._2_0_4.PositiveInteger;
-import com._4psa.reportdata_xsd._2_0_4.Call_type0;
-import com._4psa.reportdata_xsd._2_0_4.IncomingCalls_type0;
-import com._4psa.reportdata_xsd._2_0_4.OutgoingCalls_type0;
-import com._4psa.reportmessages_xsd._2_0_4.CallReportRequest;
-import com._4psa.reportmessages_xsd._2_0_4.CallReportRequestChoice_type0;
-import com._4psa.reportmessages_xsd._2_0_4.Disposion_type1;
-import com._4psa.reportmessages_xsd._2_0_4.Interval_type0;
-import com._4psa.reportmessagesinfo_xsd._2_0_4.CallReportResponseType;
-import com._4psa.voipnowservice._2_0_4.ReportPortStub;
+
+import com._4psa.headerdata_xsd._2_5.ServerInfo;
+import com._4psa.headerdata_xsd._2_5.UserCredentials;
+import com._4psa.report._2_5_1.ReportInterface;
+import com._4psa.report._2_5_1.ReportPort;
+import com._4psa.reportdata_xsd._2_5.CallReport.Call;
+import com._4psa.reportdata_xsd._2_5.CallReport.IncomingCalls;
+import com._4psa.reportdata_xsd._2_5.CallReport.OutgoingCalls;
+import com._4psa.reportmessages_xsd._2_5.CallReportRequest;
+import com._4psa.reportmessages_xsd._2_5.ObjectFactory;
+import com._4psa.reportmessages_xsd._2_5.CallReportRequest.Interval;
+import com._4psa.reportmessagesinfo_xsd._2_5.CallReportResponseType;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.DataWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.voipnow.json.CustomConverter;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
-
 /**
  * {@link CallReportAction} - Maps the action to a <tt>callreport</tt> action.
  * <p>
  * A call report is initiated using VoipNow's SOAP API.
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> -
+ *         design for VoipNow 2.0.3
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> -
+ *         rewrite for VoipNow 2.5.1
  */
-public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPortStub> {
+public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface> {
 
-    /**
-     * The SOAP path.
-     */
-    private static final String SOAP_PATH = "/soap2/report_agent.php";
+	private static final String CALLS = "calls";
+	private static final String INCOMING = "incoming";
+	private static final String OUTGOING = "outgoing";
 
-    /**
-     * The <tt>callreport</tt> action string.
-     */
-    public static final String ACTION = "callreport";
+	/**
+	 * The SOAP path.
+	 */
+	private static String SOAP_PATH = "/soap2/report_agent.php";
 
-    /**
-     * Initializes a new {@link CallReportAction}.
-     */
-    public CallReportAction() {
-        super();
-    }
+	/**
+	 * The <tt>callreport</tt> action string.
+	 */
+	public static String ACTION = "callreport";
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final long start = checkLongParameter(request, "start");
-            final long end = checkLongParameter(request, "end");
-			final String timeZoneID = request
-					.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-			final TimeZone timeZone = TimeZoneUtils
-					.getTimeZone(null == timeZoneID ? session.getUser()
-							.getTimeZone() : timeZoneID);
-            final String disposion = "answered";
-            // TODO: What about disposion??? "ANSWERED", "BUSY", "FAILED", "NO ANSWER", "UNKNOWN", or "NOT ALLOWED"
-            /*
-             * Get session user's main extension identifier
-             */
-            final String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
-            /*
-             * Get setting
-             */
-            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
-            /*
-             * Perform a SOAP request
-             */
-            final ReportPortStub stub = configureStub(setting);
-            /*
-             * Call report request
-             */
-            final CallReportRequest callReportRequest = new CallReportRequest();
-            {
-                /*
-                 * Set choice 0: user ID, identifier OR login
-                 */
-                {
-                    final CallReportRequestChoice_type0 type0 = new CallReportRequestChoice_type0();
-                    final PositiveInteger userIdParam = new PositiveInteger();
-                    userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
-                    type0.setUserID(userIdParam);
-                    callReportRequest.setCallReportRequestChoice_type0(type0);
-                }
-                /*
-                 * Set interval
-                 */
-                {
-                    final Interval_type0 interval = new Interval_type0();
-                    interval.setStartDate(new java.util.Date(start));
-                    interval.setEndDate(new java.util.Date(end));
-                    callReportRequest.setInterval(interval);
-                }
-                /*
-                 * Set disposion
-                 */
-                {
-                    if ("answered".equalsIgnoreCase(disposion)) {
-                        callReportRequest.setDisposion(Disposion_type1.value1);
-                    } else if ("busy".equalsIgnoreCase(disposion)) {
-                        callReportRequest.setDisposion(Disposion_type1.value2);
-                    } else if ("failed".equalsIgnoreCase(disposion)) {
-                        callReportRequest.setDisposion(Disposion_type1.value3);
-                    } else if ("no answer".equalsIgnoreCase(disposion)) {
-                        callReportRequest.setDisposion(Disposion_type1.value4);
-                    } else if ("unknown".equalsIgnoreCase(disposion)) {
-                        callReportRequest.setDisposion(Disposion_type1.value5);
-                    } else if ("not allowed".equalsIgnoreCase(disposion)) {
-                        callReportRequest.setDisposion(Disposion_type1.value6);
-                    } else {
-                        throw new AjaxException(AjaxException.Code.InvalidParameterValue, "disposion", disposion);
-                    }
-                }
-            }
-            /*
-             * Get response type
-             */
-			final CallReportResponseType callReportResponseType;
-			CustomConverter.setEnabled(true);
-			try {
-				callReportResponseType = stub.callReport(callReportRequest,
-						getUserCredentials(setting)).getCallReportResponse();
-			} finally {
-				CustomConverter.setEnabled(false);
-			}
-            /*
-             * Incoming calls
-             */
-            final JSONObject calls = new JSONObject();
-            {
-                final IncomingCalls_type0 incomingCalls = callReportResponseType.getIncomingCalls();
-                final JSONObject incomingCallsObject = new JSONObject();
-                incomingCallsObject.put("total", incomingCalls.getTotal().getInteger().intValue());
-                incomingCallsObject.put("answered", incomingCalls.getAnswered().getInteger().intValue());
-                incomingCallsObject.put("busy", incomingCalls.getBusy().getInteger().intValue());
-                incomingCallsObject.put("failed", incomingCalls.getFailed().getInteger().intValue());
-                incomingCallsObject.put("unallowed", incomingCalls.getUnallowed().getInteger().intValue());
-                incomingCallsObject.put("unanswered", incomingCalls.getUnanswered().getInteger().intValue());
-                incomingCallsObject.put("unknown", incomingCalls.getUnknown().getInteger().intValue());
-                /*
-                 * Add to object
-                 */
-                calls.put("incoming", incomingCallsObject);
-            }
-            /*
-             * Outgoing calls
-             */
-            {
-                final OutgoingCalls_type0 outgoingCalls = callReportResponseType.getOutgoingCalls();
-                final JSONObject outgoingCallsObject = new JSONObject();
-                outgoingCallsObject.put("total", outgoingCalls.getTotal().getInteger().intValue());
-                outgoingCallsObject.put("answered", outgoingCalls.getAnswered().getInteger().intValue());
-                outgoingCallsObject.put("busy", outgoingCalls.getBusy().getInteger().intValue());
-                outgoingCallsObject.put("failed", outgoingCalls.getFailed().getInteger().intValue());
-                outgoingCallsObject.put("unallowed", outgoingCalls.getUnallowed().getInteger().intValue());
-                outgoingCallsObject.put("unanswered", outgoingCalls.getUnanswered().getInteger().intValue());
-                outgoingCallsObject.put("unknown", outgoingCalls.getUnknown().getInteger().intValue());
-                /*
-                 * Add to object
-                 */
-                calls.put("outgoing", outgoingCallsObject);
-            }
+	/**
+	 * Initializes a new {@link CallReportAction}.
+	 */
+	public CallReportAction() {
+		super();
+	}
+
+	public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+		try {
 			/*
-			 * Call history
+			 * Parse parameters
 			 */
-			{
-				final Call_type0[] history = callReportResponseType.getCall();
-				final JSONArray historyObject = new JSONArray();
-				if (null != history) {
-					for (final Call_type0 call : history) {
-						final JSONObject callObject = new JSONObject();
-						string("source", call.getSource(), callObject);
-						string("destination", call.getDestination(), callObject);
-						date("startDate", call.getStartDate(), callObject,
-								timeZone);
-						string("duration", call.getDuration(), callObject);
-						date("answerDate", call.getAnswerDate(), callObject,
-								timeZone);
-						final com._4psa.reportdata_xsd._2_0_4.Flow_type13 flow = call
-								.getFlow();
-						if (null != flow) {
-							callObject.put("flow", flow.getValue());
-						}
-						final com._4psa.reportdata_xsd._2_0_4.Type_type13 type = call
-								.getType();
-						if (null != type) {
-							callObject.put("type", type.getValue());
-						}
-						final com._4psa.reportdata_xsd._2_0_4.Disposion_type3 disposition = call
-								.getDisposion();
-						if (null != disposition) {
-							callObject.put("disposition", disposition
-									.getValue());
-						}
-						historyObject.put(callObject);
-					}
-				}
-				calls.put("calls", historyObject);
+			long start = checkLongParameter(request, "start");
+			long end = checkLongParameter(request, "end");
+			String timeZoneID = request
+			.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+			TimeZone timeZone = TimeZoneUtils
+			.getTimeZone(null == timeZoneID ? session.getUser()
+					.getTimeZone() : timeZoneID);
+			
+			// TODO: What about disposion??? "ANSWERED", "BUSY", "FAILED", "NO ANSWER", "UNKNOWN", or "NOT ALLOWED"
+			String disposion = "answered";
+			
+			/*
+			 * Get other parameters
+			 */
+			BigInteger userId = getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId());
+			VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
+
+			/*
+			 * Perform a SOAP request
+			 */
+			ReportInterface port = configureStub(setting);
+			CallReportRequest callReportRequest = prepareReportRequest(start, end, timeZone, disposion, userId);
+			CallReportResponseType callResponse = port.callReport(callReportRequest, getUserCredentials(setting), new Holder<ServerInfo>());
+
+			/*
+			 * Generate reports
+			 */
+			JSONObject calls = new JSONObject();
+			calls.put(INCOMING, reportIncomingCalls(callResponse));
+			calls.put(OUTGOING, reportOutgoingCalls(callResponse));
+			calls.put(CALLS, reportCallHistory(callResponse));
+
+			return new AJAXRequestResult(calls);
+		} catch (JSONException e) {
+			throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+		} catch (DatatypeConfigurationException e) {
+			throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
+		}
+	}
+
+	private JSONArray reportCallHistory(CallReportResponseType callResponse) throws JSONException {
+		List<Call> history = callResponse.getCall();
+		
+		JSONArray historyObject = new JSONArray();
+		if (null != history && ! history.isEmpty()) {
+			for (Call call : history) {
+				JSONObject callObject = new JSONObject();
+				callObject.put("source", call.getSource());
+				callObject.put("destination", call.getDestination());
+				callObject.put("startDate", call.getStartDate().toGregorianCalendar().getTime());
+				callObject.put("duration", call.getDuration());
+				callObject.put("answerDate", call.getAnswerDate().toGregorianCalendar().getTime());
+				callObject.put("flow", call.getFlow()); // could be null
+				callObject.put("type", call.getType()); // could be null
+				callObject.put("disposition", call.getDisposition()); // could be null
+				historyObject.put(callObject);
 			}
-            /*
-             * Return
-             */
-            return new AJAXRequestResult(calls);
-        } catch (final AxisFault e) {
-            throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
-        } catch (final RemoteException e) {
-            throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
-        }
-    }
-    
-	private static void string(final String key,
-			final com._4psa.common_xsd._2_0_4.String value, final JSONObject object)
-			throws JSONException {
-		if (null != value) {
-			object.put(key, value.getString());
 		}
+		return historyObject;
 	}
 
-	private static void date(final String key, final DateTime value, final JSONObject object,
-			final TimeZone timeZone) throws JSONException {
-		if (null != value) {
-			final Date dateValue = value.getDateTime().getTime();
-			DataWriter.writeParameter(key, dateValue, dateValue, timeZone,
-					object);
-		}
+	private JSONObject reportOutgoingCalls(CallReportResponseType callResponse) throws JSONException {
+		OutgoingCalls outgoingCalls = callResponse.getOutgoingCalls();
+		JSONObject outgoingCallsObject = new JSONObject();
+		outgoingCallsObject.put("total", outgoingCalls.getTotal().intValue());
+		outgoingCallsObject.put("answered", outgoingCalls.getAnswered().intValue());
+		outgoingCallsObject.put("busy", outgoingCalls.getBusy().intValue());
+		outgoingCallsObject.put("failed", outgoingCalls.getFailed().intValue());
+		outgoingCallsObject.put("unallowed", outgoingCalls.getUnallowed().intValue());
+		outgoingCallsObject.put("unanswered", outgoingCalls.getUnanswered().intValue());
+		outgoingCallsObject.put("unknown", outgoingCalls.getUnknown().intValue());
+		return outgoingCallsObject;
 	}
-	
+
+	private JSONObject reportIncomingCalls(CallReportResponseType callResponse) throws JSONException {
+		IncomingCalls incomingCalls = callResponse.getIncomingCalls();
+		JSONObject incomingCallsObject = new JSONObject();
+		incomingCallsObject.put("total", incomingCalls.getTotal().intValue());
+		incomingCallsObject.put("answered", incomingCalls.getAnswered().intValue());
+		incomingCallsObject.put("busy", incomingCalls.getBusy().intValue());
+		incomingCallsObject.put("failed", incomingCalls.getFailed().intValue());
+		incomingCallsObject.put("unallowed", incomingCalls.getUnallowed().intValue());
+		incomingCallsObject.put("unanswered", incomingCalls.getUnanswered().intValue());
+		incomingCallsObject.put("unknown", incomingCalls.getUnknown().intValue());
+		return incomingCallsObject;
+	}
+
+
+	private CallReportRequest prepareReportRequest(long start, long end,
+			TimeZone timeZone, String disposion,
+			BigInteger userId)
+	throws DatatypeConfigurationException, AjaxException {
+        ObjectFactory factory = new ObjectFactory();
+        
+		CallReportRequest callReportRequest = factory.createCallReportRequest();
+
+		// Set choice 0: user ID, identifier OR login
+		//callReportRequest.setUserIdentifier(userId);
+		callReportRequest.setUserID(userId);
+
+		//Set interval
+		
+		Interval interval = factory.createCallReportRequestInterval();
+		GregorianCalendar tempCal = new GregorianCalendar(timeZone);
+		tempCal.setTime(new java.util.Date(start));
+		interval.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(tempCal));
+		tempCal.setTime(new java.util.Date(end));
+		interval.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(tempCal));
+		callReportRequest.setInterval( interval );
+
+		// Set disposion
+		List<String> allowedDispositions = Arrays.asList("answered","busy","failed","no answer","unknown","not allowed");
+		if(! allowedDispositions.contains(disposion.toLowerCase()))
+			throw new AjaxException(AjaxException.Code.InvalidParameterValue, "disposion", disposion);
+		callReportRequest.setDisposion(disposion.toUpperCase());
+
+		return callReportRequest;
+	}
+
 	@Override
-    protected String getSOAPPath() {
-        return SOAP_PATH;
-    }
+	protected String getSOAPPath() {
+		return SOAP_PATH;
+	}
 
-    @Override
-    protected int getSOAPTimeout() {
-        return 60000;
-    }
+	@Override
+	protected int getSOAPTimeout() {
+		return 60000;
+	}
 
-    @Override
-    protected ReportPortStub newSOAPStub() throws AxisFault {
-        return new ReportPortStub();
-    }
+	@Override
+	protected ReportInterface newSOAPStub(){
+		return new ReportPort(getWsdlLocation()).getReportPort();
+	}
 
 }

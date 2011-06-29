@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/AccountMessages.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:accountData="http://4psa.com/AccountData.xsd/2.5.1" xmlns:common="http://4psa.com/Common.xsd/2.5.1" xmlns:messagesInfo="http://4psa.com/AccountMessagesInfo.xsd/2.5.1" targetNamespace="http://4psa.com/AccountMessages.xsd/2.5.1" elementFormDefault="qualified" id="AccountMessages">
+	<xs:import namespace="http://4psa.com/AccountData.xsd/2.5.1" schemaLocation="AccountData.xsd"/>
+	<xs:import namespace="http://4psa.com/AccountMessagesInfo.xsd/2.5.1" schemaLocation="AccountMessagesInfo.xsd"/>
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:element name="DelAccountRequest">
+		<xs:annotation>
+			<xs:documentation>Delete account: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Reselles IDs</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="identifier" type="common:string" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Account identifiers</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelAccountResponse" type="common:delObject">
+		<xs:annotation>
+			<xs:documentation>Delete account: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="SetAccountStatusRequest">
+		<xs:annotation>
+			<xs:documentation>Change account status:request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="status" type="common:boolean" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Account status</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="phoneStatus" default="1" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Account phone status. Default value:1.</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="1">
+								<xs:annotation>
+									<xs:documentation>Customer can dial out and receive calls</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="16">
+								<xs:annotation>
+									<xs:documentation>Customer can be called and can call internally</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="32">
+								<xs:annotation>
+									<xs:documentation>Customer can be called only</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="64">
+								<xs:annotation>
+									<xs:documentation>Customer can not use phone service</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="scope" type="common:string" default="automation" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Scope identifier for the enrollment server. Scope:automation is reserved for VoipNow Automation</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="ID" type="common:positiveInteger">
+						<xs:annotation>
+							<xs:documentation>Account ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="identifier" type="common:string">
+						<xs:annotation>
+							<xs:documentation>Account identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SetAccountStatusResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Change account status: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="LinkAccountRequest">
+		<xs:annotation>
+			<xs:documentation>Link account to a remote account resource:request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice>
+					<xs:element name="ID" type="common:positiveInteger">
+						<xs:annotation>
+							<xs:documentation>Account ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="identifier" type="common:string">
+						<xs:annotation>
+							<xs:documentation>Account identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="login" type="common:string">
+						<xs:annotation>
+							<xs:documentation>Account username</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+				<xs:element name="linkResourceID" type="common:integer" default="1" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Linkage resource identifier</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="linkUUID" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Remote linkage user identifier</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="forceUpdate" type="common:boolean" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Force remote resource linkage identifier update</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="LinkAccountResponse">
+		<xs:annotation>
+			<xs:documentation>Link account to a remote account resource: response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="common:updateObject">
+					<xs:sequence>
+						<xs:element name="identifier" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Account identifier</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

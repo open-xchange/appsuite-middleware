@@ -49,19 +49,16 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.rmi.RemoteException;
-import org.apache.axis2.AxisFault;
-import org.json.JSONArray;
-import org.json.JSONException;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.pbxmessages_xsd._2_0_4.PingResponse;
-import com._4psa.pbxmessagesinfo_xsd._2_0_4.PingResponseType;
-import com._4psa.voipnowservice._2_0_4.PBXPortStub;
+import javax.xml.ws.Holder;
+
+import com._4psa.headerdata_xsd._2_5.ServerInfo;
+import com._4psa.pbx._2_5_1.PBXInterface;
+import com._4psa.pbx._2_5_1.PBXPort;
+import com._4psa.pbxmessagesinfo_xsd._2_5.PingResponseType;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
  * {@link PingAction} - The action ping.
@@ -70,17 +67,17 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PingAction extends AbstractVoipNowSOAPAction<PBXPortStub> {
+public class PingAction extends AbstractVoipNowSOAPAction<PBXInterface> {
 
     /**
      * The SOAP path.
      */
-    private static final String SOAP_PATH = "/soap2/pbx_agent.php";
+    private static String SOAP_PATH = "/soap2/pbx_agent.php";
 
     /**
      * The <tt>ping</tt> action string.
      */
-    public static final String ACTION = "ping";
+    public static String ACTION = "ping";
 
     /**
      * Initializes a new {@link PingAction}.
@@ -89,45 +86,16 @@ public final class PingAction extends AbstractVoipNowSOAPAction<PBXPortStub> {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        try {
-            //final String userId = checkStringParameter(request, "id");
-            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
-            /*
-             * The SOAP stub
-             */
-            final PBXPortStub stub = configureStub(setting);
-            /*
-             * The credentials
-             */
-            final UserCredentials userCredentials = getUserCredentials(setting);
-            /*
-             * Ping request
-             */
-            final com._4psa.pbxmessages_xsd._2_0_4.PingRequest pingRequest = new com._4psa.pbxmessages_xsd._2_0_4.PingRequest();
-            {
-                final com._4psa.common_xsd._2_0_4.String string = new com._4psa.common_xsd._2_0_4.String();
-                string.setString("ping");
-                pingRequest.setPingRequest(string);
-            }
-            /*
-             * Fire ping request
-             */
-            final PingResponse pingResponse = stub.ping(pingRequest, userCredentials);
-            final PingResponseType pingResponseType = pingResponse.getPingResponse();
-            /*
-             * Get version
-             */
-            final String version = pingResponseType.getVersion().getString();
-            /*
-             * Return version
-             */
-            return new AJAXRequestResult(version);
-        } catch (final AxisFault e) {
-            throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
-        } catch (final RemoteException e) {
-            throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
-        }
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
+
+		PBXInterface stub = configureStub(setting);
+
+		PingResponseType pingResponse = stub.ping("ping", getUserCredentials(setting), new Holder<ServerInfo>());
+
+		String version = pingResponse.getVersion();
+
+		return new AJAXRequestResult(version);
     }
 
     @Override
@@ -141,17 +109,8 @@ public final class PingAction extends AbstractVoipNowSOAPAction<PBXPortStub> {
     }
 
     @Override
-    protected PBXPortStub newSOAPStub() throws AxisFault {
-        return new PBXPortStub();
-    }
-
-    private static String[] json2StringArr(final JSONArray jsonArray) throws JSONException {
-        final int len = jsonArray.length();
-        final String[] ret = new String[len];
-        for (int i = 0; i < len; i++) {
-            ret[i] = jsonArray.getString(i);
-        }
-        return ret;
+    protected PBXInterface newSOAPStub(){
+        return new PBXPort(getWsdlLocation()).getPBXPort();
     }
 
 }

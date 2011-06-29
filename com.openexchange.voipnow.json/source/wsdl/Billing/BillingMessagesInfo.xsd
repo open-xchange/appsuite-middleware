@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/BillingMessagesInfo.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:common="http://4psa.com/Common.xsd/2.5.1" xmlns:BillingData="http://4psa.com/BillingData.xsd/2.5.1" targetNamespace="http://4psa.com/BillingMessagesInfo.xsd/2.5.1" elementFormDefault="qualified" id="BillingMessagesInfo">
+	<xs:import namespace="http://4psa.com/BillingData.xsd/2.5.1" schemaLocation="BillingData.xsd"/>
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:complexType name="GetChargingPlanResponseType">
+		<xs:annotation>
+			<xs:documentation>Get charging plans: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="chargingPlan" type="BillingData:ChargingPlanList" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A charging plans list on success</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetChargingPlanDetailsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get charging plan details: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="chargingPlan" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>A charging plans list on success</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="BillingData:ChargingPlanInfo">
+							<xs:sequence>
+								<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Charging plan ID</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="identifier" type="common:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Charging plan identifier</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Charging plan owner ID</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="userLogin" type="common:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Charging plan owner login</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="status" type="common:boolean" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Charging plan status</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="originalIdentifier" type="common:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Original charging plan identifier</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="signature" type="common:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Signature for the charging plan (used by Automation)</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetRechargesResponseType">
+		<xs:annotation>
+			<xs:documentation>Recharge : response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="credit" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="BillingData:CreditsList"/>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="limit" type="BillingData:LimitsList" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:choice>
+			<xs:element name="planType" default="postpaid" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Charging plan type</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="prepaid"/>
+						<xs:enumeration value="postpaid"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="currentIn" type="common:unlimitedUFloat" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Currently incoming credit/limit left</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="currentOut" type="common:unlimitedUFloat" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Currently outgoing credit/limit left </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="currentOverusage" type="common:unlimitedUFloat" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Currently overusage minutes left</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="currency" type="common:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Default system currency</xs:documentation>
+				</xs:annotation>
+			</xs:element>			
+		</xs:sequence>				
+	</xs:complexType>
+</xs:schema>

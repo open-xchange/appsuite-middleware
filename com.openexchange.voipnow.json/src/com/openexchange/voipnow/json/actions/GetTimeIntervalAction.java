@@ -49,21 +49,20 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.rmi.RemoteException;
-import org.apache.axis2.AxisFault;
-import com._4psa.common_xsd._2_0_4.PositiveInteger;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.pbxdata_xsd._2_0_4.TimeIntervalBlock;
-import com._4psa.pbxmessages_xsd._2_0_4.GetTimeIntervalBlocksRequest;
-import com._4psa.pbxmessages_xsd._2_0_4.GetTimeIntervalBlocksRequestChoice_type0;
-import com._4psa.pbxmessages_xsd._2_0_4.GetTimeIntervalBlocksResponse;
-import com._4psa.pbxmessagesinfo_xsd._2_0_4.GetTimeIntervalBlocksResponseType;
-import com._4psa.voipnowservice._2_0_4.PBXPortStub;
+import java.math.BigInteger;
+
+import javax.xml.ws.Holder;
+
+import com._4psa.headerdata_xsd._2_5.ServerInfo;
+import com._4psa.pbx._2_5_1.PBXInterface;
+import com._4psa.pbx._2_5_1.PBXPort;
+import com._4psa.pbxdata_xsd._2_5.TimeIntervalBlock;
+import com._4psa.pbxmessages_xsd._2_5.GetTimeIntervalBlocksRequest;
+import com._4psa.pbxmessagesinfo_xsd._2_5.GetTimeIntervalBlocksResponseType;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 
 /**
@@ -71,12 +70,12 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXPortStub> {
+public class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXInterface> {
 
     /**
      * The <tt>timeinterval</tt> action string.
      */
-    public static final String ACTION = "timeinterval";
+    public static String ACTION = "timeinterval";
 
     /**
      * Initializes a new {@link GetTimeIntervalAction}.
@@ -96,53 +95,28 @@ public final class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXPo
     }
 
     @Override
-    protected PBXPortStub newSOAPStub() throws AxisFault {
-        return new PBXPortStub();
+    protected PBXInterface newSOAPStub(){
+        return new PBXPort(getWsdlLocation()).getPBXPort();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
-            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
-            /*
-             * Stub
-             */
-            final PBXPortStub stub = configureStub(setting);
-            /*
-             * Create appropriate request
-             */
-            final GetTimeIntervalBlocksRequest getTimeIntervalBlocksRequest = new GetTimeIntervalBlocksRequest();
-            
-            final GetTimeIntervalBlocksRequestChoice_type0 ct = new GetTimeIntervalBlocksRequestChoice_type0();
-            final PositiveInteger pi = new PositiveInteger();
-            pi.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
-            ct.setUserID(pi);
-            
-            getTimeIntervalBlocksRequest.setGetTimeIntervalBlocksRequestChoice_type0(ct);
-            
-            /*
-             * Create user credentials
-             */
-            final UserCredentials userCredentials = getUserCredentials(setting);
-            /*
-             * Execute request
-             */
-            final GetTimeIntervalBlocksResponse getTimeIntervalBlocksResponse = stub.getTimeIntervalBlocks(getTimeIntervalBlocksRequest, userCredentials);
-            final GetTimeIntervalBlocksResponseType getTimeIntervalBlocksResponseType = getTimeIntervalBlocksResponse.getGetTimeIntervalBlocksResponse();
-            
-            final TimeIntervalBlock timeIntervalBlock = getTimeIntervalBlocksResponseType.getTimeIntervalBlock()[0];
-            
-            final PositiveInteger id = timeIntervalBlock.getID();
-            
-            return new AJAXRequestResult(id.getPositiveInteger());
-        } catch (final AxisFault e) {
-            throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
-        } catch (final RemoteException e) {
-            throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
-        }
+    public AJAXRequestResult perform(AJAXRequestData ajaxRequest, ServerSession session) throws AbstractOXException {
+
+		String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
+		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
+
+		PBXInterface port = configureStub(setting);
+
+		GetTimeIntervalBlocksRequest request = new GetTimeIntervalBlocksRequest();
+		
+		request.setUserID(new BigInteger(userId));
+
+		GetTimeIntervalBlocksResponseType response = port.getTimeIntervalBlocks(request, getUserCredentials(setting), new Holder<ServerInfo>());
+		
+		TimeIntervalBlock timeIntervalBlock = response.getTimeIntervalBlock().get(0);
+		
+		BigInteger id = timeIntervalBlock.getID();
+		
+		return new AJAXRequestResult(id.intValue());
     }
 
 }

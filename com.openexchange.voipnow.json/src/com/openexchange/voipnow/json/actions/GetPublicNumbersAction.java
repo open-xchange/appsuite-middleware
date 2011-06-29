@@ -49,22 +49,25 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.rmi.RemoteException;
-import org.apache.axis2.AxisFault;
+import java.math.BigInteger;
+import java.util.List;
+
+import javax.xml.ws.Holder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
-import com._4psa.channeldata_xsd._2_0_4.Assigned_type0;
-import com._4psa.channelmessages_xsd._2_0_4.GetPublicNoPollRequest;
-import com._4psa.channelmessages_xsd._2_0_4.GetPublicNoPollResponse;
-import com._4psa.channelmessagesinfo_xsd._2_0_4.GetNoSelectionResponseType;
-import com._4psa.common_xsd._2_0_4.PositiveInteger;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.voipnowservice._2_0_4.ChannelPortStub;
+
+import com._4psa.channel._2_5_1.ChannelInterface;
+import com._4psa.channel._2_5_1.ChannelPort;
+import com._4psa.channeldata_xsd._2_5.PublicNoSelection.Assigned;
+import com._4psa.channelmessages_xsd._2_5.GetPublicNoPollRequest;
+import com._4psa.channelmessagesinfo_xsd._2_5.GetNoSelectionResponseType;
+import com._4psa.headerdata_xsd._2_5.ServerInfo;
+import com._4psa.headerdata_xsd._2_5.UserCredentials;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
  * {@link GetPublicNumbersAction} - The action to set followers.
@@ -73,17 +76,17 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<ChannelPortStub> {
+public class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<ChannelInterface> {
 
     /**
      * The SOAP path.
      */
-    private static final String SOAP_PATH = "/soap2/channel_agent.php";
+    private static String SOAP_PATH = "/soap2/channel_agent.php";
 
     /**
      * The <tt>publicnums</tt> action string.
      */
-    public static final String ACTION = "publicnums";
+    public static String ACTION = "publicnums";
 
     /**
      * Initializes a new {@link GetPublicNumbersAction}.
@@ -92,56 +95,25 @@ public final class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<Chan
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        try {
-            final String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
-            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
-            /*
-             * The SOAP stub
-             */
-            final ChannelPortStub stub = configureStub(setting);
-            /*
-             * The credentials
-             */
-            final UserCredentials userCredentials = getUserCredentials(setting);
-            /*
-             * The user ID integer
-             */
-            final PositiveInteger userIdInteger = new PositiveInteger();
-            userIdInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
-            /*
-             * Get user's public numbers
-             */
-            final GetPublicNoPollRequest getPublicNoPollRequest = new GetPublicNoPollRequest();
-            getPublicNoPollRequest.setUserID(userIdInteger);
-            /*
-             * Fire request
-             */
-            final GetPublicNoPollResponse getPublicNoPollResponse = stub.getPublicNoPoll(getPublicNoPollRequest, userCredentials);
-            /*
-             * Get response type
-             */
-            final GetNoSelectionResponseType getNoSelectionResponseType = getPublicNoPollResponse.getGetPublicNoPollResponse();
-            /*
-             * Iterate response and gather public numbers
-             */
-            final JSONArray ja = new JSONArray();
-            final Assigned_type0[] assigneds = getNoSelectionResponseType.getPublicNo().getAssigned();
-            if (null != assigneds) {
-                for (final Assigned_type0 assigned : assigneds) {
-                    final com._4psa.common_xsd._2_0_4.String externalNo = assigned.getExternalNo();
-                    ja.put(externalNo.getString());
-                }
-            }
-            /*
-             * Return ID
-             */
-            return new AJAXRequestResult(ja);
-        } catch (final AxisFault e) {
-            throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
-        } catch (final RemoteException e) {
-            throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
-        }
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
+		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
+
+		GetPublicNoPollRequest getPublicNoPollRequest = new GetPublicNoPollRequest();
+		getPublicNoPollRequest.setUserID(new BigInteger(userId));
+
+		ChannelInterface port = configureStub(setting);
+
+		GetNoSelectionResponseType response = port.getPublicNoPoll(getPublicNoPollRequest, getUserCredentials(setting), new Holder<ServerInfo>());
+
+		JSONArray ja = new JSONArray();
+		List<Assigned> assigneds = response.getPublicNo().getAssigned();
+		if (null != assigneds) {
+		    for (Assigned assigned : assigneds) {
+		        ja.put(assigned.getExternalNo());
+		    }
+		}
+		return new AJAXRequestResult(ja);
     }
 
     @Override
@@ -155,17 +127,9 @@ public final class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<Chan
     }
 
     @Override
-    protected ChannelPortStub newSOAPStub() throws AxisFault {
-        return new ChannelPortStub();
+    protected ChannelInterface newSOAPStub(){
+        return new ChannelPort(getWsdlLocation()).getChannelPort();
     }
 
-    private static String[] json2StringArr(final JSONArray jsonArray) throws JSONException {
-        final int len = jsonArray.length();
-        final String[] ret = new String[len];
-        for (int i = 0; i < len; i++) {
-            ret[i] = jsonArray.getString(i);
-        }
-        return ret;
-    }
 
 }

@@ -49,19 +49,19 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.rmi.RemoteException;
-import org.apache.axis2.AxisFault;
-import com._4psa.common_xsd._2_0_4.PositiveInteger;
-import com._4psa.extensionmessages_xsd._2_0_4.GetExtensionDetailsRequest;
-import com._4psa.extensionmessages_xsd._2_0_4.GetExtensionDetailsResponse;
-import com._4psa.extensionmessagesinfo_xsd._2_0_4.GetExtensionDetailsResponseType;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.voipnowservice._2_0_4.ExtensionPortStub;
+import java.math.BigInteger;
+
+import javax.xml.ws.Holder;
+
+import com._4psa.extension._2_5_1.ExtensionInterface;
+import com._4psa.extension._2_5_1.ExtensionPort;
+import com._4psa.extensionmessages_xsd._2_5.GetExtensionDetailsRequest;
+import com._4psa.extensionmessagesinfo_xsd._2_5.GetExtensionDetailsResponseType;
+import com._4psa.headerdata_xsd._2_5.ServerInfo;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
  * {@link ExtensionDetailsAction} - Maps the action to a <tt>extensiondetails</tt> action.
@@ -70,17 +70,17 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<ExtensionPortStub> {
+public class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<ExtensionInterface> {
 
     /**
      * The SOAP path.
      */
-    private static final String SOAP_PATH = "/soap2/extension_agent.php";
+    private static String SOAP_PATH = "/soap2/extension_agent.php";
 
     /**
      * The <tt>extensiondetails</tt> action string.
      */
-    public static final String ACTION = "extensiondetails";
+    public static String ACTION = "extensiondetails";
 
     /**
      * Initializes a new {@link ExtensionDetailsAction}.
@@ -89,55 +89,20 @@ public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<Exte
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final String extensionId = checkStringParameter(request, "id");
-            //final String identifier = checkStringParameter(request, "identifier");
-            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
-            /*
-             * The SOAP stub for VoipNow extension access
-             */
-            final ExtensionPortStub stub = configureStub(setting);
-            /*
-             * Call extension detail request
-             */
-            final GetExtensionDetailsRequest detailRequest = new GetExtensionDetailsRequest();
-            /*
-             * Create "ID" and apply to request
-             */
-            final PositiveInteger extIdInt = new PositiveInteger();
-            final org.apache.axis2.databinding.types.PositiveInteger pi =
-                new org.apache.axis2.databinding.types.PositiveInteger(extensionId);
-            extIdInt.setPositiveInteger(pi);
-            detailRequest.setID(extIdInt);
-            /*
-             * Create user credentials
-             */
-            final UserCredentials userCredentials = getUserCredentials(setting);
-            /*
-             * Perform request and retrieve response
-             */
-            final GetExtensionDetailsResponse extensionDetailsResponse = stub.getExtensionDetails(detailRequest, userCredentials);
-            /*
-             * Get response type
-             */
-            final GetExtensionDetailsResponseType extensionDetailsResponseType = extensionDetailsResponse.getGetExtensionDetailsResponse();
-            /*
-             * Get extension name
-             */
-            final com._4psa.common_xsd._2_0_4.String extensionName = extensionDetailsResponseType.getName();
-            /*
-             * Return client data
-             */
-            return new AJAXRequestResult(extensionName.getString());
-        } catch (final AxisFault e) {
-            throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
-        } catch (final RemoteException e) {
-            throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
-        }
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        String extensionId = checkStringParameter(request, "id");
+		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
+
+
+		GetExtensionDetailsRequest detailRequest = new GetExtensionDetailsRequest();
+
+		detailRequest.setID(new BigInteger(extensionId));
+
+		ExtensionInterface port = configureStub(setting);
+		GetExtensionDetailsResponseType response = port.getExtensionDetails(detailRequest, getUserCredentials(setting), new Holder<ServerInfo>());
+
+		String extensionName = response.getName();
+		return new AJAXRequestResult(extensionName);
     }
 
     @Override
@@ -146,8 +111,8 @@ public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<Exte
     }
 
     @Override
-    protected ExtensionPortStub newSOAPStub() throws AxisFault {
-        return new ExtensionPortStub();
+    protected ExtensionInterface newSOAPStub(){
+        return new ExtensionPort(getWsdlLocation()).getExtensionPort();
     }
 
     @Override

@@ -49,37 +49,38 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.rmi.RemoteException;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.apache.axis2.AxisFault;
+
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Holder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
-import com._4psa.common_xsd._2_0_4.DelObject;
-import com._4psa.common_xsd._2_0_4.PositiveInteger;
-import com._4psa.common_xsd._2_0_4.Rule;
-import com._4psa.common_xsd._2_0_4.UpdateObject;
-import com._4psa.extensiondata_xsd._2_0_4.CallRuleInfo;
-import com._4psa.extensiondata_xsd._2_0_4.Match_type1;
-import com._4psa.extensionmessages_xsd._2_0_4.AddCallRulesInRequest;
-import com._4psa.extensionmessages_xsd._2_0_4.AddCallRulesInRequestChoice_type0;
-import com._4psa.extensionmessages_xsd._2_0_4.AddCallRulesInResponse;
-import com._4psa.extensionmessages_xsd._2_0_4.DelCallRulesInRequest;
-import com._4psa.extensionmessages_xsd._2_0_4.DelCallRulesInRequestChoice_type0;
-import com._4psa.extensionmessages_xsd._2_0_4.DelCallRulesInResponse;
-import com._4psa.extensionmessages_xsd._2_0_4.GetCallRulesInRequest;
-import com._4psa.extensionmessages_xsd._2_0_4.GetCallRulesInResponse;
-import com._4psa.extensionmessagesinfo_xsd._2_0_4.GetCallRulesInResponseType;
-import com._4psa.extensionmessagesinfo_xsd._2_0_4.GetCallRulesInResponseTypeSequence_type0;
-import com._4psa.extensionmessagesinfo_xsd._2_0_4.Rules_type1;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.voipnowservice._2_0_4.ExtensionPortStub;
+
+import com._4psa.common_xsd._2_5.DelObject;
+import com._4psa.common_xsd._2_5.UpdateObject;
+import com._4psa.extension._2_5_1.ExtensionInterface;
+import com._4psa.extension._2_5_1.ExtensionPort;
+import com._4psa.extensiondata_xsd._2_5.CallRuleTransferInfo;
+import com._4psa.extensionmessages_xsd._2_5.AddCallRulesInRequest;
+import com._4psa.extensionmessages_xsd._2_5.DelCallRulesInRequest;
+import com._4psa.extensionmessages_xsd._2_5.GetCallRulesInRequest;
+import com._4psa.extensionmessages_xsd._2_5.AddCallRulesInRequest.Rule;
+import com._4psa.extensionmessagesinfo_xsd._2_5.GetCallRulesInResponseType;
+import com._4psa.extensionmessagesinfo_xsd._2_5.GetCallRulesInResponseType.Rules;
+import com._4psa.extensionmessagesinfo_xsd._2_5.GetCallRulesInResponseType.Rules.Transfer;
+import com._4psa.headerdata_xsd._2_5.ServerInfo;
+import com._4psa.headerdata_xsd._2_5.UserCredentials;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
@@ -89,17 +90,25 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionPortStub> {
+/* 
+ * Advice from 4PSA to implement "follow-me" in 2.5.1
+ * You can add a rule that implements follow me by adding a 'transfer' rule in incoming call rules for an extension.
+ * To satisfy the follow me conditions you must set these parameters:
+ *  - toNumbers - this is an array containing the settings for the transfer
+ *  - transferNumber - number that will receive the transferred call
+ *  - call = true - when this is set to true the extension that owns the rule will also be called. 
+ */
+public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterface> {
 
     /**
      * The SOAP path.
      */
-    private static final String SOAP_PATH = "/soap2/extension_agent.php";
+    private static String SOAP_PATH = "/soap2/extension_agent.php";
 
     /**
      * The <tt>followme</tt> action string.
      */
-    public static final String ACTION = "followme";
+    public static String ACTION = "followme";
 
     /**
      * Initializes a new {@link SetFollowMeAction}.
@@ -108,214 +117,121 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData ajaxRequest, ServerSession session) throws AbstractOXException {
         try {
-            /*
-             * Parse parameters
-             */
-            final String[] transferTo;
+            String[] transferTo;
             {
-                final Object data = request.getData();
+                Object data = ajaxRequest.getData();
                 if (null == data) {
                     transferTo = new String[0];
                 } else {
-                    transferTo = json2StringArr((JSONArray) request.getData());
+                    transferTo = json2StringArr((JSONArray) ajaxRequest.getData());
                 }
             }
-            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
-            /*
-             * Get session user's main extension identifier
-             */
-            final String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
-            /*
-             * The SOAP stub
-             */
-            final ExtensionPortStub stub = configureStub(setting);
-            /*
-             * The credentials
-             */
-            final UserCredentials userCredentials = getUserCredentials(setting);
-            /*
-             * The user ID integer
-             */
-            final PositiveInteger userIdInteger = new PositiveInteger();
-            userIdInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
-            /*
-             * Detect existing follow-me rules
-             */
-            final List<Integer> followMeRulesIDs;
-            final String followMeStr = "followme";
-            {
-                final GetCallRulesInRequest callRulesInRequest = new GetCallRulesInRequest();
-                callRulesInRequest.setUserID(userIdInteger);
-                final GetCallRulesInResponse getCallRulesInResponse = stub.getCallRulesIn(callRulesInRequest, userCredentials);
-                final GetCallRulesInResponseType getCallRulesInResponseType = getCallRulesInResponse.getGetCallRulesInResponse();
-                final GetCallRulesInResponseTypeSequence_type0 sequenceType0 =
-                    getCallRulesInResponseType.getGetCallRulesInResponseTypeSequence_type0();
-                final Rules_type1[] rules = sequenceType0.getRules();
-                if (null != rules) {
-                    followMeRulesIDs = new ArrayList<Integer>(rules.length);
-                    for (final Rules_type1 rule : rules) {
-                        if (followMeStr.equals(rule.getAction().getValue())) {
-                            followMeRulesIDs.add(Integer.valueOf(rule.getRuleID().getPositiveInteger().intValue()));
-                        }
-                    }
-                } else {
-                    followMeRulesIDs = Collections.emptyList();
-                }
-            }
-            /*
-             * Delete existing follow-me rules
-             */
-            final String successStr = "success";
-            if (!followMeRulesIDs.isEmpty()) {
-                final int size = followMeRulesIDs.size();
-                final PositiveInteger[] ids = new PositiveInteger[size];
-                for (int i = 0; i < size; i++) {
-                    final Integer ruleId = followMeRulesIDs.get(i);
-                    final PositiveInteger ruleIdInteger = new PositiveInteger();
-                    ruleIdInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(ruleId.toString()));
-                    ids[i] = ruleIdInteger;
-                }
-                final DelCallRulesInRequest delRequest = new DelCallRulesInRequest();
-                delRequest.setID(ids);
+            VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
 
-                final DelCallRulesInRequestChoice_type0 cType0 = new DelCallRulesInRequestChoice_type0();
-                cType0.setUserID(userIdInteger);
-                delRequest.setDelCallRulesInRequestChoice_type0(cType0);
+            BigInteger userId = getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId());
 
-                final DelCallRulesInResponse delCallRulesInResponse = stub.delCallRulesIn(delRequest, userCredentials);
-                final DelObject delObject = delCallRulesInResponse.getDelCallRulesInResponse();
-                final String success = delObject.getResult().getValue();
-                if (!successStr.equalsIgnoreCase(success)) {
-                    throw VoipNowExceptionCodes.SOAP_FAULT.create("DelCallRulesInRequest failed with: " + success);
-                }
-            }
+            ExtensionInterface port = configureStub(setting);
+           
+            ((BindingProvider)port).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://voip-prototyp.netline.de/" + getSOAPPath());
+
+            UserCredentials userCredentials = getUserCredentials(setting);
+
+
+
+            List<BigInteger> followMeRulesIDs = detectExistingFollowMeRules(userId, port, userCredentials);
+            String successStr = deleteExistingFollowMeRules(userId, port, followMeRulesIDs, userCredentials);
+            
             /*
              * Add new follow-me rule
              */
-            final Integer id;
-            final int transferToLen = transferTo.length;
-            if (transferToLen > 0) {
-                final AddCallRulesInRequest addCallRulesInRequest = new AddCallRulesInRequest();
-
-                {
-                    final AddCallRulesInRequestChoice_type0 type0 = new AddCallRulesInRequestChoice_type0();
-                    type0.setUserID(userIdInteger);
-                    addCallRulesInRequest.setAddCallRulesInRequestChoice_type0(type0);
-                }
-
-                {
-                    final CallRuleInfo callRuleInfo = new CallRuleInfo();
-                    /*
-                     * "followme"
-                     */
-                    callRuleInfo.setAction(com._4psa.extensiondata_xsd._2_0_4.Action_type5.followme);
-                    /*
-                     * 1
-                     */
-                    callRuleInfo.setMatch(Match_type1.value1);
-                    /*
-                     * "."
-                     */
-                    final Rule rule = new Rule();
-                    rule.setRule(".");
-                    callRuleInfo.setNumber(rule);
-                    /*
-                     * transferTo
-                     */
-                    final com._4psa.common_xsd._2_0_4.String transferToString = new com._4psa.common_xsd._2_0_4.String();
-                    final StringBuilder sb = new StringBuilder(transferToLen * 8);
-                    sb.append(transferTo[0]);
-                    for (int i = 1; i < transferToLen; i++) {
-                        sb.append(' ').append(transferTo[i]);
-                    }
-                    transferToString.setString(sb.toString());
-                    callRuleInfo.setTransferTo(transferToString);
-                    final boolean requestInterval = true;
-                    /*
-                     * interval
-                     */
-                    if (requestInterval) {
-                        /*
-                         * Get the interval
-                         */
-                        final int interval;
-                        {
-                            final AJAXRequestResult innerResult = new GetTimeIntervalAction().perform(new AJAXRequestData(), session);
-                            interval = ((java.math.BigInteger) innerResult.getResultObject()).intValue();
-                        }
-                        final PositiveInteger intervalInteger = new PositiveInteger();
-                        intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(String.valueOf(interval)));
-                        callRuleInfo.setIntervalID(intervalInteger);
-                    } else {
-                        final PositiveInteger intervalInteger = new PositiveInteger();
-                        intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger("1"));
-                        callRuleInfo.setIntervalID(intervalInteger);
-                    }
-                    /*
-                     * Dummy values for event type and transfer type
-                     */
-                    {
-                        final com._4psa.extensiondata_xsd._2_0_4.CallRuleInfoSequence_type0 sequenceType0 =
-                            new com._4psa.extensiondata_xsd._2_0_4.CallRuleInfoSequence_type0();
-
-                        {
-                            final com._4psa.extensiondata_xsd._2_0_4.Event_type1 eventType =
-                                com._4psa.extensiondata_xsd._2_0_4.Event_type1.BUSY;
-                            sequenceType0.setEvent(eventType);
-                        }
-
-                        {
-                            final com._4psa.extensiondata_xsd._2_0_4.TransferType_type1 transferType =
-                                com._4psa.extensiondata_xsd._2_0_4.TransferType_type1.internal;
-                            sequenceType0.setTransferType(transferType);
-                        }
-
-                        callRuleInfo.setCallRuleInfoSequence_type0(sequenceType0);
-                    }
-                    /*
-                     * Dummy values for call priority
-                     */
-                    {
-                        final com._4psa.common_xsd._2_0_4.Integer prio = new com._4psa.common_xsd._2_0_4.Integer();
-                        prio.setInteger(java.math.BigInteger.ONE);
-                        callRuleInfo.setCallPriority(prio);
-                    }
-                    /*
-                     * Dummy values for key
-                     */
-                    // callRuleInfo.setKey(java.math.BigDecimal.ONE);
-
-                    addCallRulesInRequest.setRule(new CallRuleInfo[] { callRuleInfo });
-                }
-                /*
-                 * Execute request
-                 */
-                final AddCallRulesInResponse addCallRulesInResponse = stub.addCallRulesIn(addCallRulesInRequest, userCredentials);
-                final UpdateObject callRulesInResponse = addCallRulesInResponse.getAddCallRulesInResponse();
-                final String success = callRulesInResponse.getResult().getValue();
-                if (!successStr.equalsIgnoreCase(success)) {
-                    throw VoipNowExceptionCodes.SOAP_FAULT.create("AddCallRulesInRequest failed with: " + success);
-                }
-                id = Integer.valueOf(callRulesInResponse.getID()[0].getPositiveInteger().intValue());
-            } else {
-                id = Integer.valueOf(-1);
+            if (transferTo.length == 0) {
+                return new AJAXRequestResult(-1);
             }
+            
+            AddCallRulesInRequest addRequest = new AddCallRulesInRequest();
+            addRequest.setUserID(userId);
+
+            Rule followRule = new AddCallRulesInRequest.Rule();
+            com._4psa.extensionmessages_xsd._2_5.AddCallRulesInRequest.Rule.Transfer transfer = new AddCallRulesInRequest.Rule.Transfer();
+            CallRuleTransferInfo info = transfer.getToNumbers();
+            followRule.setTransfer(transfer);
+            addRequest.getRule().add(followRule);
+
+            // number this rule is responsible for:
+            //TODO
+            
+            // numbers to call on incoming call:
+            List<String> transferNumber = info.getTransferNumber();
+            transferNumber.addAll(Arrays.asList(transferTo));
+            
+            //call main number, too
+            //TODO
+
             /*
-             * Return ID
+             * Execute request
              */
-            return new AJAXRequestResult(id);
-        } catch (final AxisFault e) {
-            throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
-        } catch (final RemoteException e) {
-            throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            UpdateObject addResponse = port.addCallRulesIn(addRequest, getUserCredentials(setting), new Holder<ServerInfo>());
+            String result = addResponse.getResult();
+            
+            if (!successStr.equalsIgnoreCase(result)) {
+            	throw VoipNowExceptionCodes.SOAP_FAULT.create("AddCallRulesInRequest failed with: " + result);
+            }
+            return new AJAXRequestResult(addResponse.getID().get(0));
+        } catch (JSONException e) {
+        	throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
     }
 
-    @Override
+	private String deleteExistingFollowMeRules(BigInteger userId, ExtensionInterface port, List<BigInteger> followMeRulesIDs, UserCredentials userCredentials)
+			throws VoipNowException {
+		String successStr = "success";
+		if (!followMeRulesIDs.isEmpty()) {
+			DelCallRulesInRequest delRequest = new DelCallRulesInRequest();
+			List<BigInteger> deleteMe = delRequest.getID();
+			deleteMe.addAll(followMeRulesIDs);
+		    delRequest.setUserID(userId);
+
+		    DelObject delResponse = port.delCallRulesIn(delRequest, userCredentials, new Holder<ServerInfo>());
+		    String success = delResponse.getResult();
+		    if (!successStr.equalsIgnoreCase(success)) {
+		        throw VoipNowExceptionCodes.SOAP_FAULT.create("DelCallRulesInRequest failed with: " + success);
+		    }
+		}
+		return successStr;
+	}
+
+    private boolean isFollowRule(Rules rule) {
+		Transfer transfer = rule.getTransfer();
+		if(transfer == null)
+			return false;
+		if(transfer.getNumber() == null)
+			return false;
+		if(transfer.getToNumbers() == null)
+			return false;
+		return true;
+	}
+
+    private List<BigInteger> detectExistingFollowMeRules(BigInteger userId, ExtensionInterface port, UserCredentials userCredentials){
+    	List<BigInteger> followMeRulesIDs = Collections.emptyList();
+	    GetCallRulesInRequest request = new GetCallRulesInRequest();
+	    request.setUserID(userId);
+	    GetCallRulesInResponseType response = port.getCallRulesIn(request, userCredentials, new Holder<ServerInfo>());
+	
+	    List<Rules> rules = response.getRules();
+	    if (null != rules) {
+	    	followMeRulesIDs = new ArrayList<BigInteger>(rules.size());
+	    	for (Rules rule : rules) {
+	    		if(isFollowRule(rule)){
+	    			followMeRulesIDs.add(rule.getRuleID());
+	    		}
+	    	}
+	    }
+	    return followMeRulesIDs;
+    }
+    
+	@Override
     protected String getSOAPPath() {
         return SOAP_PATH;
     }
@@ -326,13 +242,13 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
     }
 
     @Override
-    protected ExtensionPortStub newSOAPStub() throws AxisFault {
-        return new ExtensionPortStub();
+    protected ExtensionInterface newSOAPStub() {
+        return new ExtensionPort(getWsdlLocation()).getExtensionPort();
     }
 
-    private static String[] json2StringArr(final JSONArray jsonArray) throws JSONException {
-        final int len = jsonArray.length();
-        final String[] ret = new String[len];
+    private static String[] json2StringArr(JSONArray jsonArray) throws JSONException {
+        int len = jsonArray.length();
+        String[] ret = new String[len];
         for (int i = 0; i < len; i++) {
             ret[i] = jsonArray.getString(i);
         }

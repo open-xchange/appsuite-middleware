@@ -66,7 +66,7 @@ public final class VoipNowServlet extends MultipleAdapterServletNew {
      * Initializes a new {@link VoipNowServlet}.
      */
     public VoipNowServlet() {
-        super(VoipNowActionFactory.getInstance());
+    	super(VoipNowActionFactory.getInstance());    		
     }
 
     @Override
