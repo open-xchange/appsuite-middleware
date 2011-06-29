@@ -114,6 +114,7 @@ public class OXException extends RuntimeException implements OXExceptionConstant
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
         categories.add(CATEGORY_DEFAULT);
+        // foo bar
     }
 
     public String getDetailedMessage() {
