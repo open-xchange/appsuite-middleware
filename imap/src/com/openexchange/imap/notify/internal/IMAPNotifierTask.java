@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentMap;
 import javax.mail.FetchProfile;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder.FetchProfileItem;
-import com.openexchange.imap.IMAPAccess;
+import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailAccess;
@@ -229,11 +229,12 @@ public final class IMAPNotifierTask {
                 /*
                  * Get connected IMAP access
                  */
-                final IMAPAccess imapAccess = (IMAPAccess) MailAccess.getInstance(user, context, accountId);
-                imapAccess.connect(false);
+                final MailAccess<?, ?> access = MailAccess.getInstance(user, context, accountId);
+                access.connect(false);
                 try {
-                    final IMAPStore imapStore = imapAccess.getIMAPStore();
-                    final Session session = imapAccess.getSession();
+                    final IMAPFolderStorage imapFolderStorage =  (IMAPFolderStorage) access.getFolderStorage();
+                    final IMAPStore imapStore = imapFolderStorage.getImapStore();
+                    final Session session = imapFolderStorage.getSession();
                     /*
                      * Open folders to trigger recent listener if any recent message are available
                      */
@@ -246,7 +247,7 @@ public final class IMAPNotifierTask {
                         imapFolder.close(true);
                     } while (iter.hasNext());
                 } finally {
-                    imapAccess.close(true);
+                    access.close(true);
                 }
             } catch (final Exception e) {
                 LOG.warn("Failed IMAP notifier task run.", e);
