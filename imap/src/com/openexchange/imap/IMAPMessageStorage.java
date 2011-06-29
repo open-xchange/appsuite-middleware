@@ -277,7 +277,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             final MailMessage[] messages;
             final MailField[] fields = fieldSet.toArray();
-            if (imapConfig.asMap().containsKey("UIDPLUS")) {
+            if (false && imapConfig.asMap().containsKey("UIDPLUS")) {
                 final TLongObjectHashMap<MailMessage> fetchedMsgs =
                     fetchValidWithFallbackFor(
                         uids,
@@ -328,10 +328,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         int retry = 0;
         while (true) {
             try {
-                FetchProfileModifier modifier = (FetchProfileModifier) session.getParameter(key);
+                final FetchProfileModifier modifier = (FetchProfileModifier) session.getParameter(key);
                 if (null == modifier) {
-                    modifier = FetchIMAPCommand.DEFAULT_PROFILE_MODIFIER;
-                    session.setParameter(key, modifier);
+                    // session.setParameter(key, FetchIMAPCommand.DEFAULT_PROFILE_MODIFIER);
+                    return fetchValidFor(array, len, fp, isRev1);
                 }
                 return fetchValidFor(array, len, modifier.modify(fp), isRev1);
             } catch (final FolderClosedException e) {
