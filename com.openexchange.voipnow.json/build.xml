@@ -65,8 +65,8 @@
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
     	<pathelement location="${bundlesdir}/${jaxbjar}"/>
-    	<pathelement location="${bundlesdir}/${wsmetadatajar}"/>
-    	<pathelement location="${bundlesdir}/${cxfjar}"/>
+    	<pathelement location="${bundlesdir}/${soapCxfBundle}/lib/${wsmetadatajar}"/>
+    	<pathelement location="${bundlesdir}/${soapCxfBundle}/lib/${cxfjar}"/>
     	<pathelement location="${bundlesdir}/${xmlBundle}/lib/${staxapijar}"/>
     	<pathelement location="${bundlesdir}/${servletjar}"/>
     	
