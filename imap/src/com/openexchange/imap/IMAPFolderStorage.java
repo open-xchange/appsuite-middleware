@@ -285,9 +285,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             try {
                 IMAPFolder folder =
                     (IMAPFolder) (DEFAULT_FOLDER_ID.equals(fullName) ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
-                if (imapStore.notifyRecent()) {
-                    IMAPNotifierMessageRecentListener.addNotifierFor(folder, fullName, accountId, session, true);
-                }
                 if (!doesExist(folder, true)) {
                     folder = checkForNamespaceFolder(fullName);
                 }
@@ -1730,9 +1727,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } else {
                     final String trashFullName = getTrashFolder();
                     final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(trashFullName);
-                    if (imapStore.notifyRecent()) {
-                        IMAPNotifierMessageRecentListener.addNotifierFor(trashFolder, trashFullName, accountId, session, true);
-                    }
                     if (deleteMe.getParent().getFullName().startsWith(trashFolder.getFullName()) || !inferiors(trashFolder)) {
                         /*
                          * Delete permanently
@@ -1795,7 +1789,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (DEFAULT_FOLDER_ID.equals(fullName)) {
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
-            IMAPFolder f = getIMAPFolder(fullName);
+            IMAPFolder f = getIMAPFolderWithRecentListener(fullName);
             if (!doesExist(f, true)) {
                 f = checkForNamespaceFolder(fullName);
                 if (null == f) {
@@ -2730,6 +2724,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private IMAPFolder getIMAPFolder(final String fullName) throws MessagingException {
+        return DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
+    }
+
+    private IMAPFolder getIMAPFolderWithRecentListener(final String fullName) throws MessagingException {
         final IMAPFolder ret =
             DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
         if (MailAccount.DEFAULT_ID == accountId && imapConfig.getIMAPProperties().notifyRecent()) {

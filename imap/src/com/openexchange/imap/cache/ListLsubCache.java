@@ -59,7 +59,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import com.openexchange.imap.AccessedIMAPStore;
-import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.session.Session;
@@ -239,7 +238,7 @@ public final class ListLsubCache {
      */
     public static char getSeparator(final int accountId, final AccessedIMAPStore imapStore, final Session session) throws MailException {
         try {
-            return getSeparator(accountId, getIMAPFolder(imapStore, accountId, session), session);
+            return getSeparator(accountId, (IMAPFolder) imapStore.getFolder(INBOX), session);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -303,7 +302,7 @@ public final class ListLsubCache {
      */
     public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final AccessedIMAPStore imapStore, final Session session) throws MailException {
         try {
-            final IMAPFolder imapFolder = getIMAPFolder(imapStore, accountId, session);
+            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
             synchronized (collection) {
                 if (checkTimeStamp(imapFolder, collection)) {
@@ -327,12 +326,6 @@ public final class ListLsubCache {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
-    }
-
-    private static IMAPFolder getIMAPFolder(final AccessedIMAPStore imapStore, final int accountId, final Session session) throws MessagingException {
-        final IMAPFolder ret = (IMAPFolder) imapStore.getFolder(INBOX);
-        IMAPNotifierMessageRecentListener.addNotifierFor(ret, INBOX, accountId, session, imapStore.notifyRecent());
-        return ret;
     }
 
     /**

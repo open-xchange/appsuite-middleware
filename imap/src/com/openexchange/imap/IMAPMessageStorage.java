@@ -87,7 +87,6 @@ import com.openexchange.imap.command.FetchIMAPCommand.FetchProfileModifier;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.NewFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
-import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;
@@ -1057,9 +1056,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Open and check user rights on destination folder
                  */
                 final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
-                if (imapStore.notifyRecent()) {
-                    IMAPNotifierMessageRecentListener.addNotifierFor(destFolder, destFullName, accountId, session, true);
-                }
                 {
                     final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session);
                     if (!STR_INBOX.equals(destFullName) && !listEntry.exists()) {
@@ -2058,9 +2054,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         if (messageId != null) {
             final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
-            if (imapStore.notifyRecent()) {
-                IMAPNotifierMessageRecentListener.addNotifierFor(destFolder, destFullName, accountId, session, true);
-            }
             destFolder.open(Folder.READ_ONLY);
             try {
                 /*

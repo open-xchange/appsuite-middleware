@@ -337,7 +337,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         STR_FALSE)) && IMAPCommandsCollection.isReadOnly(imapFolder)) {
                         throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolderFullname);
                     }
-                    if (imapStore.notifyRecent()) {
+                    if (imapStore.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
                         IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session, true);
                     }
                     /*
@@ -349,11 +349,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             }
         }
         final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
-        /*
-         * Add listener
-         */
-        if (imapStore.notifyRecent()) {
-            IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session, true);
+        if (imapStore.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
+            IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session, true);
         }
         /*
          * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
