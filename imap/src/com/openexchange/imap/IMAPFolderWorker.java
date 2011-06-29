@@ -350,7 +350,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         }
         final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
         if (imapStore.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
-            IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session, true);
+            IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session, true);
         }
         /*
          * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
