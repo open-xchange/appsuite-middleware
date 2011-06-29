@@ -50,16 +50,13 @@
 package com.openexchange.audit.osgi;
 
 import static com.openexchange.audit.services.AuditServiceRegistry.getServiceRegistry;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-
 import com.openexchange.audit.impl.AuditEventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -74,13 +71,13 @@ public class AuditActivator extends DeferredActivator {
 
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class } ;
 	
-	final Dictionary<Object,Object> serviceProperties;
+	final Dictionary<String,Object> serviceProperties;
 	
 	private ServiceRegistration auditServiceRegistration;
 
 	public AuditActivator() {
 		super();
-		serviceProperties = new Hashtable<Object,Object>();
+		serviceProperties = new Hashtable<String,Object>();
 		serviceProperties.put(EventConstants.EVENT_TOPIC, new String[]{
 				"com/openexchange/groupware/*"});
 	}
@@ -91,7 +88,7 @@ public class AuditActivator extends DeferredActivator {
 	}
 
 	@Override
-	protected void handleAvailability(Class<?> clazz) {
+	protected void handleAvailability(final Class<?> clazz) {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
@@ -99,7 +96,7 @@ public class AuditActivator extends DeferredActivator {
 	}
 
 	@Override
-	protected void handleUnavailability(Class<?> clazz) {
+	protected void handleUnavailability(final Class<?> clazz) {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Re-available service: " + clazz.getName());
 		}
