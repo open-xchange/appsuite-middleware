@@ -269,15 +269,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          * Get messages with given fields filled
          */
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
-            mode = Folder.READ_WRITE;
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            mode = Folder.READ_ONLY;
             /*
              * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
              * ignore the order of UIDs provided in a "UID FETCH" command.
              */
             final MailMessage[] messages;
             final MailField[] fields = fieldSet.toArray();
-            if (false && imapConfig.asMap().containsKey("UIDPLUS")) {
+            if (imapConfig.asMap().containsKey("UIDPLUS")) {
                 final TLongObjectHashMap<MailMessage> fetchedMsgs =
                     fetchValidWithFallbackFor(
                         uids,
@@ -331,9 +331,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final FetchProfileModifier modifier = (FetchProfileModifier) session.getParameter(key);
                 if (null == modifier) {
                     // session.setParameter(key, FetchIMAPCommand.DEFAULT_PROFILE_MODIFIER);
-                    return fetchValidFor(array, len, fp, isRev1);
+                    return fetchValidFor(array, len, fp, isRev1, false);
                 }
-                return fetchValidFor(array, len, modifier.modify(fp), isRev1);
+                return fetchValidFor(array, len, modifier.modify(fp), isRev1, modifier.byContentTypeHeader());
             } catch (final FolderClosedException e) {
                 throw MIMEMailException.handleMessagingException(e, imapConfig, session);
             } catch (final StoreClosedException e) {
@@ -370,10 +370,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1) throws MessagingException, MailException {
+    private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean byContentType) throws MessagingException, MailException {
         final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
         final long start = System.currentTimeMillis();
-        final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile).doCommand();
+        //final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false, false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
+        final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile).setDetermineAttachmentByHeader(byContentType).doCommand();
         final long time = System.currentTimeMillis() - start;
         mailInterfaceMonitor.addUseTime(time);
         if (DEBUG) {
@@ -389,8 +390,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws MailException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
-            mode = Folder.READ_WRITE;
+            final int desiredMode = markSeen ? Folder.READ_WRITE : Folder.READ_ONLY;
+            imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
+            mode = desiredMode;
             final IMAPMessage msg;
             {
                 final long start = System.currentTimeMillis();
@@ -487,8 +489,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws MailException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
-            mode = Folder.READ_WRITE;
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            mode = Folder.READ_ONLY;
             if (imapFolder.getMessageCount() == 0) {
                 return EMPTY_RETVAL;
             }
@@ -658,8 +660,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
-            mode = Folder.READ_WRITE;
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            mode = Folder.READ_ONLY;
             /*
              * Shall a search be performed?
              */
@@ -788,8 +790,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] getUnreadMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final int limit) throws MailException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
-            mode = Folder.READ_WRITE;
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            mode = Folder.READ_ONLY;
             MailMessage[] mails;
             {
                 /*
@@ -2030,7 +2032,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          */
         final long[] retval = new long[msgUIDs.length];
         Arrays.fill(retval, -1L);
-        if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullName, Folder.READ_WRITE)) {
+        if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullName, Folder.READ_ONLY)) {
             // No look-up possible
             return retval;
         }
