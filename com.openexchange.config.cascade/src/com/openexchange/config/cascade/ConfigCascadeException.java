@@ -62,7 +62,7 @@ public class ConfigCascadeException extends AbstractOXException {
 
     private static final long serialVersionUID = -3554129943396182447L;
 
-    private static final String STR_COMPONENT = "FILE_STORAGE";
+    private static final String STR_COMPONENT = "CONF";
 
     /**
      * The {@link Component} for file storage exception.
