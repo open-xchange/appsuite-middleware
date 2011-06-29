@@ -85,7 +85,7 @@ public final class URLMailAttachmentActivator implements BundleActivator {
             /*
              * Register data sources
              */
-            final Dictionary<Object, Object> props = new Hashtable<Object, Object>(1);
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put("identifier", name);
             registration = context.registerService(DataSource.class.getName(), new URLMailAttachmentDataSource(), props);
         } catch (final Exception e) {
