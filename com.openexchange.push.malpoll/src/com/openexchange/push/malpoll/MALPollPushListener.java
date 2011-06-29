@@ -410,4 +410,13 @@ public final class MALPollPushListener implements PushListener {
         return started;
     }
 
+    /**
+     * Gets the session.
+     * 
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
+
 }

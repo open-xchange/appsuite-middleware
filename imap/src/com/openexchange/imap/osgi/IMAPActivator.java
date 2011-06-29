@@ -64,6 +64,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -153,7 +154,12 @@ public final class IMAPActivator extends DeferredActivator {
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
             registrations.add(context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary));
-            registrations.add(context.registerService(IMAPNotifierRegistryService.class.getName(), IMAPNotifierRegistry.getInstance(), null));
+            if (IMAPProperties.getInstance().notifyRecent()) {
+                registrations.add(context.registerService(
+                    IMAPNotifierRegistryService.class.getName(),
+                    IMAPNotifierRegistry.getInstance(),
+                    null));
+            }
             /*
              * Register event handle
              */

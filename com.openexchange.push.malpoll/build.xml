@@ -35,6 +35,7 @@
     <property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="pushjar" value="com.openexchange.push.jar"/>
+	<property name="imapjar" value="com.openexchange.imap.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="configreadjar" value="com.openexchange.configread.jar"/>
 
@@ -47,6 +48,7 @@
         <pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${pushjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${imapjar}"/>
         <pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}"/>
     </path>
 
