@@ -83,7 +83,7 @@ public class OXException extends AbstractOXException {
      * @param message Message.
      */
     protected OXException(final EnumComponent component, final String message) {
-        super(component, message);
+        super(component, message); // blah
     }
 
     /**
@@ -138,7 +138,7 @@ public class OXException extends AbstractOXException {
         super.setMessageArgs(messageArgs);
     }
 
-    public OXException(ErrorMessage message, Throwable cause) {
+    public OXException(final ErrorMessage message, final Throwable cause) {
         super(message, cause);
     }
 }
