@@ -85,9 +85,6 @@ public class Enabled implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
-            /**
-             * {@inheritDoc}
-             */
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 try {
                     ConfigView view = configViews.getView(user.getId(), ctx.getContextId());
@@ -95,16 +92,13 @@ public class Enabled implements PreferencesItemService {
                     if (property.isDefined()) {
                         setting.setSingleValue(property.get());
                     } else {
-                        setting.setSingleValue(true);
+                        setting.setSingleValue(Boolean.TRUE);
                     }
                 } catch (ConfigCascadeException e) {
                     throw new SettingException(e);
                 }
             }
 
-            /**
-             * {@inheritDoc}
-             */
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
