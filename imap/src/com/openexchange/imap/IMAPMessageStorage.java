@@ -282,7 +282,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         uids,
                         uids.length,
                         getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
-                        imapConfig.getImapCapabilities().hasIMAP4rev1());
+                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                        false);
                 /*
                  * Fill array
                  */
@@ -297,7 +298,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         seqNumsMap.getValues(),
                         seqNumsMap.size(),
                         getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
-                        imapConfig.getImapCapabilities().hasIMAP4rev1());
+                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                        true);
                 /*
                  * Fill array
                  */
@@ -321,7 +323,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1) throws MailException {
+    private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum) throws MailException {
         final String key = new StringBuilder(16).append(accountId).append(".imap.fetch.modifier").toString();
         final FetchProfile fp = fetchProfile;
         int retry = 0;
@@ -330,9 +332,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final FetchProfileModifier modifier = (FetchProfileModifier) session.getParameter(key);
                 if (null == modifier) {
                     // session.setParameter(key, FetchIMAPCommand.DEFAULT_PROFILE_MODIFIER);
-                    return fetchValidFor(array, len, fp, isRev1, false);
+                    return fetchValidFor(array, len, fp, isRev1, seqnum, false);
                 }
-                return fetchValidFor(array, len, modifier.modify(fp), isRev1, modifier.byContentTypeHeader());
+                return fetchValidFor(array, len, modifier.modify(fp), isRev1, seqnum, modifier.byContentTypeHeader());
             } catch (final FolderClosedException e) {
                 throw MIMEMailException.handleMessagingException(e, imapConfig, session);
             } catch (final StoreClosedException e) {
@@ -369,7 +371,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean byContentType) throws MessagingException, MailException {
+    private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, MailException {
         final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
         final long start = System.currentTimeMillis();
         //final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false, false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
@@ -381,7 +383,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         for (final MailMessage mailMessage : tmp) {
             final IDMailMessage idmm = (IDMailMessage) mailMessage;
-            map.put(idmm.getUid(), idmm);
+            map.put(seqnum ? idmm.getSeqnum() : idmm.getUid(), idmm);
         }
         return map;
     }

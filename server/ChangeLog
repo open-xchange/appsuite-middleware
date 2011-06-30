@@ -1,3 +1,7 @@
+* 2011-06-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #19658: [L3] Moving mails with the OX WebGUI makes them disappear (dovecot)
+
 * 2011-06-29 - marcus.klein@open-xchange.com
 
  - Not creating always confirmed-spam and confirmed-ham folders anymore for Cloudmark spam handler. confirmed-spam is created if the
