@@ -271,9 +271,14 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, uids);
             seqNumFetcher = new IntSeqNumFetcher(seqNums);
             knownSeqNums = new TIntHashSet(seqNums);
-            uid = true;
             length = uids.length;
-            args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
+            if (length == messageCount) {
+                args = ARGS_ALL;
+                uid = false;
+            } else {
+                args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
+                uid = true;
+            }
         } else {
             throw new MessagingException("Illegal array argument: " + array.getClass().getSimpleName());
         }
@@ -377,12 +382,16 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args =
-                        length == messageCount ? ARGS_ALL : isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(
+                    if (length == messageCount) {
+                        args = ARGS_ALL;
+                        uid = false;
+                    } else {
+                        args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(
                             uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
                             uids,
                             false,
                             LENGTH_WITH_UID + command.length());
+                    }
                     seqNumFetcher = null;
                 }
             }
