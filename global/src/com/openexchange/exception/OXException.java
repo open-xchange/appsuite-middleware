@@ -50,31 +50,36 @@
 package com.openexchange.exception;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.IllegalFormatException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.internal.I18n;
+import com.openexchange.exception.internal.OXExceptionStrings;
+import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.session.Session;
 
 /**
  * {@link OXException} - The (super) exception class for all kinds of <a href="http://www.open-xchange.com">Open-Xchange</a> exceptions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXException extends RuntimeException implements OXExceptionConstants {
+public class OXException extends Exception implements OXExceptionConstants {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXException.class);
 
     private static final long serialVersionUID = 2058371531364916608L;
 
-    private static final Random RANDOM = new SecureRandom();
+    private static final String DELIM = "\n\t";
 
-    private static final int SERVER_ID = RANDOM.nextInt();
+    private static final int SERVER_ID = new SecureRandom().nextInt();
 
     private static final AtomicInteger COUNTER = new AtomicInteger(0);
 
@@ -97,47 +102,249 @@ public class OXException extends RuntimeException implements OXExceptionConstant
 
     private final List<Category> categories;
 
-    private int code;
+    private final Object[] messageArgs;
 
-    private String message;
+    private final int code;
+
+    private final String message;
 
     private String detailedMessage;
 
     private String exceptionId;
 
     /**
-     * Initializes a new {@link OXException}.
+     * Initializes a default {@link OXException}.
      */
     public OXException() {
+        super();
+        code = CODE_DEFAULT;
+        count = COUNTER.incrementAndGet();
+        properties = new HashMap<String, String>(8);
+        categories = new LinkedList<Category>();
+        message = OXExceptionStrings.MESSAGE;
+        detailedMessage = null;
+        messageArgs = MESSAGE_ARGS_EMPTY;
+    }
+
+    /**
+     * Initializes a new {@link OXException}.
+     * 
+     * @param code The numeric error code
+     * @param message The displayable printf-style error message (usually a constant from a class implementing {@link LocalizableStrings})
+     * @param messageArgs The message arguments
+     */
+    public OXException(final int code, final String message, final Object... messageArgs) {
         super();
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
-        categories.add(CATEGORY_DEFAULT);
-        // foo bar
-    }
-
-    public String getDetailedMessage() {
-        // TODO: Compose it!
-        return null;
+        this.code = code;
+        this.message = message;
+        this.messageArgs = messageArgs;
     }
 
     /**
-     * Gets an {@link Iterator} for specified categories.
+     * Initializes a new {@link OXException}.
      * 
-     * @return The {@link Iterator} for specified categories
+     * @param code The numeric error code
+     * @param message The displayable printf-style error message (usually a constant from a class implementing {@link LocalizableStrings})
+     * @param cause The optional cause for this {@link OXException}
+     * @param messageArgs The message arguments
      */
-    public Iterator<Category> getCategories() {
-        return new ArrayList<Category>(categories).iterator();
+    public OXException(final int code, final String message, final Throwable cause, final Object... messageArgs) {
+        super(cause);
+        count = COUNTER.incrementAndGet();
+        properties = new HashMap<String, String>(8);
+        categories = new LinkedList<Category>();
+        this.code = code;
+        this.message = message;
+        this.messageArgs = messageArgs;
+    }
+
+    /**
+     * Sets the detailed error message which appears in log and is <b>not</b> shown to user.
+     * 
+     * @param detailedMessage The detailed error message
+     * @return This exception with detailed error message applied (for chained invocations)
+     */
+    public OXException setDetailedMessage(final String detailedMessage) {
+        this.detailedMessage = detailedMessage;
+        return this;
+    }
+
+    /**
+     * Sets the detailed error message which appears in log and is <b>not</b> shown to user.
+     * 
+     * @param messageFormat The printf-style detailed error message
+     * @param args The printf arguments
+     * @return This exception with detailed error message applied (for chained invocations)
+     */
+    public OXException setDetailedMessage(final String messageFormat, final Object... args) {
+        if (null == messageFormat) {
+            return this;
+        }
+        try {
+            this.detailedMessage = String.format(Locale.US, messageFormat, args);
+        } catch (final NullPointerException e) {
+            this.detailedMessage = null;
+        } catch (final IllegalFormatException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception logMe = new Exception(super.getMessage());
+            logMe.setStackTrace(super.getStackTrace());
+            LOG.error("Illegal message format.", logMe);
+            this.detailedMessage = null;
+        }
+        return this;
+    }
+
+    /**
+     * Gets the arguments for displayable message.
+     * 
+     * @return The message arguments to set
+     */
+    public Object[] getMessageArgs() {
+        return messageArgs;
+    }
+
+    /**
+     * Logs this exception using specified logger.
+     * 
+     * @param log The logger
+     */
+    public void log(final Log log) {
+        final LogLevel logLevel = LogLevel.valueOf(log);
+        final String loggable = getLoggableDetailedMessage(logLevel, null);
+        if (null == loggable) {
+            return;
+        }
+        for (final LogLevel ll : LogLevel.rankedOrder()) {
+            if (logLevel.equals(ll)) {
+                logLevel.log(loggable, this, log);
+            }
+        }
+    }
+
+    /**
+     * Gets the detailed message for specified log level.
+     * <p>
+     * This is a convenience method that invokes {@link #getLoggableDetailedMessage(LogLevel, String)} with latter argument set to
+     * <code>null</code>.
+     * 
+     * @param logLevel The log level
+     * @return The detailed message for specified log level or <code>null</code> if not loggable.
+     * @see #getLoggableDetailedMessage(LogLevel, String)
+     */
+    public String getLoggableDetailedMessage(final LogLevel logLevel) {
+        return getLoggableDetailedMessage(logLevel, null);
+    }
+
+    /**
+     * Gets the detailed message for specified log level.
+     * 
+     * @param logLevel The log level
+     * @param defaultLog The default logging to return if this exception is not loggable for specified log level
+     * @return The detailed message for specified log level or <code>defaultLog</code> if not loggable.
+     */
+    public String getLoggableDetailedMessage(final LogLevel logLevel, final String defaultLog) {
+        if (!isLoggable(logLevel)) {
+            return defaultLog;
+        }
+        return getDetailedMessage();
+    }
+
+    /**
+     * Gets the composed detailed message.
+     * 
+     * @return The detailed message
+     */
+    public String getDetailedMessage() {
+        /*
+         * Log details
+         */
+        final StringBuilder sb = new StringBuilder(256).append(getErrorCode());
+        /*
+         * Iterate categories
+         */
+        sb.append(" Categories=");
+        {
+            final List<Category> cats = getCategories();
+            sb.append(cats.get(0));
+            final int size = cats.size();
+            for (int i = 1; i < size; i++) {
+                sb.append(',').append(cats.get(i));
+            }
+        }
+        /*
+         * Append message
+         */
+        sb.append(" Message=");
+        if (null == detailedMessage) {
+            final String str = getDisplayableMessage0(Locale.US);
+            if (null == str) {
+                sb.append(EMPTY_MSG);
+            } else {
+                sb.append('\'').append(str).append('\'');
+            }
+        } else {
+            sb.append('\'').append(detailedMessage).append('\'');
+        }
+        /*
+         * Exception identifier
+         */
+        sb.append(" exceptionID=").append(getExceptionId());
+        /*
+         * Properties
+         */
+        if (!properties.isEmpty()) {
+            for (final String propertyName : new TreeSet<String>(properties.keySet())) {
+                sb.append(DELIM).append(propertyName).append(": ").append(properties.get(propertyName));
+            }
+        }
+        /*
+         * Finally return
+         */
+        return sb.toString();
+    }
+
+    /**
+     * Checks if this {@link OXException} is loggable for specified log level.
+     * 
+     * @param logLevel The log level
+     * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
+     */
+    private boolean isLoggable(final LogLevel logLevel) {
+        for (final Category category : getCategories()) {
+            if (logLevel.includes(category)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the categories.
+     * 
+     * @return The categories
+     */
+    public List<Category> getCategories() {
+        if (this.categories.isEmpty()) {
+            /*
+             * No category specified. Fall back to default one.
+             */
+            return Collections.<Category> singletonList(CATEGORY_ERROR);
+        }
+        return Collections.<Category> unmodifiableList(this.categories);
     }
 
     /**
      * Adds specified category.
      * 
      * @param category The category to add
+     * @return This exception with category added (for chained invocations)
      */
-    public void addCategory(final Category category) {
+    public OXException addCategory(final Category category) {
         categories.add(category);
+        return this;
     }
 
     /**
@@ -156,11 +363,7 @@ public class OXException extends RuntimeException implements OXExceptionConstant
      */
     public String getExceptionId() {
         if (exceptionId == null) {
-            final StringBuilder builder = new StringBuilder();
-            builder.append(SERVER_ID);
-            builder.append('-');
-            builder.append(count);
-            exceptionId = builder.toString();
+            exceptionId = new StringBuilder(16).append(SERVER_ID).append('-').append(count).toString();
         }
         return exceptionId;
     }
@@ -179,6 +382,8 @@ public class OXException extends RuntimeException implements OXExceptionConstant
 
     /**
      * Gets the prefix for the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
+     * <p>
+     * This method is intended for being overridden by subclasses.
      * 
      * @return The prefix
      * @see #getErrorCode()
@@ -197,13 +402,33 @@ public class OXException extends RuntimeException implements OXExceptionConstant
     }
 
     /**
-     * Gets the message intended for being displayed to user.
+     * Gets the internationalized message intended for being displayed to user.
      * 
-     * @param locale The locale providing the language to which the displayabe message shall be translated
-     * @return The displayable message
+     * @param locale The locale providing the language to which the message shall be translated
+     * @return The internationalized message
      */
     public String getDisplayableMessage(final Locale locale) {
-        return I18n.getInstance().translate(locale, message);
+        final String msg = getDisplayableMessage0(locale);
+        return msg == null ? EMPTY_MSG : msg;
+    }
+
+    private String getDisplayableMessage0(final Locale locale) {
+        final Locale lcl = null == locale ? Locale.US : locale;
+        String msg = I18n.getInstance().translate(lcl, message);
+        if (msg != null) {
+            try {
+                msg = String.format(lcl, msg, messageArgs);
+            } catch (final NullPointerException e) {
+                msg = null;
+            } catch (final IllegalFormatException e) {
+                LOG.error(e.getMessage(), e);
+                final Exception logMe = new Exception(super.getMessage());
+                logMe.setStackTrace(super.getStackTrace());
+                LOG.error("Illegal message format.", logMe);
+                msg = null;
+            }
+        }
+        return msg;
     }
 
     @Override
@@ -264,6 +489,30 @@ public class OXException extends RuntimeException implements OXExceptionConstant
     }
 
     /**
+     * Sets the session properties:
+     * <ul>
+     * <li> {@link OXExceptionConstants#PROPERTY_SESSION}</li>
+     * <li> {@link OXExceptionConstants#PROPERTY_CLIENT}</li>
+     * <li> {@link OXExceptionConstants#PROPERTY_AUTH_ID}</li>
+     * <li> {@link OXExceptionConstants#PROPERTY_LOGIN}</li>
+     * <li> {@link OXExceptionConstants#PROPERTY_USER}</li>
+     * <li> {@link OXExceptionConstants#PROPERTY_CONTEXT}</li>
+     * </ul>
+     * 
+     * @param session The session
+     * @return The exception with session properties applide (for chained invocations)
+     */
+    public OXException setSessionProperties(final Session session) {
+        properties.put(PROPERTY_SESSION, session.getSessionID());
+        properties.put(PROPERTY_CLIENT, session.getClient());
+        properties.put(PROPERTY_AUTH_ID, session.getAuthId());
+        properties.put(PROPERTY_LOGIN, session.getLogin());
+        properties.put(PROPERTY_CONTEXT, String.valueOf(session.getContextId()));
+        properties.put(PROPERTY_USER, String.valueOf(session.getContextId()));
+        return this;
+    }
+
+    /**
      * Removes the value of the denoted property.
      * <p>
      * See {@link OXExceptionConstants} for property name constants; e.g. {@link OXExceptionConstants#PROPERTY_SESSION}.
@@ -286,7 +535,7 @@ public class OXException extends RuntimeException implements OXExceptionConstant
      * @see OXExceptionConstants
      */
     public Set<String> getPropertyNames() {
-        return new HashSet<String>(properties.keySet());
+        return Collections.unmodifiableSet(properties.keySet());
     }
 
 }

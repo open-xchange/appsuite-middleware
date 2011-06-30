@@ -70,7 +70,7 @@ public final class I18n {
      */
     private I18n() {
         super();
-        services = new ConcurrentHashMap<Locale, I18nService>();
+        services = new ConcurrentHashMap<Locale, I18nService>(4);
     }
 
     /**
@@ -119,6 +119,9 @@ public final class I18n {
      * @return The translated string
      */
     public String translate(final Locale locale, final String translateMe) {
+        if (null == translateMe) {
+            return null;
+        }
         final I18nService service = services.get(locale);
         if (null != service) {
             return service.getLocalized(translateMe);

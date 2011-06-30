@@ -56,30 +56,41 @@ package com.openexchange.exception;
  */
 public interface OXExceptionConstants {
 
+    /**
+     * The default error code: <code>9999</code>.
+     */
+    public static final int CODE_DEFAULT = 9999;
+
+    /**
+     * The empty message.
+     */
+    public static final String EMPTY_MSG = "[Not available]";
+    
+    /**
+     * The empty message arguments.
+     */
+    public static final Object[] MESSAGE_ARGS_EMPTY = new Object[0];
+
     /*-
      * ------------------------------- Constants for categories -----------------------------------
      */
 
     /**
-     * The default category.
+     * The category for an error.
      */
-    public static final Category CATEGORY_DEFAULT = new Category() {
+    public static final Category CATEGORY_ERROR = Category.CATEGORY_ERROR;
 
-        public LogLevel getLogLevel() {
-            return LogLevel.ERROR;
-        }
-
-        public CategoryType getType() {
-            return Category.EnumType.ERROR;
-        }
-    };
+    /**
+     * The default category for an invalid user input.
+     */
+    public static final Category CATEGORY_USER_INPUT = Category.CATEGORY_USER_INPUT;
 
     /*-
      * ------------------------------- Constants for prefixes -----------------------------------
      */
 
     /**
-     * The general, all-prupose error code prefix with no certain affiliation.
+     * The general, all-purpose error code prefix with no certain affiliation.
      */
     public static final String PREFIX_GENERAL = "OX";
 
@@ -90,7 +101,22 @@ public interface OXExceptionConstants {
     /**
      * The property name for session identifier.
      */
-    public static final String PROPERTY_SESSION = "com.openexchange.exception.session";
+    public static final String PROPERTY_SESSION = "com.openexchange.exception.sessionId";
+
+    /**
+     * The property name for client identifier.
+     */
+    public static final String PROPERTY_CLIENT = "com.openexchange.exception.client";
+
+    /**
+     * The property name for authentication identifier.
+     */
+    public static final String PROPERTY_AUTH_ID = "com.openexchange.exception.authId";
+
+    /**
+     * The property name for login string.
+     */
+    public static final String PROPERTY_LOGIN = "com.openexchange.exception.login";
 
     /**
      * The property name for user identifier.

@@ -49,6 +49,7 @@
 
 package com.openexchange.exception;
 
+
 /**
  * {@link Category} - The category for an {@link OXException} determines its behavior during exception handling and logging.
  * 
@@ -57,17 +58,67 @@ package com.openexchange.exception;
 public interface Category {
 
     /**
-     * An enumeration for log levels.
+     * The category for an error.
      */
-    public static enum LogLevel {
-        TRACE, DEBUG, INFO, WARNING, ERROR;
+    public static final Category CATEGORY_ERROR = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.ERROR;
+        }
+
+        public Type getType() {
+            return Category.EnumType.ERROR;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.ERROR.getName();
+        }
+
+    };
+
+    /**
+     * The default category for an invalid user input.
+     */
+    public static final Category CATEGORY_USER_INPUT = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.DEBUG;
+        }
+
+        public Type getType() {
+            return Category.EnumType.USER_INPUT;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.USER_INPUT.getName();
+        }
+
+    };
+
+    /**
+     * A category's type.
+     */
+    public static interface Type {
+
+        /**
+         * Gets the name for this category.
+         * 
+         * @return The name
+         */
+        String getName();
     }
 
     /**
-     * An enumeration for common types.
+     * An enumeration for common {@link Type types}.
      */
-    public static enum EnumType implements CategoryType {
-        ERROR, TRY_AGAIN, USER_INPUT, PERMISSION_DENIED;
+    public static enum EnumType implements Type {
+        ERROR, TRY_AGAIN, USER_INPUT, PERMISSION_DENIED, WARNING;
+
+        public String getName() {
+            return toString();
+        }
     }
 
     /**
@@ -82,6 +133,6 @@ public interface Category {
      * 
      * @return The type
      */
-    CategoryType getType();
+    Type getType();
 
 }
