@@ -1,0 +1,25 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+crawlerApiVersion: 618
+displayName: GoogleCalendar
+id: com.openexchange.subscribe.crawler.google.calendar
+module: 2
+priority: 2
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  steps: 
+    - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
+      actionOfLoginForm: "https://www.google.com/accounts/ServiceLoginAuth"
+      baseUrl: "https://calendar.google.com"
+      description: Log into Google Calendar
+      linkAvailableAfterLogin: logout
+      nameOfPasswordField: Passwd
+      nameOfUserField: Email
+      numberOfForm: 1
+      pageTitleAfterLogin: logout
+      password: ""
+      url: "https://calendar.google.com"
+      username: ""
+    - !com.openexchange.subscribe.crawler.GoogleCalendarICalStep
+      description: Call the url to get the calendar-export-file
+      url: "https://www.google.com/calendar/exporticalzip"
+  
