@@ -1,0 +1,174 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.exception;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import org.apache.commons.logging.Log;
+
+/**
+ * An enumeration for log levels.
+ */
+public enum LogLevel {
+    /**
+     * Trace log level.
+     */
+    TRACE,
+    /**
+     * Debug log level.
+     */
+    DEBUG,
+    /**
+     * Info log level.
+     */
+    INFO,
+    /**
+     * Warn log level.
+     */
+    WARNING,
+    /**
+     * Error log level.
+     */
+    ERROR,
+    /**
+     * Fatal error code
+     */
+    FATAL;
+
+    /**
+     * Checks if this log level includes specified category's log level.
+     * 
+     * @param category The category whose loglevel is possibly included
+     * @return <code>true</code> if this log level includes specified category's log level; otherwise <code>false</code>
+     */
+    public boolean includes(final Category category) {
+        return includes(category.getLogLevel());
+    }
+
+    /**
+     * Checks if this log level includes specified log level.
+     * 
+     * @param logLevel The log level possibly included
+     * @return <code>true</code> if this log level includes specified log level; otherwise <code>false</code>
+     */
+    public boolean includes(final LogLevel logLevel) {
+        return this.ordinal() >= logLevel.ordinal();
+    }
+
+    /**
+     * Logs specified logging and exception in appropriate log level.
+     * 
+     * @param logging The logging
+     * @param exception The exception
+     * @param logger The logger
+     */
+    public void log(final String logging, final OXException exception, final Log logger) {
+        if (TRACE.equals(this)) {
+            logger.trace(logging, exception);
+        } else if (DEBUG.equals(this)) {
+            logger.debug(logging, exception);
+        } else if (INFO.equals(this)) {
+            logger.info(logging, exception);
+        } else if (WARNING.equals(this)) {
+            logger.warn(logging, exception);
+        } else if (ERROR.equals(this)) {
+            logger.error(logging, exception);
+        } else if (FATAL.equals(this)) {
+            logger.fatal(logging, exception);
+        }
+    }
+
+    private static final Comparator<LogLevel> INVERSE = new Comparator<LogLevel>() {
+
+        public int compare(final LogLevel o1, final LogLevel o2) {
+            return (-o1.ordinal() + o2.ordinal());
+        }
+
+    };
+
+    /**
+     * Gets the log levels in ranked order.
+     * 
+     * @return The log levels in ranked order
+     */
+    public static LogLevel[] rankedOrder() {
+        final LogLevel[] values = LogLevel.values();
+        final LogLevel[] ret = new LogLevel[values.length];
+        System.arraycopy(values, 0, ret, 0, values.length);
+        Arrays.sort(ret, INVERSE);
+        return ret;
+    }
+
+    /**
+     * Gets the highest ranked log level appropriate for specified log instance.
+     * 
+     * @param log The log instance
+     * @return The appropriate log level
+     */
+    public static LogLevel valueOf(final Log log) {
+        if (log.isFatalEnabled()) {
+            return FATAL;
+        }
+        if (log.isErrorEnabled()) {
+            return ERROR;
+        }
+        if (log.isWarnEnabled()) {
+            return WARNING;
+        }
+        if (log.isInfoEnabled()) {
+            return INFO;
+        }
+        if (log.isDebugEnabled()) {
+            return DEBUG;
+        }
+        return TRACE;
+    }
+
+}

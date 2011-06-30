@@ -1,0 +1,168 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.messaging;
+
+import java.util.Arrays;
+import java.util.List;
+import com.openexchange.session.Session;
+
+
+/**
+ * {@link SimAccountManager}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class SimAccountManager implements MessagingAccountManager {
+
+    private Session session;
+    private MessagingAccount createdAccount;
+    private MessagingException exception;
+    private MessagingAccount updatedAccount;
+    private MessagingAccount deletedAccount;
+    private MessagingAccount accountToGet;
+    private int id;
+    private List<MessagingAccount> accounts;
+
+    public MessagingAccount newAccount() throws MessagingException {
+        return new SimMessagingAccount();
+    }
+
+    public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
+        createdAccount = account;
+        this.session = session;
+        exception();
+        return createdAccount.getId();
+    }
+    
+    
+    public MessagingAccount getCreatedAccount() {
+        return createdAccount;
+    }
+    
+    
+    public Session getSession() {
+        return session;
+    }
+
+    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
+        deletedAccount = account;
+        this.session = session;
+        exception();
+    }
+
+    
+    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
+        this.id = id;
+        this.session = session;
+        exception();
+        return accountToGet;
+    }
+
+    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
+        exception();
+        return accounts;
+    }
+
+    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
+        updatedAccount = account;
+        this.session = session;
+        exception();
+    }
+
+    public void setException(final MessagingException messagingException) {
+        exception = messagingException;
+    }
+    
+    private void exception() throws MessagingException {
+        if(null != exception) {
+            throw exception;
+        }
+    }
+
+
+    public MessagingAccount getUpdatedAccount() {
+        return updatedAccount;
+    }
+
+
+    public MessagingAccount getDeletedAccount() {
+        return deletedAccount;
+    }
+
+    public void setAccountToGet(final MessagingAccount account) {
+        accountToGet = account;
+    }
+
+
+    public int getId() {
+        return id;
+    }
+
+
+    public void setAllAccounts(final MessagingAccount...list) {
+        accounts = Arrays.asList(list);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.messaging.MessagingAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session, java.lang.String)
+     */
+    public String checkSecretCanDecryptStrings(final Session session, final String secret) {
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.messaging.MessagingAccountManager#migrateToNewSecret(java.lang.String, java.lang.String, com.openexchange.session.Session)
+     */
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
+        // TODO Auto-generated method stub
+        
+    }
+
+}

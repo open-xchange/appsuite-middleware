@@ -1,0 +1,291 @@
+<?xml version="1.0"?>
+<definitions xmlns:import7="http://4psa.com/HeaderData.xsd/2.5.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:import0="http://4psa.com/ResellerMessages.xsd/2.5.1" xmlns:tns="http://4psa.com/Reseller/2.5.1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://schemas.xmlsoap.org/soap/encoding/" name="Reseller" targetNamespace="http://4psa.com/Reseller/2.5.1">
+	<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new resellers, delete the old ones, edit or query the desired resellers.</documentation>
+	<types>
+		<xsd:schema>
+			<xsd:import schemaLocation="ResellerMessages.xsd" namespace="http://4psa.com/ResellerMessages.xsd/2.5.1"/>
+			<xsd:import schemaLocation="../HeaderData.xsd" namespace="http://4psa.com/HeaderData.xsd/2.5.1"/>
+		</xsd:schema>
+	</types>
+	<message name="addResellerIn">
+		<part name="messagePart" element="import0:AddResellerRequest"/>
+	</message>
+	<message name="addResellerOut">
+		<part name="messagePart" element="import0:AddResellerResponse"/>
+	</message>
+	<message name="addResellerInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addResellerOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editResellerIn">
+		<part name="messagePart" element="import0:EditResellerRequest"/>
+	</message>
+	<message name="editResellerOut">
+		<part name="messagePart" element="import0:EditResellerResponse"/>
+	</message>
+	<message name="editResellerInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editResellerOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setResellerStatusIn">
+		<part name="messagePart" element="import0:SetResellerStatusRequest"/>
+	</message>
+	<message name="setResellerStatusOut">
+		<part name="messagePart" element="import0:SetResellerStatusResponse"/>
+	</message>
+	<message name="setResellerStatusInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setResellerStatusOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setResellerCpAccessIn">
+		<part name="messagePart" element="import0:SetResellerCpAccessRequest"/>
+	</message>
+	<message name="setResellerCpAccessOut">
+		<part name="messagePart" element="import0:SetResellerCpAccessResponse"/>
+	</message>
+	<message name="setResellerCpAccessInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setResellerCpAccessOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getResellersIn">
+		<part name="messagePart" element="import0:GetResellersRequest"/>
+	</message>
+	<message name="getResellersOut">
+		<part name="messagePart" element="import0:GetResellersResponse"/>
+	</message>
+	<message name="getResellersInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getResellersOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getResellerDetailsIn">
+		<part name="messagePart" element="import0:GetResellerDetailsRequest"/>
+	</message>
+	<message name="getResellerDetailsOut">
+		<part name="messagePart" element="import0:GetResellerDetailsResponse"/>
+	</message>
+	<message name="getResellerDetailsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getResellerDetailsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delResellerIn">
+		<part name="messagePart" element="import0:DelResellerRequest"/>
+	</message>
+	<message name="delResellerOut">
+		<part name="messagePart" element="import0:DelResellerResponse"/>
+	</message>
+	<message name="delResellerInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delResellerOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setResellerPLIn">
+		<part name="messagePart" element="import0:SetResellerPLRequest"/>
+	</message>
+	<message name="setResellerPLOut">
+		<part name="messagePart" element="import0:SetResellerPLResponse"/>
+	</message>
+	<message name="setResellerPLInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setResellerPLOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="updateResellerPLIn">
+		<part name="messagePart" element="import0:UpdateResellerPLRequest"/>
+	</message>
+	<message name="updateResellerPLOut">
+		<part name="messagePart" element="import0:UpdateResellerPLResponse"/>
+	</message>
+	<message name="updateResellerPLInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="updateResellerPLOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getResellerPLIn">
+		<part name="messagePart" element="import0:GetResellerPLRequest"/>
+	</message>
+	<message name="getResellerPLOut">
+		<part name="messagePart" element="import0:GetResellerPLResponse"/>
+	</message>
+	<message name="getResellerPLInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getResellerPLOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<portType name="ResellerInterface">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new resellers, delete the old ones, edit or query the desired resellers.</documentation>
+		<operation name="AddReseller">
+			<input message="tns:addResellerIn"/>
+			<output message="tns:addResellerOut"/>
+		</operation>
+		<operation name="EditReseller">
+			<input message="tns:editResellerIn"/>
+			<output message="tns:editResellerOut"/>
+		</operation>
+		<operation name="SetResellerStatus">
+			<input message="tns:setResellerStatusIn"/>
+			<output message="tns:setResellerStatusOut"/>
+		</operation>
+		<operation name="SetResellerCpAccess">
+			<input message="tns:setResellerCpAccessIn"/>
+			<output message="tns:setResellerCpAccessOut"/>
+		</operation>
+		<operation name="GetResellers">
+			<input message="tns:getResellersIn"/>
+			<output message="tns:getResellersOut"/>
+		</operation>
+		<operation name="GetResellerDetails">
+			<input message="tns:getResellerDetailsIn"/>
+			<output message="tns:getResellerDetailsOut"/>
+		</operation>
+		<operation name="DelReseller">
+			<input message="tns:delResellerIn"/>
+			<output message="tns:delResellerOut"/>
+		</operation>
+		<operation name="SetResellerPL">
+			<input message="tns:setResellerPLIn"/>
+			<output message="tns:setResellerPLOut"/>
+		</operation>
+		<operation name="UpdateResellerPL">
+			<input message="tns:updateResellerPLIn"/>
+			<output message="tns:updateResellerPLOut"/>
+		</operation>
+		<operation name="GetResellerPL">
+			<input message="tns:getResellerPLIn"/>
+			<output message="tns:getResellerPLOut"/>
+		</operation>
+	</portType>
+	<binding name="Reseller" type="tns:ResellerInterface">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="AddReseller">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:addResellerIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addResellerInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addResellerOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditReseller">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:editResellerIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editResellerInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editResellerOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetResellerStatus">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:setResellerStatusIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setResellerStatusInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setResellerStatusOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetResellerCpAccess">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:setResellerCpAccessIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setResellerCpAccessInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setResellerCpAccessOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetResellers">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:getResellersIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getResellersInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getResellersOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetResellerDetails">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:getResellerDetailsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getResellerDetailsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getResellerDetailsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelReseller">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:delResellerIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delResellerInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delResellerOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetResellerPL">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:setResellerPLIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setResellerPLInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setResellerPLOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="UpdateResellerPL">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:updateResellerPLIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:updateResellerPLInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:updateResellerPLOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetResellerPL">
+			<soap:operation soapAction="http://4psa.com/Reseller/2.5.1:getResellerPLIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getResellerPLInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getResellerPLOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="ResellerPort">
+		<port name="ResellerPort" binding="tns:Reseller">
+			<soap:address location="https://192.168.32.222:443/soap2/reseller_agent.php"/>
+		</port>
+	</service>
+</definitions>

@@ -1,0 +1,104 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.groupware.update.internal;
+
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
+
+/**
+ * Checks if all dependencies are resolved or will be resolved before the current update task is executed.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class DependenciesResolvedChecker implements DependencyChecker {
+
+    public DependenciesResolvedChecker() {
+        super();
+    }
+
+    public boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute) {
+        if (Schema.NO_VERSION != task.addedWithVersion()) {
+            // Task has a version defined and must be sorted by the {@link LowestVersionChecker}.
+            return false;
+        }
+        if (!(task instanceof UpdateTaskV2)) {
+            // Only V2 tasks can have dependencies defined.
+            return false;
+        }
+        // Only V2 tasks having the version not defined should be in the list to be scheduled.
+        for (UpdateTask other : toExecute) {
+            if (Schema.NO_VERSION != other.addedWithVersion()) {
+                return false;
+            }
+        }
+        // Check all dependencies.
+        for (String dependency : ((UpdateTaskV2) task).getDependencies()) {
+            if (!dependencyFulfilled(dependency, executed, enqueued)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean dependencyFulfilled(String dependency, String[] executed, UpdateTask[] enqueued) {
+        for (String taskName : executed) {
+            if (taskName.equals(dependency)) {
+                return true;
+            }
+        }
+        for (UpdateTask task : enqueued) {
+            if (task.getClass().getName().equals(dependency)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}

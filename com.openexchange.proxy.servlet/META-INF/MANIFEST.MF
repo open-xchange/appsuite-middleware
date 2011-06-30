@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Proxy Servlet Bundle
+Bundle-SymbolicName: com.openexchange.proxy.servlet
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.groupware,
+ com.openexchange.proxy,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.timer,
+ com.openexchange.tools.service,
+ com.openexchange.tools.ssl,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.cookie,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.httpclient.protocol,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.service.http,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.proxy.servlet.osgi.ProxyServletActivator

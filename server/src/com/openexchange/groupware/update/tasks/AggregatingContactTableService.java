@@ -1,0 +1,169 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.groupware.update.tasks;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
+
+
+/**
+ * Note: This one does not use foreign key constraints on prg_contact.userfield20, 
+ * because it might be used for something else later on.
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ */
+public class AggregatingContactTableService  extends AbstractCreateTableImpl implements UpdateTaskV2 {
+
+    private static final String AGGREGATING_CONTACTS = "aggregatingContacts";
+
+    private String getTableSQL() {
+        return "CREATE TABLE "+AGGREGATING_CONTACTS+" (" +
+                    "contributor BINARY(16) NOT NULL, " +
+        		    "aggregator BINARY(16) NOT NULL," +
+        		    "state TINYINT NOT NULL" + 
+        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    }
+    
+    @Override
+    protected String[] getCreateStatements() {
+        return new String[] { getTableSQL() };
+    }
+
+    public TaskAttributes getAttributes() {
+        return new Attributes();
+    }
+
+    public String[] getDependencies() {
+        return new String[0];
+    }
+
+    public void perform(final PerformParameters params) throws AbstractOXException {
+        final int contextId = params.getContextId();
+        createTable(AGGREGATING_CONTACTS, getTableSQL(), contextId);
+        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(AggregatingContactTableService.class);
+        if (logger.isInfoEnabled()) {
+            logger.info("UpdateTask '" + AggregatingContactTableService.class.getSimpleName() + "' successfully performed!");
+        }
+    }
+
+    public int addedWithVersion() {
+        return Schema.NO_VERSION;
+    }
+
+    public int getPriority() {
+        return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
+    }
+
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+        UpdateTaskAdapter.perform(this, schema, contextId);
+    }
+
+    public String[] requiredTables() {
+        return new String[] { };
+    }
+
+    public String[] tablesToCreate() {
+        return new String[] { AGGREGATING_CONTACTS };
+    }
+
+    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
+        final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        final Connection writeCon;
+        try {
+            writeCon = ds.getWritable(contextId);
+        } catch (final DBPoolingException e) {
+            throw new UpdateException(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            if (tableExists(writeCon, tablename)) {
+                return;
+            }
+            stmt = writeCon.prepareStatement(sqlCreate);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            ds.backWritable(contextId, writeCon);
+        }
+    }
+
+    private boolean tableExists(final Connection con, final String table) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
+            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+        } finally {
+            DBUtils.closeSQLStuff(rs);
+        }
+        return retval;
+    }
+
+}

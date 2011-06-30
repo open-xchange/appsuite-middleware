@@ -1,0 +1,43 @@
+#!/bin/bash
+
+OXFUNCTIONS=/opt/open-xchange/etc/oxfunctions.sh
+OXCONFIG=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
+OXPREFIX=/opt/open-xchange
+OXBUNDLES=$OXPREFIX/bundles
+
+
+test -f $OXFUNCTIONS || {
+	echo "missing common shell functions file"
+	exit 1
+}
+
+. $OXFUNCTIONS
+
+test -f $OXCONFIG && . $OXCONFIG
+
+warn() {
+    echo -e "\e[1m$1\e[0m"
+}
+
+test -f $OXCONFIG && . $OXCONFIG
+
+ox_set_JAVA_BIN
+
+test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms20M -Xmx280M"
+
+JAVA_OPTS="${JAVA_XTRAOPTS} \
+-Djava.awt.headless=true \
+-Dopenexchange.propfile=$SYSTEMPROPERTIES \
+-Dopenexchange.propdir2=$COMMONPROPERTIESDIR \
+-Djava.util.logging.config.file=$LOGGINGPROPERTIES"
+
+CLASSPATH="-classpath $OXBUNDLES/com.openexchange.server.jar:\
+$OXBUNDLES/com.openexchange.global.jar:\
+$OXBUNDLES/com.openexchange.subscribe.crawler.jar:\
+$OXBUNDLES/org.apache.commons.cli_1.0.0.v20080604-1500.jar:\
+$OXBUNDLES/org.apache.commons.logging_1.0.4.v200706111724.jar"
+
+pushd $OXPREFIX
+
+umask 066
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.subscribe.crawler.commandline.CrawlerUpdateCLT $@

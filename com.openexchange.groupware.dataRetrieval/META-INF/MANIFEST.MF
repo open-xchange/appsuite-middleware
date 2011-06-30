@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DataRetrieval Plug-in
+Bundle-SymbolicName: com.openexchange.groupware.dataRetrieval
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.helper,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.config,
+ com.openexchange.exceptions,
+ com.openexchange.groupware,
+ com.openexchange.multiple,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.io,
+ com.openexchange.tools.service,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.groupware.dataRetrieval.osgi.DataRetrievalActivator
+Export-Package: com.openexchange.groupware.dataRetrieval

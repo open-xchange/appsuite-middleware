@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Extensions for the equinox console to query the component registry
+Bundle-SymbolicName: com.openexchange.exceptions.console
+Bundle-Version: 6.6.0
+Bundle-Activator: com.openexchange.exceptions.console.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.groupware,
+ com.openexchange.exceptions,
+ com.openexchange.exceptions.osgi,
+ org.eclipse.osgi.framework.console,
+ org.osgi.framework,
+ org.osgi.util.tracker

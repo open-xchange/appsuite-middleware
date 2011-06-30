@@ -1,0 +1,221 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.file.storage.rdb.internal;
+
+import gnu.trove.TIntArrayList;
+import gnu.trove.TIntProcedure;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.session.Session;
+
+/**
+ * {@link CachingFileStorageAccountStorage} - The messaging account manager backed by {@link CacheService}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18.2
+ */
+public final class CachingFileStorageAccountStorage implements FileStorageAccountStorage {
+
+    private static final CachingFileStorageAccountStorage INSTANCE = new CachingFileStorageAccountStorage();
+
+    private static final String REGION_NAME = "FileStorageAccount";
+
+    /**
+     * Gets the cache region name.
+     * 
+     * @return The cache region name
+     */
+    public static String getRegionName() {
+        return REGION_NAME;
+    }
+
+    /**
+     * Gets the cache-backed instance.
+     * 
+     * @return The cache-backed instance
+     */
+    public static CachingFileStorageAccountStorage getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Generates a new cache key.
+     * 
+     * @return The new cache key
+     */
+    private static CacheKey newCacheKey(final CacheService cacheService, final String serviceId, final int id, final int user, final int cid) {
+        return cacheService.newCacheKey(cid, serviceId, Integer.valueOf(id), Integer.valueOf(user));
+    }
+
+    /*-
+     * ------------------------------ Member section ------------------------------
+     */
+
+    /**
+     * The database-backed delegatee.
+     */
+    private final RdbFileStorageAccountStorage delegatee;
+
+    /**
+     * Lock for the cache.
+     */
+    private final Lock cacheLock;
+
+    /**
+     * The service registry.
+     */
+    private final ServiceRegistry serviceRegistry;
+
+    /**
+     * Initializes a new {@link CachingFileStorageAccountStorage}.
+     */
+    private CachingFileStorageAccountStorage() {
+        super();
+        delegatee = RdbFileStorageAccountStorage.getInstance();
+        cacheLock = new ReentrantLock(true);
+        serviceRegistry = FileStorageRdbServiceRegistry.getServiceRegistry();
+    }
+
+    private void invalidateFileStorageAccount(final String serviceId, final int id, final int user, final int cid) throws FileStorageException {
+        final CacheService cacheService = serviceRegistry.getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                final Cache cache = cacheService.getCache(REGION_NAME);
+                cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
+            } catch (final CacheException e) {
+                throw new FileStorageException(e);
+            }
+        }
+    }
+
+    public int addAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+        return delegatee.addAccount(serviceId, account, session);
+    }
+
+    public void deleteAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+        delegatee.deleteAccount(serviceId, account, session);
+        invalidateFileStorageAccount(serviceId, Integer.parseInt(account.getId()), session.getUserId(), session.getContextId());
+    }
+
+    public FileStorageAccount getAccount(final String serviceId, final int id, final Session session) throws FileStorageException {
+        final CacheService cacheService = serviceRegistry.getService(CacheService.class);
+        if (cacheService == null) {
+            return delegatee.getAccount(serviceId, id, session);
+        }
+        try {
+            return new FileStorageAccountReloader(new FileStorageAccountFactory(id, serviceId, session, cacheLock, newCacheKey(
+                cacheService,
+                serviceId,
+                id,
+                session.getUserId(),
+                session.getContextId()), delegatee), REGION_NAME);
+        } catch (final AbstractOXException e) {
+            if (e instanceof FileStorageException) {
+                throw (FileStorageException) e;
+            }
+            throw new FileStorageException(e);
+        }
+    }
+
+    public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws FileStorageException {
+        final TIntArrayList ids = delegatee.getAccountIDs(serviceId, session);
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final List<FileStorageAccount> accounts = new ArrayList<FileStorageAccount>(ids.size());
+        class AdderProcedure implements TIntProcedure {
+
+            FileStorageException fsException;
+
+            public boolean execute(final int id) {
+                try {
+                    accounts.add(getAccount(serviceId, id, session));
+                    return true;
+                } catch (final FileStorageException e) {
+                    fsException = e;
+                    return false;
+                }
+            }
+
+        }
+        final AdderProcedure ap = new AdderProcedure();
+        if (!ids.forEach(ap) && null != ap.fsException) {
+            throw ap.fsException;
+        }
+        return accounts;
+    }
+
+    public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+        delegatee.updateAccount(serviceId, account, session);
+        invalidateFileStorageAccount(serviceId, Integer.parseInt(account.getId()), session.getUserId(), session.getContextId());
+    }
+
+    public boolean checkSecretCanDecryptStrings(final FileStorageService parentService, final Session session, final String secret) throws FileStorageException {
+        return delegatee.checkSecretCanDecryptStrings(parentService, session, secret);
+    }
+
+    public void migrateToNewSecret(final FileStorageService parentService, final String oldSecret, final String newSecret, final Session session) throws FileStorageException {
+        delegatee.migrateToNewSecret(parentService, oldSecret, newSecret, session);
+    }
+
+}

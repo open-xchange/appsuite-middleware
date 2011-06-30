@@ -1,0 +1,159 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.twitter;
+
+import java.util.Date;
+
+/**
+ * {@link Status} - One single status of a user.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface Status {
+
+    /**
+     * Gets the creation date.
+     * 
+     * @return The creation date
+     */
+    Date getCreatedAt();
+
+    /**
+     * Gets the id of the status
+     * 
+     * @return the id
+     */
+    long getId();
+
+    /**
+     * Gets the text of the status
+     * 
+     * @return the text
+     */
+    String getText();
+
+    /**
+     * Gets the source
+     * 
+     * @return the source
+     */
+    String getSource();
+
+    /**
+     * Test if the status is truncated
+     * 
+     * @return <code>true</code> if truncated
+     */
+    boolean isTruncated();
+
+    /**
+     * Gets the in_reply_to status id
+     * 
+     * @return the in_reply_to status id
+     */
+    long getInReplyToStatusId();
+
+    /**
+     * Gets the in-reply user id.
+     * 
+     * @return The in-reply user id
+     */
+    int getInReplyToUserId();
+
+    /**
+     * Gets the in-reply-to screen name.
+     * 
+     * @return The in-reply-to screen name
+     */
+    String getInReplyToScreenName();
+
+    /**
+     * returns The location's latitude that this tweet refers to.
+     * 
+     * @since Twitter4J 2.0.10
+     */
+    double getLatitude();
+
+    /**
+     * Gets the location's longitude that this tweet refers to.
+     * 
+     * @return The location's longitude that this tweet refers to
+     */
+    double getLongitude();
+
+    /**
+     * Test if the status is favorited.
+     * 
+     * @return <code>true</code> if favorited; otherwise <code>false</code>
+     */
+    boolean isFavorited();
+
+    /**
+     * Gets this status' user.
+     * 
+     * @return The user
+     */
+    User getUser();
+
+    /**
+     * Check if this status is re-tweeted.
+     * 
+     * @return <code>true</code> if this status is re-tweeted; otherwise <code>false</code>
+     */
+    boolean isRetweet();
+
+    /**
+     * Gets the re-tweet details.
+     * 
+     * @return The re-tweet details.
+     */
+    RetweetDetails getRetweetDetails();
+
+}

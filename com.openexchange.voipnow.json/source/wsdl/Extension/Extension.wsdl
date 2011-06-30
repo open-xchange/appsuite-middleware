@@ -1,0 +1,1314 @@
+<?xml version="1.0"?>
+<definitions xmlns:import7="http://4psa.com/HeaderData.xsd/2.5.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:import0="http://4psa.com/ExtensionMessages.xsd/2.5.1" xmlns:tns="http://4psa.com/Extension/2.5.1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://schemas.xmlsoap.org/soap/encoding/" name="Extension" targetNamespace="http://4psa.com/Extension/2.5.1">
+	<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new extensions, delete the old ones, edit or query the desired extensions.</documentation>
+	<types>
+		<xsd:schema>
+			<xsd:import schemaLocation="ExtensionMessages.xsd" namespace="http://4psa.com/ExtensionMessages.xsd/2.5.1"/>
+			<xsd:import schemaLocation="../HeaderData.xsd" namespace="http://4psa.com/HeaderData.xsd/2.5.1"/>
+		</xsd:schema>
+	</types>
+	<message name="delExtensionIn">
+		<part name="messagePart" element="import0:DelExtensionRequest"/>
+	</message>
+	<message name="delExtensionOut">
+		<part name="messagePart" element="import0:DelExtensionResponse"/>
+	</message>
+	<message name="delExtensionInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delExtensionOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setProvisionIn">
+		<part name="messagePart" element="import0:SetProvisionRequest"/>
+	</message>
+	<message name="setProvisionOut">
+		<part name="messagePart" element="import0:SetProvisionResponse"/>
+	</message>
+	<message name="setProvisionInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setProvisionOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getProvisionFileIn">
+		<part name="messagePart" element="import0:GetProvisionFileRequest"/>
+	</message>
+	<message name="getProvisionFileOut">
+		<part name="messagePart" element="import0:GetProvisionFileResponse"/>
+	</message>
+	<message name="getProvisionFileInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getProvisionFileOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editExtensionIn">
+		<part name="messagePart" element="import0:EditExtensionRequest"/>
+	</message>
+	<message name="editExtensionOut">
+		<part name="messagePart" element="import0:EditExtensionResponse"/>
+	</message>
+	<message name="editExtensionInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editExtensionOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setExtensionStatusIn">
+		<part name="messagePart" element="import0:SetExtensionStatusRequest"/>
+	</message>
+	<message name="setExtensionStatusOut">
+		<part name="messagePart" element="import0:SetExtensionStatusResponse"/>
+	</message>
+	<message name="setExtensionStatusInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setExtensionStatusOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setExtensionCpAccessIn">
+		<part name="messagePart" element="import0:SetExtensionCpAccessRequest"/>
+	</message>
+	<message name="setExtensionCpAccessOut">
+		<part name="messagePart" element="import0:SetExtensionCpAccessResponse"/>
+	</message>
+	<message name="setExtensionCpAccessInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setExtensionCpAccessOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getExtensionsIn">
+		<part name="messagePart" element="import0:GetExtensionsRequest"/>
+	</message>
+	<message name="getExtensionsOut">
+		<part name="messagePart" element="import0:GetExtensionsResponse"/>
+	</message>
+	<message name="getExtensionsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getExtensionsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getExtensionDetailsIn">
+		<part name="messagePart" element="import0:GetExtensionDetailsRequest"/>
+	</message>
+	<message name="getExtensionDetailsOut">
+		<part name="messagePart" element="import0:GetExtensionDetailsResponse"/>
+	</message>
+	<message name="getExtensionDetailsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getExtensionDetailsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addExtensionIn">
+		<part name="messagePart" element="import0:AddExtensionRequest"/>
+	</message>
+	<message name="addExtensionOut">
+		<part name="messagePart" element="import0:AddExtensionResponse"/>
+	</message>
+	<message name="addExtensionInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addExtensionOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setExtensionPLIn">
+		<part name="messagePart" element="import0:SetExtensionPLRequest"/>
+	</message>
+	<message name="setExtensionPLOut">
+		<part name="messagePart" element="import0:SetExtensionPLResponse"/>
+	</message>
+	<message name="setExtensionPLInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setExtensionPLOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getExtensionPLIn">
+		<part name="messagePart" element="import0:GetExtensionPLRequest"/>
+	</message>
+	<message name="getExtensionPLOut">
+		<part name="messagePart" element="import0:GetExtensionPLResponse"/>
+	</message>
+	<message name="getExtensionPLInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getExtensionPLOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addCallRulesInIn">
+		<part name="messagePart" element="import0:AddCallRulesInRequest"/>
+	</message>
+	<message name="addCallRulesInOut">
+		<part name="messagePart" element="import0:AddCallRulesInResponse"/>
+	</message>
+	<message name="addCallRulesInInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addCallRulesInOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editCallRulesInIn">
+		<part name="messagePart" element="import0:EditCallRulesInRequest"/>
+	</message>
+	<message name="editCallRulesInOut">
+		<part name="messagePart" element="import0:EditCallRulesInResponse"/>
+	</message>
+	<message name="editCallRulesInInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editCallRulesInOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getCallRulesInIn">
+		<part name="messagePart" element="import0:GetCallRulesInRequest"/>
+	</message>
+	<message name="getCallRulesInOut">
+		<part name="messagePart" element="import0:GetCallRulesInResponse"/>
+	</message>
+	<message name="getCallRulesInInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getCallRulesInOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delCallRulesInIn">
+		<part name="messagePart" element="import0:DelCallRulesInRequest"/>
+	</message>
+	<message name="delCallRulesInOut">
+		<part name="messagePart" element="import0:DelCallRulesInResponse"/>
+	</message>
+	<message name="delCallRulesInInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delCallRulesInOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getAvailableCallerIDIn">
+		<part name="messagePart" element="import0:GetAvailableCallerIDRequest"/>
+	</message>
+	<message name="getAvailableCallerIDOut">
+		<part name="messagePart" element="import0:GetAvailableCallerIDResponse"/>
+	</message>
+	<message name="getAvailableCallerIDInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getAvailableCallerIDOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addCardCodeIn">
+		<part name="messagePart" element="import0:AddCardCodeRequest"/>
+	</message>
+	<message name="addCardCodeOut">
+		<part name="messagePart" element="import0:AddCardCodeResponse"/>
+	</message>
+	<message name="addCardCodeInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addCardCodeOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editCardCodeIn">
+		<part name="messagePart" element="import0:EditCardCodeRequest"/>
+	</message>
+	<message name="editCardCodeOut">
+		<part name="messagePart" element="import0:EditCardCodeResponse"/>
+	</message>
+	<message name="editCardCodeInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editCardCodeOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getCardCodeIn">
+		<part name="messagePart" element="import0:GetCardCodeRequest"/>
+	</message>
+	<message name="getCardCodeOut">
+		<part name="messagePart" element="import0:GetCardCodeResponse"/>
+	</message>
+	<message name="getCardCodeInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getCardCodeOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delCardCodeIn">
+		<part name="messagePart" element="import0:DelCardCodeRequest"/>
+	</message>
+	<message name="delCardCodeOut">
+		<part name="messagePart" element="import0:DelCardCodeResponse"/>
+	</message>
+	<message name="delCardCodeInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delCardCodeOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addCardCodeCreditIn">
+		<part name="messagePart" element="import0:AddCardCodeCreditRequest"/>
+	</message>
+	<message name="addCardCodeCreditOut">
+		<part name="messagePart" element="import0:AddCardCodeCreditResponse"/>
+	</message>
+	<message name="addCardCodeCreditInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addCardCodeCreditOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getCardCodeRechargesIn">
+		<part name="messagePart" element="import0:GetCardCodeRechargesRequest"/>
+	</message>
+	<message name="getCardCodeRechargesOut">
+		<part name="messagePart" element="import0:GetCardCodeRechargesResponse"/>
+	</message>
+	<message name="getCardCodeRechargesInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getCardCodeRechargesOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addAuthCallerIDIn">
+		<part name="messagePart" element="import0:AddAuthCallerIDRequest"/>
+	</message>
+	<message name="addAuthCallerIDOut">
+		<part name="messagePart" element="import0:AddAuthCallerIDResponse"/>
+	</message>
+	<message name="addAuthCallerIDInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addAuthCallerIDOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editAuthCallerIDIn">
+		<part name="messagePart" element="import0:EditAuthCallerIDRequest"/>
+	</message>
+	<message name="editAuthCallerIDOut">
+		<part name="messagePart" element="import0:EditAuthCallerIDResponse"/>
+	</message>
+	<message name="editAuthCallerIDInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editAuthCallerIDOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getAuthCallerIDIn">
+		<part name="messagePart" element="import0:GetAuthCallerIDRequest"/>
+	</message>
+	<message name="getAuthCallerIDOut">
+		<part name="messagePart" element="import0:GetAuthCallerIDResponse"/>
+	</message>
+	<message name="getAuthCallerIDInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getAuthCallerIDOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delAuthCallerIDIn">
+		<part name="messagePart" element="import0:DelAuthCallerIDRequest"/>
+	</message>
+	<message name="delAuthCallerIDOut">
+		<part name="messagePart" element="import0:DelAuthCallerIDResponse"/>
+	</message>
+	<message name="delAuthCallerIDInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delAuthCallerIDOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addAuthCallerIDCreditIn">
+		<part name="messagePart" element="import0:AddAuthCallerIDCreditRequest"/>
+	</message>
+	<message name="addAuthCallerIDCreditOut">
+		<part name="messagePart" element="import0:AddAuthCallerIDCreditResponse"/>
+	</message>
+	<message name="addAuthCallerIDCreditInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addAuthCallerIDCreditOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getAuthCallerIDRechargesIn">
+		<part name="messagePart" element="import0:GetAuthCallerIDRechargesRequest"/>
+	</message>
+	<message name="getAuthCallerIDRechargesOut">
+		<part name="messagePart" element="import0:GetAuthCallerIDRechargesResponse"/>
+	</message>
+	<message name="getAuthCallerIDRechargesInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getAuthCallerIDRechargesOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setupExtensionIn">
+		<part name="messagePart" element="import0:SetupExtensionRequest"/>
+	</message>
+	<message name="setupExtensionOut">
+		<part name="messagePart" element="import0:SetupExtensionResponse"/>
+	</message>
+	<message name="setupExtensionInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setupExtensionOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getExtensionSettingsIn">
+		<part name="messagePart" element="import0:GetExtensionSettingsRequest"/>
+	</message>
+	<message name="getExtensionSettingsOut">
+		<part name="messagePart" element="import0:GetExtensionSettingsResponse"/>
+	</message>
+	<message name="getExtensionSettingsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getExtensionSettingsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setVoicemailIn">
+		<part name="messagePart" element="import0:SetVoicemailRequest"/>
+	</message>
+	<message name="setVoicemailOut">
+		<part name="messagePart" element="import0:SetVoicemailResponse"/>
+	</message>
+	<message name="setVoicemailInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setVoicemailOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getVoicemailSettingsIn">
+		<part name="messagePart" element="import0:GetVoicemailSettingsRequest"/>
+	</message>
+	<message name="getVoicemailSettingsOut">
+		<part name="messagePart" element="import0:GetVoicemailSettingsResponse"/>
+	</message>
+	<message name="getVoicemailSettingsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getVoicemailSettingsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setConferenceIn">
+		<part name="messagePart" element="import0:SetConferenceRequest"/>
+	</message>
+	<message name="setConferenceOut">
+		<part name="messagePart" element="import0:SetConferenceResponse"/>
+	</message>
+	<message name="setConferenceInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setConferenceOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getConferenceSettingsIn">
+		<part name="messagePart" element="import0:GetConferenceSettingsRequest"/>
+	</message>
+	<message name="getConferenceSettingsOut">
+		<part name="messagePart" element="import0:GetConferenceSettingsResponse"/>
+	</message>
+	<message name="getConferenceSettingsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getConferenceSettingsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setCallRecordingIn">
+		<part name="messagePart" element="import0:SetCallRecordingRequest"/>
+	</message>
+	<message name="setCallRecordingOut">
+		<part name="messagePart" element="import0:SetCallRecordingResponse"/>
+	</message>
+	<message name="setCallRecordingInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setCallRecordingOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getCallRecordingSettingsIn">
+		<part name="messagePart" element="import0:GetCallRecordingSettingsRequest"/>
+	</message>
+	<message name="getCallRecordingSettingsOut">
+		<part name="messagePart" element="import0:GetCallRecordingSettingsResponse"/>
+	</message>
+	<message name="getCallRecordingSettingsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getCallRecordingSettingsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setFaxCenterIn">
+		<part name="messagePart" element="import0:SetFaxCenterRequest"/>
+	</message>
+	<message name="setFaxCenterOut">
+		<part name="messagePart" element="import0:SetFaxCenterResponse"/>
+	</message>
+	<message name="setFaxCenterInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setFaxCenterOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getFaxCenterSettingsIn">
+		<part name="messagePart" element="import0:GetFaxCenterSettingsRequest"/>
+	</message>
+	<message name="getFaxCenterSettingsOut">
+		<part name="messagePart" element="import0:GetFaxCenterSettingsResponse"/>
+	</message>
+	<message name="getFaxCenterSettingsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getFaxCenterSettingsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="assignQueueAgentIn">
+		<part name="messagePart" element="import0:AssignQueueAgentRequest"/>
+	</message>
+	<message name="assignQueueAgentOut">
+		<part name="messagePart" element="import0:AssignQueueAgentResponse"/>
+	</message>
+	<message name="assignQueueAgentInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="assignQueueAgentOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="unassignQueueAgentIn">
+		<part name="messagePart" element="import0:UnassignQueueAgentRequest"/>
+	</message>
+	<message name="unassignQueueAgentOut">
+		<part name="messagePart" element="import0:UnassignQueueAgentResponse"/>
+	</message>
+	<message name="unassignQueueAgentInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="unassignQueueAgentOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setQueueAgentIn">
+		<part name="messagePart" element="import0:SetQueueAgentRequest"/>
+	</message>
+	<message name="setQueueAgentOut">
+		<part name="messagePart" element="import0:SetQueueAgentResponse"/>
+	</message>
+	<message name="setQueueAgentInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setQueueAgentOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setQueueMemberIn">
+		<part name="messagePart" element="import0:SetQueueMemberRequest"/>
+	</message>
+	<message name="setQueueMemberOut">
+		<part name="messagePart" element="import0:SetQueueMemberResponse"/>
+	</message>
+	<message name="setQueueMemberInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setQueueMemberOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getQueueAgentsIn">
+		<part name="messagePart" element="import0:GetQueueAgentsRequest"/>
+	</message>
+	<message name="getQueueAgentsOut">
+		<part name="messagePart" element="import0:GetQueueAgentsResponse"/>
+	</message>
+	<message name="getQueueAgentsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getQueueAgentsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getQueueMembershipIn">
+		<part name="messagePart" element="import0:GetQueueMembershipRequest"/>
+	</message>
+	<message name="getQueueMembershipOut">
+		<part name="messagePart" element="import0:GetQueueMembershipResponse"/>
+	</message>
+	<message name="getQueueMembershipInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getQueueMembershipOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	
+	
+	<message name="getExtensionGroupsIn">
+
+		<part name="messagePart" element="import0:GetExtensionGroupsRequest"/>
+
+	</message>
+	<message name="getExtensionGroupsOut">
+
+		<part name="messagePart" element="import0:GetExtensionGroupsResponse"/>
+
+	</message>
+	
+	<message name="getExtensionGroupsInHeader1">
+
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getExtensionGroupsOutHeader1">
+
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+
+
+	<message name="assignQueueRemoteAgentIn">
+		<part name="messagePart" element="import0:AssignQueueRemoteAgentRequest"/>
+	</message>
+	<message name="assignQueueRemoteAgentOut">
+		<part name="messagePart" element="import0:AssignQueueRemoteAgentResponse"/>
+	</message>
+	<message name="assignQueueRemoteAgentInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="assignQueueRemoteAgentOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setQueueRemoteAgentIn">
+		<part name="messagePart" element="import0:SetQueueRemoteAgentRequest"/>
+	</message>
+	<message name="setQueueRemoteAgentOut">
+		<part name="messagePart" element="import0:SetQueueRemoteAgentResponse"/>
+	</message>
+	<message name="setQueueRemoteAgentInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setQueueRemoteAgentOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	
+	<portType name="ExtensionInterface">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new extensions, delete the old ones, edit or query the desired extensions.</documentation>
+		<operation name="DelExtension">
+			<input message="tns:delExtensionIn"/>
+			<output message="tns:delExtensionOut"/>
+		</operation>
+		<operation name="SetProvision">
+			<input message="tns:setProvisionIn"/>
+			<output message="tns:setProvisionOut"/>
+		</operation>
+		<operation name="GetProvisionFile">
+			<input message="tns:getProvisionFileIn"/>
+			<output message="tns:getProvisionFileOut"/>
+		</operation>
+		<operation name="EditExtension">
+			<input message="tns:editExtensionIn"/>
+			<output message="tns:editExtensionOut"/>
+		</operation>
+		<operation name="SetExtensionStatus">
+			<input message="tns:setExtensionStatusIn"/>
+			<output message="tns:setExtensionStatusOut"/>
+		</operation>
+		<operation name="SetExtensionCpAccess">
+			<input message="tns:setExtensionCpAccessIn"/>
+			<output message="tns:setExtensionCpAccessOut"/>
+		</operation>
+		<operation name="GetExtensions">
+			<input message="tns:getExtensionsIn"/>
+			<output message="tns:getExtensionsOut"/>
+		</operation>
+		<operation name="GetExtensionDetails">
+			<input message="tns:getExtensionDetailsIn"/>
+			<output message="tns:getExtensionDetailsOut"/>
+		</operation>
+		<operation name="AddExtension">
+			<input message="tns:addExtensionIn"/>
+			<output message="tns:addExtensionOut"/>
+		</operation>
+		<operation name="SetExtensionPL">
+			<input message="tns:setExtensionPLIn"/>
+			<output message="tns:setExtensionPLOut"/>
+		</operation>
+		<operation name="GetExtensionPL">
+			<input message="tns:getExtensionPLIn"/>
+			<output message="tns:getExtensionPLOut"/>
+		</operation>
+		<operation name="AddCallRulesIn">
+			<input message="tns:addCallRulesInIn"/>
+			<output message="tns:addCallRulesInOut"/>
+		</operation>
+		<operation name="EditCallRulesIn">
+			<input message="tns:editCallRulesInIn"/>
+			<output message="tns:editCallRulesInOut"/>
+		</operation>
+		<operation name="GetCallRulesIn">
+			<input message="tns:getCallRulesInIn"/>
+			<output message="tns:getCallRulesInOut"/>
+		</operation>
+		<operation name="DelCallRulesIn">
+			<input message="tns:delCallRulesInIn"/>
+			<output message="tns:delCallRulesInOut"/>
+		</operation>
+		<operation name="GetAvailableCallerID">
+			<input message="tns:getAvailableCallerIDIn"/>
+			<output message="tns:getAvailableCallerIDOut"/>
+		</operation>
+		<operation name="AddCardCode">
+			<input message="tns:addCardCodeIn"/>
+			<output message="tns:addCardCodeOut"/>
+		</operation>
+		<operation name="EditCardCode">
+			<input message="tns:editCardCodeIn"/>
+			<output message="tns:editCardCodeOut"/>
+		</operation>
+		<operation name="GetCardCode">
+			<input message="tns:getCardCodeIn"/>
+			<output message="tns:getCardCodeOut"/>
+		</operation>
+		<operation name="DelCardCode">
+			<input message="tns:delCardCodeIn"/>
+			<output message="tns:delCardCodeOut"/>
+		</operation>
+		<operation name="AddCardCodeCredit">
+			<input message="tns:addCardCodeCreditIn"/>
+			<output message="tns:addCardCodeCreditOut"/>
+		</operation>
+		<operation name="GetCardCodeRecharges">
+			<input message="tns:getCardCodeRechargesIn"/>
+			<output message="tns:getCardCodeRechargesOut"/>
+		</operation>
+		<operation name="AddAuthCallerID">
+			<input message="tns:addAuthCallerIDIn"/>
+			<output message="tns:addAuthCallerIDOut"/>
+		</operation>
+		<operation name="EditAuthCallerID">
+			<input message="tns:editAuthCallerIDIn"/>
+			<output message="tns:editAuthCallerIDOut"/>
+		</operation>
+		<operation name="GetAuthCallerID">
+			<input message="tns:getAuthCallerIDIn"/>
+			<output message="tns:getAuthCallerIDOut"/>
+		</operation>
+		<operation name="DelAuthCallerID">
+			<input message="tns:delAuthCallerIDIn"/>
+			<output message="tns:delAuthCallerIDOut"/>
+		</operation>
+		<operation name="AddAuthCallerIDCredit">
+			<input message="tns:addAuthCallerIDCreditIn"/>
+			<output message="tns:addAuthCallerIDCreditOut"/>
+		</operation>
+		<operation name="GetAuthCallerIDRecharges">
+			<input message="tns:getAuthCallerIDRechargesIn"/>
+			<output message="tns:getAuthCallerIDRechargesOut"/>
+		</operation>
+		<operation name="SetupExtension">
+			<input message="tns:setupExtensionIn"/>
+			<output message="tns:setupExtensionOut"/>
+		</operation>
+		<operation name="GetExtensionSettings">
+			<input message="tns:getExtensionSettingsIn"/>
+			<output message="tns:getExtensionSettingsOut"/>
+		</operation>
+		<operation name="SetVoicemail">
+			<input message="tns:setVoicemailIn"/>
+			<output message="tns:setVoicemailOut"/>
+		</operation>
+		<operation name="GetVoicemailSettings">
+			<input message="tns:getVoicemailSettingsIn"/>
+			<output message="tns:getVoicemailSettingsOut"/>
+		</operation>
+		<operation name="SetConference">
+			<input message="tns:setConferenceIn"/>
+			<output message="tns:setConferenceOut"/>
+		</operation>
+		<operation name="GetConferenceSettings">
+			<input message="tns:getConferenceSettingsIn"/>
+			<output message="tns:getConferenceSettingsOut"/>
+		</operation>
+		<operation name="SetCallRecording">
+			<input message="tns:setCallRecordingIn"/>
+			<output message="tns:setCallRecordingOut"/>
+		</operation>
+		<operation name="GetCallRecordingSettings">
+			<input message="tns:getCallRecordingSettingsIn"/>
+			<output message="tns:getCallRecordingSettingsOut"/>
+		</operation>
+		<operation name="SetFaxCenter">
+			<input message="tns:setFaxCenterIn"/>
+			<output message="tns:setFaxCenterOut"/>
+		</operation>
+		<operation name="GetFaxCenterSettings">
+			<input message="tns:getFaxCenterSettingsIn"/>
+			<output message="tns:getFaxCenterSettingsOut"/>
+		</operation>
+		<operation name="AssignQueueAgent">
+			<input message="tns:assignQueueAgentIn"/>
+			<output message="tns:assignQueueAgentOut"/>
+		</operation>
+		<operation name="UnassignQueueAgent">
+			<input message="tns:unassignQueueAgentIn"/>
+			<output message="tns:unassignQueueAgentOut"/>
+		</operation>
+		<operation name="SetQueueAgent">
+			<input message="tns:setQueueAgentIn"/>
+			<output message="tns:setQueueAgentOut"/>
+		</operation>
+		<operation name="AssignQueueRemoteAgent">
+			<input message="tns:assignQueueRemoteAgentIn"/>
+			<output message="tns:assignQueueRemoteAgentOut"/>
+		</operation>
+		<operation name="SetQueueRemoteAgent">
+			<input message="tns:setQueueRemoteAgentIn"/>
+			<output message="tns:setQueueRemoteAgentOut"/>
+		</operation>
+		<operation name="SetQueueMember">
+			<input message="tns:setQueueMemberIn"/>
+			<output message="tns:setQueueMemberOut"/>
+		</operation>
+		<operation name="GetQueueAgents">
+			<input message="tns:getQueueAgentsIn"/>
+			<output message="tns:getQueueAgentsOut"/>
+		</operation>
+		<operation name="GetQueueMembership">
+			<input message="tns:getQueueMembershipIn"/>
+			<output message="tns:getQueueMembershipOut"/>
+		</operation>
+		
+		<operation name="GetExtensionGroups">
+
+			<input message="tns:getExtensionGroupsIn"/>
+
+			<output message="tns:getExtensionGroupsOut"/>
+
+		</operation>
+	</portType>
+	<binding name="Extension" type="tns:ExtensionInterface">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="DelExtension">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:delExtensionIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delExtensionInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delExtensionOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetProvision">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setProvisionIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setProvisionInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setProvisionOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetProvisionFile">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getProvisionFileIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getProvisionFileInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getProvisionFileOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditExtension">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:editExtensionIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editExtensionInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editExtensionOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetExtensionStatus">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setExtensionStatusIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setExtensionStatusInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setExtensionStatusOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetExtensionCpAccess">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setExtensionCpAccessIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setExtensionCpAccessInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setExtensionCpAccessOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetExtensions">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getExtensionsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetExtensionDetails">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getExtensionDetailsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionDetailsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionDetailsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddExtension">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:addExtensionIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addExtensionInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addExtensionOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetExtensionPL">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setExtensionPLIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setExtensionPLInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setExtensionPLOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetExtensionPL">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getExtensionPLIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionPLInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionPLOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddCallRulesIn">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:addCallRulesInIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCallRulesInInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCallRulesInOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditCallRulesIn">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:editCallRulesInIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCallRulesInInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCallRulesInOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCallRulesIn">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getCallRulesInIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallRulesInInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallRulesInOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelCallRulesIn">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:delCallRulesInIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCallRulesInInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCallRulesInOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetAvailableCallerID">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getAvailableCallerIDIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getAvailableCallerIDInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getAvailableCallerIDOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddCardCode">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:addCardCodeIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCardCodeInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCardCodeOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditCardCode">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:editCardCodeIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCardCodeInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCardCodeOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCardCode">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getCardCodeIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCardCodeInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCardCodeOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelCardCode">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:delCardCodeIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCardCodeInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCardCodeOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddCardCodeCredit">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:addCardCodeCreditIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCardCodeCreditInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCardCodeCreditOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCardCodeRecharges">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getCardCodeRechargesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCardCodeRechargesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCardCodeRechargesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddAuthCallerID">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:addAuthCallerIDIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addAuthCallerIDInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addAuthCallerIDOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditAuthCallerID">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:editAuthCallerIDIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editAuthCallerIDInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editAuthCallerIDOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetAuthCallerID">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getAuthCallerIDIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getAuthCallerIDInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getAuthCallerIDOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelAuthCallerID">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:delAuthCallerIDIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delAuthCallerIDInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delAuthCallerIDOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddAuthCallerIDCredit">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:addAuthCallerIDCreditIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addAuthCallerIDCreditInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addAuthCallerIDCreditOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetAuthCallerIDRecharges">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getAuthCallerIDRechargesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getAuthCallerIDRechargesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getAuthCallerIDRechargesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetupExtension">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setupExtensionIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setupExtensionInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setupExtensionOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetExtensionSettings">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getExtensionSettingsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionSettingsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionSettingsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetVoicemail">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setVoicemailIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setVoicemailInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setVoicemailOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetVoicemailSettings">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getVoicemailSettingsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getVoicemailSettingsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getVoicemailSettingsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetConference">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setConferenceIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setConferenceInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setConferenceOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetConferenceSettings">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getConferenceSettingsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getConferenceSettingsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getConferenceSettingsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetCallRecording">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setCallRecordingIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setCallRecordingInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setCallRecordingOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCallRecordingSettings">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getCallRecordingSettingsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallRecordingSettingsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallRecordingSettingsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetFaxCenter">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setFaxCenterIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setFaxCenterInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setFaxCenterOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetFaxCenterSettings">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getFaxCenterSettingsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getFaxCenterSettingsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getFaxCenterSettingsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AssignQueueAgent">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:assignQueueAgentIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:assignQueueAgentInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:assignQueueAgentOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="UnassignQueueAgent">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:unassignQueueAgentIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:unassignQueueAgentInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:unassignQueueAgentOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetQueueAgent">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setQueueAgentIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setQueueAgentInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setQueueAgentOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AssignQueueRemoteAgent">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:assignQueueRemoteAgentIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:assignQueueRemoteAgentInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:assignQueueRemoteAgentOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetQueueRemoteAgent">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setQueueRemoteAgentIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setQueueRemoteAgentInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setQueueRemoteAgentOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetQueueMember">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:setQueueMemberIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setQueueMemberInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setQueueMemberOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetQueueAgents">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getQueueAgentsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getQueueAgentsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getQueueAgentsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetQueueMembership">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getQueueMembershipIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getQueueMembershipInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getQueueMembershipOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		
+		
+		<operation name="GetExtensionGroups">
+
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getExtensionGroupsIn" style="document"/>
+
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionGroupsInHeader1" part="headerPart" use="literal"/>
+
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getExtensionGroupsOutHeader1" part="headerPart" use="literal"/>
+
+			</output>
+		</operation>
+		
+	</binding>
+	<service name="ExtensionPort">
+		<port name="ExtensionPort" binding="tns:Extension">
+			<soap:address location="https://192.168.32.222:443/soap2/extension_agent.php"/>
+
+		</port>
+	</service>
+</definitions>

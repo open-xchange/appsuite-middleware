@@ -1,0 +1,160 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.subscribe.parser;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Collection;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.SubscriptionHandler;
+import com.openexchange.subscribe.TargetFolderSession;
+
+
+public class MicroformatContactParser extends ContactHandler implements SubscriptionHandler {
+    protected Collection<Contact> contacts;
+    protected SubscribeService service;
+    
+    public MicroformatContactParser(){
+        super();
+    }
+    
+    public MicroformatContactParser(SubscribeService service){
+        this.service = service;
+    }
+ 
+    /**
+     * Read the site of a subscription and return its content as a string
+     * @param subscription
+     * @return
+     * @throws IOException
+     */
+    protected String readSubscription(Subscription subscription) throws IOException{
+        BufferedReader buffy = null;
+        StringBuilder bob = new StringBuilder();
+               
+        try {
+            URL url = new URL(""); //new URL(subscription.getUrl());
+            URLConnection connection = url.openConnection();
+            buffy = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
+            String line = buffy.readLine();
+            while (line != null){
+                bob.append (line);
+                bob.append ("\n");
+                line = buffy.readLine();
+            }
+        } finally {
+            if(buffy != null) {
+                buffy.close();
+            }
+        }
+        return bob.toString();
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.parser.SubscriptionHandler#handleSubscription(com.openexchange.subscribe.Subscription)
+     */
+    public void handleSubscription(Subscription subscription) throws AbstractOXException{
+        try {
+            String website = readSubscription(subscription);
+            
+            parse( website );
+            
+            storeContacts(new TargetFolderSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
+            
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (OXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ContextException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+    }
+
+    public void parse(String text) {
+        XMLReader xmlReader = null;
+        try {
+            AbstractMicroformatSAXHandler handler = new MicroformatContactSAXHandler();
+            xmlReader = XMLReaderFactory.createXMLReader();
+            xmlReader.setContentHandler( handler );
+            xmlReader.setErrorHandler( handler );
+            xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes()) ) );
+            contacts = handler.getObjects();
+        } catch (SAXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public Collection<Contact> getContacts() {
+        return contacts;
+    }
+
+}

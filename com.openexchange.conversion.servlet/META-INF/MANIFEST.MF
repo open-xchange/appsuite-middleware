@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Conversion Servlet
+Bundle-SymbolicName: com.openexchange.conversion.servlet
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.ajax.writer,
+ com.openexchange.conversion,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.service,
+ com.openexchange.tools.servlet.http,
+ javax.servlet;version="2.4.0",
+ javax.servlet.http;version="2.4.0",
+ org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging.impl;version="1.0.4",
+ org.json,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.service.http;version="1.2.0",
+ org.osgi.util.tracker;version="1.3.3"
+Bundle-Activator: com.openexchange.conversion.servlet.osgi.ConversionServletActivator

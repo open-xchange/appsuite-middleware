@@ -1,0 +1,448 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.parser.handlers;
+
+import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import javax.mail.Part;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.parser.MailMessageHandler;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.uuencode.UUEncodedPart;
+
+/**
+ * {@link MultipleMailPartHandler} - Looks for multiple mail parts by sequence IDs.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class MultipleMailPartHandler implements MailMessageHandler {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MultipleMailPartHandler.class);
+
+    private static final class TextMailPart extends MailPart {
+
+        private static final long serialVersionUID = 5622318721711740585L;
+
+        private final String text;
+
+        private transient DataSource dataSource;
+
+        /**
+         * @param text The text content
+         */
+        public TextMailPart(final String text, final ContentType contentType) {
+            super();
+            this.text = text;
+            setSize(text.length());
+            if (contentType.getCharsetParameter() == null) {
+                contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+            }
+            setContentType(contentType);
+        }
+
+        private DataSource getDataSource() throws MailException {
+            if (null == dataSource) {
+                try {
+                    dataSource = new MessageDataSource(text, getContentType());
+                } catch (final UnsupportedEncodingException e) {
+                    throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                }
+            }
+            return dataSource;
+        }
+
+        @Override
+        public Object getContent() throws MailException {
+            return text;
+        }
+
+        @Override
+        public DataHandler getDataHandler() throws MailException {
+            return new DataHandler(getDataSource());
+        }
+
+        @Override
+        public int getEnclosedCount() throws MailException {
+            return NO_ENCLOSED_PARTS;
+        }
+
+        @Override
+        public MailPart getEnclosedMailPart(final int index) throws MailException {
+            return null;
+        }
+
+        @Override
+        public InputStream getInputStream() throws MailException {
+            try {
+                return getDataSource().getInputStream();
+            } catch (final IOException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            }
+        }
+
+        @Override
+        public void loadContent() {
+            // Nothing to do
+        }
+
+        @Override
+        public void prepareForCaching() {
+            // Nothing to do
+        }
+
+    }
+
+    private final Set<String> ids;
+
+    private final Map<String, MailPart> mailParts;
+
+    private final boolean errorOnAbsence;
+
+    /**
+     * Initializes a new empty {@link MultipleMailPartHandler}.
+     * 
+     * @param errorOnAbsence <code>true</code> to throw an error if one or more parts could not be found; otherwise <code>false</code>
+     */
+    public MultipleMailPartHandler(final boolean errorOnAbsence) {
+        super();
+        this.ids = new HashSet<String>();
+        mailParts = new HashMap<String, MailPart>();
+        this.errorOnAbsence = errorOnAbsence;
+    }
+
+    /**
+     * Initializes a new {@link MultipleMailPartHandler}.
+     * 
+     * @param ids The sequence IDs to look for
+     * @param errorOnAbsence <code>true</code> to throw an error if one or more parts could not be found; otherwise <code>false</code>
+     */
+    public MultipleMailPartHandler(final String[] ids, final boolean errorOnAbsence) {
+        super();
+        if (null == ids) {
+            this.ids = new HashSet<String>(0);
+        } else {
+            this.ids = new HashSet<String>(Arrays.asList(ids));
+        }
+        mailParts = new HashMap<String, MailPart>(this.ids.size());
+        this.errorOnAbsence = errorOnAbsence;
+    }
+
+    /**
+     * Initializes a new {@link MultipleMailPartHandler}.
+     * 
+     * @param ids The sequence IDs to look for
+     * @param errorOnAbsence <code>true</code> to throw an error if one or more parts could not be found; otherwise <code>false</code>
+     */
+    public MultipleMailPartHandler(final Set<String> ids, final boolean errorOnAbsence) {
+        super();
+        if (null == ids) {
+            this.ids = new HashSet<String>(0);
+        } else {
+            this.ids = new HashSet<String>(ids);
+        }
+        mailParts = new HashMap<String, MailPart>(this.ids.size());
+        this.errorOnAbsence = errorOnAbsence;
+    }
+
+    /**
+     * Sets sequence IDs.
+     * <p>
+     * Remaining mail parts are cleared.
+     * 
+     * @param ids The sequence IDs
+     */
+    public void setSequenceIDs(final String[] ids) {
+        this.ids.clear();
+        if (null != ids) {
+            this.ids.addAll(Arrays.asList(ids));
+        }
+        mailParts.clear();
+    }
+
+    /**
+     * Sets sequence IDs.
+     * <p>
+     * Remaining mail parts are cleared.
+     * 
+     * @param ids The sequence IDs
+     */
+    public void setSequenceIDs(final Set<String> ids) {
+        this.ids.clear();
+        if (null != ids) {
+            this.ids.addAll(ids);
+        }
+        mailParts.clear();
+    }
+
+    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
+        if (ids.contains(id)) {
+            mailParts.put(id, part);
+            if (!isInline) {
+                checkFilename(part, id, baseContentType);
+            }
+            return (ids.size() > mailParts.size());
+        }
+        return true;
+    }
+
+    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+        return true;
+    }
+
+    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+        return true;
+    }
+
+    public boolean handleColorLabel(final int colorLabel) throws MailException {
+        return true;
+    }
+
+    public boolean handleContentId(final String contentId) throws MailException {
+        return true;
+    }
+
+    public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
+        return true;
+    }
+
+    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
+        return true;
+    }
+
+    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws MailException {
+        if (ids.contains(id)) {
+            mailParts.put(id, part);
+            if (!isInline) {
+                checkFilename(part, id, baseContentType);
+            }
+            return (ids.size() > mailParts.size());
+        }
+        return true;
+    }
+
+    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+        if (ids.contains(id)) {
+            final MailPart mailPart = new TextMailPart(htmlContent, contentType);
+            mailPart.setContentType(contentType);
+            mailPart.setSize(size);
+            mailPart.setFileName(fileName);
+            mailPart.setSequenceId(id);
+            mailParts.put(id, mailPart);
+            return (ids.size() > mailParts.size());
+        }
+        return true;
+    }
+
+    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+        if (ids.contains(id)) {
+            final MailPart mailPart = new TextMailPart(plainTextContent, contentType);
+            mailPart.setContentType(contentType);
+            mailPart.setSize(size);
+            mailPart.setFileName(fileName);
+            mailPart.setSequenceId(id);
+            mailParts.put(id, mailPart);
+            return (ids.size() > mailParts.size());
+        }
+        return true;
+    }
+
+    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
+        if (ids.contains(id)) {
+            final MailPart mailPart = new UUEncodedAttachmentMailPart(part);
+            String ct = MIMEType2ExtMap.getContentType(part.getFileName());
+            if (ct == null || ct.length() == 0) {
+                ct = MIMETypes.MIME_APPL_OCTET;
+            }
+            mailPart.setContentType(ct);
+            mailPart.setSize(part.getFileSize());
+            mailPart.setFileName(part.getFileName());
+            mailPart.setSequenceId(id);
+            mailParts.put(id, mailPart);
+            return (ids.size() > mailParts.size());
+        }
+        return true;
+    }
+
+    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException {
+        return handleInlinePlainText(decodedTextContent, contentType, size, fileName, id);
+    }
+
+    public void handleMessageEnd(final MailMessage msg) throws MailException {
+        if (errorOnAbsence && ids.size() > mailParts.size()) {
+            for (final String id : ids) {
+                if (!mailParts.containsKey(id)) {
+                    throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, id, Long.valueOf(msg.getMailId()), msg.getFolder());
+                }
+            }
+        }
+    }
+
+    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
+        return true;
+    }
+
+    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+        if (ids.contains(id)) {
+            mailParts.put(id, mailPart);
+            return (ids.size() > mailParts.size());
+        }
+        final Object content = mailPart.getContent();
+        final MailMessage nestedMail;
+        if (content instanceof MailMessage) {
+            nestedMail = (MailMessage) content;
+        } else if (content instanceof InputStream) {
+            try {
+                nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
+                    MIMEDefaultSession.getDefaultSession(),
+                    (InputStream) content));
+            } catch (final MessagingException e) {
+                throw MIMEMailException.handleMessagingException(e);
+            }
+        } else {
+            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+            return true;
+        }
+        final MultipleMailPartHandler nestedHandler = new MultipleMailPartHandler(ids, errorOnAbsence);
+        new MailMessageParser().parseMailMessage(nestedMail, nestedHandler, id);
+        this.mailParts.putAll(nestedHandler.getMailParts0());
+        return (ids.size() > mailParts.size());
+    }
+
+    public boolean handlePriority(final int priority) throws MailException {
+        return true;
+    }
+
+    public boolean handleMsgRef(final String msgRef) throws MailException {
+        return true;
+    }
+
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws MailException {
+        return true;
+    }
+
+    public boolean handleReceivedDate(final Date receivedDate) throws MailException {
+        return true;
+    }
+
+    public boolean handleSentDate(final Date sentDate) throws MailException {
+        return true;
+    }
+
+    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
+        return handleAttachment(
+            part,
+            (!Part.ATTACHMENT.equalsIgnoreCase(part.getContentDisposition().getDisposition()) && part.getFileName() == null),
+            baseContentType,
+            fileName,
+            id);
+    }
+
+    public boolean handleSubject(final String subject) throws MailException {
+        return true;
+    }
+
+    public boolean handleSystemFlags(final int flags) throws MailException {
+        return true;
+    }
+
+    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+        return true;
+    }
+
+    public boolean handleUserFlags(final String[] userFlags) throws MailException {
+        return true;
+    }
+
+    /**
+     * Gets the identified mail parts matching given sequence IDs
+     * 
+     * @return The identified mail part matching given sequence IDs
+     */
+    public Map<String, MailPart> getMailParts() {
+        return new HashMap<String, MailPart>(mailParts);
+    }
+
+    private Map<String, MailPart> getMailParts0() {
+        return mailParts;
+    }
+
+    private static void checkFilename(final MailPart mailPart, final String id, final String baseMimeType) {
+        if (mailPart.getFileName() == null) {
+            mailPart.setFileName(generateFilename(id, baseMimeType));
+        }
+    }
+
+}

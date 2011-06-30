@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Storage classes for generic models
+Bundle-SymbolicName: com.openexchange.modules.storage
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.database,
+ com.openexchange.groupware,
+ com.openexchange.modules.model,
+ com.openexchange.sql.builder,
+ com.openexchange.sql.grammar,
+ com.openexchange.sql.schema,
+ com.openexchange.sql.tools
+Export-Package: com.openexchange.modules.storage.memory,
+ com.openexchange.modules.storage.sql,
+ com.openexchange.modules.storage.sql.engines

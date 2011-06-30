@@ -1,0 +1,126 @@
+#################
+#
+# Mappings 
+# The left side contains the values in OX, and the right side contains the value name for ldap
+
+# This part contains the ADS mappings
+
+# Required
+com.openexchange.contacts.ldap.mapping.ads.uniqueid				= sAMAccountName
+# Use this if your ADS only uses one DC (two DCs can work but not tested yet) see
+# documentation for this
+#com.openexchange.contacts.ldap.mapping.ads.uniqueid				= uSNCreated
+
+# Optional
+com.openexchange.contacts.ldap.mapping.ads.displayname			= displayName
+com.openexchange.contacts.ldap.mapping.ads.givenname			= givenName
+com.openexchange.contacts.ldap.mapping.ads.surname				= sn
+com.openexchange.contacts.ldap.mapping.ads.password				=
+com.openexchange.contacts.ldap.mapping.ads.email1				= mail
+com.openexchange.contacts.ldap.mapping.ads.department			=
+com.openexchange.contacts.ldap.mapping.ads.company				=
+
+# The name of the attribute where the name of distributionlists is stored
+com.openexchange.contacts.ldap.mapping.ads.distributionlistname = name
+
+# This attribute must be set to have a uid field for distributionlists because this
+# differs from the uid for user object on some LDAP servers
+com.openexchange.contacts.ldap.mapping.ads.distributionuid = sAMAccountName
+# Use this if your ADS only uses one DC (two DCs can work but not tested yet) see
+# documentation for this
+#com.openexchange.contacts.ldap.mapping.ads.distributionuid = uSNCreated
+
+
+com.openexchange.contacts.ldap.mapping.ads.birthday				=
+com.openexchange.contacts.ldap.mapping.ads.anniversary			=
+com.openexchange.contacts.ldap.mapping.ads.branches				=
+com.openexchange.contacts.ldap.mapping.ads.business_category		=
+com.openexchange.contacts.ldap.mapping.ads.postal_code_business		= postalCode
+com.openexchange.contacts.ldap.mapping.ads.state_business			= st
+com.openexchange.contacts.ldap.mapping.ads.street_business			= streetAddress
+com.openexchange.contacts.ldap.mapping.ads.telephone_callback		=
+com.openexchange.contacts.ldap.mapping.ads.city_home			=
+com.openexchange.contacts.ldap.mapping.ads.commercial_register		=
+com.openexchange.contacts.ldap.mapping.ads.country_home			=
+com.openexchange.contacts.ldap.mapping.ads.email2				=
+com.openexchange.contacts.ldap.mapping.ads.email3				=
+com.openexchange.contacts.ldap.mapping.ads.employeetype			=
+com.openexchange.contacts.ldap.mapping.ads.fax_business			= facsimileTelehoneNumber
+com.openexchange.contacts.ldap.mapping.ads.fax_home				=
+com.openexchange.contacts.ldap.mapping.ads.fax_other			=
+com.openexchange.contacts.ldap.mapping.ads.instant_messenger1		=
+com.openexchange.contacts.ldap.mapping.ads.instant_messenger2		=
+com.openexchange.contacts.ldap.mapping.ads.telephone_ip			=
+com.openexchange.contacts.ldap.mapping.ads.telephone_isdn			= internationaliSDNNumber
+com.openexchange.contacts.ldap.mapping.ads.mail_folder_drafts_name		=
+com.openexchange.contacts.ldap.mapping.ads.mail_folder_sent_name		=
+com.openexchange.contacts.ldap.mapping.ads.mail_folder_spam_name		=
+com.openexchange.contacts.ldap.mapping.ads.mail_folder_trash_name		=
+com.openexchange.contacts.ldap.mapping.ads.manager_name			=
+com.openexchange.contacts.ldap.mapping.ads.marital_status			=
+com.openexchange.contacts.ldap.mapping.ads.cellular_telephone1		=
+com.openexchange.contacts.ldap.mapping.ads.cellular_telephone2		=
+com.openexchange.contacts.ldap.mapping.ads.info				= info
+com.openexchange.contacts.ldap.mapping.ads.nickname				=
+com.openexchange.contacts.ldap.mapping.ads.number_of_children		=
+com.openexchange.contacts.ldap.mapping.ads.note				=
+com.openexchange.contacts.ldap.mapping.ads.number_of_employee		=
+com.openexchange.contacts.ldap.mapping.ads.telephone_pager			= pager
+com.openexchange.contacts.ldap.mapping.ads.telephone_assistant		=
+com.openexchange.contacts.ldap.mapping.ads.telephone_business1		= telephoneNumber
+com.openexchange.contacts.ldap.mapping.ads.telephone_business2		=
+com.openexchange.contacts.ldap.mapping.ads.telephone_car			=
+com.openexchange.contacts.ldap.mapping.ads.telephone_company		=
+com.openexchange.contacts.ldap.mapping.ads.telephone_home1			= homePhone
+com.openexchange.contacts.ldap.mapping.ads.telephone_home2			=
+com.openexchange.contacts.ldap.mapping.ads.telephone_other			=
+com.openexchange.contacts.ldap.mapping.ads.postal_code_home			=
+com.openexchange.contacts.ldap.mapping.ads.profession			=
+com.openexchange.contacts.ldap.mapping.ads.telephone_radio			=
+com.openexchange.contacts.ldap.mapping.ads.room_number			= physicalDeliveryOfficeName
+com.openexchange.contacts.ldap.mapping.ads.sales_volume			=
+com.openexchange.contacts.ldap.mapping.ads.city_other			=
+com.openexchange.contacts.ldap.mapping.ads.country_other			=
+com.openexchange.contacts.ldap.mapping.ads.middle_name			=
+com.openexchange.contacts.ldap.mapping.ads.postal_code_other		=
+com.openexchange.contacts.ldap.mapping.ads.state_other			=
+com.openexchange.contacts.ldap.mapping.ads.street_other			=
+com.openexchange.contacts.ldap.mapping.ads.spouse_name			=
+com.openexchange.contacts.ldap.mapping.ads.state_home			=
+com.openexchange.contacts.ldap.mapping.ads.street_home			=
+com.openexchange.contacts.ldap.mapping.ads.suffix				=
+com.openexchange.contacts.ldap.mapping.ads.tax_id				=
+com.openexchange.contacts.ldap.mapping.ads.telephone_telex			=
+com.openexchange.contacts.ldap.mapping.ads.telephone_ttytdd			=
+com.openexchange.contacts.ldap.mapping.ads.url				= wWWHomePage
+com.openexchange.contacts.ldap.mapping.ads.userfield01			=
+com.openexchange.contacts.ldap.mapping.ads.userfield02			=
+com.openexchange.contacts.ldap.mapping.ads.userfield03			=
+com.openexchange.contacts.ldap.mapping.ads.userfield04			=
+com.openexchange.contacts.ldap.mapping.ads.userfield05			=
+com.openexchange.contacts.ldap.mapping.ads.userfield06			=
+com.openexchange.contacts.ldap.mapping.ads.userfield07			=
+com.openexchange.contacts.ldap.mapping.ads.userfield08			=
+com.openexchange.contacts.ldap.mapping.ads.userfield09			=
+com.openexchange.contacts.ldap.mapping.ads.userfield10			=	
+com.openexchange.contacts.ldap.mapping.ads.userfield11			=
+com.openexchange.contacts.ldap.mapping.ads.userfield12			=
+com.openexchange.contacts.ldap.mapping.ads.userfield13			=
+com.openexchange.contacts.ldap.mapping.ads.userfield14			=
+com.openexchange.contacts.ldap.mapping.ads.userfield15			=
+com.openexchange.contacts.ldap.mapping.ads.userfield16			=
+com.openexchange.contacts.ldap.mapping.ads.userfield17			=
+com.openexchange.contacts.ldap.mapping.ads.userfield18			=
+com.openexchange.contacts.ldap.mapping.ads.userfield19			=
+com.openexchange.contacts.ldap.mapping.ads.userfield20			=
+com.openexchange.contacts.ldap.mapping.ads.city_business			= l
+com.openexchange.contacts.ldap.mapping.ads.country_business			= co
+com.openexchange.contacts.ldap.mapping.ads.assistant_name			=
+com.openexchange.contacts.ldap.mapping.ads.telephone_primary		=
+com.openexchange.contacts.ldap.mapping.ads.categories			=
+# Integer value between 1 and 3 specifying one of the values in email1... email3
+com.openexchange.contacts.ldap.mapping.ads.defaultaddress		=
+com.openexchange.contacts.ldap.mapping.ads.title				= title
+com.openexchange.contacts.ldap.mapping.ads.position				= 
+com.openexchange.contacts.ldap.mapping.ads.lastmodified				= whenChanged
+com.openexchange.contacts.ldap.mapping.ads.creationdate				= whenCreated

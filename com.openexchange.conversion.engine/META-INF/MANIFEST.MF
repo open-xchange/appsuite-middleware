@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Conversion Engine
+Bundle-SymbolicName: com.openexchange.conversion.engine
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.conversion,
+ com.openexchange.session,
+ org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging.impl;version="1.0.4",
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.3.3"
+Bundle-Activator: com.openexchange.conversion.engine.osgi.ConversionEngineActivator

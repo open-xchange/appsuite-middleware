@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange HTML Bundle
+Bundle-SymbolicName: com.openexchange.html
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ClassPath: com.openexchange.html.jar,
+ lib/htmlcleaner-2.2.jar,
+ lib/kxml.jar,
+ lib/jTidy.jar,
+ .
+Import-Package: com.openexchange.config,
+ com.openexchange.proxy,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.stream,
+ gnu.inet.encoding,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.w3c.dom
+Export-Package: com.openexchange.html
+Bundle-Activator: com.openexchange.html.osgi.HTMLServiceActivator

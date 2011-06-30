@@ -1,0 +1,596 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax.writer;
+
+import gnu.trove.TIntObjectHashMap;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.tools.TimeZoneUtils;
+
+/**
+ * {@link DataWriter} - Base class for all writers used throughout modules.
+ *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class DataWriter {
+
+    protected TimeZone timeZone;
+
+    static final TimeZone UTC = TimeZoneUtils.getTimeZone("UTC");
+
+    protected JSONWriter jsonwriter;
+
+    private static final DecimalFormat floatFormat =
+        new DecimalFormat("#######0.##", new DecimalFormatSymbols(Locale.ENGLISH));
+
+    /**
+     * Constructor for subclasses.
+     */
+    protected DataWriter(final TimeZone timeZone, final JSONWriter writer) {
+        super();
+        this.timeZone = timeZone;
+        this.jsonwriter = writer;
+    }
+
+    public void writeParameter(final String name, final String value) throws JSONException {
+        if (value != null && value.length() > 0) {
+            jsonwriter.key(name);
+            jsonwriter.value(value);
+        }
+    }
+
+    public void writeParameter(final String name, final Date value) throws JSONException {
+        if (value != null) {
+            jsonwriter.key(name);
+            jsonwriter.value(value.getTime());
+        }
+    }
+
+    // new implementation
+
+    /**
+     * Puts given name-<code>String</code>-pair into specified JSON object provided that <code>String</code> value is not <code>null</code>
+     * and not empty
+     * 
+     * @param name The name to which the value is bound
+     * @param value The <code>String</code> value
+     * @param json The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final String value, final JSONObject json) throws JSONException {
+        if (value != null && value.length() > 0) {
+            json.put(name, value);
+        }
+    }
+
+    /**
+     * Conditionally puts given name-<code>String</code>-pair into specified
+     * JSON object provided that <code>String</code> value is not
+     * <code>null</code> and not empty.
+     * @param name The name to which the value is bound
+     * @param value The <code>String</code> value
+     * @param json The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final String value, final JSONObject json, final boolean condition) throws JSONException {
+        if (condition) {
+            writeParameter(name, value, json);
+        }
+    }
+
+    /**
+     * Puts given name-<code>int</code>-pair into specified JSON object
+     *
+     * @param name The name to which the value is bound
+     * @param value The <code>int</code> value
+     * @param json The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final int value, final JSONObject json) throws JSONException {
+        json.put(name, value);
+    }
+
+    /**
+     * Conditionally puts given <code>int</code> value into specified JSON object
+     * 
+     * @param name The value's name
+     * @param value The <code>int</code> value
+     * @param json The JSON object to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void writeParameter(final String name, final int value, final JSONObject json, final boolean condition) throws JSONException {
+        if (condition) {
+            writeParameter(name, value, json);
+        }
+    }
+
+    /**
+     * Puts given name-<code>long</code>-pair into specified JSON object
+     *
+     * @param name The value's name
+     * @param value The <code>long</code> value
+     * @param json The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final long value, final JSONObject json) throws JSONException {
+        // Large values of long must be written as string. See bug 11311.
+        writeParameter(name, String.valueOf(value), json);
+    }
+
+    /**
+     * Conditionally puts given <code>long</code> value into specified JSON object.
+     * @param name The value's name
+     * @param value The <code>long</code> value
+     * @param json The JSON object to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void writeParameter(final String name, final long value, final JSONObject json, final boolean condition) throws JSONException {
+        // Large values of long must be written as string. See bug 11311.
+        writeParameter(name, Long.toString(value), json, condition);
+    }
+
+    public static void writeParameter(String name, Long value, JSONObject json, boolean condition) throws JSONException {
+        if (null == value) {
+            writeNull(name, json, condition);
+        } else {
+            writeParameter(name, String.valueOf(value), json, condition);
+        }
+    }
+
+    /**
+     * Conditionally puts given <code>float</code> value into specified JSON
+     * object.
+     * @param name The value's name
+     * @param value The <code>float</code> value
+     * @param json The JSON object to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void writeParameter(final String name, final Float value, final JSONObject json, final boolean condition) throws JSONException {
+        // Floats must be written as strings.
+        if (null == value) {
+            writeNull(name, json, condition);
+        } else {
+            writeParameter(name, floatFormat.format(value), json, condition);
+        }
+    }
+
+    /**
+     * Puts given name-<code>boolean</code>-pair into specified JSON object
+     *
+     * @param name The value's name
+     * @param value The <code>boolean</code> value
+     * @param jsonObj The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final boolean value, final JSONObject jsonObj) throws JSONException {
+        jsonObj.put(name, value);
+    }
+
+    /**
+     * Conditionally puts given <code>boolean</code> value into specified JSON object
+     *
+     * @param name The value's name
+     * @param value The <code>boolean</code> value
+     * @param jsonObj The JSON object to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void writeParameter(final String name, final boolean value, final JSONObject jsonObj, final boolean condition) throws JSONException {
+        if (condition) {
+            jsonObj.put(name, value);
+        }
+    }
+
+    /**
+     * Puts given name-<code>Date</code>-pair into specified JSON object
+     * provided that <code>Date</code> value is not <code>null</code>
+     *
+     * @param name The value's name
+     * @param value The <code>Date</code> value
+     * @param jsonObj The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final Date value, final JSONObject jsonObj) throws JSONException {
+        if (value != null) {
+            jsonObj.put(name, value.getTime());
+        }
+    }
+
+    /**
+     * Puts given name-<code>Date</code>-pair into specified JSON object with respect to time zone
+     * provided that <code>Date</code> value is not <code>null</code>
+     *
+     * @param name The value's name
+     * @param value The <code>Date</code> value
+     * @param timeZone The time zone
+     * @param jsonObj The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final Date value, final TimeZone timeZone, final JSONObject jsonObj) throws JSONException {
+        writeParameter(name, value, value, timeZone, jsonObj);
+    }
+
+    static void writeParameter(final String name, final Date value, final TimeZone timeZone, final JSONObject json, final boolean condition) throws JSONException {
+        if (condition) {
+            writeParameter(name, value, timeZone, json);
+        }
+    }
+
+    /**
+     * Puts given name-<code>Date</code>-pair into specified JSON object with respect to time zone
+     * provided that <code>Date</code> value is not <code>null</code>
+     *
+     * @param name The value's name
+     * @param value The <code>Date</code> value
+     * @param offsetDate The offset <code>Date</code> value
+     * @param timeZone The time zone
+     * @param jsonObj The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final Date value, final Date offsetDate, final TimeZone timeZone, final JSONObject jsonObj) throws JSONException {
+        if (value != null) {
+            jsonObj.put(name, value.getTime() + timeZone.getOffset(offsetDate.getTime()));
+        }
+    }
+
+    /**
+     * Puts given <code>String</code> value into specified JSON array
+     * <p>
+     * {@link JSONObject#NULL} is put into specified JSON array if either
+     * <code>String</code> value is <code>null</code> or empty.
+     *
+     * @param value The <code>String</code> value
+     * @param jsonArray The JSON array to put into
+     */
+    public static void writeValue(final String value, final JSONArray jsonArray) {
+        if (value != null && value.length() > 0) {
+            jsonArray.put(value);
+        } else {
+            jsonArray.put(JSONObject.NULL);
+        }
+    }
+
+    /**
+     * Conditionally puts given <code>String</code> value into specified JSON
+     * array. {@link JSONObject#NULL} is put into specified JSON array if either
+     * <code>String</code> value is <code>null</code> or empty.
+     * @param value The <code>String</code> value
+     * @param jsonArray The JSON array to put into
+     * @param condition conditionally write the value.
+     */
+    static void writeValue(final String value, final JSONArray jsonArray, final boolean condition) {
+        if (condition) {
+            writeValue(value, jsonArray);
+        } else {
+            jsonArray.put(JSONObject.NULL);
+        }
+    }
+
+    /**
+     * Puts given <code>int</code> value into specified JSON array
+     *
+     * @param value The <code>int</code> value
+     * @param jsonArray The JSON array to put into
+     */
+    public static void writeValue(final int value, final JSONArray jsonArray) {
+        jsonArray.put(value);
+    }
+
+    /**
+     * Conditionally puts given <code>int</code> value into specified JSON array
+     *
+     * @param value The <code>int</code> value
+     * @param jsonArray The JSON array to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+     */
+    public static void writeValue(final int value, final JSONArray jsonArray, final boolean condition) {
+        if (condition) {
+            jsonArray.put(value);
+        } else {
+            jsonArray.put(JSONObject.NULL);
+        }
+    }
+
+    /**
+     * Conditionally puts given <code>float</code> value into specified JSON
+     * array.
+     * @param value The <code>float</code> value
+     * @param jsonArray The JSON array to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code>
+     * to put {@link JSONObject#NULL}
+     */
+    public static void writeValue(Float value, final JSONArray jsonArray, final boolean condition) {
+        // Floats must be written as strings
+        if (condition) {
+            writeValue(floatFormat.format(value), jsonArray);
+        } else {
+            writeNull(jsonArray);
+        }
+    }
+
+    /**
+     * Conditionally puts given <code>long</code> value into specified JSON array
+     *
+     * @param value The <code>long</code> value
+     * @param jsonArray The JSON array to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+     */
+    public static void writeValue(final long value, final JSONArray jsonArray, final boolean condition) {
+        // Large values of long must be written as string. See bug 11311.
+        writeValue(Long.toString(value), jsonArray, condition);
+    }
+
+    public static void writeValue(Long value, JSONArray json, boolean condition) {
+        // Large values of long must be written as string. See bug 11311.
+        if (condition) {
+            writeValue(value.toString(), json);
+        } else {
+            writeNull(json);
+        }
+    }
+
+    protected static void writeNull(JSONArray json) {
+        json.put(JSONObject.NULL);
+    }
+
+    protected static void writeNull(String name, JSONObject json, boolean condition) throws JSONException {
+        if (condition) {
+            json.put(name, JSONObject.NULL);
+        }
+    }
+
+    /**
+     * Puts given <code>boolean</code> value into specified JSON array
+     *
+     * @param value The <code>boolean</code> value
+     * @param jsonArray The JSON array to put into
+     */
+    public static void writeValue(final boolean value, final JSONArray jsonArray) {
+        jsonArray.put(value);
+    }
+
+    /**
+     * Conditionally puts given <code>boolean</code> value into specified JSON array
+     *
+     * @param value The <code>boolean</code> value
+     * @param jsonArray The JSON array to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+     */
+    public static void writeValue(final boolean value, final JSONArray jsonArray, final boolean condition) {
+        if (condition) {
+            jsonArray.put(value);
+        } else {
+            jsonArray.put(JSONObject.NULL);
+        }
+    }
+
+    /**
+     * Puts given <code>java.util.Date</code>'s time value into specified JSON array
+     *
+     * @param value The <code>Date</code> value
+     * @param jsonArray The JSON array to put into
+     */
+    public static void writeValue(final Date value, final JSONArray jsonArray) {
+        if (value == null) {
+            jsonArray.put(JSONObject.NULL);
+        } else {
+            jsonArray.put(value.getTime());
+        }
+    }
+
+    public static void writeValue(final Date value, final JSONArray json, final boolean condition) {
+        if (condition) {
+            json.put(value.getTime());
+        } else {
+            json.put(JSONObject.NULL);
+        }
+    }
+
+    /**
+     * Puts given <code>java.util.Date</code>'s time value into specified JSON array with respect to specified time zone
+     *
+     * @param value The <code>Date</code> value
+     * @param timeZone The time zone
+     * @param jsonArray The JSON array to put into
+     */
+    public static void writeValue(final Date value, final TimeZone timeZone, final JSONArray jsonArray) {
+        writeValue(value, value, timeZone, jsonArray);
+    }
+
+    static void writeValue(final Date value, final TimeZone timeZone, final JSONArray json, final boolean condition) {
+        if (condition) {
+            writeValue(value, timeZone, json);
+        } else {
+            json.put(JSONObject.NULL);
+        }
+    }
+
+    /**
+     * Puts given <code>java.util.Date</code>'s time value into specified JSON array with respect to specified time zone
+     *
+     * @param value The <code>Date</code> value
+     * @param offsetDate The offset <code>Date</code> value
+     * @param timeZone The time zone
+     * @param jsonArray The JSON array to put into
+     */
+    public static void writeValue(final Date value, final Date offsetDate, final TimeZone timeZone,
+            final JSONArray jsonArray) {
+        if (value == null) {
+            jsonArray.put(JSONObject.NULL);
+        } else {
+            final int offset = timeZone.getOffset(offsetDate.getTime());
+            jsonArray.put(value.getTime() + offset);
+        }
+    }
+
+    /**
+     * Puts {@link JSONObject#NULL} into specified JSON array
+     *
+     * @param jsonArray The JSON array to put {@link JSONObject#NULL} into
+     */
+    public static void writeValueNull(final JSONArray jsonArray) {
+        jsonArray.put(JSONObject.NULL);
+    }
+
+    protected void writeFields(final DataObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
+        final WriterProcedure<DataObject> procedure = new WriterProcedure<DataObject>(obj, json, tz);
+        if (!WRITER_MAP.forEachValue(procedure)) {
+            final JSONException je = procedure.getError();
+            if (null != je) {
+                throw je;
+            }
+        }
+    }
+
+    protected boolean writeField(final DataObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+        final FieldWriter<DataObject> writer = WRITER_MAP.get(column);
+        if (null == writer) {
+            return false;
+        }
+        writer.write(obj, tz, json);
+        return true;
+    }
+
+    protected static interface FieldWriter<T> {
+
+        /**
+         * Writes this writer's value taken from specified data object to given JSON array.
+         * 
+         * @param data the data object
+         * @param json The JSON array
+         * @throws JSONException If writing to JSON array fails
+         */
+        void write(T obj, TimeZone timeZone, JSONArray json) throws JSONException;
+
+        void write(T obj, TimeZone timeZone, JSONObject json) throws JSONException;
+    }
+
+    private static final FieldWriter<DataObject> OBJECT_ID_WRITER = new FieldWriter<DataObject>() {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getObjectID(), json, obj.containsObjectID());
+        }
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(DataFields.ID, obj.getObjectID(), json, obj.containsObjectID());
+        }
+    };
+
+    private static final FieldWriter<DataObject> CREATED_BY_WRITER = new FieldWriter<DataObject>() {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getCreatedBy(), json, obj.containsCreatedBy());
+        }
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(DataFields.CREATED_BY, obj.getCreatedBy(), json, obj.containsCreatedBy());
+        }
+    };
+
+    private static final FieldWriter<DataObject> CREATION_DATE_WRITER = new FieldWriter<DataObject>() {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getCreationDate(), timeZone, json, obj.containsCreationDate());
+        }
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(DataFields.CREATION_DATE, obj.getCreationDate(), timeZone, json);
+        }
+    };
+
+    private static final FieldWriter<DataObject> MODIFIED_BY_WRITER = new FieldWriter<DataObject>() {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getModifiedBy(), json, obj.containsModifiedBy());
+        }
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(DataFields.MODIFIED_BY, obj.getModifiedBy(), json, obj.containsModifiedBy());
+        }
+    };
+
+    private static final FieldWriter<DataObject> LAST_MODIFIED_WRITER = new FieldWriter<DataObject>() {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getLastModified(), timeZone, json, obj.containsLastModified());
+        }
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(DataFields.LAST_MODIFIED, obj.getLastModified(), timeZone, json, obj.containsLastModified());
+        }
+    };
+
+    private static final FieldWriter<DataObject> LAST_MODIFIED_UTC_WRITER = new FieldWriter<DataObject>() {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getLastModified(), UTC, json, obj.containsLastModified());
+        }
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(DataFields.LAST_MODIFIED_UTC, obj.getLastModified(), UTC, json, obj.containsLastModified());
+        }
+    };
+
+    static {
+        final TIntObjectHashMap<FieldWriter<DataObject>> m = new TIntObjectHashMap<FieldWriter<DataObject>>(6, 1);
+        m.put(DataObject.OBJECT_ID, OBJECT_ID_WRITER);
+        m.put(DataObject.CREATED_BY, CREATED_BY_WRITER);
+        m.put(DataObject.CREATION_DATE, CREATION_DATE_WRITER);
+        m.put(DataObject.MODIFIED_BY, MODIFIED_BY_WRITER);
+        m.put(DataObject.LAST_MODIFIED, LAST_MODIFIED_WRITER);
+        m.put(DataObject.LAST_MODIFIED_UTC, LAST_MODIFIED_UTC_WRITER);
+        WRITER_MAP = m;
+    }
+
+    private static final TIntObjectHashMap<FieldWriter<DataObject>> WRITER_MAP;
+
+}

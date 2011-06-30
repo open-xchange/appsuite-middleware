@@ -1,0 +1,20 @@
+* 2011-02-09 - choeger@open-xchange.com
+
+ - Bugfix #18276 - new outlook oxtender 2 is not installed
+
+* 2010-11-24 - choeger@open-xchange.com
+
+ - Bugfix #17556 - Installation on RHEL5 fails, no java installed
+   only provide sun-java on centos
+ 
+* 2010-10-29 - choeger@open-xchange.com
+
+ - Bugfix #17347 - Outlook OXtender repository not configured correctly
+ - Bugfix #17348 - Wrong defaultpackage for component "oxmobility"
+
+* 2010-06-24 - choeger@open-xchange.com
+
+ - Bugfix #16354 - strange package dependencies for open-xchange-meta-singleserver
+ - Bugfix #16000 - Add open-xchange-mail-pushnotify to package dependency list
+   in open-xchange-meta-oxucs.
+

@@ -1,0 +1,189 @@
+<serviceGroup>
+
+<service name="OXResellerService" scope="application">
+    <description>
+        OX Reseller Service
+    </description>
+    <messageReceivers>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </messageReceivers>
+    <operation name="change">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="delete">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="initDatabaseRestrictions">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="removeDatabaseRestrictions">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="updateDatabaseModuleAccessRestrictions">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <parameter name="beanPropertyRules">
+    	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
+    	<bean class="java.rmi.RemoteException" excludeProperties="cause" />
+    	<bean class="java.lang.Exception" excludeProperties="Exception" />
+    	<bean class="com.openexchange.admin.rmi.exceptions.InvalidDataException" excludeProperties="fieldnames" />
+	</parameter>
+    <parameter name="ServiceClass">com.openexchange.admin.reseller.soap.OXReseller</parameter>
+</service>
+
+<service name="OXResellerContextService" scope="application">
+    <description>
+        OX Reseller Context Service
+    </description>
+    <messageReceivers>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </messageReceivers>
+    <operation name="change">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="changeModuleAccess">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="changeModuleAccessByName">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="delete">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="disable">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="disableAll">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="downgrade">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="enable">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="enableAll">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <parameter name="beanPropertyRules">
+    	<bean class="com.openexchange.admin.rmi.dataobjects.User" excludeProperties="extensions" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.Group" excludeProperties="extensions" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.Context" excludeProperties="namespace|userAttributes" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
+    	<bean class="java.rmi.RemoteException" excludeProperties="cause" />
+    	<bean class="java.lang.Exception" excludeProperties="Exception" />
+    	<bean class="com.openexchange.admin.rmi.exceptions.InvalidDataException" excludeProperties="fieldnames" />
+	</parameter>
+    <parameter name="ServiceClass">com.openexchange.admin.reseller.soap.OXResellerContext</parameter>
+</service>
+
+<service name="OXResellerUserService" scope="application">
+    <description>
+        OX Reseller User Service
+    </description>
+    <messageReceivers>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </messageReceivers>
+    <operation name="change">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="changeByModuleAccess">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="changeByModuleAccessName">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="deleteMultiple">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="delete">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <parameter name="beanPropertyRules">
+    	<bean class="com.openexchange.admin.rmi.dataobjects.User" excludeProperties="extensions|userAttributes|guiPreferences" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.Group" excludeProperties="extensions" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
+    	<bean class="java.rmi.RemoteException" excludeProperties="cause" />
+    	<bean class="java.lang.Exception" excludeProperties="Exception" />
+    	<bean class="com.openexchange.admin.rmi.exceptions.InvalidDataException" excludeProperties="fieldnames" />
+	</parameter>
+    <parameter name="ServiceClass">com.openexchange.admin.reseller.soap.OXResellerUser</parameter>
+</service>
+
+<service name="OXResellerGroupService" scope="application">
+    <description>
+        OX Reseller Group Service
+    </description>
+    <messageReceivers>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </messageReceivers>
+    <operation name="addMember">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="change">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="delete">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="deleteMultiple">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="removeMember">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <parameter name="beanPropertyRules">
+    	<bean class="com.openexchange.admin.rmi.dataobjects.User" excludeProperties="extensions" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.Group" excludeProperties="extensions" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
+    	<bean class="java.rmi.RemoteException" excludeProperties="cause" />
+    	<bean class="java.lang.Exception" excludeProperties="Exception" />
+    	<bean class="com.openexchange.admin.rmi.exceptions.InvalidDataException" excludeProperties="fieldnames" />
+	</parameter>
+    <parameter name="ServiceClass">com.openexchange.admin.reseller.soap.OXResellerGroup</parameter>
+</service>
+
+<service name="OXResellerResourceService" scope="application">
+    <description>
+        OX Resource Resource Service
+    </description>
+    <messageReceivers>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </messageReceivers>
+    <operation name="change">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <operation name="delete">
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
+	</operation> 
+    <parameter name="beanPropertyRules">
+    	<bean class="com.openexchange.admin.rmi.dataobjects.Resource" excludeProperties="extensions" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
+    	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
+    	<bean class="java.rmi.RemoteException" excludeProperties="cause" />
+    	<bean class="java.lang.Exception" excludeProperties="Exception" />
+    	<bean class="com.openexchange.admin.rmi.exceptions.InvalidDataException" excludeProperties="fieldnames" />
+	</parameter>
+    <parameter name="ServiceClass">com.openexchange.admin.reseller.soap.OXResellerResource</parameter>
+</service>
+
+</serviceGroup>

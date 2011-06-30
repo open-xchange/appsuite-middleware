@@ -1,0 +1,170 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.group.servlet.osgi;
+
+import static com.openexchange.group.servlet.services.GroupRequestServiceRegistry.getServiceRegistry;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.osgi.framework.ServiceRegistration;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.group.GroupService;
+import com.openexchange.group.servlet.preferences.Module;
+import com.openexchange.group.servlet.request.GroupManageRequest;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.user.UserService;
+
+/**
+ * Activator for the group management requests.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class GroupManageActivator extends DeferredActivator {
+
+    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { UserService.class, GroupService.class };
+
+    private final Lock lock = new ReentrantLock();
+
+    private ServiceRegistration handlerRegistration;
+
+    private ServiceRegistration preferencesItemRegistration;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        getServiceRegistry().addService(clazz, getService(clazz));
+        registerService();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        getServiceRegistry().removeService(clazz);
+        unregisterService();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        final ServiceRegistry registry = getServiceRegistry();
+        registry.clearRegistry();
+        for (final Class<?> tmp : getNeededServices()) {
+            final Object service = getService(tmp);
+            if (null != service) {
+                registry.addService(tmp, service);
+            }
+        }
+        registerService();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void stopBundle() throws Exception {
+        unregisterService();
+    }
+
+    private void registerService() {
+        final boolean needsRegistration;
+        lock.lock();
+        try {
+            // Registration must only be done if all needed services are available
+            needsRegistration = NEEDED_SERVICES.length == getServiceRegistry().size();
+        } finally {
+            lock.unlock();
+        }
+        if (needsRegistration && handlerRegistration == null) {
+            handlerRegistration = context.registerService(AJAXRequestHandler.class.getName(),
+                new GroupManageRequest(), null);
+            preferencesItemRegistration = context.registerService(
+                PreferencesItemService.class.getName(), new Module(), null);
+        }
+    }
+
+    private void unregisterService() {
+        ServiceRegistration unregister1 = null;
+        ServiceRegistration unregister2 = null;
+        lock.lock();
+        try {
+            if (null != handlerRegistration) {
+                unregister1 = handlerRegistration;
+                handlerRegistration = null;
+                unregister2 = preferencesItemRegistration;
+                preferencesItemRegistration = null;
+            }
+        } finally {
+            lock.unlock();
+        }
+        if (null != unregister1) {
+            unregister1.unregister();
+        }
+        if (null != unregister2) {
+            unregister2.unregister();
+        }
+    }
+}

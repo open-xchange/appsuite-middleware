@@ -1,0 +1,222 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.folder.json.osgi;
+
+import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.folder.json.Constants;
+import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
+import com.openexchange.folder.json.preferences.Tree;
+import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folder.json.servlet.FolderServlet;
+import com.openexchange.folderstorage.ContentTypeDiscoveryService;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.tools.service.SessionServletRegistration;
+
+/**
+ * {@link Activator} - Activator for JSON folder interface.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class Activator extends DeferredActivator {
+
+    private static final Log LOG = LogFactory.getLog(Activator.class);
+
+    private List<ServiceRegistration> serviceRegistrations;
+
+    private List<ServiceTracker> trackers;
+
+    private String module;
+
+    private String servletPath;
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
+
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        apply((ConfigurationService) getService(clazz));
+    }
+
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        restore();
+    }
+
+    @Override
+    public void startBundle() throws Exception {
+        try {
+            /*
+             * Configure
+             */
+            apply(getService(ConfigurationService.class));
+            /*
+             * Service trackers
+             */
+            trackers = new ArrayList<ServiceTracker>(6);
+            trackers.add(new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(
+                context,
+                getInstance(),
+                FolderService.class)));
+            trackers.add(new SessionServletRegistration(context, new FolderServlet(), Constants.getServletPath()));
+            trackers.add(new ServiceTracker(
+                context,
+                ContentTypeDiscoveryService.class.getName(),
+                new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(context, getInstance(), ContentTypeDiscoveryService.class)));
+            trackers.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(
+                context,
+                Constants.ADDITIONAL_FOLDER_FIELD_LIST)));
+            /*
+             * Open trackers
+             */
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
+            /*
+             * Preference item
+             */
+            serviceRegistrations = new ArrayList<ServiceRegistration>(2);
+            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new Tree(), null));
+            serviceRegistrations.add(context.registerService(
+                MultipleHandlerFactoryService.class.getName(),
+                new FolderMultipleHandlerFactory(),
+                null));
+            serviceRegistrations.add(context.registerService(LoginHandlerService.class.getName(), new FolderConsistencyLoginHandler(), null));
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void stopBundle() throws Exception {
+        try {
+            if (null != trackers) {
+                /*
+                 * Close trackers
+                 */
+                while (!trackers.isEmpty()) {
+                    trackers.remove(0).close();
+                }
+                trackers = null;
+            }
+            if (null != serviceRegistrations) {
+                /*
+                 * Unregister
+                 */
+                while (!serviceRegistrations.isEmpty()) {
+                    serviceRegistrations.remove(0).unregister();
+                }
+                serviceRegistrations = null;
+            }
+            /*
+             * Restore
+             */
+            restore();
+        } catch (final Exception e) {
+            org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    private void apply(final ConfigurationService configurationService) {
+        ServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
+        final String tmpModule = configurationService.getProperty("com.openexchange.folder.json.module");
+        if (null != tmpModule) {
+            final String cmod = Constants.getModule();
+            if (!cmod.equals(tmpModule)) {
+                /*
+                 * Remember old module and apply new one
+                 */
+                module = cmod;
+                Constants.setModule(tmpModule);
+            }
+        }
+        final String tmpServletPath = configurationService.getProperty("com.openexchange.folder.json.servletPath");
+        if (null != tmpServletPath) {
+            final String cpath = Constants.getServletPath();
+            if (!cpath.equals(tmpServletPath)) {
+                /*
+                 * Remember old path and apply new one
+                 */
+                servletPath = cpath;
+                Constants.setServletPath(tmpServletPath);
+            }
+        }
+    }
+
+    private void restore() {
+        if (null != module) {
+            Constants.setModule(module);
+            module = null;
+        }
+        if (null != servletPath) {
+            Constants.setServletPath(servletPath);
+            servletPath = null;
+        }
+        ServiceRegistry.getInstance().removeService(ConfigurationService.class);
+    }
+
+}

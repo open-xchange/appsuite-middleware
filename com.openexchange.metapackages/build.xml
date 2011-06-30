@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Open-Xchange Meta Packages" default="default" basedir=".">
+    <property name="version" value="6.20.0.0"/>
+
+    <target name="install"/>
+
+    <target name="default" depends="install"/>
+
+    <target name="compile"/>
+
+    <target name="clean"/>
+
+    <target name="dist" depends="clean">
+      <property name="dist-package" value="dist-package"/>
+      <property name="composite.name" value="open-xchange-meta-${version}"/>
+      <delete dir="${dist-package}"/>
+      <mkdir dir="${dist-package}/${composite.name}"/>
+      <copy todir="${dist-package}/${composite.name}">
+         <fileset dir=".">
+             <exclude name="**${dist-package}/**"/>
+             <exclude name="**debian/**"/>
+             <exclude name="**CVS/**"/>
+             <exclude name=".**/**"/>
+             <exclude name="Todo"/>
+         </fileset>
+        </copy>
+      <tar destfile="../${composite.name}.tar.gz"  basedir="${dist-package}"
+                includes="${composite.name}/"  compression="gzip"/>
+      <delete dir="${dist-package}"/>
+   </target>
+
+
+</project>

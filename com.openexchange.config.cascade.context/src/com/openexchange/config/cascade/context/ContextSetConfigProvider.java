@@ -1,0 +1,294 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.config.cascade.context;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.context.matching.ContextSetTerm;
+import com.openexchange.config.cascade.context.matching.ContextSetTermParser;
+import com.openexchange.config.cascade.context.matching.UserConfigurationAnalyzer;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.userconf.UserConfigurationService;
+
+
+/**
+ * {@link ContextSetConfigProvider}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider {
+
+    private static final String TAXONOMY_TYPES = "taxonomy/types";
+
+    public static final String SCOPE = "contextSets";
+
+    private static final String TYPE_PROPERTY = "com.openexchange.config.cascade.types";
+    
+    private List<ContextSetConfig> contextSetConfigs;
+    private List<AdditionalPredicates> additionalPredicates;
+
+    private UserConfigurationService userConfigs;
+    private UserConfigurationAnalyzer userConfigAnalyzer = new UserConfigurationAnalyzer();
+
+    private ConfigViewFactory configViews;
+
+    public ContextSetConfigProvider(ContextService contexts, ConfigurationService config, UserConfigurationService userConfigs, ConfigViewFactory configViews) {
+        super(contexts);
+        
+        Map<String, Object> yamlInFolder = config.getYamlInFolder("contextSets");
+        if(yamlInFolder != null) {
+            prepare(yamlInFolder);
+        } else {
+            contextSetConfigs = Collections.emptyList();
+            additionalPredicates = Collections.emptyList();
+        }
+        
+        this.userConfigs = userConfigs;
+        this.configViews = configViews;
+    }
+    
+    protected Set<String> getSpecification(Context context, UserConfiguration userConfig) throws ConfigCascadeException {
+        Set<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
+        if(typeValues == null) {
+            typeValues = Collections.emptySet();
+        }
+        
+        Set<String> tags = new HashSet<String>();
+        for (String string : typeValues) {
+            tags.addAll(Arrays.asList(string.split("\\s*,\\s*")));
+        }
+        
+        tags.addAll(userConfigAnalyzer.getTags(userConfig));
+        
+        int user = userConfig.getUserId();
+        
+        // Now let's try modifications by cascade, first those below the contextSet level
+        ConfigView view = configViews.getView(user, context.getContextId());
+        
+        String[] searchPath = configViews.getSearchPath();
+        for (String scope : searchPath) {
+            if(!scope.equals(SCOPE)) {
+                String types = view.property(TYPE_PROPERTY, String.class).precedence(scope).get();
+                if(types != null) {
+                    tags.addAll(Arrays.asList(types.split("\\s*,\\s*")));
+                }
+            }
+        }
+        
+        // Add additional predicates. Do so until no modification has been done
+        boolean goOn = true;
+        while(goOn) {
+            goOn = false;
+            for(AdditionalPredicates additional : additionalPredicates) {
+                goOn = goOn || additional.apply(tags);
+            }
+        }
+        
+        return tags;
+    }
+
+    @Override
+    protected BasicProperty get(final String property, Context context, int user) throws ConfigCascadeException {
+        final List<Map<String, Object>> config = getConfigData(getSpecification(context, getUserConfiguration(context, user)));
+
+        final String value = findFirst(config, property);
+        
+        return new BasicProperty() {
+
+            public String get() {
+                return value;
+            }
+
+            public String get(String metadataName) {
+                return null;
+            }
+
+            public boolean isDefined() {
+                return value != null;
+            }
+
+            public void set(String value) throws ConfigCascadeException {
+                throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, SCOPE);
+            }
+
+            public void set(String metadataName, String value) throws ConfigCascadeException {
+                throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, SCOPE);
+            }
+
+            public List<String> getMetadataNames() throws ConfigCascadeException {
+                return Collections.emptyList();
+            }
+            
+        };
+    }
+
+
+    private UserConfiguration getUserConfiguration(Context ctx, int user) throws ConfigCascadeException {
+        try {
+            return userConfigs.getUserConfiguration(user, ctx);
+        } catch (UserConfigurationException e) {
+            throw new ConfigCascadeException(e);
+        }
+    }
+
+    @Override
+    protected Collection<String> getAllPropertyNames(Context context) {
+        return Collections.emptyList();
+    }
+
+    protected String findFirst(List<Map<String, Object>> configData, String property) {
+        for (Map<String, Object> map : configData) {
+            Object object = map.get(property);
+            if(object != null) {
+                return object.toString();
+            }
+        }
+        return null;
+    }
+    
+
+    
+    protected List<Map<String, Object>> getConfigData(Set<String> tags) {
+        List<Map<String, Object>> retval = new LinkedList<Map<String, Object>>();
+        for (ContextSetConfig c : contextSetConfigs) {
+            if (c.matches(tags)) {
+                retval.add(c.getConfiguration());
+            }
+        }
+        return retval;
+    }
+    
+    protected void prepare(Map<String, Object> yamlFiles) {
+        ContextSetTermParser parser = new ContextSetTermParser();
+        contextSetConfigs = new LinkedList<ContextSetConfig>();
+        additionalPredicates = new LinkedList<AdditionalPredicates>();
+        for(Map.Entry<String, Object> file : yamlFiles.entrySet()) {
+            String filename = file.getKey();
+            Map<String, Map<String, Object>> content = (Map<String, Map<String, Object>>) file.getValue();
+            for(Map.Entry<String, Map<String, Object>> configData : content.entrySet()) {
+                String configName = configData.getKey();
+                Map<String, Object> configuration = configData.getValue();
+                
+                String withTags = (String) configuration.get("withTags");
+                if(withTags == null) {
+                    throw new IllegalArgumentException("Missing withTags specification in configuration "+configName+" in file "+filename);
+                }
+                try {
+                    ContextSetTerm term = parser.parse(withTags);
+                    contextSetConfigs.add(new ContextSetConfig(term, configuration));
+                    Object addTags = configuration.get("addTags");
+                    if(addTags != null) {
+                        String additional = addTags.toString();
+                        List<String> additionalList = Arrays.asList(additional.split("\\s*,\\s*"));
+                        additionalPredicates.add(new AdditionalPredicates(term, additionalList));
+                    }
+                } catch (IllegalArgumentException x) {
+                    throw new IllegalArgumentException("Could not parse withTags expression '"+withTags+"' in configuration "+configName+" in file "+filename+": "+x.getMessage());
+                }
+            }
+
+        }
+    }
+    
+    private class ContextSetConfig {
+        private ContextSetTerm term;
+        private Map<String, Object> configuration;
+        
+        public ContextSetConfig(ContextSetTerm term, Map<String, Object> configuration) {
+            super();
+            this.term = term;
+            this.configuration = configuration;
+        }
+       
+        public boolean matches(Set<String> tags) {
+            return term.matches(tags);
+        }
+        
+        public Map<String, Object> getConfiguration() {
+            return configuration;
+        }
+        
+    }
+    
+    private class AdditionalPredicates {
+        private ContextSetTerm term;
+        private List<String> additionalTags;
+        
+        public AdditionalPredicates(ContextSetTerm term, List<String> additionalTags) {
+            super();
+            this.term = term;
+            this.additionalTags = additionalTags;
+        }
+        
+        public boolean apply(Set<String> terms) {
+            if(term.matches(terms)) {
+                return terms.addAll(additionalTags);
+            }
+            return false;
+        }
+        
+    }
+
+}

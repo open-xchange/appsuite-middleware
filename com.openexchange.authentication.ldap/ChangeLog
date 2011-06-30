@@ -1,0 +1,13 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
+* 2010-09-03 - choeger@open-xchange.com
+
+ - Added new functions adsBind and referral
+
+* 2010-02-02 - dennis.sieben@open-xchange.com
+
+ - Bugfix #15309: [L3] open-xchange-authentication-ldap: multiple OUs works
+   only for LDAP-Server on localhost
+   - Enabled usage of config file parameter for user search

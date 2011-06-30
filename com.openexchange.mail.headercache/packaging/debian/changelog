@@ -1,0 +1,11 @@
+open-xchange-mail-headercache (6.15.0.0-1) unstable; urgency=low
+
+  * first build for 6.15-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 27 Jan 2010 14:56:40 +0100
+
+open-xchange-mail-headercache (6.15.0.0-0) unstable; urgency=low
+
+  * Initial release.
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 5 Jan 2010 15:38:15 +0200

@@ -1,0 +1,25 @@
+* 2011-04-04 - choeger@open-xchange.com
+
+ - Bugfix #18834 - [L3] mail push should also check ox login name on external new mail trigger
+
+* 2011-03-14 - choeger@open-xchange.com
+
+ - Bugfix #18615 - [L3] mail push does not work when login does not match mailbox name
+
+* 2010-09-23 - wolfgang.rosenauer@open-xchange.com
+
+ - Support multicast networking
+
+* 2010-09-16 - wolfgang.rosenauer@open-xchange.com
+
+ - Bugfix: allow imapLoginDelimiter to be null
+ - Minor string changes
+
+* 2010-06-22 - choeger@open-xchange.com
+
+ - Bugfix #16001 - mail push bundle does not work on installations with cyrus virtdomains switched on
+ 
+* 2010-04-08 - choeger@open-xchange.com
+
+ - Bugfix #15822: open-xchange-push-mailnotify uses wrong configuration option names
+

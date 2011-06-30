@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Monitoring
+Bundle-SymbolicName: com.openexchange.monitoring
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.config,
+ com.openexchange.counter,
+ com.openexchange.groupware,
+ com.openexchange.management,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.sessiond,
+ javax.management,
+ org.apache.commons.logging,
+ org.apache.commons.logging.impl,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.monitoring
+Bundle-Activator: com.openexchange.monitoring.osgi.MonitoringActivator

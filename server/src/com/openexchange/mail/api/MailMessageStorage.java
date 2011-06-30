@@ -1,0 +1,270 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.api;
+
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailPath;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.parser.handlers.ImageMessageHandler;
+import com.openexchange.mail.parser.handlers.MailPartHandler;
+import com.openexchange.mail.search.FlagTerm;
+import com.openexchange.mail.search.SearchTerm;
+
+/**
+ * {@link MailMessageStorage} - Abstract implementation of {@link IMailMessageStorage}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public abstract class MailMessageStorage implements IMailMessageStorage {
+
+    /**
+     * The fields containing {@link MailField#FULL}.
+     */
+    private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
+
+    private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
+
+    public abstract String[] appendMessages(String destFolder, MailMessage[] msgs) throws MailException;
+
+    public abstract String[] copyMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws MailException;
+
+    public abstract void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws MailException;
+
+    /**
+     * A convenience method that delivers all messages contained in given folder through invoking
+     * {@link #searchMessages(String, IndexRange, MailSortField, OrderDirection, SearchTerm, MailField[]) searchMessages()} without search
+     * arguments.
+     * <p>
+     * Note that sorting needs not to be supported by underlying mailing system. This can be done n application side, too
+     * <p>
+     * This method may be overridden in implementing subclass if a faster way can be achieved.
+     * 
+     * @param folder The folder fullname
+     * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
+     *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
+     *            range is <code>end - start</code>.
+     * @param sortField The sort field
+     * @param order Whether ascending or descending sort order
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @return The desired, pre-filled instances of {@link MailMessage}
+     * @throws MailException
+     */
+    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
+        return searchMessages(folder, indexRange, sortField, order, null, fields);
+    }
+
+    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
+        final MailPartHandler handler = new MailPartHandler(sequenceId);
+        new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
+        final MailPart ret = handler.getMailPart();
+        if (ret == null) {
+            throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, sequenceId, mailId, folder);
+        }
+        return ret;
+    }
+
+    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException {
+        final ImageMessageHandler handler = new ImageMessageHandler(contentId);
+        new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
+        final MailPart ret = handler.getImagePart();
+        if (ret == null) {
+            throw new MailException(MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND, contentId, mailId, folder);
+        }
+        return ret;
+    }
+
+    /**
+     * Gets the mail located in given folder whose mail ID matches specified ID.
+     * <p>
+     * This is a convenience method that invokes {@link #getMessages(String, String[], MailField[])} with specified mail ID and
+     * {@link MailField#FULL}. Thus the returned instance of {@link MailMessage} is completely pre-filled including content references.
+     * <p>
+     * If no mail could be found for given mail ID, <code>null</code> is returned.
+     * <p>
+     * This method may be overridden in implementing subclass if a faster way can be achieved.
+     * 
+     * @param folder The folder fullname
+     * @param mailId The mail ID
+     * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
+     *            <code>false</code> to leave as-is
+     * @return Corresponding message
+     * @throws MailException If message could not be returned
+     */
+    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
+        final MailMessage[] mails = getMessages(folder, new String[] { mailId }, FIELDS_FULL);
+        if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
+            return null;
+        }
+        final MailMessage mail = mails[0];
+        if (!mail.isSeen() && markSeen) {
+            mail.setPrevSeen(false);
+            updateMessageFlags(folder, new String[] { mailId }, MailMessage.FLAG_SEEN, true);
+            mail.setFlag(MailMessage.FLAG_SEEN, true);
+            mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
+        }
+        return mail;
+    }
+
+    public abstract MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws MailException;
+
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+        return null;
+    }
+
+    /**
+     * Gets all unread messages located in given folder; meaning messages that do not have the \Seen flag set. The constant
+     * {@link #EMPTY_RETVAL} may be returned if no unseen messages available in specified folder.
+     * <p>
+     * This is a convenience method that may be overridden if a faster way can be achieved.
+     * 
+     * @param folder The folder fullname
+     * @param sortField The sort field
+     * @param order The sort order
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @param limit The max. number of returned unread messages or <code>-1</code> to request all unread messages in folder
+     * @return Unread messages contained in an array of {@link MailMessage}
+     * @throws MailException If unread messages cannot be returned.
+     */
+    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
+        if (limit == 0) {
+            return EMPTY_RETVAL;
+        }
+        return searchMessages(folder, limit < 0 ? IndexRange.NULL : new IndexRange(0, limit), sortField, order, TERM_FLAG_SEEN, fields);
+    }
+
+    /**
+     * Moves the mails identified through given mail IDs from source folder to destination folder.
+     * <p>
+     * If no mail could be found for a given mail ID, the corresponding value in returned array of <code>String</code> is <code>null</code>.
+     * <p>
+     * This is a convenience method that may be overridden if a faster way can be achieved.
+     * 
+     * @param sourceFolder The source folder fullname
+     * @param destFolder The destination folder fullname
+     * @param mailIds The mail IDs in source folder
+     * @param fast <code>true</code> to perform a fast move operation, meaning the corresponding mail IDs in destination folder are ignored
+     *            and an empty array of String is returned; otherwise <code>false</code>
+     * @return The corresponding mail IDs if copied messages in destination folder
+     * @throws MailException If messages cannot be copied.
+     */
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+        final String[] ids = copyMessages(sourceFolder, destFolder, mailIds, fast);
+        deleteMessages(sourceFolder, mailIds, true);
+        return ids;
+    }
+
+    public abstract void releaseResources() throws MailException;
+
+    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException {
+        final String uid;
+        try {
+            final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
+            filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
+            /*
+             * Append message to draft folder
+             */
+            uid = appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
+        } finally {
+            draftMail.cleanUp();
+        }
+        /*
+         * Check for draft-edit operation: Delete old version
+         */
+        final MailPath msgref = draftMail.getMsgref();
+        if (msgref != null && draftFullname.equals(msgref.getFolder())) {
+            deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
+            draftMail.setMsgref(null);
+        }
+        /*
+         * Return draft mail
+         */
+        return getMessage(draftFullname, uid, true);
+    }
+
+    public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
+
+    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws MailException {
+        // Empty body here
+    }
+
+    public abstract void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws MailException;
+
+    /**
+     * Gets all new and modified messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is returned.
+     * 
+     * @param folder The folder fullname
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @return All new and modified messages in specified folder
+     * @throws MailException If mails cannot be returned
+     */
+    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws MailException {
+        return EMPTY_RETVAL;
+    }
+
+    /**
+     * Gets all deleted messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is returned.
+     * 
+     * @param folder The folder fullname
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @return All deleted messages in specified folder
+     * @throws MailException If mails cannot be returned
+     */
+    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws MailException {
+        return EMPTY_RETVAL;
+    }
+}

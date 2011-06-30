@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mail Data Retrieval Plug-in
+Bundle-SymbolicName: com.openexchange.groupware.dataRetrieval.mail
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.groupware,
+ com.openexchange.groupware.dataRetrieval,
+ com.openexchange.mail,
+ com.openexchange.mail.api,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.mime,
+ com.openexchange.mail.service,
+ com.openexchange.mail.utils,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.groupware.dataRetrieval.mail.osgi.MailDataRetrievalActivator

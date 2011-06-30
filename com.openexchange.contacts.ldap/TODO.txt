@@ -1,0 +1,1 @@
+- Implemented reaction to property changes so that the bundle doesn't have to be restarted on property change

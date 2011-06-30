@@ -1,0 +1,1103 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax.helper;
+
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+
+/**
+ * ParamContainer
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public abstract class ParamContainer {
+
+    private static interface ErrorInfo {
+
+        public String getMissingParamMsg();
+
+        public Category getMissingParamCategory();
+
+        public int getMissingParamNum();
+
+        public String getBadParamMsg();
+
+        public Category getBadParamCategory();
+
+        public int getBadParamNum();
+    }
+
+    private static final ErrorInfo FOLDER_ERR_INFO = new ErrorInfo() {
+
+        public Category getBadParamCategory() {
+            return FolderCode.BAD_PARAM_VALUE.getCategory();
+        }
+
+        public String getBadParamMsg() {
+            return FolderCode.BAD_PARAM_VALUE.getMessage();
+        }
+
+        public int getBadParamNum() {
+            return FolderCode.BAD_PARAM_VALUE.getNumber();
+        }
+
+        public Category getMissingParamCategory() {
+            return FolderCode.MISSING_PARAMETER.getCategory();
+        }
+
+        public String getMissingParamMsg() {
+            return FolderCode.MISSING_PARAMETER.getMessage();
+        }
+
+        public int getMissingParamNum() {
+            return FolderCode.MISSING_PARAMETER.getNumber();
+        }
+    };
+
+    private static final ErrorInfo MAIL_ERR_INFO = new ErrorInfo() {
+
+        public Category getBadParamCategory() {
+            return com.openexchange.mail.MailException.Code.BAD_PARAM_VALUE.getCategory();
+        }
+
+        public String getBadParamMsg() {
+            return com.openexchange.mail.MailException.Code.BAD_PARAM_VALUE.getMessage();
+        }
+
+        public int getBadParamNum() {
+            return com.openexchange.mail.MailException.Code.BAD_PARAM_VALUE.getNumber();
+        }
+
+        public Category getMissingParamCategory() {
+            return com.openexchange.mail.MailException.Code.MISSING_PARAMETER.getCategory();
+        }
+
+        public String getMissingParamMsg() {
+            return com.openexchange.mail.MailException.Code.MISSING_PARAMETER.getMessage();
+        }
+
+        public int getMissingParamNum() {
+            return com.openexchange.mail.MailException.Code.MISSING_PARAMETER.getNumber();
+        }
+    };
+
+    private static final ErrorInfo DEFAULT_ERR_INFO = new ErrorInfo() {
+
+        public Category getBadParamCategory() {
+            return ParamContainerException.Code.BAD_PARAM_VALUE.getCategory();
+        }
+
+        public String getBadParamMsg() {
+            return ParamContainerException.Code.BAD_PARAM_VALUE.getMessage();
+        }
+
+        public int getBadParamNum() {
+            return ParamContainerException.Code.BAD_PARAM_VALUE.getNumber();
+        }
+
+        public Category getMissingParamCategory() {
+            return ParamContainerException.Code.MISSING_PARAMETER.getCategory();
+        }
+
+        public String getMissingParamMsg() {
+            return ParamContainerException.Code.MISSING_PARAMETER.getMessage();
+        }
+
+        public int getMissingParamNum() {
+            return ParamContainerException.Code.MISSING_PARAMETER.getNumber();
+        }
+    };
+
+    static final ErrorInfo getErrorInfo(final EnumComponent component) {
+        switch (component) {
+        case FOLDER:
+            return FOLDER_ERR_INFO;
+        case MAIL:
+            return MAIL_ERR_INFO;
+        default:
+            return DEFAULT_ERR_INFO;
+        }
+    }
+
+    /**
+     * Split pattern for CSV.
+     */
+    static final Pattern SPLIT = Pattern.compile(" *, *");
+
+    private static final class MapParamContainer extends ParamContainer {
+
+        private final Map<String, String> map;
+
+        private final EnumComponent component;
+
+        private final ErrorInfo errorInfo;
+
+        public MapParamContainer(final Map<String, String> map, final EnumComponent component) {
+            super();
+            this.map = map;
+            this.component = component;
+            errorInfo = getErrorInfo(component);
+        }
+
+        @Override
+        public Set<String> getParameterNames() {
+            return map.keySet();
+        }
+
+        @Override
+        public Date checkDateParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return new Date(Long.parseLong(tmp));
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            final String[] sa = SPLIT.split(tmp, 0);
+            final int intArray[] = new int[sa.length];
+            for (int a = 0; a < sa.length; a++) {
+                try {
+                    intArray[a] = Integer.parseInt(sa[a]);
+                } catch (final NumberFormatException e) {
+                    throw new ParamContainerException(
+                        component,
+                        errorInfo.getBadParamCategory(),
+                        errorInfo.getBadParamNum(),
+                        errorInfo.getBadParamMsg(),
+                        null,
+                        tmp,
+                        paramName);
+                }
+            }
+            return intArray;
+        }
+
+        @Override
+        public int checkIntParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return Integer.parseInt(tmp);
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public long checkLongParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return Long.parseLong(tmp);
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public String checkStringParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            return tmp;
+        }
+
+        @Override
+        public Date getDateParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                return null;
+            }
+            try {
+                return new Date(Long.parseLong(tmp));
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public String getHeader(final String hdrName) {
+            return null;
+        }
+
+        @Override
+        public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                return null;
+            }
+            final String[] sa = SPLIT.split(tmp, 0);
+            final int intArray[] = new int[sa.length];
+            for (int a = 0; a < sa.length; a++) {
+                try {
+                    intArray[a] = Integer.parseInt(sa[a]);
+                } catch (final NumberFormatException e) {
+                    throw new ParamContainerException(
+                        component,
+                        errorInfo.getBadParamCategory(),
+                        errorInfo.getBadParamNum(),
+                        errorInfo.getBadParamMsg(),
+                        null,
+                        tmp,
+                        paramName);
+                }
+            }
+            return intArray;
+        }
+
+        @Override
+        public int getIntParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                return NOT_FOUND;
+            }
+            try {
+                return Integer.parseInt(tmp);
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public long getLongParam(final String paramName) throws AbstractOXException {
+            final String tmp = map.get(paramName);
+            if (tmp == null) {
+                return NOT_FOUND;
+            }
+            try {
+                return Long.parseLong(tmp);
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public String getStringParam(final String paramName) {
+            return map.get(paramName);
+        }
+
+        @Override
+        public HttpServletResponse getHttpServletResponse() {
+            return null;
+        }
+
+    }
+
+    private static final class HttpParamContainer extends ParamContainer {
+
+        private final HttpServletRequest req;
+
+        private final EnumComponent component;
+
+        private final HttpServletResponse resp;
+
+        private final ErrorInfo errorInfo;
+
+        /**
+         * @param req
+         * @param component
+         * @param resp
+         */
+        public HttpParamContainer(final HttpServletRequest req, final EnumComponent component, final HttpServletResponse resp) {
+            this.req = req;
+            this.component = component;
+            this.resp = resp;
+            errorInfo = getErrorInfo(component);
+        }
+
+        @Override
+        public Set<String> getParameterNames() {
+            final Set<String> ret = new HashSet<String>();
+            for (final Enumeration<?> enumeration = req.getParameterNames(); enumeration.hasMoreElements();) {
+                ret.add((String) enumeration.nextElement());
+            }
+            return ret;
+        }
+
+        @Override
+        public Date checkDateParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return new Date(Long.parseLong(tmp));
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            final String[] sa = SPLIT.split(tmp, 0);
+            final int intArray[] = new int[sa.length];
+            for (int a = 0; a < sa.length; a++) {
+                try {
+                    intArray[a] = Integer.parseInt(sa[a]);
+                } catch (final NumberFormatException e) {
+                    throw new ParamContainerException(
+                        component,
+                        errorInfo.getBadParamCategory(),
+                        errorInfo.getBadParamNum(),
+                        errorInfo.getBadParamMsg(),
+                        null,
+                        tmp,
+                        paramName);
+                }
+            }
+            return intArray;
+        }
+
+        @Override
+        public long checkLongParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return Long.parseLong(tmp);
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public int checkIntParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return Integer.parseInt(tmp);
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public String checkStringParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            return tmp;
+        }
+
+        @Override
+        public Date getDateParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                return null;
+            }
+            try {
+                return new Date(Long.parseLong(tmp));
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public String getHeader(final String hdrName) {
+            return req.getHeader(hdrName);
+        }
+
+        @Override
+        public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                return null;
+            }
+            final String[] sa = SPLIT.split(tmp, 0);
+            final int intArray[] = new int[sa.length];
+            for (int a = 0; a < sa.length; a++) {
+                try {
+                    intArray[a] = Integer.parseInt(sa[a]);
+                } catch (final NumberFormatException e) {
+                    throw new ParamContainerException(
+                        component,
+                        errorInfo.getBadParamCategory(),
+                        errorInfo.getBadParamNum(),
+                        errorInfo.getBadParamMsg(),
+                        null,
+                        tmp,
+                        paramName);
+                }
+            }
+            return intArray;
+        }
+
+        @Override
+        public int getIntParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                return NOT_FOUND;
+            }
+            try {
+                return Integer.parseInt(tmp);
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public long getLongParam(final String paramName) throws AbstractOXException {
+            final String tmp = req.getParameter(paramName);
+            if (tmp == null) {
+                return NOT_FOUND;
+            }
+            try {
+                return Long.parseLong(tmp);
+            } catch (final NumberFormatException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    tmp,
+                    paramName);
+            }
+        }
+
+        @Override
+        public String getStringParam(final String paramName) {
+            return req.getParameter(paramName);
+        }
+
+        @Override
+        public HttpServletResponse getHttpServletResponse() {
+            return resp;
+        }
+    }
+
+    private static final class JSONParamContainer extends ParamContainer {
+
+        private final JSONObject jo;
+
+        private final EnumComponent component;
+
+        private final ErrorInfo errorInfo;
+
+        /**
+         * @param jo
+         * @param component
+         */
+        public JSONParamContainer(final JSONObject jo, final EnumComponent component) {
+            super();
+            this.jo = jo;
+            this.component = component;
+            errorInfo = getErrorInfo(component);
+        }
+
+        @Override
+        public Set<String> getParameterNames() {
+            return jo.keySet();
+        }
+
+        @Override
+        public Date checkDateParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return new Date(jo.getLong(paramName));
+            } catch (final JSONException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+        }
+
+        @Override
+        public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            String[] tmp;
+            try {
+                tmp = SPLIT.split(jo.getString(paramName), 0);
+            } catch (final JSONException e1) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+            final int[] intArray = new int[tmp.length];
+            for (int i = 0; i < tmp.length; i++) {
+                try {
+                    intArray[i] = Integer.parseInt(tmp[i]);
+                } catch (final NumberFormatException e) {
+                    throw new ParamContainerException(
+                        component,
+                        errorInfo.getBadParamCategory(),
+                        errorInfo.getBadParamNum(),
+                        errorInfo.getBadParamMsg(),
+                        null,
+                        jo.opt(paramName),
+                        paramName);
+                }
+            }
+            return intArray;
+        }
+
+        @Override
+        public int checkIntParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return jo.getInt(paramName);
+            } catch (final JSONException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+        }
+
+        @Override
+        public long checkLongParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return jo.getLong(paramName);
+            } catch (final JSONException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+        }
+
+        @Override
+        public String checkStringParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getMissingParamCategory(),
+                    errorInfo.getMissingParamNum(),
+                    errorInfo.getMissingParamMsg(),
+                    null,
+                    paramName);
+            }
+            try {
+                return jo.getString(paramName);
+            } catch (final JSONException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+        }
+
+        @Override
+        public Date getDateParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                return null;
+            }
+            try {
+                return new Date(jo.getLong(paramName));
+            } catch (final JSONException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+        }
+
+        @Override
+        public String getHeader(final String hdrName) {
+            return null;
+        }
+
+        @Override
+        public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                return null;
+            }
+            String[] tmp;
+            try {
+                tmp = SPLIT.split(jo.getString(paramName), 0);
+            } catch (final JSONException e1) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+            final int[] intArray = new int[tmp.length];
+            for (int i = 0; i < tmp.length; i++) {
+                try {
+                    intArray[i] = Integer.parseInt(tmp[i]);
+                } catch (final NumberFormatException e) {
+                    throw new ParamContainerException(
+                        component,
+                        errorInfo.getBadParamCategory(),
+                        errorInfo.getBadParamNum(),
+                        errorInfo.getBadParamMsg(),
+                        null,
+                        jo.opt(paramName),
+                        paramName);
+                }
+            }
+            return intArray;
+        }
+
+        @Override
+        public int getIntParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                return NOT_FOUND;
+            }
+            try {
+                return jo.getInt(paramName);
+            } catch (final JSONException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+        }
+
+        @Override
+        public long getLongParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                return NOT_FOUND;
+            }
+            try {
+                return jo.getLong(paramName);
+            } catch (final JSONException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+        }
+
+        @Override
+        public String getStringParam(final String paramName) throws AbstractOXException {
+            if (!jo.has(paramName) || jo.isNull(paramName)) {
+                return null;
+            }
+            try {
+                return jo.getString(paramName);
+            } catch (final JSONException e) {
+                throw new ParamContainerException(
+                    component,
+                    errorInfo.getBadParamCategory(),
+                    errorInfo.getBadParamNum(),
+                    errorInfo.getBadParamMsg(),
+                    null,
+                    jo.opt(paramName),
+                    paramName);
+            }
+        }
+
+        @Override
+        public HttpServletResponse getHttpServletResponse() {
+            return null;
+        }
+    }
+
+    public static final int NOT_FOUND = -9999;
+
+    public static ParamContainer getInstance(final HttpServletRequest req, final EnumComponent component, final HttpServletResponse resp) {
+        return new HttpParamContainer(req, component, resp);
+    }
+
+    public static ParamContainer getInstance(final JSONObject jo, final EnumComponent component) {
+        return new JSONParamContainer(jo, component);
+    }
+
+    public static ParamContainer getInstance(final Map<String, String> map, final EnumComponent component) {
+        return new MapParamContainer(map, component);
+    }
+
+    /**
+     * Gets a parameter as String
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as <code>String</code> or <code>null</code> if not found
+     * @throws AbstractOXException
+     */
+    public abstract String getStringParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Gets the parameter names.
+     * 
+     * @return The parameter names
+     */
+    public abstract Set<String> getParameterNames();
+
+    /**
+     * Requires a parameter as <code>String</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as <code>String</code>
+     * @throws AbstractOXException if parameter could not be found
+     */
+    public abstract String checkStringParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Gets a parameter as <code>int</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as <code>int</code> or constant <code>NOT_FOUND</code> if not found
+     * @throws AbstractOXException
+     */
+    public abstract int getIntParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Requires a parameter as <code>int</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as <code>int</code>
+     * @throws AbstractOXException if parameter could not be found
+     */
+    public abstract int checkIntParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Gets a parameter as <code>long</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as <code>long</code> or constant <code>NOT_FOUND</code> if not found
+     * @throws AbstractOXException
+     */
+    public abstract long getLongParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Requires a parameter as <code>long</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as <code>long</code>
+     * @throws AbstractOXException if parameter could not be found
+     */
+    public abstract long checkLongParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Gets a parameter as an array of <code>int</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as an array of <code>int</code> or <code>null</code> if not found
+     * @throws AbstractOXException
+     */
+    public abstract int[] getIntArrayParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Requires a parameter as an array of <code>int</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as an array of <code>int</code>
+     * @throws AbstractOXException if parameter could not be found
+     */
+    public abstract int[] checkIntArrayParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Gets a parameter as a <code>java.util.Date</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as an array of <code>java.util.Date</code> or <code>null</code> if not found
+     * @throws AbstractOXException
+     */
+    public abstract Date getDateParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Requires a parameter as a <code>java.util.Date</code>
+     * 
+     * @param paramName - the parameter name
+     * @return parameter value as <code>java.util.Date</code>
+     * @throws AbstractOXException if parameter could not be found
+     */
+    public abstract Date checkDateParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Gets a header
+     * 
+     * @param hdrName - the header name
+     * @return the header as <code>String</code> or <code>null</code> if not found
+     */
+    public abstract String getHeader(String hdrName);
+
+    /**
+     * Gets the <code>javax.servlet.http.HttpServletResponse</code> instance
+     * 
+     * @return the <code>javax.servlet.http.HttpServletResponse</code> instance if present; otherwise <code>null</code>
+     */
+    public abstract HttpServletResponse getHttpServletResponse();
+
+}

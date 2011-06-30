@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/BillingMessages.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:BillingData="http://4psa.com/BillingData.xsd/2.5.1" xmlns:common="http://4psa.com/Common.xsd/2.5.1" xmlns:messagesInfo="http://4psa.com/BillingMessagesInfo.xsd/2.5.1" targetNamespace="http://4psa.com/BillingMessages.xsd/2.5.1" elementFormDefault="qualified" id="BillingMessages">
+	<xs:import namespace="http://4psa.com/BillingData.xsd/2.5.1" schemaLocation="BillingData.xsd"/>
+	<xs:import namespace="http://4psa.com/BillingMessagesInfo.xsd/2.5.1" schemaLocation="BillingMessagesInfo.xsd"/>
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:element name="AddChargingPlanRequest">
+		<xs:annotation>
+			<xs:documentation>Add charging plan: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="BillingData:ChargingPlanInfo">
+					<xs:sequence>
+						<xs:choice>
+							<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Charging plan owner ID</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="userIdentifier" type="common:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Charging plan owner identifier</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="userLogin" type="common:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Charging plan owner login</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+						<xs:element name="forceChannelRule" type="common:boolean" default="1" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Create charging plan with default outgoing routing rules group if  channelRuleID is not valid</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="exception" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Destination exceptions</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="areaCode" type="common:string" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>Area code</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="description" type="common:string" minOccurs="0"/>
+									<xs:element name="charge" minOccurs="0">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:annotation>
+													<xs:documentation>Cost {initialAmount}  USD for the first {initialInterval} seconds then charge {amount} USD every  {interval}seconds. For fixed charging plans ONLY</xs:documentation>
+													<xs:documentation>Cost {amount}  x call cost + {setupAmount} USD/ {interval} seconds. For inherited charging plans ONLY</xs:documentation>
+												</xs:annotation>
+												<xs:element name="initialAmount" type="xs:float" minOccurs="0">
+													<xs:annotation>
+														<xs:documentation>For fixed charging plans ONLY</xs:documentation>
+													</xs:annotation>
+												</xs:element>
+												<xs:element name="initialInterval" type="common:integer" minOccurs="0">
+													<xs:annotation>
+														<xs:documentation>For fixed charging plans ONLY</xs:documentation>
+													</xs:annotation>
+												</xs:element>
+												<xs:element name="amount" type="xs:float"/>
+												<xs:element name="interval" type="common:integer"/>
+												<xs:element name="setupAmount" type="xs:float" minOccurs="0">
+													<xs:annotation>
+														<xs:documentation>For inherited charging plans ONLY</xs:documentation>
+													</xs:annotation>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element name="package" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>Free minutes package</xs:documentation>
+										</xs:annotation>
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="name" type="common:string"/>
+												<xs:element name="minutes" type="xs:float"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="scope" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Scope identifier for the enrollment server. Scope:automation is reserved for VoipNow Automation</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="signature" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Signature for the charging plan (used by Automation)</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AddChargingPlanResponse">
+		<xs:annotation>
+			<xs:documentation>Add charging plan: response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="common:updateObject">
+					<xs:sequence>
+						<xs:element name="identifier" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Unique client identifier</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditChargingPlanRequest">
+		<xs:annotation>
+			<xs:documentation>Edit charging plan: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="BillingData:ChargingPlanInfo">
+					<xs:sequence>
+						<xs:choice>
+							<xs:element name="ID" type="common:positiveInteger">
+								<xs:annotation>
+									<xs:documentation>Charging plan ID</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="identifier">
+								<xs:annotation>
+									<xs:documentation>Charging plan identifier</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditChargingPlanResponse">
+		<xs:annotation>
+			<xs:documentation>Edit charging plan: response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="common:updateObject">
+					<xs:sequence>
+						<xs:element name="identifier" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Unique client identifier</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetChargingPlansRequest">
+		<xs:annotation>
+			<xs:documentation>Get charging plans: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:annotation>
+				<xs:documentation>Either of</xs:documentation>
+			</xs:annotation>
+			<xs:sequence>
+				<xs:element name="default" type="common:boolean" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Set to filter default charging plan</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="filter" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Filter charging plan list by charging plan name. Ignored when default filter in on.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="scope" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Scope identifier for the enrollment server. Scope:automation is reserved for VoipNow Automation</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Charging plan owner ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="userIdentifier" type="common:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Charging plan owner identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetChargingPlansResponse" type="messagesInfo:GetChargingPlanResponseType">
+		<xs:annotation>
+			<xs:documentation>Get charging plans: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetChargingPlanDetailsRequest">
+		<xs:annotation>
+			<xs:documentation>Get charging plan details: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Charging plan ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="identifier" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Charging plan identifier</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetChargingPlanDetailsResponse" type="messagesInfo:GetChargingPlanDetailsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get charging plan details: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DelChargingPlanRequest">
+		<xs:annotation>
+			<xs:documentation>Delete charging plans: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="timeIntervalRemoval" type="common:boolean" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Remove also time intervals used by this charging plan</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Charging plan ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="identifier" type="common:string" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Charging plan identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelChargingPlanResponse" type="common:delObject">
+		<xs:annotation>
+			<xs:documentation>Delete charging plans: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="RechargeRequest">
+		<xs:annotation>
+			<xs:documentation>Add charging limits/credits to charging plan:request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice>
+					<xs:element name="userID" type="common:positiveInteger">
+						<xs:annotation>
+							<xs:documentation>User for which the recharge is made</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="userIdentifier" type="common:string">
+						<xs:annotation>
+							<xs:documentation>User for which the recharge is made</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+				<xs:choice>
+					<xs:annotation>
+						<xs:documentation>Either of</xs:documentation>
+					</xs:annotation>
+					<xs:element name="limit" type="BillingData:Limits">
+						<xs:annotation>
+							<xs:documentation>Charging plan limit definition: for postpaid charging plan</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="credit" type="BillingData:Credits">
+						<xs:annotation>
+							<xs:documentation>Charging plan credit definiton: for prepaid charging plan</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RechargeResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Add charging limits/credits to charging plan: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetRechargesRequest">
+		<xs:annotation>
+			<xs:documentation>Get user list of charging limits/credits: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="userID" type="common:positiveInteger" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>User ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="userIdentifier" type="common:string" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>User identifier</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetRechargesResponse">
+		<xs:annotation>
+			<xs:documentation>Get user list of charging limits/credits: response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="recharge" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="messagesInfo:GetRechargesResponseType">
+								<xs:sequence>
+									<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>User ID</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="userIdentifier" type="common:string" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>User identifier</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelMonthlyLimitRequest">
+		<xs:annotation>
+			<xs:documentation>Delete recharge monthly limit: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="userID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>User ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="userIdentifier" type="common:string">
+					<xs:annotation>
+						<xs:documentation>User identifier</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelMonthlyLimitResponse" type="common:delObject">
+		<xs:annotation>
+			<xs:documentation>Delete recharge monthly limit: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AddDestinationExceptionRequest">
+		<xs:annotation>
+			<xs:documentation>Add destination exception charge: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="exception" type="BillingData:DestinationException" maxOccurs="unbounded"/>
+				<xs:choice>
+					<xs:element name="chargingPlanID" type="common:positiveInteger" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Charging plan ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="chargingPlanIdentifier" type="common:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Charging  plan identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AddDestinationExceptionResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Add destination exception charge: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="EditDestinationExceptionRequest">
+		<xs:annotation>
+			<xs:documentation>Edit destination exception charge: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="BillingData:DestinationException">
+					<xs:sequence>
+						<xs:element name="exceptionID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Destination exception charge ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="chargingPlanID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Charging plan ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditDestinationExceptionResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Edit destination exception charge: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetDestinationExceptionsRequest">
+		<xs:annotation>
+			<xs:documentation>Get destination exception charges: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="chargingPlanID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Charging plan ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="filter" type="common:text" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Filter destination exception charges list after areaCode, description</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetDestinationExceptionsResponse" type="BillingData:DestinationExceptionList">
+		<xs:annotation>
+			<xs:documentation>Get destination exception charges: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DelDestinationExceptionRequest">
+		<xs:annotation>
+			<xs:documentation>Remove destination exception charge: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="chargingPlanID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Charging plan ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Destination exception charge</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelDestinationExceptionResponse" type="common:delObject">
+		<xs:annotation>
+			<xs:documentation>Remove destination exception charge: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AddChargingPackageRequest">
+		<xs:annotation>
+			<xs:documentation>Add free minutes package: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="BillingData:ChargingPackage">
+					<xs:sequence>
+						<xs:element name="chargingPlanID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Chraging plan ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AddChargingPackageResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Add free minutes package: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="EditChargingPackageRequest">
+		<xs:annotation>
+			<xs:documentation>Edit free minutes package: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="BillingData:ChargingPackage">
+					<xs:sequence>
+						<xs:element name="chargingPlanID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Chraging plan ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="chargingPackageID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Free minutes package ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditChargingPackageResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Edit free minutes package: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetChargingPackagesRequest">
+		<xs:annotation>
+			<xs:documentation>Get free minutes packages: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="chargingPlanID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Charging plan ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="filter" type="common:text" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Filter destination exception charges list after areaCode, description</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetChargingPackagesResponse" type="BillingData:ChargingPackageList">
+		<xs:annotation>
+			<xs:documentation>Get free minutes packages: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DelChargingPackageRequest">
+		<xs:annotation>
+			<xs:documentation>Remove free minutes package: request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="chargingPlanID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Charging plan ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Free minutes package ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelChargingPackageResponse" type="common:delObject">
+		<xs:annotation>
+			<xs:documentation>Remove free minutes package: response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+</xs:schema>

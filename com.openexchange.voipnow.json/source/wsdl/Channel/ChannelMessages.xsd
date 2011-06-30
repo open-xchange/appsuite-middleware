@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/ChannelMessages.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:channelData="http://4psa.com/ChannelData.xsd/2.5.1" xmlns:common="http://4psa.com/Common.xsd/2.5.1" xmlns:messagesInfo="http://4psa.com/ChannelMessagesInfo.xsd/2.5.1" targetNamespace="http://4psa.com/ChannelMessages.xsd/2.5.1" elementFormDefault="qualified" id="ChannelMessages">
+	<xs:import namespace="http://4psa.com/ChannelData.xsd/2.5.1" schemaLocation="ChannelData.xsd"/>
+	<xs:import namespace="http://4psa.com/ChannelMessagesInfo.xsd/2.5.1" schemaLocation="ChannelMessagesInfo.xsd"/>
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:element name="AddChannelRequest">
+		<xs:annotation>
+			<xs:documentation>Add channel: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="type" default="sip" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Channel type: sip, dahdi, iax, enum. Default value: sip</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="sip"/>
+							<!--<xs:enumeration value="dahdi"/>
+							<xs:enumeration value="iax"/>
+							<xs:enumeration value="enum"/>-->
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:choice>
+					<xs:annotation>
+						<xs:documentation>Either of</xs:documentation>
+					</xs:annotation>
+					<xs:element name="SIP" type="channelData:SIPChannelInfo" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>SIP channel</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="Dahdi" minOccurs="0" maxOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Not available</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="IAX" minOccurs="0" maxOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Not available</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<!--<xs:element name="Enum" minOccurs="0" maxOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Not available</xs:documentation>
+						</xs:annotation>
+					</xs:element>-->
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AddChannelResponse" type="messagesInfo:UpdateChannelResponseType">
+		<xs:annotation>
+			<xs:documentation>Add channel: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="EditChannelRequest">
+		<xs:annotation>
+			<xs:documentation>Edit channel: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Channel ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:annotation>
+						<xs:documentation>Either of</xs:documentation>
+					</xs:annotation>
+					<xs:element name="SIP" type="channelData:SIPChannelInfo" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>SIP channel</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="Dahdi" minOccurs="0" maxOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Not available</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="IAX" minOccurs="0" maxOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Not available</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditChannelResponse" type="messagesInfo:UpdateChannelResponseType">
+		<xs:annotation>
+			<xs:documentation>Edit channel: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetChannelsRequest">
+		<xs:annotation>
+			<xs:documentation>Get channels: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="groupID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Channel group ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="enabled" type="common:boolean" default="1" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>1: only enabled channels, 2: disabled channels, 0: all channels. Default: all</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="flow" default="both" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Channel capabilities. Default both.</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="in"/>
+							<xs:enumeration value="out"/>
+							<xs:enumeration value="both"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="filter" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Filter channels list by name, login, hostname or channel group name.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetChannelsResponse" type="messagesInfo:GetChannelsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get channels: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DelChannelRequest">
+		<xs:annotation>
+			<xs:documentation>Delete channel: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Channel ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelChannelResponse" type="messagesInfo:DelChannelResponseType">
+		<xs:annotation>
+			<xs:documentation>Delete channel: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetCodecsRequest">
+		<xs:annotation>
+			<xs:documentation>Get the available codecs for channel setup: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="channelID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Channel ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetCodecsResponse" type="messagesInfo:GetCodecsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get the available codecs: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetPublicNoPollRequest">
+		<xs:annotation>
+			<xs:documentation>Get user available and assigned public phone numbers: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="userID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>User ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="userIdentifier" type="common:string">
+					<xs:annotation>
+						<xs:documentation>User identifier</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetPublicNoPollResponse" type="messagesInfo:GetNoSelectionResponseType">
+		<xs:annotation>
+			<xs:documentation>Get user available and assigned public phone numbers:  response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AssignPublicNoRequest">
+		<xs:annotation>
+			<xs:documentation>Assign available public phone numbers: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="didID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Public phone number ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="userID" type="common:positiveInteger">
+						<xs:annotation>
+							<xs:documentation>User ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="userIdentifier" type="common:string">
+						<xs:annotation>
+							<xs:documentation>User identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AssignPublicNoResponse" type="messagesInfo:AssignPublicNoResponseType">
+		<xs:annotation>
+			<xs:documentation>Assign available public phone numbers: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="UnassignPublicNoRequest">
+		<xs:annotation>
+			<xs:documentation>Unassign available public phone numbers: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="didID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Public phone number ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="userID" type="common:positiveInteger">
+						<xs:annotation>
+							<xs:documentation>User ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="userIdentifier" type="common:string">
+						<xs:annotation>
+							<xs:documentation>User identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="UnassignPublicNoResponse" type="messagesInfo:AssignPublicNoResponseType">
+		<xs:annotation>
+			<xs:documentation>Unassign available public phone numbers: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AddPublicNoRequest">
+		<xs:annotation>
+			<xs:documentation>Add public phone numbers: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="publicNo" maxOccurs="10">
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="channelData:PublicNoInfo">
+								<xs:sequence>
+									<xs:element name="channelID" type="common:positiveInteger">
+										<xs:annotation>
+											<xs:documentation>Channel ID</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AddPublicNoResponse" type="messagesInfo:AddPublicNoResponseType">
+		<xs:annotation>
+			<xs:documentation>Add public phone numbers: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="EditPublicNoRequest">
+		<xs:annotation>
+			<xs:documentation>Edit public phone number: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="channelData:PublicNoInfo">
+					<xs:sequence>
+						<xs:element name="didID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Public phone number ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditPublicNoResponse" type="messagesInfo:EditPublicNoResponseType">
+		<xs:annotation>
+			<xs:documentation>Edit public phone number: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetPublicNoRequest">
+		<xs:annotation>
+			<xs:documentation>Get public phone numbers: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="channelID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Channel ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="inUse" type="common:boolean" default="0" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Usage filter. For unset numbers: 1</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="type" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Assignation method: 'stacked' or 'exclusive'.</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="exclusive"/>
+							<xs:enumeration value="stacked"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="filter" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Filter public number list by external number, DID or callback extension</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Client that uses the public phone number</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="userIdentifier" type="common:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Client (identifier) that uses the public phone number</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetPublicNoResponse" type="messagesInfo:GetPublicNoResponseType">
+		<xs:annotation>
+			<xs:documentation>Get public phone numbers: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DelPublicNoRequest">
+		<xs:annotation>
+			<xs:documentation>Delete public phone number: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Public phone number ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelPublicNoResponse" type="messagesInfo:DelPublicNoResponseType">
+		<xs:annotation>
+			<xs:documentation>Delete public phone numbers: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AddChannelGroupRequest" type="channelData:ChannelGroupInfo">
+		<xs:annotation>
+			<xs:documentation>Add channel group: request</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AddChannelGroupResponse" type="messagesInfo:UpdateChannelGroupResponseType">
+		<xs:annotation>
+			<xs:documentation>Add channel group: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="EditChannelGroupRequest">
+		<xs:annotation>
+			<xs:documentation>Edit channel group: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="channelData:ChannelGroupInfo">
+					<xs:sequence>
+						<xs:element name="ID" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Channel group ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditChannelGroupResponse" type="messagesInfo:UpdateChannelGroupResponseType">
+		<xs:annotation>
+			<xs:documentation>Edit channel group: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetChannelGroupsRequest">
+		<xs:annotation>
+			<xs:documentation>Get channel groups request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="channelID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Channel ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="filter" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Filter channel group list by name or channel name</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetChannelGroupsResponse" type="messagesInfo:GetChannelGroupsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get channel groups response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DelChannelGroupRequest">
+		<xs:annotation>
+			<xs:documentation>Delete channel group request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Channel group ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelChannelGroupResponse" type="messagesInfo:DelChannelGroupResponseType">
+		<xs:annotation>
+			<xs:documentation>Delete channel group response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetChannelGroupPollRequest">
+		<xs:annotation>
+			<xs:documentation>Get channel available and assigned groups:  request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="channelID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Channel ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetChannelGroupPollResponse" type="messagesInfo:GetGroupSelectionResponseType">
+		<xs:annotation>
+			<xs:documentation>Get channel available and assigned channnel groups:response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AddCallRulesOutGroupRequest" type="channelData:RoutingRuleGroupInfo">
+		<xs:annotation>
+			<xs:documentation>Add outgoing routing rules group: request</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AddCallRulesOutGroupResponse" type="messagesInfo:UpdateCallRulesOutGroupResponseType">
+		<xs:annotation>
+			<xs:documentation>Add outgoing routing rules group: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="EditCallRulesOutGroupRequest">
+		<xs:annotation>
+			<xs:documentation>Edit outgoing routing rules group (modify group name, status, change rules order, modify status for group rules) request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Outgoing routing rules group ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="name" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Outgoing routing rules group name</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="status" type="common:boolean" default="1" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Outgoing routing rules group status</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ruleStatus" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Rule status</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ruleID" type="common:positiveInteger">
+								<xs:annotation>
+									<xs:documentation>Outgoing routing rule ID</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="status" type="common:boolean" default="1">
+								<xs:annotation>
+									<xs:documentation>Outgoing routing rule status</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="changeOrder" type="common:positiveInteger" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>New order for the routing rules</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditCallRulesOutGroupResponse" type="messagesInfo:UpdateCallRulesOutGroupResponseType">
+		<xs:annotation>
+			<xs:documentation>Edit outgoing routing rules group (modify group name, status, change rules order, modify status for group rules) response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetCallRulesOutGroupRequest">
+		<xs:annotation>
+			<xs:documentation>Get outgoing routing rules group request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Routing rules group owner ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="status" type="common:boolean" default="0" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>1: enabled groups, 0: all groups. Default value: 0.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="filter" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Filter outgoing call rules list by name</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetCallRulesOutGroupResponse">
+		<xs:annotation>
+			<xs:documentation>Get outgoing routing rules group response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="messagesInfo:GetCallRulesOutGroupResponseType"/>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelCallRulesOutGroupRequest">
+		<xs:annotation>
+			<xs:documentation>Delete outgoing routing rules group request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Outgoing routing rule group ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelCallRulesOutGroupResponse" type="messagesInfo:DelCallRulesOutGroupResponseType">
+		<xs:annotation>
+			<xs:documentation>Delete outgoing routing rules group response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AddCallRulesOutRequest">
+		<xs:annotation>
+			<xs:documentation>Add group outgoing routing rule: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Outgoing routing rules group ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="rules" type="channelData:RoutingRuleInfo" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AddCallRulesOutResponse" type="messagesInfo:AddCallRulesOutResponseType">
+		<xs:annotation>
+			<xs:documentation>Add group outgoing routing rule: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetCallRulesOutRequest">
+		<xs:annotation>
+			<xs:documentation>Get outgoing routing rule in a certain group request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Outgoing routing rules group ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetCallRulesOutResponse" type="messagesInfo:GetCallRulesOutResponseType">
+		<xs:annotation>
+			<xs:documentation>Get outgoing routing rule in a certain group response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DelCallRulesOutRequest">
+		<xs:annotation>
+			<xs:documentation>Delete outgoing  routing rules request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="rulesGroupID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Outgoing routing rules group ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Outgoint routing rule ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelCallRulesOutResponse" type="messagesInfo:DelCallRulesOutGroupResponseType">
+		<xs:annotation>
+			<xs:documentation>Delete outgoing routing rules response.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+</xs:schema>

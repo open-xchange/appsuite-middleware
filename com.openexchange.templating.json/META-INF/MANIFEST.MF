@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JSON Interface to templating services
+Bundle-SymbolicName: com.openexchange.templating.json
+Bundle-Version: 6.20.0.0
+Bundle-Activator: com.openexchange.templating.json.osgi.TemplatingJSONActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.groupware,
+ com.openexchange.multiple,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.templating,
+ com.openexchange.tools.service,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.json,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.service.http

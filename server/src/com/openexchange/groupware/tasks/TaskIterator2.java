@@ -1,0 +1,318 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.groupware.tasks;
+
+import static com.openexchange.java.Autoboxing.I;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.tools.Collections;
+import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.sql.DBUtils;
+
+/**
+ * This class implements the new iterator for tasks that fixes problems with
+ * connection timeouts if a lot of tasks are read and that improved performance
+ * while reading from database.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class TaskIterator2 implements TaskIterator, Runnable {
+
+    private final Context ctx;
+
+    private final int userId;
+
+    private final String sql;
+
+    private final StatementSetter setter;
+
+    private final int folderId;
+
+    private final int[] taskAttributes;
+
+    private final int[] additionalAttributes;
+
+    private final StorageType type;
+
+    private final PreRead<Task> preread = new PreRead<Task>();
+
+    private final Queue<Task> ready = new LinkedList<Task>();
+
+    private TaskException exc;
+
+    private final Thread runner;
+
+    private final ParticipantStorage partStor = ParticipantStorage.getInstance();
+
+    private final List<AbstractOXException> warnings;
+
+    /**
+     * Default constructor.
+     * @param ctx Context.
+     * @param userId unique identifier of the user if we have to load reminders.
+     * @param result This iterator iterates over this ResultSet.
+     * @param folderId Unique identifier of the folder through that the tasks
+     * are requested.
+     * @param attributes Array of fields that the returned tasks should contain.
+     * @param type ACTIVE or DELETED.
+     */
+    TaskIterator2(final Context ctx, final int userId, final String sql,
+        final StatementSetter setter, final int folderId, final int[] attributes,
+        final StorageType type) {
+        super();
+        this.warnings =  new ArrayList<AbstractOXException>(2);
+        this.ctx = ctx;
+        this.userId = userId;
+        this.sql = sql;
+        this.setter = setter;
+        this.folderId = folderId;
+        final List<Integer> tmp1 = new ArrayList<Integer>(attributes.length);
+        final List<Integer> tmp2 = new ArrayList<Integer>(attributes.length);
+        for (final int column : attributes) {
+            if (null == Mapping.getMapping(column) && Task.FOLDER_ID != column) {
+                tmp2.add(I(column));
+            } else {
+                tmp1.add(I(column));
+            }
+        }
+        this.taskAttributes = Collections.toArray(tmp1);
+        modifyAdditionalAttributes(tmp2);
+        this.additionalAttributes = Collections.toArray(tmp2);
+        this.type = type;
+        runner = new Thread(this);
+        runner.start();
+    }
+
+    private void modifyAdditionalAttributes(final List<Integer> additional) {
+        // If participants are requested we also add users automatically. Users
+        // are calculated from participants.
+        if (additional.contains(I(Task.USERS))) {
+            if (!additional.contains(I(Task.PARTICIPANTS))) {
+                additional.add(I(Task.PARTICIPANTS));
+            }
+            // Not removed users will give SearchIteratorException in code
+            // below.
+            additional.remove(I(Task.USERS));
+        }
+    }
+
+    public void close() throws SearchIteratorException {
+        try {
+            runner.join();
+        } catch (final InterruptedException e) {
+            throw new SearchIteratorException(new TaskException(Code.THREAD_ISSUE, e));
+        }
+    }
+
+    public boolean hasNext() {
+        return !ready.isEmpty() || preread.hasNext() || null != exc;
+    }
+
+    public boolean hasSize() {
+        return false;
+    }
+
+    public Task next() throws SearchIteratorException {
+        if (ready.isEmpty() && !preread.hasNext()) {
+            throw new SearchIteratorException(exc);
+        }
+        if (ready.isEmpty()) {
+            try {
+                final List<Task> tasks = new ArrayList<Task>();
+                tasks.addAll(preread.take(additionalAttributes.length > 0));
+                for (final int attribute : additionalAttributes) {
+                    switch (attribute) {
+                    case Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+                        addLastModifiedOfNewestAttachment(tasks);
+                        break;
+                    case Task.PARTICIPANTS:
+                        try {
+                            readParticipants(tasks);
+                        } catch (final TaskException e) {
+                            throw new SearchIteratorException(e);
+                        }
+                        break;
+                    case Task.ALARM:
+                        try {
+                            Reminder.loadReminder(ctx, userId, tasks);
+                        } catch (final TaskException e) {
+                            throw new SearchIteratorException(e);
+                        }
+                        break;
+                    default:
+                        throw new SearchIteratorException(new TaskException(
+                            TaskException.Code.UNKNOWN_ATTRIBUTE, Integer
+                            .valueOf(attribute)));
+                    }
+                }
+                ready.addAll(tasks);
+            } catch (final InterruptedException e) {
+                throw new SearchIteratorException(new TaskException(
+                    TaskException.Code.THREAD_ISSUE, e));
+            }
+        }
+        return ready.poll();
+    }
+
+    public void addWarning(final AbstractOXException warning) {
+        warnings.add(warning);
+    }
+
+    public AbstractOXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    }
+
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
+
+    /**
+     * Reads the participants for the tasks.
+     * @param tasks Tasks that should be filled with participants.
+     * @throws TaskException if reading the participants fails.
+     */
+    private void readParticipants(final List<Task> tasks) throws TaskException {
+        final int[] ids = new int[tasks.size()];
+        for (int i = 0; i < tasks.size(); i++) {
+            ids[i] = tasks.get(i).getObjectID();
+        }
+        final Map<Integer, Set<TaskParticipant>> parts = partStor.selectParticipants(ctx, ids, type);
+        for (final Task task : tasks) {
+            final Set<TaskParticipant> participants = parts.get(I(task.getObjectID()));
+            if (null != participants) {
+                task.setParticipants(TaskLogic.createParticipants(participants));
+                task.setUsers(TaskLogic.createUserParticipants(participants));
+            }
+        }
+    }
+
+    private void addLastModifiedOfNewestAttachment(List<Task> tasks) throws SearchIteratorException {
+        final int[] ids = new int[tasks.size()];
+        for (int i = 0; i < tasks.size(); i++) {
+            ids[i] = tasks.get(i).getObjectID();
+        }
+        AttachmentBase attachmentBase = Attachments.getInstance();
+        try {
+            Map<Integer, Date> dates = attachmentBase.getNewestCreationDates(ctx, Types.TASK, ids);
+            for (Task task : tasks) {
+                Date newestCreationDate = dates.get(I(task.getObjectID()));
+                if (null != newestCreationDate) {
+                    task.setLastModifiedOfNewestAttachment(newestCreationDate);
+                }
+            }
+        } catch (AttachmentException e) {
+            throw new SearchIteratorException(e);
+        }
+    }
+
+    public int size() {
+        return -1;
+    }
+
+    public void run() {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            con = DBPool.pickup(ctx);
+            stmt = con.prepareStatement(sql);
+            setter.perform(stmt);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                final Task task = new Task();
+                int pos = 1;
+                for (final int taskField : taskAttributes) {
+                    final Mapper<?> mapper = Mapping.getMapping(taskField);
+                    if (Task.FOLDER_ID == taskField) {
+                        if (-1 == folderId) {
+                            task.setParentFolderID(result.getInt(pos++));
+                        } else {
+                            task.setParentFolderID(folderId);
+                        }
+                    } else if (null != mapper) {
+                        mapper.fromDB(result, pos++, task);
+                    }
+                }
+                preread.offer(task);
+            }
+        } catch (final SQLException e) {
+            exc = new TaskException(Code.SQL_ERROR, e);
+        } catch (final DBPoolingException e) {
+            exc = new TaskException(Code.NO_CONNECTION, e);
+        } catch (Throwable t) {
+            exc = new TaskException(Code.THREAD_ISSUE, t);
+        } finally {
+            preread.finished();
+            DBUtils.closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    interface StatementSetter {
+        void perform(final PreparedStatement stmt) throws SQLException;
+    }
+}

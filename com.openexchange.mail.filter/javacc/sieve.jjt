@@ -1,0 +1,274 @@
+/****************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one   *
+ * or more contributor license agreements.  See the NOTICE file *
+ * distributed with this work for additional information        *
+ * regarding copyright ownership.  The ASF licenses this file   *
+ * to you under the Apache License, Version 2.0 (the            *
+ * "License"); you may not use this file except in compliance   *
+ * with the License.  You may obtain a copy of the License at   *
+ *                                                              *
+ *   http://www.apache.org/licenses/LICENSE-2.0                 *
+ *                                                              *
+ * Unless required by applicable law or agreed to in writing,   *
+ * software distributed under the License is distributed on an  *
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY       *
+ * KIND, either express or implied.  See the License for the    *
+ * specific language governing permissions and limitations      *
+ * under the License.                                           *
+ ****************************************************************/
+
+options {
+  MULTI=true;
+  VISITOR=true;
+  VISITOR_EXCEPTION="org.apache.jsieve.SieveException";
+  NODE_PACKAGE="org.apache.jsieve.parser.generated";
+  NODE_DEFAULT_VOID=false;
+  STATIC = false;
+  JAVA_UNICODE_ESCAPE = true;  
+  DEBUG_PARSER = false;
+  NODE_EXTENDS="org.apache.jsieve.parser.SieveNode";
+  NODE_SCOPE_HOOK=true;
+}
+
+PARSER_BEGIN(SieveParser)
+
+package org.apache.jsieve.parser.generated;
+
+import org.apache.jsieve.*;
+import org.apache.jsieve.parser.*;
+
+public class SieveParser { 
+
+  public void jjtreeOpenNodeScope(Node n) {
+    ((SieveNode) n).setFirstToken(getToken(1));
+  }
+  
+  public void jjtreeCloseNodeScope(Node n) {
+    ((SieveNode) n).setLastToken(getToken(0));
+  }
+}
+
+PARSER_END(SieveParser)
+
+/*****************************************
+ * THE SIEVE LANGUAGE TOKENS STARTS HERE *
+ *****************************************/
+
+SKIP : /* WHITE SPACE */
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+SPECIAL_TOKEN : /* COMMENTS */
+{
+  <HASH_COMMENT: "#" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+| 
+  <BRACKET_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+}
+
+TOKEN : /* Can't make this one special */
+{
+  <EOF_HASH_COMMENT: "#" (~["\n","\r"])*>
+}              
+
+
+// identifier = (ALPHA / "_") *(ALPHA DIGIT "_")
+TOKEN : /* IDENTIFIER */
+{
+   <IDENTIFIER: (<ALPHA>|"_") (<ALPHA>|<DIGIT>|"_")*>
+|
+  < #ALPHA:
+      [
+       "\u0041"-"\u005a",
+       "\u0061"-"\u007a"
+      ]
+  >
+|
+  < #DIGIT:
+      [
+       "\u0030"-"\u0039"
+      ]
+  >  
+}
+
+// tag = ":" identifier
+TOKEN : /* TAG */
+{
+   <TAG: ":" <IDENTIFIER> >
+}
+
+TOKEN : /* LITERALS */
+{
+// number = 1*DIGIT [QUANTIFIER]
+// QUANTIFIER = "K" / "M" / "G"
+   < NUMBER: 
+       <DECIMAL_LITERAL> (<QUANTIFIER>)?
+   >
+|
+  < #DECIMAL_LITERAL: (["0"-"9"])+ >
+|
+  < #QUANTIFIER: ["K","M","G"] >    
+|
+// quoted-string = DQUOTE *CHAR DQUOTE
+// in general, \ CHAR inside a string maps to CHAR
+// so \" maps to " and \\ maps to \
+// note that newlines and other characters are all allowed strings
+  < QUOTED_STRING:
+      "\""
+      (~["\""]|"\\\"")*
+      "\""
+  >
+|
+// multi-line = "text:" *(SP / HTAB) (hash-comment / CRLF)
+//               *(multi-line-literal / multi-line-dotstuff)
+//               "." CRLF
+// Hmm. What we need to do is treat (CRLF / LF / CR) as <NEWLINE> throughout
+  < MULTI_LINE:
+      <MULTI_LINE_START>
+      (<MULTI_LINE_LITERAL> |<MULTI_LINE_DOTSTUFF>)*
+      <MULTI_LINE_END>
+  >
+|
+  <#MULTI_LINE_START: 
+      ("text:")
+      ([" ", "\t"])*
+      (<HASH_COMMENT>|<NEWLINE>)
+  >
+|
+  <#MULTI_LINE_END:
+      ("." <NEWLINE>)
+  >              
+|
+  <#NEWLINE:
+      ("\n"|"\r"|"\r\n")
+  >
+|                           
+// multi-line-literal  = [CHAR-NOT-DOT *CHAR_NOT_NEWLINE] NEWLINE 
+  < #MULTI_LINE_LITERAL:
+      (<CHAR_NOT_DOT> (<CHAR_NOT_NEWLINE>)*)?
+      <NEWLINE>
+  >  
+|
+  < #CHAR_NOT_DOT: 
+      (~["."])
+  >
+|
+  < #CHAR_NOT_NEWLINE: 
+      (~["\n"] | ("\r" ~["\n"]))
+  >   
+|
+// multi-line-dotstuff = "." 1*CHAR-NOT-CRLF CRLF
+// A line containing only "." ends the multi-line.
+// Remove a leading '.' if followed by another '.'.
+  < #MULTI_LINE_DOTSTUFF:
+    "."
+    (<CHAR_NOT_NEWLINE>)+
+    <NEWLINE>
+  >  
+}
+
+/******************************************
+ * THE SIEVE LANGUAGE GRAMMAR STARTS HERE *
+ ******************************************/
+
+// start = commands   
+SimpleNode start() :
+{  }
+{
+  commands()
+  (<EOF_HASH_COMMENT>)? // Allow a Hash comment immediately prior to EOF
+  <EOF>
+  { return jjtThis; }  
+}
+
+//   commands = *command
+void commands() :
+{ }
+{
+  (command())*
+}
+
+//   command = identifier arguments ( ";" / block )
+void command() :
+{ Token identifier = null; }
+{
+  (identifier = <IDENTIFIER>) arguments() (";" | block())
+  {
+    jjtThis.setName(identifier.image);
+  }  
+}
+
+//   block = "{" commands "}"
+void block() :
+{ }
+{
+   "{" commands() "}"
+}
+
+//   arguments = *argument [test / test-list]
+void arguments() :
+{ }
+{
+  (argument())* (test() | test_list())?
+}
+
+//    argument = string-list / number / tag
+void argument() :
+{ Token string_list = null, number = null, tag = null; }
+{
+  (string_list() | number = <NUMBER> | tag = <TAG>)
+  {
+    Argument value = null; 
+    if (null != number)
+       value = new NumberArgument(number);
+    else if (null != tag)
+       value = new TagArgument(tag);
+    jjtThis.setValue(value);       
+  }
+}
+
+//   test = identifier arguments
+void test() :
+{ Token identifier = null; }
+{
+  (identifier = <IDENTIFIER> arguments())
+  {
+    jjtThis.setName(identifier.image);
+  }   
+}
+
+//   test-list = "(" test *("," test) ")"
+void test_list() :
+{ }
+{
+  "(" test() ("," test())* ")"
+}
+
+//   string = quoted-string / multi-line
+void string() :
+{ Token quoted_string = null, multi_line = null;}
+{
+  (quoted_string = <QUOTED_STRING> | multi_line = <MULTI_LINE>)
+  {
+    if (null != quoted_string)
+      jjtThis.setValue(quoted_string.image);
+    else if (null != multi_line)
+      jjtThis.setValue(multi_line.image);  
+  }
+}
+
+//   string-list = "[" string *("," string) "]" / string         ;; if
+//   there is only a single string, the brackets are optional
+void string_list() :
+{ }
+{
+  ("[" string() ("," string())* "]") | string()
+}
+
+
+   
+ 

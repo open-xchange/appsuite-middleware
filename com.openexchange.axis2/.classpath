@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="lib" path="lib/annogen.jar"/>
+	<classpathentry kind="lib" path="lib/axiom-api.jar"/>
+	<classpathentry kind="lib" path="lib/axiom-impl.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-adb-codegen.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-adb.jar" sourcepath="source/axis2-1.4-src.zip"/>
+	<classpathentry kind="lib" path="lib/axis2-ant-plugin.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-clustering.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-codegen.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-corba.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-fastinfoset.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-java2wsdl.jar" sourcepath="source/axis2-1.4-src.zip"/>
+	<classpathentry kind="lib" path="lib/axis2-jaxbri.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-jaxws.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-jibx.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-json.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-kernel.jar" sourcepath="source/axis2-1.5.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/axis2-metadata.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-mtompolicy.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-saaj.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-spring.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-xmlbeans.jar"/>
+	<classpathentry kind="lib" path="lib/geronimo-stax-api_1.0_spec.jar"/>
+	<classpathentry kind="lib" path="lib/neethi.jar"/>
+	<classpathentry kind="lib" path="lib/woden-api.jar"/>
+	<classpathentry kind="lib" path="lib/wsdl4j.jar"/>
+	<classpathentry kind="lib" path="lib/wstx-asl.jar"/>
+	<classpathentry kind="lib" path="lib/xalan.jar"/>
+	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/XmlSchema.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-transport-http.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-transport-local.jar"/>
+	<classpathentry kind="lib" path="lib/geronimo-ws-metadata_2.0_spec.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore.jar"/>
+	<classpathentry kind="lib" path="lib/axiom-dom.jar"/>
+	<classpathentry kind="lib" path="lib/jaxen.jar"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>

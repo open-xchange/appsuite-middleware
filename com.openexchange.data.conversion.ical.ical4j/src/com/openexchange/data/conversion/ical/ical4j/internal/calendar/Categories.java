@@ -1,0 +1,97 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.TimeZone;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
+
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
+public class Categories<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+    public boolean isSet(final U calendar) {
+        return calendar.containsCategories();
+    }
+
+    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+        final String categories = u.getCategories();
+        if(null == categories){
+            return;
+        }
+        t.getProperties().add(new net.fortuna.ical4j.model.property.Categories(categories));
+    }
+
+    public boolean hasProperty(final T t) {
+        final PropertyList categoriesList = t.getProperties("CATEGORIES");
+        return categoriesList.size() > 0;
+    }
+
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+       final PropertyList categoriesList = component.getProperties("CATEGORIES");
+        final StringBuilder bob = new StringBuilder();
+        for(int i = 0, size = categoriesList.size(); i < size; i++) {
+            final net.fortuna.ical4j.model.property.Categories categories = (net.fortuna.ical4j.model.property.Categories) categoriesList.get(i);
+            for(final Iterator<Object> catObjects = categories.getCategories().iterator(); catObjects.hasNext();) {
+                bob.append(catObjects.next()).append(",");
+            }
+        }
+        if(bob.length() > 0) {
+            bob.setLength(bob.length()-1);
+        }
+        cObj.setCategories(bob.toString());
+    }
+}

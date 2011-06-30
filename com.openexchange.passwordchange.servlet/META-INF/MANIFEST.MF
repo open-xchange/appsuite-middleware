@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Password Change Servlet
+Bundle-SymbolicName: com.openexchange.passwordchange.servlet
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.ajax.writer,
+ com.openexchange.context,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.passwordchange,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.servlet.http,
+ javax.servlet;version="2.4.0",
+ javax.servlet.http;version="2.4.0",
+ org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging.impl;version="1.0.4",
+ org.json,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.service.http;version="1.2.0"
+Bundle-Activator: com.openexchange.passwordchange.servlet.osgi.PasswordChangeServletActivator

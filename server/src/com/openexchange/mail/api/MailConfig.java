@@ -1,0 +1,826 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.api;
+
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
+import java.net.InetSocketAddress;
+import java.security.GeneralSecurityException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.partmodifier.DummyPartModifier;
+import com.openexchange.mail.partmodifier.PartModifier;
+import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.secret.SecretService;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+
+/**
+ * {@link MailConfig} - The user-specific mail properties; e.g. containing user's login data.
+ * <p>
+ * Provides access to global mail properties.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public abstract class MailConfig {
+
+    public static enum BoolCapVal {
+
+        /**
+         * AUTO
+         */
+        AUTO("auto"),
+        /**
+         * FALSE
+         */
+        FALSE("false"),
+        /**
+         * TRUE
+         */
+        TRUE("true");
+
+        /**
+         * Parses given capability value. If given value equals ignore-case to string <code>true</code>, constant {@link #TRUE} will be
+         * returned. Else if given value equals ignore-case to string <code>auto</code>, constant {@link #AUTO} will be returned. Otherwise
+         * {@link #FALSE} will be returned.
+         * 
+         * @param capVal - the string value to parse
+         * @return an instance of <code>BoolCapVal</code>: either {@link #TRUE}, {@link #FALSE}, or {@link #AUTO}
+         */
+        public final static BoolCapVal parseBoolCapVal(final String capVal) {
+            if (TRUE.str.equalsIgnoreCase(capVal)) {
+                return TRUE;
+            } else if (AUTO.str.equalsIgnoreCase(capVal)) {
+                return AUTO;
+            }
+            return FALSE;
+        }
+
+        private final String str;
+
+        private BoolCapVal(final String str) {
+            this.str = str;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
+    public static enum LoginSource {
+
+        /**
+         * Login is taken from user.mail kept in storage; e.g. <code>test@foo.bar</code>
+         */
+        PRIMARY_EMAIL("mail"),
+        /**
+         * Login is taken from user.imapLogin kept in storage; e.g. <code>test</code>
+         */
+        USER_IMAPLOGIN("login"),
+        /**
+         * Login is user's name; e.g. <code>test</code>
+         */
+        USER_NAME("name");
+
+        /**
+         * Parses specified string into a login source.
+         * 
+         * @param loginSourceStr The string to parse to a login source
+         * @return An appropriate login source or <code>null</code> if string could not be parsed to a login source
+         */
+        public static final LoginSource parse(final String loginSourceStr) {
+            final LoginSource[] values = LoginSource.values();
+            for (final LoginSource loginSource : values) {
+                if (loginSource.str.equalsIgnoreCase(loginSourceStr)) {
+                    return loginSource;
+                }
+            }
+            return null;
+        }
+
+        private final String str;
+
+        private LoginSource(final String str) {
+            this.str = str;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
+    public static enum PasswordSource {
+
+        /**
+         * Password is taken from appropriate property
+         */
+        GLOBAL("global"),
+        /**
+         * Password is equal to session password
+         */
+        SESSION("session");
+
+        /**
+         * Parses specified string into a password source.
+         * 
+         * @param passwordSourceStr The string to parse to a password source
+         * @return An appropriate password source or <code>null</code> if string could not be parsed to a password source
+         */
+        public static final PasswordSource parse(final String passwordSourceStr) {
+            final PasswordSource[] values = PasswordSource.values();
+            for (final PasswordSource passwordSource : values) {
+                if (passwordSource.str.equalsIgnoreCase(passwordSourceStr)) {
+                    return passwordSource;
+                }
+            }
+            return null;
+        }
+
+        private final String str;
+
+        private PasswordSource(final String str) {
+            this.str = str;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
+    public static enum ServerSource {
+
+        /**
+         * Server is taken from appropriate property
+         */
+        GLOBAL("global"),
+        /**
+         * Server is taken from user
+         */
+        USER("user");
+
+        /**
+         * Parses specified string into a server source.
+         * 
+         * @param serverSourceStr The string to parse to a server source
+         * @return An appropriate server source or <code>null</code> if string could not be parsed to a server source
+         */
+        public static final ServerSource parse(final String serverSourceStr) {
+            final ServerSource[] values = ServerSource.values();
+            for (final ServerSource serverSource : values) {
+                if (serverSource.str.equalsIgnoreCase(serverSourceStr)) {
+                    return serverSource;
+                }
+            }
+            return null;
+        }
+
+        private final String str;
+
+        private ServerSource(final String str) {
+            this.str = str;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
+    private static volatile Boolean usePartModifier;
+
+    protected static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
+
+    protected static final Object[] INIT_ARGS = new Object[0];
+
+    /**
+     * Gets the user-specific mail configuration.
+     * 
+     * @param <C> The return value type
+     * @param clazz The mail configuration type
+     * @param mailConfig A newly created {@link MailConfig mail configuration}
+     * @param session The session providing needed user data
+     * @param accountId The mail account ID
+     * @return The user-specific mail configuration
+     * @throws MailException If user-specific mail configuration cannot be determined
+     */
+    public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final C mailConfig, final Session session, final int accountId) throws MailException {
+        /*
+         * Fetch mail account
+         */
+        final MailAccount mailAccount;
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        try {
+            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            if (accountId == MailAccount.DEFAULT_ID) {
+                mailAccount = storage.getDefaultMailAccount(userId, contextId);
+            } else {
+                mailAccount = storage.getMailAccount(accountId, userId, contextId);
+            }
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
+        mailConfig.accountId = accountId;
+        mailConfig.session = session;
+        fillLoginAndPassword(mailConfig, session, UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
+        String serverURL = MailConfig.getMailServerURL(mailAccount);
+        if (serverURL == null) {
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
+                throw new MailConfigException(
+                    new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
+                        "\" not set in mail properties").toString());
+            }
+            throw new MailConfigException(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(
+                " in context ").append(contextId).toString());
+        }
+        {
+            /*
+             * Remove ending '/' character
+             */
+            final int lastPos = serverURL.length() - 1;
+            if (serverURL.charAt(lastPos) == '/') {
+                serverURL = serverURL.substring(0, lastPos);
+            }
+        }
+        mailConfig.parseServerURL(serverURL);
+        return mailConfig;
+    }
+
+    /**
+     * Gets the mail login with respect to configured login source.
+     * 
+     * @param mailAccount The mail account used to determine the login
+     * @param userLoginInfo The login information of the user
+     * @return The mail login of specified user
+     */
+    public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) {
+        if (!mailAccount.isDefaultAccount()) {
+            return mailAccount.getLogin();
+        }
+        final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
+        if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
+            return mailAccount.getLogin();
+        }
+        if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+            try {
+                return QuotedInternetAddress.toACE(mailAccount.getPrimaryAddress());
+            } catch (final AddressException e) {
+                final String primaryAddress = mailAccount.getPrimaryAddress();
+                org.apache.commons.logging.LogFactory.getLog(MailConfig.class).warn(
+                    "Login source primary email address \"" + primaryAddress + "\" could not be converted to ASCII. Using unicode representation.",
+                    e);
+                return primaryAddress;
+            }
+        }
+        return userLoginInfo;
+    }
+
+    /**
+     * Gets the mail server URL appropriate to configured mail server source.
+     * 
+     * @param mailAccount The user
+     * @return The appropriate mail server URL or <code>null</code>
+     */
+    public static final String getMailServerURL(final MailAccount mailAccount) {
+        if (!mailAccount.isDefaultAccount()) {
+            return mailAccount.generateMailServerURL();
+        }
+        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
+            return MailProperties.getInstance().getMailServer();
+        }
+        return mailAccount.generateMailServerURL();
+    }
+
+    /**
+     * Gets the mail server URL appropriate to configured mail server source.
+     * 
+     * @param session The user session
+     * @param accountId The account ID
+     * @return The appropriate mail server URL or <code>null</code>
+     * @throws MailException If mail server URL cannot be returned
+     */
+    public static final String getMailServerURL(final Session session, final int accountId) throws MailException {
+        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
+            return MailProperties.getInstance().getMailServer();
+        }
+        try {
+            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            return storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL();
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
+    }
+
+    /**
+     * Gets the part modifier.
+     * 
+     * @return the part modifier.
+     */
+    public static final PartModifier getPartModifier() {
+        return PartModifier.getInstance();
+    }
+
+    /**
+     * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source.
+     * 
+     * @param pattern The pattern
+     * @param server The server address
+     * @param ctx The context
+     * @return The user IDs from specified pattern dependent on configuration's setting for mail login source
+     * @throws AbstractOXException If resolving user by specified pattern fails
+     */
+    public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws AbstractOXException {
+        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+            MailAccountStorageService.class,
+            true);
+        if (isDefaultAccount) {
+            switch (MailProperties.getInstance().getLoginSource()) {
+            case USER_IMAPLOGIN:
+            case PRIMARY_EMAIL:
+                final MailAccount[] accounts;
+                switch (MailProperties.getInstance().getLoginSource()) {
+                case USER_IMAPLOGIN:
+                    accounts = storageService.resolveLogin(pattern, ctx.getContextId());
+                    break;
+                case PRIMARY_EMAIL:
+                    accounts = storageService.resolvePrimaryAddr(pattern, ctx.getContextId());
+                    break;
+                default:
+                    throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
+                }
+                final Set<Integer> userIds = new HashSet<Integer>();
+                if (accounts.length == 1) {
+                    // On ASE some accounts are configured to connect to localhost, some to the full qualified local host name. The socket
+                    // would then not match. If we only find one then, use it.
+                    userIds.add(I(accounts[0].getUserId()));
+                } else {
+                    for (final MailAccount candidate : accounts) {
+                        final InetSocketAddress shouldMatch;
+                        switch (MailProperties.getInstance().getMailServerSource()) {
+                        case USER:
+                            shouldMatch = toSocketAddr(candidate.generateMailServerURL(), 143);
+                            break;
+                        case GLOBAL:
+                            shouldMatch = toSocketAddr(MailProperties.getInstance().getMailServer(), 143);
+                            break;
+                        default:
+                            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
+                        }
+                        if (server.equals(shouldMatch)) {
+                            userIds.add(I(candidate.getUserId()));
+                        }
+                    }
+                }
+                // Prefer the default mail account.
+                final Set<Integer> notDefaultAccount = new HashSet<Integer>();
+                if (userIds.size() > 1) {
+                    final Iterator<Integer> iter = userIds.iterator();
+                    while (iter.hasNext()) {
+                        final int userId = i(iter.next());
+                        for (final MailAccount candidate : accounts) {
+                            if (candidate.getUserId() == userId && !candidate.isDefaultAccount()) {
+                                notDefaultAccount.add(I(userId));
+                            }
+                        }
+                    }
+                }
+                if (notDefaultAccount.size() < userIds.size()) {
+                    userIds.removeAll(notDefaultAccount);
+                }
+                return I2i(userIds);
+            case USER_NAME:
+                return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
+            }
+        }
+        // Find user name by user's imap login
+        final MailAccount[] accounts = storageService.resolveLogin(pattern, server, ctx.getContextId());
+        final int[] retval = new int[accounts.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = accounts[i].getUserId();
+        }
+        return retval;
+    }
+
+    /**
+     * Parses protocol out of specified server string according to URL specification; e.g. <i>mailprotocol://dev.myhost.com:1234</i>
+     * 
+     * @param server The server string
+     * @return An array of {@link String} with length <code>2</code>. The first element is the protocol and the second the server. If no
+     *         protocol pattern could be found <code>null</code> is returned; meaning no protocol is present in specified server string.
+     */
+    public final static String[] parseProtocol(final String server) {
+        final int len = server.length();
+        char c = '\0';
+        for (int i = 0; (i < len) && ((c = server.charAt(i)) != '/'); i++) {
+            if (c == ':' && ((c = server.charAt(i + 1)) == '/') && ((c = server.charAt(i + 2)) == '/')) {
+                final String s = server.substring(0, i).toLowerCase(Locale.ENGLISH);
+                if (isValidProtocol(s)) {
+                    int start = i + 1;
+                    while (server.charAt(start) == '/') {
+                        start++;
+                    }
+                    return new String[] { s, server.substring(start) };
+                }
+                break;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Checks if a part modifier shall be used, that is {@link PartModifier#getInstance()} is not <code>null</code> and not
+     * assignment-compatible to {@link DummyPartModifier} (which does nothing at all).
+     * 
+     * @return <code>true</code> if part modifier shall be used; otherwise <code>false</code>
+     */
+    public static final boolean usePartModifier() {
+        Boolean tmp = usePartModifier;
+        if (tmp == null) {
+            synchronized (MailConfig.class) {
+                tmp = usePartModifier;
+                if (tmp == null) {
+                    final PartModifier pm = PartModifier.getInstance();
+                    tmp = usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    private final static boolean isValidProtocol(final String protocol) {
+        final int len = protocol.length();
+        if (len < 1) {
+            return false;
+        }
+        char c = protocol.charAt(0);
+        if (!Character.isLetter(c)) {
+            return false;
+        }
+        for (int i = 1; i < len; i++) {
+            c = protocol.charAt(i);
+            if (!Character.isLetterOrDigit(c) && (c != '.') && (c != '+') && (c != '-')) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Fills login and password in specified instance of {@link MailConfig}.
+     * 
+     * @param mailConfig The mail config whose login and password shall be set
+     * @param sessionPassword The session password
+     * @param mailAccount The mail account
+     * @throws MailConfigException If a configuration error occurs
+     */
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
+        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+        // Assign login
+        final String slogin = session.getLoginName();
+        if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
+            mailConfig.login = slogin;
+        } else {
+            mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
+        }
+        // Assign password
+        final String sessionPassword = session.getPassword();
+        if (mailAccount.isDefaultAccount()) {
+            final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
+            if (PasswordSource.GLOBAL.equals(cur)) {
+                final String masterPw = MailProperties.getInstance().getMasterPassword();
+                if (masterPw == null) {
+                    throw new MailConfigException(new StringBuilder().append("Property \"masterPassword\" not set").toString());
+                }
+                mailConfig.password = masterPw;
+            } else {
+                mailConfig.password = sessionPassword;
+            }
+        } else {
+            final String mailAccountPassword = mailAccount.getPassword();
+            if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
+                // Set to empty string
+                mailConfig.password = "";
+            } else {
+                // Decrypt mail account's password using session password
+                try {
+                    final SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
+                    final String secret = secretService.getSecret(session);
+                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, secret);
+                } catch (final GeneralSecurityException e) {
+                    throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(
+                        e,
+                        mailConfig.login,
+                        mailAccount.getMailServer(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId())));
+                }
+            }
+        }
+    }
+
+    /*-
+     * Member section
+     */
+
+    protected int accountId;
+
+    protected Session session;
+
+    protected String login;
+
+    protected String password;
+
+    /**
+     * Initializes a new {@link MailConfig}
+     */
+    protected MailConfig() {
+        super();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj == null) {
+            return false;
+        } else if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MailConfig other = (MailConfig) obj;
+        if (login == null) {
+            if (other.login != null) {
+                return false;
+            }
+        } else if (!login.equals(other.login)) {
+            return false;
+        }
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+        if (getPort() != other.getPort()) {
+            return false;
+        }
+        if (getServer() == null) {
+            if (other.getServer() != null) {
+                return false;
+            }
+        } else if (!getServer().equals(other.getServer())) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Gets the account ID.
+     * 
+     * @return The account ID
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * Gets the session.
+     * 
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
+
+    /**
+     * Gets the mail system's capabilities
+     * 
+     * @return The mail system's capabilities
+     */
+    public abstract MailCapabilities getCapabilities();
+
+    /**
+     * Gets the login.
+     * 
+     * @return the login
+     */
+    public final String getLogin() {
+        return login;
+    }
+
+    /**
+     * Gets the password.
+     * 
+     * @return the password
+     */
+    public final String getPassword() {
+        return password;
+    }
+
+    /**
+     * Gets the optional port of the server.
+     * 
+     * @return The optional port of the server obtained via {@link #getServer()} or <code>-1</code> if no port needed.
+     */
+    public abstract int getPort();
+
+    /**
+     * Gets the host name or IP address of the server.
+     * 
+     * @return The host name or IP address of the server.
+     */
+    public abstract String getServer();
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("{ MailConfig [accountId=").append(accountId).append(", ");
+        if (login != null) {
+            builder.append("login=").append(login).append(", ");
+        }
+        if (password != null) {
+            builder.append("password=").append(password).append(", ");
+        }
+        builder.append("getPort()=").append(getPort()).append(", ");
+        if (getServer() != null) {
+            builder.append("getServer()=").append(getServer()).append(", ");
+        }
+        builder.append("isSecure()=").append(isSecure()).append("] }");
+        return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((login == null) ? 0 : login.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + (getPort());
+        final String server = getServer();
+        result = prime * result + ((server == null) ? 0 : server.hashCode());
+        return result;
+    }
+
+    /**
+     * Checks if a secure connection shall be established.
+     * 
+     * @return <code>true</code> if a secure connection shall be established; otherwise <code>false</code>
+     */
+    public abstract boolean isSecure();
+
+    /**
+     * Sets the account ID (externally).
+     * 
+     * @param accountId The account ID
+     */
+    public void setAccountId(final int accountId) {
+        this.accountId = accountId;
+    }
+
+    /**
+     * Sets the session
+     * 
+     * @param session The session
+     */
+    public void setSession(final Session session) {
+        this.session = session;
+    }
+
+    /**
+     * Sets the login (externally).
+     * 
+     * @param login The login
+     */
+    public void setLogin(final String login) {
+        this.login = login;
+    }
+
+    /**
+     * Sets the password (externally).
+     * 
+     * @param password The password
+     */
+    public void setPassword(final String password) {
+        this.password = password;
+    }
+
+    /**
+     * Sets the port (externally).
+     * 
+     * @param port The port
+     */
+    public abstract void setPort(int port);
+
+    /**
+     * Sets (externally) whether a secure connection should be established or not.
+     * 
+     * @param secure <code>true</code> if a secure connection should be established; otherwise <code>false</code>
+     */
+    public abstract void setSecure(boolean secure);
+
+    /**
+     * Sets the host name or IP address of the server (externally).
+     * 
+     * @param server The host name or IP address of the server
+     */
+    public abstract void setServer(String server);
+
+    /**
+     * Gets the mail properties for this mail configuration.
+     * 
+     * @return The mail properties for this mail configuration
+     */
+    public abstract IMailProperties getMailProperties();
+
+    /**
+     * Sets the mail properties for this mail configuration.
+     * 
+     * @param mailProperties The mail properties for this mail configuration
+     */
+    public abstract void setMailProperties(IMailProperties mailProperties);
+
+    /**
+     * Parses given server URL which is then accessible through {@link #getServer()} and optional {@link #getPort()}.
+     * <p>
+     * The implementation is supposed to use {@link #parseProtocol(String)} to determine the protocol.
+     * <p>
+     * Moreover this method should check if a secure connection shall be established dependent on URL's protocol. The result is then
+     * accessible via {@link #isSecure()}.
+     * 
+     * @param serverURL The server URL of the form:<br>
+     *            (&lt;protocol&gt;://)?&lt;host&gt;(:&lt;port&gt;)?
+     * @throws MailException If server URL cannot be parsed
+     */
+    protected abstract void parseServerURL(String serverURL) throws MailException;
+}

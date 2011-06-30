@@ -1,0 +1,230 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.tools.file.internal;
+
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.external.FileStorageException;
+
+/**
+ * {@link CompositingFileStorage}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class CompositingFileStorage implements FileStorage {
+
+    private Map<String, FileStorage> prefixedStores = new HashMap<String, FileStorage>();
+
+    private FileStorage standardFS;
+
+    private String savePrefix;
+
+    public boolean deleteFile(String identifier) throws FileStorageException {
+        PreparedName prepared = prepareName(identifier);
+        return prepared.fs.deleteFile(prepared.name);
+    }
+
+    public Set<String> deleteFiles(String[] identifiers) throws FileStorageException {
+        Map<FileStorage, List<String>> partitions = new HashMap<FileStorage, List<String>>();
+        Map<FileStorage, String> prefixes = new HashMap<FileStorage, String>();
+        
+        for (String name : identifiers) {
+            PreparedName preparedName = prepareName(name);
+            
+            List<String> list = partitions.get(preparedName.fs);
+            if(list == null) {
+                list = new LinkedList<String>();
+                partitions.put(preparedName.fs, list);
+            }
+            
+            list.add(preparedName.name);
+            if(preparedName.prefix != null) {
+                prefixes.put(preparedName.fs, preparedName.prefix);
+            }
+        }
+        Set<String> notDeleted = new HashSet<String>();
+        for(Map.Entry<FileStorage, List<String>> entry: partitions.entrySet()) {
+            FileStorage fileStorage = entry.getKey();
+            List<String> ids = entry.getValue();
+            
+            Set<String> files = fileStorage.deleteFiles(ids.toArray(new String[ids.size()]));
+            String prefix = prefixes.get(fileStorage);
+            if(prefix == null) {
+                notDeleted.addAll(files);
+            } else {
+                for(String file: files) {
+                    notDeleted.add(prefix+"/"+file);
+                }
+            }
+        }
+        
+        return notDeleted;
+    }
+
+    public InputStream getFile(String name) throws FileStorageException {
+        PreparedName prepared = prepareName(name);
+        return prepared.fs.getFile(prepared.name);
+    }
+
+    public SortedSet<String> getFileList() throws FileStorageException {
+        SortedSet<String> fileList = standardFS.getFileList();
+        for(Map.Entry<String, FileStorage> entry: prefixedStores.entrySet()) {
+            String prefix = entry.getKey();
+            FileStorage fileStorage = entry.getValue();
+            
+            SortedSet<String> files = fileStorage.getFileList();
+            for (String file : files) {
+                fileList.add(prefix+"/"+file);
+            }
+        }
+        return fileList;
+    }
+
+    public long getFileSize(String name) throws FileStorageException {
+        PreparedName preparedName = prepareName(name);
+        return preparedName.fs.getFileSize(preparedName.name);
+    }
+
+    public String getMimeType(String name) throws FileStorageException {
+        return standardFS.getMimeType(name);
+    }
+
+    public void recreateStateFile() throws FileStorageException {
+        standardFS.recreateStateFile();
+        for(FileStorage fs: prefixedStores.values()) {
+            fs.recreateStateFile();
+        }
+    }
+
+    public void remove() throws FileStorageException {
+        standardFS.remove();
+        for(FileStorage fs: prefixedStores.values()) {
+            fs.remove();
+        }
+    }
+
+    public String saveNewFile(InputStream file) throws FileStorageException {
+        if (savePrefix != null) {
+            return saveNewFileInPrefixedSto(savePrefix, file);
+        }
+        return standardFS.saveNewFile(file);
+    }
+
+    protected String saveNewFileInPrefixedSto(String prefix, InputStream file) throws FileStorageException {
+        FileStorage fileStorage = prefixedStores.get(prefix);
+        return prefix + "/" + fileStorage.saveNewFile(file);
+    }
+
+    public boolean stateFileIsCorrect() throws FileStorageException {
+        boolean stateFileIsCorrect = standardFS.stateFileIsCorrect();
+        if(!stateFileIsCorrect) {
+            return false;
+        }
+        for(FileStorage fs: prefixedStores.values()) {
+            boolean isCorrect = fs.stateFileIsCorrect();
+            if(!isCorrect) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void addStore(FileStorage fs) {
+        standardFS = fs;
+    }
+
+    public void addStore(String prefix, FileStorage fs) {
+        prefixedStores.put(prefix, fs);
+    }
+
+    protected PreparedName prepareName(String canonicalName) {
+        int idx = canonicalName.indexOf('/');
+        if (idx < 0) {
+            return new PreparedName(standardFS, canonicalName, null);
+        }
+
+        String prefix = canonicalName.substring(0, idx);
+        String rest = canonicalName.substring(idx + 1);
+
+        FileStorage fileStorage = prefixedStores.get(prefix);
+        if (fileStorage != null) {
+            return new PreparedName(fileStorage, rest, prefix);
+        }
+
+        return new PreparedName(standardFS, canonicalName, null);
+    }
+
+    protected static final class PreparedName {
+
+        public FileStorage fs;
+        public String name;
+        public String prefix;
+
+        public PreparedName(FileStorage fs, String name, String prefix) {
+            super();
+            this.fs = fs;
+            this.name = name;
+            this.prefix = prefix;
+        }
+
+    }
+
+    public void setSavePrefix(String savePrefix) {
+        this.savePrefix = savePrefix;
+    }
+
+}

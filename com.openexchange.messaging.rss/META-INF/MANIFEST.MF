@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Messaging RSS Bundle
+Bundle-SymbolicName: com.openexchange.messaging.rss
+Bundle-Version: 6.20.0.0
+Bundle-Activator: com.openexchange.messaging.rss.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.datatypes.genericonf,
+ com.openexchange.groupware,
+ com.openexchange.html,
+ com.openexchange.i18n,
+ com.openexchange.messaging,
+ com.openexchange.messaging.generic,
+ com.openexchange.messaging.generic.internet,
+ com.openexchange.proxy,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ javax.swing.text,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.logging,
+ org.jdom,
+ org.jdom.input,
+ org.jdom.output,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.xml.sax
+Bundle-ClassPath: lib/rome-1.0.jar,
+ lib/rome-fetcher-1.0.jar,
+ extraClassPath/,
+ .

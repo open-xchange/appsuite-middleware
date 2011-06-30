@@ -1,0 +1,47 @@
+open-xchange-push-imapidle (6.20.0.0-7) unstable; urgency=low
+
+  * Public PTF 2011-06-22
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue, 21 Jun 2011 14:42:21 +0000
+
+open-xchange-push-imapidle (6.20.0.0-6) unstable; urgency=low
+
+  * build for public ptf 2011-06-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 17 Jun 2011 13:42:23 +0000
+
+open-xchange-push-imapidle (6.20.0.0-5) unstable; urgency=low
+
+  * Public PTF 2011-05-31
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Fri, 27 May 2011 16:27:08 +0000
+
+open-xchange-push-imapidle (6.20.0.0-4) unstable; urgency=low
+
+  * build for public ptf 2011-05-18
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 May 2011 14:41:04 +0000
+
+open-xchange-push-imapidle (6.20.0.0-3) unstable; urgency=low
+
+  * another build for PTF 2011050310000419
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 10 May 2011 07:31:47 +0000
+
+open-xchange-push-imapidle (6.20.0.0-2) unstable; urgency=low
+
+  * Build for PTF 2011050310000419
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Sat, 07 May 2011 10:55:55 +0000
+
+open-xchange-push-imapidle (6.20.0.0-1) unstable; urgency=low
+
+  * build for public ptf 2011-04-21
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 19 Apr 2011 15:17:13 +0000
+
+open-xchange-push-imapidle (6.20.0.0-0) unstable; urgency=low
+
+  * initial release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 28 Mar 2011 13:20:00 +0000

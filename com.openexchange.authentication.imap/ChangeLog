@@ -1,0 +1,27 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
+* 2009-11-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #14891: Using proper login to check IMAP authentication
+
+* 2009-10-05 - dennis.sieben@open-xchange.com
+
+ - Bugfix #14634: imap authentication bundle doesn't support utf-8 passwords
+   - Added configuration setting to configure charset
+
+* 2009-07-27 - marcus.klein@open-xchange.com
+
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
+
+* 2008-12-24 - manuel.kraft@open-xchange.com
+
+ - Features added:
+            Imapservers defined in OX User Accounts can be used instead of single IMAP Server defined in config -> USE_MULTIPLE=false
+            Added SSL/TLS Support for config defined imap connections -> IMAP_USE_SECURE=false
+
+* 2008-11-20 - choeger@open-xchange.com
+
+ - Bugfix ID#12581: [L3] imapauth plugin ships file imapauth.properties but
+   requires imapauthplugin.properties

@@ -1,0 +1,1486 @@
+<?xml version="1.0"?>
+<definitions xmlns:import7="http://4psa.com/HeaderData.xsd/2.5.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:import0="http://4psa.com/PBXMessages.xsd/2.5.1" xmlns:import4="http://4psa.com/HeaderData.xsd/2.5.1" xmlns:tns="http://4psa.com/PBX/2.5.1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://schemas.xmlsoap.org/soap/encoding/" xmlns:soapenvelope="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://4psa.com/Common.xsd/2.5.1" xmlns:ns2="http://4psa.com/PBXData.xsd/2.5.1" xmlns:ns3="http://4psa.com/PBXMessagesInfo.xsd/2.5.1" name="PBX" targetNamespace="http://4psa.com/PBX/2.5.1">
+	<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+	<types>
+		<xsd:schema>
+			<xsd:import schemaLocation="PBXMessages.xsd" namespace="http://4psa.com/PBXMessages.xsd/2.5.1"/>
+			<xsd:import schemaLocation="../HeaderData.xsd" namespace="http://4psa.com/HeaderData.xsd/2.5.1"/>
+		</xsd:schema>
+	</types>
+	<message name="updateLicenseIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:UpdateLicenseRequest"/>
+	</message>
+	<message name="updateLicenseOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:UpdateLicenseResponse"/>
+	</message>
+	<message name="updateLicenseInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="updateLicenseOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getSystemAPISettingsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetSystemAPISettingsRequest"/>
+	</message>
+	<message name="getSystemAPISettingsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetSystemAPISettingsResponse"/>
+	</message>
+	<message name="getSystemAPISettingsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getSystemAPISettingsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getCallAPISettingsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetCallAPISettingsRequest"/>
+	</message>
+	<message name="getCallAPISettingsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetCallAPISettingsResponse"/>
+	</message>
+	<message name="getCallAPISettingsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getCallAPISettingsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getRegionsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetRegionsRequest"/>
+	</message>
+	<message name="getRegionsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetRegionsResponse"/>
+	</message>
+	<message name="getRegionsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getRegionsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getTimezoneIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetTimezoneRequest"/>
+	</message>
+	<message name="getTimezoneOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetTimezoneResponse"/>
+	</message>
+	<message name="getTimezoneInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getTimezoneOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="enrollIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EnrollRequest"/>
+	</message>
+	<message name="enrollOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EnrollResponse"/>
+	</message>
+	<message name="enrollInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="enrollOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="withdrawIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:WithdrawRequest"/>
+	</message>
+	<message name="withdrawOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:WithdrawResponse"/>
+	</message>
+	<message name="withdrawInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="withdrawOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="editCustomAlertIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditCustomAlertRequest"/>
+	</message>
+	<message name="editCustomAlertOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditCustomAlertResponse"/>
+	</message>
+	<message name="editCustomAlertInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="editCustomAlertOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="editCustomButtonIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditCustomButtonRequest"/>
+	</message>
+	<message name="editCustomButtonOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditCustomButtonResponse"/>
+	</message>
+	<message name="editCustomButtonInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="editCustomButtonOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="addCustomButtonIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddCustomButtonRequest"/>
+	</message>
+	<message name="addCustomButtonOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddCustomButtonResponse"/>
+	</message>
+	<message name="addCustomButtonInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="addCustomButtonOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getCustomButtonsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetCustomButtonsRequest"/>
+	</message>
+	<message name="getCustomButtonsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetCustomButtonsResponse"/>
+	</message>
+	<message name="getCustomButtonsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getCustomButtonsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="delCustomButtonIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelCustomButtonRequest"/>
+	</message>
+	<message name="delCustomButtonOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelCustomButtonResponse"/>
+	</message>
+	<message name="delCustomButtonInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="delCustomButtonOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="setCustomButtonStatusIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:SetCustomButtonStatusRequest"/>
+	</message>
+	<message name="setCustomButtonStatusOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:SetCustomButtonStatusResponse"/>
+	</message>
+	<message name="setCustomButtonStatusInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="setCustomButtonStatusOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="addCustomAlertIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddCustomAlertRequest"/>
+	</message>
+	<message name="addCustomAlertOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddCustomAlertResponse"/>
+	</message>
+	<message name="addCustomAlertInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="addCustomAlertOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getCustomAlertsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetCustomAlertsRequest"/>
+	</message>
+	<message name="getCustomAlertsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetCustomAlertsResponse"/>
+	</message>
+	<message name="getCustomAlertsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getCustomAlertsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="delCustomAlertIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelCustomAlertRequest"/>
+	</message>
+	<message name="delCustomAlertOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelCustomAlertResponse"/>
+	</message>
+	<message name="delCustomAlertInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="delCustomAlertOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="setCustomAlertStatusIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:SetCustomAlertStatusRequest"/>
+	</message>
+	<message name="setCustomAlertStatusOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:SetCustomAlertStatusResponse"/>
+	</message>
+	<message name="setCustomAlertStatusInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="setCustomAlertStatusOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="addTimeIntervalBlockIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddTimeIntervalBlockRequest"/>
+	</message>
+	<message name="addTimeIntervalBlockOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddTimeIntervalBlockResponse"/>
+	</message>
+	<message name="addTimeIntervalBlockInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="addTimeIntervalBlockOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="editTimeIntervalBlockIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditTimeIntervalBlockRequest"/>
+	</message>
+	<message name="editTimeIntervalBlockOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditTimeIntervalBlockResponse"/>
+	</message>
+	<message name="editTimeIntervalBlockInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="editTimeIntervalBlockOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getTimeIntervalBlocksIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetTimeIntervalBlocksRequest"/>
+	</message>
+	<message name="getTimeIntervalBlocksOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetTimeIntervalBlocksResponse"/>
+	</message>
+	<message name="getTimeIntervalBlocksInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getTimeIntervalBlocksOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="delTimeIntervalBlockIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelTimeIntervalBlockRequest"/>
+	</message>
+	<message name="delTimeIntervalBlockOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelTimeIntervalBlockResponse"/>
+	</message>
+	<message name="delTimeIntervalBlockInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="delTimeIntervalBlockOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getTimeIntervalsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetTimeIntervalsRequest"/>
+	</message>
+	<message name="getTimeIntervalsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetTimeIntervalsResponse"/>
+	</message>
+	<message name="getTimeIntervalsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getTimeIntervalsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="delTimeIntervalIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelTimeIntervalRequest"/>
+	</message>
+	<message name="delTimeIntervalOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelTimeIntervalResponse"/>
+	</message>
+	<message name="delTimeIntervalInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="delTimeIntervalOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getOwnedSoundsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetOwnedSoundsRequest"/>
+	</message>
+	<message name="getOwnedSoundsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetOwnedSoundsResponse"/>
+	</message>
+	<message name="getOwnedSoundsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getOwnedSoundsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getSharedSoundsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetSharedSoundsRequest"/>
+	</message>
+	<message name="getSharedSoundsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetSharedSoundsResponse"/>
+	</message>
+	<message name="getSharedSoundsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getSharedSoundsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getFileLanguagesIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetFileLanguagesRequest"/>
+	</message>
+	<message name="getFileLanguagesOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetFileLanguagesResponse"/>
+	</message>
+	<message name="getFileLanguagesInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getFileLanguagesOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getFoldersIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetFoldersRequest"/>
+	</message>
+	<message name="getFoldersOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetFoldersResponse"/>
+	</message>
+	<message name="getFoldersInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getFoldersOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="addTimeIntervalIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddTimeIntervalRequest"/>
+	</message>
+	<message name="addTimeIntervalOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddTimeIntervalResponse"/>
+	</message>
+	<message name="addTimeIntervalInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="addTimeIntervalOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="editTimeIntervalIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditTimeIntervalRequest"/>
+	</message>
+	<message name="editTimeIntervalOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditTimeIntervalResponse"/>
+	</message>
+	<message name="editTimeIntervalInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="editTimeIntervalOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getSchemaVersionsIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetSchemaVersionsRequest"/>
+	</message>
+	<message name="getSchemaVersionsOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetSchemaVersionsResponse"/>
+	</message>
+	<message name="getSchemaVersionsInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getSchemaVersionsOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getInterfaceLangIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetInterfaceLangRequest"/>
+	</message>
+	<message name="getInterfaceLangOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetInterfaceLangResponse"/>
+	</message>
+	<message name="getInterfaceLangInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getInterfaceLangOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getPhoneLangIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetPhoneLangRequest"/>
+	</message>
+	<message name="getPhoneLangOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetPhoneLangResponse"/>
+	</message>
+	<message name="getPhoneLangInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getPhoneLangOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getTemplatesIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetTemplatesRequest"/>
+	</message>
+	<message name="getTemplatesOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetTemplatesResponse"/>
+	</message>
+	<message name="getTemplatesInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getTemplatesOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="pingIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:PingRequest"/>
+	</message>
+	<message name="pingOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:PingResponse"/>
+	</message>
+	<message name="pingInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="pingOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="upgradeVoipNowIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:UpgradeVoipNowRequest"/>
+	</message>
+	<message name="upgradeVoipNowOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:UpgradeVoipNowResponse"/>
+	</message>
+	<message name="upgradeVoipNowInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="upgradeVoipNowOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="upgradeHistoryIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:UpgradeHistoryRequest"/>
+	</message>
+	<message name="upgradeHistoryOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:UpgradeHistoryResponse"/>
+	</message>
+	<message name="upgradeHistoryInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="upgradeHistoryOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="addIndustryIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddIndustryRequest"/>
+	</message>
+	<message name="addIndustryOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddIndustryResponse"/>
+	</message>
+	<message name="addIndustryInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="addIndustryOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="editIndustryIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditIndustryRequest"/>
+	</message>
+	<message name="editIndustryOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditIndustryResponse"/>
+	</message>
+	<message name="editIndustryInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="editIndustryOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getIndustriesIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetIndustriesRequest"/>
+	</message>
+	<message name="getIndustriesOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetIndustriesResponse"/>
+	</message>
+	<message name="getIndustriesInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getIndustriesOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="delIndustriesIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelIndustriesRequest"/>
+	</message>
+	<message name="delIndustriesOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:DelIndustriesResponse"/>
+	</message>
+	<message name="delIndustriesInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="delIndustriesOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="getAdvertisingTemplatesIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetAdvertisingTemplatesRequest"/>
+	</message>
+	<message name="getAdvertisingTemplatesOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetAdvertisingTemplatesResponse"/>
+	</message>
+	<message name="getAdvertisingTemplatesInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getAdvertisingTemplatesOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+
+	<message name="getDevicesIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetDevicesRequest"/>
+	</message>
+	<message name="getDevicesOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:GetDevicesResponse"/>
+	</message>
+	<message name="getDevicesInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="getDevicesOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="addDeviceIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddDeviceRequest"/>
+	</message>
+	<message name="addDeviceOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:AddDeviceResponse"/>
+	</message>
+	<message name="addDeviceInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="addDeviceOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>
+	<message name="editDeviceIn">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditDeviceRequest"/>
+	</message>
+	<message name="editDeviceOut">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="messagePart" element="import0:EditDeviceResponse"/>
+	</message>
+	<message name="editDeviceInHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:userCredentials"/>
+	</message>
+	<message name="editDeviceOutHeader1">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<part name="headerPart" element="import4:serverInfo"/>
+	</message>	
+	<message name="getEquipmentListIn">
+		<part name="messagePart" element="import0:GetEquipmentListRequest"/>
+	</message>
+	<message name="getEquipmentListOut">
+		<part name="messagePart" element="import0:GetEquipmentListResponse"/>
+	</message>
+	<message name="getEquipmentListInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getEquipmentListOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delDeviceIn">
+		<part name="messagePart" element="import0:DelDeviceRequest"/>
+	</message>
+	<message name="delDeviceOut">
+		<part name="messagePart" element="import0:DelDeviceResponse"/>
+	</message>
+	<message name="delDeviceInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delDeviceOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<portType name="PBXInterface">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+		<operation name="UpdateLicense">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:updateLicenseIn"/>
+			<output message="tns:updateLicenseOut"/>
+		</operation>
+		<operation name="GetSystemAPISettings">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getSystemAPISettingsIn"/>
+			<output message="tns:getSystemAPISettingsOut"/>
+		</operation>
+		<operation name="GetCallAPISettings">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getCallAPISettingsIn"/>
+			<output message="tns:getCallAPISettingsOut"/>
+		</operation>
+		<operation name="GetRegions">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getRegionsIn"/>
+			<output message="tns:getRegionsOut"/>
+		</operation>
+		<operation name="GetTimezone">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getTimezoneIn"/>
+			<output message="tns:getTimezoneOut"/>
+		</operation>
+		<operation name="Enroll">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:enrollIn"/>
+			<output message="tns:enrollOut"/>
+		</operation>
+		<operation name="Withdraw">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:withdrawIn"/>
+			<output message="tns:withdrawOut"/>
+		</operation>
+		<operation name="EditCustomAlert">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:editCustomAlertIn"/>
+			<output message="tns:editCustomAlertOut"/>
+		</operation>
+		<operation name="EditCustomButton">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:editCustomButtonIn"/>
+			<output message="tns:editCustomButtonOut"/>
+		</operation>
+		<operation name="AddCustomButton">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:addCustomButtonIn"/>
+			<output message="tns:addCustomButtonOut"/>
+		</operation>
+		<operation name="AddCustomAlert">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:addCustomAlertIn"/>
+			<output message="tns:addCustomAlertOut"/>
+		</operation>
+		<operation name="GetCustomAlerts">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getCustomAlertsIn"/>
+			<output message="tns:getCustomAlertsOut"/>
+		</operation>
+		<operation name="DelCustomAlert">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:delCustomAlertIn"/>
+			<output message="tns:delCustomAlertOut"/>
+		</operation>
+		<operation name="SetCustomAlertStatus">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:setCustomAlertStatusIn"/>
+			<output message="tns:setCustomAlertStatusOut"/>
+		</operation>
+		<operation name="GetCustomButtons">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getCustomButtonsIn"/>
+			<output message="tns:getCustomButtonsOut"/>
+		</operation>
+		<operation name="DelCustomButton">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:delCustomButtonIn"/>
+			<output message="tns:delCustomButtonOut"/>
+		</operation>
+		<operation name="SetCustomButtonStatus">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:setCustomButtonStatusIn"/>
+			<output message="tns:setCustomButtonStatusOut"/>
+		</operation>
+		<operation name="AddTimeIntervalBlock">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:addTimeIntervalBlockIn"/>
+			<output message="tns:addTimeIntervalBlockOut"/>
+		</operation>
+		<operation name="EditTimeIntervalBlock">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:editTimeIntervalBlockIn"/>
+			<output message="tns:editTimeIntervalBlockOut"/>
+		</operation>
+		<operation name="GetTimeIntervalBlocks">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getTimeIntervalBlocksIn"/>
+			<output message="tns:getTimeIntervalBlocksOut"/>
+		</operation>
+		<operation name="DelTimeIntervalBlock">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:delTimeIntervalBlockIn"/>
+			<output message="tns:delTimeIntervalBlockOut"/>
+		</operation>
+		<operation name="GetTimeIntervals">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getTimeIntervalsIn"/>
+			<output message="tns:getTimeIntervalsOut"/>
+		</operation>
+		<operation name="DelTimeInterval">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:delTimeIntervalIn"/>
+			<output message="tns:delTimeIntervalOut"/>
+		</operation>
+		<operation name="GetOwnedSounds">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getOwnedSoundsIn"/>
+			<output message="tns:getOwnedSoundsOut"/>
+		</operation>
+		<operation name="GetSharedSounds">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getSharedSoundsIn"/>
+			<output message="tns:getSharedSoundsOut"/>
+		</operation>
+		<operation name="GetFileLanguages">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getFileLanguagesIn"/>
+			<output message="tns:getFileLanguagesOut"/>
+		</operation>
+		<operation name="GetFolders">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getFoldersIn"/>
+			<output message="tns:getFoldersOut"/>
+		</operation>
+		<operation name="AddTimeInterval">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:addTimeIntervalIn"/>
+			<output message="tns:addTimeIntervalOut"/>
+		</operation>
+		<operation name="EditTimeInterval">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:editTimeIntervalIn"/>
+			<output message="tns:editTimeIntervalOut"/>
+		</operation>
+		<operation name="GetSchemaVersions">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getSchemaVersionsIn"/>
+			<output message="tns:getSchemaVersionsOut"/>
+		</operation>
+		<operation name="GetInterfaceLang">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getInterfaceLangIn"/>
+			<output message="tns:getInterfaceLangOut"/>
+		</operation>
+		<operation name="GetPhoneLang">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getPhoneLangIn"/>
+			<output message="tns:getPhoneLangOut"/>
+		</operation>
+		<operation name="GetTemplates">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getTemplatesIn"/>
+			<output message="tns:getTemplatesOut"/>
+		</operation>
+		<operation name="Ping">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:pingIn"/>
+			<output message="tns:pingOut"/>
+		</operation>
+		<operation name="UpgradeVoipNow">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:upgradeVoipNowIn"/>
+			<output message="tns:upgradeVoipNowOut"/>
+		</operation>
+		<operation name="UpgradeHistory">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:upgradeHistoryIn"/>
+			<output message="tns:upgradeHistoryOut"/>
+		</operation>
+		<operation name="AddIndustry">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:addIndustryIn"/>
+			<output message="tns:addIndustryOut"/>
+		</operation>
+		<operation name="EditIndustry">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:editIndustryIn"/>
+			<output message="tns:editIndustryOut"/>
+		</operation>
+		<operation name="GetIndustries">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getIndustriesIn"/>
+			<output message="tns:getIndustriesOut"/>
+		</operation>
+		<operation name="DelIndustries">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:delIndustriesIn"/>
+			<output message="tns:delIndustriesOut"/>
+		</operation>
+		<operation name="GetAdvertisingTemplates">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getAdvertisingTemplatesIn"/>
+			<output message="tns:getAdvertisingTemplatesOut"/>
+		</operation>
+		<operation name="GetDevices">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:getDevicesIn"/>
+			<output message="tns:getDevicesOut"/>
+		</operation>
+		<operation name="AddDevice">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:addDeviceIn"/>
+			<output message="tns:addDeviceOut"/>
+		</operation>
+		<operation name="EditDevice">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+			<input message="tns:editDeviceIn"/>
+			<output message="tns:editDeviceOut"/>
+		</operation>
+		<operation name="GetEquipmentList">
+			<input message="tns:getEquipmentListIn"/>
+			<output message="tns:getEquipmentListOut"/>
+		</operation>
+		<operation name="DelDevice">
+			<input message="tns:delDeviceIn"/>
+			<output message="tns:delDeviceOut"/>
+		</operation>
+	</portType>
+	<binding name="PBX" type="tns:PBXInterface">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="UpdateLicense">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:updateLicenseIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:updateLicenseInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:updateLicenseOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetSystemAPISettings">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getSystemAPISettingsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getSystemAPISettingsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getSystemAPISettingsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCallAPISettings">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:grtCallAPISettingsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallAPISettingsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCallAPISettingsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetRegions">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getRegionsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getRegionsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getRegionsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetTimezone">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getTimezoneIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getTimezoneInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getTimezoneOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="Enroll">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:enrollIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:enrollInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:enrollOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="Withdraw">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:withdrawIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:withdrawInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:withdrawOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditCustomAlert">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:editCustomAlertIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCustomAlertInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCustomAlertOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditCustomButton">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:editCustomButtonIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCustomButtonInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editCustomButtonOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddCustomButton">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:addCustomButtonIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCustomButtonInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCustomButtonOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddCustomAlert">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:addCustomAlertIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCustomAlertInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addCustomAlertOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCustomAlerts">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getCustomAlertsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCustomAlertsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCustomAlertsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelCustomAlert">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:delCustomAlertIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCustomAlertInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCustomAlertOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetCustomAlertStatus">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:setCustomAlertStatusIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setCustomAlertStatusInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setCustomAlertStatusOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetCustomButtons">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getCustomButtonsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCustomButtonsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getCustomButtonsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelCustomButton">
+			<soap:operation soapAction="http://4psa.com/PBX/2.0.0:delCustomButtonIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCustomButtonInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delCustomButtonOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetCustomButtonStatus">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:setCustomButtonStatusIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setCustomButtonStatusInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setCustomButtonStatusOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddTimeIntervalBlock">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:addTimeIntervalBlockIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addTimeIntervalBlockInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addTimeIntervalBlockOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditTimeIntervalBlock">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:editTimeIntervalBlockIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editTimeIntervalBlockInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editTimeIntervalBlockOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelTimeIntervalBlock">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:delTimeIntervalBlockIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delTimeIntervalBlockInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delTimeIntervalBlockOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetTimeIntervalBlocks">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getTimeIntervalBlocksIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getTimeIntervalBlocksInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getTimeIntervalBlocksOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetTimeIntervals">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getTimeIntervalsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getTimeIntervalsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getTimeIntervalsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelTimeInterval">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:delTimeIntervalIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delTimeIntervalInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delTimeIntervalOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetOwnedSounds">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getOwnedSoundsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getOwnedSoundsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getOwnedSoundsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetSharedSounds">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getSharedSoundsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getSharedSoundsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getSharedSoundsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetFileLanguages">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getFileLanguagesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getFileLanguagesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getFileLanguagesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetFolders">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getFoldersIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getFoldersInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getFoldersOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddTimeInterval">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:addTimeIntervalIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addTimeIntervalInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addTimeIntervalOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditTimeInterval">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:editTimeIntervalIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editTimeIntervalInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editTimeIntervalOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetSchemaVersions">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getSchemaVersionsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getSchemaVersionsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getSchemaVersionsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetInterfaceLang">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getInterfaceLangIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getInterfaceLangInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getInterfaceLangOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetPhoneLang">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getPhoneLangIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getPhoneLangInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getPhoneLangOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetTemplates">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getTemplatesIn"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getTemplatesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getTemplatesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="Ping">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:pingIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:pingInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:pingOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="UpgradeVoipNow">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:upgradeVoipNowIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:upgradeVoipNowInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:upgradeVoipNowOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="UpgradeHistory">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:upgradeHistoryIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:upgradeHistoryInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:upgradeHistoryOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddIndustry">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:addIndustryIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addIndustryInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addIndustryOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditIndustry">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:editIndustryIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editIndustryInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editIndustryOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetIndustries">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getIndustriesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getIndustriesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getIndustriesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelIndustries">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:delIndustriesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delIndustriesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delIndustriesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetAdvertisingTemplates">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getAdvertisingTemplatesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getAdvertisingTemplatesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getAdvertisingTemplatesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetDevices">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:getDevicesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getDevicesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getDevicesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddDevice">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:addDeviceIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addDeviceInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addDeviceOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditDevice">
+			<soap:operation soapAction="http://4psa.com/PBX/2.5.1:editDeviceIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editDeviceInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editDeviceOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetEquipmentList">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:getEquipmentListIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getEquipmentListInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getEquipmentListOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+			<operation name="DelDevice">
+			<soap:operation soapAction="http://4psa.com/Extension/2.5.1:delDeviceIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delDeviceInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delDeviceOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		
+		
+	</binding>
+	<service name="PBXPort">
+		<port name="PBXPort" binding="tns:PBX">
+			<soap:address location="https://192.168.32.222:443/soap2/pbx_agent.php"/>
+		</port>
+	</service>
+</definitions>

@@ -1,0 +1,47 @@
+open-xchange-subscribe-msn (6.20.0.0-7) unstable; urgency=low
+
+  * Public PTF 2011-06-22
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue, 21 Jun 2011 14:41:10 +0000
+
+open-xchange-subscribe-msn (6.20.0.0-6) unstable; urgency=low
+
+  * build for public ptf 2011-06-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 17 Jun 2011 13:41:01 +0000
+
+open-xchange-subscribe-msn (6.20.0.0-5) unstable; urgency=low
+
+  * Public PTF 2011-05-31
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Fri, 27 May 2011 16:25:45 +0000
+
+open-xchange-subscribe-msn (6.20.0.0-4) unstable; urgency=low
+
+  * build for public ptf 2011-05-18
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 May 2011 14:39:41 +0000
+
+open-xchange-subscribe-msn (6.20.0.0-3) unstable; urgency=low
+
+  * another build for PTF 2011050310000419
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 10 May 2011 07:30:16 +0000
+
+open-xchange-subscribe-msn (6.20.0.0-2) unstable; urgency=low
+
+  * Build for PTF 2011050310000419
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Sat, 07 May 2011 10:54:31 +0000
+
+open-xchange-subscribe-msn (6.20.0.0-1) unstable; urgency=low
+
+  * build for public ptf 2011-04-21
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 19 Apr 2011 14:23:07 +0000
+
+open-xchange-subscribe-msn (6.20.0.0-0) unstable; urgency=low
+
+  * initial version.
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Mon, 18 Apr 2011 11:30:00 +0100

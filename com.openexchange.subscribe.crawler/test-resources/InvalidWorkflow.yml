@@ -1,0 +1,21 @@
+--- !com.openexchange.subscribe.crawler.Workflow
+steps: 
+  - !com.openexchange.subscribe.crawler.LoginPageStep
+    nameOfLoginForm: loginform
+    nameOfPasswordField: login_password
+    nameOfUserField: login_user_name
+    password: 
+    url: "https://www.xing.com"
+    username: 
+  - !com.openexchange.subscribe.crawler.TextPagesByLinkStep
+    linkpart: /app/vcard
+    offset: 10
+    urlAfterOffset: ""
+    urlBeforeOffset: "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset="
+  - !com.openexchange.subscribe.crawler.TextPagesByLinkStep
+    linkpart: /app/vcard
+    offset: 10
+    urlAfterOffset: ""
+    urlBeforeOffset: "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset="
+
+
