@@ -19,7 +19,7 @@ if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 
 if ( $ARGV[0] and $ARGV[0] eq "suggest")
 {
-	open(SHOWRUNTIME,"$showruntimestats |") || die "can not read monitoring output";
+	open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 	while (<SHOWRUNTIME>)
 	{
 		if ( $_ =~  /DB Pool/ and $_ =~ /PoolSize/ ) {
