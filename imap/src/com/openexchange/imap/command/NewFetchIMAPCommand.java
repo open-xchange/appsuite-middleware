@@ -190,6 +190,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private TIntHashSet knownSeqNums;
 
+    private final Set<FetchItemHandler> lastHandlers;
+
     // private final int recentCount;
 
     /**
@@ -230,6 +232,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (loadBody) {
             throw new MessagingException("Loading body not supported.");
         }
+        lastHandlers = new HashSet<FetchItemHandler>();
         this.separator = separator;
         command = getFetchCommand(isRev1, fp, loadBody);
         set(arr, isSequential, keepOrder, messageCount);
@@ -254,6 +257,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             returnDefaultValue = true;
         }
         this.separator = separator;
+        lastHandlers = new HashSet<FetchItemHandler>();
         command = getFetchCommand(isRev1, fp, false);
         if (array instanceof int[]) {
             final int[] seqNums = (int[]) array;
@@ -451,6 +455,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (0 == fetchLen) {
             returnDefaultValue = true;
         }
+        lastHandlers = new HashSet<FetchItemHandler>();
         args = AbstractIMAPCommand.ARGS_ALL;
         uid = false;
         length = fetchLen;
@@ -524,7 +529,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     try {
                         final Message message = imapFolder.getMessage(seqNum);
                         final IDMailMessage mail = new IDMailMessage(null, fullname);
-                        for (final FetchItemHandler fetchItemHandler : MAP.values()) {
+                        for (final FetchItemHandler fetchItemHandler : lastHandlers.isEmpty() ? MAP.values() : lastHandlers) {
                             fetchItemHandler.handleMessage(message, mail, LOG);
                         }
                         retval[pos] = mail;
@@ -616,9 +621,11 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                             LOG.warn("Unknown FETCH item: " + item.getClass().getName());
                         }
                     } else {
+                        lastHandlers.add(itemHandler);
                         itemHandler.handleItem(item, mail, LOG);
                     }
                 } else {
+                    lastHandlers.add(itemHandler);
                     itemHandler.handleItem(item, mail, LOG);
                 }
             }
