@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.command;
 
+import gnu.trove.TIntHashSet;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Collection;
@@ -61,7 +63,9 @@ import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.UIDFolder;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -184,6 +188,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private final String fullname;
 
+    private TIntHashSet knownSeqNums;
+
     // private final int recentCount;
 
     /**
@@ -247,16 +253,20 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (messageCount == 0) {
             returnDefaultValue = true;
         }
-        seqNumFetcher = null;
         this.separator = separator;
         command = getFetchCommand(isRev1, fp, false);
         if (array instanceof int[]) {
             final int[] seqNums = (int[]) array;
+            knownSeqNums = new TIntHashSet(seqNums);
             uid = false;
             length = seqNums.length;
+            seqNumFetcher = new IntSeqNumFetcher(seqNums);
             args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
         } else if (array instanceof long[]) {
             final long[] uids = (long[]) array;
+            final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, uids);
+            seqNumFetcher = new IntSeqNumFetcher(seqNums);
+            knownSeqNums = new TIntHashSet(seqNums);
             uid = true;
             length = uids.length;
             args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
@@ -319,6 +329,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             } else {
                 if (keepOrder) {
                     seqNumFetcher = new IntSeqNumFetcher(seqNums);
+                    knownSeqNums = new TIntHashSet(seqNums);
                     args =
                         (isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
                             seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
@@ -353,6 +364,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                             true,
                             LENGTH + command.length());
                     seqNumFetcher = new IntSeqNumFetcher(seqNums);
+                    knownSeqNums = new TIntHashSet(seqNums);
                 }
             } else {
                 final long[] uids = (long[]) arr;
@@ -502,15 +514,50 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     @Override
     protected MailMessage[] getReturnVal() throws MessagingException {
-        if (index < length) {
+        if (seqNumFetcher != null && knownSeqNums != null && !knownSeqNums.isEmpty()) {
+            for (final int seqNum : knownSeqNums.toArray()) {
+                /*
+                 * Look-up position
+                 */
+                final int pos = seqNumFetcher.getIndexOf(seqNum);
+                if (pos > 0) {
+                    try {
+                        final Message message = imapFolder.getMessage(seqNum);
+                        final IDMailMessage mail = new IDMailMessage(null, fullname);
+                        for (final FetchItemHandler fetchItemHandler : MAP.values()) {
+                            fetchItemHandler.handleMessage(message, mail, LOG);
+                        }
+                        retval[pos] = mail;
+                    } catch (final MessagingException e) {
+                        if (WARN) {
+                            final MailException imapExc = MIMEMailException.handleMessagingException(e);
+                            LOG.warn(
+                                new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(
+                                    imapExc.getMessage()).toString(),
+                                imapExc);
+                        }
+                    } catch (final MailException e) {
+                        if (WARN) {
+                            LOG.warn(
+                                new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
+                                e);
+                        }
+                    }
+                }
+
+            }
+
+        } else if (index < length) {
             String server = imapFolder.getStore().toString();
             int pos = server.indexOf('@');
             if (pos >= 0 && ++pos < server.length()) {
                 server = server.substring(pos);
             }
-            throw new MessagingException(
-                new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(index).append(
-                    " from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append("\".").toString());
+            final MessagingException e =
+                new MessagingException(new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
+                    index).append(" from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append(
+                    "\".").toString());
+            LOG.warn(e.getMessage(), e);
         }
         return retval;
     }
@@ -526,18 +573,22 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         final FetchResponse fetchResponse = (FetchResponse) currentReponse;
         int seqnum;
         final int pos;
+        final int currentSeqNum = fetchResponse.getNumber();
+        if (null != knownSeqNums) {
+            knownSeqNums.remove(currentSeqNum);
+        }
         if (null == seqNumFetcher) {
-            seqnum = fetchResponse.getNumber();
+            seqnum = currentSeqNum;
             pos = index;
         } else {
             seqnum = seqNumFetcher.getNextSeqNum(index);
-            if (seqnum == fetchResponse.getNumber()) {
+            if (seqnum == currentSeqNum) {
                 pos = index;
             } else {
                 /*
                  * Assign to current response's sequence number
                  */
-                seqnum = fetchResponse.getNumber();
+                seqnum = currentSeqNum;
                 /*
                  * Look-up position
                  */
@@ -728,7 +779,9 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
          * @throws MessagingException If a messaging error occurs
          * @throws MailException If a mail error occurs
          */
-        public abstract void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException;
+        void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException;
+
+        void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException;
     }
 
     private static final String MULTI_SUBTYPE_MIXED = "MIXED";
@@ -740,6 +793,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     private interface HeaderHandler {
 
         void handle(Header hdr, IDMailMessage mailMessage) throws MailException;
+
     }
 
     private static final FetchItemHandler HEADER_ITEM_HANDLER = new FetchItemHandler() {
@@ -868,12 +922,104 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                  */
             }
         }
+
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
+            for (final Enumeration<?> e = message.getAllHeaders(); e.hasMoreElements();) {
+                final Header hdr = (Header) e.nextElement();
+                final String name = hdr.getName();
+                {
+                    final HeaderHandler headerHandler = hh.get(name);
+                    if (null != headerHandler) {
+                        headerHandler.handle(hdr, msg);
+                    }
+                }
+                try {
+                    msg.addHeader(name, hdr.getValue());
+                } catch (final IllegalArgumentException illegalArgumentExc) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Ignoring invalid header.", illegalArgumentExc);
+                    }
+                }
+                /*-
+                 * 
+                final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
+                if (hdrHandler == null) {
+                    msg.setHeader(hdr.getName(), hdr.getValue());
+                } else {
+                    hdrHandler.handleHeader(hdr.getValue(), msg);
+                }
+                 */
+            }
+        }
     };
 
     private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
 
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
             final FLAGS flags = (FLAGS) item;
+            /*
+             * Parse system flags
+             */
+            int retval = 0;
+            int colorLabel = MailMessage.COLOR_LABEL_NONE;
+            Collection<String> ufCol = null;
+            if (flags.contains(Flags.Flag.ANSWERED)) {
+                retval |= MailMessage.FLAG_ANSWERED;
+            }
+            if (flags.contains(Flags.Flag.DELETED)) {
+                retval |= MailMessage.FLAG_DELETED;
+            }
+            if (flags.contains(Flags.Flag.DRAFT)) {
+                retval |= MailMessage.FLAG_DRAFT;
+            }
+            if (flags.contains(Flags.Flag.FLAGGED)) {
+                retval |= MailMessage.FLAG_FLAGGED;
+            }
+            if (flags.contains(Flags.Flag.RECENT)) {
+                retval |= MailMessage.FLAG_RECENT;
+            }
+            if (flags.contains(Flags.Flag.SEEN)) {
+                retval |= MailMessage.FLAG_SEEN;
+            }
+            if (flags.contains(Flags.Flag.USER)) {
+                retval |= MailMessage.FLAG_USER;
+            }
+            final String[] userFlags = flags.getUserFlags();
+            if (userFlags != null) {
+                /*
+                 * Mark message to contain user flags
+                 */
+                final Set<String> set = new HashSet<String>(userFlags.length);
+                for (final String userFlag : userFlags) {
+                    if (MailMessage.isColorLabel(userFlag)) {
+                        try {
+                            colorLabel = MailMessage.getColorLabelIntValue(userFlag);
+                        } catch (final MailException e) {
+                            // Cannot occur
+                            colorLabel = MailMessage.COLOR_LABEL_NONE;
+                        }
+                    } else if (MailMessage.USER_FORWARDED.equalsIgnoreCase(userFlag)) {
+                        retval |= MailMessage.FLAG_FORWARDED;
+                    } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
+                        retval |= MailMessage.FLAG_READ_ACK;
+                    } else {
+                        set.add(userFlag);
+                    }
+                }
+                ufCol = set.isEmpty() ? null : set;
+            }
+            /*
+             * Apply parsed flags
+             */
+            msg.setFlags(retval);
+            msg.setColorLabel(colorLabel);
+            if (null != ufCol) {
+                msg.addUserFlags(ufCol.toArray(new String[ufCol.size()]));
+            }
+        }
+
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
+            final Flags flags = message.getFlags();
             /*
              * Parse system flags
              */
@@ -964,6 +1110,30 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             msg.setSubject(MIMEMessageUtility.decodeEnvelopeSubject(env.subject));
             msg.setSentDate(env.date);
         }
+
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
+            msg.addFrom((InternetAddress[]) message.getFrom());
+            msg.addTo((InternetAddress[]) message.getRecipients(RecipientType.TO));
+            msg.addCc((InternetAddress[]) message.getRecipients(RecipientType.CC));
+            msg.addBcc((InternetAddress[]) message.getRecipients(RecipientType.BCC));
+            String[] header = message.getHeader("Reply-To");
+            if (null != header && header.length > 0) {
+                msg.addHeader("Reply-To", header[0]);
+            }
+            header = message.getHeader("In-Reply-To");
+            if (null != header && header.length > 0) {
+                msg.addHeader("In-Reply-To", header[0]);
+            }
+            header = message.getHeader("Message-Id");
+            if (null != header && header.length > 0) {
+                msg.addHeader("Message-Id", header[0]);
+            }
+            header = message.getHeader("Subject");
+            if (null != header && header.length > 0) {
+                msg.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(header[0]));
+            }
+            msg.setSentDate(message.getSentDate());
+        }
     };
 
     private static final FetchItemHandler INTERNALDATE_ITEM_HANDLER = new FetchItemHandler() {
@@ -971,12 +1141,20 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) {
             msg.setReceivedDate(((INTERNALDATE) item).getDate());
         }
+
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
+            msg.setReceivedDate(message.getReceivedDate());
+        }
     };
 
     private static final FetchItemHandler SIZE_ITEM_HANDLER = new FetchItemHandler() {
 
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) {
             msg.setSize(((RFC822SIZE) item).size);
+        }
+
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
+            msg.setSize(message.getSize());
         }
     };
 
@@ -1002,12 +1180,44 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             }
             msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MIMEMessageUtility.hasAttachments(bs)));
         }
+
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
+            String contentType;
+            try {
+                contentType = message.getContentType();
+            } catch (final MessagingException e) {
+                final String[] header = message.getHeader("Content-Type");
+                if (null != header && header.length > 0) {
+                    contentType = header[0];
+                } else {
+                    contentType = null;
+                }
+            }
+            if (null == contentType) {
+                msg.setHasAttachment(false);
+            } else {
+                try {
+                    final ContentType ct = new ContentType(contentType);
+                    msg.setHasAttachment(ct.startsWith("multipart/") && ("mixed".equalsIgnoreCase(ct.getSubType()) || MIMEMessageUtility.hasAttachments(
+                        (Multipart) message.getContent(),
+                        ct.getSubType())));
+                } catch (final IOException e) {
+                    throw new MessagingException(e.getMessage(), e);
+                }
+            }
+        }
     };
 
     private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
 
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) {
             final long id = ((UID) item).uid;
+            msg.setMailId(String.valueOf(id));
+            msg.setUid(id);
+        }
+
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
+            final long id = ((IMAPFolder) message.getFolder()).getUID(message);
             msg.setMailId(String.valueOf(id));
             msg.setUid(id);
         }

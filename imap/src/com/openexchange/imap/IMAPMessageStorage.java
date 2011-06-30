@@ -373,9 +373,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, MailException {
         final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
-        final long start = System.currentTimeMillis();
         //final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false, false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
-        final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile).setDetermineAttachmentByHeader(byContentType).doCommand();
+        final NewFetchIMAPCommand command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+        final long start = System.currentTimeMillis();
+        final MailMessage[] tmp = command.doCommand();
         final long time = System.currentTimeMillis() - start;
         mailInterfaceMonitor.addUseTime(time);
         if (DEBUG) {
@@ -383,7 +384,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         for (final MailMessage mailMessage : tmp) {
             final IDMailMessage idmm = (IDMailMessage) mailMessage;
-            map.put(seqnum ? idmm.getSeqnum() : idmm.getUid(), idmm);
+            if (null != idmm) {
+                map.put(seqnum ? idmm.getSeqnum() : idmm.getUid(), idmm);
+            }
         }
         return map;
     }
