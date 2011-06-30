@@ -50,6 +50,7 @@
 package com.openexchange.exception;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
@@ -207,21 +208,17 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Logs this exception using specified logger.
+     * Logs this exception - if allowed - using specified logger.
      * 
      * @param log The logger
      */
     public void log(final Log log) {
-        final LogLevel logLevel = LogLevel.valueOf(log);
-        final String loggable = getLoggableDetailedMessage(logLevel, null);
+        final LogLevel highestLogLevel = getCategories().get(0).getLogLevel();
+        final String loggable = getLoggableDetailedMessage(highestLogLevel, null);
         if (null == loggable) {
             return;
         }
-        for (final LogLevel ll : LogLevel.rankedOrder()) {
-            if (logLevel.equals(ll)) {
-                logLevel.log(loggable, this, log);
-            }
-        }
+        highestLogLevel.log(loggable, this, log);
     }
 
     /**
@@ -322,9 +319,9 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the categories.
+     * Gets the (sorted) categories.
      * 
-     * @return The categories
+     * @return The (sorted) categories
      */
     public List<Category> getCategories() {
         if (this.categories.isEmpty()) {
@@ -333,7 +330,9 @@ public class OXException extends Exception implements OXExceptionConstants {
              */
             return Collections.<Category> singletonList(CATEGORY_ERROR);
         }
-        return Collections.<Category> unmodifiableList(this.categories);
+        final List<Category> categories = new ArrayList<Category>(this.categories);
+        Collections.sort(categories);
+        return categories;
     }
 
     /**

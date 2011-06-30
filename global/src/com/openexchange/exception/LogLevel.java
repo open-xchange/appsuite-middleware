@@ -83,6 +83,17 @@ public enum LogLevel {
     FATAL;
 
     /**
+     * The default comparator for {@link LogLevel}.
+     */
+    public static final Comparator<LogLevel> COMPARATOR = new Comparator<LogLevel>() {
+
+        public int compare(final LogLevel o1, final LogLevel o2) {
+            return (-o1.ordinal() + o2.ordinal());
+        }
+
+    };
+
+    /**
      * Checks if this log level includes specified category's log level.
      * 
      * @param category The category whose loglevel is possibly included
@@ -111,27 +122,31 @@ public enum LogLevel {
      */
     public void log(final String logging, final OXException exception, final Log logger) {
         if (TRACE.equals(this)) {
-            logger.trace(logging, exception);
+            if (logger.isTraceEnabled()) {
+                logger.trace(logging, exception);
+            }
         } else if (DEBUG.equals(this)) {
-            logger.debug(logging, exception);
+            if (logger.isDebugEnabled()) {
+                logger.debug(logging, exception);
+            }
         } else if (INFO.equals(this)) {
-            logger.info(logging, exception);
+            if (logger.isInfoEnabled()) {
+                logger.info(logging, exception);
+            }
         } else if (WARNING.equals(this)) {
-            logger.warn(logging, exception);
+            if (logger.isWarnEnabled()) {
+                logger.warn(logging, exception);
+            }
         } else if (ERROR.equals(this)) {
-            logger.error(logging, exception);
+            if (logger.isErrorEnabled()) {
+                logger.error(logging, exception);
+            }
         } else if (FATAL.equals(this)) {
-            logger.fatal(logging, exception);
+            if (logger.isFatalEnabled()) {
+                logger.fatal(logging, exception);
+            }
         }
     }
-
-    private static final Comparator<LogLevel> INVERSE = new Comparator<LogLevel>() {
-
-        public int compare(final LogLevel o1, final LogLevel o2) {
-            return (-o1.ordinal() + o2.ordinal());
-        }
-
-    };
 
     /**
      * Gets the log levels in ranked order.
@@ -142,7 +157,7 @@ public enum LogLevel {
         final LogLevel[] values = LogLevel.values();
         final LogLevel[] ret = new LogLevel[values.length];
         System.arraycopy(values, 0, ret, 0, values.length);
-        Arrays.sort(ret, INVERSE);
+        Arrays.sort(ret, COMPARATOR);
         return ret;
     }
 
