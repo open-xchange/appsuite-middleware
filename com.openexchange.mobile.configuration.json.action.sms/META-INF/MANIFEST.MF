@@ -22,6 +22,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.mail,
  com.openexchange.mail.dataobjects,
  com.openexchange.mail.dataobjects.compose,
+ com.openexchange.mobile.configuration.json.action,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
@@ -51,8 +52,7 @@ Import-Package: com.openexchange.ajax,
  org.w3c.dom,
  org.xml.sax,
  org.xml.sax.ext,
- org.xml.sax.helpers,
- com.openexchange.mobile.configuration.json.action
+ org.xml.sax.helpers
 Require-Bundle: com.openexchange.server,
  com.openexchange.common,
  com.openexchange.mobile.configuration.json
