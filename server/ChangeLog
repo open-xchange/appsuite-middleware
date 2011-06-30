@@ -5,6 +5,7 @@
 * 2011-06-30 - thorben.betten@open-xchange.com
 
  - Bugfix #19658: [L3] Moving mails with the OX WebGUI makes them disappear (dovecot)
+ - Bugfix #19669: Proper expunge flag on folder closure
 
 * 2011-06-29 - marcus.klein@open-xchange.com
 
