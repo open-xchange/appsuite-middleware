@@ -1,4 +1,9 @@
-* 2011-06-24 - marcus.klein@open-xchange.com
+* 2011-06-29 - marcus.klein@open-xchange.com
+
+ - Not creating always confirmed-spam and confirmed-ham folders anymore for Cloudmark spam handler. confirmed-spam is created if the
+   configuration tells to move spam mails to that folder.
+
+* 2011-06-27 - francisco.laguna@open-xchange.com
 
  - Bug #19598: Don't die on decryption errors so users can remove their OAuth accounts
 

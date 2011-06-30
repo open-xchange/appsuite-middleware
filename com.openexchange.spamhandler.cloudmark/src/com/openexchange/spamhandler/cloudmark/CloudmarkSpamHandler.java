@@ -54,6 +54,8 @@ import static com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerSe
 import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -64,97 +66,84 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
- * {@link CloudmarkSpamHandler}
- * 
+ * Cloudmark spam handler
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
  */
 public final class CloudmarkSpamHandler extends SpamHandler {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CloudmarkSpamHandler.class);
-	
-	private static final String NAME = "CloudmarkSpamHandler";
+    private static final Log LOG = LogFactory.getLog(CloudmarkSpamHandler.class);
 
-	private static final CloudmarkSpamHandler instance = new CloudmarkSpamHandler();
+    private static final String NAME = "CloudmarkSpamHandler";
 
-	/**
-	 * Gets the singleton instance of {@link CloudmarkSpamHandler}
-	 * 
-	 * @return The singleton instance of {@link CloudmarkSpamHandler}
-	 */
-	public static CloudmarkSpamHandler getInstance() {
-		return instance;
-	}
-	
-	/**
-	 * Initializes a new {@link CloudmarkSpamHandler}
-	 */
-	private CloudmarkSpamHandler() {
-		super();
-	}
+    private static final CloudmarkSpamHandler SINGLETON = new CloudmarkSpamHandler();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.spamhandler.SpamHandler#getSpamHandlerName()
-	 */
-	@Override
-	public String getSpamHandlerName() {
-		return NAME;
-	}
+    public static CloudmarkSpamHandler getInstance() {
+        return SINGLETON;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.spamhandler.SpamHandler#handleSpam(java.lang.String,
-	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
-	 */
-	@Override
-	public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move,	final Session session) throws MailException {
-		final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
-		final String targetSpamEmailAddress = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress", "").trim();
-			
-		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-		mailAccess.connect();
-		
-		try {
-			final MailMessage[] mailMessage = mailAccess.getMessageStorage().getMessages(fullname, mailIDs, new MailField[]{MailField.FULL});
-			for (int i = 0; i < mailMessage.length; i++) {
-				final MailTransport transport = MailTransport.getInstance(session);
-				try {
-					transport.sendRawMessage(mailMessage[i].getSourceBytes(), new Address[] { new InternetAddress(targetSpamEmailAddress, true) });
-				} catch (final AddressException e) {
-					LOG.error("The configured target eMail address is not valid", e);
-				} finally {
-					transport.close();
-				}
-			}
-			
-			if (move) {
-				final String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
-				
-				if (targetSpamFolder.equals("1")) {
-					mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
-				} else if (targetSpamFolder.equals("2")) {
-					mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getSpamFolder(), mailIDs, true);
-				} else if (targetSpamFolder.equals("3")) {
-					mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getConfirmedSpamFolder(), mailIDs, true);
-				} else {
-					mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
-				}
-			}
-		} finally {
-			mailAccess.close(true);
-		}
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.spamhandler.SpamHandler#handleHam(java.lang.String,
-	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
-	 */
-	@Override
-	public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException { }
+    private CloudmarkSpamHandler() {
+        super();
+    }
 
+    @Override
+    public String getSpamHandlerName() {
+        return NAME;
+    }
+
+    @Override
+    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
+        final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
+        final String targetSpamEmailAddress = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress", "").trim();
+
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+        mailAccess.connect();
+
+        try {
+            final MailMessage[] mailMessage = mailAccess.getMessageStorage().getMessages(fullname, mailIDs, new MailField[]{MailField.FULL});
+            for (int i = 0; i < mailMessage.length; i++) {
+                final MailTransport transport = MailTransport.getInstance(session);
+                try {
+                    transport.sendRawMessage(mailMessage[i].getSourceBytes(), new Address[] { new InternetAddress(targetSpamEmailAddress, true) });
+                } catch (final AddressException e) {
+                    LOG.error("The configured target eMail address is not valid", e);
+                } finally {
+                    transport.close();
+                }
+            }
+
+            if (move) {
+                final String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
+
+                if (targetSpamFolder.equals("1")) {
+                    mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
+                } else if (targetSpamFolder.equals("2")) {
+                    mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getSpamFolder(), mailIDs, true);
+                } else if (targetSpamFolder.equals("3")) {
+                    mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getConfirmedSpamFolder(), mailIDs, true);
+                } else {
+                    mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
+                }
+            }
+        } finally {
+            mailAccess.close(true);
+        }
+    }
+
+    @Override
+    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) {
+        // Nothing to do.
+    }
+
+    @Override
+    public boolean isCreateConfirmedSpam() {
+        final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
+        final String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
+        return targetSpamFolder.equals("3");
+    }
+
+    @Override
+    public boolean isCreateConfirmedHam() {
+        return false;
+    }
 }
