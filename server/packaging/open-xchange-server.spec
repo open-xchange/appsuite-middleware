@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 15
+%define		ox_release 16
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -809,8 +809,23 @@ fi
 %doc doc/examples
 
 %changelog
+* Thu Jun 30 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19658: [L3] Moving mails with the OX WebGUI makes them disappear (dovecot)
+ - Bugfix #19669: Proper expunge flag on folder closure
+* Thu Jun 30 2011 - steffen.templin@open-xchange.com
+ - Bugfix #19670: To see the updater-download-link in the OX GUI the user also needs permissions for USM istead of only for OLOX20.
+* Wed Jun 29 2011 - marcus.klein@open-xchange.com
+ - Not creating always confirmed-spam and confirmed-ham folders anymore for Cloudmark spam handler. confirmed-spam is created if the
+   configuration tells to move spam mails to that folder.
+* Mon Jun 27 2011 - francisco.laguna@open-xchange.com
+ - Bug #19598: Don't die on decryption errors so users can remove their OAuth accounts
+* Fri Jun 24 2011 - marcus.klein@open-xchange.com
+ - TA7380 of US6578, Bugfix #19609: Passing HTTP headers to authentication implementation.
+* Thu Jun 23 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19591: Dealing with failing retrieval of a POP3 server's capabilities (through CAPA command)
 * Wed Jun 22 2011 - thorben.betten@open-xchange.com
  - Bugfix #19571: Resolved warnings when creating a POP3 account
+ - Bugfix #19584: Properly dealing with a CommandFailedException and switching fetch profile
 * Tue Jun 21 2011 - thorben.betten@open-xchange.com
  - Bugfix #19540: Applying proper flag to contact instance if considered as distribution list
  - Bugfix #19471: Adapted to MS invitation mails
