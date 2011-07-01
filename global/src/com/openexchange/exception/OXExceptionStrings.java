@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.exception.internal;
+package com.openexchange.exception;
 
 import com.openexchange.i18n.LocalizableStrings;
 

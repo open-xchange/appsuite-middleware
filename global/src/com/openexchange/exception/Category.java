@@ -49,13 +49,12 @@
 
 package com.openexchange.exception;
 
-
 /**
  * {@link Category} - The category for an {@link OXException} determines its behavior during exception handling and logging.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Category {
+public interface Category extends Comparable<Category> {
 
     /**
      * The category for an error.
@@ -73,6 +72,10 @@ public interface Category {
         @Override
         public String toString() {
             return Category.EnumType.ERROR.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -95,6 +98,34 @@ public interface Category {
             return Category.EnumType.USER_INPUT.getName();
         }
 
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
+     * The default category for a configuration issue.
+     */
+    public static final Category CATEGORY_CONFIGURATION = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.ERROR;
+        }
+
+        public Type getType() {
+            return Category.EnumType.CONFIGURATION;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.CONFIGURATION.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
     };
 
     /**
@@ -114,7 +145,30 @@ public interface Category {
      * An enumeration for common {@link Type types}.
      */
     public static enum EnumType implements Type {
-        ERROR, TRY_AGAIN, USER_INPUT, PERMISSION_DENIED, WARNING;
+        /**
+         * The default error category.
+         */
+        ERROR,
+        /**
+         * The try-again category
+         */
+        TRY_AGAIN,
+        /**
+         * The user-inoput category
+         */
+        USER_INPUT,
+        /**
+         * The permission-denid category
+         */
+        PERMISSION_DENIED,
+        /**
+         * The configuration category
+         */
+        CONFIGURATION,
+        /**
+         * The warning category 
+         */
+        WARNING;
 
         public String getName() {
             return toString();

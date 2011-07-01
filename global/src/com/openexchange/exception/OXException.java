@@ -62,7 +62,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.internal.I18n;
-import com.openexchange.exception.internal.OXExceptionStrings;
 import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.session.Session;
 
@@ -111,6 +110,8 @@ public class OXException extends Exception implements OXExceptionConstants {
     private String detailedMessage;
 
     private String exceptionId;
+
+    private String prefix;
 
     /**
      * Initializes a default {@link OXException}.
@@ -207,35 +208,34 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Logs this exception using specified logger.
+     * Logs this exception - if allowed - using specified logger.
      * 
      * @param log The logger
      */
     public void log(final Log log) {
-        final LogLevel logLevel = LogLevel.valueOf(log);
-        final String loggable = getLoggableDetailedMessage(logLevel, null);
+        final LogLevel logLevel = getCategories().get(0).getLogLevel();
+        if (!logLevel.appliesTo(log)) {
+            return;
+        }
+        final String loggable = getLogMessage(logLevel, null);
         if (null == loggable) {
             return;
         }
-        for (final LogLevel ll : LogLevel.rankedOrder()) {
-            if (logLevel.equals(ll)) {
-                logLevel.log(loggable, this, log);
-            }
-        }
+        logLevel.log(loggable, this, log);
     }
 
     /**
      * Gets the detailed message for specified log level.
      * <p>
-     * This is a convenience method that invokes {@link #getLoggableDetailedMessage(LogLevel, String)} with latter argument set to
+     * This is a convenience method that invokes {@link #getLogMessage(LogLevel, String)} with latter argument set to
      * <code>null</code>.
      * 
      * @param logLevel The log level
      * @return The detailed message for specified log level or <code>null</code> if not loggable.
-     * @see #getLoggableDetailedMessage(LogLevel, String)
+     * @see #getLogMessage(LogLevel, String)
      */
-    public String getLoggableDetailedMessage(final LogLevel logLevel) {
-        return getLoggableDetailedMessage(logLevel, null);
+    public String getLogMessage(final LogLevel logLevel) {
+        return getLogMessage(logLevel, null);
     }
 
     /**
@@ -245,7 +245,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param defaultLog The default logging to return if this exception is not loggable for specified log level
      * @return The detailed message for specified log level or <code>defaultLog</code> if not loggable.
      */
-    public String getLoggableDetailedMessage(final LogLevel logLevel, final String defaultLog) {
+    public String getLogMessage(final LogLevel logLevel, final String defaultLog) {
         if (!isLoggable(logLevel)) {
             return defaultLog;
         }
@@ -253,9 +253,9 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the composed detailed message.
+     * Gets the composed detail message.
      * 
-     * @return The detailed message
+     * @return The detail message
      */
     public String getDetailedMessage() {
         /*
@@ -279,7 +279,7 @@ public class OXException extends Exception implements OXExceptionConstants {
          */
         sb.append(" Message=");
         if (null == detailedMessage) {
-            final String str = getDisplayableMessage0(Locale.US);
+            final String str = getDisplayMessage0(Locale.US);
             if (null == str) {
                 sb.append(EMPTY_MSG);
             } else {
@@ -322,9 +322,9 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the categories.
+     * Gets the (sorted) categories.
      * 
-     * @return The categories
+     * @return The (sorted) categories
      */
     public List<Category> getCategories() {
         if (this.categories.isEmpty()) {
@@ -333,7 +333,8 @@ public class OXException extends Exception implements OXExceptionConstants {
              */
             return Collections.<Category> singletonList(CATEGORY_ERROR);
         }
-        return Collections.<Category> unmodifiableList(this.categories);
+        Collections.sort(this.categories);
+        return Collections.unmodifiableList(this.categories);
     }
 
     /**
@@ -343,7 +344,9 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return This exception with category added (for chained invocations)
      */
     public OXException addCategory(final Category category) {
-        categories.add(category);
+        if (null != category) {
+            categories.add(category);
+        }
         return this;
     }
 
@@ -389,7 +392,18 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @see #getErrorCode()
      */
     public String getPrefix() {
-        return PREFIX_GENERAL;
+        return null == prefix ? PREFIX_GENERAL : prefix;
+    }
+
+    /**
+     * Sets the prefix for the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
+     * 
+     * @param prefix The prefix
+     * @return This {@link OXException} with new prefix applied (for chained invocations)
+     */
+    public OXException setPrefix(final String prefix) {
+        this.prefix = prefix;
+        return this;
     }
 
     /**
@@ -407,12 +421,12 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param locale The locale providing the language to which the message shall be translated
      * @return The internationalized message
      */
-    public String getDisplayableMessage(final Locale locale) {
-        final String msg = getDisplayableMessage0(locale);
+    public String getDisplayMessage(final Locale locale) {
+        final String msg = getDisplayMessage0(locale);
         return msg == null ? EMPTY_MSG : msg;
     }
 
-    private String getDisplayableMessage0(final Locale locale) {
+    private String getDisplayMessage0(final Locale locale) {
         final Locale lcl = null == locale ? Locale.US : locale;
         String msg = I18n.getInstance().translate(lcl, message);
         if (msg != null) {
