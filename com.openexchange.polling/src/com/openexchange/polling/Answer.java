@@ -65,7 +65,7 @@ public class Answer {
         return answers;
     }
 
-    
+    // Gnitz    
     public void setAnswers(List<Integer> answers) {
         this.answers = answers;
     }
