@@ -72,6 +72,18 @@ import com.openexchange.session.Session;
  */
 public class OXException extends Exception implements OXExceptionConstants {
 
+    // ([A-Z_]+)\((".*").*,
+    // public static final String $1_MSG = $2;
+    
+    
+    // /\*\*([\s*])*(\S.*\S)([\s*])*/
+    // // $2
+    
+    
+    
+    // ([A-Za-z_]+)\((".*"),
+    // $1($1_MSG,
+
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXException.class);
 
     private static final long serialVersionUID = 2058371531364916608L;
