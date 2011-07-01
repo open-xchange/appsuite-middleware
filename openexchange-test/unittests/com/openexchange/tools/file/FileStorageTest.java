@@ -49,8 +49,11 @@
 
 package com.openexchange.tools.file;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
+
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +70,21 @@ public class FileStorageTest extends TestCase {
 
     private static final Log LOG = LogFactory.getLog(FileStorageTest.class);
 
-    /**
+    
+    
+    @Override
+	protected void setUp() throws Exception {
+		// TODO Auto-generated method stub
+		super.setUp();
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		// TODO Auto-generated method stub
+		super.tearDown();
+	}
+
+	/**
      * Test method for
      * 'com.openexchange.tools.file.FileStorage.getInstance(Object...)'.
      * @throws Throwable if an error occurs.
@@ -97,6 +114,7 @@ public class FileStorageTest extends TestCase {
         rmdir(tempFile);
         assertNotNull("Can't create new file in file storage.", identifier);
     }
+
 
     /**
      * Test for bug 3978.
@@ -139,7 +157,26 @@ public class FileStorageTest extends TestCase {
         }
         rmdir(tempFile);
     }
+    
+    /**
+     * Test for changes related to bug 19600, which was caused by creating directories
+     * when checking for their existence (using the root user, not the open-xchange user).
+     */
+    public final void testDeleteFile() throws Throwable {
+        final ByteArrayInputStream baos = new ByteArrayInputStream(
+        		RandomString.generateLetter(100).getBytes("UTF-8"));
+        
+        final File tempFile = File.createTempFile("filestorage", ".tmp");
+        tempFile.delete();
+        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
+        final String identifier = storage.saveNewFile(baos);
 
+        assertTrue( storage.deleteFile(identifier));
+        assertFalse(storage.deleteFile(identifier));
+    }
+
+    
+    
     private static void rmdir(final File tempFile) {
         if (tempFile.isDirectory()) {
             for (final File f : tempFile.listFiles()) {
