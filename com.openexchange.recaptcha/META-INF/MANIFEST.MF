@@ -22,5 +22,6 @@ Import-Package: com.openexchange.ajax,
  org.osgi.service.http
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.recaptcha
-Bundle-ClassPath: lib/recaptcha4j-0.0.7.jar,
+Bundle-ClassPath: com.openexchange.recaptcha.jar,
+ lib/recaptcha4j-0.0.7.jar,
  .
