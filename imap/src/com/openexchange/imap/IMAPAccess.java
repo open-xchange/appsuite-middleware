@@ -624,7 +624,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-            imapStore = (AccessedIMAPStore) imapSession.getStore(PROTOCOL);
+            imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
             imapStore.connect(server, port, login, pw);
         }
         /*
