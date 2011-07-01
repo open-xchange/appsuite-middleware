@@ -49,7 +49,6 @@
 
 package com.openexchange.exception;
 
-
 /**
  * {@link Category} - The category for an {@link OXException} determines its behavior during exception handling and logging.
  * 
@@ -106,6 +105,30 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
+     * The default category for a configuration issue.
+     */
+    public static final Category CATEGORY_CONFIGURATION = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.ERROR;
+        }
+
+        public Type getType() {
+            return Category.EnumType.CONFIGURATION;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.CONFIGURATION.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
      * A category's type.
      */
     public static interface Type {
@@ -122,7 +145,30 @@ public interface Category extends Comparable<Category> {
      * An enumeration for common {@link Type types}.
      */
     public static enum EnumType implements Type {
-        ERROR, TRY_AGAIN, USER_INPUT, PERMISSION_DENIED, WARNING;
+        /**
+         * The default error category.
+         */
+        ERROR,
+        /**
+         * The try-again category
+         */
+        TRY_AGAIN,
+        /**
+         * The user-inoput category
+         */
+        USER_INPUT,
+        /**
+         * The permission-denid category
+         */
+        PERMISSION_DENIED,
+        /**
+         * The configuration category
+         */
+        CONFIGURATION,
+        /**
+         * The warning category 
+         */
+        WARNING;
 
         public String getName() {
             return toString();
