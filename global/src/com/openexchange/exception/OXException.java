@@ -342,7 +342,9 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return This exception with category added (for chained invocations)
      */
     public OXException addCategory(final Category category) {
-        categories.add(category);
+        if (null != category) {
+            categories.add(category);
+        }
         return this;
     }
 
