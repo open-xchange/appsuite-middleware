@@ -62,7 +62,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.internal.I18n;
-import com.openexchange.exception.internal.OXExceptionStrings;
 import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.session.Session;
 
@@ -213,6 +212,9 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public void log(final Log log) {
         final LogLevel logLevel = getCategories().get(0).getLogLevel();
+        if (!logLevel.appliesTo(log)) {
+            return;
+        }
         final String loggable = getLoggableDetailedMessage(logLevel, null);
         if (null == loggable) {
             return;

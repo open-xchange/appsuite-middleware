@@ -103,6 +103,31 @@ public enum LogLevel {
     }
 
     /**
+     * Checks if this log level applies to specified logger.
+     * 
+     * @param logger The logger
+     * @return <code>true</code> if specified logger applies; otherwise <code>false</code>
+     */
+    public boolean appliesTo(final Log logger) {
+        switch (this) {
+        case TRACE:
+            return logger.isTraceEnabled();
+        case DEBUG:
+            return logger.isDebugEnabled();
+        case INFO:
+            return logger.isInfoEnabled();
+        case WARNING:
+            return logger.isWarnEnabled();
+        case ERROR:
+            return logger.isErrorEnabled();
+        case FATAL:
+            return logger.isFatalEnabled();
+        default:
+            return false;
+        }
+    }
+
+    /**
      * Logs specified logging and exception in appropriate log level.
      * 
      * @param logging The logging
@@ -112,34 +137,22 @@ public enum LogLevel {
     public void log(final String logging, final OXException exception, final Log logger) {
         switch (this) {
         case TRACE:
-            if (logger.isTraceEnabled()) {
-                logger.trace(logging, exception);
-            }
+            logger.trace(logging, exception);
             break;
         case DEBUG:
-            if (logger.isDebugEnabled()) {
-                logger.debug(logging, exception);
-            }
+            logger.debug(logging, exception);
             break;
         case INFO:
-            if (logger.isInfoEnabled()) {
-                logger.info(logging, exception);
-            }
+            logger.info(logging, exception);
             break;
         case WARNING:
-            if (logger.isWarnEnabled()) {
-                logger.warn(logging, exception);
-            }
+            logger.warn(logging, exception);
             break;
         case ERROR:
-            if (logger.isErrorEnabled()) {
-                logger.error(logging, exception);
-            }
+            logger.error(logging, exception);
             break;
         case FATAL:
-            if (logger.isFatalEnabled()) {
-                logger.fatal(logging, exception);
-            }
+            logger.fatal(logging, exception);
             break;
         default:
             break;
