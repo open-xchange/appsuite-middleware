@@ -212,16 +212,12 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param log The logger
      */
     public void log(final Log log) {
-        final LogLevel logLevel = LogLevel.valueOf(log);
+        final LogLevel logLevel = getCategories().get(0).getLogLevel();
         final String loggable = getLoggableDetailedMessage(logLevel, null);
         if (null == loggable) {
             return;
         }
-        for (final LogLevel ll : LogLevel.rankedOrder()) {
-            if (logLevel.equals(ll)) {
-                logLevel.log(loggable, this, log);
-            }
-        }
+        logLevel.log(loggable, this, log);
     }
 
     /**
@@ -322,9 +318,9 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the categories.
+     * Gets the (sorted) categories.
      * 
-     * @return The categories
+     * @return The (sorted) categories
      */
     public List<Category> getCategories() {
         if (this.categories.isEmpty()) {
@@ -333,7 +329,8 @@ public class OXException extends Exception implements OXExceptionConstants {
              */
             return Collections.<Category> singletonList(CATEGORY_ERROR);
         }
-        return Collections.<Category> unmodifiableList(this.categories);
+        Collections.sort(this.categories);
+        return Collections.unmodifiableList(this.categories);
     }
 
     /**

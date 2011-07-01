@@ -55,7 +55,7 @@ package com.openexchange.exception;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Category {
+public interface Category extends Comparable<Category> {
 
     /**
      * The category for an error.
@@ -73,6 +73,10 @@ public interface Category {
         @Override
         public String toString() {
             return Category.EnumType.ERROR.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -93,6 +97,10 @@ public interface Category {
         @Override
         public String toString() {
             return Category.EnumType.USER_INPUT.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };

@@ -110,22 +110,46 @@ public enum LogLevel {
      * @param logger The logger
      */
     public void log(final String logging, final OXException exception, final Log logger) {
-        if (TRACE.equals(this)) {
-            logger.trace(logging, exception);
-        } else if (DEBUG.equals(this)) {
-            logger.debug(logging, exception);
-        } else if (INFO.equals(this)) {
-            logger.info(logging, exception);
-        } else if (WARNING.equals(this)) {
-            logger.warn(logging, exception);
-        } else if (ERROR.equals(this)) {
-            logger.error(logging, exception);
-        } else if (FATAL.equals(this)) {
-            logger.fatal(logging, exception);
+        switch (this) {
+        case TRACE:
+            if (logger.isTraceEnabled()) {
+                logger.trace(logging, exception);
+            }
+            break;
+        case DEBUG:
+            if (logger.isDebugEnabled()) {
+                logger.debug(logging, exception);
+            }
+            break;
+        case INFO:
+            if (logger.isInfoEnabled()) {
+                logger.info(logging, exception);
+            }
+            break;
+        case WARNING:
+            if (logger.isWarnEnabled()) {
+                logger.warn(logging, exception);
+            }
+            break;
+        case ERROR:
+            if (logger.isErrorEnabled()) {
+                logger.error(logging, exception);
+            }
+            break;
+        case FATAL:
+            if (logger.isFatalEnabled()) {
+                logger.fatal(logging, exception);
+            }
+            break;
+        default:
+            break;
         }
     }
 
-    private static final Comparator<LogLevel> INVERSE = new Comparator<LogLevel>() {
+    /**
+     * The default {@link Comparator} for log levels.
+     */
+    public static final Comparator<LogLevel> COMPARATOR = new Comparator<LogLevel>() {
 
         public int compare(final LogLevel o1, final LogLevel o2) {
             return (-o1.ordinal() + o2.ordinal());
@@ -142,7 +166,7 @@ public enum LogLevel {
         final LogLevel[] values = LogLevel.values();
         final LogLevel[] ret = new LogLevel[values.length];
         System.arraycopy(values, 0, ret, 0, values.length);
-        Arrays.sort(ret, INVERSE);
+        Arrays.sort(ret, COMPARATOR);
         return ret;
     }
 
