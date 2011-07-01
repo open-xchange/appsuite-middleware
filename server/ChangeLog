@@ -1,3 +1,7 @@
+* 2011-07-01 - thorben.betten@open-xchange.com
+
+ - Bugfix #19536: Proper detection of possible quota exceeded error
+
 * 2011-07-01 - tobias.prinz@open-xchange.com
 
  - Bugfix #19600: Deleting the first and only user of a context made the filestore inaccessible to other users in that context. Fixed. 
