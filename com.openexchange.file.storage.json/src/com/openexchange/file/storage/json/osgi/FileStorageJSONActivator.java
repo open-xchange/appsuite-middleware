@@ -49,63 +49,32 @@
 
 package com.openexchange.file.storage.json.osgi;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheException;
-import com.openexchange.caching.CacheService;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.json.FileConverter;
 import com.openexchange.file.storage.json.FileMetadataParser;
-import com.openexchange.file.storage.json.actions.accounts.AccountActionFactory;
-import com.openexchange.file.storage.json.multiple.AccountMultipleHandler;
-import com.openexchange.file.storage.json.multiple.FileMultipleAdapter;
+import com.openexchange.file.storage.json.actions.files.FileActionFactory;
 import com.openexchange.file.storage.json.services.Services;
-import com.openexchange.file.storage.json.servlets.AccountServlet;
-import com.openexchange.file.storage.json.servlets.FileServlet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link FileStorageJSONActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileStorageJSONActivator extends DeferredActivator {
+public class FileStorageJSONActivator extends AJAXModuleActivator {
 
     private static final Log LOG = LogFactory.getLog(FileStorageJSONActivator.class);
 
     private static final Class<?>[] NEEDED_SERVICES =
-        new Class[] { FileStorageServiceRegistry.class, HttpService.class, CacheService.class, IDBasedFileAccessFactory.class, AttachmentBase.class };
-
-    private final List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
-
-    private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
-
-    private FileStorageServiceRegistry registry;
-
-    private List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(4);
-    
-    // private MessagingMessageParser parser;
-
-    // private MessagingMessageWriter writer;
-
-    private CacheService cacheService;
-
-    private boolean cacheConfigured;
+        new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -113,117 +82,14 @@ public class FileStorageJSONActivator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        try {
-            register();
-        } catch (final CacheException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        if (clazz == FileStorageServiceRegistry.class) {
-            hide();
-        }
-    }
-
-    private void hide() {
-        for (SessionServletRegistration reg : servletRegistrations) {
-            reg.close();
-        }
-
-        for (final ServiceRegistration registration : registrations) {
-            registration.unregister();
-        }
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
             Services.LOOKUP = this;
-            // parser = new MessagingMessageParser();
-
-            // trackers.add(new ContentParserTracker(context, parser));
-            // trackers.add(new HeaderParserTracker(context, parser));
-
-            // writer = new MessagingMessageWriter();
-            // trackers.add(new ContentWriterTracker(context, writer));
-            // trackers.add(new HeaderWriterTracker(context, writer));
-            trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
-
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
-
-            register();
-        } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
-            throw x;
-        }
-    }
-
-    private void register() throws CacheException {
-
-        registry = getService(FileStorageServiceRegistry.class);
-        cacheService = getService(CacheService.class);
-
-        if (!allAvailable()) {
-            return;
-        }
-
-        AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
-        // MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
-        // ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
-
-        servletRegistrations.add(new SessionServletRegistration(context, new AccountServlet(), "ajax/filestorage/account"));
-        servletRegistrations.add(new SessionServletRegistration(context, new FileServlet(), "ajax/infostore"));
-
-        for (SessionServletRegistration reg : servletRegistrations) {
-            reg.open();
-        }
-
-        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
-        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new FileMultipleAdapter(), null));
-        // registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
-        // registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
-        registrations.add(context.registerService(FileMetadataParserService.class.getName(), FileMetadataParser.getInstance(), null));
-    }
-
-    private Cache getCache() throws CacheException {
-        final String regionName = "com.openexchange.file.storage.json.fileCache";
-        if (!cacheConfigured) {
-            cacheConfigured = true;
-            final byte[] ccf = ("jcs.region." + regionName + "=LTCP\n"
-                + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n"
-                + "jcs.region." + regionName + ".cacheattributes.MaxObjects=10000000\n"
-                + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n"
-                + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n"
-                + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=180\n"
-                + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n"
-                + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n"
-                + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n"
-                + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=300\n"
-                + "jcs.region." + regionName + ".elementattributes.IdleTime=180\n"
-                + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n"
-                + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n"
-                + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
-            cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
-        }
-        return cacheService.getCache(regionName);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            for (final ServiceTracker tracker : trackers) {
-                tracker.close();
-            }
-            trackers.clear();
-            for (final ServiceRegistration registration : registrations) {
-                registration.unregister();
-            }
-            registrations.clear();
+            rememberTracker(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            openTrackers();
+            registerModule(FileActionFactory.INSTANCE, "infostore");
+            registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
+            registerService(ResultConverter.class, new FileConverter());
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
             throw x;

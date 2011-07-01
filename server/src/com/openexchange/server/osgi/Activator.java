@@ -63,6 +63,7 @@ public class Activator extends CompositeBundleActivator {
     private final BundleActivator[] activators = {
         new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
         new com.openexchange.tools.file.osgi.DefaultFileStorageActivator(),
+        new com.openexchange.ajax.requesthandler.osgi.DispatcherActivator(),
         new com.openexchange.database.osgi.Activator(),
         new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
         new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
@@ -80,7 +81,8 @@ public class Activator extends CompositeBundleActivator {
         new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
         new com.openexchange.consistency.osgi.ConsistencyActivator(),
         new com.openexchange.authorization.osgi.AuthorizationActivator(),
-        new com.openexchange.ajax.login.osgi.LoginActivator()
+        new com.openexchange.ajax.login.osgi.LoginActivator(),
+        new com.openexchange.tools.images.osgi.ImageToolsActivator(),
     };
 
     public Activator() {

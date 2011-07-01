@@ -83,8 +83,7 @@ public class AllTest extends FileActionTest {
             .param("folder", "12")
             .param("columns", "1,700,702") // id, title and filename
             .param("sort", "700")
-            .param("order", "desc")
-            .param("timezone", "Europe/Berlin");
+            .param("order", "desc");
         
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
         fileAccess().expectCall("getDocuments", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult()); 
@@ -92,9 +91,6 @@ public class AllTest extends FileActionTest {
         perform();
         
         fileAccess().assertAllWereCalled();
-        
-        assertEquals(TimeZone.getTimeZone("Europe/Berlin"), writer().getTimeZone());
-        assertEquals(columns, writer().getColumns());
     }
 
     @Override

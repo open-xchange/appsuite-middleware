@@ -1,0 +1,8 @@
+*.class
+build
+build/*
+bin
+bin/*
+open-xchange-config/development/tmp
+open-xchange-config/development/adminTmp
+open-xchange-config/development/commonTmp

@@ -84,6 +84,8 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         
         put("saveAs", new SaveAsAction());
         
+        put("document", new DocumentAction());
+        
     }};
     
     public AJAXActionService createActionService(String action) throws AjaxException {

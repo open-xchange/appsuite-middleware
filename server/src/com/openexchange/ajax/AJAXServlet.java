@@ -356,7 +356,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_FILTER = "filter";
     
     public static final String PARAMETER_COLLATION = "collation";
-       
+
     /**
      * The content type if the response body contains javascript data. Set it with
      * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .
@@ -375,7 +375,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final String STR_ERROR_PARAMS = "error_params";
 
 	// JavaScript for substituteJS()
-	private static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC "
+	public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC "
 			+ "\"-//W3C//DTD HTML 4.01//EN\" "
 			+ "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
 			+ "<META http-equiv=\"Content-Type\" "

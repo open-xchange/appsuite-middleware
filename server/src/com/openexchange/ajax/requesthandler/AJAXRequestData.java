@@ -63,9 +63,12 @@ import java.util.Map.Entry;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.strings.StringParser;
 
 /**
  * {@link AJAXRequestData} contains the parameters and the payload of the request.
@@ -88,10 +91,16 @@ public class AJAXRequestData {
 
     private final Map<String, String> params;
 
+    private final Map<String, String> headers;
+
     private boolean secure;
 
     private Object data;
 
+    private String module;
+    
+    private String action;
+    
     private InputStreamProvider uploadStreamProvider;
 
     private final List<UploadFile> files = new ArrayList<UploadFile>(5);
@@ -101,6 +110,8 @@ public class AJAXRequestData {
     private String route;
 
     private UploadEvent uploadEvent;
+    
+    private String format;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -112,6 +123,17 @@ public class AJAXRequestData {
         this();
         data = DataParser.checkJSONObject(json, RequestConstants.DATA);
     }
+    
+    /**
+     * Initializes a new {@link AJAXRequestData}.
+     * 
+     * @param data The payload to use data
+     * @throws AjaxException If an AJAX error occurs
+     */
+    public AJAXRequestData(final Object data) throws AjaxException {
+        this();
+        this.data = data;
+    }
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -119,6 +141,7 @@ public class AJAXRequestData {
     public AJAXRequestData() {
         super();
         params = new LinkedHashMap<String, String>();
+        headers = new LinkedHashMap<String, String>();
     }
 
     /**
@@ -162,6 +185,16 @@ public class AJAXRequestData {
             throw new NullPointerException("name is null");
         }
         return params.get(name);
+    }
+    
+    /**
+     * Tries to get a parameter value as parsed as a certain type
+     * @param name The parameter name
+     * @param coerceTo The type the parameter should be interpreted as
+     * @return
+     */
+    public <T> T getParameter(final String name, Class<T> coerceTo) {
+        return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(getParameter(name), coerceTo);
     }
 
     /**
@@ -215,6 +248,27 @@ public class AJAXRequestData {
         this.data = data;
     }
 
+    
+    /**
+     * Gets the format
+     *
+     * @return The format
+     */
+    public String getFormat() {
+        return format;
+    }
+    
+    
+    /**
+     * Sets the format
+     *
+     * @param format The format to set
+     */
+    public void setFormat(String format) {
+        this.format = format;
+    }
+    
+    
     /**
      * Whether this request has a secure connection.
      * 
@@ -253,14 +307,7 @@ public class AJAXRequestData {
     }
 
     /**
-     * Computes a list of missing parameters from a list of mandatory parameters. The typical idiom to use this would be:
-     * 
-     * <pre>
-     * List&lt;String&gt; missingParameters = requestData.getMissingParameters(&quot;param1&quot;, &quot;param2&quot;, &quot;param3&quot;);
-     * if (!missingParameters.isEmpty()) {
-     *     // Throw AbstractOXException
-     * }
-     * </pre>
+     * Computes a list of missing parameters from a list of mandatory parameters. Or use {@link #require(String...)} to check for the presence of certain parameters
      * 
      * @param mandatoryParameters The mandatory parameters expected.
      * @return A list of missing parameter names
@@ -274,7 +321,54 @@ public class AJAXRequestData {
         }
         return missing;
     }
+    
+    /**
+     * Require a set of mandatory parameters, throw an exception, if a parameter is missing otherwise.
+     */
+    public void require(final String...mandatoryParameters) throws AbstractOXException {
+        List<String> missingParameters = getMissingParameters(mandatoryParameters);
+        if(!missingParameters.isEmpty()) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, missingParameters.toString());
+        }
+    }
+    
+    /**
+     * Finds out if a parameter is set
+     */
+    public boolean isSet(String paramName) {
+        return params.containsKey(paramName);
+    }
+    
+    /**
+     * Sets a header value
+     */
+    public void setHeader(String header, String value) {
+        headers.put(header, value);
+    }
 
+    /**
+     * Gets a header value
+     */
+    public String getHeader(String header) {
+        return headers.get(header);
+    }
+    
+    /**
+     * Gets a header value
+     */
+    public <T> T getHeader(String header, Class<T> coerceTo) {
+        return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(getHeader(header), coerceTo);
+    }
+    
+    /**
+     * Gets the headers
+     *
+     * @return The headers
+     */
+    public Map<String, String> getHeaders() {
+        return new HashMap<String,String>(headers);
+    }
+    
     /**
      * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
      * multiple module.
@@ -406,4 +500,28 @@ public class AJAXRequestData {
         return uploadEvent;
     }
 
+    
+    public String getModule() {
+        return module;
+    }
+
+    
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    
+    public String getAction() {
+        return action;
+    }
+
+    
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public void setData(Object object, String format) {
+        setData(object);
+        setFormat(format);
+    }
 }

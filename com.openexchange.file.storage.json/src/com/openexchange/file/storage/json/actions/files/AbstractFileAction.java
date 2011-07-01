@@ -118,7 +118,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
 
     protected AJAXRequestResult results(SearchIterator<File> results, long timestamp, InfostoreRequest request) throws AbstractOXException {
         try {
-            return new AJAXRequestResult(getWriter().write(results, request.getColumns(), request.getTimezone()), new Date(timestamp));
+            return new AJAXRequestResult(results, new Date(timestamp), "infostore");
         } finally {
             results.close();
         }
@@ -146,7 +146,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
 
     public AJAXRequestResult result(File file, InfostoreRequest request) throws AbstractOXException {
-        return new AJAXRequestResult(getWriter().write(file, request.getTimezone()), new Date(file.getSequenceNumber()));
+        return new AJAXRequestResult(file, new Date(file.getSequenceNumber()), "infostore");
     }
 
 

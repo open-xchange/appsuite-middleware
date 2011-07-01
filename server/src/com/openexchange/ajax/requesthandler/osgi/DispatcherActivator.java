@@ -1,0 +1,197 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax.requesthandler.osgi;
+
+import java.util.HashMap;
+import java.util.Map;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.DefaultConverter;
+import com.openexchange.ajax.requesthandler.DefaultDispatcher;
+import com.openexchange.ajax.requesthandler.DispatcherMultipleServiceFactoryHandler;
+import com.openexchange.ajax.requesthandler.DispatcherServlet;
+import com.openexchange.ajax.requesthandler.ResponseOutputter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.converters.DebugConverter;
+import com.openexchange.ajax.requesthandler.converters.JSONResponseConverter;
+import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
+import com.openexchange.ajax.requesthandler.responseOutputters.FileResponseOutputter;
+import com.openexchange.ajax.requesthandler.responseOutputters.JSONResponseOutputter;
+import com.openexchange.ajax.requesthandler.responseOutputters.StringResponseOutputter;
+import com.openexchange.java.Autoboxing;
+import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.server.osgiservice.SimpleRegistryListener;
+import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.service.SessionServletRegistration;
+
+
+/**
+ * {@link DispatcherActivator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class DispatcherActivator extends HousekeepingActivator {
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        final DefaultDispatcher dispatcher = new DefaultDispatcher();
+        
+        final DefaultConverter defaultConverter = new DefaultConverter();
+        defaultConverter.addConverter(new JSONResponseConverter());
+        defaultConverter.addConverter(new DebugConverter());
+        
+        track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
+
+            public void added(ServiceReference ref, ResultConverter thing) {
+                defaultConverter.addConverter(thing);
+            }
+
+            public void removed(ServiceReference ref, ResultConverter thing) {
+                defaultConverter.removeConverter(thing);
+            }
+            
+        });
+        
+        dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
+        
+        final DispatcherServlet servlet = new DispatcherServlet(dispatcher, "/ajax/");
+        
+        DispatcherServlet.registerRenderer(new JSONResponseOutputter());
+        final FileResponseOutputter fileRenderer = new FileResponseOutputter();
+        DispatcherServlet.registerRenderer(fileRenderer);
+        DispatcherServlet.registerRenderer(new StringResponseOutputter());
+        
+        track(ResponseOutputter.class, new SimpleRegistryListener<ResponseOutputter>() {
+
+            public void added(ServiceReference ref, ResponseOutputter thing) {
+                DispatcherServlet.registerRenderer(thing);
+            }
+
+            public void removed(ServiceReference ref, ResponseOutputter thing) {
+                DispatcherServlet.unregisterRenderer(thing);    
+            }
+            
+        });
+        
+        
+        track(AJAXActionServiceFactory.class, new Registerer(dispatcher, servlet));
+        
+        track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
+
+            public void added(ServiceReference ref, ImageScalingService thing) {
+                fileRenderer.setScaler(thing);
+            }
+
+            public void removed(ServiceReference ref, ImageScalingService thing) {
+                fileRenderer.setScaler(null);
+            }
+            
+        });
+        
+        openTrackers();
+    }
+    
+    private final class Registerer implements SimpleRegistryListener<AJAXActionServiceFactory> {
+
+        private DefaultDispatcher dispatcher;
+        private DispatcherServlet servlet;
+        
+        private Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
+        private Map<String, ServiceRegistration> serviceRegistrations = new HashMap<String, ServiceRegistration>();
+        
+        public Registerer(DefaultDispatcher dispatcher, DispatcherServlet servlet) {
+            this.dispatcher = dispatcher;
+            this.servlet = servlet;
+        }
+
+        public void added(ServiceReference ref, AJAXActionServiceFactory thing) {
+            String module = (String) ref.getProperty("module");
+            dispatcher.register(module, thing);
+            SessionServletRegistration registration = new SessionServletRegistration(context, servlet, "/ajax/"+module);
+            registrations.put(module, registration);
+            rememberTracker(registration);
+            
+            if (registerForMultipleRequests(ref)) {
+                ServiceRegistration serviceRegistration = context.registerService(MultipleHandlerFactoryService.class.getName(), new AJAXActionServiceAdapterHandler(new DispatcherMultipleServiceFactoryHandler(dispatcher, module), module), null);
+                serviceRegistrations.put(module, serviceRegistration);
+            }
+        }
+        
+        private boolean registerForMultipleRequests(ServiceReference ref) {
+            Object property = ref.getProperty("multiple");
+            if (property == null) {
+                return true;
+            }
+            return Autoboxing.a2b(property);
+        }
+
+        public void removed(ServiceReference ref, AJAXActionServiceFactory thing) {
+            String module = (String) ref.getProperty("module");
+            dispatcher.remove(module);
+            SessionServletRegistration tracker = registrations.remove(module);
+            tracker.remove();
+            forgetTracker(tracker);
+            serviceRegistrations.remove(module).unregister();
+        }
+
+        
+    }
+
+}
+
