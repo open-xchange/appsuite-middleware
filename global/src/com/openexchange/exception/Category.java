@@ -153,6 +153,30 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
+     * The default category for a try-again issue.
+     */
+    public static final Category CATEGORY_TRY_AGAIN = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.DEBUG;
+        }
+
+        public Type getType() {
+            return Category.EnumType.TRY_AGAIN;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.TRY_AGAIN.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
      * A category's type.
      */
     public static interface Type {
