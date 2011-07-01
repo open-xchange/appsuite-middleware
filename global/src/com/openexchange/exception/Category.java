@@ -129,6 +129,30 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
+     * The default category for a permission-denied issue.
+     */
+    public static final Category CATEGORY_PERMISSION_DENIED = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.DEBUG;
+        }
+
+        public Type getType() {
+            return Category.EnumType.PERMISSION_DENIED;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.PERMISSION_DENIED.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
      * A category's type.
      */
     public static interface Type {
