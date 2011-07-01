@@ -19,9 +19,10 @@ RMI and SOAP.
 
 =head2 Installation and Configuration
 
-In order to use the SOAP Interface of the Open-Xchange Admin Daemon,
-you need the Open-Xchange Server and the Axis2 bundle. The SOAP
-Interface is a service that must be deployed into the Axis2 Bundle.
+In order to use the SOAP Interface of the Open-Xchange Admin Daemon, you need
+to install the package open-xchange-admin-soap. This package has a dependency
+to the Open-Xchange Server and the Axis2 bundle. The SOAP Interface is a
+service that must be deployed into the Axis2 Bundle.
 
 For more information about the Axis2 bundle, please refer to the
 Quick-OX-Axis2-Integration-Overview document, that ships with the
