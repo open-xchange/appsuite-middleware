@@ -87,7 +87,6 @@ exec $JAVA_BIN $JAVA_XTRAOPTS \
 	-Dopenexchange.propdir2=$OXPREFIX/$COMMONCONFIGDIR \
 	-Dconfigdir=$OXPREFIX/$OXCONFIGDIR \
 	-Djava.util.logging.config.file=$LOGGINGPROPERTIES \
-	-Duser.timezone=GMT \
 	-Dlibdir=$BUNDLELIBPATH \
 	-jar $OSGIBUNDLE \
 	-configuration file:$OSGIPATH/ >> $CONSOLELOG 2>&1
