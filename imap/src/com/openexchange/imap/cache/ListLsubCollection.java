@@ -434,13 +434,13 @@ final class ListLsubCollection {
      */
     public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         if (deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
-            init(listMap.containsKey(fullName), imapFolder, doStatus, doGetAcl);
+            init(true, imapFolder, doStatus, doGetAcl);
             return;
         }
         /*
          * Do a full re-build anyway...
          */
-        init(listMap.containsKey(fullName), imapFolder, doStatus, doGetAcl);
+        init(true, imapFolder, doStatus, doGetAcl);
         return;
 
         // try {
