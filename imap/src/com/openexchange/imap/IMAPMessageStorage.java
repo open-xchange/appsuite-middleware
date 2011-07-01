@@ -929,14 +929,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
                 }
             } catch (final MessagingException e) {
-                if (e.getMessage().indexOf("Over quota") > -1) {
+                if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
                     /*
                      * We face an Over-Quota-Exception
                      */
                     throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
                 }
                 final Exception nestedExc = e.getNextException();
-                if (nestedExc != null && nestedExc.getMessage().indexOf("Over quota") > -1) {
+                if (nestedExc != null && nestedExc.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
                     /*
                      * We face an Over-Quota-Exception
                      */
