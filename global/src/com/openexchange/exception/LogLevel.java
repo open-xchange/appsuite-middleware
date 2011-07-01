@@ -83,6 +83,17 @@ public enum LogLevel {
     FATAL;
 
     /**
+     * The default comparator for {@link LogLevel}.
+     */
+    public static final Comparator<LogLevel> COMPARATOR = new Comparator<LogLevel>() {
+
+        public int compare(final LogLevel o1, final LogLevel o2) {
+            return (-o1.ordinal() + o2.ordinal());
+        }
+
+    };
+
+    /**
      * Checks if this log level includes specified category's log level.
      * 
      * @param category The category whose loglevel is possibly included
@@ -158,17 +169,6 @@ public enum LogLevel {
             break;
         }
     }
-
-    /**
-     * The default {@link Comparator} for log levels.
-     */
-    public static final Comparator<LogLevel> COMPARATOR = new Comparator<LogLevel>() {
-
-        public int compare(final LogLevel o1, final LogLevel o2) {
-            return (-o1.ordinal() + o2.ordinal());
-        }
-
-    };
 
     /**
      * Gets the log levels in ranked order.

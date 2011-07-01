@@ -206,7 +206,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Logs this exception using specified logger.
+     * Logs this exception - if allowed - using specified logger.
      * 
      * @param log The logger
      */
