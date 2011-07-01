@@ -130,7 +130,7 @@ final class ListLsubCollection {
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
-        init(imapFolder, doStatus, doGetAcl);
+        init(false, imapFolder, doStatus, doGetAcl);
     }
 
     /**
@@ -150,7 +150,7 @@ final class ListLsubCollection {
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
-        init(imapStore, doStatus, doGetAcl);
+        init(false, imapStore, doStatus, doGetAcl);
     }
 
     private void checkDeprecated() {
@@ -247,7 +247,7 @@ final class ListLsubCollection {
      */
     public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
         clear();
-        init(imapStore, doStatus, doGetAcl);
+        init(true, imapStore, doStatus, doGetAcl);
     }
 
     /**
@@ -260,21 +260,23 @@ final class ListLsubCollection {
      */
     public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         clear();
-        init(imapFolder, doStatus, doGetAcl);
+        init(true, imapFolder, doStatus, doGetAcl);
     }
 
-    private void init(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    private void init(final boolean clearMaps, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
         try {
-            init((IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
+            init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
     }
 
-    private void init(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         try {
-            // listMap.clear();
-            // lsubMap.clear();
+            if (clearMaps) {
+                listMap.clear();
+                lsubMap.clear();
+            }
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             /*
              * Perform LIST "" ""
@@ -288,7 +290,7 @@ final class ListLsubCollection {
 
             });
             /*
-             * Perform LIST "*" %
+             * Perform LIST "" "*"
              */
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -299,7 +301,7 @@ final class ListLsubCollection {
 
             });
             /*
-             * Perform LSUB "*" %
+             * Perform LSUB "" "*"
              */
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -432,13 +434,13 @@ final class ListLsubCollection {
      */
     public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
         if (deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
-            init(imapFolder, doStatus, doGetAcl);
+            init(listMap.containsKey(fullName), imapFolder, doStatus, doGetAcl);
             return;
         }
         /*
          * Do a full re-build anyway...
          */
-        init(imapFolder, doStatus, doGetAcl);
+        init(listMap.containsKey(fullName), imapFolder, doStatus, doGetAcl);
         return;
 
         // try {
@@ -566,8 +568,13 @@ final class ListLsubCollection {
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
             final Set<String> unsubscribeFullNames = lsub ? new HashSet<String>(4) : Collections.<String> emptySet();
-            final Set<String> removeFullNames = new HashSet<String>(map.keySet());
-            removeFullNames.remove(ROOT_FULL_NAME);
+            final Set<String> removeFullNames;
+            if (map.isEmpty()) {
+                removeFullNames = Collections.<String> emptySet();
+            } else {
+                removeFullNames = new HashSet<String>(map.keySet());
+                removeFullNames.remove(ROOT_FULL_NAME);
+            }
             final ListLsubEntryImpl rootEntry = map.get(ROOT_FULL_NAME);
             /*
              * Get sorted responses
@@ -587,7 +594,9 @@ final class ListLsubCollection {
                     unsubscribeFullNames.add(fullName);
                     continue;
                 }
-                removeFullNames.remove(fullName);
+                if (!removeFullNames.isEmpty()) {
+                    removeFullNames.remove(fullName);
+                }
                 {
                     final ListLsubEntryImpl oldEntry = map.get(fullName);
                     if (oldEntry == null) {

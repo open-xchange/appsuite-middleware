@@ -72,7 +72,10 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class ListLsubCache {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListLsubCache.Key.class);
+    /**
+     * The logger.
+     */
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListLsubCache.Key.class);
 
     private static final class Key {
 
@@ -427,15 +430,34 @@ public final class ListLsubCache {
             final FutureTask<ListLsubCollection> ft = new FutureTask<ListLsubCollection>(new Callable<ListLsubCollection>() {
 
                 public ListLsubCollection call() throws MailException {
-                    final String[] shared;
-                    final String[] user;
+                    String[] shared;
+                    String[] user;
                     try {
                         final IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
-                        if (imapStore.hasCapability("NAMESPACE")) {
+                        try {
                             shared = check(NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId));
-                            user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
-                        } else {
+                        } catch (final MessagingException e) {
+                            if (imapStore.hasCapability("NAMESPACE")) {
+                                LOG.warn("Couldn't get shared namespaces.", e);
+                            } else {
+                                LOG.debug("Couldn't get shared namespaces.", e);
+                            }
                             shared = new String[0];
+                        } catch (final RuntimeException e) {
+                            LOG.warn("Couldn't get shared namespaces.", e);
+                            shared = new String[0];
+                        }
+                        try {
+                            user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
+                        } catch (final MessagingException e) {
+                            if (imapStore.hasCapability("NAMESPACE")) {
+                                LOG.warn("Couldn't get user namespaces.", e);
+                            } else {
+                                LOG.debug("Couldn't get user namespaces.", e);
+                            }
+                            user = new String[0];
+                        } catch (final RuntimeException e) {
+                            LOG.warn("Couldn't get user namespaces.", e);
                             user = new String[0];
                         }
                     } catch (final MessagingException e) {
