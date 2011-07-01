@@ -64,24 +64,33 @@ import com.openexchange.tools.servlet.AjaxException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+// The PollingActionFactory implements the entry point for the dispatcher for this module. It holds a map of all the actions this module implements
 public class PollingActionFactory implements AJAXActionServiceFactory {
 
+	// The ServiceLookup provides access to the services we want to use from the OSGi framework.
     private ServiceLookup services;
 
+    //  This map holds our action implementations
     private Map<String, AbstractPollingAction> ACTIONS = new HashMap<String, AbstractPollingAction>();
     
     public PollingActionFactory(ServiceLookup services) {
         super();
         this.services = services;
-        
+        // Here we assemble the actions our module understands. Note that we pass a reference to this instance to the constructor
+        // so that we can put some centralized services (mainly, looking up the PollService) here.
         ACTIONS.put("new", new CreateAction(this));
         ACTIONS.put("get", new GetAction(this));
+        ACTIONS.put("all", new AllAction(this));
+        // Try to add an update action!
+        // Try to add a delete action!
     }
 
     public AJAXActionService createActionService(String action) throws AjaxException {
         return ACTIONS.get(action);
     }
-
+    
+    // The actions all need access to the PollService. That is why we passed this instance to the actions, and the in turn may call this method to
+    // access the PollService
     public PollService getPollService() {
         return services.getService(PollService.class);
     }

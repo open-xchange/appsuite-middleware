@@ -69,28 +69,47 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+// The PollJSONConverter tells the framework it knows how to turn a poll into a JSONObject
+// Note that it can also handle Lists of Polls. The format specification is essentially a contract between the actions and a converter. Everything an action spits out in a certain format, the corresponding
+// Converter has to know how to handle. As a convention, converters for older style modules should know how to write single objects and search iterators, more modern modules will usually work with lists.
 public class PollJSONConverter implements ResultConverter {
 
     public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws AbstractOXException {
-        Poll poll = (Poll) result.getResultObject();
-        
-        JSONObject object = convert(poll);
-        
-        result.setResultObject(object, "json");
+    	Object resultObject = result.getResultObject();
+    	
+    	if (resultObject instanceof Poll) {
+        	Poll poll = (Poll) result.getResultObject();
+            
+            JSONObject object = convert(poll);
+            
+            result.setResultObject(object, "json");
+    	} else if (resultObject instanceof List) {
+    		List<Poll> polls = (List<Poll>) resultObject;
+    		JSONArray arr = new JSONArray();
+    		for (Poll poll : polls) {
+				arr.put(convert(poll));
+			}
+    		
+    		result.setResultObject(arr, "json");
+    	}
     }
 
+    // The input format we accept. This converter accepts everything labelled poll
     public String getInputFormat() {
         return "poll";
     }
 
+    // And it spits out json
     public String getOutputFormat() {
         return "json";
     }
 
+    // And we consider it a pretty good conversion
     public Quality getQuality() {
         return Quality.GOOD;
     }
     
+    // The meat of this class. Here be dragons ;)
     private JSONObject convert(Poll poll) throws AbstractOXException {
         try {
             JSONObject object = new JSONObject();

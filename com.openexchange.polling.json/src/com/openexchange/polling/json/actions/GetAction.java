@@ -60,12 +60,17 @@ import com.openexchange.polling.PollService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+//This action implements the "get" call
+//Note that we extend the AbstractPollingAction, which is responsible for constructing a nice PollingRequest
 public class GetAction extends AbstractPollingAction {
 
     protected GetAction(PollingActionFactory factory) {
         super(factory);
     }
-
+    
+    // So this is what we do in this action. Note how little must be done in an action. While refactoring or creating new HTTP API interfaces
+    // We're aiming for a very slim controller (that's what actions are in an Model-View-Controller architecture) much like this one. Most complicated
+    // stuff should happen at the model level (meaning, mostly in the PollService or the Poll class). 
     @Override
     protected AJAXRequestResult perform(PollingRequest req) throws AbstractOXException {
         req.require("id");
@@ -76,6 +81,9 @@ public class GetAction extends AbstractPollingAction {
         
         Poll poll = polls.getPoll(id, cid);
         
+        // We return a result of type 'poll' This is the type that is used when trying to convert this result into something the client understands
+        // When you loo att the PollJSONConverter, it claims it can turn a poll into JSON. This, supplying a Poll Object and saying its format is 'pull' is the
+        // other half of that equation.
         return new AJAXRequestResult(poll, "poll");
     }
 

@@ -61,8 +61,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+// It's usually a good idea to have a super class for all actions. Here we can put stuff all actions have to do in common
+// Or implement some control flow, that every invocation of every method has to go through anyway.
 public abstract class AbstractPollingAction implements AJAXActionService {
 
+	// The factory, which gives us access to the poll service, among other things
     protected PollingActionFactory factory;
     
     protected AbstractPollingAction(PollingActionFactory factory) {
@@ -70,11 +73,16 @@ public abstract class AbstractPollingAction implements AJAXActionService {
         this.factory = factory;
     }
 
+    // This is the method we have to implement as an AJAXActionService
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
-        PollingRequest req = new PollingRequest(request, session, factory);
-        return perform(req);
+    	// We construct a PollingRequest. I've found it useful to wrap request data, along with the session and our factory into a single request object. Everything that has to do with parsing request parameters or bodies
+    	// can be put neatly into this class.
+    	PollingRequest req = new PollingRequest(request, session, factory);
+    	// Call our concrete subclasses perorm method, with our custom request object
+    	return perform(req);
     }
 
+    // This is the method our subclasses must implement, where we put the concrete logic for an action.
     protected abstract AJAXRequestResult perform(PollingRequest req) throws AbstractOXException;
 
 }
