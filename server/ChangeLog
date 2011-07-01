@@ -1,3 +1,7 @@
+* 2011-07-01 - tobias.prinz@open-xchange.com
+
+ - Bugfix #19600: Deleting the first and only user of a context made the filestore inaccessible to other users in that context. Fixed. 
+
 * 2011-06-30 - steffen.templin@open-xchange.com
 
  - Bugfix #19670: To see the updater-download-link in the OX GUI the user also needs permissions for USM istead of only for OLOX20.

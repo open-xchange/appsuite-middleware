@@ -110,6 +110,11 @@ public class LocalFileStorage implements FileStorage {
     private final File storage;
 
     /**
+     * Whether the path to this filestorage has already been created
+     */
+	private boolean alreadyInitialized;
+
+    /**
      * Default buffer size.
      */
     private static final int DEFAULT_BUFSIZE = 1024;
@@ -154,29 +159,8 @@ public class LocalFileStorage implements FileStorage {
         super();
         storage = new File(uri);
         
-        if (!storage.exists()) {
-            try {
-                LOCK.lock();
-                if (!storage.exists() && !mkdirs(storage)) {
-                    throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
-                }
-            } finally {
-                LOCK.unlock();
-            }            
-        }
+       	alreadyInitialized = storage.exists();
         
-        lock(LOCK_TIMEOUT);
-        try {
-            if (!exists(STATEFILENAME)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Repairing.");
-                }
-                final State state = repairState();
-                saveState(state);
-            }
-        } finally {
-            unlock();
-        }
     }
 
     /**
@@ -331,6 +315,7 @@ public class LocalFileStorage implements FileStorage {
      * @throws FileStorageException if an error occurs while storing the file.
      */
     public String saveNewFile(final InputStream input) throws FileStorageException {
+    	initialize();
         String nextentry = null;
         State state = null;
         lock(LOCK_TIMEOUT);
@@ -848,5 +833,35 @@ public class LocalFileStorage implements FileStorage {
             return false;
         }
         return directory.mkdir();
+    }
+    
+    private void initialize() throws FileStorageException{
+    	if(alreadyInitialized)
+    		return;
+    	
+        try {
+            LOCK.lock();
+            if (!storage.exists() && !mkdirs(storage)) {
+                throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
+            }
+        } finally {
+            LOCK.unlock();
+        }
+        
+        lock(LOCK_TIMEOUT);
+        try {
+            if (!exists(STATEFILENAME)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Repairing.");
+                }
+                final State state = repairState();
+                saveState(state);
+            }
+        } finally {
+            unlock();
+        }
+        alreadyInitialized = true;
+
+
     }
 }
