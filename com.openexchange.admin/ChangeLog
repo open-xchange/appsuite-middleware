@@ -1,3 +1,7 @@
+* 2011-06-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #19653: Not starting administration daemon with GMT timezone anymore.
+
 * 2011-06-20 - marcus.klein@open-xchange.com
 
  - Bugfix #19495: listfilestore now works again if server_id something else than 2.
