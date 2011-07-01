@@ -63,12 +63,15 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+// The PollingRequest wraps all request data that is usually handed to us by the framework.
+// This is a good place to put everything that has to do with parameter handling and body parsing.
 public class PollingRequest {
 
     private AJAXRequestData request;
     private ServerSession session;
     private PollingActionFactory factory;
 
+    // Out neato PollParser. Turns a JSONObject into a Poll
     private static final PollParser PARSER = new PollParser();
     
     public PollingRequest(AJAXRequestData request, ServerSession session, PollingActionFactory factory) {
@@ -77,19 +80,25 @@ public class PollingRequest {
         this.factory = factory;
     }
 
+    // Handle the body. This will typically be used by new and update actions.
     public Poll getPoll() throws AbstractOXException {
         JSONObject object = (JSONObject) request.getData();
         return PARSER.parse(object);
     }
     
+    // The contextId usually comes from the session
     public int getContextId() {
         return session.getContextId();
     }
 
+    // A helpful delegate method. Add delegate methods as needed by the action implementations.
+    // ServerSession#getContext oder ServerSession#getUser are also popular for this.
     public void require(String... mandatoryParameters) throws AbstractOXException {
         request.require(mandatoryParameters);
     }
 
+    // Parse the ID as an int
+    // Every class for which we have a StringParser (which currently are all basic data types, Date and TimeSpan)
     public int getId() {
         return request.getParameter("id", int.class);
     }
