@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 13
+%define		ox_release 14
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -405,6 +405,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Jun 30 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19653: Not starting administration daemon with GMT timezone anymore.
 * Mon Jun 20 2011 - marcus.klein@open-xchange.com
  - Bugfix #19495: listfilestore now works again if server_id something else than 2.
 * Thu Jun 16 2011 - thorben.betten@open-xchange.com
