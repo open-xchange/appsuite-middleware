@@ -72,7 +72,6 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.cache.ListLsubEntry.ChangeState;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
@@ -567,14 +566,6 @@ final class ListLsubCollection {
         if (response.isOK()) {
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
-            final Set<String> unsubscribeFullNames = lsub ? new HashSet<String>(4) : Collections.<String> emptySet();
-            final Set<String> removeFullNames;
-            if (map.isEmpty()) {
-                removeFullNames = Collections.<String> emptySet();
-            } else {
-                removeFullNames = new HashSet<String>(map.keySet());
-                removeFullNames.remove(ROOT_FULL_NAME);
-            }
             final ListLsubEntryImpl rootEntry = map.get(ROOT_FULL_NAME);
             /*
              * Get sorted responses
@@ -587,16 +578,6 @@ final class ListLsubCollection {
                     mbox = Boolean.FALSE;
                 }
                 final String fullName = listLsubEntry.getFullName();
-                if (lsub && !listMap.containsKey(fullName)) {
-                    /*
-                     * Found a subscribed folder that does no more exist
-                     */
-                    unsubscribeFullNames.add(fullName);
-                    continue;
-                }
-                if (!removeFullNames.isEmpty()) {
-                    removeFullNames.remove(fullName);
-                }
                 {
                     final ListLsubEntryImpl oldEntry = map.get(fullName);
                     if (oldEntry == null) {
@@ -649,7 +630,7 @@ final class ListLsubCollection {
                 /*
                  * Handle parent map
                  */
-                handleParentMap(parentMap, separator, rootEntry, lsub, map, removeFullNames, false);
+                handleParentMap(parentMap, separator, rootEntry, lsub, map, null, false);
             }
             /*
              * Check namespace folders
@@ -686,24 +667,6 @@ final class ListLsubCollection {
                         rootEntry.addChildIfAbsent(namespaceFolder);
                         map.put(userNamespace, namespaceFolder);
                     }
-                }
-            }
-            /*
-             * Drop removed folders
-             */
-            if (!removeFullNames.isEmpty()) {
-                for (final String removeFullName : removeFullNames) {
-                    map.remove(removeFullName);
-                }
-            }
-            /*
-             * Unsubscribe folders
-             */
-            if (!unsubscribeFullNames.isEmpty()) {
-                for (final String unsubscribeFullName : unsubscribeFullNames) {
-                    final Argument args = new Argument();
-                    args.writeString(BASE64MailboxEncoder.encode(unsubscribeFullName));
-                    protocol.command("UNSUBSCRIBE", args);
                 }
             }
             /*
@@ -896,10 +859,12 @@ final class ListLsubCollection {
                         Boolean.TRUE,
                         lsub ? null : lsubMap).setNamespace(isNamespace(parentFullName));
                     map.put(parentFullName, parent);
-                    if (add) {
-                        set.add(parentFullName);
-                    } else {
-                        set.remove(parentFullName);
+                    if (null != set) {
+                        if (add) {
+                            set.add(parentFullName);
+                        } else {
+                            set.remove(parentFullName);
+                        }
                     }
                     final int pos = parentFullName.lastIndexOf(separator);
                     if (pos >= 0) {
