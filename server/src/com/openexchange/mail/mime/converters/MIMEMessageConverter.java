@@ -1926,16 +1926,16 @@ public final class MIMEMessageConverter {
                 part.writeTo(out);
                 headers = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
             } catch (final IOException e2) {
-                LOG.error("Unable to parse headers", e2);
+                LOG.warn("Unable to parse headers. Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
             } catch (final MessagingException e2) {
-                LOG.error("Unable to parse headers", e2);
+                LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
-            } catch (final IllegalArgumentException e2) {
-                LOG.error("Unable to parse headers", e2);
+            } catch (final RuntimeException e2) {
+                LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
             }
-        } catch (final IllegalArgumentException e) {
+        } catch (final RuntimeException e) {
             if (DEBUG) {
                 LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             }
@@ -1944,13 +1944,13 @@ public final class MIMEMessageConverter {
                 part.writeTo(out);
                 headers = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
             } catch (final IOException e2) {
-                LOG.error("Unable to parse headers", e2);
+                LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
             } catch (final MessagingException e2) {
-                LOG.error("Unable to parse headers", e2);
+                LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
-            } catch (final IllegalArgumentException e2) {
-                LOG.error("Unable to parse headers", e2);
+            } catch (final RuntimeException e2) {
+                LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
             }
         }
