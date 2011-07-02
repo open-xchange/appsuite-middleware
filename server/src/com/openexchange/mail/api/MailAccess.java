@@ -395,7 +395,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 
      * TODO: Add to configuration?
      */
-    private static final int MAX_PER_USER = 2;
+    private static final int MAX_PER_USER = 3;
 
     /**
      * Gets the appropriate {@link IMailAccessCache mail access cache} instance.
