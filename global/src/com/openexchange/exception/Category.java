@@ -105,7 +105,7 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
-     * The default category for a configuration issue.
+     * The default category for a configuration issue (e.g. missing required property).
      */
     public static final Category CATEGORY_CONFIGURATION = new Category() {
 
@@ -177,6 +177,54 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
+     * The default category for a connectivity issue (e.g. broken/lost TCP connection).
+     */
+    public static final Category CATEGORY_CONNECTIVITY = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.DEBUG;
+        }
+
+        public Type getType() {
+            return Category.EnumType.TRY_AGAIN;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.TRY_AGAIN.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
+     * The default category for a missing service or system (e.g. database).
+     */
+    public static final Category CATEGORY_SERVICE_DOWN = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.DEBUG;
+        }
+
+        public Type getType() {
+            return Category.EnumType.TRY_AGAIN;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.TRY_AGAIN.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
      * A category's type.
      */
     public static interface Type {
@@ -194,27 +242,35 @@ public interface Category extends Comparable<Category> {
      */
     public static enum EnumType implements Type {
         /**
-         * The default error category.
+         * The default error type.
          */
         ERROR,
         /**
-         * The try-again category
+         * The try-again type
          */
         TRY_AGAIN,
         /**
-         * The user-inoput category
+         * The user-input type
          */
         USER_INPUT,
         /**
-         * The permission-denid category
+         * The permission-denied type
          */
         PERMISSION_DENIED,
         /**
-         * The configuration category
+         * The configuration type
          */
         CONFIGURATION,
         /**
-         * The warning category 
+         * The connectivity type.
+         */
+        CONNECTIVITY,
+        /**
+         * The service-down type.
+         */
+        SERVICE_DOWN,
+        /**
+         * The warning type 
          */
         WARNING;
 
