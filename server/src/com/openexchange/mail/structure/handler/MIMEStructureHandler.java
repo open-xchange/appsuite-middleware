@@ -343,7 +343,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 /*
                  * Ensure proper content type
                  */
-                final JSONObject headers = currentMailObject.getJSONObject(KEY_HEADERS);
+                final JSONObject headers = currentMailObject.optJSONObject(KEY_HEADERS);
                 if (null == headers) {
                     // Add multipart's headers
                     final Map<String, String> headersMap = new HashMap<String, String>(1);
@@ -488,7 +488,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
-                fillBodyPart(bodyObject, part, currentMailObject.getJSONObject(KEY_HEADERS), id);
+                final JSONObject headersJSONObject = currentMailObject.optJSONObject(KEY_HEADERS);
+                fillBodyPart(bodyObject, part, null == headersJSONObject ? new JSONObject() : headersJSONObject, id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
@@ -508,7 +509,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
-                fillBodyPart(bodyObject, size, isp, contentType, currentMailObject.getJSONObject(KEY_HEADERS), id);
+                final JSONObject headersJSONObject = currentMailObject.optJSONObject(KEY_HEADERS);
+                fillBodyPart(bodyObject, size, isp, contentType, null == headersJSONObject ? new JSONObject() : headersJSONObject, id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
