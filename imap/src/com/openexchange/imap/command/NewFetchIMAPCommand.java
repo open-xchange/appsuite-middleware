@@ -577,12 +577,12 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     }
 
     @Override
-    protected void handleResponse(final Response currentReponse) throws MessagingException {
+    protected boolean handleResponse(final Response currentReponse) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */
         if (!FetchResponse.class.isInstance(currentReponse)) {
-            return;
+            return false;
         }
         final FetchResponse fetchResponse = (FetchResponse) currentReponse;
         int seqnum;
@@ -669,6 +669,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (!error) {
             retval[pos] = mail;
         }
+        return true;
     }
 
     private static final Set<Integer> ENV_FIELDS;

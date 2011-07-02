@@ -131,11 +131,12 @@ public abstract class AbstractIMAPCommand<T> {
                 if (response.isOK()) {
                     try {
                         for (int index = 0; (index < r.length) && abstractIMAPCommand.addLoopCondition(); index++) {
-                            abstractIMAPCommand.handleResponse(r[index]);
-                            /*
-                             * Discard handled response
-                             */
-                            r[index] = null;
+                            if (abstractIMAPCommand.handleResponse(r[index])) {
+                                /*
+                                 * Discard handled response
+                                 */
+                                r[index] = null;
+                            }
                         }
                         /*
                          * Dispatch unhandled responses
@@ -229,7 +230,7 @@ public abstract class AbstractIMAPCommand<T> {
      * @param response The response
      * @throws MessagingException If a message-related error occurs
      */
-    protected abstract void handleResponse(Response response) throws MessagingException;
+    protected abstract boolean handleResponse(Response response) throws MessagingException;
 
     /**
      * Gets the return value.

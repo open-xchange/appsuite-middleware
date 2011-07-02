@@ -123,8 +123,9 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
     }
 
     @Override
-    protected void handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(final Response response) throws MessagingException {
         // Nothing to do
+        return false;
     }
 
 }

@@ -213,9 +213,12 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
     private static final String COPYUID = "copyuid";
 
     @Override
-    protected void handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(final Response response) throws MessagingException {
+        if (!response.isOK()) {
+            return false;
+        }
         if (fast) {
-            return;
+            return true;
         }
         final String resp = response.toString().toLowerCase(Locale.ENGLISH);
         /*-
@@ -265,6 +268,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
             }
             proceed = false;
         }
+        return true;
     }
 
     private static final class COPYUIDResponse {

@@ -122,9 +122,9 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
     }
 
     @Override
-    protected void handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(final Response response) throws MessagingException {
         if (!(response instanceof FetchResponse)) {
-            return;
+            return false;
         }
         final FetchResponse f = (FetchResponse) response;
         /*
@@ -134,9 +134,10 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
         final long correspondingUID = uids[fetchRespIndex++];
         if (correspondingUID != currentUID) {
             LOG.warn("IMAPUtils.getSequenceNumbers(): UID mismatch");
-            return;
+            return false;
         }
         sia.append(f.getNumber());
+        return true;
     }
 
 }
