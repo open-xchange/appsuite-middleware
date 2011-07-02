@@ -71,6 +71,7 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -215,7 +216,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (int i = 0; i < size; i++) {
                 completionService.submit(new LoggingCallable<GetMessagesResult>(session) {
 
-                    public GetMessagesResult call() throws Exception {
+                    public GetMessagesResult call() throws MailException {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
@@ -229,17 +230,34 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         }
                         try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
-                            final int innersize = folderUIDMap.size();
-                            final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
-                            for (int j = 0; j < innersize; j++) {
+                            for (final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator(); inneriter.hasNext();) {
                                 final Map.Entry<String, List<String>> e = inneriter.next();
                                 final String folder = e.getKey();
                                 final List<String> uids = e.getValue();
-                                // Return object
-                                return new GetMessagesResult(accountId, folder, mailAccess.getMessageStorage().getMessages(
-                                    folder,
-                                    uids.toArray(new String[uids.size()]),
-                                    fields));
+                                try {
+                                    return new GetMessagesResult(accountId, folder, mailAccess.getMessageStorage().getMessages(
+                                        folder,
+                                        uids.toArray(new String[uids.size()]),
+                                        fields));
+                                } catch (final MailException me) {
+                                    final MailConfig config = mailAccess.getMailConfig();
+                                    final StringBuilder tmp = new StringBuilder(128);
+                                    tmp.append("Couldn't get messages from folder \"");
+                                    tmp.append((null == folder ? "<unknown>" : folder)).append("\" from server \"").append(
+                                        config.getServer());
+                                    tmp.append("\" for login \"").append(config.getLogin()).append("\".");
+                                    getLogger().warn(tmp.toString(), me);
+                                    return GetMessagesResult.EMPTY_RESULT;
+                                } catch (final RuntimeException rte) {
+                                    final MailConfig config = mailAccess.getMailConfig();
+                                    final StringBuilder tmp = new StringBuilder(128);
+                                    tmp.append("Couldn't get messages from folder \"");
+                                    tmp.append((null == folder ? "<unknown>" : folder)).append("\" from server \"").append(
+                                        config.getServer());
+                                    tmp.append("\" for login \"").append(config.getLogin()).append("\".");
+                                    getLogger().warn(tmp.toString(), rte);
+                                    return GetMessagesResult.EMPTY_RESULT;
+                                }
                             }
                         } finally {
                             mailAccess.close(true);
@@ -400,7 +418,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
-                    public List<MailMessage> call() throws Exception {
+                    public List<MailMessage> call() {
                         final int accountId = mailAccount.getId();
                         final MailAccess<?, ?> mailAccess;
                         try {
@@ -410,9 +428,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             getLogger().error(e.getMessage(), e);
                             return Collections.emptyList();
                         }
+                        String fn = null;
                         try {
-                            // Get real fullname
-                            final String fn = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullName);
+                            // Get real full name
+                            fn = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
                                 return Collections.emptyList();
@@ -429,6 +448,20 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 messages.add(umm);
                             }
                             return messages;
+                        } catch (final MailException e) {
+                            final StringBuilder tmp = new StringBuilder(128);
+                            tmp.append("Couldn't get messages from folder \"");
+                            tmp.append((null == fn ? "<unknown>" : fn)).append("\" from server \"").append(mailAccount.getMailServer());
+                            tmp.append("\" for login \"").append(mailAccount.getLogin()).append("\".");
+                            getLogger().warn(tmp.toString(), e);
+                            return Collections.emptyList();
+                        } catch (final RuntimeException e) {
+                            final StringBuilder tmp = new StringBuilder(128);
+                            tmp.append("Couldn't get messages from folder \"");
+                            tmp.append((null == fn ? "<unknown>" : fn)).append("\" from server \"").append(mailAccount.getMailServer());
+                            tmp.append("\" for login \"").append(mailAccount.getLogin()).append("\".");
+                            getLogger().warn(tmp.toString(), e);
+                            return Collections.emptyList();
                         } finally {
                             mailAccess.close(true);
                         }

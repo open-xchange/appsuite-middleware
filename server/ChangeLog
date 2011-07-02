@@ -4,6 +4,7 @@
  - Bugfix #19683: Fixed NPE in Unified Mail
  - Bugfix #19684: Dealing with possible missing headers when writing OLOX2's structured JSON mail object
  - Bugfix #19628: Safe reading of a message's address headers
+ - Bugfix #19657: Dealing with possible failure when reading from an account's folder
 
 * 2011-07-01 - thorben.betten@open-xchange.com
 
