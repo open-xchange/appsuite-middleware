@@ -57,10 +57,10 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.search.FromStringTerm;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
@@ -127,7 +127,8 @@ public final class FromTerm extends SearchTerm<String> {
             }          
             return (getAllAddresses(addresses).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            LogFactory.getLog(FromTerm.class).warn("Error during search.", e);
+            return false;
         }
     }
 

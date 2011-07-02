@@ -3,6 +3,7 @@
  - Bugfix #19561: Proper re-initialization of LIST/LSUB cache
  - Bugfix #19683: Fixed NPE in Unified Mail
  - Bugfix #19684: Dealing with possible missing headers when writing OLOX2's structured JSON mail object
+ - Bugfix #19628: Safe reading of a message's address headers
 
 * 2011-07-01 - thorben.betten@open-xchange.com
 

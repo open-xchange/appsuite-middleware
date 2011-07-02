@@ -56,6 +56,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -116,20 +117,28 @@ public final class BodyTerm extends SearchTerm<String> {
 
     @Override
     public boolean matches(final Message msg) throws MailException {
-        final String text = getTextContent(msg);
-        if (text == null) {
-            if (null == pattern) {
-                return true;
+        try {
+            final String text = getTextContent(msg);
+            if (text == null) {
+                if (null == pattern) {
+                    return true;
+                }
+                return false;
             }
+            if (null == pattern) {
+                return false;
+            }
+            if (containsWildcard()) {
+                return toRegex(pattern).matcher(text).find();
+            }
+            return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
+        } catch (final MailException e) {
+            LogFactory.getLog(FromTerm.class).warn("Error during search.", e);
+            return false;
+        } catch (final RuntimeException e) {
+            LogFactory.getLog(FromTerm.class).warn("Error during search.", e);
             return false;
         }
-        if (null == pattern) {
-            return false;
-        }
-        if (containsWildcard()) {
-            return toRegex(pattern).matcher(text).find();
-        }
-        return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
     }
 
     @Override

@@ -53,10 +53,10 @@ import java.util.Collection;
 import java.util.Locale;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
 
 /**
  * {@link SubjectTerm}
@@ -96,7 +96,8 @@ public final class SubjectTerm extends SearchTerm<String> {
         try {
             subject = msg.getSubject();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            LogFactory.getLog(SubjectTerm.class).warn("Error during search.", e);
+            return false;
         }
         if (subject != null) {
             if (containsWildcard()) {
