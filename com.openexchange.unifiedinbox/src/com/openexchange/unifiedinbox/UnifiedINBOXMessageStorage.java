@@ -307,7 +307,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             // Get messages
             final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, fields);
             for (final MailMessage mail : mails) {
-                mail.setFolder(fullName);
+                if (null != mail) {
+                    mail.setFolder(fullName);
+                }
             }
             return mails;
         } finally {
