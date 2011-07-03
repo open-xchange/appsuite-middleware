@@ -74,17 +74,15 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     // ([A-Z_]+)\((".*").*,
     // public static final String $1_MSG = $2;
-    
-    
+
     // /\*\*([\s*])*(\S.*\S)([\s*])*/
     // // $2
-    
-    
-    
+
     // ([A-Za-z_]+)\((".*"),
     // $1($1_MSG,
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXException.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXException.class));
 
     private static final long serialVersionUID = 2058371531364916608L;
 
@@ -191,6 +189,15 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Gets the numeric code.
+     * 
+     * @return The code
+     */
+    public int getCode() {
+        return code;
+    }
+
+    /**
      * Sets the error message which appears in log and is <b>not</b> shown to user.
      * 
      * @param logMessage The log error message
@@ -255,8 +262,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     /**
      * Gets the log message appropriate for specified log level.
      * <p>
-     * This is a convenience method that invokes {@link #getLogMessage(LogLevel, String)} with latter argument set to
-     * <code>null</code>.
+     * This is a convenience method that invokes {@link #getLogMessage(LogLevel, String)} with latter argument set to <code>null</code>.
      * 
      * @param logLevel The log level
      * @return The log message for specified log level or <code>null</code> if not loggable.
