@@ -225,6 +225,30 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
+     * The default category for a missing service or system (e.g. database).
+     */
+    public static final Category CATEGORY_TRUNCATED = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.ERROR;
+        }
+
+        public Type getType() {
+            return Category.EnumType.TRUNCATED;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.TRUNCATED.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
      * A category's type.
      */
     public static interface Type {
@@ -269,6 +293,10 @@ public interface Category extends Comparable<Category> {
          * The service-down type.
          */
         SERVICE_DOWN,
+        /**
+         * The category for truncated data.
+         */
+        TRUNCATED,
         /**
          * The warning type 
          */
