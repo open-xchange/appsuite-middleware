@@ -121,7 +121,7 @@ import com.openexchange.tx.TransactionException;
  */
 final class OXFolderManagerImpl extends OXFolderManager {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXFolderManagerImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderManagerImpl.class));
 
     /**
      * No options.

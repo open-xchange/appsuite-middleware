@@ -53,30 +53,31 @@ import static com.openexchange.tx.TransactionExceptionMessages.CANNOT_COMMIT_MSG
 import static com.openexchange.tx.TransactionExceptionMessages.CANNOT_FINISH_MSG;
 import static com.openexchange.tx.TransactionExceptionMessages.CANNOT_ROLLBACK_MSG;
 import static com.openexchange.tx.TransactionExceptionMessages.NO_COMPLETE_ROLLBACK_MSG;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link TransactionExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum TransactionExceptionCodes implements OXErrorMessage {
+public enum TransactionExceptionCodes {
 
     /** This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool! */
-    NO_COMPLETE_ROLLBACK(NO_COMPLETE_ROLLBACK_MSG, Category.CODE_ERROR, 1),
+    NO_COMPLETE_ROLLBACK(NO_COMPLETE_ROLLBACK_MSG, Category.CATEGORY_ERROR, 1),
     /** Cannot commit transaction to write DB */
-    CANNOT_COMMIT(CANNOT_COMMIT_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 400),
+    CANNOT_COMMIT(CANNOT_COMMIT_MSG, Category.CATEGORY_SERVICE_DOWN, 400),
     /** Cannot rollback transaction in write DB */
-    CANNOT_ROLLBACK(CANNOT_ROLLBACK_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 401),
+    CANNOT_ROLLBACK(CANNOT_ROLLBACK_MSG, Category.CATEGORY_SERVICE_DOWN, 401),
     /** Cannot finish transaction */
-    CANNOT_FINISH(CANNOT_FINISH_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 402);
+    CANNOT_FINISH(CANNOT_FINISH_MSG, Category.CATEGORY_SERVICE_DOWN, 402);
 
     private String message;
     private Category category;
     private int number;
 
-    private TransactionExceptionCodes(String message, Category category, int number) {
+    private TransactionExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
@@ -98,11 +99,37 @@ public enum TransactionExceptionCodes implements OXErrorMessage {
         return category;
     }
 
-    public TransactionException create(Object... args) {
-        return TXExceptionFactory.getInstance().create(this, args);
+    /**
+     * Creates an {@link OXException} instance using this error code.
+     * 
+     * @return The newly created {@link OXException} instance.
+     */
+    public OXException create() {
+        return create(new Object[0]);
     }
 
-    public TransactionException create(Throwable cause, Object... args) {
-        return TXExceptionFactory.getInstance().create(this, cause, args);
+    /**
+     * Creates an {@link OXException} instance using this error code.
+     * 
+     * @param logArguments The arguments for log message.
+     * @return The newly created {@link OXException} instance.
+     */
+    public OXException create(final Object... logArguments) {
+        return create(null, logArguments);
+    }
+
+    private static final String PREFIX = "TX";
+
+    /**
+     * Creates an {@link OXException} instance using this error code.
+     * 
+     * @param cause The initial cause for {@link OXException}
+     * @param logArguments The arguments for log message.
+     * @return The newly created {@link OXException} instance.
+     */
+    public OXException create(final Throwable cause, final Object... logArguments) {
+        return new OXException(number, OXExceptionStrings.MESSAGE, cause).setPrefix(PREFIX).addCategory(category).setLogMessage(
+            message,
+            logArguments);
     }
 }

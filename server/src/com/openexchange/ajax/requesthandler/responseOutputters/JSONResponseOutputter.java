@@ -80,7 +80,7 @@ import com.openexchange.tools.servlet.OXJSONException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JSONResponseOutputter implements ResponseOutputter {
-    private static final Log LOG = LogFactory.getLog(JSONResponseOutputter.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseOutputter.class));
     
     public int getPriority() {
         return 0;

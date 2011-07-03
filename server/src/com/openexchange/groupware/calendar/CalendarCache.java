@@ -53,8 +53,8 @@ import java.io.Serializable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -70,7 +70,7 @@ public final class CalendarCache {
 
     private static final String CACHE_NAME = "CalendarCache";
 
-    private static final Log LOG = LogFactory.getLog(CalendarCache.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarCache.class));
     
     private Cache jcs;
     
@@ -78,7 +78,7 @@ public final class CalendarCache {
         try {
             try {
                 jcs = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_NAME);
-            } catch (final CacheException ce) {
+            } catch (final OXException ce) {
                 LOG.error("CalendarCache could not be initialized!", ce);
             }
         } catch (final Exception e) {
@@ -97,7 +97,7 @@ public final class CalendarCache {
         return instance;
     }
     
-    public void add(final Object key, final String groupKey, final Object o) throws CacheException {
+    public void add(final Object key, final String groupKey, final Object o) throws OXException {
         jcs.putInGroup((Serializable) key, groupKey, (Serializable) o);
     }
     
@@ -105,7 +105,7 @@ public final class CalendarCache {
         return jcs.getFromGroup((Serializable) key, groupKey);
     }
     
-    public void clear() throws CacheException {
+    public void clear() throws OXException {
         jcs.clear();
     }
     

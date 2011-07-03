@@ -77,7 +77,7 @@ public class Reminder extends DataServlet {
 	 */
 	private static final long serialVersionUID = 7117849531568676025L;
 	
-	private static final Log LOG = LogFactory.getLog(Reminder.class);
+	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Reminder.class));
 	
 	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {

@@ -64,7 +64,7 @@ public class ContactConfig {
 
     private static final ContactConfig SINGLETON = new ContactConfig();
 
-    private static final Log LOG = LogFactory.getLog(ContactConfig.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ContactConfig.class));
 
     private final Properties props = new Properties();
 

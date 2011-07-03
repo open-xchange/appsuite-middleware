@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavPutAction extends AbstractAction {
 
-	private static final Log LOG = LogFactory.getLog(WebdavPutAction.class);
+	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(WebdavPutAction.class));
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		final WebdavResource resource = req.getResource();

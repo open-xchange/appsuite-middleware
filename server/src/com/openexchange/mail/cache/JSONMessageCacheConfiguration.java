@@ -252,7 +252,7 @@ public final class JSONMessageCacheConfiguration {
         }
 
         logBuilder.append("JSON message cache properties successfully loaded!");
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(JSONMessageCacheConfiguration.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageCacheConfiguration.class));
         if (logger.isInfoEnabled()) {
             logger.info(logBuilder.toString());
         }

@@ -82,7 +82,7 @@ import com.openexchange.tools.servlet.UploadServletException;
  */
 public final class AJPv13Task implements Task<Object> {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class));
 
     /**
      * Creates a new {@link AJPv13Task} instance.

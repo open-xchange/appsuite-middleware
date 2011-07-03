@@ -57,7 +57,8 @@ import java.util.Iterator;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.configuration.ConfigurationException.ConfigurationExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.io.IOUtils;
 
 /**
@@ -183,12 +184,12 @@ public abstract class AbstractConfig {
      * @return the name of the property file.
      * @throws ConfigurationException if determining the filename of the property file fails.
      */
-    protected abstract String getPropertyFileName() throws ConfigurationException;
+    protected abstract String getPropertyFileName() throws OXException;
 
     /**
      * Loads the properties file by using the JVM system property defining the path to the system.properties configuration file.
      */
-    protected final void loadPropertiesInternal() throws ConfigurationException {
+    protected final void loadPropertiesInternal() throws OXException {
         loadPropertiesInternal(getPropertyFileName());
     }
 
@@ -197,16 +198,16 @@ public abstract class AbstractConfig {
      * 
      * @param propFileName name of the file containing the system.properties.
      */
-    protected final void loadPropertiesInternal(final String propFileName) throws ConfigurationException {
+    protected final void loadPropertiesInternal(final String propFileName) throws OXException {
         if (null == propFileName) {
-            throw new ConfigurationException(Code.NO_FILENAME);
+            throw ConfigurationExceptionCodes.NO_FILENAME.create();
         }
         final File propFile = new File(propFileName);
         if (!propFile.exists()) {
-            throw new ConfigurationException(Code.FILE_NOT_FOUND, propFile.getAbsoluteFile());
+            throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(propFile.getAbsoluteFile());
         }
         if (!propFile.canRead()) {
-            throw new ConfigurationException(Code.NOT_READABLE, propFile.getAbsoluteFile());
+            throw ConfigurationExceptionCodes.NOT_READABLE.create(propFile.getAbsoluteFile());
         }
         loadProperties(propFile);
     }
@@ -216,16 +217,16 @@ public abstract class AbstractConfig {
      * 
      * @param propFile file containing the system.properties.
      */
-    protected final void loadProperties(final File propFile) throws ConfigurationException {
+    protected final void loadProperties(final File propFile) throws OXException {
         props = new Properties();
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(propFile);
             props.load(fis);
         } catch (final FileNotFoundException e) {
-            throw new ConfigurationException(Code.FILE_NOT_FOUND, propFile.getAbsolutePath(), e);
+            throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(propFile.getAbsolutePath(), e);
         } catch (final IOException e) {
-            throw new ConfigurationException(Code.READ_ERROR, propFile.getAbsolutePath(), e);
+            throw ConfigurationExceptionCodes.READ_ERROR.create(propFile.getAbsolutePath(), e);
         } finally {
             if (null != fis) {
                 try {

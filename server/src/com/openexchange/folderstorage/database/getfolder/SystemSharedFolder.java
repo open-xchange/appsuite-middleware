@@ -90,7 +90,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  */
 public final class SystemSharedFolder {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SystemSharedFolder.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SystemSharedFolder.class));
 
     /**
      * Initializes a new {@link SystemSharedFolder}.

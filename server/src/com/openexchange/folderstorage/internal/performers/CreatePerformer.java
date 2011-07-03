@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class CreatePerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CreatePerformer.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreatePerformer.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

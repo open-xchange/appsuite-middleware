@@ -73,7 +73,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class PasswordMechUpdateTask implements UpdateTask {
 
-	private static final Log LOG = LogFactory.getLog(PasswordMechUpdateTask.class);
+	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PasswordMechUpdateTask.class));
 
 	public int addedWithVersion() {
 		return 1;

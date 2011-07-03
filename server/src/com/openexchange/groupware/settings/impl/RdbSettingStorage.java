@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RdbSettingStorage extends SettingStorage {
 
-    private static final Log LOG = LogFactory.getLog(RdbSettingStorage.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RdbSettingStorage.class));
 
     /**
      * SQL statement for loading one specific user setting.

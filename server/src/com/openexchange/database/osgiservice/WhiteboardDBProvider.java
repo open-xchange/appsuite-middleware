@@ -53,8 +53,8 @@ import java.sql.Connection;
 import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.tools.global.OXCloseable;
@@ -69,8 +69,8 @@ public class WhiteboardDBProvider implements DBProvider{
     
     public static class Factory implements WhiteboardFactoryService<DBProvider> {
 
-        public DBProvider create(BundleContext context, Collection<OXCloseable> closeables) {
-            WhiteboardDBProvider provider = new WhiteboardDBProvider(context);
+        public DBProvider create(final BundleContext context, final Collection<OXCloseable> closeables) {
+            final WhiteboardDBProvider provider = new WhiteboardDBProvider(context);
             return provider;
         }
 
@@ -80,15 +80,15 @@ public class WhiteboardDBProvider implements DBProvider{
 
     }
 
-    private BundleContext context;
+    private final BundleContext context;
 
-    public WhiteboardDBProvider(BundleContext context) {
+    public WhiteboardDBProvider(final BundleContext context) {
         this.context = context;
     }
 
-    public Connection getReadConnection(Context ctx) throws DBPoolingException {
+    public Connection getReadConnection(final Context ctx) throws OXException {
         DBProvider provider = null;
-        ServiceReference reference = null;
+        ServiceReference<DBProvider> reference = null;
         try {
             reference = getReference();
             provider = getProvider(reference);
@@ -98,9 +98,9 @@ public class WhiteboardDBProvider implements DBProvider{
         }
     }
 
-    public Connection getWriteConnection(Context ctx) throws DBPoolingException {
+    public Connection getWriteConnection(final Context ctx) throws OXException {
         DBProvider provider = null;
-        ServiceReference reference = null;
+        ServiceReference<DBProvider> reference = null;
         try {
             reference = getReference();
             provider = getProvider(reference);
@@ -110,9 +110,9 @@ public class WhiteboardDBProvider implements DBProvider{
         }
     }
 
-    public void releaseReadConnection(Context ctx, Connection con) {
+    public void releaseReadConnection(final Context ctx, final Connection con) {
         DBProvider provider = null;
-        ServiceReference reference = null;
+        ServiceReference<DBProvider> reference = null;
         try {
             reference = getReference();
             provider = getProvider(reference);
@@ -122,9 +122,9 @@ public class WhiteboardDBProvider implements DBProvider{
         }
     }
 
-    public void releaseWriteConnection(Context ctx, Connection con) {
+    public void releaseWriteConnection(final Context ctx, final Connection con) {
         DBProvider provider = null;
-        ServiceReference reference = null;
+        ServiceReference<DBProvider> reference = null;
         try {
             reference = getReference();
             provider = getProvider(reference);
@@ -134,16 +134,16 @@ public class WhiteboardDBProvider implements DBProvider{
         }
     }
 
-    private void releaseProvider(ServiceReference reference) {
+    private void releaseProvider(final ServiceReference<DBProvider> reference) {
         context.ungetService(reference);
     }
 
-    private DBProvider getProvider(ServiceReference reference) {
-        return (DBProvider) context.getService(reference);
+    private DBProvider getProvider(final ServiceReference<DBProvider> reference) {
+        return context.getService(reference);
     }
 
-    private ServiceReference getReference() {
-        return context.getServiceReference(DBProvider.class.getName());
+    private ServiceReference<DBProvider> getReference() {
+        return context.getServiceReference(DBProvider.class);
     }
 
 }

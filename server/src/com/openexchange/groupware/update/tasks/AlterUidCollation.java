@@ -70,7 +70,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class AlterUidCollation implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(AlterUidCollation.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AlterUidCollation.class));
 
     private static final String SQL = "ALTER TABLE login2user MODIFY uid VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL";
 

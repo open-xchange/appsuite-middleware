@@ -50,7 +50,7 @@
 package com.openexchange.server;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ServerInitialization} - The {@link Initialization initialization} for server.
@@ -73,7 +73,7 @@ final class ServerInitialization implements Initialization {
         started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
         }
@@ -93,7 +93,7 @@ final class ServerInitialization implements Initialization {
         java.security.Security.setProperty("networkaddress.cache.negative.ttl", String.valueOf(10));
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;
         }

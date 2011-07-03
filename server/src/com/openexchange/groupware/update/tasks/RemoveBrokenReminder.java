@@ -81,7 +81,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(RemoveBrokenReminder.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RemoveBrokenReminder.class));
 
     /**
      * Default constructor.

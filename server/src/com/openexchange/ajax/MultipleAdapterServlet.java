@@ -79,7 +79,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public abstract class MultipleAdapterServlet extends PermissionServlet {
 
-    private static final Log LOG = LogFactory.getLog(MultipleAdapterServlet.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServlet.class));
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(MultipleAdapterServlet.class, LOG);
     
 

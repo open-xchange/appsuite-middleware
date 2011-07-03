@@ -74,7 +74,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 	
     private static final Property KEY = Property.INFOSTORE;
     
-    private static final Log LOG = LogFactory.getLog(InfostoreConfig.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostoreConfig.class));
     
     private static InfostoreConfig singleton;
     

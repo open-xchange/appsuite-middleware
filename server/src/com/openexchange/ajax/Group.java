@@ -74,7 +74,7 @@ public class Group extends DataServlet {
 	 * For serialization.
 	 */
 	private static final long serialVersionUID = 6699123983027304951L;
-	private static final transient Log LOG = LogFactory.getLog(Group.class);
+	private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Group.class));
 
 	/**
 	 * {@inheritDoc}

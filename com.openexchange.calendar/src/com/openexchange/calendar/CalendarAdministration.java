@@ -98,7 +98,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
     private StringBuilder u1;
 
-    private static final Log LOG = LogFactory.getLog(CalendarAdministration.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarAdministration.class));
     
     private Set<Integer> handledObjects = new HashSet<Integer>();
     

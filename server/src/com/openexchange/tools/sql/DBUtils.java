@@ -76,7 +76,7 @@ import com.openexchange.groupware.search.Order;
  */
 public final class DBUtils {
 
-    private static final Log LOG = LogFactory.getLog(DBUtils.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DBUtils.class));
 
     public static final int IN_LIMIT = 1000;
 

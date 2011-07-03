@@ -110,7 +110,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class MIMEMessageUtility {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMessageUtility.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageUtility.class));
 
     private static final Set<HeaderName> ENCODINGS;
 

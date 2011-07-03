@@ -72,7 +72,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class AppointmentWriter extends CalendarWriter {
 
-    private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AppointmentWriter.class));
 
     private CalendarCollectionService calColl;
 

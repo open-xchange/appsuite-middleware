@@ -58,8 +58,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.exception.OXException;
 
 /**
  * This class contains methods for handling the server name and identifier.
@@ -67,7 +67,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
  */
 public final class Server {
 
-    private static final Log LOG = LogFactory.getLog(Server.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Server.class));
 
     private static final String PROPERTY_NAME = "SERVER_NAME";
 
@@ -86,11 +86,11 @@ public final class Server {
         super();
     }
 
-    static void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
+    static void setConfigDatabaseService(final ConfigDatabaseService configDatabaseService) {
         Server.configDatabaseService = configDatabaseService;
     }
 
-    public static final int getServerId() throws DBPoolingException {
+    public static final int getServerId() throws OXException {
         synchronized (Server.class) {
             if (-1 == serverId) {
                 serverId = Server.loadServerId(getServerName());
@@ -103,21 +103,21 @@ public final class Server {
         return serverId;
     }
 
-    public static final void start(ConfigurationService service) throws DBPoolingException {
+    public static final void start(final ConfigurationService service) throws OXException {
         serverName = service.getProperty(PROPERTY_NAME);
         if (null == serverName || serverName.length() == 0) {
             throw DBPoolingExceptionCodes.NO_SERVER_NAME.create();
         }
     }
 
-    public static String getServerName() throws DBPoolingException {
+    public static String getServerName() throws OXException {
         if (null == serverName) {
             throw DBPoolingExceptionCodes.NOT_INITIALIZED.create(Server.class.getName());
         }
         return serverName;
     }
 
-    private static int loadServerId(final String name) throws DBPoolingException {
+    private static int loadServerId(final String name) throws OXException {
         int retval = -1;
         Connection con = null;
         PreparedStatement stmt = null;

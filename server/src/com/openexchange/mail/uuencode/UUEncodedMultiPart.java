@@ -63,7 +63,7 @@ import java.util.regex.Pattern;
  */
 public class UUEncodedMultiPart {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UUEncodedMultiPart.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UUEncodedMultiPart.class));
 
     private final List<UUEncodedPart> uuencodeParts;
 

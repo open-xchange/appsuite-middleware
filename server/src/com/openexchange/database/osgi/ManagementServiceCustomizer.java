@@ -62,32 +62,32 @@ import com.openexchange.management.ManagementService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ManagementServiceCustomizer implements ServiceTrackerCustomizer {
+public final class ManagementServiceCustomizer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
-    private static final Log LOG = LogFactory.getLog(ManagementServiceCustomizer.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ManagementServiceCustomizer.class));
 
     private final BundleContext context;
 
     /**
      * Default constructor.
      */
-    public ManagementServiceCustomizer(BundleContext context) {
+    public ManagementServiceCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        ManagementService service = (ManagementService) context.getService(reference);
+    public ManagementService addingService(final ServiceReference<ManagementService> reference) {
+        final ManagementService service = context.getService(reference);
         LOG.info("Injecting ManagementService into database bundle.");
         Initialization.getInstance().getManagement().setManagementService(service);
         return service;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         LOG.info("Removing ManagementService from database bundle.");
         Initialization.getInstance().getManagement().removeManagementService();
         context.ungetService(reference);

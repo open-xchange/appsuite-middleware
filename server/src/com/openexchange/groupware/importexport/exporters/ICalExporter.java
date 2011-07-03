@@ -112,7 +112,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class ICalExporter implements Exporter {
 
-    private static final Log LOG = LogFactory.getLog(ICalExporter.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ICalExporter.class));
     private static final Date DATE_ZERO = new Date(0);
     private final static int[] _appointmentFields = {
         DataObject.OBJECT_ID,

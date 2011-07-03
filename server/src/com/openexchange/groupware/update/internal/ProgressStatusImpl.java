@@ -60,7 +60,7 @@ import com.openexchange.groupware.update.ProgressState;
  */
 public class ProgressStatusImpl implements ProgressState {
 
-    private static final Log LOG = LogFactory.getLog(ProgressStatusImpl.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ProgressStatusImpl.class));
 
     /**
      * Log every 10 seconds the state.

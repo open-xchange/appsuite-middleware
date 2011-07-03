@@ -67,7 +67,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(SynchronizedPool.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(SynchronizedPool.class));
 
     /* --- Constants --- */
 

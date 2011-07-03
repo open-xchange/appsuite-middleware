@@ -73,7 +73,7 @@ public final class Collections {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Collections.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Collections.class));
 
     /**
      * Prevent instantiation

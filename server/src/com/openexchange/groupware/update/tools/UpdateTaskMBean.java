@@ -91,7 +91,7 @@ import com.openexchange.groupware.update.internal.UpdateProcess;
  */
 public final class UpdateTaskMBean implements DynamicMBean {
 
-    private static final Log LOG = LogFactory.getLog(UpdateTaskMBean.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(UpdateTaskMBean.class));
 
     private final MBeanInfo mbeanInfo;
 

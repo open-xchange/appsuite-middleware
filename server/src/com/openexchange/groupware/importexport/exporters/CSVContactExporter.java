@@ -158,7 +158,7 @@ public class CSVContactExporter implements Exporter {
         Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20,
         Contact.DEFAULT_ADDRESS };
 
-    private static final Log LOG = LogFactory.getLog(CSVContactExporter.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CSVContactExporter.class));
 
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) {
         if (!format.equals(Format.CSV)) {

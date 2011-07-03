@@ -71,7 +71,7 @@ import com.openexchange.java.Strings;
  */
 class UpdateTaskCollection {
 
-    private static final Log LOG = LogFactory.getLog(UpdateTaskCollection.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(UpdateTaskCollection.class));
 
     private static final UpdateTaskCollection SINGLETON = new UpdateTaskCollection();
 

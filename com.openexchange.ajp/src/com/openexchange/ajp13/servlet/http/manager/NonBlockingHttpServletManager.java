@@ -59,10 +59,10 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
-import com.openexchange.tools.NonBlockingRWLock;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.FiFoServletQueue;
 import com.openexchange.ajp13.servlet.http.ServletQueue;
+import com.openexchange.tools.NonBlockingRWLock;
 
 /**
  * {@link NonBlockingHttpServletManager} - A HTTP servlet manager using a {@link NonBlockingRWLock non-blocking read-write lock}.

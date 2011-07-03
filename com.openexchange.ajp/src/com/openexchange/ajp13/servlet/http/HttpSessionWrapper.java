@@ -71,7 +71,7 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
  */
 public class HttpSessionWrapper implements HttpSession {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpSessionWrapper.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpSessionWrapper.class));
 
     private final Map<String, Object> attributes;
 

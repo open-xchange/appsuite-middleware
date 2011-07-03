@@ -92,7 +92,7 @@ import com.openexchange.tools.arrays.Arrays;
  */
 public class RdbUserStorage extends UserStorage {
 
-    private static final Log LOG = LogFactory.getLog(RdbUserStorage.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RdbUserStorage.class));
 
     private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
         "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId FROM user WHERE user.cid=?";

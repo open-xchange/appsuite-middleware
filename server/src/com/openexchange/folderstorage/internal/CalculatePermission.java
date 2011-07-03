@@ -138,10 +138,10 @@ public final class CalculatePermission {
                     }
                 }
             } catch (final UserConfigurationException e) {
-                final Log logger = LogFactory.getLog(CalculatePermission.class);
+                final Log logger = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalculatePermission.class));
                 logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             } catch (final UserException e) {
-                final Log logger = LogFactory.getLog(CalculatePermission.class);
+                final Log logger = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalculatePermission.class));
                 logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             }
         }

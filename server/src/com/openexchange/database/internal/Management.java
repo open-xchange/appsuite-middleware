@@ -66,7 +66,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class Management {
 
-    private static final Log LOG = LogFactory.getLog(Management.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Management.class));
 
     private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 

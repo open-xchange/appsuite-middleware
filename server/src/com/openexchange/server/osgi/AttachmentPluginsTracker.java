@@ -66,7 +66,7 @@ import com.openexchange.tools.service.SpecificServiceChooser;
  */
 public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceTracker<T> {
 
-    private static final Log LOG = LogFactory.getLog(AttachmentPluginsTracker.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AttachmentPluginsTracker.class));
     
     public AttachmentPluginsTracker(BundleContext context, Class<T> toTrack) {
         super(context, toTrack);

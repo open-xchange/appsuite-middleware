@@ -49,14 +49,15 @@
 
 package com.openexchange.configuration;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Exception if problems occur in configuration classes.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ConfigurationException extends AbstractOXException {
+public class ConfigurationException extends OXException {
 
     private static final long serialVersionUID = 7857242456684578343L;
 
@@ -64,54 +65,33 @@ public class ConfigurationException extends AbstractOXException {
      * Initializes a new {@link ConfigurationException}
      * @param cause The cause exception
      */
-    public ConfigurationException(final AbstractOXException cause) {
-        super(cause);
-    }
-
-    /**
-     * Initializes a new exception using the information provides by the code.
-     * @param code code for the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public ConfigurationException(final Code code,
-        final Object... messageArgs) {
-        this(code, null, messageArgs);
-    }
-
-    /**
-     * Initializes a new exception using the information provides by the code.
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public ConfigurationException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.CONFIGURATION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
-        setMessageArgs(messageArgs);
+    private ConfigurationException() {
+        super();
     }
 
     /**
      * Error codes for the configuration exception.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    public static enum Code {
+    public static enum ConfigurationExceptionCodes {
         /** Filename for property file is not defined. */
-        NO_FILENAME("Filename for property file is not defined.", Category.SETUP_ERROR, 1),
+        NO_FILENAME("Filename for property file is not defined.", Category.CATEGORY_CONFIGURATION, 1),
         /** File "%1$s" does not exist. */
-        FILE_NOT_FOUND("File \"%1$s\" does not exist.", Category.SETUP_ERROR, 2),
+        FILE_NOT_FOUND("File \"%1$s\" does not exist.", Category.CATEGORY_CONFIGURATION, 2),
         /** File "%1$s" is not readable. */
-        NOT_READABLE("File \"%1$s\" is not readable.", Category.SETUP_ERROR, 3),
+        NOT_READABLE("File \"%1$s\" is not readable.", Category.CATEGORY_CONFIGURATION, 3),
         /** Cannot read file "%1$s". */
-        READ_ERROR("Cannot read file \"%1$s\".", Category.SETUP_ERROR, 4),
+        READ_ERROR("Cannot read file \"%1$s\".", Category.CATEGORY_CONFIGURATION, 4),
         /** Property "%1$s" is not defined. */
-        PROPERTY_MISSING("Property \"%1$s\" is not defined.", Category.SETUP_ERROR, 5),
+        PROPERTY_MISSING("Property \"%1$s\" is not defined.", Category.CATEGORY_CONFIGURATION, 5),
         /** Cannot load class "%1$s". */
-        CLASS_NOT_FOUND("Cannot load class \"%1$s\".", Category.SETUP_ERROR, 6),
+        CLASS_NOT_FOUND("Cannot load class \"%1$s\".", Category.CATEGORY_CONFIGURATION, 6),
         /** Invalid configuration: %1$s */
-        INVALID_CONFIGURATION("Invalid configuration: %1$s", Category.SETUP_ERROR, 7),
+        INVALID_CONFIGURATION("Invalid configuration: %1$s", Category.CATEGORY_CONFIGURATION, 7),
         /** Property %1$s is not an integer */
-        PROPERTY_NOT_AN_INTEGER("Property %1$s is not an integer", Category.CODE_ERROR, 8),
+        PROPERTY_NOT_AN_INTEGER("Property %1$s is not an integer", Category.CATEGORY_CONFIGURATION, 8),
         /** An I/O error occurred: %1$s */
-        IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 9);
+        IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_CONFIGURATION, 9);
 
         private final String message;
 
@@ -119,23 +99,46 @@ public class ConfigurationException extends AbstractOXException {
 
         private final int detailNumber;
 
-        private Code(final String message, final Category category,
+        private ConfigurationExceptionCodes(final String message, final Category category,
             final int detailNumber) {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;
         }
 
-        public Category getCategory() {
-            return category;
+        /**
+         * Creates an {@link OXException} instance using this error code.
+         * 
+         * @return The newly created {@link OXException} instance.
+         */
+        public OXException create() {
+            return create(new Object[0]);
         }
 
-        public int getDetailNumber() {
-            return detailNumber;
+        /**
+         * Creates an {@link OXException} instance using this error code.
+         * 
+         * @param logArguments The arguments for log message.
+         * @return The newly created {@link OXException} instance.
+         */
+        public OXException create(final Object... logArguments) {
+            return create(null, logArguments);
         }
 
-        public String getMessage() {
-            return message;
+        private static final String PREFIX = "CFG";
+
+        /**
+         * Creates an {@link OXException} instance using this error code.
+         * 
+         * @param cause The initial cause for {@link OXException}
+         * @param logArguments The arguments for log message.
+         * @return The newly created {@link OXException} instance.
+         */
+        public OXException create(final Throwable cause, final Object... logArguments) {
+            return new OXException(detailNumber, OXExceptionStrings.MESSAGE, cause).setPrefix(PREFIX).addCategory(category).setLogMessage(
+                message,
+                logArguments);
         }
+
     }
 }

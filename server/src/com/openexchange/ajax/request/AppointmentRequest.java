@@ -151,7 +151,7 @@ public class AppointmentRequest extends CalendarRequest {
 
     private final AppointmentSqlFactoryService appointmentFactory;
 
-    private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AppointmentRequest.class));
 
     /**
      * Initializes a new {@link AppointmentRequest}.

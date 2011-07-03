@@ -60,8 +60,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.ConfigDatabaseService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -71,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
-    private static final Log LOG = LogFactory.getLog(ConfigDatabaseServiceImpl.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ConfigDatabaseServiceImpl.class));
 
     private final boolean forceWriteOnly;
 
@@ -79,14 +79,14 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private final ConfigDatabaseAssignmentService assignmentService;
 
-    ConfigDatabaseServiceImpl(boolean forceWriteOnly, ConfigDatabaseAssignmentService assignmentService, Pools pools) {
+    ConfigDatabaseServiceImpl(final boolean forceWriteOnly, final ConfigDatabaseAssignmentService assignmentService, final Pools pools) {
         super();
         this.forceWriteOnly = forceWriteOnly;
         this.assignmentService = assignmentService;
         this.pools = pools;
     }
 
-    private Connection get(boolean write) throws DBPoolingException {
+    private Connection get(final boolean write) throws OXException {
         final Assignment assign = assignmentService.getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
@@ -95,7 +95,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
             poolId = assign.getReadPoolId();
         }
         try {
-            Connection retval = pools.getPool(poolId).get();
+            final Connection retval = pools.getPool(poolId).get();
             ReplicationMonitor.incrementFetched(assign, write);
             return retval;
         } catch (final PoolingException e) {
@@ -106,7 +106,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         
     }
 
-    private void back(Connection con, boolean write) {
+    private void back(final Connection con, final boolean write) {
         final Assignment assign = assignmentService.getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
@@ -117,14 +117,14 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         final ConnectionPool pool;
         try {
             pool = pools.getPool(poolId);
-        } catch (DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return;
         }
         try {
             pool.back(con);
-        } catch (PoolingException e) {
-            final DBPoolingException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
+        } catch (final PoolingException e) {
+            final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
             LOG.error(e1.getMessage(), e1);
         }
         // TODO enable the following if the configuration database gets a table replicationMonitor.
@@ -136,25 +136,25 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         // }
     }
 
-    public Connection getReadOnly() throws DBPoolingException {
+    public Connection getReadOnly() throws OXException {
         return get(false);
     }
 
-    public Connection getWritable() throws DBPoolingException {
+    public Connection getWritable() throws OXException {
         return get(true);
     }
 
-    public void backReadOnly(Connection con) {
+    public void backReadOnly(final Connection con) {
         back(con, false);
     }
 
-    public void backWritable(Connection con) {
+    public void backWritable(final Connection con) {
         back(con, true);
     }
 
-    public int[] listContexts(int poolId) throws DBPoolingException {
-        List<Integer> tmp = new ArrayList<Integer>();
-        Connection con = getReadOnly();
+    public int[] listContexts(final int poolId) throws OXException {
+        final List<Integer> tmp = new ArrayList<Integer>();
+        final Connection con = getReadOnly();
         final String getcid = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -166,20 +166,20 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
             while (result.next()) {
                 tmp.add(I(result.getInt(1)));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             backReadOnly(con);
         }
-        int[] retval = new int[tmp.size()];
+        final int[] retval = new int[tmp.size()];
         for (int i = 0; i < tmp.size(); i++) {
             retval[i] = tmp.get(i).intValue();
         }
         return retval;
     }
 
-    public int getServerId() throws DBPoolingException {
+    public int getServerId() throws OXException {
         return Server.getServerId();
     }
 }

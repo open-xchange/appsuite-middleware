@@ -71,7 +71,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public class FolderParser {
 
-    private static final Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderParser.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderParser.class));
 
     private final UserConfiguration userConfig;
 

@@ -58,9 +58,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.internal.CreateReplicationTable;
-import com.openexchange.database.internal.DBPoolingExceptionFactory;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.management.ManagementService;
 import com.openexchange.timer.TimerService;
 
@@ -71,33 +68,25 @@ import com.openexchange.timer.TimerService;
  */
 public class Activator implements BundleActivator {
 
-    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
 
-    private ComponentRegistration dbpoolingComponent;
+    private ServiceRegistration<CreateTableService> createTableRegistration;
 
-    private ServiceRegistration createTableRegistration;
-
-    public void start(BundleContext context) throws Exception {
-        dbpoolingComponent = new ComponentRegistration(
-            context,
-            EnumComponent.DB_POOLING,
-            "com.openexchange.database",
-            DBPoolingExceptionFactory.getInstance());
-        createTableRegistration = context.registerService(CreateTableService.class.getName(), new CreateReplicationTable(), null);
-        trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new DatabaseServiceRegisterer(context)));
-        trackers.push(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context)));
-        trackers.push(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceCustomizer(context)));
-        trackers.push(new ServiceTracker(context, CacheService.class.getName(), new CacheServiceCustomizer(context)));
-        for (ServiceTracker tracker : trackers) {
+    public void start(final BundleContext context) throws Exception {
+        createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
+        trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class.getName(), new DatabaseServiceRegisterer(context)));
+        trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context)));
+        trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class.getName(), new TimerServiceCustomizer(context)));
+        trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheServiceCustomizer(context)));
+        for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
         }
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
         createTableRegistration.unregister();
-        dbpoolingComponent.unregister();
     }
 }

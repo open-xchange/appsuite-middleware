@@ -72,6 +72,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -117,7 +118,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
         final AJAXRequestResult retval;
         final UserService userService = getServiceRegistry().getService(UserService.class);
         if (null == userService) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
+            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, UserService.class.getName());
         }
         final User user = userService.getUser(session.getUserId(), ctx);
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {

@@ -53,7 +53,7 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * Abstract class for easily implementing {@link CreateTableService} services.
@@ -66,14 +66,14 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         super();
     }
 
-    public final void perform(Connection con) throws AbstractOXException {
+    public final void perform(final Connection con) throws OXException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            for (String create : getCreateStatements()) {
+            for (final String create : getCreateStatements()) {
                 stmt.execute(create);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);

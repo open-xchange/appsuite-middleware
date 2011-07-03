@@ -75,7 +75,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public abstract class MailMessageStorageLong extends MailMessageStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailMessageStorageLong.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessageStorageLong.class));
 
     /**
      * The fields containing {@link MailField#FULL}.

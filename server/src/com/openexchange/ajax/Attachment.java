@@ -134,7 +134,7 @@ public class Attachment extends PermissionServlet {
 
     public static transient final Exception2Message OXEXCEPTION_HANDLER = new InfostoreException2Message();
 
-    private static transient final Log LOG = LogFactory.getLog(Attachment.class);
+    private static transient final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Attachment.class));
 
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Attachment.class, LOG);
 

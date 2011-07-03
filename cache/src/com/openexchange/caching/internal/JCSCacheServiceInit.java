@@ -60,11 +60,13 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.engine.control.CompositeCacheConfigurator;
 import org.apache.jcs.engine.control.CompositeCacheManager;
-import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheExceptionCodes;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceErrorCode;
 
 /**
  * {@link JCSCacheServiceInit} - Initialization for {@link JCSCache}.
@@ -157,20 +159,20 @@ public final class JCSCacheServiceInit {
         auxiliaryNames = new HashSet<String>(4);
     }
 
-    private static Properties loadProperties(final String cacheConfigFile) throws CacheException {
+    private static Properties loadProperties(final String cacheConfigFile) throws OXException {
         try {
             return loadProperties(new FileInputStream(cacheConfigFile));
         } catch (final FileNotFoundException e) {
-            throw new CacheException(CacheException.Code.MISSING_CACHE_CONFIG_FILE, e, cacheConfigFile);
+            throw CacheExceptionCodes.MISSING_CACHE_CONFIG_FILE.create(e, cacheConfigFile);
         }
     }
 
-    private static Properties loadProperties(final InputStream in) throws CacheException {
+    private static Properties loadProperties(final InputStream in) throws OXException {
         final Properties props = new Properties();
         try {
             props.load(in);
         } catch (final IOException e) {
-            throw new CacheException(CacheException.Code.IO_ERROR, e, e.getMessage());
+            throw CacheExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             try {
                 in.close();
@@ -181,7 +183,7 @@ public final class JCSCacheServiceInit {
         return props;
     }
 
-    private void configure(final Properties properties) throws CacheException {
+    private void configure(final Properties properties) throws OXException {
         synchronized (ccmInstance) {
             if (null == props) {
                 /*
@@ -263,9 +265,9 @@ public final class JCSCacheServiceInit {
      * Loads the cache configuration file denoted by specified cache configuration file.
      * 
      * @param cacheConfigFile The cache configuration file
-     * @throws CacheException If configuration of JCS caching system fails
+     * @throws OXException If configuration of JCS caching system fails
      */
-    public void loadConfiguration(final String cacheConfigFile) throws CacheException {
+    public void loadConfiguration(final String cacheConfigFile) throws OXException {
         initializeCompositeCacheManager(true);
         configure(loadProperties(cacheConfigFile.trim()));
         LOG.info("JCS caching system successfully configured with property file: " + cacheConfigFile);
@@ -275,9 +277,9 @@ public final class JCSCacheServiceInit {
      * Loads the cache configuration from given input stream.
      * 
      * @param inputStream The input stream
-     * @throws CacheException If configuration of JCS caching system fails
+     * @throws OXException If configuration of JCS caching system fails
      */
-    public void loadConfiguration(final InputStream inputStream) throws CacheException {
+    public void loadConfiguration(final InputStream inputStream) throws OXException {
         initializeCompositeCacheManager(true);
         configure(loadProperties(inputStream));
         LOG.info("JCS caching system successfully configured with properties from input stream.");
@@ -286,11 +288,11 @@ public final class JCSCacheServiceInit {
     /**
      * Loads the default cache configuration file.
      * 
-     * @throws CacheException If configuration of JCS caching system fails
+     * @throws OXException If configuration of JCS caching system fails
      */
-    public void loadDefaultConfiguration() throws CacheException {
+    public void loadDefaultConfiguration() throws OXException {
         if (configurationService == null) {
-            throw new CacheException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ConfigurationService.class.getName()));
+            throw ServiceErrorCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
         }
         configureByPropertyFile(true, true);
         LOG.info("JCS caching system successfully re-configured.");
@@ -302,7 +304,7 @@ public final class JCSCacheServiceInit {
      * @param configurationService The configuration service
      * @throws CacheException If configuration of JCS caching system fails
      */
-    public void start(final ConfigurationService configurationService) throws CacheException {
+    public void start(final ConfigurationService configurationService) throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error("JCS cache service has already been started. Start-up canceled.");
         }
@@ -320,19 +322,19 @@ public final class JCSCacheServiceInit {
     public void reconfigureByPropertyFile() {
         try {
             configureByPropertyFile(false, true);
-        } catch (final CacheException e) {
+        } catch (final OXException e) {
             // Cannot occur
             LOG.error(e.getMessage(), e);
         }
     }
 
-    private void configureByPropertyFile(final boolean errorIfNull, final boolean obtainMutex) throws CacheException {
+    private void configureByPropertyFile(final boolean errorIfNull, final boolean obtainMutex) throws OXException {
         /*
          * Check default cache configuration file defined through property
          */
         final String cacheConfigFile = configurationService.getProperty(PROP_CACHE_CONF_FILE);
         if (cacheConfigFile == null) {
-            final CacheException ce = new CacheException(CacheException.Code.MISSING_CONFIGURATION_PROPERTY, PROP_CACHE_CONF_FILE);
+            final OXException ce = CacheExceptionCodes.MISSING_CONFIGURATION_PROPERTY.create(PROP_CACHE_CONF_FILE);
             if (errorIfNull) {
                 throw ce;
             }
@@ -351,13 +353,13 @@ public final class JCSCacheServiceInit {
      * 
      * @throws CacheException If default auxiliary is missing
      */
-    private void checkDefaultAuxiliary() throws CacheException {
+    private void checkDefaultAuxiliary() throws OXException {
         /*
          * Ensure an auxiliary cache is present
          */
         final String value = props.getProperty(DEFAULT_REGION);
         if (null == value || 0 == value.length()) {
-            throw new CacheException(CacheException.Code.MISSING_DEFAULT_AUX);
+            throw CacheExceptionCodes.MISSING_DEFAULT_AUX.create();
         }
     }
 

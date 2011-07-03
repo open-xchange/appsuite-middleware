@@ -90,7 +90,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     private static final long serialVersionUID = 301910346402779362L;
 
-    private static final transient Log LOG = LogFactory.getLog(OXServlet.class);
+    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(OXServlet.class));
 
     /**
      * Simple {@link LoginRequest} implementation.

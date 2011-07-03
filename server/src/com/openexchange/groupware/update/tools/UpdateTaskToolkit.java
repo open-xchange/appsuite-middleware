@@ -89,7 +89,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class UpdateTaskToolkit {
 
-    private static final Log LOG = LogFactory.getLog(UpdateTaskToolkit.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(UpdateTaskToolkit.class));
 
     private static final Object LOCK = new Object();
 

@@ -60,7 +60,7 @@ import com.openexchange.server.Initialization;
  */
 public final class TransportPropertiesInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TransportPropertiesInit.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TransportPropertiesInit.class));
 
     private final AtomicBoolean started = new AtomicBoolean();
 

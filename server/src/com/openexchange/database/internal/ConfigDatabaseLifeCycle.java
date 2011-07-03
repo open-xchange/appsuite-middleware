@@ -49,7 +49,7 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 
 /**
  * Creates the pools for the configuration database connections.
@@ -62,7 +62,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
     private final ConnectionPool configDBRead;
 
-    ConfigDatabaseLifeCycle(Configuration configuration, Management management, Timer timer) {
+    ConfigDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer) {
         super();
         configDBWrite = new ConnectionPool(configuration.getWriteUrl(), configuration.getWriteProps(), configuration.getPoolConfig());
         timer.addTask(configDBWrite.getCleanerTask());
@@ -72,7 +72,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
         management.addPool(Constants.CONFIGDB_READ_ID, configDBRead);
     }
 
-    public ConnectionPool create(int poolId) throws DBPoolingException {
+    public ConnectionPool create(final int poolId) throws OXException {
         switch (poolId) {
         case Constants.CONFIGDB_WRITE_ID:
             return configDBWrite;
@@ -83,7 +83,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
         }
     }
 
-    public boolean destroy(int poolId) {
+    public boolean destroy(final int poolId) {
         // Pools to configuration database will not be destroyed.
         return poolId == Constants.CONFIGDB_WRITE_ID || poolId == Constants.CONFIGDB_READ_ID;
     }

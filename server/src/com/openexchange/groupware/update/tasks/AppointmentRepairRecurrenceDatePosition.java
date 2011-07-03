@@ -86,7 +86,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(AppointmentRepairRecurrenceDatePosition.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AppointmentRepairRecurrenceDatePosition.class));
 
     public AppointmentRepairRecurrenceDatePosition() {
         super();

@@ -58,7 +58,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
  */
 final class AJPv13UncaughtExceptionhandler implements UncaughtExceptionHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13UncaughtExceptionhandler.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13UncaughtExceptionhandler.class));
 
     /**
      * Initializes a new {@link AJPv13UncaughtExceptionhandler}.

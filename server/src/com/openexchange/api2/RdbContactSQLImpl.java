@@ -146,7 +146,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
     private final UserConfiguration userConfiguration;
 
-    private static final Log LOG = LogFactory.getLog(RdbContactSQLImpl.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RdbContactSQLImpl.class));
 
     public RdbContactSQLImpl(final Session session) throws ContextException {
         super();

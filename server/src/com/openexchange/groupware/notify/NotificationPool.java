@@ -78,7 +78,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class NotificationPool {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NotificationPool.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(NotificationPool.class));
 
     private static final NotificationPool instance = new NotificationPool();
 
@@ -232,7 +232,7 @@ public final class NotificationPool {
 
         public NotificationPoolTimerTask(final Map<PooledNotification, PooledNotification> map, final DelayQueue<PooledNotification> queue, final Lock writeLock) {
             super();
-            logger = org.apache.commons.logging.LogFactory.getLog(NotificationPoolTimerTask.class);
+            logger = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(NotificationPoolTimerTask.class));
             this.taskMap = map;
             this.taskQueue = queue;
             this.taskWriteLock = writeLock;

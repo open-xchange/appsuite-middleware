@@ -58,7 +58,7 @@ import com.openexchange.monitoring.MonitoringInfo;
 
 public final class XAJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(XAJPv13ThreadPoolExecutor.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13ThreadPoolExecutor.class));
 
     private final AtomicInteger numRunning;
 

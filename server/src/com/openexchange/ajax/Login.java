@@ -103,6 +103,7 @@ import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -127,7 +128,7 @@ public class Login extends AJAXServlet {
 
     private static final long serialVersionUID = 7680745138705836499L;
 
-    static final Log LOG = LogFactory.getLog(Login.class);
+    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Login.class));
 
     private static interface JSONRequestHandler {
         
@@ -245,7 +246,7 @@ public class Login extends AJAXServlet {
                 }
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 if (sessiondService == null) {
-                    final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
+                    final ServiceException se = new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, SessiondService.class.getName());
                     LOG.error(se.getMessage(), se);
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
@@ -310,7 +311,7 @@ public class Login extends AJAXServlet {
                 }
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 if (sessiondService == null) {
-                    final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
+                    final ServiceException se = new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, SessiondService.class.getName());
                     LOG.error(se.getMessage(), se);
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
@@ -636,7 +637,7 @@ public class Login extends AJAXServlet {
         }
         final SessiondService sessiond = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null == sessiond) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
+            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, SessiondService.class.getName());
         }
 
         final String sessionId = req.getParameter(PARAMETER_SESSION);

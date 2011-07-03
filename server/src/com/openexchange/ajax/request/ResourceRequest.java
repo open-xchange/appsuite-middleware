@@ -68,6 +68,7 @@ import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceWriter;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.tools.servlet.AjaxException;
@@ -247,7 +248,7 @@ public class ResourceRequest {
             JSONException {
         final ResourceService resourceService = ResourceServiceImpl.getInstance();
         if (null == resourceService) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
+            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, ResourceService.class.getName());
         }
 
         final JSONArray jsonResponseArray = new JSONArray();

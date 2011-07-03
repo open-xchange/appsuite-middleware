@@ -95,7 +95,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
 
     private static final long serialVersionUID = -3731372041610025543L;
 
-    private static final transient Log LOG = LogFactory.getLog(contacts.class);
+    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(contacts.class));
 
     /**
      * Initializes a new {@link contacts}.

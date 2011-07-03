@@ -70,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ContactsChangedFromUpdateTask implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(ContactsChangedFromUpdateTask.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ContactsChangedFromUpdateTask.class));
 
     /**
      * Default constructor

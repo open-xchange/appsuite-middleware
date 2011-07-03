@@ -79,7 +79,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  */
 public final class CheckPermissionOnInsert extends CheckPermission {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CheckPermissionOnInsert.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CheckPermissionOnInsert.class));
 
     /**
      * Initializes a new {@link CheckPermissionOnInsert}

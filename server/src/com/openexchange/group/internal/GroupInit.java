@@ -62,7 +62,7 @@ import com.openexchange.server.Initialization;
  */
 public final class GroupInit implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(GroupInit.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(GroupInit.class));
 
     /**
      * Singleton instance.

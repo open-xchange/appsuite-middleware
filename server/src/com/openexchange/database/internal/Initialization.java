@@ -53,9 +53,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Initialization}
@@ -64,7 +64,7 @@ import com.openexchange.database.DatabaseService;
  */
 public final class Initialization {
 
-    private static final Log LOG = LogFactory.getLog(Initialization.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Initialization.class));
 
     private static final Initialization SINGLETON = new Initialization();
 
@@ -99,7 +99,7 @@ public final class Initialization {
         return null != pools;
     }
 
-    public DatabaseService start(ConfigurationService configurationService) throws DBPoolingException {
+    public DatabaseService start(final ConfigurationService configurationService) throws OXException {
         if (null != pools) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
@@ -111,7 +111,7 @@ public final class Initialization {
         pools = new Pools(timer);
         management.addOverview(new Overview(pools));
         // Add life cycle for configuration database
-        ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
+        final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
         configDatabaseService = new ConfigDatabaseServiceImpl(configuration.getPoolConfig().forceWriteOnly, new ConfigDatabaseAssignmentImpl(), pools);
@@ -122,14 +122,14 @@ public final class Initialization {
             contextAssignment.setCacheService(cacheService);
         }
         // Context pool life cycle.
-        ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
+        final ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
         pools.addLifeCycle(contextDBLifeCycle);
 
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {
             LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
-        } catch (DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
 
@@ -147,7 +147,7 @@ public final class Initialization {
         configuration.clear();
     }
 
-    public void setCacheService(CacheService service) {
+    public void setCacheService(final CacheService service) {
         this.cacheService = service;
         if (null != contextAssignment) {
             contextAssignment.setCacheService(service);

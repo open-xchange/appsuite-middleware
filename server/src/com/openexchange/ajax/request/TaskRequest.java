@@ -95,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class TaskRequest extends CalendarRequest {
 
-    private static final Log LOG = LogFactory.getLog(TaskRequest.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(TaskRequest.class));
 
     protected final static int[] _taskFields = {
         DataObject.OBJECT_ID,

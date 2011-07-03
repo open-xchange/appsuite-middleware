@@ -87,7 +87,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public final class ContactDataSource implements DataSource {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactDataSource.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactDataSource.class));
 
     private static final Class<?>[] TYPES = { InputStream.class, byte[].class };
 

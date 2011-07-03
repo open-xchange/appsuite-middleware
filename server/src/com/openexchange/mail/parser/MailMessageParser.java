@@ -113,7 +113,7 @@ import com.openexchange.tools.tnef.TNEF2ICal;
  */
 public final class MailMessageParser {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailMessageParser.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessageParser.class));
 
     private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 

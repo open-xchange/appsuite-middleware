@@ -62,7 +62,8 @@ import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
 import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.ajp13.xajp.XAJPv13Server;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.Log;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -80,7 +81,7 @@ public final class AJPv13Activator extends DeferredActivator {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
 
     private static final int AJP_MODE_STABLE = 1;
 
@@ -110,7 +111,7 @@ public final class AJPv13Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class);
+        final org.apache.commons.logging.Log logger = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -120,7 +121,7 @@ public final class AJPv13Activator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class);
+        final org.apache.commons.logging.Log logger = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -245,14 +246,14 @@ public final class AJPv13Activator extends DeferredActivator {
             super();
         }
 
-        public void start() throws AbstractOXException {
+        public void start() throws OXException {
             AJPv13Server.setInstance(new com.openexchange.ajp13.stable.AJPv13ServerImpl());
             AJPv13Config.getInstance().start();
             AJPv13Monitors.setListenerMonitor(com.openexchange.ajp13.stable.AJPv13ServerImpl.getListenerMonitor());
             AJPv13Server.startAJPServer();
         }
 
-        public void stop() throws AbstractOXException {
+        public void stop() throws OXException {
             AJPv13Server.stopAJPServer();
             AJPv13Monitors.releaseListenerMonitor();
             AJPv13Config.getInstance().stop();
@@ -266,7 +267,7 @@ public final class AJPv13Activator extends DeferredActivator {
             super();
         }
 
-        public void start() throws AbstractOXException {
+        public void start() throws OXException {
             /*
              * Proper synchronous queue
              */
@@ -289,7 +290,7 @@ public final class AJPv13Activator extends DeferredActivator {
             AJPv13Server.startAJPServer();
         }
 
-        public void stop() throws AbstractOXException {
+        public void stop() throws OXException {
             com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
             AJPv13Config.getInstance().stop();
             AJPv13Server.releaseInstrance();
@@ -303,12 +304,12 @@ public final class AJPv13Activator extends DeferredActivator {
             super();
         }
 
-        public void start() throws AbstractOXException {
+        public void start() throws OXException {
             AJPv13Config.getInstance().start();
             XAJPv13Server.getInstance().start();
         }
 
-        public void stop() throws AbstractOXException {
+        public void stop() throws OXException {
             AJPv13Config.getInstance().stop();
             XAJPv13Server.getInstance().close();
             XAJPv13Server.releaseInstance();

@@ -65,17 +65,15 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 
@@ -86,14 +84,14 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
  */
 public class CaldavCollection extends AbstractCollection {
     
-    private UserizedFolder folder;
-    private GroupwareCaldavFactory factory;
-    private WebdavPath url;
+    private final UserizedFolder folder;
+    private final GroupwareCaldavFactory factory;
+    private final WebdavPath url;
     private int id = -1;
     
-    private static final Log LOG = LogFactory.getLog(CaldavCollection.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavCollection.class));
 
-    public CaldavCollection(AbstractStandardCaldavCollection parent, UserizedFolder folder, GroupwareCaldavFactory factory) {
+    public CaldavCollection(final AbstractStandardCaldavCollection parent, final UserizedFolder folder, final GroupwareCaldavFactory factory) {
         super();
         this.folder = folder;
         this.factory = factory;
@@ -107,22 +105,22 @@ public class CaldavCollection extends AbstractCollection {
         
 
     }
-    private String getFolderName(UserizedFolder f) {
-        Type type = f.getType();
+    private String getFolderName(final UserizedFolder f) {
+        final Type type = f.getType();
         if (type.equals(SharedType.getInstance())) {
             return f.getName()+" ("+getOwnerName(f)+")";
         } 
         return f.getName();
     }
 
-    private String getOwnerName(UserizedFolder f) {
-        Permission[] permissions = f.getPermissions();
-        for (Permission permission : permissions) {
+    private String getOwnerName(final UserizedFolder f) {
+        final Permission[] permissions = f.getPermissions();
+        for (final Permission permission : permissions) {
             if (permission.isAdmin()) {
-                int entity = permission.getEntity();
+                final int entity = permission.getEntity();
                 try {
                     return factory.resolveUser(entity).getDisplayName();
-                } catch (WebdavProtocolException e) {
+                } catch (final WebdavProtocolException e) {
                     LOG.error(e.getMessage(), e);
                     return new Integer(entity).toString();
                 }
@@ -147,22 +145,22 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+    protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
+    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    protected boolean isset(Property p) {
+    protected boolean isset(final Property p) {
         if (p.getId() == Protocol.GETCONTENTLANGUAGE || p.getId() == Protocol.GETCONTENTLENGTH || p.getId() == Protocol.GETETAG) {
             return false;
         }
@@ -170,21 +168,21 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     @Override
-    public void setCreationDate(Date date) throws WebdavProtocolException {
+    public void setCreationDate(final Date date) throws WebdavProtocolException {
         // IGNORE, this is not writable
     }
 
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
-        State state = factory.getState();
-        List<Appointment> appointments = state.getFolder(getId());
+        final State state = factory.getState();
+        final List<Appointment> appointments = state.getFolder(getId());
         if (appointments == null) {
-            int a = 12;
+            final int a = 12;
             System.out.println(a);
         }
-        List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
+        final List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
 
-        for (Appointment appointment : appointments) {
-            CaldavResource resource = new CaldavResource(this, appointment, factory);
+        for (final Appointment appointment : appointments) {
+            final CaldavResource resource = new CaldavResource(this, appointment, factory);
             children.add(resource);
         }
         
@@ -195,15 +193,15 @@ public class CaldavCollection extends AbstractCollection {
 
     private static final Pattern NAME_PATTERN = Pattern.compile("(.+?)\\.ics");
     
-    public CaldavResource getChild(String name) throws WebdavProtocolException {
-        Matcher matcher = NAME_PATTERN.matcher(name);
+    public CaldavResource getChild(final String name) throws WebdavProtocolException {
+        final Matcher matcher = NAME_PATTERN.matcher(name);
         if (!matcher.find()) {
             throw new WebdavProtocolException(getUrl().dup().append(name), 404);
         }
         
-        String uid = matcher.group(1);
+        final String uid = matcher.group(1);
         
-        Appointment appointment = factory.getState().get(uid, getId());
+        final Appointment appointment = factory.getState().get(uid, getId());
         if (appointment == null) {
             // Not Found
             return new CaldavResource(this, getUrl().dup().append(name), factory);
@@ -231,7 +229,7 @@ public class CaldavCollection extends AbstractCollection {
         return folder.getLastModified();
     }
 
-    public WebdavLock getLock(String token) throws WebdavProtocolException {
+    public WebdavLock getLock(final String token) throws WebdavProtocolException {
         return null;
     }
 
@@ -239,7 +237,7 @@ public class CaldavCollection extends AbstractCollection {
         return Collections.emptyList();
     }
 
-    public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+    public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
         return null;
     }
 
@@ -255,7 +253,7 @@ public class CaldavCollection extends AbstractCollection {
         return url;
     }
 
-    public void lock(WebdavLock lock) throws WebdavProtocolException {
+    public void lock(final WebdavLock lock) throws WebdavProtocolException {
         // IGNORE
     }
 
@@ -263,11 +261,11 @@ public class CaldavCollection extends AbstractCollection {
 //        throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
+    public void setDisplayName(final String displayName) throws WebdavProtocolException {
         // IGNORE
     }
 
-    public void unlock(String token) throws WebdavProtocolException {
+    public void unlock(final String token) throws WebdavProtocolException {
         // IGNORE
     }
     

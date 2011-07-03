@@ -50,7 +50,8 @@
 package com.openexchange.database;
 
 import java.sql.Connection;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * If your bundle needs to create database tables for working properly this service must be implemented. Its method are called if a new
@@ -84,8 +85,8 @@ public interface CreateTableService {
      * configured to use the correct schema. The given connection is already in a transaction. Do not modify the transaction state of the
      * connection.
      * @param con writable connection in a transaction state.
-     * @throws AbstractOXException should be thrown if creating the table fails.
+     * @throws OXException should be thrown if creating the table fails.
      */
-    void perform(Connection con) throws AbstractOXException;
+    void perform(Connection con) throws OXException;
 
 }

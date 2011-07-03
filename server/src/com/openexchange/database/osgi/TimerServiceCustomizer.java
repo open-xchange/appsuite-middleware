@@ -62,29 +62,29 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TimerServiceCustomizer implements ServiceTrackerCustomizer {
+public final class TimerServiceCustomizer implements ServiceTrackerCustomizer<TimerService, TimerService> {
 
-    private static final Log LOG = LogFactory.getLog(ManagementServiceCustomizer.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ManagementServiceCustomizer.class));
 
     private final BundleContext context;
 
-    public TimerServiceCustomizer(BundleContext context) {
+    public TimerServiceCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        TimerService timer = (TimerService) context.getService(reference);
+    public TimerService addingService(final ServiceReference<TimerService> reference) {
+        final TimerService timer = context.getService(reference);
         LOG.info("Injecting TimerService into database bundle.");
         Initialization.getInstance().getTimer().setTimerService(timer);
         return timer;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<TimerService> reference, final TimerService service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<TimerService> reference, final TimerService service) {
         LOG.info("Removing TimerService from database bundle.");
         Initialization.getInstance().getTimer().removeTimerService();
         context.ungetService(reference);

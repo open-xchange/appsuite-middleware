@@ -59,9 +59,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.internal.wrapping.ConnectionReturnerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -71,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class ReplicationMonitor {
 
-    static final Log LOG = LogFactory.getLog(ReplicationMonitor.class);
+    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
 
     private static long masterConnectionsFetched;
 
@@ -84,28 +84,33 @@ public final class ReplicationMonitor {
     }
 
     interface FetchAndSchema {
-        Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws PoolingException, DBPoolingException;
+        Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws OXException;
     }
 
     static final FetchAndSchema TIMEOUT = new FetchAndSchema() {
-        public Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws PoolingException, DBPoolingException {
+        public Connection get(final Pools pools, final Assignment assign, final boolean write, final boolean usedAsRead) throws OXException {
             final int poolId;
             if (write) {
                 poolId = assign.getWritePoolId();
             } else {
                 poolId = assign.getReadPoolId();
             }
-            ConnectionPool pool = pools.getPool(poolId);
-            Connection retval = pool.get();
+            final ConnectionPool pool = pools.getPool(poolId);
+            Connection retval;
             try {
-                String schema = assign.getSchema();
+                retval = pool.get();
+            } catch (final PoolingException e) {
+                throw new OXException(e);
+            }
+            try {
+                final String schema = assign.getSchema();
                 if (null != schema && !retval.getCatalog().equals(schema)) {
                     retval.setCatalog(schema);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 try {
                     pool.back(retval);
-                } catch (PoolingException e1) {
+                } catch (final PoolingException e1) {
                     LOG.error(e1.getMessage(), e1);
                 }
                 throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
@@ -115,21 +120,26 @@ public final class ReplicationMonitor {
     };
 
     static final FetchAndSchema NOTIMEOUT = new FetchAndSchema() {
-        public Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws PoolingException, DBPoolingException {
+        public Connection get(final Pools pools, final Assignment assign, final boolean write, final boolean usedAsRead) throws OXException {
             final int poolId;
             if (write) {
                 poolId = assign.getWritePoolId();
             } else {
                 poolId = assign.getReadPoolId();
             }
-            ConnectionPool pool = pools.getPool(poolId);
-            final Connection retval = pool.getWithoutTimeout();
+            final ConnectionPool pool = pools.getPool(poolId);
+            final Connection retval;
             try {
-                String schema = assign.getSchema();
+                retval = pool.getWithoutTimeout();
+            } catch (final PoolingException e) {
+                throw new OXException(e);
+            }
+            try {
+                final String schema = assign.getSchema();
                 if (null != schema && !retval.getCatalog().equals(schema)) {
                     retval.setCatalog(schema);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 pool.backWithoutTimeout(retval);
                 throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
             }
@@ -137,17 +147,17 @@ public final class ReplicationMonitor {
         }
     };
 
-    static Connection checkActualAndFallback(Pools pools, Assignment assign, boolean noTimeout, boolean write) throws DBPoolingException {
+    static Connection checkActualAndFallback(final Pools pools, final Assignment assign, final boolean noTimeout, final boolean write) throws OXException {
         return checkActualAndFallback(pools, assign, noTimeout ? NOTIMEOUT : TIMEOUT, write);
     }
 
-    static Connection checkActualAndFallback(Pools pools, Assignment assign, FetchAndSchema fetch, boolean write) throws DBPoolingException {
+    static Connection checkActualAndFallback(final Pools pools, final Assignment assign, final FetchAndSchema fetch, final boolean write) throws OXException {
         Connection retval;
         try {
             retval = fetch.get(pools, assign, write, false);
             incrementFetched(assign, write);
-        } catch (PoolingException e) {
-            DBPoolingException e1 = createException(assign, write, e);
+        } catch (final OXException e) {
+            final OXException e1 = createException(assign, write, e);
             // Immediately fail if connection to master is wanted or no fallback is there.
             if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
                 throw e1;
@@ -157,42 +167,42 @@ public final class ReplicationMonitor {
             try {
                 retval = fetch.get(pools, assign, true, true);
                 incrementInstead();
-            } catch (PoolingException e2) {
+            } catch (final OXException e2) {
                 throw createException(assign, true, e2);
             }
         }
         if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), readTransaction(retval, assign.getContextId()))) {
             LOG.debug("Slave " + assign.getReadPoolId() + " is not actual. Using master " + assign.getWritePoolId() + " instead.");
-            Connection toReturn = retval;
+            final Connection toReturn = retval;
             try {
                 retval = fetch.get(pools, assign, true, true);
                 incrementInstead();
                 try {
                     toReturn.close();
-                } catch (SQLException e) {
-                    DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                } catch (final SQLException e) {
+                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                     LOG.error(e1.getMessage(), e1);
                 }
-            } catch (PoolingException e) {
+            } catch (final OXException e) {
                 // Use not actual slave if master connection cannot be obtained.
-                DBPoolingException e1 = createException(assign, true, e);
+                final OXException e1 = createException(assign, true, e);
                 LOG.warn(e1.getMessage(), e1);
             }
         }
         return retval;
     }
 
-    private static DBPoolingException createException(Assignment assign, boolean write, Throwable cause) {
-        int poolId = write ? assign.getWritePoolId() : assign.getReadPoolId();
+    private static OXException createException(final Assignment assign, final boolean write, final Throwable cause) {
+        final int poolId = write ? assign.getWritePoolId() : assign.getReadPoolId();
         return assign.getReadPoolId() == Constants.CONFIGDB_READ_ID ? DBPoolingExceptionCodes.NO_CONFIG_DB.create(cause) : DBPoolingExceptionCodes.NO_CONNECTION.create(cause, I(poolId));
     }
 
-    private static boolean isUpToDate(long masterTransaction, long slaveTransaction) {
+    private static boolean isUpToDate(final long masterTransaction, final long slaveTransaction) {
         // TODO handle overflow
         return slaveTransaction >= masterTransaction;
     }
 
-    public static void backAndIncrementTransaction(Pools pools, Assignment assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
+    public static void backAndIncrementTransaction(final Pools pools, final Assignment assign, final Connection con, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
@@ -205,7 +215,7 @@ public final class ReplicationMonitor {
         final ConnectionPool pool;
         try {
             pool = pools.getPool(poolId);
-        } catch (DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return;
         }
@@ -214,14 +224,14 @@ public final class ReplicationMonitor {
         } else {
             try {
                 pool.back(con);
-            } catch (PoolingException e) {
-                DBPoolingException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
+            } catch (final PoolingException e) {
+                final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
                 LOG.error(e1.getMessage(), e1);
             }
         }
     }
 
-    private static long readTransaction(Connection con, int ctxId) throws DBPoolingException {
+    private static long readTransaction(final Connection con, final int ctxId) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final long retval;
@@ -234,7 +244,7 @@ public final class ReplicationMonitor {
             } else {
                 throw DBPoolingExceptionCodes.TRANSACTION_MISSING.create(I(ctxId));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -244,13 +254,13 @@ public final class ReplicationMonitor {
 
     private static long lastLogged = 0;
 
-    static void increaseTransactionCounter(Assignment assign, Connection con) {
+    static void increaseTransactionCounter(final Assignment assign, final Connection con) {
         try {
             if (con.isClosed()) {
                 return;
             }
-        } catch (SQLException e) {
-            DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final SQLException e) {
+            final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
             return;
         }
@@ -271,16 +281,16 @@ public final class ReplicationMonitor {
                 LOG.error("Updating transaction for replication monitor failed for context " + assign.getContextId() + ".");
             }
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             if (1146 == e.getErrorCode()) {
                 if (lastLogged + 300000 < System.currentTimeMillis()) {
                     lastLogged = System.currentTimeMillis();
-                    DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                     LOG.error(e1.getMessage(), e1);
                 }
             } else {
-                DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 LOG.error(e1.getMessage(), e1);
             }
         } finally {
@@ -289,7 +299,7 @@ public final class ReplicationMonitor {
         }
     }
 
-    public static void incrementFetched(Assignment assign, boolean write) {
+    public static void incrementFetched(final Assignment assign, final boolean write) {
         if (assign.getWritePoolId() == assign.getReadPoolId() || write) {
             masterConnectionsFetched++;
         } else {

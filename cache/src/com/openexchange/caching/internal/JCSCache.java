@@ -55,9 +55,9 @@ import org.apache.jcs.access.exception.ObjectExistsException;
 import org.apache.jcs.engine.behavior.ICacheElement;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
-import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheStatistics;
+import com.openexchange.caching.CacheExceptionCodes;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.internal.cache2jcs.CacheElement2JCS;
 import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
@@ -86,7 +86,7 @@ public final class JCSCache implements Cache {
         try {
             cache.clear();
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.CACHE_ERROR.create(e, e.getMessage());
+            throw CacheExceptionCodes.CACHE_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -110,7 +110,7 @@ public final class JCSCache implements Cache {
         try {
             return new ElementAttributes2JCS(cache.getDefaultElementAttributes());
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.FAILED_ATTRIBUTE_RETRIEVAL.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_ATTRIBUTE_RETRIEVAL.create(e, e.getMessage());
         }
     }
 
@@ -126,7 +126,7 @@ public final class JCSCache implements Cache {
         try {
             cache.put(key, obj);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
@@ -134,7 +134,7 @@ public final class JCSCache implements Cache {
         try {
             cache.put(key, val, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
@@ -142,7 +142,7 @@ public final class JCSCache implements Cache {
         try {
             cache.putInGroup(key, groupName, value);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
@@ -150,7 +150,7 @@ public final class JCSCache implements Cache {
         try {
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
@@ -158,9 +158,9 @@ public final class JCSCache implements Cache {
         try {
             cache.putSafe(key, value);
         } catch (final ObjectExistsException e) {
-            throw CacheException.Code.FAILED_SAFE_PUT.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_SAFE_PUT.create(e, e.getMessage());
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
@@ -168,7 +168,7 @@ public final class JCSCache implements Cache {
         try {
             cache.remove(key);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.FAILED_REMOVE.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_REMOVE.create(e, e.getMessage());
         }
     }
 
@@ -180,7 +180,7 @@ public final class JCSCache implements Cache {
         try {
             cache.setDefaultElementAttributes(new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheException.Code.FAILED_ATTRIBUTE_ASSIGNMENT.create(e, e.getMessage());
+            throw CacheExceptionCodes.FAILED_ATTRIBUTE_ASSIGNMENT.create(e, e.getMessage());
         }
     }
 

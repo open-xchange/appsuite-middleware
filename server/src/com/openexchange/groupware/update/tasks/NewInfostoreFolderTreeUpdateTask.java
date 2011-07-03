@@ -78,7 +78,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(NewInfostoreFolderTreeUpdateTask.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(NewInfostoreFolderTreeUpdateTask.class));
 
     private OCLPermission systemPermission;
 

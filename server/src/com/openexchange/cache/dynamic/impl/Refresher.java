@@ -72,7 +72,7 @@ public abstract class Refresher<T extends Serializable> {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Refresher.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Refresher.class));
 
     /**
      * Factory for reloading cached objects.
@@ -214,7 +214,7 @@ public abstract class Refresher<T extends Serializable> {
 
     public static Cache getCache(final String regionName) throws CacheException {
         if (null == regionName) {
-            throw new CacheException(CacheException.Code.INVALID_CACHE_REGION_NAME, regionName);
+            throw new CacheException(Code.INVALID_CACHE_REGION_NAME, regionName);
         }
         final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
         return null == service ? null : service.getCache(regionName);

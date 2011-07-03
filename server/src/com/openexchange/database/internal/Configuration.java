@@ -53,8 +53,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.pooling.ExhaustedActions;
 
 /**
@@ -63,15 +63,15 @@ import com.openexchange.pooling.ExhaustedActions;
  */
 public final class Configuration {
 
-    private static final Log LOG = LogFactory.getLog(Configuration.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Configuration.class));
 
     private static final String CONFIG_FILENAME = "configdb.properties";
 
     private Properties props;
 
-    private Properties readProps = new Properties();
+    private final Properties readProps = new Properties();
 
-    private Properties writeProps = new Properties();
+    private final Properties writeProps = new Properties();
 
     private final ConnectionPool.Config poolConfig = ConnectionPool.DEFAULT_CONFIG;
 
@@ -107,7 +107,7 @@ public final class Configuration {
         T convert(String toConvert);
     }
 
-    private <T> T getUniversal(Property property, T def, Convert<T> converter) {
+    private <T> T getUniversal(final Property property, final T def, final Convert<T> converter) {
         final T retval;
         if (props != null && props.containsKey(property.getPropertyName())) {
             retval = converter.convert(props.getProperty(property.getPropertyName()));
@@ -117,33 +117,33 @@ public final class Configuration {
         return retval;
     }
 
-    String getProperty(Property property, String def) {
+    String getProperty(final Property property, final String def) {
         return getUniversal(property, def, new Convert<String>() {
-            public String convert(String toConvert) {
+            public String convert(final String toConvert) {
                 return toConvert;
             }
         });
     }
 
-    int getInt(Property property, int def) {
+    int getInt(final Property property, final int def) {
         return getUniversal(property, Integer.valueOf(def), new Convert<Integer>() {
-            public Integer convert(String toConvert) {
+            public Integer convert(final String toConvert) {
                 return Integer.valueOf(toConvert);
             }
         }).intValue();
     }
 
-    long getLong(Property property, long def) {
+    long getLong(final Property property, final long def) {
         return getUniversal(property, Long.valueOf(def), new Convert<Long>() {
-            public Long convert(String toConvert) {
+            public Long convert(final String toConvert) {
                 return Long.valueOf(toConvert);
             }
         }).longValue();
     }
 
-    boolean getBoolean(Property property, boolean def) {
+    boolean getBoolean(final Property property, final boolean def) {
         return getUniversal(property, Boolean.valueOf(def), new Convert<Boolean>() {
-            public Boolean convert(String toConvert) {
+            public Boolean convert(final String toConvert) {
                 return Boolean.valueOf(toConvert);
             }
         }).booleanValue();
@@ -152,7 +152,7 @@ public final class Configuration {
     /**
      * {@inheritDoc}
      */
-    public void readConfiguration(ConfigurationService service) throws DBPoolingException {
+    public void readConfiguration(final ConfigurationService service) throws OXException {
         if (null != props) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(this.getClass().getName());
         }
@@ -166,7 +166,7 @@ public final class Configuration {
     }
 
     private void separateReadWrite() {
-        for (Object tmp : props.keySet()) {
+        for (final Object tmp : props.keySet()) {
             final String key = (String) tmp;
             if (key.startsWith("readProperty.")) {
                 final String value = props.getProperty(key);
@@ -185,14 +185,14 @@ public final class Configuration {
         }
     }
 
-    private void loadDrivers() throws DBPoolingException {
+    private void loadDrivers() throws OXException {
         final String readDriverClass = getProperty(Property.READ_DRIVER_CLASS);
         if (null == readDriverClass) {
             throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.READ_DRIVER_CLASS.getPropertyName());
         }
         try {
             Class.forName(readDriverClass);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, readDriverClass);
         }
         if (!isWriteDefined()) {
@@ -204,7 +204,7 @@ public final class Configuration {
         }
         try {
             Class.forName(writeDriverClass);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, writeDriverClass);
         }
     }
@@ -284,7 +284,7 @@ public final class Configuration {
 
         private String propertyName;
 
-        private Property(String propertyName) {
+        private Property(final String propertyName) {
             this.propertyName = propertyName;
         }
 

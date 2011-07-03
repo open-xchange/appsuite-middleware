@@ -56,39 +56,39 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.Initialization;
+import com.openexchange.exception.OXException;
 
 /**
  * Injects the {@link ConfigurationService} and publishes the DatabaseService.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
+public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
-    private static final Log LOG = LogFactory.getLog(DatabaseServiceRegisterer.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DatabaseServiceRegisterer.class));
 
-    private BundleContext context;
+    private final BundleContext context;
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<DatabaseService> serviceRegistration;
 
-    public DatabaseServiceRegisterer(BundleContext context) {
+    public DatabaseServiceRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
         if (Initialization.getInstance().isStarted()) {
             // No reconfiguration;
             return null;
         }
-        ConfigurationService configuration = (ConfigurationService) context.getService(reference);
+        final ConfigurationService configuration = context.getService(reference);
         try {
-            DatabaseService service = Initialization.getInstance().start(configuration);
+            final DatabaseService service = Initialization.getInstance().start(configuration);
             LOG.info("Publishing DatabaseService.");
-            serviceRegistration = context.registerService(DatabaseService.class.getName(), service, null);
-        } catch (DBPoolingException e) {
+            serviceRegistration = context.registerService(DatabaseService.class, service, null);
+        } catch (final OXException e) {
             LOG.error("Publishing the DatabaseService failed.", e);
         }
         return configuration;
@@ -97,14 +97,14 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // Nothing to do.
     }
 
     /**
      * {@inheritDoc}
      */
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         if (null != serviceRegistration) {
             LOG.info("Unpublishing DatabaseService.");
             serviceRegistration.unregister();

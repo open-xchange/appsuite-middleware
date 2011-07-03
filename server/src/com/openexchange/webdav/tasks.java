@@ -93,7 +93,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     private static final long serialVersionUID = 1750720959626156342L;
 
-    private static final Log LOG = LogFactory.getLog(tasks.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(tasks.class));
 
     public tasks() {
         super();

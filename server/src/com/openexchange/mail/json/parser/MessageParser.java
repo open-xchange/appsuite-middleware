@@ -119,6 +119,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -132,7 +133,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class MessageParser {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageParser.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageParser.class));
 
     /**
      * No instantiation
@@ -242,7 +243,7 @@ public final class MessageParser {
                     final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
                     if (conversionService == null) {
                         throw new MailException(new ServiceException(
-                            ServiceException.Code.SERVICE_UNAVAILABLE,
+                            ServiceErrorCode.SERVICE_UNAVAILABLE,
                             ConversionService.class.getName()));
                     }
                     final Set<Class<?>> types = new HashSet<Class<?>>(4);

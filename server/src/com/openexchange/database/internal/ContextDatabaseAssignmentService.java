@@ -49,35 +49,31 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.database.DBPoolingException;
-
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ContextDatabaseAssignmentService}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 interface ContextDatabaseAssignmentService {
 
     /**
-     * Gets a database assignment for a context. If the cache is enabled this
-     * method looks into the cache for the assignment and loads it from the
-     * database if cache is disabled or the cache doesn't contain the entry.
+     * Gets a database assignment for a context. If the cache is enabled this method looks into the cache for the assignment and loads it
+     * from the database if cache is disabled or the cache doesn't contain the entry.
      * 
-     * @param contextId unique identifier of the context.
+     * @param contextId The unique identifier of the context.
      * @return the assignment.
-     * @throws DBPoolingException if getting the assignment fails.
+     * @throws OXException If getting the assignment fails.
      */
-    Assignment getAssignment(int contextId) throws DBPoolingException;
+    Assignment getAssignment(int contextId) throws OXException;
 
     /**
      * Invalidates an assignment for a context in the cache.
      * 
-     * @param contextId
-     *            unique identifier of the context.
-     * @throws DBPoolingException
-     *             if getting the server identifier fails.
+     * @param contextId The unique identifier of the context.
+     * @throws OXException If getting the server identifier fails.
      */
-    void removeAssignments(int contextId) throws DBPoolingException;
+    void removeAssignments(int contextId) throws OXException;
 
 }

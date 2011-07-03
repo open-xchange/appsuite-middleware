@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountAction {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractMailAccountTreeAction.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAccountTreeAction.class));
 
     /**
      * Initializes a new {@link AbstractMailAccountTreeAction}.

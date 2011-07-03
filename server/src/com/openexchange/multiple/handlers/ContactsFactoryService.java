@@ -107,7 +107,7 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
                 return retval;
             } catch (final AbstractOXException e) {
                 final org.apache.commons.logging.Log log =
-                    org.apache.commons.logging.LogFactory.getLog(ContactsFactoryService.ContactsHandler.class);
+                    com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactsFactoryService.ContactsHandler.class));
                 log.error(e.getMessage(), e);
                 throw e;
             }

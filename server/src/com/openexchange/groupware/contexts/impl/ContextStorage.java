@@ -68,7 +68,7 @@ public abstract class ContextStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ContextStorage.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ContextStorage.class));
 
     /**
      * Singleton implementation.

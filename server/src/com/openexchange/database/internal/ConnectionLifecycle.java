@@ -60,8 +60,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.Properties;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 
@@ -81,7 +81,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     /**
      * Time between checks if a connection still works.
      */
-    private long checkTime = ConnectionPool.DEFAULT_CHECK_TIME;
+    private final long checkTime = ConnectionPool.DEFAULT_CHECK_TIME;
 
     public ConnectionLifecycle(final String url, final Properties info) {
         this.url = url;
@@ -146,7 +146,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             ConnectionPool.LOG.debug("Problem while closing connection.", e);
         }
     }
-    private static void addTrace(final DBPoolingException dbe,
+    private static void addTrace(final OXException dbe,
         final PooledData<Connection> data) {
         if (null != data.getTrace()) {
             dbe.setStackTrace(data.getTrace());
@@ -161,7 +161,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 ConnectionPool.LOG.error("Found closed connection.");
                 retval = false;
             } else if (!con.getAutoCommit()) {
-                final DBPoolingException dbe = DBPoolingExceptionCodes.NO_AUTOCOMMIT.create();
+                final OXException dbe = DBPoolingExceptionCodes.NO_AUTOCOMMIT.create();
                 addTrace(dbe, data);
                 ConnectionPool.LOG.error(dbe.getMessage(), dbe);
                 con.rollback();
@@ -173,7 +173,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 final Method method = connectionClass.getMethod("getActiveStatementCount");
                 final int active = ((Integer) method.invoke(con, new Object[0])).intValue();
                 if (active > 0) {
-                    final DBPoolingException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
+                    final OXException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
                     addTrace(dbe, data);
                     ConnectionPool.LOG.error(dbe.getMessage(), dbe);
                     retval = false;
@@ -183,7 +183,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             }
             // Write warning if using this connection was longer than 2 seconds.
             if (data.getTimeDiff() > 2000) {
-                final DBPoolingException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
+                final OXException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
                 addTrace(dbe, data);
                 if (ConnectionPool.LOG.isWarnEnabled()) {
                     ConnectionPool.LOG.warn(dbe.getMessage(), dbe);

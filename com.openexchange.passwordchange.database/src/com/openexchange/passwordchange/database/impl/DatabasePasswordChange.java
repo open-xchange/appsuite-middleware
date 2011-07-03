@@ -63,6 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.user.UserService;
 
@@ -84,7 +85,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         {
             final UserService userService = getServiceRegistry().getService(UserService.class);
             if (userService == null) {
-                throw new UserException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName()));
+                throw new UserException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, UserService.class.getName()));
             }
             final User user = userService.getUser(event.getSession().getUserId(), ctx);
             // Get encoded version of new password

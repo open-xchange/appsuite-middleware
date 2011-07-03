@@ -64,7 +64,7 @@ import com.openexchange.charset.ModifyCharsetStandardProvider;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CharsetActivator implements BundleActivator, ServiceTrackerCustomizer {
+public final class CharsetActivator implements BundleActivator, ServiceTrackerCustomizer<CharsetProvider, CharsetProvider> {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CharsetActivator.class);
 
@@ -76,7 +76,7 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 
     private BundleContext context;
 
-    private ServiceTracker serviceTracker;
+    private ServiceTracker<CharsetProvider, CharsetProvider> serviceTracker;
 
     /**
      * Default constructor
@@ -85,10 +85,10 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         super();
     }
 
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
-        if (addedService instanceof CharsetProvider) {
-            collectionCharsetProvider.addCharsetProvider((CharsetProvider) addedService);
+    public CharsetProvider addingService(final ServiceReference<CharsetProvider> reference) {
+        final CharsetProvider addedService = context.getService(reference);
+        {
+            collectionCharsetProvider.addCharsetProvider(addedService);
             if (LOG.isInfoEnabled()) {
                 LOG.info("New charset provider detected and added: " + addedService.getClass().getName());
             }
@@ -96,13 +96,13 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         return addedService;
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<CharsetProvider> reference, final CharsetProvider service) {
         // Nope
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
-        if (service instanceof CharsetProvider) {
-            collectionCharsetProvider.removeCharsetProvider((CharsetProvider) service);
+    public void removedService(final ServiceReference<CharsetProvider> reference, final CharsetProvider service) {
+        {
+            collectionCharsetProvider.removeCharsetProvider(service);
             if (LOG.isInfoEnabled()) {
                 LOG.info("Charset provider removed: " + service.getClass().getName());
             }
@@ -130,7 +130,7 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
              * Initialize a service tracker to track bundle chars providers
              */
             this.context = context;
-            serviceTracker = new ServiceTracker(context, CharsetProvider.class.getName(), this);
+            serviceTracker = new ServiceTracker<CharsetProvider, CharsetProvider>(context, CharsetProvider.class.getName(), this);
             serviceTracker.open();
             if (LOG.isInfoEnabled()) {
                 LOG.info("Charset bundle successfully started");

@@ -67,7 +67,7 @@ public final class Task2Links {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Task2Links.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Task2Links.class));
 
     /**
      * Prevent instantiation

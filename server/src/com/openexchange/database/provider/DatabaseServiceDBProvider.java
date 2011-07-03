@@ -51,8 +51,8 @@ package com.openexchange.database.provider;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -74,7 +74,7 @@ public class DatabaseServiceDBProvider implements DBProvider {
         this.databaseService = databaseService;
     }
 
-    public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+    public Connection getReadConnection(final Context ctx) throws OXException {
         return databaseService.getReadOnly(ctx);
     }
 
@@ -84,7 +84,7 @@ public class DatabaseServiceDBProvider implements DBProvider {
         }
     }
 
-    public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+    public Connection getWriteConnection(final Context ctx) throws OXException {
         return databaseService.getWritable(ctx);
     }
 

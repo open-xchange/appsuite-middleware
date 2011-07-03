@@ -51,11 +51,11 @@ package com.openexchange.ajp13.najp.threadpool;
 
 import java.net.Socket;
 import javax.management.NotCompliantMBeanException;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.AJPv13Task;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -65,7 +65,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class AJPv13SocketHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13SocketHandler.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13SocketHandler.class));
 
     /**
      * The atomic boolean to track started status.

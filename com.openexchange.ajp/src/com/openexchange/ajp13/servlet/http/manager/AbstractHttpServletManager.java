@@ -79,7 +79,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      * The logger.
      */
     protected static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(AbstractHttpServletManager.class);
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractHttpServletManager.class));
 
     /**
      * The empty class array.

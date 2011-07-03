@@ -79,7 +79,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class CaldavActivator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(CaldavActivator.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavActivator.class));
     
     private static final Class[] NEEDED = new Class[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class};
 

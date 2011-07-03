@@ -96,7 +96,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  */
 public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     
-    private static final Log LOG = LogFactory.getLog(GroupwareCaldavFactory.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(GroupwareCaldavFactory.class));
     
     private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
 

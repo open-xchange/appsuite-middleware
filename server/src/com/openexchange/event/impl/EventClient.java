@@ -95,7 +95,7 @@ import com.openexchange.tools.oxfolder.OXFolderPermissionException;
  */
 public class EventClient {
 
-    private static final Log LOG = LogFactory.getLog(EventClient.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(EventClient.class));
 
     public static final int CREATED = 5;
     public static final int CHANGED = 6;

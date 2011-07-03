@@ -94,7 +94,7 @@ import com.openexchange.configuration.ServerConfig;
  */
 public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerImpl.class));
 
     private static final int NO = 0;
 

@@ -83,7 +83,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 final class ManagedFileManagementImpl implements ManagedFileManagement {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagedFileManagementImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagedFileManagementImpl.class));
 
     private static final int DELAY = 10000;
 

@@ -66,7 +66,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class ManagedInputStream extends InputStream {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagedInputStream.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagedInputStream.class));
 
     private static final int SIZE_LIMIT = 1048576; // 1MB
 

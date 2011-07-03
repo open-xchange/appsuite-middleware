@@ -77,7 +77,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = LogFactory.getLog(RemoveAdminPermissionOnInfostoreTask.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RemoveAdminPermissionOnInfostoreTask.class));
 
     public RemoveAdminPermissionOnInfostoreTask() {
         super();

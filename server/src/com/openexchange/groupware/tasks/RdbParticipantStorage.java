@@ -81,7 +81,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(RdbParticipantStorage.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RdbParticipantStorage.class));
 
     /**
      * Default constructor.

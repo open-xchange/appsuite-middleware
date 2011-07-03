@@ -70,7 +70,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(ClearOrphanedInfostoreDocuments.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ClearOrphanedInfostoreDocuments.class));
 
     public int addedWithVersion() {
         return 26;

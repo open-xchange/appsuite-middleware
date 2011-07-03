@@ -163,7 +163,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     private static final String STR_UNKNOWN = "UNKNOWN";
 
-    private final static Log LOG = LogFactory.getLog(ParticipantNotify.class);
+    private final static Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ParticipantNotify.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

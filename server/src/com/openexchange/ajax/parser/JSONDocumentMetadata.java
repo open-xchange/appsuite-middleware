@@ -69,7 +69,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     
     private final JSONObject jsonObject;
 
-    private static final Log LOG = LogFactory.getLog(JSONDocumentMetadata.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONDocumentMetadata.class));
     private static final String DEFAULT_MIMETYPE = "application/octet-stream";
     //private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(JSONDocumentMetadata.class);
     

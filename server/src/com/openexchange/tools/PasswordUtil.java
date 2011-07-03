@@ -70,7 +70,7 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class PasswordUtil {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PasswordUtil.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasswordUtil.class));
 
     /**
      * The key length.

@@ -74,7 +74,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CorrectCharsetAndCollationTask implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(CorrectCharsetAndCollationTask.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CorrectCharsetAndCollationTask.class));
 
     public CorrectCharsetAndCollationTask() {
         super();

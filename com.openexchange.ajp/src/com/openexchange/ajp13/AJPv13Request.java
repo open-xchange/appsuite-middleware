@@ -50,7 +50,6 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import javax.servlet.ServletException;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 

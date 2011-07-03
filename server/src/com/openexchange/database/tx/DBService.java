@@ -59,13 +59,12 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.database.provider.RequestDBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionException;
@@ -75,8 +74,7 @@ import com.openexchange.tx.UndoableAction;
 
 public abstract class DBService implements TransactionAware, DBProviderUser, DBProvider {
 
-    private static final Log LOG = LogFactory.getLog(DBService.class);
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(DBService.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DBService.class));
 
     private RequestDBProvider provider;
 
@@ -106,14 +104,14 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         setProvider(provider);
     }
 
-    public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+    public Connection getReadConnection(final Context ctx) throws OXException {
         if(txState.get() != null && txState.get().preferWriteCon) {
             return getWriteConnection(ctx);
         }
         return provider.getReadConnection(ctx);
     }
 
-    public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+    public Connection getWriteConnection(final Context ctx) throws OXException {
         final Connection writeCon = provider.getWriteConnection(ctx);
         if(txState.get() != null && txState.get().preferWriteCon) {
             txState.get().writeCons.add(writeCon);
@@ -140,41 +138,37 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         provider.releaseWriteConnection(ctx, con);
     }
 
-    public void commitDBTransaction() throws DBPoolingException {
+    public void commitDBTransaction() throws OXException {
         provider.commit();
     }
 
-    public void commitDBTransaction(final Undoable undo) throws DBPoolingException {
+    public void commitDBTransaction(final Undoable undo) throws OXException {
         provider.commit();
         addUndoable(undo);
     }
 
-    public void rollbackDBTransaction() throws DBPoolingException {
+    public void rollbackDBTransaction() throws OXException {
         provider.rollback();
     }
 
-    public void startDBTransaction() throws DBPoolingException {
+    public void startDBTransaction() throws OXException {
         provider.startTransaction();
     }
 
-    public void finishDBTransaction() throws DBPoolingException {
+    public void finishDBTransaction() throws OXException {
         provider.finish();
     }
 
-    public void startTransaction() throws TransactionException {
+    public void startTransaction() throws OXException {
         txState.set(new ThreadState());
     }
 
-    public void finish() throws TransactionException {
-        try {
-            provider.finish();
-        } catch (DBPoolingException e) {
-            throw new TransactionException(e);
-        }
+    public void finish() throws OXException {
+        provider.finish();
         txState.set(null);
     }
 
-    public void rollback() throws TransactionException {
+    public void rollback() throws OXException {
         final List<Undoable> failed = new ArrayList<Undoable>();
         final List<Undoable> undos = new ArrayList<Undoable>(txState.get().undoables);
         Collections.reverse(undos);
@@ -187,7 +181,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             }
         }
         if (failed.size() != 0) {
-            final TransactionException exception = TransactionExceptionCodes.NO_COMPLETE_ROLLBACK.create();
+            final OXException exception = TransactionExceptionCodes.NO_COMPLETE_ROLLBACK.create();
             if (LOG.isFatalEnabled()) {
                 final StringBuilder explanations = new StringBuilder();
                 for(final Undoable undo : failed) {
@@ -224,7 +218,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         txState.get().undoables.add(undo);
     }
 
-    protected void perform(final UndoableAction action, final boolean dbTransaction) throws AbstractOXException {
+    protected void perform(final UndoableAction action, final boolean dbTransaction) throws OXException {
         try {
             if(dbTransaction) {
                 startDBTransaction();
@@ -235,12 +229,12 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             } else {
                 addUndoable(action);
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             if(dbTransaction) {
                 try {
                     rollbackDBTransaction();
-                } catch (final DBPoolingException x) {
-                    LL.log(x);
+                } catch (final OXException x) {
+                    x.log(LOG);
                 }
             }
             throw e;
@@ -248,8 +242,8 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             if(dbTransaction) {
                 try {
                     finishDBTransaction();
-                } catch (final DBPoolingException x) {
-                    LL.log(x);
+                } catch (final OXException x) {
+                    x.log(LOG);
                 }
             }
         }

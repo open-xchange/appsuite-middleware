@@ -89,6 +89,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -106,7 +107,7 @@ public class AttachmentRequest extends CommonRequest {
 
     private static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 
-    private static final Log LOG = LogFactory.getLog(AttachmentRequest.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AttachmentRequest.class));
 
     private static final String DATASOURCE = "datasource";
 
@@ -160,7 +161,7 @@ public class AttachmentRequest extends CommonRequest {
                 
                 if (conversionService == null) {
                     throw new ServiceException(
-                        ServiceException.Code.SERVICE_UNAVAILABLE,
+                        ServiceErrorCode.SERVICE_UNAVAILABLE,
                         ConversionService.class.getName());
                 }
                 

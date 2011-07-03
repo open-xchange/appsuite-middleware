@@ -119,7 +119,7 @@ public final class attachments extends OXServlet {
         ATTACHMENT_BASE.setTransactional(true);
     }
 
-    private static final transient Log LOG = LogFactory.getLog(attachments.class);
+    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(attachments.class));
 
     @Override
     protected Interface getInterface() {

@@ -83,7 +83,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ContactsRepairLinksAttachments implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(ContactsRepairLinksAttachments.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ContactsRepairLinksAttachments.class));
 
     public ContactsRepairLinksAttachments() {
         super();

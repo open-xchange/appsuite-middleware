@@ -79,7 +79,7 @@ public abstract class MailMessage extends MailPart {
 
     private static final long serialVersionUID = 8585899349289256569L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailMessage.class);
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessage.class));
 
     /*-
      * ------------------- Flags ------------------------------

@@ -75,7 +75,7 @@ public class Infostore extends OXServlet {
 
     private static final long serialVersionUID = -2064098724675986123L;
 
-    private static final transient Log LOG = LogFactory.getLog(Infostore.class);
+    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Infostore.class));
 
     @Override
     protected Interface getInterface() {

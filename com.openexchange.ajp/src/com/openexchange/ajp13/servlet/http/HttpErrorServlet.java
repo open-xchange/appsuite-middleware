@@ -66,7 +66,7 @@ public class HttpErrorServlet extends HttpServlet {
 
     private static final long serialVersionUID = -4233220177036230470L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpErrorServlet.class);
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpErrorServlet.class));
 
     private final String message;
 

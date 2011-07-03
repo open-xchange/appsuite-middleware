@@ -51,9 +51,6 @@ package com.openexchange.tx.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.tx.TXExceptionFactory;
 
 /**
  * {@link TransactionActivator}
@@ -62,17 +59,18 @@ import com.openexchange.tx.TXExceptionFactory;
  */
 public class TransactionActivator implements BundleActivator {
 
-    private ComponentRegistration registration;
-
+    /**
+     * Initializes a new {@link TransactionActivator}.
+     */
     public TransactionActivator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.TRANSACTION, "com.openexchange.groupware.tx", TXExceptionFactory.getInstance());
+    public void start(final BundleContext context) throws Exception {
+        // Nope
     }
 
-    public void stop(BundleContext context) throws Exception {
-        registration.unregister();
+    public void stop(final BundleContext context) throws Exception {
+        // Nope
     }
 }

@@ -51,10 +51,10 @@ package com.openexchange.consistency;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
- * FIXME {@link AbstractOXException} should not be thrown by MBeans. Normal JMX clients are not able to deserialize specialized
+ * FIXME {@link OXException} should not be thrown by MBeans. Normal JMX clients are not able to deserialize specialized
  * {@link Exception Exceptions}.
  * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -64,32 +64,32 @@ public interface ConsistencyMBean {
     // List
 
     // Missing
-    List<String> listMissingFilesInContext(int contextId) throws AbstractOXException;
+    List<String> listMissingFilesInContext(int contextId) throws OXException;
 
-    Map<Integer, List<String>> listMissingFilesInFilestore(int filestoreId) throws AbstractOXException;
+    Map<Integer, List<String>> listMissingFilesInFilestore(int filestoreId) throws OXException;
 
-    Map<Integer, List<String>> listMissingFilesInDatabase(int databaseId) throws AbstractOXException;
+    Map<Integer, List<String>> listMissingFilesInDatabase(int databaseId) throws OXException;
 
-    Map<Integer, List<String>> listAllMissingFiles() throws AbstractOXException;
+    Map<Integer, List<String>> listAllMissingFiles() throws OXException;
 
     // Unassigned
 
-    List<String> listUnassignedFilesInContext(int contextId) throws AbstractOXException;
+    List<String> listUnassignedFilesInContext(int contextId) throws OXException;
 
-    Map<Integer, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws AbstractOXException;
+    Map<Integer, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws OXException;
 
-    Map<Integer, List<String>> listUnassignedFilesInDatabase(int databaseId) throws AbstractOXException;
+    Map<Integer, List<String>> listUnassignedFilesInDatabase(int databaseId) throws OXException;
 
-    Map<Integer, List<String>> listAllUnassignedFiles() throws AbstractOXException;
+    Map<Integer, List<String>> listAllUnassignedFiles() throws OXException;
 
     // Repair
 
-    void repairFilesInContext(int contextId, String resolverPolicy) throws AbstractOXException;
+    void repairFilesInContext(int contextId, String resolverPolicy) throws OXException;
 
-    void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws AbstractOXException;
+    void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws OXException;
 
-    void repairFilesInDatabase(int databaseId, String resolverPolicy) throws AbstractOXException;
+    void repairFilesInDatabase(int databaseId, String resolverPolicy) throws OXException;
 
-    void repairAllFiles(String resolverPolicy) throws AbstractOXException;
+    void repairAllFiles(String resolverPolicy) throws OXException;
 
 }

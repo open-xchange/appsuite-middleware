@@ -68,7 +68,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class MailUploadQuotaUpdateTask implements UpdateTask {
 	
-	private static final Log LOG = LogFactory.getLog(MailUploadQuotaUpdateTask.class);
+	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MailUploadQuotaUpdateTask.class));
 
 	public MailUploadQuotaUpdateTask() {
 		super();

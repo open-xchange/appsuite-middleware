@@ -50,6 +50,7 @@
 package com.openexchange.database;
 
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ConfigDatabaseService}
@@ -63,14 +64,14 @@ public interface ConfigDatabaseService {
      * @return a connection for reading from the config database.
      * @throws DBPoolingException if no connection can be obtained.
      */
-    Connection getReadOnly() throws DBPoolingException;
+    Connection getReadOnly() throws OXException;
 
     /**
      * Returns a connection to the config database.
      * @return a connection to the config database.
      * @throws DBPoolingException if no connection can be obtained.
      */
-    Connection getWritable() throws DBPoolingException;
+    Connection getWritable() throws OXException;
 
     /**
      * Returns a read only connection to the config database to the pool.
@@ -84,8 +85,8 @@ public interface ConfigDatabaseService {
      */
     void backWritable(Connection con);
 
-    int[] listContexts(int poolId) throws DBPoolingException;
+    int[] listContexts(int poolId) throws OXException;
 
-    int getServerId() throws DBPoolingException;
+    int getServerId() throws OXException;
 
 }

@@ -64,7 +64,7 @@ import com.openexchange.tools.NonBlockingRWLock;
  */
 final class AJPv13ListenerPool {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ListenerPool.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ListenerPool.class));
 
     /**
      * A capacity-bounded queue

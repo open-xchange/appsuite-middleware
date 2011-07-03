@@ -50,8 +50,8 @@
 package com.openexchange.server.impl;
 
 import java.sql.Connection;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -60,19 +60,19 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class DBPool  {
     
-    public static final Connection pickup() throws DBPoolingException {
+    public static final Connection pickup() throws OXException {
         return Database.get(false);
     }
     
-    public static final Connection pickup(final Context context) throws DBPoolingException {
+    public static final Connection pickup(final Context context) throws OXException {
         return Database.get(context, false);
     }
     
-    public static final Connection pickupWriteable() throws DBPoolingException {
+    public static final Connection pickupWriteable() throws OXException {
         return Database.get(true);
     }
     
-    public static final Connection pickupWriteable(final Context context) throws DBPoolingException {
+    public static final Connection pickupWriteable(final Context context) throws OXException {
         return Database.get(context, true);
     }
     

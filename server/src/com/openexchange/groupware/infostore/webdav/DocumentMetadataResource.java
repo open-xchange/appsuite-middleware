@@ -93,7 +93,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 public class DocumentMetadataResource extends AbstractResource implements OXWebdavResource {
 
-    private static final Log LOG = LogFactory.getLog(DocumentMetadataResource.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DocumentMetadataResource.class));
 
     private final InfostoreWebdavFactory factory;
 

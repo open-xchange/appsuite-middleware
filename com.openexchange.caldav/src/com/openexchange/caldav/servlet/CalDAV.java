@@ -72,7 +72,7 @@ import com.openexchange.caldav.servlet.CaldavPerformer.Action;
  */
 public class CalDAV extends OXServlet {
 
-    private static final transient Log LOG = LogFactory.getLog(CalDAV.class);
+    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalDAV.class));
 
     @Override
     protected Interface getInterface() {

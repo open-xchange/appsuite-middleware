@@ -77,7 +77,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class FileResponseOutputter implements ResponseOutputter {
     
-    private static final Log LOG = LogFactory.getLog(FileResponseOutputter.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseOutputter.class));
     
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
     private static final String PARAMETER_CONTENT_TYPE = "content_type";

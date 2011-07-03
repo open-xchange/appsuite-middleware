@@ -55,6 +55,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.printing.days.CalendarTools;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.Constants;
@@ -62,7 +63,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.server.ServiceException;
 import com.openexchange.user.UserService;
 
 /**
@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
  */
 public class CPAppointment {
 
-    private static final Log LOG = LogFactory.getLog(CPAppointment.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CPAppointment.class));
 
     private String title, description, location;
 
@@ -90,11 +90,11 @@ public class CPAppointment {
         this.context = null;
     }
 
-    public CPAppointment(Appointment mother) {
+    public CPAppointment(final Appointment mother) {
         this(mother, null, null);
     }
 
-    public CPAppointment(Appointment mother, CPCalendar cal, Context context) {
+    public CPAppointment(final Appointment mother, final CPCalendar cal, final Context context) {
         super();
         this.cal = cal;
         this.context = context;
@@ -122,7 +122,7 @@ public class CPAppointment {
         return startDate;
     }
 
-    public String format(String pattern, Date date) {
+    public String format(final String pattern, final Date date) {
         return cal.format(pattern, date);
     }
 
@@ -138,47 +138,47 @@ public class CPAppointment {
         return (endDate.getTime() - startDate.getTime()) / Constants.MILLI_MINUTE;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(final String location) {
         this.location = location;
     }
 
-    public void setStartDate(Date start) {
+    public void setStartDate(final Date start) {
         this.startDate = start;
     }
 
-    public void setEndDate(Date end) {
+    public void setEndDate(final Date end) {
         this.endDate = end;
     }
 
     public List<String> getParticipants() {
-        List<String> retval = new ArrayList<String>();
-        for (Participant participant : original.getParticipants()) {
+        final List<String> retval = new ArrayList<String>();
+        for (final Participant participant : original.getParticipants()) {
             switch (participant.getType()) {
             case Participant.USER:
                 try {
-                    UserService userService = CPServiceRegistry.getInstance().getService(UserService.class, true);
+                    final UserService userService = CPServiceRegistry.getInstance().getService(UserService.class, true);
                     retval.add(userService.getUser(participant.getIdentifier(), context).getDisplayName());
-                } catch (UserException e) {
+                } catch (final UserException e) {
                     LOG.error(e.getMessage(), e);
-                } catch (ServiceException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 break;
             case Participant.GROUP:
                 try {
-                    GroupService service = CPServiceRegistry.getInstance().getService(GroupService.class, true);
+                    final GroupService service = CPServiceRegistry.getInstance().getService(GroupService.class, true);
                     retval.add(service.getGroup(context, participant.getIdentifier()).getDisplayName());
-                } catch (ServiceException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
-                } catch (GroupException e) {
+                } catch (final GroupException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 break;
@@ -196,7 +196,7 @@ public class CPAppointment {
         return retval;
     }
 
-    public void setOriginal(Appointment original) {
+    public void setOriginal(final Appointment original) {
         this.original = original;
     }
 

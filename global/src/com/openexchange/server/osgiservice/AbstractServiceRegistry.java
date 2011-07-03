@@ -52,7 +52,8 @@ package com.openexchange.server.osgiservice;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.server.ServiceException;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceErrorCode;
 
 /**
  * {@link AbstractServiceRegistry} can be used to create a singleton inside a bundle for holding concrete service implementations.
@@ -122,16 +123,16 @@ public class AbstractServiceRegistry {
      * @param clazz The service's class
      * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
      * @return The service if found; otherwise <code>null</code> if <code>errorOnAbsence</code> is <code>false</code>
-     * @throws ServiceException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
+     * @throws OXException If service is unavailable and <code>errorOnAbsence</code> is <code>true</code>
      */
-    public <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws ServiceException {
+    public <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws OXException {
         final Object service = services.get(clazz);
         if (null == service) {
             /*
              * Service is not present
              */
             if (errorOnAbsence) {
-                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, clazz.getName());
+                throw ServiceErrorCode.SERVICE_UNAVAILABLE.create(clazz.getName());
             }
             return null;
         }

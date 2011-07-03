@@ -50,6 +50,7 @@
 package com.openexchange.database;
 
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -62,60 +63,60 @@ public interface DatabaseService extends ConfigDatabaseService {
      * Returns a read only connection to the database of the specified context.
      * @param ctx Context.
      * @return a read only connection to the database of the specified context.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    Connection getReadOnly(Context ctx) throws DBPoolingException;
+    Connection getReadOnly(Context ctx) throws OXException;
 
     /**
      * Returns a read only connection to the database of the context with the specified identifier.
      * @param contextId identifier of the context.
      * @return a read only connection to the database of the specified context.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    Connection getReadOnly(int contextId) throws DBPoolingException;
+    Connection getReadOnly(int contextId) throws OXException;
 
     /**
      * Returns a writable connection to the database of the specified context.
      * @param ctx Context.
      * @return a writable connection to the database of the specified context.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    Connection getWritable(Context ctx) throws DBPoolingException;
+    Connection getWritable(Context ctx) throws OXException;
 
     /**
      * Returns a writable connection to the database of the context with the specified identifier.
      * @param contextId identifier of the context.
      * @return a writable connection to the database of the specified context.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    Connection getWritable(int contextId) throws DBPoolingException;
+    Connection getWritable(int contextId) throws OXException;
 
     /**
      * Returns a writable connection to the database of the context with the specified identifier. This connection will not have a
      * connection timeout to support long running update tasks.
      * @param contextId identifier of the context.
      * @return a writable connection to the database of the specified context without a connection timeout.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    Connection getForUpdateTask(int contextId) throws DBPoolingException;
+    Connection getForUpdateTask(int contextId) throws OXException;
 
     /**
      * This method is for moving contexts only.
      * @param poolId identifier of the database pool.
      * @param schema schema name.
      * @return a connection to the database from the given pool directed to the given schema.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    Connection get(int poolId, String schema) throws DBPoolingException;
+    Connection get(int poolId, String schema) throws OXException;
 
     /**
      * This method is only for administrative access to contexts.
      * @param poolId identifier of the database pool.
      * @param schema schema name.
      * @return a connection to the database without a time-out from the given pool directed to the given schema.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    Connection getNoTimeout(int poolId, String schema) throws DBPoolingException;
+    Connection getNoTimeout(int poolId, String schema) throws OXException;
 
     /**
      * This method is only for administrative access to contexts.
@@ -167,22 +168,22 @@ public interface DatabaseService extends ConfigDatabaseService {
      */
     void back(int poolId, Connection con);
 
-    int getWritablePool(int contextId) throws DBPoolingException;
+    int getWritablePool(int contextId) throws OXException;
 
-    String getSchemaName(int contextId) throws DBPoolingException;
+    String getSchemaName(int contextId) throws OXException;
 
     /**
      * Finds all contexts their data is stored in the same schema and on the same database like the given one. 
      * @param contextId identifier of a context.
      * @return all contexts having their data in the same schema and on the same database.
-     * @throws DBPoolingException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    int[] getContextsInSameSchema(int contextId) throws DBPoolingException;
+    int[] getContextsInSameSchema(int contextId) throws OXException;
 
     /**
      * Invalidates all cached database pooling information for a context. This are especially the assignments to database servers.
      * @param contextId unique identifier of the context.
-     * @throws DBPoolingException if resolving the server identifier fails.
+     * @throws OXException if resolving the server identifier fails.
      */
-    void invalidate(int contextId) throws DBPoolingException;
+    void invalidate(int contextId) throws OXException;
 }

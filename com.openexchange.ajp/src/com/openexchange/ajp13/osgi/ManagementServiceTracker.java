@@ -66,7 +66,7 @@ import com.openexchange.server.osgiservice.BundleServiceTracker;
  */
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
-    private static final Log LOG = LogFactory.getLog(ManagementServiceTracker.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class));
 
     /**
      * Initializes a new {@link ManagementServiceTracker}

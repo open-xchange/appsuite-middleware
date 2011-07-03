@@ -95,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final Log LOG = LogFactory.getLog(VisibleFoldersPerformer.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(VisibleFoldersPerformer.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -56,8 +56,8 @@ import java.sql.SQLException;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.AbstractUndoable;
@@ -66,13 +66,13 @@ import com.openexchange.tx.UndoableAction;
 public abstract class AbstractDBAction extends AbstractUndoable implements
 		UndoableAction {
 	
-	private static final Log LOG = LogFactory.getLog(AbstractDBAction.class);
+	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AbstractDBAction.class));
 	
 	private DBProvider provider = null;
 	private Context context = null;
 
 	
-	protected int doUpdates(final UpdateBlock...updates) throws UpdateException, DBPoolingException {
+	protected int doUpdates(final UpdateBlock...updates) throws UpdateException, OXException {
 		Connection writeCon = null;
 		UpdateBlock current = null;
 		int counter = 0;
@@ -96,7 +96,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		return counter;
 	}
 
-    protected int doUpdates(final List<UpdateBlock> updates) throws DBPoolingException, UpdateException {
+    protected int doUpdates(final List<UpdateBlock> updates) throws OXException, UpdateException {
         return doUpdates(updates.toArray(new UpdateBlock[updates.size()]));
     }
 

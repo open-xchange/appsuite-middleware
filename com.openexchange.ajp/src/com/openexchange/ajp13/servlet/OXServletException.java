@@ -49,64 +49,65 @@
 
 package com.openexchange.ajp13.servlet;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * OXServletException
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXServletException extends AbstractOXException {
+public class OXServletException extends OXException {
 
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 3931776129684819019L;
 
+    private static final String PREFIX = "SVL";
+
     /**
-     * Code
-     * 
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * The Open-Xchange servlet error code enumeration.
      */
     public static enum Code {
 
         /**
          * Missing property %s in 'system.properties'
          */
-        MISSING_SERVLET_DIR("Missing property %s in 'system.properties'", Category.SETUP_ERROR, 1),
+        MISSING_SERVLET_DIR("Missing property %s in 'system.properties'", Category.CATEGORY_CONFIGURATION, 1),
         /**
          * Servlet mapping directory does not exist: %s
          */
-        DIR_NOT_EXISTS("Servlet mapping directory does not exist: %s", Category.SETUP_ERROR, 2),
+        DIR_NOT_EXISTS("Servlet mapping directory does not exist: %s", Category.CATEGORY_CONFIGURATION, 2),
         /**
          * File is not a directory: %s
          */
-        NO_DIRECTORY("File is not a directory: %s", Category.SETUP_ERROR, 3),
+        NO_DIRECTORY("File is not a directory: %s", Category.CATEGORY_CONFIGURATION, 3),
         /**
          * Servlet mappings could not be loaded due to following error: %s
          */
-        SERVLET_MAPPINGS_NOT_LOADED("Servlet mappings could not be loaded due to following error: %s", Category.CODE_ERROR, 4),
+        SERVLET_MAPPINGS_NOT_LOADED("Servlet mappings could not be loaded due to following error: %s", Category.CATEGORY_ERROR, 4),
         /**
          * No servlet class name found for key "%s". Please check servlet mappings.
          */
-        NO_CLASS_NAME_FOUND("No servlet class name found for key \"%s\". Please check servlet mappings.", Category.SETUP_ERROR, 5),
+        NO_CLASS_NAME_FOUND("No servlet class name found for key \"%s\". Please check servlet mappings.", Category.CATEGORY_ERROR, 5),
         /**
          * Name "%s" already mapped to "%s". Ignoring servlet class "%s"
          */
-        ALREADY_PRESENT("Name \"%s\" already mapped to \"%s\". Ignoring servlet class \"%s\"", Category.SETUP_ERROR, 6),
+        ALREADY_PRESENT("Name \"%s\" already mapped to \"%s\". Ignoring servlet class \"%s\"", Category.CATEGORY_CONFIGURATION, 6),
         /**
          * SecurityException while loading servlet class "%s"
          */
-        SECURITY_ERR("SecurityException while loading servlet class \"%s\"", Category.CODE_ERROR, 7),
+        SECURITY_ERR("SecurityException while loading servlet class \"%s\"", Category.CATEGORY_ERROR, 7),
         /**
          * Couldn't find servlet class "%s"
          */
-        CLASS_NOT_FOUND("Couldn't find servlet class \"%s\"", Category.CODE_ERROR, 8),
+        CLASS_NOT_FOUND("Couldn't find servlet class \"%s\"", Category.CATEGORY_ERROR, 8),
         /**
          * No default constructor specified in servlet class "%s"
          */
-        NO_DEFAULT_CONSTRUCTOR("No default constructor specified in servlet class \"%s\"", Category.CODE_ERROR, 9);
+        NO_DEFAULT_CONSTRUCTOR("No default constructor specified in servlet class \"%s\"", Category.CATEGORY_ERROR, 9);
 
         /**
          * Message of the exception.
@@ -136,30 +137,41 @@ public class OXServletException extends AbstractOXException {
             number = detailNumber;
         }
 
-        public Category getCategory() {
-            return category;
+        /**
+         * Creates an {@link OXException} instance using this error code.
+         * 
+         * @return The newly created {@link OXException} instance.
+         */
+        public OXException create() {
+            return create(new Object[0]);
         }
 
-        public String getMessage() {
-            return message;
+        /**
+         * Creates an {@link OXException} instance using this error code.
+         * 
+         * @param logArguments The arguments for log message.
+         * @return The newly created {@link OXException} instance.
+         */
+        public OXException create(final Object... logArguments) {
+            return create(null, logArguments);
         }
 
-        public int getNumber() {
-            return number;
+        /**
+         * Creates an {@link OXException} instance using this error code.
+         * 
+         * @param cause The initial cause for {@link OXException}
+         * @param logArguments The arguments for log message.
+         * @return The newly created {@link OXException} instance.
+         */
+        public OXException create(final Throwable cause, final Object... logArguments) {
+            return new OXException(number, OXExceptionStrings.MESSAGE, cause).setPrefix(PREFIX).addCategory(category).setLogMessage(
+                message,
+                logArguments);
         }
     }
 
-    public OXServletException(final AbstractOXException cause) {
-        super(cause);
-    }
-
-    public OXServletException(final Code code, final Object... messageArgs) {
-        this(code, null, messageArgs);
-    }
-
-    public OXServletException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.SERVLET, code.category, code.number, code.message, cause);
-        setMessageArgs(messageArgs);
+    private OXServletException() {
+        super();
     }
 
 }

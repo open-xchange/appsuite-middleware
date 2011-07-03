@@ -77,7 +77,7 @@ import com.openexchange.ajp13.xajp.request.XAJPv13RequestBody;
 @Execution(Execution.MULTITHREADED)
 public final class XAJPv13DataHandler implements IDataHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(XAJPv13DataHandler.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13DataHandler.class));
 
     /**
      * Starts the request handle cycle with following data.

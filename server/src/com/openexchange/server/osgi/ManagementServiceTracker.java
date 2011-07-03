@@ -70,7 +70,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  */
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
-    private static final Log LOG = LogFactory.getLog(ManagementServiceTracker.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class));
 
     private ObjectName gadObjectName;
 

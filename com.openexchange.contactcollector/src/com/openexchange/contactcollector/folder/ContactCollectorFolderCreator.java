@@ -54,11 +54,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -68,7 +68,6 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -94,7 +93,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(final LoginResult login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws OXException {
         final int cid = login.getSession().getContextId();
         DatabaseService databaseService = null;
         Connection con = null;
@@ -103,21 +102,18 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             con = databaseService.getWritable(cid);
             final String folderName = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             create(login.getSession(), login.getContext(), folderName, con);
-        } catch (final ServiceException e) {
-            throw new LoginException(e);
         } catch (final DBPoolingException e) {
             throw new LoginException(e);
         } catch (final SettingException e) {
-            throw new LoginException(e);
-        } catch (final OXException e) {
             throw new LoginException(e);
         } catch (final SQLException e) {
             throw new LoginException(new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage()));
         } catch (final AbstractOXException e) {
             throw new LoginException(e);
         } finally {
-            if (databaseService != null)
+            if (databaseService != null) {
                 databaseService.backWritable(cid, con);
+            }
         }
     }
     

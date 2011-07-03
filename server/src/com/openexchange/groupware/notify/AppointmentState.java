@@ -92,7 +92,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class AppointmentState extends LinkableState {
 
-    private static final Log LOGGER = LogFactory.getLog(AppointmentState.class);
+    private static final Log LOGGER = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AppointmentState.class));
 
     private final TemplateReplacement actionRepl;
 

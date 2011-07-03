@@ -68,7 +68,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailAccountServletInit implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(MailAccountServletInit.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MailAccountServletInit.class));
 
     private static final String ALIAS = "ajax/" + Constants.getModule();
 

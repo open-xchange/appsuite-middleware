@@ -55,6 +55,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -77,7 +78,7 @@ public final class OXResourceResolver implements ResourceResolver {
      */
     public Resource load(final int resourceId, final Context ctx) throws ResourceException, ServiceException {
         if (null == resourceService) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE,
                 ResourceService.class.getName());
         }
         return resourceService.getResource(resourceId, ctx);
@@ -90,7 +91,7 @@ public final class OXResourceResolver implements ResourceResolver {
             return retval;
         }
         if (null == resourceService) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE,
                 ResourceService.class.getName());
         }
         for (final String name : resourceNames) {

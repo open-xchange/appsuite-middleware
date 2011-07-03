@@ -63,7 +63,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
  */
 public abstract class UserSettingMailStorage implements CacheAvailabilityListener {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UserSettingMailStorage.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserSettingMailStorage.class));
 
     private static volatile UserSettingMailStorage singleton;
 

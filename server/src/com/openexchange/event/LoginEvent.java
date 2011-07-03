@@ -66,7 +66,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class LoginEvent {
     
-    private static final Log LOG = LogFactory.getLog(LoginEvent.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(LoginEvent.class));
     
     public static final String TOPIC = "com/openexchange/login";
     

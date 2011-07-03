@@ -64,7 +64,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class ResourceStorageInit implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(ResourceStorageInit.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ResourceStorageInit.class));
 
     private static final ResourceStorageInit SINGLETON = new ResourceStorageInit();
 

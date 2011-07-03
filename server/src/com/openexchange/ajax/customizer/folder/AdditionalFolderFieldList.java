@@ -67,7 +67,7 @@ public class AdditionalFolderFieldList {
 
     // TODO: Track service ranking and allow fields to overwrite other fields.
 
-    private static final Log LOG = LogFactory.getLog(AdditionalFolderFieldList.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AdditionalFolderFieldList.class));
 
     private final TIntObjectHashMap<AdditionalFolderField> byColId = new TIntObjectHashMap<AdditionalFolderField>();
     private final Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();

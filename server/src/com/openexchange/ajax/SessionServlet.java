@@ -84,6 +84,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -106,7 +107,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final long serialVersionUID = -8308340875362868795L;
 
-    private static final Log LOG = LogFactory.getLog(SessionServlet.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(SessionServlet.class));
 
     public static final String SESSION_KEY = "sessionObject";
 
@@ -192,7 +193,7 @@ public abstract class SessionServlet extends AJAXServlet {
          */
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
-            throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+            throw new SessiondException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
         }
         final String sessionId = getSessionId(req);
         final ServerSession session = getSession(req, sessionId, sessiondService);

@@ -75,7 +75,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(ContactsGlobalMoveUpdateTask.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ContactsGlobalMoveUpdateTask.class));
 
     public ContactsGlobalMoveUpdateTask() {
         super();

@@ -98,7 +98,7 @@ public final class MailFolderImpl extends AbstractFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

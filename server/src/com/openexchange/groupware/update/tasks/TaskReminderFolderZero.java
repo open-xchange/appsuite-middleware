@@ -84,7 +84,7 @@ public class TaskReminderFolderZero implements UpdateTask {
     private static final String DELETE_REMINDER = "DELETE FROM reminder "
         + "WHERE cid=? AND object_id=?";
 
-    private static final Log LOG = LogFactory.getLog(TaskReminderFolderZero.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(TaskReminderFolderZero.class));
 
     public TaskReminderFolderZero() {
         super();

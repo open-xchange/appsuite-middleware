@@ -105,7 +105,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class StructureMailMessageParser {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(StructureMailMessageParser.class);
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StructureMailMessageParser.class));
 
     private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 

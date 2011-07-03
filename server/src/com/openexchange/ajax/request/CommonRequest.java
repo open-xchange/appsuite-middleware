@@ -65,7 +65,7 @@ public abstract class CommonRequest {
 	
 	protected JSONWriter w;
 	
-	private final Log LOG = LogFactory.getLog(CommonRequest.class);
+	private final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CommonRequest.class));
 	private final LoggingLogic LL = LoggingLogic.getLoggingLogic(CommonRequest.class, LOG);
 	
 	public CommonRequest(final JSONWriter w) {

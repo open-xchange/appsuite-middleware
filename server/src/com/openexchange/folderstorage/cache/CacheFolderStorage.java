@@ -403,7 +403,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     ids = Collections.singletonList(id);
                 }
             } catch (final Exception e) {
-                final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(CacheFolderStorage.class);
+                final org.apache.commons.logging.Log log = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheFolderStorage.class));
                 if (log.isDebugEnabled()) {
                     log.debug(e.getMessage(), e);
                 }

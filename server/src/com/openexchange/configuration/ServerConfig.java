@@ -56,7 +56,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.configuration.ConfigurationException.ConfigurationExceptionCodes;
+import com.openexchange.exception.OXException;
 
 /**
  * This class handles the configuration parameters read from the configuration property file server.properties.
@@ -65,7 +66,7 @@ import com.openexchange.configuration.ConfigurationException.Code;
  */
 public final class ServerConfig {
 
-    private static final Log LOG = LogFactory.getLog(ServerConfig.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ServerConfig.class));
 
     /**
      * Singleton object.
@@ -175,21 +176,17 @@ public final class ServerConfig {
     }
 
     /**
-     * Returns the value of the property with the specified key. This method
-     * returns <code>null</code> if the property is not found.
+     * Returns the value of the property with the specified key. This method returns <code>null</code> if the property is not found.
      * 
-     * @param key
-     *            the property key.
-     * @return the value of the property or <code>null</code> if the property
-     *         is not found.
+     * @param key the property key.
+     * @return the value of the property or <code>null</code> if the property is not found.
      */
     private static String getProperty(final String key) {
         return SINGLETON.props.getProperty(key);
     }
 
     /**
-     * @param property
-     *            wanted property.
+     * @param property wanted property.
      * @return the value of the property.
      */
     public static String getProperty(final Property property) {
@@ -235,15 +232,12 @@ public final class ServerConfig {
     }
 
     /**
-     * Returns <code>true</code> if and only if the property named by the
-     * argument exists and is equal to the string <code>"true"</code>. The
-     * test of this string is case insensitive.
+     * Returns <code>true</code> if and only if the property named by the argument exists and is equal to the string <code>"true"</code>.
+     * The test of this string is case insensitive.
      * <p>
-     * If there is no property with the specified name, or if the specified name
-     * is empty or null, then <code>false</code> is returned.
+     * If there is no property with the specified name, or if the specified name is empty or null, then <code>false</code> is returned.
      * 
-     * @param property
-     *            the property.
+     * @param property the property.
      * @return the <code>boolean</code> value of the property.
      */
     public static boolean getBoolean(final Property property) {
@@ -258,7 +252,7 @@ public final class ServerConfig {
         return value;
     }
 
-    public static Integer getInteger(final Property property) throws ConfigurationException {
+    public static Integer getInteger(final Property property) throws OXException {
         final Integer value;
         switch (property) {
         case MaxFileUploadSize:
@@ -277,24 +271,22 @@ public final class ServerConfig {
             try {
                 final String prop = getProperty(property.getPropertyName());
                 if (prop == null) {
-                    throw new ConfigurationException(Code.PROPERTY_MISSING, property.getPropertyName());
+                    throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
                 }
                 value = Integer.valueOf(getProperty(property.getPropertyName()));
             } catch (final NumberFormatException e) {
-                throw new ConfigurationException(Code.PROPERTY_NOT_AN_INTEGER, property.getPropertyName());
+                throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(property.getPropertyName());
             }
         }
         return value;
     }
 
     /**
-     * @param property
-     *            wanted property.
+     * @param property wanted property.
      * @return the value of the property.
-     * @throws ConfigurationException
-     *             If property is missing or its type is not an integer
+     * @throws ConfigurationException If property is missing or its type is not an integer
      */
-    public static int getInt(final Property property) throws ConfigurationException {
+    public static int getInt(final Property property) throws OXException {
         final int value;
         if (Property.MaxFileUploadSize == property) {
             value = SINGLETON.maxFileUploadSize;
@@ -306,12 +298,11 @@ public final class ServerConfig {
             try {
                 final String prop = getProperty(property.getPropertyName());
                 if (prop == null) {
-                    throw new ConfigurationException(Code.PROPERTY_MISSING, property.getPropertyName());
+                    throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
                 }
                 value = Integer.parseInt(getProperty(property.getPropertyName()));
             } catch (final NumberFormatException e) {
-                throw new ConfigurationException(Code.PROPERTY_NOT_AN_INTEGER,
-                        property.getPropertyName());
+                throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(property.getPropertyName());
             }
         }
         return value;
@@ -336,8 +327,7 @@ public final class ServerConfig {
          */
         DefaultEncoding("DefaultEncoding", "UTF-8"),
         /**
-         * The maximum size of accepted uploads. Max be overridden in
-         * specialized module configs and user settings.
+         * The maximum size of accepted uploads. Max be overridden in specialized module configs and user settings.
          */
         MAX_UPLOAD_SIZE("MAX_UPLOAD_SIZE", "0"),
         /**
@@ -353,8 +343,7 @@ public final class ServerConfig {
          */
         MaxUploadIdleTimeMillis("MAX_UPLOAD_IDLE_TIME_MILLIS", "300000"),
         /**
-         * Number of characters a search pattern must contain to prevent slow
-         * search queries and big responses in large contexts.
+         * Number of characters a search pattern must contain to prevent slow search queries and big responses in large contexts.
          */
         MINIMUM_SEARCH_CHARACTERS("com.openexchange.MinimumSearchCharacters", "0"),
         /**

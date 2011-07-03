@@ -49,21 +49,52 @@
 
 package com.openexchange.groupware.infostore;
 
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.*;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.ALREADY_LOCKED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.COULD_NOT_LOAD_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DELETE_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DOCUMENT_CONTAINS_NO_FILE_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DOCUMENT_NOT_EXISTS_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DUPLICATE_SUBFOLDER_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.FILENAME_NOT_UNIQUE_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.ITERATE_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.LOCKED_BY_ANOTHER_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.MODIFIED_CONCURRENTLY_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NEW_ID_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_ALL_DELETED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_EXIST_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_INFOSTORE_FOLDER_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_CREATE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DELETE_PERMISSION_FOR_VERSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DELETE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_READ_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_SOURCE_DELETE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_TARGET_CREATE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_WRITE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NUMBER_OF_VERSIONS_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.PREFETCH_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.TOO_LONG_VALUES_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.UPDATED_BETWEEN_DO_AND_UNDO_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.VALIDATION_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.WRITE_PERMS_FOR_LOCK_MISSING_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.WRITE_PERMS_FOR_UNLOCK_MISSING_MSG;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link InfostoreExceptionCodes}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum InfostoreExceptionCodes implements OXErrorMessage {
-    TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, Category.TRUNCATED, 100),
+public enum InfostoreExceptionCodes {
+    TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, Category.TRUNCATED, 100, false),
     /** Invalid SQL Query: %s */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 200),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 200, false),
     /** Cannot pre-fetch results. */
-    PREFETCH_FAILED(PREFETCH_FAILED_MSG, Category.TRY_AGAIN, 219),
+    PREFETCH_FAILED(PREFETCH_FAILED_MSG, Category.TRY_AGAIN, 219, false),
     /** The requested item does not exist. */
     NOT_EXIST(NOT_EXIST_MSG, Category.USER_INPUT, 300),
     /** Could not load documents to check the permissions */
@@ -122,13 +153,18 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     VALIDATION_FAILED(VALIDATION_FAILED_MSG, Category.USER_INPUT, 2100);
 
     private final String message;
+
     private final Category category;
+
     private final int number;
 
-    private InfostoreExceptionCodes(String message, Category category, int number) {
+    private final boolean display;
+
+    private InfostoreExceptionCodes(final String message, final Category category, final int number, final boolean display) {
         this.message = message;
         this.category = category;
         this.number = number;
+        this.display = display;
     }
 
     public int getDetailNumber() {
@@ -147,11 +183,41 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
         return category;
     }
 
-    public InfostoreException create(Object... args) {
-        return InfostoreExceptionFactory.getInstance().create(this, args);
+    /**
+     * Creates an {@link OXException} instance using this error code.
+     * 
+     * @return The newly created {@link OXException} instance.
+     */
+    public OXException create() {
+        return create(new Object[0]);
     }
 
-    public InfostoreException create(Throwable cause, Object... args) {
-        return InfostoreExceptionFactory.getInstance().create(this, cause, args);
+    /**
+     * Creates an {@link OXException} instance using this error code.
+     * 
+     * @param logArguments The arguments for log message.
+     * @return The newly created {@link OXException} instance.
+     */
+    public OXException create(final Object... logArguments) {
+        return create(null, logArguments);
+    }
+
+    private static final String PREFIX = "IDO";
+
+    /**
+     * Creates an {@link OXException} instance using this error code.
+     * 
+     * @param cause The initial cause for {@link OXException}
+     * @param logArguments The arguments for message.
+     * @return The newly created {@link OXException} instance.
+     */
+    public OXException create(final Throwable cause, final Object... logArguments) {
+        final OXException ret;
+        if (display) {
+            new OXException(number, message, cause, logArguments);
+        } else {
+            ret = new OXException(number, OXExceptionStrings.MESSAGE, cause);
+        }
+        return ret.setPrefix(PREFIX).addCategory(category).setLogMessage(message, logArguments);
     }
 }

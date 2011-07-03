@@ -68,6 +68,7 @@ import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;
@@ -120,7 +121,7 @@ public abstract class AJAXServlet extends HttpServlet {
             
             final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null == service) {
-                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
+                throw new SessiondException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE));
             }            
             final Session session = service.getSession(sessionId);
             if (null == session) {
@@ -177,7 +178,7 @@ public abstract class AJAXServlet extends HttpServlet {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
             final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null == service) {
-                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
+                throw new SessiondException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE));
             }
             final Session session = service.getSession(sessionId);
             if (null == session) {

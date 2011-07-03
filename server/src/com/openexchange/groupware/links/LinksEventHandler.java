@@ -80,7 +80,7 @@ import com.openexchange.tools.sql.DBUtils;
 public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface,
         InfostoreEventInterface {
 
-    private static final Log LOG = LogFactory.getLog(LinksEventHandler.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(LinksEventHandler.class));
 
     public LinksEventHandler() {
         super();

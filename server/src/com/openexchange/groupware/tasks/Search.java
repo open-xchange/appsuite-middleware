@@ -78,7 +78,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class Search {
 
-    private static final Log LOG = LogFactory.getLog(Search.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Search.class));
 
     private final Context ctx;
 

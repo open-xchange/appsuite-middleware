@@ -56,7 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ServiceHolderInit} - Initialization for service holder
@@ -65,7 +65,7 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public final class ServiceHolderInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServiceHolderInit.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServiceHolderInit.class));
 
     private static final String DEFAULT_TIMEOUT = "10000";
 
@@ -90,11 +90,7 @@ public final class ServiceHolderInit implements Initialization {
         started = new AtomicBoolean();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.Initialization#start()
-     */
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error("Service holder initialization already started", new Throwable());
             return;
@@ -104,12 +100,12 @@ public final class ServiceHolderInit implements Initialization {
             final String propDir = System.getProperties().getProperty("openexchange.propdir");
             if (null == propDir) {
                 LOG.error("Missing property \"openexchange.propdir\"");
-                throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
+                throw ServiceErrorCode.SERVICE_INITIALIZATION_FAILED.create();
             }
             final File sysPropFile = new File(propDir, "system.properties");
             if (!sysPropFile.exists() || !sysPropFile.isFile()) {
                 LOG.error(new StringBuilder("Missing property file \"system.properties\" in properties path \"").append(propDir).append('"').toString());
-                throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
+                throw ServiceErrorCode.SERVICE_INITIALIZATION_FAILED.create();
             }
             try {
                 in = new FileInputStream(sysPropFile);
@@ -118,7 +114,7 @@ public final class ServiceHolderInit implements Initialization {
                  * Cannot occur due to the above check
                  */
                 LOG.error(e.getMessage(), e);
-                throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
+                throw ServiceErrorCode.SERVICE_INITIALIZATION_FAILED.create();
             }
         }
         try {
@@ -145,7 +141,7 @@ public final class ServiceHolderInit implements Initialization {
                     }
                 }
             } catch (final IOException e) {
-                throw new ServiceException(ServiceException.Code.IO_ERROR);
+                throw ServiceErrorCode.IO_ERROR.create();
             }
         } finally {
             try {
@@ -156,11 +152,7 @@ public final class ServiceHolderInit implements Initialization {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.Initialization#stop()
-     */
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error("Service holder initialization has not been started", new Throwable());
             return;

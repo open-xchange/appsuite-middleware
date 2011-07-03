@@ -74,7 +74,7 @@ public final class ImageRegistry {
 
     private static final int INITIAL_DELAY = 1000;
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

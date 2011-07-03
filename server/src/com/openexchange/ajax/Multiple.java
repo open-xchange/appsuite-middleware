@@ -101,7 +101,7 @@ public class Multiple extends SessionServlet {
 
     private static final String ATTRIBUTE_MAIL_REQUEST = "mr";
 
-    private static final transient Log LOG = LogFactory.getLog(Multiple.class);
+    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Multiple.class));
     
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Multiple.class, LOG);
 

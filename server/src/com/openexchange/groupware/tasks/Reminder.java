@@ -75,7 +75,7 @@ final class Reminder {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Reminder.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Reminder.class));
 
     /**
      * Prevent instantiation.

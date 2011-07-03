@@ -49,7 +49,7 @@
 
 package com.openexchange.login;
 
-import com.openexchange.authentication.LoginException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link LoginHandlerService} - Handles a performed login.
@@ -62,15 +62,15 @@ public interface LoginHandlerService {
      * Handles the specified performed login.
      * 
      * @param login The performed login.
-     * @throws LoginException If an error occurs while handling the login
+     * @throws OXException If an error occurs while handling the login
      */
-    public void handleLogin(LoginResult login) throws LoginException;
+    public void handleLogin(LoginResult login) throws OXException;
 
     /**
      * Handles the specified performed logout.
      * 
      * @param logout The performed logout.
-     * @throws LoginException If an error occurs while handling the logout
+     * @throws OXException If an error occurs while handling the logout
      */
-    public void handleLogout(LoginResult logout) throws LoginException;
+    public void handleLogout(LoginResult logout) throws OXException;
 }

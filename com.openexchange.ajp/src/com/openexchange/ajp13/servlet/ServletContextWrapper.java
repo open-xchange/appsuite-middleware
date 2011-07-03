@@ -72,7 +72,7 @@ import com.openexchange.server.impl.Version;
  */
 public class ServletContextWrapper implements ServletContext {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletContextWrapper.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServletContextWrapper.class));
 
     private static final int OX_SERVLET_MAJOR = 6;
 

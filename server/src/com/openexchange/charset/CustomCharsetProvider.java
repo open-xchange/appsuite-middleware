@@ -73,7 +73,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
     /**
      * The logger instance.
      */
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CustomCharsetProvider.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CustomCharsetProvider.class));
 
     /**
      * The charset map.

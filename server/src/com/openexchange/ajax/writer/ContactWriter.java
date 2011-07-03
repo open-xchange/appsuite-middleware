@@ -144,7 +144,7 @@ public class ContactWriter extends CommonWriter {
         if (contact.containsImage1()) {
             final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
             if (null == imageService) {
-                final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(ContactWriter.class);
+                final org.apache.commons.logging.Log logger = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactWriter.class));
                 if (logger.isWarnEnabled()) {
                     logger.warn("Contact image URL cannot be written. Missing service: " + ImageService.class.getName());
                 }

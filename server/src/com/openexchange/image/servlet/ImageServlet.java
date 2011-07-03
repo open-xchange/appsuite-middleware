@@ -66,6 +66,7 @@ import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -125,7 +126,7 @@ public final class ImageServlet extends HttpServlet {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {
                 throw new SessiondException(
-                    new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+                    new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
             }
             final String uid = req.getParameter(PARAMETER_UID);
             if (uid == null) {

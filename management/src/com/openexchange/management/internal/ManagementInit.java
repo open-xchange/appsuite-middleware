@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceException;
 
@@ -97,7 +98,7 @@ public final class ManagementInit implements Initialization {
         final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
         final ConfigurationService c = getServiceRegistry().getService(ConfigurationService.class);
         if (c == null) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ConfigurationService.class.getName());
+            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, ConfigurationService.class.getName());
         }
         /*
          * Configure

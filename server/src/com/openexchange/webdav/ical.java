@@ -100,6 +100,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -123,7 +124,7 @@ public final class ical extends PermissionServlet {
     /**
      * Logger.
      */
-    private static final transient Log LOG = LogFactory.getLog(ical.class);
+    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ical.class));
 
     private final static int[] APPOINTMENT_FIELDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.MODIFIED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED,
@@ -201,7 +202,7 @@ public final class ical extends PermissionServlet {
 
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             if (null == emitter) {
-                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ICalEmitter.class.getName());
+                throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, ICalEmitter.class.getName());
             }
             final ICalSession iSession = emitter.createSession();
             final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();

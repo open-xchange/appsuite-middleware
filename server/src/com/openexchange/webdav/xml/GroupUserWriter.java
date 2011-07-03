@@ -144,7 +144,7 @@ public class GroupUserWriter extends ContactWriter {
 
     protected Element parent = null;
 
-    private static final Log LOG = LogFactory.getLog(GroupUserWriter.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(GroupUserWriter.class));
 
     public GroupUserWriter(final User userObj, final Context ctx, final Session sessionObj, final Element parent) {
         super(userObj, ctx, sessionObj);

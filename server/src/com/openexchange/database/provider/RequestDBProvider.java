@@ -57,14 +57,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 public class RequestDBProvider implements DBProvider {
 
     private static final ThreadLocal<DBTransaction> txIds = new ThreadLocal<DBTransaction>();
 
-    private static final Log LOG = LogFactory.getLog(RequestDBProvider.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RequestDBProvider.class));
     private boolean commits = true;
 
 
@@ -117,14 +117,14 @@ public class RequestDBProvider implements DBProvider {
     
     // Service
     
-    public void startTransaction() throws DBPoolingException {
+    public void startTransaction() throws OXException {
         final DBTransaction tx = createTransaction();
         tx.transactional = transactional;
         tx.commit = commits;
         txIds.set(tx);
     }
     
-    public void commit() throws DBPoolingException{
+    public void commit() throws OXException{
         checkThreadDeath();
         commit(getActiveTransaction());
     }
@@ -155,7 +155,7 @@ public class RequestDBProvider implements DBProvider {
         */
     }
 
-    public void rollback() throws DBPoolingException{
+    public void rollback() throws OXException{
         rollback(getActiveTransaction());
     }
     
@@ -171,7 +171,7 @@ public class RequestDBProvider implements DBProvider {
         return tx;
     }
 
-    protected void commit(final DBTransaction tx) throws DBPoolingException {
+    protected void commit(final DBTransaction tx) throws OXException {
         try {
             if (tx.writeConnection != null && !tx.writeConnection.getAutoCommit()) {
                 if(tx.commit) {
@@ -183,7 +183,7 @@ public class RequestDBProvider implements DBProvider {
         }
     }
 
-    protected void rollback(final DBTransaction tx) throws DBPoolingException {
+    protected void rollback(final DBTransaction tx) throws OXException {
         if(tx == null) {
             return;
         }
@@ -199,7 +199,7 @@ public class RequestDBProvider implements DBProvider {
         }
     }
     
-    public Connection getReadConnection(final Context ctx) throws DBPoolingException{
+    public Connection getReadConnection(final Context ctx) throws OXException{
         checkThreadDeath();
         final DBTransaction tx = getActiveTransaction();
         int rc = readCount.get();
@@ -233,7 +233,7 @@ public class RequestDBProvider implements DBProvider {
         return readCon;
     }
     
-    public Connection getWriteConnection(final Context ctx) throws DBPoolingException{
+    public Connection getWriteConnection(final Context ctx) throws OXException{
         checkThreadDeath();
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {
@@ -299,7 +299,7 @@ public class RequestDBProvider implements DBProvider {
         }
     }
     
-    public void finish() throws DBPoolingException {
+    public void finish() throws OXException {
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {
             return;

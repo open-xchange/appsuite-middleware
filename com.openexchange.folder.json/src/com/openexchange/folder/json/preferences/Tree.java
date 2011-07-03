@@ -104,7 +104,7 @@ public class Tree implements PreferencesItemService {
                         tree = Integer.valueOf(value);
                     } catch (final NumberFormatException e) {
                         throw new SettingException(new ConfigurationException(
-                            ConfigurationException.Code.PROPERTY_NOT_AN_INTEGER,
+                            ConfigurationException.ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER,
                             e,
                             PROPERTY_NAME));
                     }

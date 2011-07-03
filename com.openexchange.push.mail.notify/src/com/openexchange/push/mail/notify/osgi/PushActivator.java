@@ -224,7 +224,7 @@ public final class PushActivator extends DeferredActivator {
             udpListenHost = tmp.trim();
             sb.append("\t" + PROP_UDP_LISTEN_HOST + ": " + udpListenHost + CRLF);
         } else {
-            throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, PROP_UDP_LISTEN_HOST);
+            throw new ConfigurationException(ConfigurationException.ConfigurationExceptionCodes.PROPERTY_MISSING, PROP_UDP_LISTEN_HOST);
         }
 
         tmp = configurationService.getProperty(PROP_IMAP_LOGIN_DELIMITER);
@@ -242,10 +242,10 @@ public final class PushActivator extends DeferredActivator {
                 udpListenPort = Integer.parseInt(tmp.trim());
                 sb.append("\t" + PROP_UDP_LISTEN_PORT + ": " + udpListenPort + CRLF);
             } catch (final NumberFormatException e) {
-                throw new ConfigurationException(ConfigurationException.Code.PROPERTY_NOT_AN_INTEGER, PROP_UDP_LISTEN_PORT);
+                throw new ConfigurationException(ConfigurationException.ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER, PROP_UDP_LISTEN_PORT);
             }
         } else {
-            throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, PROP_UDP_LISTEN_PORT);
+            throw new ConfigurationException(ConfigurationException.ConfigurationExceptionCodes.PROPERTY_MISSING, PROP_UDP_LISTEN_PORT);
         }
 
         tmp = configurationService.getProperty(PROP_USE_OX_LOGIN);

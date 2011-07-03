@@ -50,33 +50,31 @@
 package com.openexchange.database.provider;
 
 import java.sql.Connection;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 public class AlwaysWriteConnectionProvider implements DBProvider {
 
-	private final DBProvider delegate;
+    private final DBProvider delegate;
 
-	public AlwaysWriteConnectionProvider(final DBProvider delegate) {
-		this.delegate = delegate;
-	}
-	
-	public Connection getReadConnection(final Context ctx)
-			throws DBPoolingException {
-		return delegate.getWriteConnection(ctx);
-	}
+    public AlwaysWriteConnectionProvider(final DBProvider delegate) {
+        this.delegate = delegate;
+    }
 
-	public Connection getWriteConnection(final Context ctx)
-			throws DBPoolingException {
-		return delegate.getWriteConnection(ctx);
-	}
+    public Connection getReadConnection(final Context ctx) throws OXException {
+        return delegate.getWriteConnection(ctx);
+    }
 
-	public void releaseReadConnection(final Context ctx, final Connection con) {
-		delegate.releaseWriteConnection(ctx, con);
-	}
+    public Connection getWriteConnection(final Context ctx) throws OXException {
+        return delegate.getWriteConnection(ctx);
+    }
 
-	public void releaseWriteConnection(final Context ctx, final Connection con) {
-		delegate.releaseWriteConnection(ctx, con);
-	}
+    public void releaseReadConnection(final Context ctx, final Connection con) {
+        delegate.releaseWriteConnection(ctx, con);
+    }
+
+    public void releaseWriteConnection(final Context ctx, final Connection con) {
+        delegate.releaseWriteConnection(ctx, con);
+    }
 
 }

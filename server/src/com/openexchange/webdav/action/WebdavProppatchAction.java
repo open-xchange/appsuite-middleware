@@ -70,7 +70,7 @@ import com.openexchange.webdav.protocol.util.Utils;
 public class WebdavProppatchAction extends AbstractAction {
 
 	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
-	private static final Log LOG = LogFactory.getLog(WebdavProppatchAction.class);
+	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(WebdavProppatchAction.class));
 	
 	private PropertyAction SET = null;
 	private static final PropertyAction REMOVE = new RemoveAction();

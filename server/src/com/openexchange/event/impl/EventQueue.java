@@ -152,7 +152,7 @@ public final class EventQueue {
 
     private static boolean isEnabled;
 
-    static final Log LOG = LogFactory.getLog(EventQueue.class);
+    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(EventQueue.class));
 
     /*
      * +++++++++++++++ Appointment Event Lists +++++++++++++++

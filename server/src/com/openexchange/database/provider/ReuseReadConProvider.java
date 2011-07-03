@@ -50,51 +50,51 @@
 package com.openexchange.database.provider;
 
 import java.sql.Connection;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 public class ReuseReadConProvider implements DBProvider {
 
-	private final DBProvider provider;
-	private Connection readCon;
-	private int refCount;
+    private final DBProvider provider;
 
-	public ReuseReadConProvider(final DBProvider provider) {
-		this.provider = provider;
-	}
+    private Connection readCon;
 
-	public Connection getReadConnection(final Context ctx)
-			throws DBPoolingException {
-		if(readCon != null) {
-			refCount++;
-			return readCon;
-		}
-		readCon = provider.getReadConnection(ctx);
-		refCount++;
-		return readCon;
-	}
+    private int refCount;
 
-	public Connection getWriteConnection(final Context ctx)
-			throws DBPoolingException {
-		throw new UnsupportedOperationException();
-	}
+    public ReuseReadConProvider(final DBProvider provider) {
+        this.provider = provider;
+    }
 
-	public void releaseReadConnection(final Context ctx, final Connection con) {
-		if(con == null) {
-			return;
-		}
-		if(!readCon.equals(con)) {
-			throw new IllegalArgumentException("I don't know this connection");
-		}
-		refCount--;
-		if(refCount == 0) {
-			provider.releaseReadConnection(ctx, con);
-			readCon = null;
-		}
-	}
+    public Connection getReadConnection(final Context ctx) throws OXException {
+        if (readCon != null) {
+            refCount++;
+            return readCon;
+        }
+        readCon = provider.getReadConnection(ctx);
+        refCount++;
+        return readCon;
+    }
 
-	public void releaseWriteConnection(final Context ctx, final Connection con) {
-		throw new UnsupportedOperationException();
-	}
+    public Connection getWriteConnection(final Context ctx) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    public void releaseReadConnection(final Context ctx, final Connection con) {
+        if (con == null) {
+            return;
+        }
+        if (!readCon.equals(con)) {
+            throw new IllegalArgumentException("I don't know this connection");
+        }
+        refCount--;
+        if (refCount == 0) {
+            provider.releaseReadConnection(ctx, con);
+            readCon = null;
+        }
+    }
+
+    public void releaseWriteConnection(final Context ctx, final Connection con) {
+        throw new UnsupportedOperationException();
+    }
 
 }

@@ -65,7 +65,7 @@ import com.openexchange.tools.oxfolder.deletelistener.sql.UserPermissionMerger;
  */
 public final class OXFolderDeleteListenerHelper {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXFolderDeleteListenerHelper.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderDeleteListenerHelper.class));
 
     /**
      * Initializes a new {@link OXFolderDeleteListenerHelper}

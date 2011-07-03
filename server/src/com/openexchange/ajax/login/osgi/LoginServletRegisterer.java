@@ -73,7 +73,7 @@ import com.openexchange.login.ConfigurationProperty;
  */
 public class LoginServletRegisterer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(LoginServletRegisterer.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(LoginServletRegisterer.class));
     private static final String SERVLET_PATH = "/ajax/login";
     
     private final BundleContext context;

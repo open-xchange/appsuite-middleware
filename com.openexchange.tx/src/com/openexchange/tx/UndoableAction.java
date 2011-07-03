@@ -49,8 +49,9 @@
 
 package com.openexchange.tx;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 public interface UndoableAction extends Undoable {
-	public void perform() throws AbstractOXException;
+
+    public void perform() throws OXException;
 }

@@ -109,7 +109,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = LogFactory.getLog(MultipleAdapterServletNew.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServletNew.class));
 
     private static Dispatcher dispatcher;
 

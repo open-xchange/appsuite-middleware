@@ -53,7 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.configuration.ConfigurationException.ConfigurationExceptionCodes;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -63,7 +63,7 @@ import com.openexchange.tools.conf.AbstractConfig;
  */
 public class NotificationConfig extends AbstractConfig implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(NotificationConfig.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(NotificationConfig.class));
 
     private static final Property KEY = Property.NOTIFICATION;
 
@@ -97,7 +97,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
     protected String getPropertyFileName() throws ConfigurationException {
         final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING,
+            throw new ConfigurationException(ConfigurationExceptionCodes.PROPERTY_MISSING,
                 KEY.getPropertyName());
         }
         return filename;

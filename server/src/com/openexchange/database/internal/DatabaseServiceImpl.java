@@ -55,9 +55,9 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.ConfigDatabaseService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.pooling.PoolingException;
 
@@ -68,7 +68,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class DatabaseServiceImpl implements DatabaseService {
 
-    private static final Log LOG = LogFactory.getLog(DatabaseServiceImpl.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DatabaseServiceImpl.class));
 
     private final boolean forceWriteOnly;
 
@@ -89,7 +89,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         this.assignmentService = assignmentService;
     }
 
-    private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws DBPoolingException {
+    private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final Assignment assign = assignmentService.getAssignment(contextId);
         return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write || forceWriteOnly);
     }
@@ -98,22 +98,22 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             con.close();
         } catch (final SQLException e) {
-            final DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
         }
     }
 
-    public void invalidate(final int contextId) throws DBPoolingException {
+    public void invalidate(final int contextId) throws OXException {
         assignmentService.removeAssignments(contextId);
     }
 
     // Delegate config database service methods.
 
-    public Connection getReadOnly() throws DBPoolingException {
+    public Connection getReadOnly() throws OXException {
         return configDatabaseService.getReadOnly();
     }
 
-    public Connection getWritable() throws DBPoolingException {
+    public Connection getWritable() throws OXException {
         return configDatabaseService.getWritable();
     }
 
@@ -125,37 +125,37 @@ public final class DatabaseServiceImpl implements DatabaseService {
         configDatabaseService.backWritable(con);
     }
 
-    public int[] listContexts(final int poolId) throws DBPoolingException {
+    public int[] listContexts(final int poolId) throws OXException {
         return configDatabaseService.listContexts(poolId);
     }
 
-    public int getServerId() throws DBPoolingException {
+    public int getServerId() throws OXException {
         return configDatabaseService.getServerId();
     }
 
     // Implemented database service methods.
 
-    public Connection getReadOnly(final Context ctx) throws DBPoolingException {
+    public Connection getReadOnly(final Context ctx) throws OXException {
         return get(ctx.getContextId(), false, false);
     }
 
-    public Connection getReadOnly(final int contextId) throws DBPoolingException {
+    public Connection getReadOnly(final int contextId) throws OXException {
         return get(contextId, false, false);
     }
 
-    public Connection getWritable(final Context ctx) throws DBPoolingException {
+    public Connection getWritable(final Context ctx) throws OXException {
         return get(ctx.getContextId(), true, false);
     }
 
-    public Connection getWritable(final int contextId) throws DBPoolingException {
+    public Connection getWritable(final int contextId) throws OXException {
         return get(contextId, true, false);
     }
 
-    public Connection getForUpdateTask(final int contextId) throws DBPoolingException {
+    public Connection getForUpdateTask(final int contextId) throws OXException {
         return get(contextId, true, true);
     }
 
-    public Connection get(final int poolId, final String schema) throws DBPoolingException {
+    public Connection get(final int poolId, final String schema) throws OXException {
         final Connection con;
         try {
             con = pools.getPool(poolId).get();
@@ -177,7 +177,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return con;
     }
 
-    public Connection getNoTimeout(final int poolId, final String schema) throws DBPoolingException {
+    public Connection getNoTimeout(final int poolId, final String schema) throws OXException {
         final Connection con;
         try {
             con = pools.getPool(poolId).getWithoutTimeout();
@@ -223,9 +223,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             pools.getPool(poolId).back(con);
         } catch (final PoolingException e) {
-            final DBPoolingException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
+            final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
             LOG.error(e2.getMessage(), e2);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -233,21 +233,21 @@ public final class DatabaseServiceImpl implements DatabaseService {
     public void backNoTimeoout(final int poolId, final Connection con) {
         try {
             pools.getPool(poolId).backWithoutTimeout(con);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    public int getWritablePool(final int contextId) throws DBPoolingException {
+    public int getWritablePool(final int contextId) throws OXException {
         final Assignment assign = assignmentService.getAssignment(contextId);
         return assign.getWritePoolId();
     }
 
-    public String getSchemaName(final int contextId) throws DBPoolingException {
+    public String getSchemaName(final int contextId) throws OXException {
         return assignmentService.getAssignment(contextId).getSchema();
     }
 
-    public int[] getContextsInSameSchema(final int contextId) throws DBPoolingException {
+    public int[] getContextsInSameSchema(final int contextId) throws OXException {
         final Assignment assign = assignmentService.getAssignment(contextId);
         final ConfigDBStorage configDBStorage = new ConfigDBStorage(configDatabaseService);
         return configDBStorage.getContextsFromSchema(assign.getSchema(), assign.getWritePoolId());

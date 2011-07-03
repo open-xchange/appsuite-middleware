@@ -66,7 +66,7 @@ import java.util.regex.Pattern;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.servlet.OXServletException;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -76,7 +76,8 @@ import com.openexchange.server.Initialization;
  */
 public final class HttpManagersInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpManagersInit.class);
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpManagersInit.class));
 
     private static final HttpManagersInit instance = new HttpManagersInit();
 
@@ -98,7 +99,7 @@ public final class HttpManagersInit implements Initialization {
         return instance;
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(this.getClass().getName() + " already started");
             return;
@@ -110,7 +111,7 @@ public final class HttpManagersInit implements Initialization {
         }
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
             return;
@@ -122,21 +123,19 @@ public final class HttpManagersInit implements Initialization {
         }
     }
 
-    private void initServletMappings(final boolean readFromFile) throws OXServletException {
+    private void initServletMappings(final boolean readFromFile) throws OXException {
         try {
             final Map<String, Constructor<?>> servletConstructorMap;
             if (readFromFile) {
                 final String servletMappingDir = AJPv13Config.getSystemProperty(SystemConfig.Property.ServletMappingDir);
                 if (servletMappingDir == null) {
-                    throw new OXServletException(
-                        OXServletException.Code.MISSING_SERVLET_DIR,
-                        SystemConfig.Property.ServletMappingDir.getPropertyName());
+                    throw OXServletException.Code.MISSING_SERVLET_DIR.create(SystemConfig.Property.ServletMappingDir.getPropertyName());
                 }
                 final File dir = new File(servletMappingDir);
                 if (!dir.exists()) {
-                    throw new OXServletException(OXServletException.Code.DIR_NOT_EXISTS, servletMappingDir);
+                    throw OXServletException.Code.DIR_NOT_EXISTS.create(servletMappingDir);
                 } else if (!dir.isDirectory()) {
-                    throw new OXServletException(OXServletException.Code.NO_DIRECTORY, servletMappingDir);
+                    throw OXServletException.Code.NO_DIRECTORY.create(servletMappingDir);
                 }
                 final File[] propFiles = dir.listFiles(new FilenameFilter() {
 
@@ -172,7 +171,7 @@ public final class HttpManagersInit implements Initialization {
              */
             HttpServletManager.initHttpServletManager(servletConstructorMap, false);
         } catch (final IOException exc) {
-            throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, exc.getMessage());
+            throw OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED.create(exc, exc.getMessage());
         }
     }
 
@@ -215,8 +214,7 @@ public final class HttpManagersInit implements Initialization {
             if (servletConstructorMap.containsKey(name)) {
                 final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(className) != -1;
                 if (!isEqual && LOG.isWarnEnabled()) {
-                    final OXServletException e =
-                        new OXServletException(OXServletException.Code.ALREADY_PRESENT, name, servletConstructorMap.get(name), className);
+                    final OXException e = OXServletException.Code.ALREADY_PRESENT.create(name, servletConstructorMap.get(name), className);
                     LOG.warn(e.getMessage(), e);
                 }
             } else {
@@ -224,17 +222,17 @@ public final class HttpManagersInit implements Initialization {
             }
         } catch (final SecurityException e) {
             if (LOG.isWarnEnabled()) {
-                final OXServletException se = new OXServletException(OXServletException.Code.SECURITY_ERR, e, className);
+                final OXException se = OXServletException.Code.SECURITY_ERR.create(e, className);
                 LOG.warn(se.getMessage(), se);
             }
         } catch (final ClassNotFoundException e) {
             if (LOG.isWarnEnabled()) {
-                final OXServletException se = new OXServletException(OXServletException.Code.CLASS_NOT_FOUND, e, className);
+                final OXException se = OXServletException.Code.CLASS_NOT_FOUND.create(e, className);
                 LOG.warn(se.getMessage(), se);
             }
         } catch (final NoSuchMethodException e) {
             if (LOG.isWarnEnabled()) {
-                final OXServletException se = new OXServletException(OXServletException.Code.NO_DEFAULT_CONSTRUCTOR, e, className);
+                final OXException se = OXServletException.Code.NO_DEFAULT_CONSTRUCTOR.create(e, className);
                 LOG.warn(se.getMessage(), se);
             }
         }

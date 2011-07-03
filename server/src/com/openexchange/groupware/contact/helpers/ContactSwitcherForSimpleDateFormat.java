@@ -70,7 +70,7 @@ import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
  */
 public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherWithDelegate {
 
-    private static final Log LOG = LogFactory.getLog(ContactSwitcherForSimpleDateFormat.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ContactSwitcherForSimpleDateFormat.class));
 
     private static interface DateValidator {
         

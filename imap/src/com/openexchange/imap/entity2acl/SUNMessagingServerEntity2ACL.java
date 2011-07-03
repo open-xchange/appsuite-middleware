@@ -58,6 +58,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.user.UserService;
@@ -121,7 +122,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
         {
             final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
             if (null == userService) {
-                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
+                throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, UserService.class.getName());
             }
             userLoginInfo = userService.getUser(userId, ctx).getLoginInfo();
         }

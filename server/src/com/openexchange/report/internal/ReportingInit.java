@@ -63,7 +63,7 @@ import com.openexchange.server.Initialization;
  */
 public class ReportingInit implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(ReportingInit.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ReportingInit.class));
 
     private final ManagementService managementService;
 

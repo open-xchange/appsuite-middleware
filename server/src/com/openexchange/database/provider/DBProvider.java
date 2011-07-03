@@ -50,31 +50,31 @@
 package com.openexchange.database.provider;
 
 import java.sql.Connection;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 public interface DBProvider {
 
     static final DBProvider DUMMY = new DBProvider() {
-        public Connection getReadConnection(Context ctx) {
+        public Connection getReadConnection(final Context ctx) {
             throw new UnsupportedOperationException();
         }
-        public Connection getWriteConnection(Context ctx) {
+        public Connection getWriteConnection(final Context ctx) {
             throw new UnsupportedOperationException();
         }
-        public void releaseReadConnection(Context ctx, Connection con) {
+        public void releaseReadConnection(final Context ctx, final Connection con) {
             throw new UnsupportedOperationException();
         }
-        public void releaseWriteConnection(Context ctx, Connection con) {
+        public void releaseWriteConnection(final Context ctx, final Connection con) {
             throw new UnsupportedOperationException();
         }
     };
 
-    Connection getReadConnection(Context ctx) throws DBPoolingException;
+    Connection getReadConnection(Context ctx) throws OXException;
 
     void releaseReadConnection(Context ctx, Connection con);
 
-    Connection getWriteConnection(Context ctx) throws DBPoolingException;
+    Connection getWriteConnection(Context ctx) throws OXException;
 
     void releaseWriteConnection(Context ctx, Connection con);
 }

@@ -72,7 +72,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(FolderAddPermColumnUpdateTask.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FolderAddPermColumnUpdateTask.class));
 
     public int addedWithVersion() {
         return 28;

@@ -52,7 +52,8 @@ package com.openexchange.configuration;
 import java.io.File;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.configuration.ConfigurationException.ConfigurationExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
 
@@ -72,7 +73,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(SystemConfig.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(SystemConfig.class));
 
     /**
      * Key of the system property that contains the file name of the
@@ -141,7 +142,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     /**
      * {@inheritDoc}
      */
-    public void start() throws ConfigurationException {
+    public void start() throws OXException {
         if (isPropertiesLoadInternal()) {
             LOG.error("Duplicate initialization of SystemConfig.");
             return;
@@ -160,10 +161,10 @@ public final class SystemConfig extends AbstractConfig implements Initialization
      * {@inheritDoc}
      */
     @Override
-    protected String getPropertyFileName() throws ConfigurationException {
+    protected String getPropertyFileName() throws OXException {
         final String directory = System.getProperty(KEY);
         if (null == directory) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING, KEY);
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY);
         }
         return directory + File.separator + "system.properties";
     }

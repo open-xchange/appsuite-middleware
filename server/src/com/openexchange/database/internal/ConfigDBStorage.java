@@ -59,8 +59,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.ConfigDatabaseService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.exception.OXException;
 
 /**
  * ConfigDBStorage
@@ -70,12 +70,12 @@ import com.openexchange.database.DBPoolingExceptionCodes;
  */
 public class ConfigDBStorage {
 
-    private ConfigDatabaseService configDatabaseService;
+    private final ConfigDatabaseService configDatabaseService;
 
     /**
      * Default constructor-
      */
-    public ConfigDBStorage(ConfigDatabaseService configDatabaseService) {
+    public ConfigDBStorage(final ConfigDatabaseService configDatabaseService) {
         super();
         this.configDatabaseService = configDatabaseService;
     }
@@ -91,9 +91,9 @@ public class ConfigDBStorage {
      *            corresponding write pool ID (master database)
      * @return an array of <code>int</code> representing all retrieved context
      *         IDs
-     * @throws DBPoolingException
+     * @throws OXException
      */
-    public final int[] getContextsFromSchema(final String schema, final int writePoolId) throws DBPoolingException {
+    public final int[] getContextsFromSchema(final String schema, final int writePoolId) throws OXException {
         try {
             Connection con = null;
             PreparedStatement stmt = null;
@@ -108,7 +108,7 @@ public class ConfigDBStorage {
                 stmt.setInt(2, writePoolId);
                 stmt.setString(3, schema);
                 rs = stmt.executeQuery();
-                List<Integer> tmp = new ArrayList<Integer>();
+                final List<Integer> tmp = new ArrayList<Integer>();
                 while (rs.next()) {
                     tmp.add(I(rs.getInt(1)));
                 }

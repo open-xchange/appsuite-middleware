@@ -63,8 +63,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.database.ConfigDatabaseService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.pooling.ExhaustedActions;
 
 /**
@@ -96,7 +96,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         this.defaultPoolConfig = configuration.getPoolConfig();
     }
 
-    public ConnectionPool create(final int poolId) throws DBPoolingException {
+    public ConnectionPool create(final int poolId) throws OXException {
         final ConnectionData data = loadPoolData(poolId);
         try {
             Class.forName(data.driverClass);
@@ -133,7 +133,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         return retval;
     }
 
-    private static void parseUrlToProperties(final ConnectionData retval) throws DBPoolingException {
+    private static void parseUrlToProperties(final ConnectionData retval) throws OXException {
         final int paramStart = retval.url.indexOf('?');
         if (-1 != paramStart) {
             final Matcher matcher = pattern.matcher(retval.url);
@@ -152,7 +152,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         }
     }
 
-    ConnectionData loadPoolData(final int poolId) throws DBPoolingException {
+    ConnectionData loadPoolData(final int poolId) throws OXException {
         ConnectionData retval = null;
         final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;

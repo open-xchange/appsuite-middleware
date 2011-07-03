@@ -52,10 +52,10 @@ package com.openexchange.groupware.calendar;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ConfigurationException.ConfigurationExceptionCodes;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -70,7 +70,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     
     private static final Property KEY = Property.CALENDAR;
     
-    private static final Log LOG = LogFactory.getLog(CalendarConfig.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarConfig.class));
     
     private static boolean solo_reminder_trigger_event = true;
     private static boolean check_and_remove_past_reminders = true;
@@ -104,11 +104,10 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
      * {@inheritDoc}
      */
     @Override
-    protected String getPropertyFileName() throws ConfigurationException {
+    protected String getPropertyFileName() throws OXException {
         final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING,
-                    KEY.getPropertyName());
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
         }
         return filename;
     }
@@ -127,7 +126,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (isPropertiesLoadInternal()) {
             LOG.error("Duplicate initialization of CalendarConfig.");
             return;
@@ -138,7 +137,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!isPropertiesLoadInternal()) {
             LOG.error("Duplicate shutdown of CalendarConfig.");
             return;
@@ -152,13 +151,13 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
      * @deprecated use normal server startup through {@link Starter}.
      */
     @Deprecated
-	public static void init() throws ConfigurationException {
+	public static void init() throws OXException {
         if (null == singleton) {
             reinit();
         }
     }
     
-    public static void reinit() throws ConfigurationException {
+    public static void reinit() throws OXException {
         singleton.loadPropertiesInternal();
         String check_cached_iterator_fast_fetch = CalendarConfig.getProperty("CACHED_ITERATOR_FAST_FETCH");
         if (check_cached_iterator_fast_fetch != null) {
@@ -246,23 +245,23 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     
     //friendly methods for testing purposes
     
-    static void setCheckAndRemovePastReminders(boolean value) {
+    static void setCheckAndRemovePastReminders(final boolean value) {
         check_and_remove_past_reminders = value;
     }
     
-    static void setSoloReminderTriggerEvent(boolean value) {
+    static void setSoloReminderTriggerEvent(final boolean value) {
         solo_reminder_trigger_event = value;
     }
 
-    static void setMaxOperationsInRecurrenceCalculations(int value) {
+    static void setMaxOperationsInRecurrenceCalculations(final int value) {
         max_operations_in_recurrence_calculations = value;
     }
     
-    static void setSeriesConflictLimit(boolean value) {
+    static void setSeriesConflictLimit(final boolean value) {
         seriesconflictlimit = value;
     }
     
-    static void setUndefinedStatusConflict(boolean value) {
+    static void setUndefinedStatusConflict(final boolean value) {
         undefinedstatusconflict = value;
     }
 }

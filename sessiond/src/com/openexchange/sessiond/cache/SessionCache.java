@@ -58,6 +58,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.objects.CachedSession;
+import com.openexchange.server.ServiceErrorCode;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -102,7 +103,7 @@ public final class SessionCache {
     private Cache getCache() throws ServiceException, CacheException {
         final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
         if (null == cacheService) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, CacheService.class.getName());
+            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, CacheService.class.getName());
         }
         return cacheService.getCache(REGION_NAME);
     }

@@ -64,7 +64,7 @@ import com.openexchange.authorization.AuthorizationService;
  */
 public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(AuthorizationCustomizer.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AuthorizationCustomizer.class));
 
     private final BundleContext context;
 

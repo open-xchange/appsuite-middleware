@@ -36,7 +36,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                 datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
             }
         } else {
-            throw new ConfigurationException(ConfigurationException.Code.INVALID_CONFIGURATION, "Can't get internet addres to given hostname " + udpListenHost);
+            throw new ConfigurationException(ConfigurationException.ConfigurationExceptionCodes.INVALID_CONFIGURATION, "Can't get internet addres to given hostname " + udpListenHost);
         }
     }
     

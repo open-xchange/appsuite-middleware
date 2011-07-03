@@ -57,10 +57,8 @@ import java.util.Queue;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
@@ -80,7 +78,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -116,15 +113,15 @@ public class AuditEventHandler implements EventHandler {
 			{
 				if (AuditConfiguration.getEnabled() == true) {
 					try {
-						Logger rootLogger = Logger.getLogger("");
-						Handler[] handlers = rootLogger.getHandlers();		
+						final Logger rootLogger = Logger.getLogger("");
+						final Handler[] handlers = rootLogger.getHandlers();		
 						for (int position = 0; position < handlers.length; position ++) {
 							handlers[position].setFilter(new AuditFilter());
 						}
 						LOG.addHandler(new AuditFileHandler());
-					} catch (SecurityException e) {
+					} catch (final SecurityException e) {
 						LOG.log(Level.SEVERE, e.getMessage(), e);
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						LOG.log(Level.SEVERE, e.getMessage(), e);
 					}
 					LOG.info("Using own Logging instance.");
@@ -132,14 +129,14 @@ public class AuditEventHandler implements EventHandler {
 					LOG.info("Using global Logging instance.");
 				}
 			}
-		} catch (ServiceException e) {
+		} catch (final com.openexchange.exception.OXException e) {
 			LOG.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
 	
 	public void handleEvent(final Event event) {
 		try {
-			StringBuffer log = new StringBuffer();
+			final StringBuffer log = new StringBuffer();
 			
 			final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 			final Context context = ContextStorage.getInstance().getContext(commonEvent.getContextId());
@@ -147,7 +144,7 @@ public class AuditEventHandler implements EventHandler {
 	        ModuleSwitch: switch (commonEvent.getModule()) {
 	        default: break ModuleSwitch;
 	        case Types.APPOINTMENT:	        	
-	        	Appointment appointment = (Appointment)commonEvent.getActionObj();
+	        	final Appointment appointment = (Appointment)commonEvent.getActionObj();
 	        	
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
@@ -175,7 +172,7 @@ public class AuditEventHandler implements EventHandler {
 	        	 * Replace by:
 	        	 * Contact contact = (Contact)commonEvent.getActionObj();
 	        	 */
-	        	Contact contact = Contacts.getContactById(((Contact)commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
+	        	final Contact contact = Contacts.getContactById(((Contact)commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
 	        	
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
@@ -196,7 +193,7 @@ public class AuditEventHandler implements EventHandler {
 				
 	        	break ModuleSwitch;
 	        case Types.TASK:
-	        	Task task = (Task)commonEvent.getActionObj();
+	        	final Task task = (Task)commonEvent.getActionObj();
 	        	
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
@@ -217,7 +214,7 @@ public class AuditEventHandler implements EventHandler {
 				
 	        	break ModuleSwitch;
 	        case Types.INFOSTORE:
-	        	DocumentMetadata document = (DocumentMetadata)commonEvent.getActionObj();
+	        	final DocumentMetadata document = (DocumentMetadata)commonEvent.getActionObj();
 	        	
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
@@ -256,7 +253,7 @@ public class AuditEventHandler implements EventHandler {
 	 * @param sessionObj
 	 * @return String fullFolderPath
 	 */
-	private String getPathToRoot(int folderId, int contextId, Session sessionObj) {
+	private String getPathToRoot(final int folderId, final int contextId, final Session sessionObj) {
 		String retval = "";
 		
 		try {
@@ -267,11 +264,11 @@ public class AuditEventHandler implements EventHandler {
 			for (int i = 0; i < size; i++) {
 			    retval = iter.next().getFolderName() + "/" + retval;
 			}
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
 			e.printStackTrace();
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			e.printStackTrace();
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			e.printStackTrace();
 		}
 		

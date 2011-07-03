@@ -69,7 +69,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 
-	private static final Log LOG = LogFactory.getLog(UnboundFolderReplacementUpdateTask.class);
+	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(UnboundFolderReplacementUpdateTask.class));
 
 	public UnboundFolderReplacementUpdateTask() {
 		super();

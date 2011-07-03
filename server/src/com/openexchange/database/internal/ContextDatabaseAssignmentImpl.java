@@ -60,12 +60,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.ConfigDatabaseService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.exception.OXException;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster access.
@@ -74,7 +73,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
  */
 public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssignmentService {
 
-    private static final Log LOG = LogFactory.getLog(ContextDatabaseAssignmentImpl.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ContextDatabaseAssignmentImpl.class));
 
     private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
 
@@ -94,12 +93,12 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     /**
      * Default constructor.
      */
-    public ContextDatabaseAssignmentImpl(ConfigDatabaseService configDatabaseService) {
+    public ContextDatabaseAssignmentImpl(final ConfigDatabaseService configDatabaseService) {
         super();
         this.configDatabaseService = configDatabaseService;
     }
 
-    public Assignment getAssignment(int contextId) throws DBPoolingException {
+    public Assignment getAssignment(final int contextId) throws OXException {
         Assignment retval;
         if (null == cache) {
             retval = loadAssignment(contextId);
@@ -112,7 +111,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                     retval = loadAssignment(contextId);
                     try {
                         cache.putSafe(key, retval);
-                    } catch (final CacheException e) {
+                    } catch (final OXException e) {
                         LOG.error("Cannot put database assignment into cache.", e);
                     }
                 }
@@ -123,7 +122,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
-    private Assignment loadAssignment(int contextId) throws DBPoolingException {
+    private Assignment loadAssignment(final int contextId) throws OXException {
         Assignment retval = null;
         final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;
@@ -140,7 +139,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             } else {
                 throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(Server.getServerId()));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -149,11 +148,11 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
-    public void removeAssignments(int contextId) throws DBPoolingException {
+    public void removeAssignments(final int contextId) throws OXException {
         if (null != cache) {
             try {
                 cache.remove(cache.newCacheKey(contextId, Server.getServerId()));
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -163,7 +162,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         this.cacheService = service;
         try {
             this.cache = service.getCache(CACHE_NAME);
-        } catch (final CacheException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -173,7 +172,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         if (null != cache) {
             try {
                 cache.clear();
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             cache = null;

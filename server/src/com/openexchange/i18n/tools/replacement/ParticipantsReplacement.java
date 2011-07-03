@@ -68,7 +68,7 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class ParticipantsReplacement implements TemplateReplacement {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ParticipantsReplacement.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ParticipantsReplacement.class));
 
     private static final String CRLF = "\r\n";
 

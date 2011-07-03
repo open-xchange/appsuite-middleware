@@ -65,7 +65,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailAccountStorageInit implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(MailAccountStorageInit.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MailAccountStorageInit.class));
 
     private final AtomicBoolean started;
 

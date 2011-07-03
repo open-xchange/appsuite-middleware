@@ -128,7 +128,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(2);
 
     private boolean has_next;
-    private static final Log LOG = LogFactory.getLog(CalendarOperation.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarOperation.class));
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private ResultSet co_rs;

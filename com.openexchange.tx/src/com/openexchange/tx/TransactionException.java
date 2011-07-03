@@ -49,25 +49,17 @@
 
 package com.openexchange.tx;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
-public class TransactionException extends AbstractOXException {
+public class TransactionException extends OXException {
 
     private static final long serialVersionUID = -8149589818960075908L;
-    private StackTraceElement[] elements;
-    
-    public TransactionException(final AbstractOXException exc) {
-        super(exc);
-    }
+    private final StackTraceElement[] elements;
 
-    public TransactionException(final String arg0, final StackTraceElement[] elements) {
+    public TransactionException(final String logMessage, final StackTraceElement[] elements) {
+        super();
+        setLogMessage(logMessage);
         this.elements = elements;
-    }
-
-    public TransactionException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
     }
 
     public StackTraceElement[] getElements() {

@@ -53,21 +53,21 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 
 public class DBPoolProvider implements DBProvider {
 
-    private static final Log LOG = LogFactory.getLog(DBPoolProvider.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DBPoolProvider.class));
 
-    public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+    public Connection getReadConnection(final Context ctx) throws OXException {
         try {
             final Connection readCon = DBPool.pickup(ctx);
             return readCon;
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new DBPoolingException(e);
+            throw e;
         }
     }
 
@@ -77,12 +77,12 @@ public class DBPoolProvider implements DBProvider {
         }
     }
 
-    public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+    public Connection getWriteConnection(final Context ctx) throws OXException {
         try {
             final Connection writeCon = DBPool.pickupWriteable(ctx);
             return writeCon;
-        } catch (final DBPoolingException e) {
-            throw new DBPoolingException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 

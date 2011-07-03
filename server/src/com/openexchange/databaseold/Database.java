@@ -52,10 +52,10 @@ package com.openexchange.databaseold;
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceErrorCode;
 
 /**
  * Interface class for accessing the database system.
@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceException;
  */
 public final class Database {
 
-    private static final Log LOG = LogFactory.getLog(Database.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Database.class));
 
     private static DatabaseService databaseService;
 
@@ -78,18 +78,18 @@ public final class Database {
         Database.databaseService = databaseService;
     }
 
-    private static DatabaseService getDatabaseService() throws DBPoolingException {
+    private static DatabaseService getDatabaseService() throws OXException {
         if (null == databaseService) {
-            throw new DBPoolingException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, DatabaseService.class.getName()));
+            throw ServiceErrorCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         return databaseService;
     }
 
-    public static int resolvePool(final int contextId, final boolean write) throws DBPoolingException {
+    public static int resolvePool(final int contextId, final boolean write) throws OXException {
         return getDatabaseService().getWritablePool(contextId);
     }
 
-    public static String getSchema(final int contextId) throws DBPoolingException {
+    public static String getSchema(final int contextId) throws OXException {
         return getDatabaseService().getSchemaName(contextId);
     }
 
@@ -97,9 +97,9 @@ public final class Database {
      * Returns a connection to the config database.
      * @param write <code>true</code> if you need a writable connection.
      * @return a connection to the config database.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    public static Connection get(final boolean write) throws DBPoolingException {
+    public static Connection get(final boolean write) throws OXException {
         return write ? getDatabaseService().getWritable() : getDatabaseService().getReadOnly();
     }
 
@@ -108,9 +108,9 @@ public final class Database {
      * @param ctx Context.
      * @param write <code>true</code> if you need a writable connection.
      * @return a connection to the database of the specified context.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    public static Connection get(final Context ctx, final boolean write) throws DBPoolingException {
+    public static Connection get(final Context ctx, final boolean write) throws OXException {
         return write ? getDatabaseService().getWritable(ctx) : getDatabaseService().getReadOnly(ctx);
     }
 
@@ -119,9 +119,9 @@ public final class Database {
      * @param contextId identifier of the context.
      * @param write <code>true</code> if you need a writable connection.
      * @return a connection to the database of the context.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    public static Connection get(final int contextId, final boolean write) throws DBPoolingException {
+    public static Connection get(final int contextId, final boolean write) throws OXException {
         return write ? getDatabaseService().getWritable(contextId) : getDatabaseService().getReadOnly(contextId);
     }
 
@@ -130,9 +130,9 @@ public final class Database {
      * @param contextId identifier of the context.
      * @param write <code>true</code> if you need a writable connection.
      * @return a connection to the database of the context.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    public static Connection getNoTimeout(final int contextId, final boolean write) throws DBPoolingException {
+    public static Connection getNoTimeout(final int contextId, final boolean write) throws OXException {
         return getDatabaseService().getForUpdateTask(contextId);
     }
 
@@ -141,9 +141,9 @@ public final class Database {
      * @param poolId identifier of the database pool.
      * @param schema schema name.
      * @return a connection to the database from the given pool directed to the given schema.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    public static Connection get(final int poolId, final String schema) throws DBPoolingException {
+    public static Connection get(final int poolId, final String schema) throws OXException {
         return getDatabaseService().get(poolId, schema);
     }
 
@@ -159,7 +159,7 @@ public final class Database {
             } else {
                 getDatabaseService().backReadOnly(con);
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -177,7 +177,7 @@ public final class Database {
             } else {
                 getDatabaseService().backReadOnly(ctx, con);
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -195,7 +195,7 @@ public final class Database {
             } else {
                 getDatabaseService().backReadOnly(contextId, con);
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -210,7 +210,7 @@ public final class Database {
     public static void backNoTimeout(final int contextId, final boolean write, final Connection con) {
         try {
             getDatabaseService().backForUpdateTask(contextId, con);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -223,7 +223,7 @@ public final class Database {
     public static void back(final int poolId, final Connection con) {
         try {
             getDatabaseService().back(poolId, con);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -233,9 +233,9 @@ public final class Database {
      * @param poolId identifier of the database pool.
      * @param schema schema name.
      * @return a connection to the database without a time-out from the given pool directed to the given schema.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
-    public static Connection getNoTimeout(final int poolId, final String schema) throws DBPoolingException {
+    public static Connection getNoTimeout(final int poolId, final String schema) throws OXException {
         return getDatabaseService().getNoTimeout(poolId, schema);
     }
 
@@ -247,7 +247,7 @@ public final class Database {
     public static void backNoTimeoout(final int poolId, final Connection con) {
         try {
             getDatabaseService().backNoTimeoout(poolId, con);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -255,17 +255,17 @@ public final class Database {
     /**
      * Resets the database pooling information for a context. This is especially the assignments to database servers.
      * @param contextId unique identifier of the context.
-     * @throws DBPoolingException if resolving the server identifier fails.
+     * @throws OXException if resolving the server identifier fails.
      */
-    public static void reset(final int contextId) throws DBPoolingException {
+    public static void reset(final int contextId) throws OXException {
         getDatabaseService().invalidate(contextId);
     }
 
-    public static int[] getContextsInSameSchema(final int contextId) throws DBPoolingException {
+    public static int[] getContextsInSameSchema(final int contextId) throws OXException {
         return getDatabaseService().getContextsInSameSchema(contextId);
     }
 
-    public static int getServerId() throws DBPoolingException {
+    public static int getServerId() throws OXException {
         return getDatabaseService().getServerId();
     }
 }

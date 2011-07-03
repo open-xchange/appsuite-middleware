@@ -66,7 +66,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
-    static final Log LOG = LogFactory.getLog(ReentrantLockPool.class);
+    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ReentrantLockPool.class));
 
     private final int minIdle;
     private final int maxIdle;

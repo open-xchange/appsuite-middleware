@@ -112,7 +112,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     };
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailPart.class);
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailPart.class));
 
     /**
      * The <code>Content-Type</code> header

@@ -83,7 +83,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     private Mode MODE;
 
-    private static final Log LOG = LogFactory.getLog(PathResolverImpl.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PathResolverImpl.class));
 
     private final ThreadLocal<Map<WebdavPath,Resolved>> resolveCache = new ThreadLocal<Map<WebdavPath,Resolved>>();
     private final ThreadLocal<Map<Integer,WebdavPath>> docPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();

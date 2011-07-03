@@ -76,7 +76,7 @@ class State {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(State.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(State.class));
 
     /**
      * Version long for interoperability.

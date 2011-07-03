@@ -61,9 +61,9 @@ import com.openexchange.database.internal.Initialization;
  * This customizer adds a discovered cache service to server components to improve their performance.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CacheServiceCustomizer implements ServiceTrackerCustomizer {
+public class CacheServiceCustomizer implements ServiceTrackerCustomizer<CacheService, CacheService> {
 
-    private static final Log LOG = LogFactory.getLog(CacheServiceCustomizer.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CacheServiceCustomizer.class));
 
     private final BundleContext context;
 
@@ -76,18 +76,18 @@ public class CacheServiceCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
-    public Object addingService(final ServiceReference reference) {
-        final CacheService service = (CacheService) context.getService(reference);
+    public CacheService addingService(final ServiceReference<CacheService> reference) {
+        final CacheService service = context.getService(reference);
         LOG.info("Injecting CacheService into database bundle.");
         Initialization.getInstance().setCacheService(service);
         return service;
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<CacheService> reference, final CacheService service) {
         // Nothing to do.
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
         LOG.info("Removing CacheService from database bundle.");
         Initialization.getInstance().removeCacheService();
         context.ungetService(reference);

@@ -66,7 +66,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailCacheConfiguration implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailCacheConfiguration.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailCacheConfiguration.class));
 
     private static final MailCacheConfiguration instance = new MailCacheConfiguration();
 
@@ -99,7 +99,7 @@ public final class MailCacheConfiguration implements Initialization {
                 SystemConfig.Property.MailCacheConfig.getPropertyName());
             if (cacheConfigFile == null) {
                 throw new ConfigurationException(
-                    ConfigurationException.Code.PROPERTY_MISSING,
+                    ConfigurationException.ConfigurationExceptionCodes.PROPERTY_MISSING,
                     SystemConfig.Property.MailCacheConfig.getPropertyName());
             }
         }

@@ -66,7 +66,7 @@ import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAli
  */
 public final class InternalList {
 
-    private static final Log LOG = LogFactory.getLog(InternalList.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InternalList.class));
 
     private static final InternalList SINGLETON = new InternalList();
 

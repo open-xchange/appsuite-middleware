@@ -50,7 +50,6 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import javax.servlet.ServletInputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 
@@ -63,7 +62,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
  */
 public final class AJPv13ServletInputStream extends ServletInputStream {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ServletInputStream.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ServletInputStream.class));
 
     private final AJPv13Connection ajpCon;
 

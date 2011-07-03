@@ -67,7 +67,7 @@ public final class IOUtils {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(IOUtils.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(IOUtils.class));
 
     /**
      * Prevent instantiation

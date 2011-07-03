@@ -75,7 +75,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class HeaderCollection implements Serializable {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -869,7 +869,7 @@ public class HeaderCollection implements Serializable {
      * Simple test method
      */
     public static final void test() {
-        final Log log2 = org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class);
+        final Log log2 = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class));
         try {
             final HeaderCollection hc = new HeaderCollection();
 

@@ -98,7 +98,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public class CaldavResource extends AbstractResource {
 
-    private static final Log LOG = LogFactory.getLog(CaldavResource.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavResource.class));
     
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 

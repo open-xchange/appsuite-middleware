@@ -76,7 +76,6 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.caching.CacheException;
 import com.openexchange.calendar.CachedCalendarIterator;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
@@ -103,9 +102,9 @@ import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.MBoolean;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -120,6 +119,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.preferences.ServerUserSetting;
@@ -127,7 +127,6 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -181,7 +180,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public static final TimeZone ZONE_UTC = TimeZone.getTimeZone("UTC");
     
     
-    private static final Log LOG = LogFactory.getLog(CalendarCollection.class);
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarCollection.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
     
@@ -1319,7 +1318,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXException If cloned version cannot be created
      */
     public CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao, final int sessionUser) throws OXException {
-        final CalendarDataObject clone = (CalendarDataObject) edao.clone();
+        final CalendarDataObject clone = edao.clone();
         // Recurrence exceptions MUST contain the position and date position.
         // This is necessary for further handling of the series.
         if (cdao.containsRecurrencePosition()) {
@@ -1569,7 +1568,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         /*
          * Create a clone for calculation purpose
          */
-        final CalendarDataObject clone = (CalendarDataObject) cdao.clone();
+        final CalendarDataObject clone = cdao.clone();
         clone.setEndDate(new Date(maxEnd));
         final RecurringResultsInterface rresults;
         try {
@@ -1588,8 +1587,8 @@ public final class CalendarCollection implements CalendarCollectionService {
         return new Date(maxEnd);
     }
     
-    public long addYears(long base, int years) {
-        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+    public long addYears(final long base, final int years) {
+        final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(base);
         calendar.add(Calendar.YEAR, years);
         return calendar.getTimeInMillis();
@@ -1654,7 +1653,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 } else {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
 
-                    EffectivePermission oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
+                    final EffectivePermission oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     if (oclp.canReadAllObjects()|| oclp.canReadOwnObjects()) {
                             return true;
                     }
@@ -1830,15 +1829,17 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndFillIfUserIsParticipant(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
      */
-    public void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, UserParticipant up) {
+    public void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
         if (cdao.getParticipants() != null) {
-            for (Participant p : cdao.getParticipants()) {
+            for (final Participant p : cdao.getParticipants()) {
                 if (p.getType() == Participant.USER && p.getIdentifier() == up.getIdentifier()) {
-                    UserParticipant userFromParticipant = (UserParticipant) p;
-                    if (userFromParticipant.containsConfirm())
+                    final UserParticipant userFromParticipant = (UserParticipant) p;
+                    if (userFromParticipant.containsConfirm()) {
                         up.setConfirm(userFromParticipant.getConfirm());
-                    if (userFromParticipant.containsConfirmMessage())
+                    }
+                    if (userFromParticipant.containsConfirmMessage()) {
                         up.setConfirmMessage(userFromParticipant.getConfirmMessage());
+                    }
                 }
             }
         }
@@ -1865,10 +1866,10 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndConfirmIfUserUserIsParticipantInPublicFolder(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
      */
     public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(final CalendarDataObject cdao, final UserParticipant up) {
-        Participant[] participants = cdao.getParticipants();
+        final Participant[] participants = cdao.getParticipants();
         boolean isInParticipants = false;
         if (participants != null) {
-            for (Participant participant : participants) {
+            for (final Participant participant : participants) {
                 if (participant.getIdentifier() == up.getIdentifier()) {
                     isInParticipants  = true;
                     break;
@@ -1876,14 +1877,15 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
         }
 
-        UserParticipant check[] = cdao.getUsers();
+        final UserParticipant check[] = cdao.getUsers();
         if (check == null || check.length == 0) {
-            if (isInParticipants)
+            if (isInParticipants) {
                 cdao.setUsers(new UserParticipant[] { up } );
+            }
             return;
         }
         
-        for (UserParticipant user : check) {
+        for (final UserParticipant user : check) {
             if (user.getIdentifier() == up.getIdentifier()) {
                 if (!user.containsConfirm()) {
                     user.setConfirm(CalendarDataObject.ACCEPT);
@@ -1902,7 +1904,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (!user.containsConfirm()) {
                     try {
                         user.setConfirm(ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
-                    } catch (SettingException e) {
+                    } catch (final SettingException e) {
                         throw new OXCalendarException(e);
                     }
                 }
@@ -2027,7 +2029,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     newp[check.length] = p;
                     cdao.setParticipants(newp);
                 }
-            } catch (LdapException e) {
+            } catch (final LdapException e) {
                 throw new OXException(e);
             }
         } else {
@@ -2037,18 +2039,18 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
     }
     
-    private boolean containsParticipant(Participant[] participants, Participant p, Context ctx) throws LdapException {
-        for (Participant part : participants) {
+    private boolean containsParticipant(final Participant[] participants, final Participant p, final Context ctx) throws LdapException {
+        for (final Participant part : participants) {
             if (part.getType() == p.getType()) {
                 if (part.getIdentifier() == p.getIdentifier()) {
                     return true;
                 }
             } else {
                 if (part.getType() == Participant.GROUP) {
-                    GroupStorage groups = GroupStorage.getInstance();
-                    Group group = groups.getGroup(part.getIdentifier(), ctx);
-                    int[] member = group.getMember();
-                    for (int memberId : member) {
+                    final GroupStorage groups = GroupStorage.getInstance();
+                    final Group group = groups.getGroup(part.getIdentifier(), ctx);
+                    final int[] member = group.getMember();
+                    for (final int memberId : member) {
                         if (memberId == p.getIdentifier()) {
                             return true;
                         }
@@ -2293,7 +2295,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         try {
             int folderId = oldAppointment.getEffectiveFolderId();
             if (folderId == 0) {
-                OXFolderAccess folderAccess = new OXFolderAccess(oldAppointment.getContext());
+                final OXFolderAccess folderAccess = new OXFolderAccess(oldAppointment.getContext());
                 folderId = folderAccess.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID();
             }
             final FolderObject sourceFolder = getFolder(session, folderId);
@@ -2524,7 +2526,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
             try {
                 cache.add(cfo.getObjectKey(), cfo.getGroupKey(), cfo);
-            } catch (final CacheException ex) {
+            } catch (final com.openexchange.exception.OXException ex) {
                 LOG.error(ex.getMessage(), ex);
             }
         } else {
@@ -3353,7 +3355,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#fillEventInformation(com.openexchange.calendar.CalendarDataObject, com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
      */
-    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants,final UserParticipant[] modified_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[], Participant[] modified_participants) {
+    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants,final UserParticipant[] modified_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[], final Participant[] modified_participants) {
         final Participants pu = new Participants();
         final Participants p = new Participants();
         final UserParticipant oup[] = edao.getUsers();
@@ -3400,7 +3402,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         
         // Apply changes
         if(modified_userparticipants != null && modified_userparticipants.length > 0) {
-            for (UserParticipant participant : modified_userparticipants) {
+            for (final UserParticipant participant : modified_userparticipants) {
                 if(participant.getType() == Participant.USER) {
                     for(int i = 0; i < up_event.length; i++) {
                         if(up_event[i].getIdentifier() == participant.getIdentifier()) {

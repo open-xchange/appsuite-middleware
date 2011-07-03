@@ -49,22 +49,24 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 
 /**
  * Interface for creating database connection pools.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface PoolLifeCycle {
 
     /**
      * Creates a connection pool for the given pool identifier.
-     * @param poolId the pool identifier.
-     * @return the connection pool or <code>null</code> if the current {@link PoolLifeCycle} is not responsive for the given pool identifier.
-     * @throws DBPoolingException if creating the connection pool has some serious problems.
+     * 
+     * @param poolId The pool identifier.
+     * @return The connection pool or <code>null</code> if the current {@link PoolLifeCycle} is not responsive for the given pool
+     *         identifier.
+     * @throws OXException If creating the connection pool has some serious problems.
      */
-    ConnectionPool create(int poolId) throws DBPoolingException;
+    ConnectionPool create(int poolId) throws OXException;
 
     boolean destroy(int poolId);
 }
