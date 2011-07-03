@@ -113,13 +113,13 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private final List<Category> categories;
 
-    private final Object[] messageArgs;
+    private final Object[] displayArgs;
 
     private final int code;
 
-    private final String message;
+    private final String displayMessage;
 
-    private String detailedMessage;
+    private String logMessage;
 
     private String exceptionId;
 
@@ -134,89 +134,89 @@ public class OXException extends Exception implements OXExceptionConstants {
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
-        message = OXExceptionStrings.MESSAGE;
-        detailedMessage = null;
-        messageArgs = MESSAGE_ARGS_EMPTY;
+        displayMessage = OXExceptionStrings.MESSAGE;
+        logMessage = null;
+        displayArgs = MESSAGE_ARGS_EMPTY;
     }
 
     /**
      * Initializes a new {@link OXException}.
      * 
      * @param code The numeric error code
-     * @param message The displayable printf-style error message (usually a constant from a class implementing {@link LocalizableStrings})
-     * @param messageArgs The message arguments
+     * @param displayMessage The printf-style display message (usually a constant from a class implementing {@link LocalizableStrings})
+     * @param displayArgs The arguments for display message
      */
-    public OXException(final int code, final String message, final Object... messageArgs) {
+    public OXException(final int code, final String displayMessage, final Object... displayArgs) {
         super();
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
         this.code = code;
-        this.message = message;
-        this.messageArgs = messageArgs;
+        this.displayMessage = displayMessage;
+        this.displayArgs = displayArgs;
     }
 
     /**
      * Initializes a new {@link OXException}.
      * 
      * @param code The numeric error code
-     * @param message The displayable printf-style error message (usually a constant from a class implementing {@link LocalizableStrings})
+     * @param displayMessage The printf-style display message (usually a constant from a class implementing {@link LocalizableStrings})
      * @param cause The optional cause for this {@link OXException}
-     * @param messageArgs The message arguments
+     * @param displayArgs The arguments for display message
      */
-    public OXException(final int code, final String message, final Throwable cause, final Object... messageArgs) {
+    public OXException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
         super(cause);
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
         this.code = code;
-        this.message = message;
-        this.messageArgs = messageArgs;
+        this.displayMessage = displayMessage;
+        this.displayArgs = displayArgs;
     }
 
     /**
-     * Sets the detailed error message which appears in log and is <b>not</b> shown to user.
+     * Sets the error message which appears in log and is <b>not</b> shown to user.
      * 
-     * @param detailedMessage The detailed error message
-     * @return This exception with detailed error message applied (for chained invocations)
+     * @param logMessage The log error message
+     * @return This exception with log error message applied (for chained invocations)
      */
-    public OXException setDetailedMessage(final String detailedMessage) {
-        this.detailedMessage = detailedMessage;
+    public OXException setLogMessage(final String logMessage) {
+        this.logMessage = logMessage;
         return this;
     }
 
     /**
-     * Sets the detailed error message which appears in log and is <b>not</b> shown to user.
+     * Sets the error message which appears in log and is <b>not</b> shown to user.
      * 
-     * @param messageFormat The printf-style detailed error message
+     * @param displayFormat The printf-style log error message
      * @param args The printf arguments
-     * @return This exception with detailed error message applied (for chained invocations)
+     * @return This exception with log error message applied (for chained invocations)
      */
-    public OXException setDetailedMessage(final String messageFormat, final Object... args) {
-        if (null == messageFormat) {
+    public OXException setLogMessage(final String displayFormat, final Object... args) {
+        if (null == displayFormat) {
             return this;
         }
         try {
-            this.detailedMessage = String.format(Locale.US, messageFormat, args);
+            this.logMessage = String.format(Locale.US, displayFormat, args);
         } catch (final NullPointerException e) {
-            this.detailedMessage = null;
+            this.logMessage = null;
         } catch (final IllegalFormatException e) {
             LOG.error(e.getMessage(), e);
             final Exception logMe = new Exception(super.getMessage());
             logMe.setStackTrace(super.getStackTrace());
             LOG.error("Illegal message format.", logMe);
-            this.detailedMessage = null;
+            this.logMessage = null;
         }
         return this;
     }
 
     /**
-     * Gets the arguments for displayable message.
+     * Gets the arguments for display message.
      * 
-     * @return The message arguments to set
+     * @return The display arguments
      */
-    public Object[] getMessageArgs() {
-        return messageArgs;
+    public Object[] getDisplayArgs() {
+        return displayArgs;
     }
 
     /**
@@ -237,13 +237,13 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the detailed message for specified log level.
+     * Gets the log message for specified log level.
      * <p>
      * This is a convenience method that invokes {@link #getLogMessage(LogLevel, String)} with latter argument set to
      * <code>null</code>.
      * 
      * @param logLevel The log level
-     * @return The detailed message for specified log level or <code>null</code> if not loggable.
+     * @return The log message for specified log level or <code>null</code> if not loggable.
      * @see #getLogMessage(LogLevel, String)
      */
     public String getLogMessage(final LogLevel logLevel) {
@@ -251,25 +251,25 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the detailed message for specified log level.
+     * Gets the log message for specified log level.
      * 
      * @param logLevel The log level
      * @param defaultLog The default logging to return if this exception is not loggable for specified log level
-     * @return The detailed message for specified log level or <code>defaultLog</code> if not loggable.
+     * @return The log message for specified log level or <code>defaultLog</code> if not loggable.
      */
     public String getLogMessage(final LogLevel logLevel, final String defaultLog) {
         if (!isLoggable(logLevel)) {
             return defaultLog;
         }
-        return getDetailedMessage();
+        return getLogMessage();
     }
 
     /**
-     * Gets the composed detail message.
+     * Gets the composed log message.
      * 
-     * @return The detail message
+     * @return The log message
      */
-    public String getDetailedMessage() {
+    public String getLogMessage() {
         /*
          * Log details
          */
@@ -290,7 +290,7 @@ public class OXException extends Exception implements OXExceptionConstants {
          * Append message
          */
         sb.append(" Message=");
-        if (null == detailedMessage) {
+        if (null == logMessage) {
             final String str = getDisplayMessage0(Locale.US);
             if (null == str) {
                 sb.append(EMPTY_MSG);
@@ -298,7 +298,7 @@ public class OXException extends Exception implements OXExceptionConstants {
                 sb.append('\'').append(str).append('\'');
             }
         } else {
-            sb.append('\'').append(detailedMessage).append('\'');
+            sb.append('\'').append(logMessage).append('\'');
         }
         /*
          * Exception identifier
@@ -440,10 +440,10 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private String getDisplayMessage0(final Locale locale) {
         final Locale lcl = null == locale ? Locale.US : locale;
-        String msg = I18n.getInstance().translate(lcl, message);
+        String msg = I18n.getInstance().translate(lcl, displayMessage);
         if (msg != null) {
             try {
-                msg = String.format(lcl, msg, messageArgs);
+                msg = String.format(lcl, msg, displayArgs);
             } catch (final NullPointerException e) {
                 msg = null;
             } catch (final IllegalFormatException e) {
@@ -459,12 +459,12 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     @Override
     public String getMessage() {
-        return getDetailedMessage();
+        return getLogMessage();
     }
 
     @Override
     public String toString() {
-        return getDetailedMessage();
+        return getLogMessage();
     }
 
     /*-
