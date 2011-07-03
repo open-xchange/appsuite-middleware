@@ -81,6 +81,7 @@ public class PollingActionFactory implements AJAXActionServiceFactory {
         ACTIONS.put("new", new CreateAction(this));
         ACTIONS.put("get", new GetAction(this));
         ACTIONS.put("all", new AllAction(this));
+        //Bla
         // Try to add an update action!
         // Try to add a delete action!
     }
