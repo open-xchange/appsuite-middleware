@@ -278,9 +278,9 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
         private final org.apache.commons.logging.Log logger;
 
-        String src;
+        protected String src;
 
-        String dest;
+        protected String dest;
 
         public COPYUIDResponse(final org.apache.commons.logging.Log logger) {
             super();
