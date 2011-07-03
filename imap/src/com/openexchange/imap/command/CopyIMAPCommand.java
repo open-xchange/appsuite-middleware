@@ -50,10 +50,10 @@
 package com.openexchange.imap.command;
 
 import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument;
+import gnu.trove.TLongArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import javax.mail.MessagingException;
-import com.openexchange.tools.Collections.SmartLongArray;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -332,20 +332,20 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
          * @return The corresponding array of <code>long</code>.
          */
         private static long[] toLongArray(final String uidSet) {
-            final SmartLongArray arr = new SmartLongArray();
+            final TLongArrayList arr = new TLongArrayList(32);
             final String[] sa = uidSet.split(" *, *");
             Next: for (int i = 0; i < sa.length; i++) {
                 final int pos = sa[i].indexOf(':');
                 if (pos == -1) {
-                    arr.append(Long.parseLong(sa[i]));
+                    arr.add(Long.parseLong(sa[i]));
                     continue Next;
                 }
                 final long endUID = Long.parseLong(sa[i].substring(pos + 1));
                 for (long j = Long.parseLong(sa[i].substring(0, pos)); j <= endUID; j++) {
-                    arr.append(j);
+                    arr.add(j);
                 }
             }
-            return arr.toArray();
+            return arr.toNativeArray();
         }
     }
 
