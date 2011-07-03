@@ -273,6 +273,30 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
+     * The default category for if a 3rd party system reported capacity restrictions (e.g. quota).
+     */
+    public static final Category CATEGORY_CAPACITY = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.DEBUG;
+        }
+
+        public Type getType() {
+            return Category.EnumType.CAPACITY;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.CAPACITY.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
      * A category's type.
      */
     public static interface Type {
@@ -325,6 +349,10 @@ public interface Category extends Comparable<Category> {
          * The category for a conflicting modification operation.
          */
         CONFLICT,
+        /**
+         * The category if a 3rd party system reported capacity restrictions (e.g. quota).
+         */
+        CAPACITY,
         /**
          * The warning type 
          */
