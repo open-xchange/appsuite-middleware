@@ -233,41 +233,44 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new StringBuilder(128).append("Missing COPYUID response code: ").append(resp).toString());
             }
-        } else {
-            final COPYUIDResponse copyuidResp = new COPYUIDResponse(LOG);
-            /*
-             * Find next starting ATOM in IMAP response
-             */
-            pos += COPYUID.length();
-            while (Character.isWhitespace(resp.charAt(pos))) {
-                pos++;
-            }
-            /*
-             * Split by ATOMs
-             */
-            final String[] sa = resp.substring(pos).split("\\s+");
-            if (sa.length >= 3) {
-                /*-
-                 * Array contains atoms like:
-                 * 
-                 * "1167880112", "11937", "11939]", "Completed"
-                 */
-                copyuidResp.src = sa[1];
-                {
-                    final String destStr = sa[2];
-                    final int mlen = destStr.length() - 1;
-                    if (']' == destStr.charAt(mlen)) {
-                        copyuidResp.dest = destStr.substring(0, mlen);
-                    } else {
-                        copyuidResp.dest = destStr;
-                    }
-                }
-                copyuidResp.fillResponse(uids, retval);
-            } else {
-                LOG.error(new StringBuilder(128).append("Invalid COPYUID response: ").append(resp).toString());
-            }
-            proceed = false;
+            return true;
         }
+        /*
+         * Found COPYUID...
+         */
+        final COPYUIDResponse copyuidResp = new COPYUIDResponse(LOG);
+        /*
+         * Find next starting ATOM in IMAP response
+         */
+        pos += COPYUID.length();
+        while (Character.isWhitespace(resp.charAt(pos))) {
+            pos++;
+        }
+        /*
+         * Split by ATOMs
+         */
+        final String[] sa = resp.substring(pos).split("\\s+");
+        if (sa.length >= 3) {
+            /*-
+             * Array contains atoms like:
+             * 
+             * "1167880112", "11937", "11939]", "Completed"
+             */
+            copyuidResp.src = sa[1];
+            {
+                final String destStr = sa[2];
+                final int mlen = destStr.length() - 1;
+                if (']' == destStr.charAt(mlen)) {
+                    copyuidResp.dest = destStr.substring(0, mlen);
+                } else {
+                    copyuidResp.dest = destStr;
+                }
+            }
+            copyuidResp.fillResponse(uids, retval);
+        } else {
+            LOG.error(new StringBuilder(128).append("Invalid COPYUID response: ").append(resp).toString());
+        }
+        proceed = false;
         return true;
     }
 
