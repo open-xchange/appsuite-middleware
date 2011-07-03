@@ -157,6 +157,21 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Initializes a new {@link OXException}.
      * 
      * @param code The numeric error code
+     */
+    public OXException(final int code) {
+        super();
+        count = COUNTER.incrementAndGet();
+        properties = new HashMap<String, String>(8);
+        categories = new LinkedList<Category>();
+        this.code = code;
+        this.displayMessage = OXExceptionStrings.MESSAGE;
+        this.displayArgs = MESSAGE_ARGS_EMPTY;
+    }
+
+    /**
+     * Initializes a new {@link OXException}.
+     * 
+     * @param code The numeric error code
      * @param displayMessage The printf-style display message (usually a constant from a class implementing {@link LocalizableStrings})
      * @param displayArgs The arguments for display message
      */
@@ -167,7 +182,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         categories = new LinkedList<Category>();
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
-        this.displayArgs = displayArgs;
+        this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
     }
 
     /**
@@ -458,7 +473,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     private String getDisplayMessage0(final Locale locale) {
         final Locale lcl = null == locale ? Locale.US : locale;
         String msg = I18n.getInstance().translate(lcl, displayMessage);
-        if (msg != null) {
+        if (msg != null && displayArgs != null) {
             try {
                 msg = String.format(lcl, msg, displayArgs);
             } catch (final NullPointerException e) {
