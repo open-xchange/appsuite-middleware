@@ -54,24 +54,28 @@
 package com.openexchange.ajp13.exception;
 
 import com.openexchange.ajp13.AJPv13Response;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link AJPv13Exception} - Indicates an AJP error.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AJPv13Exception extends AbstractOXException {
+public class AJPv13Exception extends OXException {
 
     private static final long serialVersionUID = 3492183535749551904L;
 
+    /**
+     * The AJP error code enumeration.
+     */
     public static enum AJPCode {
 
         /**
-         * An internal exception
+         * An internal exception: %1$s
          */
-        INTERNAL_EXCEPTION("", Category.INTERNAL_ERROR, 1),
+        INTERNAL_EXCEPTION("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
         /**
          * Corrupt AJP package #%1$d: First two bytes do not indicate a package from server to container: %2$s %3$s\nWrong AJP package's
          * data:\n%4$s
@@ -79,94 +83,94 @@ public class AJPv13Exception extends AbstractOXException {
          * Invalid byte sequence
          * </p>
          */
-        INVALID_BYTE_SEQUENCE("Corrupt AJP package #%1$d: First two bytes do not indicate a package from server to container: %2$s %3$s\nWrong AJP package's data:\n%4$s", Category.SOCKET_CONNECTION, 2),
+        INVALID_BYTE_SEQUENCE("Corrupt AJP package #%1$d: First two bytes do not indicate a package from server to container: %2$s %3$s\nWrong AJP package's data:\n%4$s", Category.CATEGORY_CONNECTIVITY, 2),
         /**
          * Socket closed by web server. Wait for input data of package #%1$d took %2$dmsec.
          */
-        SOCKET_CLOSED_BY_WEB_SERVER("Socket closed by web server. Wait for input data of package #%1$d took %2$dmsec.", Category.SOCKET_CONNECTION, 3),
+        SOCKET_CLOSED_BY_WEB_SERVER("Socket closed by web server. Wait for input data of package #%1$d took %2$dmsec.", Category.CATEGORY_CONNECTIVITY, 3),
         /**
          * No data provided from web server: input stream returned \"-1\" while reading AJP magic bytes in package #%1$d. Wait for input
          * data took %2$dmsec.
          */
-        EMPTY_INPUT_STREAM("No data provided from web server: input stream returned \"-1\" while reading AJP magic bytes in package #%1$d. Wait for input data took %2$dmsec.", Category.SOCKET_CONNECTION, 4),
+        EMPTY_INPUT_STREAM("No data provided from web server: input stream returned \"-1\" while reading AJP magic bytes in package #%1$d. Wait for input data took %2$dmsec.", Category.CATEGORY_CONNECTIVITY, 4),
         /**
          * AJP connection is not set to status "ASSIGNED"
          */
-        INVALID_CONNECTION_STATE("AJP connection is not set to status \"ASSIGNED\"", Category.CODE_ERROR, 5),
+        INVALID_CONNECTION_STATE("AJP connection is not set to status \"ASSIGNED\"", Category.CATEGORY_ERROR, 5),
         /**
          * Response package exceeds max package size value of 8192k: %s
          */
-        MAX_PACKAGE_SIZE("Response package exceeds max package size value of 8192k: %1$s", Category.CODE_ERROR, 6),
+        MAX_PACKAGE_SIZE("Response package exceeds max package size value of 8192k: %1$s", Category.CATEGORY_ERROR, 6),
         /**
          * Unknown Request Prefix Code: %1$s
          */
-        UNKNOWN_PREFIX_CODE("Unknown Request Prefix Code: %1$s", Category.SOCKET_CONNECTION, 7),
+        UNKNOWN_PREFIX_CODE("Unknown Request Prefix Code: %1$s", Category.CATEGORY_CONNECTIVITY, 7),
         /**
          * Missing payload data in client's body chunk package
          */
-        MISSING_PAYLOAD_DATA("Missing payload data in client's body chunk package", Category.SOCKET_CONNECTION, 8),
+        MISSING_PAYLOAD_DATA("Missing payload data in client's body chunk package", Category.CATEGORY_CONNECTIVITY, 8),
         /**
          * Empty SEND_BODY_CHUNK package MUST NOT be sent
          */
-        NO_EMPTY_SENT_BODY_CHUNK("Empty SEND_BODY_CHUNK package MUST NOT be sent", Category.CODE_ERROR, 9),
+        NO_EMPTY_SENT_BODY_CHUNK("Empty SEND_BODY_CHUNK package MUST NOT be sent", Category.CATEGORY_ERROR, 9),
         /**
          * Integer value exceeds max allowed value ([MAX_INT_VALUE]): %1$d
          */
         INTEGER_VALUE_TOO_BIG(new StringBuilder("Integer value exceeds max allowed value (").append(AJPv13Response.MAX_INT_VALUE).append(
-            "): %1$d").toString(), Category.CODE_ERROR, 10),
+            "): %1$d").toString(), Category.CATEGORY_ERROR, 10),
         /**
          * Invalid content-type header value: %1$s
          */
-        INVALID_CONTENT_TYPE("Invalid content-type header value: %1$s", Category.CODE_ERROR, 11),
+        INVALID_CONTENT_TYPE("Invalid content-type header value: %1$s", Category.CATEGORY_ERROR, 11),
         /**
          * Unparseable header field %1$s in forward request package
          */
-        UNPARSEABLE_HEADER_FIELD("Unparseable header field %1$s in forward request package", Category.SOCKET_CONNECTION, 12),
+        UNPARSEABLE_HEADER_FIELD("Unparseable header field %1$s in forward request package", Category.CATEGORY_CONNECTIVITY, 12),
         /**
          * String parse exception: No ending 0x00 found
          */
-        UNPARSEABLE_STRING("String parse exception: No ending 0x00 found", Category.SOCKET_CONNECTION, 13),
+        UNPARSEABLE_STRING("String parse exception: No ending 0x00 found", Category.CATEGORY_CONNECTIVITY, 13),
         /**
          * Unsupported encoding: %1$s
          */
-        UNSUPPORTED_ENCODING("Unsupported encoding: %1$s", Category.CODE_ERROR, 14),
+        UNSUPPORTED_ENCODING("Unsupported encoding: %1$s", Category.CATEGORY_ERROR, 14),
         /**
          * No attribute name could be found for code: %1$d
          */
-        NO_ATTRIBUTE_NAME("No attribute name could be found for code: %1$d", Category.CODE_ERROR, 15),
+        NO_ATTRIBUTE_NAME("No attribute name could be found for code: %1$d", Category.CATEGORY_ERROR, 15),
         /**
          * An I/O error occurred: %1$s
          */
-        IO_ERROR("An I/O error occurred: %1$s", Category.SOCKET_CONNECTION, 16),
+        IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_CONNECTIVITY, 16),
         /**
          * A messaging error occurred: %1$s
          */
-        MESSAGING_ERROR("A messaging error occurred: %1$s", Category.CODE_ERROR, 17),
+        MESSAGING_ERROR("A messaging error occurred: %1$s", Category.CATEGORY_ERROR, 17),
         /**
          * Missing property AJP_JVM_ROUTE in file "ajp.properties"
          */
-        MISSING_JVM_ROUTE("Missing property AJP_JVM_ROUTE in file \"ajp.properties\"", Category.SETUP_ERROR, 18),
+        MISSING_JVM_ROUTE("Missing property AJP_JVM_ROUTE in file \"ajp.properties\"", Category.CATEGORY_CONFIGURATION, 18),
         /**
          * Cookie JSESSIONID contains non-matching JVM route: %1$s not equal to %2$s
          */
-        WRONG_JVM_ROUTE("Cookie JSESSIONID contains non-matching JVM route: %1$s not equal to %2$s", Category.SOCKET_CONNECTION, 19),
+        WRONG_JVM_ROUTE("Cookie JSESSIONID contains non-matching JVM route: %1$s not equal to %2$s", Category.CATEGORY_CONNECTIVITY, 19),
         /**
          * Unexpected empty body package received from web server. Total-Received: %1$d | Content-Length: %2$d.\nCorresponding AJP forward
          * package:\n%3$s
          */
-        UNEXPECTED_EMPTY_DATA_PACKAGE("Unexpected empty body package received from web server. Total-Received: %1$d | Content-Length: %2$d.\nCorresponding AJP forward package:\n%3$s", Category.SOCKET_CONNECTION, 20),
+        UNEXPECTED_EMPTY_DATA_PACKAGE("Unexpected empty body package received from web server. Total-Received: %1$d | Content-Length: %2$d.\nCorresponding AJP forward package:\n%3$s", Category.CATEGORY_CONNECTIVITY, 20),
         /**
          * AJP server socket could not be bind to port %1$d. Probably another process is already listening on this port.
          */
-        STARTUP_ERROR("AJP server socket could not be bound to port %1$d. Probably another process is already listening on this port.", Category.SOCKET_CONNECTION, 21),
+        STARTUP_ERROR("AJP server socket could not be bound to port %1$d. Probably another process is already listening on this port.", Category.CATEGORY_CONNECTIVITY, 21),
         /**
          * File "%1$s" could not be found
          */
-        FILE_NOT_FOUND("File \"%1$s\" could not be found.", Category.CODE_ERROR, 22),
+        FILE_NOT_FOUND("File \"%1$s\" could not be found.", Category.CATEGORY_ERROR, 22),
         /**
          * Invalid cookie header value: %1$s
          */
-        INVALID_COOKIE_HEADER("Invalid cookie header value: %1$s", Category.CODE_ERROR, 23);
+        INVALID_COOKIE_HEADER("Invalid cookie header value: %1$s", Category.CATEGORY_ERROR, 23);
 
         private final String message;
 
@@ -233,8 +237,8 @@ public class AJPv13Exception extends AbstractOXException {
      * @param messageArgs The error message arguments
      */
     public AJPv13Exception(final AJPCode code, final boolean keepAlive, final Exception cause, final Object... messageArgs) {
-        super(EnumComponent.AJP, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
-        setMessageArgs(messageArgs);
+        super(code.getDetailNumber(), OXExceptionStrings.MESSAGE, cause);
+        addCategory(code.getCategory()).setPrefix("AJP").setLogMessage(code.getMessage(), messageArgs);
         this.keepAlive = keepAlive;
     }
 
@@ -244,14 +248,9 @@ public class AJPv13Exception extends AbstractOXException {
      * @param cause The throwable to wrap
      */
     public AJPv13Exception(final Throwable cause) {
-        super(
-            EnumComponent.AJP,
-            AJPCode.INTERNAL_EXCEPTION.getCategory(),
-            AJPCode.INTERNAL_EXCEPTION.getDetailNumber(),
-            cause.getMessage(),
-            cause);
-        setMessageArgs(EMPTY_ARGS);
-        keepAlive = false;
+        super(AJPCode.INTERNAL_EXCEPTION.getDetailNumber(), OXExceptionStrings.MESSAGE, cause);
+        addCategory(AJPCode.INTERNAL_EXCEPTION.getCategory()).setPrefix("AJP").setLogMessage(AJPCode.INTERNAL_EXCEPTION.getMessage(), cause.getMessage());
+        this.keepAlive = false;
     }
 
     /**

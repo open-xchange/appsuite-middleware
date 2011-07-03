@@ -64,7 +64,7 @@ import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.UploadServletException;
 
@@ -353,13 +353,13 @@ final class AJPv13Listener implements Runnable {
                         /*
                          * Catch every exception
                          */
-                        final AbstractOXException logMe;
-                        if (e instanceof AbstractOXException) {
-                            logMe = (AbstractOXException) e;
+                        final OXException logMe;
+                        if (e instanceof OXException) {
+                            logMe = (OXException) e;
                         } else {
                             logMe = new AJPv13Exception(e);
                         }
-                        LOG.error(logMe.getMessage(), logMe);
+                        logMe.log(LOG);
                         closeAndKeepAlive();
                     }
                     ajpCon.resetConnection(false);

@@ -60,7 +60,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -124,7 +124,7 @@ public final class AJPv13Config implements Initialization {
 
     private boolean logForwardRequest;
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(this.getClass().getName() + " already started");
             return;
@@ -132,7 +132,7 @@ public final class AJPv13Config implements Initialization {
         init();
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
             return;

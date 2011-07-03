@@ -56,6 +56,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link JCSCacheService} - Cache service implementation through JCS cache.
@@ -100,32 +101,32 @@ public final class JCSCacheService implements CacheService {
          */
     }
 
-    public Cache getCache(final String name) throws CacheException {
+    public Cache getCache(final String name) throws OXException {
         try {
             /*
              * The JCS cache manager already tracks initialized caches though the same region name always points to the same cache
              */
             return new JCSCache(JCS.getInstance(name));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getMessage());
+            throw CacheException.Code.CACHE_ERROR.create(e, e.getMessage());
         } catch (final NullPointerException npe) {
             /*
              * Can't use JCS without a configuration file or to be more precise a configuration file which lacks a region of the specified
              * name. It should fail more gracefully, but that's a minor concern in the eyes of JCS developer.
              */
-            throw new CacheException(CacheException.Code.MISSING_CACHE_REGION, npe, name);
+            throw CacheException.Code.MISSING_CACHE_REGION.create(npe, name);
         }
     }
 
-    public void loadConfiguration(final String cacheConfigFile) throws CacheException {
+    public void loadConfiguration(final String cacheConfigFile) throws OXException {
         JCSCacheServiceInit.getInstance().loadConfiguration(cacheConfigFile);
     }
 
-    public void loadConfiguration(final InputStream inputStream) throws CacheException {
+    public void loadConfiguration(final InputStream inputStream) throws OXException {
         JCSCacheServiceInit.getInstance().loadConfiguration(inputStream);
     }
 
-    public void loadDefaultConfiguration() throws CacheException {
+    public void loadDefaultConfiguration() throws OXException {
         JCSCacheServiceInit.getInstance().loadDefaultConfiguration();
     }
 

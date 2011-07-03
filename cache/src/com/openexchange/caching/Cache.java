@@ -50,6 +50,7 @@
 package com.openexchange.caching;
 
 import java.io.Serializable;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Cache} - This class provides an interface for all types of access to the cache.
@@ -63,9 +64,9 @@ public interface Cache {
     /**
      * Removes all of the elements from cache.
      * 
-     * @throws CacheException If cache cannot be cleared
+     * @throws OXException If cache cannot be cleared
      */
-    public void clear() throws CacheException;
+    public void clear() throws OXException;
 
     /**
      * Disposes this cache. Flushes objects to and closes auxiliary caches. This is a shutdown command.
@@ -103,9 +104,9 @@ public interface Cache {
      * Each time an element is added to the cache without element attributes, the default element attributes are cloned.
      * 
      * @return The default element attributes used by this cache.
-     * @throws CacheException If default element attributes cannot be returned
+     * @throws OXException If default element attributes cannot be returned
      */
-    public ElementAttributes getDefaultElementAttributes() throws CacheException;
+    public ElementAttributes getDefaultElementAttributes() throws OXException;
 
     /**
      * Gets an item out of the cache that is in specified group.
@@ -129,9 +130,9 @@ public interface Cache {
      * 
      * @param key The key
      * @param obj Object to store
-     * @exception CacheException If put operation on cache fails
+     * @exception OXException If put operation on cache fails
      */
-    public void put(Serializable key, Serializable obj) throws CacheException;
+    public void put(Serializable key, Serializable obj) throws OXException;
 
     /**
      * Constructs a cache element with these attributes, and puts it into the cache.
@@ -141,9 +142,9 @@ public interface Cache {
      * @param key The key
      * @param val The object to store
      * @param attr The object's element attributes
-     * @exception CacheException If put operation on cache fails
+     * @exception OXException If put operation on cache fails
      */
-    public void put(Serializable key, Serializable val, ElementAttributes attr) throws CacheException;
+    public void put(Serializable key, Serializable val, ElementAttributes attr) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
@@ -153,9 +154,9 @@ public interface Cache {
      * @param groupName The group name.
      * @param value The object to cache
      * @param attr The objects attributes.
-     * @throws CacheException If put operation on cache fails
+     * @throws OXException If put operation on cache fails
      */
-    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws CacheException;
+    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the
@@ -164,9 +165,9 @@ public interface Cache {
      * @param key The key
      * @param groupName The group name.
      * @param value The object to cache
-     * @throws CacheException If put operation on cache fails
+     * @throws OXException If put operation on cache fails
      */
-    public void putInGroup(Serializable key, String groupName, Serializable value) throws CacheException;
+    public void putInGroup(Serializable key, String groupName, Serializable value) throws OXException;
 
     /**
      * Place a new object in the cache, associated with key. If there is currently an object associated with key in the cache an exception
@@ -174,17 +175,17 @@ public interface Cache {
      * 
      * @param key The key
      * @param value Object to store
-     * @exception CacheException If the item is already in the cache.
+     * @exception OXException If the item is already in the cache.
      */
-    public void putSafe(Serializable key, Serializable value) throws CacheException;
+    public void putSafe(Serializable key, Serializable value) throws OXException;
 
     /**
      * Removes the object from the cache which is bound to specified key.
      * 
      * @param key The key
-     * @throws CacheException If remove operation on cache fails
+     * @throws OXException If remove operation on cache fails
      */
-    public void remove(Serializable key) throws CacheException;
+    public void remove(Serializable key) throws OXException;
 
     /**
      * Removes the object located in specified group and bound to given key.
@@ -200,9 +201,9 @@ public interface Cache {
      * attributes. Items subsequently put into the cache will use these defaults if they do not specify specific attributes.
      * 
      * @param attr The default attributes.
-     * @throws CacheException If default element attributes cannot be applied.
+     * @throws OXException If default element attributes cannot be applied.
      */
-    public void setDefaultElementAttributes(ElementAttributes attr) throws CacheException;
+    public void setDefaultElementAttributes(ElementAttributes attr) throws OXException;
 
     /**
      * This returns the cache statistics with information on this region and its auxiliaries.

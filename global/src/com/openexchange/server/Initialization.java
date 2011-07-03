@@ -49,7 +49,7 @@
 
 package com.openexchange.server;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * Components of the server have to implement this interface if this component needs some code to be executed during startup. If the
@@ -62,16 +62,15 @@ public interface Initialization {
     /**
      * Called to start a component.
      * 
-     * @throws AbstractOXException should be thrown if the initialization of the component is not successfully and further start of the
-     *             server should be interrupted.
+     * @throws OXException If the initialization of the component is not successfully and further start of the server should be interrupted.
      */
-    void start() throws AbstractOXException;
+    void start() throws OXException;
 
     /**
      * Called to stop a component. This method is only called if the {@link #start()} method was executed successfully.
      * 
-     * @throws AbstractOXException if some problem occurs. The component then remains as stopped.
+     * @throws OXException If some problem occurs. The component then remains as stopped.
      */
-    void stop() throws AbstractOXException;
+    void stop() throws OXException;
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.caching;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CacheService} - The cache service.
@@ -66,9 +67,9 @@ public interface CacheService {
      * 
      * @param name The region name
      * @return A cache which accesses the provided region.
-     * @throws CacheException If cache cannot be obtained
+     * @throws OXException If cache cannot be obtained
      */
-    public Cache getCache(String name) throws CacheException;
+    public Cache getCache(String name) throws OXException;
 
     /**
      * The cache identified through given name is removed from this cache service and all of its items are going to be disposed.<br>
@@ -83,7 +84,7 @@ public interface CacheService {
      * 
      * @param name The name of the cache region that ought to be freed
      */
-    public void freeCache(String name) throws CacheException;
+    public void freeCache(String name) throws OXException;
 
     /**
      * Additionally feeds the cache manager with specified cache configuration file.
@@ -93,9 +94,9 @@ public interface CacheService {
      * configuration and needs <b>not</b> to be invoked to initialize the cache manager at all.
      * 
      * @param cacheConfigFile The cache configuration file
-     * @throws CacheException If configuration fails
+     * @throws OXException If configuration fails
      */
-    public void loadConfiguration(String cacheConfigFile) throws CacheException;
+    public void loadConfiguration(String cacheConfigFile) throws OXException;
 
     /**
      * Additionally feeds the cache manager with specified input stream. The stream will be closed.
@@ -105,16 +106,16 @@ public interface CacheService {
      * configuration and needs <b>not</b> to be invoked to initialize the cache manager at all.
      * 
      * @param inputStream The input stream to read from
-     * @throws CacheException If configuration fails
+     * @throws OXException If configuration fails
      */
-    public void loadConfiguration(InputStream inputStream) throws CacheException;
+    public void loadConfiguration(InputStream inputStream) throws OXException;
 
     /**
      * Re-Loads the cache manager's default configuration.
      * 
-     * @throws CacheException If configuration fails
+     * @throws OXException If configuration fails
      */
-    public void loadDefaultConfiguration() throws CacheException;
+    public void loadDefaultConfiguration() throws OXException;
 
     /**
      * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.

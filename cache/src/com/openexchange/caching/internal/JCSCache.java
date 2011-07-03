@@ -63,6 +63,7 @@ import com.openexchange.caching.internal.cache2jcs.CacheElement2JCS;
 import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
@@ -81,11 +82,11 @@ public final class JCSCache implements Cache {
         this.cache = cache;
     }
 
-    public void clear() throws CacheException {
+    public void clear() throws OXException {
         try {
             cache.clear();
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getMessage());
+            throw CacheException.Code.CACHE_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -105,11 +106,11 @@ public final class JCSCache implements Cache {
         return new CacheElement2JCS(cacheElement);
     }
 
-    public ElementAttributes getDefaultElementAttributes() throws CacheException {
+    public ElementAttributes getDefaultElementAttributes() throws OXException {
         try {
             return new ElementAttributes2JCS(cache.getDefaultElementAttributes());
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_RETRIEVAL, e, e.getMessage());
+            throw CacheException.Code.FAILED_ATTRIBUTE_RETRIEVAL.create(e, e.getMessage());
         }
     }
 
@@ -121,53 +122,53 @@ public final class JCSCache implements Cache {
         cache.invalidateGroup(group);
     }
 
-    public void put(final Serializable key, final Serializable obj) throws CacheException {
+    public void put(final Serializable key, final Serializable obj) throws OXException {
         try {
             cache.put(key, obj);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
+            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
-    public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws CacheException {
+    public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws OXException {
         try {
             cache.put(key, val, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
+            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
-    public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws CacheException {
+    public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
             cache.putInGroup(key, groupName, value);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
+            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
-    public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws CacheException {
+    public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
+            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
-    public void putSafe(final Serializable key, final Serializable value) throws CacheException {
+    public void putSafe(final Serializable key, final Serializable value) throws OXException {
         try {
             cache.putSafe(key, value);
         } catch (final ObjectExistsException e) {
-            throw new CacheException(CacheException.Code.FAILED_SAFE_PUT, e, e.getMessage());
+            throw CacheException.Code.FAILED_SAFE_PUT.create(e, e.getMessage());
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
+            throw CacheException.Code.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
-    public void remove(final Serializable key) throws CacheException {
+    public void remove(final Serializable key) throws OXException {
         try {
             cache.remove(key);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_REMOVE, e, e.getMessage());
+            throw CacheException.Code.FAILED_REMOVE.create(e, e.getMessage());
         }
     }
 
@@ -175,11 +176,11 @@ public final class JCSCache implements Cache {
         cache.remove(key, group);
     }
 
-    public void setDefaultElementAttributes(final ElementAttributes attr) throws CacheException {
+    public void setDefaultElementAttributes(final ElementAttributes attr) throws OXException {
         try {
             cache.setDefaultElementAttributes(new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_ASSIGNMENT, e, e.getMessage());
+            throw CacheException.Code.FAILED_ATTRIBUTE_ASSIGNMENT.create(e, e.getMessage());
         }
     }
 
