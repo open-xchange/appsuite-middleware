@@ -237,7 +237,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the log message for specified log level.
+     * Gets the log message appropriate for specified log level.
      * <p>
      * This is a convenience method that invokes {@link #getLogMessage(LogLevel, String)} with latter argument set to
      * <code>null</code>.
@@ -251,7 +251,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the log message for specified log level.
+     * Gets the log message appropriate for specified log level.
      * 
      * @param logLevel The log level
      * @param defaultLog The default logging to return if this exception is not loggable for specified log level
@@ -325,12 +325,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
      */
     private boolean isLoggable(final LogLevel logLevel) {
-        for (final Category category : getCategories()) {
-            if (logLevel.includes(category)) {
-                return true;
-            }
-        }
-        return false;
+        return logLevel.implies(getCategories().get(0));
     }
 
     /**
