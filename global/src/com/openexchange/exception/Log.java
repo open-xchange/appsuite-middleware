@@ -50,8 +50,8 @@
 package com.openexchange.exception;
 
 /**
- * {@link Log} - A simple wrapper for {@link org.apache.commons.logging.Log} which uses {@link OXException#getLogMessage(LogLevel)} if an
- * {@link OXException} is passed to one of its log methods.
+ * {@link Log} - A simple wrapper for {@link org.apache.commons.logging.Log} which checks with {@link OXException#isLoggable(LogLevel)} if
+ * an {@link OXException} is passed to one of its log methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -116,8 +116,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void trace(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t)) {
-            ((OXException) t).getLogMessage(LogLevel.TRACE);
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.TRACE)) {
             return;
         }
         delegatee.trace(message, t);
@@ -128,8 +127,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void debug(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t)) {
-            ((OXException) t).getLogMessage(LogLevel.DEBUG);
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.DEBUG)) {
             return;
         }
         delegatee.debug(message, t);
@@ -140,8 +138,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void info(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t)) {
-            ((OXException) t).getLogMessage(LogLevel.INFO);
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.INFO)) {
             return;
         }
         delegatee.info(message, t);
@@ -152,8 +149,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void warn(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t)) {
-            ((OXException) t).getLogMessage(LogLevel.WARNING);
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.WARNING)) {
             return;
         }
         delegatee.warn(message, t);
@@ -164,8 +160,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void error(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t)) {
-            ((OXException) t).getLogMessage(LogLevel.ERROR);
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.ERROR)) {
             return;
         }
         delegatee.error(message, t);
@@ -176,8 +171,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void fatal(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t)) {
-            ((OXException) t).getLogMessage(LogLevel.FATAL);
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.FATAL)) {
             return;
         }
         delegatee.fatal(message, t);
