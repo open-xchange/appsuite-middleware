@@ -58,9 +58,9 @@ import java.util.List;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Answer {
-    private List<Integer> answers;
-
-    
+	private List<Integer> answers;
+ 
+    // Bla
     public List<Integer> getAnswers() {
         return answers;
     }
