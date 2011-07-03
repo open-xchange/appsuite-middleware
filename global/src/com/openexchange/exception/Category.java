@@ -206,16 +206,16 @@ public interface Category extends Comparable<Category> {
     public static final Category CATEGORY_SERVICE_DOWN = new Category() {
 
         public LogLevel getLogLevel() {
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         public Type getType() {
-            return Category.EnumType.TRY_AGAIN;
+            return Category.EnumType.SERVICE_DOWN;
         }
 
         @Override
         public String toString() {
-            return Category.EnumType.TRY_AGAIN.getName();
+            return Category.EnumType.SERVICE_DOWN.getName();
         }
 
         public int compareTo(final Category other) {
