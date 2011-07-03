@@ -324,7 +324,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param logLevel The log level
      * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
      */
-    private boolean isLoggable(final LogLevel logLevel) {
+    public boolean isLoggable(final LogLevel logLevel) {
         return logLevel.implies(getCategories().get(0));
     }
 
