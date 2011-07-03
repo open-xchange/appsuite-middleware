@@ -166,7 +166,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
         this.code = code;
-        this.displayMessage = displayMessage;
+        this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
     }
 
@@ -184,7 +184,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
         this.code = code;
-        this.displayMessage = displayMessage;
+        this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
     }
 
