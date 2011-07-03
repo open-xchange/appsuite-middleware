@@ -94,23 +94,24 @@ public enum LogLevel {
     };
 
     /**
-     * Checks if this log level includes specified category's log level.
+     * Checks if this log level implies specified category's log level; e.g. {@link LogLevel#DEBUG DEBUG} implies {@link LogLevel#ERROR
+     * ERROR}.
      * 
      * @param category The category whose loglevel is possibly included
-     * @return <code>true</code> if this log level includes specified category's log level; otherwise <code>false</code>
+     * @return <code>true</code> if this log level implies specified category's log level; otherwise <code>false</code>
      */
-    public boolean includes(final Category category) {
-        return includes(category.getLogLevel());
+    public boolean implies(final Category category) {
+        return implies(category.getLogLevel());
     }
 
     /**
-     * Checks if this log level includes specified log level.
+     * Checks if this log level implies specified log level; e.g. {@link LogLevel#DEBUG DEBUG} implies {@link LogLevel#ERROR ERROR}.
      * 
      * @param logLevel The log level possibly included
-     * @return <code>true</code> if this log level includes specified log level; otherwise <code>false</code>
+     * @return <code>true</code> if this log level implies specified log level; otherwise <code>false</code>
      */
-    public boolean includes(final LogLevel logLevel) {
-        return this.ordinal() >= logLevel.ordinal();
+    public boolean implies(final LogLevel logLevel) {
+        return this.ordinal() <= logLevel.ordinal();
     }
 
     /**
