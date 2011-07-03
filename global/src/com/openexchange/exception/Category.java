@@ -57,7 +57,7 @@ package com.openexchange.exception;
 public interface Category extends Comparable<Category> {
 
     /**
-     * The category for an error.
+     * The category for an error using error log level.
      */
     public static final Category CATEGORY_ERROR = new Category() {
 
@@ -81,7 +81,7 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
-     * The default category for an invalid user input.
+     * The default category for an invalid user input using debug log level.
      */
     public static final Category CATEGORY_USER_INPUT = new Category() {
 
@@ -129,7 +129,7 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
-     * The default category for a permission-denied issue.
+     * The default category for a permission-denied issue using debug log level.
      */
     public static final Category CATEGORY_PERMISSION_DENIED = new Category() {
 
@@ -153,7 +153,7 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
-     * The default category for a try-again issue.
+     * The default category for a try-again issue using debug šeg level.
      */
     public static final Category CATEGORY_TRY_AGAIN = new Category() {
 
@@ -177,7 +177,7 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
-     * The default category for a connectivity issue (e.g. broken/lost TCP connection).
+     * The default category for a connectivity issue (e.g. broken/lost TCP connection) using debug log level.
      */
     public static final Category CATEGORY_CONNECTIVITY = new Category() {
 
@@ -201,7 +201,7 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
-     * The default category for a missing service or system (e.g. database).
+     * The default category for a missing service or system (e.g. database) using debug log level.
      */
     public static final Category CATEGORY_SERVICE_DOWN = new Category() {
 
@@ -216,6 +216,54 @@ public interface Category extends Comparable<Category> {
         @Override
         public String toString() {
             return Category.EnumType.TRY_AGAIN.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
+     * The default category for truncated data using error log level.
+     */
+    public static final Category CATEGORY_TRUNCATED = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.ERROR;
+        }
+
+        public Type getType() {
+            return Category.EnumType.TRUNCATED;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.TRUNCATED.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
+     * The default category for conflicting data using debug log level.
+     */
+    public static final Category CATEGORY_CONFLICT = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.DEBUG;
+        }
+
+        public Type getType() {
+            return Category.EnumType.CONFLICT;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.CONFLICT.getName();
         }
 
         public int compareTo(final Category other) {
@@ -269,6 +317,14 @@ public interface Category extends Comparable<Category> {
          * The service-down type.
          */
         SERVICE_DOWN,
+        /**
+         * The category for truncated data.
+         */
+        TRUNCATED,
+        /**
+         * The category for a conflicting modification operation.
+         */
+        CONFLICT,
         /**
          * The warning type 
          */

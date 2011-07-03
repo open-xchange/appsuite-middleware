@@ -84,7 +84,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     // ([A-Za-z_]+)\((".*"),
     // $1($1_MSG,
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXException.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXException.class));
 
     private static final long serialVersionUID = 2058371531364916608L;
 
@@ -130,6 +130,22 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException() {
         super();
+        code = CODE_DEFAULT;
+        count = COUNTER.incrementAndGet();
+        properties = new HashMap<String, String>(8);
+        categories = new LinkedList<Category>();
+        displayMessage = OXExceptionStrings.MESSAGE;
+        logMessage = null;
+        displayArgs = MESSAGE_ARGS_EMPTY;
+    }
+
+    /**
+     * Initializes a default {@link OXException}.
+     * 
+     * @param cause The cause
+     */
+    public OXException(final Throwable cause) {
+        super(cause);
         code = CODE_DEFAULT;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
