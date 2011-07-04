@@ -54,10 +54,7 @@ import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageException;
-import com.openexchange.file.storage.exception.FileStorageExceptionFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 
 /**
@@ -67,8 +64,6 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
  * @since Open-Xchange v6.18.2
  */
 public final class FileStorageActivator implements BundleActivator {
-
-    private ComponentRegistration componentRegistration;
 
     private OSGIFileStorageServiceRegistry registry;
 
@@ -91,15 +86,6 @@ public final class FileStorageActivator implements BundleActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.file.storage");
             }
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    FileStorageException.COMPONENT,
-                    "com.openexchange.file.storage",
-                    FileStorageExceptionFactory.getInstance());
             /*
              * Start registry tracking
              */
@@ -153,13 +139,6 @@ public final class FileStorageActivator implements BundleActivator {
             if (null != eventAdminLookup) {
                 eventAdminLookup.stop();
                 eventAdminLookup = null;
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.file.storage\" failed.", e);

@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link FileStorageExceptionMessages} - Exception messages for {@link FileStorageException} that needs to be translated.
