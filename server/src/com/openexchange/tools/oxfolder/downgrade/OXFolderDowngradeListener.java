@@ -77,7 +77,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.downgrade.sql.OXFolderDowngradeSQL;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -150,7 +149,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteSharedFolderData(newUserConfiguration.getUserId(), event);
-            } catch (final OXFolderException e) {
+            } catch (final OXException e) {
                 throw new DowngradeFailedException(e);
             }
             if (LOG.isInfoEnabled()) {
@@ -453,9 +452,9 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
      * 
      * @param entity The entity
      * @param event The downgrade event
-     * @throws OXFolderException If deleting the shared folder data fails
+     * @throws OXException If deleting the shared folder data fails
      */
-    private static void deleteSharedFolderData(final int entity, final DowngradeEvent event) throws OXFolderException {
+    private static void deleteSharedFolderData(final int entity, final DowngradeEvent event) throws OXException {
         final int cid = event.getContext().getContextId();
         final Set<Integer> set = new HashSet<Integer>();
         try {

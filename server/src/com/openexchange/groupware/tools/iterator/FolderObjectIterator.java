@@ -75,7 +75,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;

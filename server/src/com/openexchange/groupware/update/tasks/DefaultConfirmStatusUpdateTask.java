@@ -59,7 +59,6 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;

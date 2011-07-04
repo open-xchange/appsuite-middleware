@@ -75,7 +75,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -700,7 +699,7 @@ public final class FolderWriter extends DataWriter {
         return retval;
     }
 
-    static int createPermissionBits(final OCLPermission perm) throws OXFolderException {
+    static int createPermissionBits(final OCLPermission perm) throws OXException {
         return createPermissionBits(
             perm.getFolderPermission(),
             perm.getReadPermission(),
@@ -709,7 +708,7 @@ public final class FolderWriter extends DataWriter {
             perm.isFolderAdmin());
     }
 
-    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws OXFolderException {
+    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws OXException {
         final int[] perms = new int[5];
         perms[0] = fp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
         perms[1] = orp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
@@ -719,7 +718,7 @@ public final class FolderWriter extends DataWriter {
         return createPermissionBits(perms);
     }
 
-    private static int createPermissionBits(final int[] permission) throws OXFolderException {
+    private static int createPermissionBits(final int[] permission) throws OXException {
         int retval = 0;
         boolean first = true;
         for (int i = permission.length - 1; i >= 0; i--) {

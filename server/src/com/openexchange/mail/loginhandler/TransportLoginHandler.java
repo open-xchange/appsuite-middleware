@@ -72,7 +72,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -124,7 +123,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
                 throw new LoginException(e);
             } catch (final SQLException e) {
                 throw new LoginException(OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage()));
-            } catch (final OXFolderException e) {
+            } catch (final OXException e) {
                 throw new LoginException(e);
             } catch (final OXException e) {
                 throw new LoginException(e);
@@ -222,7 +221,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         return ((now - creationDate) > ttl);
     }
 
-    private int createIfAbsent(final Session session, final Context ctx, final String name) throws DBPoolingException, SQLException, OXException, OXFolderException {
+    private int createIfAbsent(final Session session, final Context ctx, final String name) throws DBPoolingException, SQLException, OXException, OXException {
         final int lookUpFolder =
             OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
         if (-1 == lookUpFolder) {

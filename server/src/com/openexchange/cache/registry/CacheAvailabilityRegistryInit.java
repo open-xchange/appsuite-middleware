@@ -49,7 +49,7 @@
 
 package com.openexchange.cache.registry;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -81,7 +81,7 @@ public final class CacheAvailabilityRegistryInit implements Initialization {
 	 * 
 	 * @see com.openexchange.server.Initialization#start()
 	 */
-	public void start() throws AbstractOXException {
+	public void start() throws OXException {
 		CacheAvailabilityRegistry.initInstance();
 	}
 
@@ -90,7 +90,7 @@ public final class CacheAvailabilityRegistryInit implements Initialization {
 	 * 
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
-	public void stop() throws AbstractOXException {
+	public void stop() throws OXException {
 		CacheAvailabilityRegistry.releaseInstance();
 	}
 

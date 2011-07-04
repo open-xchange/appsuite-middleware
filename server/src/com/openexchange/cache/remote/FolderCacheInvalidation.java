@@ -51,7 +51,7 @@ package com.openexchange.cache.remote;
 
 import java.rmi.RemoteException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.cache.impl.FolderCacheNotEnabledException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
@@ -85,8 +85,6 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 		if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
 			try {
 				FolderCacheManager.getInstance().removeFolderObject(objectId, ContextStorage.getInstance().getContext(contextId));
-			} catch (final FolderCacheNotEnabledException e) {
-				throw new RemoteException(ERR, e);
 			} catch (final OXException e) {
 				throw new RemoteException(ERR, e);
 			} catch (final ContextException e) {

@@ -152,7 +152,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
                     createNewContactFolder(userId, folderName, parent),
                     true,
                     System.currentTimeMillis()).getObjectID();
-        } catch (final OXFolderException folderException) {
+        } catch (final OXException folderException) {
             if (folderException.getDetailNumber() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
                 LOG.info(new StringBuilder("Found Folder with name of contact collect folder. Guess this is the dedicated folder."));
                 collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);

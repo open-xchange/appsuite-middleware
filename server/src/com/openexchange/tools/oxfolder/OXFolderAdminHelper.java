@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;

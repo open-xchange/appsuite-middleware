@@ -65,7 +65,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;

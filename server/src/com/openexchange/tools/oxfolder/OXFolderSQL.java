@@ -70,7 +70,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.Types;

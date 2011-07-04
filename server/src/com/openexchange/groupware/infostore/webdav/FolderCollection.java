@@ -62,7 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
@@ -78,7 +77,6 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
@@ -153,7 +151,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			//oxfa.deleteFolder(id, getSession(),con, con, true,System.currentTimeMillis()); // FIXME
 			exists = false;
 			factory.removed(this);
-		} catch (final OXFolderException x) {
+		} catch (final OXException x) {
 			if(isPermissionException(x)) {
 			    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 			}
@@ -490,7 +488,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), writeCon, writeCon);
 				oxma.updateFolder(folder, true, System.currentTimeMillis());
 				//oxfa.updateMoveRenameFolder(folder, session, true, folder.getLastModified().getTime(), writeCon, writeCon);
-			} catch (final OXFolderException x) {
+			} catch (final OXException x) {
 				if(isPermissionException(x)) {
 				    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 				}
@@ -520,7 +518,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				folder = oxma.createFolder(folder, true, System.currentTimeMillis());
 				//oxfa.createFolder(folder, session, true, writeCon, writeCon, true);
 				setId(folder.getObjectID());
-			} catch (final OXFolderException x) {
+			} catch (final OXException x) {
 				if(isPermissionException(x)) {
 				    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 				}
@@ -536,7 +534,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		
 	}
 	
-	private boolean isPermissionException(final OXFolderException x) {
+	private boolean isPermissionException(final OXException x) {
 		return Category.PERMISSION.equals(x.getCategory());
 	}
 

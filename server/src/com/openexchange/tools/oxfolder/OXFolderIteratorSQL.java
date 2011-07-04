@@ -791,9 +791,9 @@ public final class OXFolderIteratorSQL {
      * @param ctx The context
      * @param con An optional connection; set to <code>null</code> to obtain from connection pool
      * @return <code>true</code> if folder is visible; otherwise <code>false</code>
-     * @throws OXFolderException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public static boolean isVisibleFolder(final int folderId, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXFolderException {
+    public static boolean isVisibleFolder(final int folderId, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
         final StringBuilder condBuilder = new StringBuilder(32);
         final String fields = condBuilder.append(STR_OT).append(".fuid").toString();
         condBuilder.setLength(0);
@@ -855,9 +855,9 @@ public final class OXFolderIteratorSQL {
      * @param ctx The context
      * @param con An optional connection; set to <code>null</code> to obtain from connection pool
      * @return The subfolders' identifiers
-     * @throws OXFolderException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public static TIntArrayList getVisibleSubfolders(final int parent, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXFolderException {
+    public static TIntArrayList getVisibleSubfolders(final int parent, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
         final StringBuilder condBuilder = new StringBuilder(32);
         final String fields = condBuilder.append(STR_OT).append(".fuid").toString();
         condBuilder.setLength(0);

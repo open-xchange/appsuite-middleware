@@ -170,9 +170,9 @@ final class OXFolderManagerImpl extends OXFolderManager {
      * Constructor which only uses <code>Session</code>. Optional connections are going to be set to <code>null</code>.
      * 
      * @param session The session providing needed user data
-     * @throws OXFolderException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    OXFolderManagerImpl(final Session session) throws OXFolderException {
+    OXFolderManagerImpl(final Session session) throws OXException {
         this(session, null, null);
     }
 
@@ -180,18 +180,18 @@ final class OXFolderManagerImpl extends OXFolderManager {
      * Constructor which only uses <code>Session</code> and <code>OXFolderAccess</code>. Optional connection are going to be set to
      * <code>null</code>.
      * 
-     * @throws OXFolderException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) throws OXFolderException {
+    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) throws OXException {
         this(session, oxfolderAccess, null, null);
     }
 
     /**
      * Constructor which uses <code>Session</code> and also uses a readable and a writable <code>Connection</code>.
      * 
-     * @throws OXFolderException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon) throws OXFolderException {
+    OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon) throws OXException {
         this(session, null, readCon, writeCon);
     }
 
@@ -199,9 +199,9 @@ final class OXFolderManagerImpl extends OXFolderManager {
      * Constructor which uses <code>Session</code>, <code>OXFolderAccess</code> and also uses a readable and a writable
      * <code>Connection</code>.
      * 
-     * @throws OXFolderException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXFolderException {
+    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXException {
         super();
         this.session = session;
         try {
@@ -266,7 +266,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             try {
                 final EffectivePermission p = parentFolder.getEffectiveUserPermission(user.getId(), userConfig, readCon);
                 if (!p.canCreateSubfolders()) {
-                    final OXFolderException fe = new OXFolderException(
+                    final OXException fe = new OXFolderException(
                         OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION,
                         OXFolderUtility.getUserName(user.getId(), ctx),
                         OXFolderUtility.getFolderName(parentFolder),
@@ -2028,7 +2028,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         }
     }
 
-    private OXFolderException parseTruncated(final DataTruncation exc, final FolderObject folder, final String tableName) {
+    private OXException parseTruncated(final DataTruncation exc, final FolderObject folder, final String tableName) {
         final String[] fields = DBUtils.parseTruncatedFields(exc);
         final OXFolderException.Truncated[] truncateds = new OXFolderException.Truncated[fields.length];
         final StringBuilder sFields = new StringBuilder(fields.length << 3);
@@ -2082,7 +2082,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             };
         }
         sFields.setLength(sFields.length() - 2);
-        final OXFolderException fe;
+        final OXException fe;
         if (truncateds.length > 0) {
             final OXFolderException.Truncated truncated = truncateds[0];
             fe = new OXFolderException(

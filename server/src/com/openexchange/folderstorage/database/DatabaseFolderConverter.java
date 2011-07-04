@@ -71,7 +71,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 
@@ -321,7 +320,7 @@ public final class DatabaseFolderConverter {
             throw new FolderException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }

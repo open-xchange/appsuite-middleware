@@ -100,9 +100,9 @@ public final class OXFolderUtility {
      * @param folderName The folder name to check
      * @param locale The user's locale
      * @param ctx The context
-     * @throws OXFolderException If a duplicate folder exists
+     * @throws OXException If a duplicate folder exists
      */
-    public static void checki18nString(final int parentFolderId, final String folderName, final Locale locale, final Context ctx) throws OXFolderException {
+    public static void checki18nString(final int parentFolderId, final String folderName, final Locale locale, final Context ctx) throws OXException {
         if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderId) {
             if (FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale).equalsIgnoreCase(folderName)) {
                 final String parentFolderName =
@@ -136,9 +136,9 @@ public final class OXFolderUtility {
      * 
      * @param folder The folder whose permissions shall be checked.
      * @param ctx The context
-     * @throws OXFolderException If specified folder contains contains duplicate permissions.
+     * @throws OXException If specified folder contains contains duplicate permissions.
      */
-    public static void checkForDuplicateNonSystemPermissions(final FolderObject folder, final Context ctx) throws OXFolderException {
+    public static void checkForDuplicateNonSystemPermissions(final FolderObject folder, final Context ctx) throws OXException {
         final OCLPermission[] permissions = folder.getNonSystemPermissionsAsArray();
         if (permissions.length == 0) {
             return;
@@ -169,9 +169,9 @@ public final class OXFolderUtility {
      * @param allSharedFolders The shared folders
      * @param folderName The folder name of the folder that shall be shared
      * @param ctx The context
-     * @throws OXFolderException If a similar named shared folder is already shared to a user
+     * @throws OXException If a similar named shared folder is already shared to a user
      */
-    public static void checkSimilarNamedSharedFolder(final Set<Integer> userIds, final FolderObject[] allSharedFolders, final String folderName, final Context ctx) throws OXFolderException {
+    public static void checkSimilarNamedSharedFolder(final Set<Integer> userIds, final FolderObject[] allSharedFolders, final String folderName, final Context ctx) throws OXException {
         final List<Integer> affectedUsers = new ArrayList<Integer>();
         for (final FolderObject f : allSharedFolders) {
             if (null == f) {
@@ -217,9 +217,9 @@ public final class OXFolderUtility {
      * Checks for invalid characters in folder name
      * 
      * @param checkMe The folder whose name shall be checked
-     * @throws OXFolderException If folder name contains invalid characters
+     * @throws OXException If folder name contains invalid characters
      */
-    public static void checkFolderStringData(final FolderObject checkMe) throws OXFolderException {
+    public static void checkFolderStringData(final FolderObject checkMe) throws OXException {
         final String result;
         if (checkMe.containsFolderName() && (result = Check.containsInvalidChars(checkMe.getFolderName())) != null) {
             throw OXFolderExceptionCode.INVALID_DATA.create(result);
@@ -322,9 +322,9 @@ public final class OXFolderUtility {
      * @param folderId The folder ID
      * @param newPerms The update-operation permissions
      * @param ctx The context
-     * @throws OXFolderException If changing system folder's permission is denied
+     * @throws OXException If changing system folder's permission is denied
      */
-    public static void checkSystemFolderPermissions(final int folderId, final OCLPermission[] newPerms, final User user, final Context ctx) throws OXFolderException {
+    public static void checkSystemFolderPermissions(final int folderId, final OCLPermission[] newPerms, final User user, final Context ctx) throws OXException {
         if (folderId >= FolderObject.MIN_FOLDER_ID) {
             return;
         }
@@ -362,7 +362,7 @@ public final class OXFolderUtility {
         }
     }
 
-    private static void checkSystemFolderObjectPermissions(final int folderId, final OCLPermission toCheck, final int admin, final int[] allowedObjectPermissions, final int maxAllowedFolderPermission, final User user, final Context ctx) throws OXFolderException {
+    private static void checkSystemFolderObjectPermissions(final int folderId, final OCLPermission toCheck, final int admin, final int[] allowedObjectPermissions, final int maxAllowedFolderPermission, final User user, final Context ctx) throws OXException {
         /*
          * Only context admin may hold administer right and folder visibility change only
          */

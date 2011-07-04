@@ -145,7 +145,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
@@ -362,7 +361,7 @@ public class Folder extends SessionServlet {
                     jsonWriter.endArray();
                 }
             }
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
@@ -834,7 +833,7 @@ public class Folder extends SessionServlet {
                                 }
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
-                        } catch (final OXFolderException e) {
+                        } catch (final OXException e) {
                             if (e.getDetailNumber() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public calendar folders due to user configuration
@@ -865,7 +864,7 @@ public class Folder extends SessionServlet {
                                 }
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
-                        } catch (final OXFolderException e) {
+                        } catch (final OXException e) {
                             if (OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() == e.getDetailNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public contact folders due to user configuration
@@ -896,7 +895,7 @@ public class Folder extends SessionServlet {
                                 }
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
-                        } catch (final OXFolderException e) {
+                        } catch (final OXException e) {
                             if (e.getDetailNumber() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public task folders due to user configuration
@@ -1041,7 +1040,7 @@ public class Folder extends SessionServlet {
                     }
                 }
             }
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
@@ -1305,7 +1304,7 @@ public class Folder extends SessionServlet {
                     }
                 }
             }
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
@@ -1678,7 +1677,7 @@ public class Folder extends SessionServlet {
              * Set timestamp
              */
             lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
@@ -1809,7 +1808,7 @@ public class Folder extends SessionServlet {
                     }
                 }
             }
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
@@ -1949,7 +1948,7 @@ public class Folder extends SessionServlet {
                     }
                 }
             }
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
@@ -2062,7 +2061,7 @@ public class Folder extends SessionServlet {
                     }
                 }
             }
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
@@ -2187,7 +2186,7 @@ public class Folder extends SessionServlet {
                     mailInterface = null;
                 }
             }
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
@@ -2316,7 +2315,7 @@ public class Folder extends SessionServlet {
                     mailInterface = null;
                 }
             }
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
                 response.setException(e);

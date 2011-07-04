@@ -114,7 +114,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
@@ -456,7 +455,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.clearFolder(fo, true, System.currentTimeMillis());
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -489,7 +488,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              * 
              */
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
-        } catch (final OXFolderException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);

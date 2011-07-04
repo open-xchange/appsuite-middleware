@@ -52,7 +52,6 @@ package com.openexchange.tools.oxfolder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;

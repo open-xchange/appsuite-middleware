@@ -56,7 +56,7 @@ import com.openexchange.groupware.contexts.Context;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXFolderNotFoundException extends OXFolderException {
+public class OXFolderNotFoundException extends OXException {
 
     private static final long serialVersionUID = 1949728866316863300L;
 

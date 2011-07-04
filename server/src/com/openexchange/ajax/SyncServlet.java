@@ -76,7 +76,6 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -251,7 +250,7 @@ public class SyncServlet extends PermissionServlet {
 					mailInterface = null;
 				}
 			}
-		} catch (final OXFolderException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);

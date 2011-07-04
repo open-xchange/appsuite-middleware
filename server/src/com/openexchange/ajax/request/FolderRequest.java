@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
@@ -77,7 +76,7 @@ public class FolderRequest {
         this.pw = pw;
     }
 
-    public void action(final String action, final JSONObject jsonObject) throws JSONException, OXFolderException {
+    public void action(final String action, final JSONObject jsonObject) throws JSONException, OXException {
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_ROOT)) {
             FOLDER_SERVLET.actionGetRoot(session, pw, jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {

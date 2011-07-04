@@ -71,7 +71,6 @@ import com.openexchange.tools.OXCloneable;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
@@ -950,7 +949,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
-    public final List<Integer> getSubfolderIds() throws OXFolderException {
+    public final List<Integer> getSubfolderIds() throws OXException {
         if (!b_subfolderIds) {
             throw OXFolderExceptionCode.ATTRIBUTE_NOT_SET.create("subfolderIds", String.valueOf(getObjectID()), "");
         }
@@ -1097,7 +1096,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         if (other.containsSubfolderIds() && (overwrite || !containsSubfolderIds())) {
             try {
                 setSubfolderIds((ArrayList<Integer>) other.getSubfolderIds());
-            } catch (final OXFolderException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -1279,7 +1278,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                         sb.append('|');
                     }
                 }
-            } catch (final OXFolderException e) {
+            } catch (final OXException e) {
                 sb.append("");
             }
         }

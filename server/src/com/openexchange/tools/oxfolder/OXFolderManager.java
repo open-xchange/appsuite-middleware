@@ -67,9 +67,9 @@ public abstract class OXFolderManager {
      * 
      * @param session The session
      * @return An appropriate instance of {@link OXFolderManager}.
-     * @throws OXFolderException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
      */
-    public static final OXFolderManager getInstance(final Session session) throws OXFolderException {
+    public static final OXFolderManager getInstance(final Session session) throws OXException {
         return new OXFolderManagerImpl(session);
     }
 
@@ -79,9 +79,9 @@ public abstract class OXFolderManager {
      * @param session The session
      * @param appSql AppointemtSQLInterface
      * @return An appropriate instance of {@link OXFolderManager}.
-     * @throws OXFolderException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
      */
-    public static final OXFolderManager getInstance(final Session session, AppointmentSQLInterface appSql) throws OXFolderException {
+    public static final OXFolderManager getInstance(final Session session, AppointmentSQLInterface appSql) throws OXException {
         OXFolderManagerImpl retVal = new OXFolderManagerImpl(session);
         retVal.setCSql(appSql);
         return retVal;
@@ -93,9 +93,9 @@ public abstract class OXFolderManager {
      * @param session The session
      * @param oxfolderAccess An instance of {@link OXFolderAccess} to use; may be <code>null</code>
      * @return An appropriate instance of {@link OXFolderManager}
-     * @throws OXFolderException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
      */
-    public static final OXFolderManager getInstance(final Session session, final OXFolderAccess oxfolderAccess) throws OXFolderException {
+    public static final OXFolderManager getInstance(final Session session, final OXFolderAccess oxfolderAccess) throws OXException {
         return new OXFolderManagerImpl(session, oxfolderAccess);
     }
 
@@ -106,9 +106,9 @@ public abstract class OXFolderManager {
      * @param readCon A connection with read capability; pass <code>null</code> to fetch from pool
      * @param writeCon A connection with write capability; pass <code>null</code> to fetch from pool
      * @return An appropriate instance of {@link OXFolderManager}
-     * @throws OXFolderException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
      */
-    public static final OXFolderManager getInstance(final Session session, final Connection readCon, final Connection writeCon) throws OXFolderException {
+    public static final OXFolderManager getInstance(final Session session, final Connection readCon, final Connection writeCon) throws OXException {
         return new OXFolderManagerImpl(session, readCon, writeCon);
     }
     
@@ -118,9 +118,9 @@ public abstract class OXFolderManager {
      * @param session The session
      * @param appSql AppointemtSQLInterface
      * @return An appropriate instance of {@link OXFolderManager}.
-     * @throws OXFolderException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
      */
-    public static final OXFolderManager getInstance(final Session session, AppointmentSQLInterface appSql, final Connection readCon, final Connection writeCon) throws OXFolderException {
+    public static final OXFolderManager getInstance(final Session session, AppointmentSQLInterface appSql, final Connection readCon, final Connection writeCon) throws OXException {
         OXFolderManagerImpl retVal = new OXFolderManagerImpl(session, readCon, writeCon);
         retVal.setCSql(appSql);
         return retVal;
@@ -135,9 +135,9 @@ public abstract class OXFolderManager {
      * @param readCon A connection with read capability; pass <code>null</code> to fetch from pool
      * @param writeCon A connection with write capability; pass <code>null</code> to fetch from pool
      * @return An appropriate instance of {@link OXFolderManager}
-     * @throws OXFolderException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
      */
-    public static final OXFolderManager getInstance(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXFolderException {
+    public static final OXFolderManager getInstance(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXException {
         return new OXFolderManagerImpl(session, oxfolderAccess, readCon, writeCon);
     }
 

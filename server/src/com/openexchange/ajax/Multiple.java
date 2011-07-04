@@ -79,7 +79,6 @@ import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.exceptions.LoggingLogic;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -255,7 +254,7 @@ public class Multiple extends SessionServlet {
                 final FolderRequest folderequest = new FolderRequest(session, jsonWriter);
                 try {
                     folderequest.action(action, jsonObj);
-                } catch (final OXFolderException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     jsonWriter.object();
                     ResponseWriter.writeException(e, jsonWriter);
