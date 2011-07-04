@@ -50,6 +50,7 @@
 package com.openexchange.server;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionStrings;
@@ -85,7 +86,7 @@ public enum ServiceExceptionCode implements OXExceptionCode {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
-        display = category.getLogLevel().isDebug();
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     public Category getCategory() {
