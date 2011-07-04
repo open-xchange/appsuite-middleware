@@ -1,3 +1,9 @@
+open-xchange-spamhandler-cloudmark (6.20.0.0-4) unstable; urgency=low
+
+  * build for public ptf 2011-07-06
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Jul 2011 14:22:38 +0000
+
 open-xchange-spamhandler-cloudmark (6.20.0.0-3) unstable; urgency=low
 
   * build for PTF 2011070410000182
