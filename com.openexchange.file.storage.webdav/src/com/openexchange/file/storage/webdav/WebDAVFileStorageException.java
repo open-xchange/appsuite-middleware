@@ -50,17 +50,17 @@
 package com.openexchange.file.storage.webdav;
 
 import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 /**
- * {@link WebDAVFileStorageException} - A WebDAV file storage exception
+ * {@link WebDAVOXException} - A WebDAV file storage exception
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class WebDAVFileStorageException extends FileStorageException {
+public class WebDAVOXException extends OXException {
 
     private static final long serialVersionUID = 8319301827228045384L;
 
@@ -79,54 +79,54 @@ public class WebDAVFileStorageException extends FileStorageException {
     };
 
     /**
-     * Initializes a new {@link WebDAVFileStorageException}.
+     * Initializes a new {@link WebDAVOXException}.
      * 
      * @param cause The cause
      */
-    public WebDAVFileStorageException(final AbstractOXException cause) {
+    public WebDAVOXException(final AbstractOXException cause) {
         super(cause);
     }
 
     /**
-     * Initializes a new {@link WebDAVFileStorageException}.
+     * Initializes a new {@link WebDAVOXException}.
      * 
      * @param message The message
      * @param cause The cause
      */
-    public WebDAVFileStorageException(final String message, final AbstractOXException cause) {
+    public WebDAVOXException(final String message, final AbstractOXException cause) {
         super(WEBDAV_COMPONENT, message, cause);
     }
 
     /**
-     * Initializes a new {@link WebDAVFileStorageException}.
+     * Initializes a new {@link WebDAVOXException}.
      * 
      * @param category The category
      * @param detailNumber The detail number
      * @param message The message
      * @param cause The cause
      */
-    public WebDAVFileStorageException(final Category category, final int detailNumber, final String message, final Throwable cause) {
+    public WebDAVOXException(final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(WEBDAV_COMPONENT, category, detailNumber, message, cause);
     }
 
     /**
-     * Initializes a new {@link WebDAVFileStorageException}.
+     * Initializes a new {@link WebDAVOXException}.
      * 
      * @param message The message
      * @param cause The cause
      */
-    public WebDAVFileStorageException(final ErrorMessage message, final Throwable cause) {
+    public WebDAVOXException(final ErrorMessage message, final Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Initializes a new {@link WebDAVFileStorageException}.
+     * Initializes a new {@link WebDAVOXException}.
      * 
      * @param message The message
      * @param cause The cause
      * @param messageArguments The message arguments
      */
-    public WebDAVFileStorageException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
+    public WebDAVOXException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
         super(message, cause);
         setMessageArgs(messageArguments);
     }

@@ -71,7 +71,7 @@ import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
@@ -308,7 +308,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
             LOG.info("Context is already removed. Assuming its files are removed, too.");
         } catch (final FilestoreException e) {
             LOG.warn("Unable to delete file '" + filename + "' in context " + cid + ". Problem with FilestoreStorage.", e);
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             LOG.warn("Unable to delete file '" + filename + "' in context " + cid + ". Problem with Filestore.", e);
         }
         final String sql = "DELETE FROM prg_attachment WHERE cid=? AND id=?";

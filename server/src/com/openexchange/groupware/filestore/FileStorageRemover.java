@@ -58,7 +58,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 
 /**
  * This class implements a delete listener and removes the directories of the
@@ -87,14 +87,14 @@ public final class FileStorageRemover extends ContextDelete {
         try {
             final FileStorage stor = getFileStorage(ctx, dbProvider);
             stor.remove();
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new DeleteFailedException(e);
         } catch (final FilestoreException e) {
             throw new DeleteFailedException(e);
         }
     }
 
-    private FileStorage getFileStorage(final Context ctx, DBProvider dbProvider) throws FileStorageException, FilestoreException {
+    private FileStorage getFileStorage(final Context ctx, DBProvider dbProvider) throws OXException, FilestoreException {
         return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx); 
     }
 }

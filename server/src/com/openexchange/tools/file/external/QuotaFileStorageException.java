@@ -57,14 +57,14 @@ import com.openexchange.groupware.EnumComponent;
  * 
  * @author Steffen Templin
  */
-public class QuotaFileStorageException extends FileStorageException {
+public class QuotaOXException extends OXException {
 
     /**
      * For serialization.
      */
     private static final long serialVersionUID = 5832529635500224019L;
 
-    public QuotaFileStorageException(final AbstractOXException x) {
+    public QuotaOXException(final AbstractOXException x) {
         super(x);
     }
 
@@ -74,7 +74,7 @@ public class QuotaFileStorageException extends FileStorageException {
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public QuotaFileStorageException(final Code code, final Object... messageArgs) {
+    public QuotaOXException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
@@ -85,7 +85,7 @@ public class QuotaFileStorageException extends FileStorageException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public QuotaFileStorageException(final Code code, final Throwable cause, final Object... messageArgs) {
+    public QuotaOXException(final Code code, final Throwable cause, final Object... messageArgs) {
         super(EnumComponent.FILESTORE, code.getCategory(), code.getDetailNumber(), null == code.getMessage() ? cause.getMessage() : code.getMessage(), cause);
         setMessageArgs(messageArgs);
     }
@@ -99,7 +99,7 @@ public class QuotaFileStorageException extends FileStorageException {
      * @param message message of the exception.
      * @param cause the cause.
      */
-    protected QuotaFileStorageException(final EnumComponent component, final Category category, final int detailNumber, final String message, final Throwable cause) {
+    protected QuotaOXException(final EnumComponent component, final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(component, category, detailNumber, message, cause);
     }
 

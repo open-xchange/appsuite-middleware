@@ -94,7 +94,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
@@ -199,7 +199,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         for (final Entry<LockTokenKey, String> entry : lockTokenMap.entrySet()) {
             try {
                 unlock0(entry.getKey(), entry.getValue());
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageFileAccess.class).error(e.getMessage(), e);
             }
         }
@@ -366,7 +366,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         // Nope
     }
 
-    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFile, final List<Field> modifiedFields) throws FileStorageException {
+    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFile, final List<Field> modifiedFields) throws OXException {
         try {
             final String fid = checkFolderId(source.getFolder(), rootUri);
             final String id = source.getId();
@@ -397,7 +397,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              * Return
              */
             return ret;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -410,7 +410,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public boolean exists(final String folderId, final String id, final int version) throws FileStorageException {
+    public boolean exists(final String folderId, final String id, final int version) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUri);
             final URI uri = new URI(fid + id, true);
@@ -454,7 +454,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             } finally {
                 closeHttpMethod(propFindMethod);
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -467,7 +467,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public File getFileMetadata(final String folderId, final String id, final int version) throws FileStorageException {
+    public File getFileMetadata(final String folderId, final String id, final int version) throws OXException {
         if (version != CURRENT_VERSION) {
             throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
@@ -520,7 +520,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             } finally {
                 closeHttpMethod(propFindMethod);
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -533,15 +533,15 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws FileStorageException {
+    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
         saveFileMetadata0(file, null);
     }
 
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws FileStorageException {
+    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         saveFileMetadata0(file, modifiedFields);
     }
 
-    private void saveFileMetadata0(final File file, final List<Field> modifiedFields) throws FileStorageException {
+    private void saveFileMetadata0(final File file, final List<Field> modifiedFields) throws OXException {
         try {
             final String folderId = checkFolderId(file.getFolderId(), rootUri);
             final String id;
@@ -608,17 +608,17 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final DavException e) {
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            if (e instanceof FileStorageException) {
-                throw (FileStorageException) e;
+            if (e instanceof OXException) {
+                throw (OXException) e;
             }
             if (e instanceof AbstractOXException) {
-                throw new FileStorageException((AbstractOXException) e);
+                throw new OXException((AbstractOXException) e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    public InputStream getDocument(final String folderId, final String id, final int version) throws FileStorageException {
+    public InputStream getDocument(final String folderId, final String id, final int version) throws OXException {
         final String fid = checkFolderId(folderId, rootUri);
         final URI uri;
         try {
@@ -645,7 +645,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              * Return as stream
              */
             return new HttpMethodInputStream(getMethod);
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             closeHttpMethod(getMethod);
             throw e;
         } catch (final HttpException e) {
@@ -660,15 +660,15 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws FileStorageException {
+    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
         saveDocument0(file, data, null);
     }
 
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws FileStorageException {
+    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         saveDocument0(file, data, modifiedFields);
     }
 
-    private void saveDocument0(final File file, final InputStream data, final List<Field> modifiedColumns) throws FileStorageException {
+    private void saveDocument0(final File file, final InputStream data, final List<Field> modifiedColumns) throws OXException {
         try {
             /*
              * Save metadata
@@ -704,7 +704,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     }
                 }
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -714,17 +714,17 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             if (e instanceof AbstractOXException) {
-                throw new FileStorageException((AbstractOXException) e);
+                throw new OXException((AbstractOXException) e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    public void removeDocument(final String folderId, final long sequenceNumber) throws FileStorageException {
+    public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
         accountAccess.getFolderAccess().clearFolder(checkFolderId(folderId, rootUri));
     }
 
-    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws FileStorageException {
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (final IDTuple idTuple : ids) {
@@ -760,7 +760,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public int[] removeVersion(final String folderId, final String id, final int[] versions) throws FileStorageException {
+    public int[] removeVersion(final String folderId, final String id, final int[] versions) throws OXException {
         for (final int version : versions) {
             if (version != CURRENT_VERSION) {
                 throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
@@ -796,7 +796,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public void unlock(final String folderId, final String id) throws FileStorageException {
+    public void unlock(final String folderId, final String id) throws OXException {
         final String fid = checkFolderId(folderId, rootUri);
         final LockTokenKey lockTokenKey = new LockTokenKey(fid, id);
         final String lockToken = lockTokenMap.get(lockTokenKey);
@@ -804,7 +804,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         lockTokenMap.remove(lockTokenKey);
     }
 
-    private void unlock0(final LockTokenKey lockTokenKey, final String lockToken) throws FileStorageException {
+    private void unlock0(final LockTokenKey lockTokenKey, final String lockToken) throws OXException {
         try {
             final String folderId = lockTokenKey.getFolderId();
             final String id = lockTokenKey.getId();
@@ -829,7 +829,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public void lock(final String folderId, final String id, final long diff) throws FileStorageException {
+    public void lock(final String folderId, final String id, final long diff) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUri);
             final URI uri = new URI(fid + id, true);
@@ -865,7 +865,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public void touch(final String folderId, final String id) throws FileStorageException {
+    public void touch(final String folderId, final String id) throws OXException {
         /*
          * Update last-modified time stamp through a PropPatch on a dummy property
          */
@@ -895,25 +895,25 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final DavException e) {
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            if (e instanceof FileStorageException) {
-                throw (FileStorageException) e;
+            if (e instanceof OXException) {
+                throw (OXException) e;
             }
             if (e instanceof AbstractOXException) {
-                throw new FileStorageException((AbstractOXException) e);
+                throw new OXException((AbstractOXException) e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    public TimedResult<File> getDocuments(final String folderId) throws FileStorageException {
+    public TimedResult<File> getDocuments(final String folderId) throws OXException {
         return new FileTimedResult(getFileList(folderId, null));
     }
 
-    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws FileStorageException {
+    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws OXException {
         return new FileTimedResult(getFileList(folderId, fields));
     }
 
-    private List<File> getFileList(final String folderId, final List<Field> fields) throws FileStorageException {
+    private List<File> getFileList(final String folderId, final List<Field> fields) throws OXException {
         try {
             /*
              * Check
@@ -980,7 +980,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(propFindMethod);
             }
             return files;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -993,7 +993,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order) throws FileStorageException {
+    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
         final List<File> files = getFileList(folderId, fields);
         /*
          * Sort list
@@ -1005,19 +1005,19 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return new FileTimedResult(files);
     }
 
-    public TimedResult<File> getVersions(final String folderId, final String id) throws FileStorageException {
+    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
         return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws FileStorageException {
+    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
         return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws FileStorageException {
+    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
         return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
-    public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws FileStorageException {
+    public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws OXException {
         final List<File> list = new ArrayList<File>(ids.size());
         for (final IDTuple idTuple : ids) {
             list.add(getFileMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION));
@@ -1027,15 +1027,15 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
 
-    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws FileStorageException {
+    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
-    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws FileStorageException {
+    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
-    public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws FileStorageException {
+    public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         final List<File> results;
         if (ALL_FOLDERS == folderId) {
             /*
@@ -1099,7 +1099,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return new SearchIteratorAdapter<File>(results.iterator(), results.size());
     }
 
-    private void recursiveSearchFile(final String pattern, final String folderId, final List<Field> fields, final List<File> results) throws FileStorageException {
+    private void recursiveSearchFile(final String pattern, final String folderId, final List<Field> fields, final List<File> results) throws OXException {
         try {
             /*
              * Check
@@ -1170,7 +1170,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             } finally {
                 closeHttpMethod(propFindMethod);
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());

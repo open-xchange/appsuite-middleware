@@ -50,11 +50,11 @@
 package com.openexchange.file.storage.webdav;
 
 import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.file.storage.webdav.exception.WebDAVFileStorageExceptionFactory;
+import com.openexchange.file.storage.webdav.exception.WebDAVOXExceptionFactory;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * {@link WebDAVFileStorageExceptionCodes} - Enumeration of all {@link WebDAVFileStorageException}s.
+ * {@link WebDAVFileStorageExceptionCodes} - Enumeration of all {@link WebDAVOXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -64,51 +64,51 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(WebDAVFileStorageExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(WebDAVOXExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
     /**
      * A HTTP error occurred: %1$s
      */
-    HTTP_ERROR(WebDAVFileStorageExceptionMessages.HTTP_ERROR_MSG, Category.CODE_ERROR, 2),
+    HTTP_ERROR(WebDAVOXExceptionMessages.HTTP_ERROR_MSG, Category.CODE_ERROR, 2),
     /**
      * A DAV error occurred: %1$s
      */
-    DAV_ERROR(WebDAVFileStorageExceptionMessages.DAV_ERROR_MSG, Category.CODE_ERROR, 3),
+    DAV_ERROR(WebDAVOXExceptionMessages.DAV_ERROR_MSG, Category.CODE_ERROR, 3),
     /**
      * The resource is not a directory: %1$s
      */
-    NOT_A_FOLDER(WebDAVFileStorageExceptionMessages.NOT_A_FOLDER_MSG, Category.CODE_ERROR, 4),
+    NOT_A_FOLDER(WebDAVOXExceptionMessages.NOT_A_FOLDER_MSG, Category.CODE_ERROR, 4),
     /**
      * Invalid property "%1$s". Should be "%2$s", but is not.
      */
-    INVALID_PROPERTY(WebDAVFileStorageExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 5),
+    INVALID_PROPERTY(WebDAVOXExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 5),
     /**
      * Invalid date property: %1$s
      */
-    INVALID_DATE_PROPERTY(WebDAVFileStorageExceptionMessages.INVALID_DATE_PROPERTY_MSG, Category.CODE_ERROR, 6),
+    INVALID_DATE_PROPERTY(WebDAVOXExceptionMessages.INVALID_DATE_PROPERTY_MSG, Category.CODE_ERROR, 6),
     /**
      * Directory "%1$s" must not be deleted.
      */
-    DELETE_DENIED(WebDAVFileStorageExceptionMessages.DELETE_DENIED_MSG, Category.CODE_ERROR, 7),
+    DELETE_DENIED(WebDAVOXExceptionMessages.DELETE_DENIED_MSG, Category.CODE_ERROR, 7),
     /**
      * Directory "%1$s" must not be updated.
      */
-    UPDATE_DENIED(WebDAVFileStorageExceptionMessages.UPDATE_DENIED_MSG, Category.CODE_ERROR, 8),
+    UPDATE_DENIED(WebDAVOXExceptionMessages.UPDATE_DENIED_MSG, Category.CODE_ERROR, 8),
     /**
      * Invalid or missing credentials to access WebDAV server "%1$s".
      */
-    INVALID_CREDS(WebDAVFileStorageExceptionMessages.INVALID_CREDS_MSG, Category.CODE_ERROR, 9),
+    INVALID_CREDS(WebDAVOXExceptionMessages.INVALID_CREDS_MSG, Category.CODE_ERROR, 9),
     /**
      * The resource is not a file: %1$s
      */
-    NOT_A_FILE(WebDAVFileStorageExceptionMessages.NOT_A_FILE_MSG, Category.CODE_ERROR, 10),
+    NOT_A_FILE(WebDAVOXExceptionMessages.NOT_A_FILE_MSG, Category.CODE_ERROR, 10),
     /**
      * Versioning not supported by WebDAV.
      */
-    VERSIONING_NOT_SUPPORTED(WebDAVFileStorageExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 11),
+    VERSIONING_NOT_SUPPORTED(WebDAVOXExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 11),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(WebDAVFileStorageExceptionMessages.MISSING_FILE_NAME_MSG, Category.CODE_ERROR, 12);
+    MISSING_FILE_NAME(WebDAVOXExceptionMessages.MISSING_FILE_NAME_MSG, Category.CODE_ERROR, 12);
     
 
     private final Category category;
@@ -145,8 +145,8 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
      * @param messageArgs The message arguments
      * @return A new twitter exception
      */
-    public WebDAVFileStorageException create(final Object... messageArgs) {
-        return WebDAVFileStorageExceptionFactory.getInstance().create(this, messageArgs);
+    public WebDAVOXException create(final Object... messageArgs) {
+        return WebDAVOXExceptionFactory.getInstance().create(this, messageArgs);
     }
 
     /**
@@ -156,7 +156,7 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
      * @param messageArgs The message arguments
      * @return A new twitter exception
      */
-    public WebDAVFileStorageException create(final Throwable cause, final Object... messageArgs) {
-        return WebDAVFileStorageExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public WebDAVOXException create(final Throwable cause, final Object... messageArgs) {
+        return WebDAVOXExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
 }

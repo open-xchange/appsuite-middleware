@@ -77,7 +77,7 @@ import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 
 /**
  * This class contains some tools to ease update of database.
@@ -544,7 +544,7 @@ public final class Tools {
 
     private static final String TABLE = "TABLE";
 
-    public static void removeFile(final int cid, final String fileStoreLocation) throws FileStorageException, FilestoreException, ContextException {
+    public static void removeFile(final int cid, final String fileStoreLocation) throws OXException, FilestoreException, ContextException {
         final Context ctx = ContextStorage.getInstance().loadContext(cid);
         final URI fileStorageURI = FilestoreStorage.createURI(ctx);
         final File file = new File(fileStorageURI);

@@ -63,7 +63,7 @@ import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -121,9 +121,9 @@ class State {
      * Creates a state object from the inputstream.
      * 
      * @param input input stream to read the state file from.
-     * @throws FileStorageException if an input error occurs
+     * @throws OXException if an input error occurs
      */
-    State(final InputStream input) throws FileStorageException {
+    State(final InputStream input) throws OXException {
         super();
         InputStreamReader isr = null;
         BufferedReader reader = null;
@@ -140,11 +140,11 @@ class State {
                 line = reader.readLine();
             }
         } catch (final UnsupportedEncodingException e) {
-            throw new FileStorageException(FileStorageException.Code.ENCODING, e);
+            throw new OXException(OXException.Code.ENCODING, e);
         } catch (final NumberFormatException e) {
-            throw new FileStorageException(FileStorageException.Code.NO_NUMBER, e);
+            throw new OXException(OXException.Code.NO_NUMBER, e);
         } catch (final IOException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
+            throw new OXException(OXException.Code.IOERROR, e, e.getMessage());
         } finally {
             if (null != reader) {
                 try {
@@ -167,9 +167,9 @@ class State {
      * Saves the state object.
      * 
      * @return an inputstream from that the state file can be read.
-     * @throws FileStorageException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    InputStream saveState() throws FileStorageException {
+    InputStream saveState() throws OXException {
         try {
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
             final OutputStreamWriter osw = new OutputStreamWriter(baos, "ISO-8859-1");
@@ -189,9 +189,9 @@ class State {
             osw.close();
             return new ByteArrayInputStream(baos.toByteArray());
         } catch (final UnsupportedEncodingException e) {
-            throw new FileStorageException(FileStorageException.Code.ENCODING, e);
+            throw new OXException(OXException.Code.ENCODING, e);
         } catch (final IOException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
+            throw new OXException(OXException.Code.IOERROR, e, e.getMessage());
         }
     }
 

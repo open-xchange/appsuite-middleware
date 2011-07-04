@@ -50,7 +50,7 @@
 package com.openexchange.tools.file;
 
 import java.io.InputStream;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 
 public class SaveFileWithQuotaAction extends SaveFileAction {
 
@@ -63,12 +63,12 @@ public class SaveFileWithQuotaAction extends SaveFileAction {
     private String id;
 
     @Override
-    protected void undoAction() throws FileStorageException {
+    protected void undoAction() throws OXException {
         storage.deleteFile(id);
     }
 
     @Override
-    public void perform() throws FileStorageException {
+    public void perform() throws OXException {
         id = storage.saveNewFile(in, sizeHint);
     }
 

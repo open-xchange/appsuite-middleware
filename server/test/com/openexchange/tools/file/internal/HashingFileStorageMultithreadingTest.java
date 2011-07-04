@@ -56,7 +56,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 
 /**
  * {@link HashingFileStorageMultithreadingTest}
@@ -68,7 +68,7 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
     private final int NUM_FILES = 10000;
     private final int NUM_THREADS = 10;
     
-    public void testManyThreads() throws InterruptedException, FileStorageException, IOException {
+    public void testManyThreads() throws InterruptedException, OXException, IOException {
         List<FileSaverThread> fsThreads = new ArrayList<FileSaverThread>(10);
         for(int i = 0; i < NUM_THREADS; i++) {
             FileSaverThread thread = new FileSaverThread("Thread "+i);
@@ -92,7 +92,7 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
             this.prefix = prefix;
         }
 
-        public void checkConsistency() throws FileStorageException, IOException {
+        public void checkConsistency() throws OXException, IOException {
             for(Map.Entry<String, String> entry: dataMap.entrySet()) {
                 String fileId = entry.getKey();
                 String data = entry.getValue();
@@ -116,7 +116,7 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
                 try {
                     String file = fs.saveNewFile(IS(data));
                     dataMap.put(file, data);
-                } catch (FileStorageException e) {
+                } catch (OXException e) {
                     fail(e.getMessage());
                 } catch (UnsupportedEncodingException e) {
                     fail(e.getMessage());

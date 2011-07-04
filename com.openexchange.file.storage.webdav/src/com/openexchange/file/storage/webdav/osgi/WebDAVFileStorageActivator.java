@@ -61,8 +61,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.webdav.WebDAVFileStorageException;
-import com.openexchange.file.storage.webdav.exception.WebDAVFileStorageExceptionFactory;
+import com.openexchange.file.storage.webdav.WebDAVOXException;
+import com.openexchange.file.storage.webdav.exception.WebDAVOXExceptionFactory;
 import com.openexchange.file.storage.webdav.session.WebDAVEventHandler;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -142,9 +142,9 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
             componentRegistration =
                 new ComponentRegistration(
                     context,
-                    WebDAVFileStorageException.WEBDAV_COMPONENT,
+                    WebDAVOXException.WEBDAV_COMPONENT,
                     "com.openexchange.file.storage.webdav",
-                    WebDAVFileStorageExceptionFactory.getInstance());
+                    WebDAVOXExceptionFactory.getInstance());
 
             trackers = new ArrayList<ServiceTracker>(1);
             // trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));

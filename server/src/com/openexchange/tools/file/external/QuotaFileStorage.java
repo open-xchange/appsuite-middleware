@@ -53,8 +53,8 @@ public interface QuotaFileStorage extends FileStorage {
 
     long getQuota();
 
-    long getUsage() throws QuotaFileStorageException;
+    long getUsage() throws QuotaOXException;
 
-    void recalculateUsage() throws QuotaFileStorageException;
+    void recalculateUsage() throws QuotaOXException;
 
 }

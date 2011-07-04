@@ -74,7 +74,7 @@ import org.apache.jackrabbit.webdav.client.methods.DavMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -158,7 +158,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return session;
     }
 
-    public void connect() throws FileStorageException {
+    public void connect() throws OXException {
         if (null != httpClientRef.get()) {
             return;
         }
@@ -201,7 +201,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         httpClientRef.set(null);
     }
 
-    public boolean ping() throws FileStorageException {
+    public boolean ping() throws OXException {
         String url = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
         if (null == url) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(WebDAVConstants.WEBDAV_URL);
@@ -227,7 +227,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return account.getId();
     }
 
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException {
+    public FileStorageFolderAccess getFolderAccess() throws OXException {
         final HttpClient client = httpClientRef.get();
         if (null == client) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
@@ -244,7 +244,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return tmp;
     }
 
-    public FileStorageFileAccess getFileAccess() throws FileStorageException {
+    public FileStorageFileAccess getFileAccess() throws OXException {
         final HttpClient client = httpClientRef.get();
         if (null == client) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
@@ -261,7 +261,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return tmp;
     }
 
-    public FileStorageFolder getRootFolder() throws FileStorageException {
+    public FileStorageFolder getRootFolder() throws OXException {
         connect();
         return getFolderAccess().getRootFolder();
     }
@@ -278,9 +278,9 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * @param account The facebook messaging account providing credentials and settings
      * @param session The user session
      * @return The HttpClient; either newly created or fetched from underlying registry
-     * @throws FileStorageException If a HttpClient could not be created
+     * @throws OXException If a HttpClient could not be created
      */
-    private static HttpClient clientFor(final String url, final FileStorageAccount account, final Session session) throws FileStorageException {
+    private static HttpClient clientFor(final String url, final FileStorageAccount account, final Session session) throws OXException {
         final WebDAVHttpClientRegistry registry = WebDAVHttpClientRegistry.getInstance();
         final String accountId = account.getId();
         HttpClient client = registry.getClient(session.getContextId(), session.getUserId(), accountId);
@@ -299,9 +299,9 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * Creates a new {@link HttpClient}.
      * 
      * @return The newly created {@link HttpClient}
-     * @throws FileStorageException If creation fails
+     * @throws OXException If creation fails
      */
-    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration) throws FileStorageException {
+    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration) throws OXException {
         // http://www.jarvana.com/jarvana/view/org/apache/jackrabbit/jackrabbit-webdav/2.0-beta3/jackrabbit-webdav-2.0-beta3-javadoc.jar!/org/apache/jackrabbit/webdav/client/methods/package-summary.html
         /*
          * The URL to WebDAV server
@@ -390,9 +390,9 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * 
      * @param url The URL to WebDAV server
      * @param client The HttpClient to check
-     * @throws FileStorageException If check fails
+     * @throws OXException If check fails
      */
-    private static void checkHttpClient(final String url, final HttpClient client) throws FileStorageException {
+    private static void checkHttpClient(final String url, final HttpClient client) throws OXException {
         try {
             /*
              * Check

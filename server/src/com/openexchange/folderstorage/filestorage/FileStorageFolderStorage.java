@@ -69,7 +69,7 @@ import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -199,7 +199,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     getServiceRegistry().getService(FileStorageServiceRegistry.class, true).getFileStorageService(serviceId).getAccountAccess(
                         accountId,
                         session);
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             } catch (final ServiceException e) {
                 throw new FolderException(e);
@@ -212,11 +212,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
         return accountAccess;
     }
 
-    private void openFileStorageAccess(final FileStorageAccountAccess accountAccess) throws FileStorageException {
+    private void openFileStorageAccess(final FileStorageAccountAccess accountAccess) throws OXException {
         if (!accountAccess.isConnected()) {
             try {
                 accountAccess.connect();
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 throw e;
             }
         }
@@ -294,7 +294,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             }
             final String fullname = accountAccess.getFolderAccess().createFolder(fsFolder);
             folder.setID(new FileStorageFolderIdentifier(serviceId, accountId, fullname).toString());
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -317,7 +317,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             final String fullname = fsfi.getFolderId();
             final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
             folderAccess.clearFolder(fullname, true);
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -343,7 +343,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
              */
             final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
             folderAccess.deleteFolder(fullname, true);
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -391,7 +391,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 }
             }
             return false;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -422,7 +422,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
              */
             openFileStorageAccess(accountAccess);
             return 0 == accountAccess.getFolderAccess().getFolder(fullname).getFileCount();
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -521,7 +521,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             }
 
             return retval;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -626,7 +626,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 list.add(new FileStorageId(FileStorageFolderIdentifier.getFQN(serviceId, accountId, cur.getId()), j, cur.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final ContextException e) {
             throw new FolderException(e);
@@ -697,7 +697,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             openFileStorageAccess(accountAccess);
 
             return accountAccess.getFolderAccess().exists(fsfi.getFolderId());
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -876,12 +876,12 @@ public final class FileStorageFolderStorage implements FolderStorage {
              * Handle update of permission or subscription
              */
             accountAccess.getFolderAccess().updateFolder(id, fsFolder);
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
 
-    private void check4DuplicateFolder(final FileStorageAccountAccess accountAccess, final String parentId, final String name2check) throws FileStorageException {
+    private void check4DuplicateFolder(final FileStorageAccountAccess accountAccess, final String parentId, final String name2check) throws OXException {
         final FileStorageFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(parentId, true);
         for (final FileStorageFolder subfolder : subfolders) {
             if (name2check.equals(subfolder.getName())) {
@@ -890,7 +890,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         }
     }
 
-    private static String fullCopy(final FileStorageAccountAccess srcAccess, final String srcFullname, final FileStorageAccountAccess destAccess, final String destParent, final int user, final boolean hasPermissions) throws FileStorageException {
+    private static String fullCopy(final FileStorageAccountAccess srcAccess, final String srcFullname, final FileStorageAccountAccess destAccess, final String destParent, final int user, final boolean hasPermissions) throws OXException {
         // Create folder
         final FileStorageFolder source = srcAccess.getFolderAccess().getFolder(srcFullname);
         final DefaultFileStorageFolder mfd = new DefaultFileStorageFolder();

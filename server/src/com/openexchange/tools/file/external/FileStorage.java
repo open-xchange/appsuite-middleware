@@ -55,24 +55,24 @@ import java.util.SortedSet;
 
 public interface FileStorage {
 
-    String saveNewFile(final InputStream file) throws FileStorageException;
+    String saveNewFile(final InputStream file) throws OXException;
 
-    InputStream getFile(String name) throws FileStorageException;
+    InputStream getFile(String name) throws OXException;
 
-    SortedSet<String> getFileList() throws FileStorageException;
+    SortedSet<String> getFileList() throws OXException;
 
-    long getFileSize(final String name) throws FileStorageException;
+    long getFileSize(final String name) throws OXException;
 
-    String getMimeType(final String name) throws FileStorageException;
+    String getMimeType(final String name) throws OXException;
 
-    boolean deleteFile(final String identifier) throws FileStorageException;
+    boolean deleteFile(final String identifier) throws OXException;
 
-    Set<String> deleteFiles(final String[] identifiers) throws FileStorageException;
+    Set<String> deleteFiles(final String[] identifiers) throws OXException;
 
-    void remove() throws FileStorageException;
+    void remove() throws OXException;
 
-    void recreateStateFile() throws FileStorageException;
+    void recreateStateFile() throws OXException;
     
-    boolean stateFileIsCorrect() throws FileStorageException;
+    boolean stateFileIsCorrect() throws OXException;
 
 }

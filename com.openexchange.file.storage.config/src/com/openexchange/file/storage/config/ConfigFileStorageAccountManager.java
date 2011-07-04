@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.session.Session;
@@ -90,19 +90,19 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         }
     }
 
-    public String addAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
         throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(serviceId);
     }
 
-    public void updateAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
         throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(serviceId);
     }
 
-    public void deleteAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
         throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(serviceId);
     }
 
-    public List<FileStorageAccount> getAccounts(final Session session) throws FileStorageException {
+    public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         final Map<String, ConfigFileStorageAccount> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
         if (null == accounts || accounts.isEmpty()) {
             return Collections.<FileStorageAccount> emptyList();
@@ -114,7 +114,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         return ret;
     }
 
-    public FileStorageAccount getAccount(final String id, final Session session) throws FileStorageException {
+    public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
         final Map<String, ConfigFileStorageAccount> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
         if (null == accounts) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(

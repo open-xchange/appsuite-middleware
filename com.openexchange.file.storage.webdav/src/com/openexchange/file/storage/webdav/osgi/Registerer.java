@@ -54,7 +54,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageService;
 
@@ -99,7 +99,7 @@ public final class Registerer implements EventHandler {
                         service = WebDAVFileStorageService.newInstance();
                         registration = context.registerService(FileStorageService.class.getName(), service, null);
                         this.ranking = ranking;
-                    } catch (final FileStorageException e) {
+                    } catch (final OXException e) {
                         LOG.warn("Registration of \"" + WebDAVFileStorageService.class.getName() + "\" failed.", e);
                     }
                 } else {
@@ -116,7 +116,7 @@ public final class Registerer implements EventHandler {
                                 service = WebDAVFileStorageService.newInstance();
                                 registration = context.registerService(FileStorageService.class.getName(), service, null);
                                 this.ranking = ranking;
-                            } catch (final FileStorageException e) {
+                            } catch (final OXException e) {
                                 LOG.warn("Registration of \"" + WebDAVFileStorageService.class.getName() + "\" failed.", e);
                             }
                         }

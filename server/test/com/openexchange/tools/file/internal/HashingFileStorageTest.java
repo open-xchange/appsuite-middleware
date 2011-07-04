@@ -57,7 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import junit.framework.TestCase;
 
 
@@ -123,7 +123,7 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         try {
             fs.getFile("fantasyName");
             fail("Could read unkown file");
-        } catch (FileStorageException e) {
+        } catch (OXException e) {
         }
     }
     

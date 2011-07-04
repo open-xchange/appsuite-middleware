@@ -59,7 +59,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 
@@ -93,9 +93,9 @@ public final class CIFSFolder extends DefaultFileStorageFolder {
      * Parses specified CIFS/SMB file.
      * 
      * @param smbFile The CIFS/SMB file denoting the directory
-     * @throws FileStorageException If parsing  CIFS/SMB file property set fails
+     * @throws OXException If parsing  CIFS/SMB file property set fails
      */
-    public void parseSmbFolder(final SmbFile smbFile) throws FileStorageException {
+    public void parseSmbFolder(final SmbFile smbFile) throws OXException {
         if (null != smbFile) {
             try {
                 id = Utils.checkFolderId(smbFile.getPath());

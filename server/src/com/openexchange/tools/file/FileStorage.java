@@ -53,9 +53,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.external.FileStorageException.Code;
+import com.openexchange.tools.file.external.OXException.Code;
 
 public class FileStorage {
 
@@ -72,9 +72,9 @@ public class FileStorage {
         this.fs = fs;
     }
 
-    public static final FileStorage getInstance(final URI uri) throws FileStorageException {
+    public static final FileStorage getInstance(final URI uri) throws OXException {
         if (fss == null) {
-            throw new FileStorageException(Code.INSTANTIATIONERROR, "No file storage starter registered.");
+            throw new OXException(Code.INSTANTIATIONERROR, "No file storage starter registered.");
         }
         return new FileStorage(fss.getFileStorage(uri));
     }
@@ -83,39 +83,39 @@ public class FileStorage {
         FileStorage.fss = fss;
     }
 
-    public boolean deleteFile(final String identifier) throws FileStorageException {
+    public boolean deleteFile(final String identifier) throws OXException {
         return fs.deleteFile(identifier);
     }
 
-    public Set<String> deleteFiles(final String[] identifiers) throws FileStorageException {
+    public Set<String> deleteFiles(final String[] identifiers) throws OXException {
         return fs.deleteFiles(identifiers);
     }
 
-    public InputStream getFile(final String name) throws FileStorageException {
+    public InputStream getFile(final String name) throws OXException {
         return fs.getFile(name);
     }
 
-    public SortedSet<String> getFileList() throws FileStorageException {
+    public SortedSet<String> getFileList() throws OXException {
         return fs.getFileList();
     }
 
-    public long getFileSize(final String name) throws FileStorageException {
+    public long getFileSize(final String name) throws OXException {
         return fs.getFileSize(name);
     }
 
-    public String getMimeType(final String name) throws FileStorageException {
+    public String getMimeType(final String name) throws OXException {
         return fs.getMimeType(name);
     }
 
-    public void recreateStateFile() throws FileStorageException {
+    public void recreateStateFile() throws OXException {
         fs.recreateStateFile();
     }
 
-    public void remove() throws FileStorageException {
+    public void remove() throws OXException {
         fs.remove();
     }
 
-    public String saveNewFile(final InputStream file) throws FileStorageException {
+    public String saveNewFile(final InputStream file) throws OXException {
         return fs.saveNewFile(file);
     }
 

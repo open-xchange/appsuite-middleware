@@ -74,7 +74,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tx.TransactionException;
 
 /**
@@ -295,7 +295,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 output("Recalculating usage...");
                 ((QuotaFileStorage)storage).recalculateUsage();
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             erroroutput(e);
         }
     }
@@ -303,7 +303,7 @@ public abstract class Consistency implements ConsistencyMBean {
     protected abstract Context getContext(int contextId) throws ContextException;
     protected abstract DatabaseImpl getDatabase();
     protected abstract AttachmentBase getAttachments();
-    protected abstract FileStorage getFileStorage(Context ctx) throws FileStorageException, FilestoreException;
+    protected abstract FileStorage getFileStorage(Context ctx) throws OXException, FilestoreException;
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws ContextException;
     protected abstract List<Context> getContextsForDatabase(int datbaseId) throws ContextException, DBPoolingException, ServiceException;
     protected abstract List<Context> getAllContexts() throws ContextException;
@@ -417,9 +417,9 @@ public abstract class Consistency implements ConsistencyMBean {
         /**
          * This method create a dummy file a returns its name
          * @return The name of the dummy file
-         * @throws FileStorageException
+         * @throws OXException
          */
-        protected String createDummyFile() throws FileStorageException {
+        protected String createDummyFile() throws OXException {
             final String filetext = "This is just a dummy file";
             final InputStream input = new ByteArrayInputStream(filetext.getBytes());
 
@@ -456,7 +456,7 @@ public abstract class Consistency implements ConsistencyMBean {
                                 " in context " + ctx.getContextId() + " to new " +
                                 "dummy identifier " + identifier);
                     }
-                } catch (final FileStorageException e) {
+                } catch (final OXException e) {
                     LOG1.error("", e);
                 } catch (final OXException e) {
                     LOG1.error("", e);
@@ -513,7 +513,7 @@ public abstract class Consistency implements ConsistencyMBean {
                         LOG1.info("Created dummy entry for: " + old_identifier +
                                 ". New identifier is: " + identifier);
                     }
-                } catch (final FileStorageException e) {
+                } catch (final OXException e) {
                     LOG1.error("", e);
                 } catch (final TransactionException e) {
                     LOG1.error("", e);
@@ -568,7 +568,7 @@ public abstract class Consistency implements ConsistencyMBean {
              * that now new free file slots are available.
              */
                 storage.recreateStateFile();
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 LOG1.error("", e);
             }
         }
@@ -728,7 +728,7 @@ public abstract class Consistency implements ConsistencyMBean {
                                     "created. The admin of this context has now " +
                                     "a new document");
                         }
-                    } catch (final FileStorageException e) {
+                    } catch (final OXException e) {
                         LOG1.error("", e);
                         try {
                             database.rollback();

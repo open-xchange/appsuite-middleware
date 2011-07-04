@@ -59,6 +59,6 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface QuotaFileStorageFactory {
 
-    public QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws QuotaFileStorageException;
+    public QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws QuotaOXException;
 
 }

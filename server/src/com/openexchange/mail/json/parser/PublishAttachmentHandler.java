@@ -71,7 +71,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -589,7 +589,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     fileAccess.saveDocument(file, in, FileStorageFileAccess.DISTANT_FUTURE);
                     fileAccess.commit();
                     retry = false;
-                } catch (final FileStorageException x) {
+                } catch (final OXException x) {
                     fileAccess.rollback();
                     if (441 != x.getDetailNumber()) {
                         throw new MailException(x);
@@ -669,7 +669,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     arr.set(0, publication.infostoreId);
                     fileAccess.removeDocument(arr, timestamp);
                     fileAccess.commit();
-                } catch (final FileStorageException x) {
+                } catch (final OXException x) {
                     fileAccess.rollback();
                     throw x;
                 } finally {
@@ -680,7 +680,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     new StringBuilder("Transaction error while deleting infostore document with ID \"").append(publication.infostoreId).append(
                         "\" failed.").toString(),
                     e);
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 LOG.error(
                     new StringBuilder("Deleting infostore document with ID \"").append(publication.infostoreId).append("\" failed.").toString(),
                     e);

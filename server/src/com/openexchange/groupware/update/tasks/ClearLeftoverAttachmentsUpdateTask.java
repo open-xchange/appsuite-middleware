@@ -70,7 +70,7 @@ import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
@@ -152,7 +152,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private void removeFile(final String fileId,final int ctx_id) throws SQLException, DBPoolingException, FileStorageException, UpdateException {
+    private void removeFile(final String fileId,final int ctx_id) throws SQLException, DBPoolingException, OXException, UpdateException {
         // We have to use the local file storage to bypass quota handling, which must remain
         // unaffected by these operations
 
@@ -169,7 +169,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
         try {
             fs.deleteFile(fileId);
-        } catch (final FileStorageException x) {
+        } catch (final OXException x) {
             LOG.warn("Could not delete "+fileId+ "in context "+ctx_id+". The file might be gone already.");
         }
     }

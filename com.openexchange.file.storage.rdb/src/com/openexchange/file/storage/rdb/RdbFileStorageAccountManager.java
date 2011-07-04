@@ -52,7 +52,7 @@ package com.openexchange.file.storage.rdb;
 import java.util.List;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
 import com.openexchange.session.Session;
@@ -91,31 +91,31 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
         this.service = service;
     }
 
-    public FileStorageAccount getAccount(final String id, final Session session) throws FileStorageException {
+    public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
         return CACHE.getAccount(serviceId, Integer.parseInt(id), session);
     }
 
-    public List<FileStorageAccount> getAccounts(final Session session) throws FileStorageException {
+    public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         return CACHE.getAccounts(serviceId, session);
     }
 
-    public String addAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
         return String.valueOf(CACHE.addAccount(serviceId, account, session));
     }
 
-    public void deleteAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
         CACHE.deleteAccount(serviceId, account, session);
     }
 
-    public void updateAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
         CACHE.updateAccount(serviceId, account, session);
     }
 
-    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws FileStorageException {
+    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
         return CACHE.checkSecretCanDecryptStrings(service, session, secret);
     }
 
-    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws FileStorageException {
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
     }
 

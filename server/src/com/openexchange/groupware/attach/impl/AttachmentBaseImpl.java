@@ -100,7 +100,7 @@ import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.file.SaveFileWithQuotaAction;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -155,7 +155,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         if (data != null) {
             try {
                 fileId = saveFile(data, attachment, ctx);
-            } catch (FileStorageException e) {
+            } catch (OXException e) {
                 throw AttachmentExceptionCodes.SAVE_FAILED.create(e);
             }
         } else {
@@ -424,7 +424,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     public void deleteAll(final Context context) throws AttachmentException {
         try {
             removeFiles(context);
-        } catch (FileStorageException e) {
+        } catch (OXException e) {
             throw AttachmentExceptionCodes.FILE_DELETE_FAILED.create(e, I(context.getContextId()));
         }
         try {
@@ -459,7 +459,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     }
 
-    private void removeFiles(final Context context) throws FileStorageException, AttachmentException {
+    private void removeFiles(final Context context) throws OXException, AttachmentException {
         final FileStorage fs = getFileStorage(context);
         for (final String fileId : this.getAttachmentFileStoreLocationsperContext(context)) {
             fs.deleteFile(fileId);
@@ -550,7 +550,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return IDGenerator.getId(ctx, Types.ATTACHMENT, writeCon);
     }
 
-    private String saveFile(final InputStream data, final AttachmentMetadata attachment, final Context ctx) throws FileStorageException, AttachmentException {
+    private String saveFile(final InputStream data, final AttachmentMetadata attachment, final Context ctx) throws OXException, AttachmentException {
         final QuotaFileStorage fs = getFileStorage(ctx);
         SaveFileAction action = null;
         final SaveFileWithQuotaAction a = new SaveFileWithQuotaAction();
@@ -605,7 +605,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             final FileStorage fs = getFileStorage(ctx);
             return fs.getFile(fileId);
 
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw AttachmentExceptionCodes.READ_FAILED.create(e, fileId);
         }
     }
@@ -933,7 +933,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 for (final String fileId : fileIdRemoveList.get()) {
                     fs.deleteFile(fileId);
                 }
-            } catch (FileStorageException e) {
+            } catch (OXException e) {
                 try {
                     rollback();
                 } catch (final TransactionException txe) {
@@ -960,7 +960,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         super.startTransaction();
     }
 
-    protected QuotaFileStorage getFileStorage(final Context ctx) throws FileStorageException, AttachmentException {
+    protected QuotaFileStorage getFileStorage(final Context ctx) throws OXException, AttachmentException {
         try {
             return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         } catch (FilestoreException e) {

@@ -93,7 +93,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -388,7 +388,7 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new InfostoreException(e);
         } catch (final FilestoreException e) {
             throw new InfostoreException(e);
@@ -1550,7 +1550,7 @@ public class DatabaseImpl extends DBService {
         return dmi;
     }
 
-    protected FileStorage getFileStorage(final Context ctx) throws FileStorageException, FilestoreException {
+    protected FileStorage getFileStorage(final Context ctx) throws OXException, FilestoreException {
         return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
@@ -1570,7 +1570,7 @@ public class DatabaseImpl extends DBService {
                 getFileStorage(ctx).deleteFile(id);
             } catch (final FilestoreException e) {
                 throw new TransactionException(e);
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 throw new TransactionException(e);
             }
         }
@@ -1593,7 +1593,7 @@ public class DatabaseImpl extends DBService {
                 getFileStorage(ctx).deleteFile(id);
             } catch (final FilestoreException e) {
                 throw new TransactionException(e);
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 throw new TransactionException(e);
             }
         }

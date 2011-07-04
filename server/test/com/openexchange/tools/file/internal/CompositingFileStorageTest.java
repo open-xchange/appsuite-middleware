@@ -60,7 +60,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import junit.framework.TestCase;
 
 /**
@@ -135,7 +135,7 @@ public class CompositingFileStorageTest extends TestCase {
         builder.assertAllWereCalled();
     }
 
-    public void testDeleteWithPrefix() throws FileStorageException {
+    public void testDeleteWithPrefix() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder builder = new SimBuilder();
@@ -149,12 +149,12 @@ public class CompositingFileStorageTest extends TestCase {
         builder.assertAllWereCalled();
     }
 
-    public void testBulkDeleteWithAndWithoutPrefix() throws FileStorageException {
+    public void testBulkDeleteWithAndWithoutPrefix() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
         
         SimFileStorage prefixedStorage = new SimFileStorage() {
             @Override
-            public Set<String> deleteFiles(String[] arg0) throws FileStorageException {
+            public Set<String> deleteFiles(String[] arg0) throws OXException {
                 assertEquals("ab/cd/ef/12345", arg0[0]);
                 assertEquals("ab/cd/ef/54321", arg0[1]);
                 
@@ -166,7 +166,7 @@ public class CompositingFileStorageTest extends TestCase {
         
         SimFileStorage standardStorage = new SimFileStorage() {
             @Override
-            public Set<String> deleteFiles(String[] arg0) throws FileStorageException {
+            public Set<String> deleteFiles(String[] arg0) throws OXException {
                 assertEquals("ab/cd/ef/12345", arg0[0]);
                 assertEquals("ab/cd/ef/54321", arg0[1]);
                 
@@ -189,7 +189,7 @@ public class CompositingFileStorageTest extends TestCase {
         assertEquals(Boolean.TRUE, standardStorage.getMemory().get(0));
     }
 
-    public void testGetFileSizeWithoutPrefix() throws FileStorageException {
+    public void testGetFileSizeWithoutPrefix() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder builder = new SimBuilder();
@@ -205,7 +205,7 @@ public class CompositingFileStorageTest extends TestCase {
         builder.assertAllWereCalled();
     }
 
-    public void testGetFileSizeWithPrefix() throws FileStorageException {
+    public void testGetFileSizeWithPrefix() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder builder = new SimBuilder();
@@ -221,7 +221,7 @@ public class CompositingFileStorageTest extends TestCase {
         builder.assertAllWereCalled();
     }
 
-    public void testGetMimeTypeOnStandardFS() throws FileStorageException {
+    public void testGetMimeTypeOnStandardFS() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder builder = new SimBuilder();
@@ -235,7 +235,7 @@ public class CompositingFileStorageTest extends TestCase {
         builder.assertAllWereCalled();
     }
 
-    public void testCompositeFileList() throws FileStorageException {
+    public void testCompositeFileList() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder prefixedBuilder = new SimBuilder();
@@ -257,7 +257,7 @@ public class CompositingFileStorageTest extends TestCase {
         standardBuilder.assertAllWereCalled();
     }
 
-    public void testRemoveIsMultiplexed() throws FileStorageException {
+    public void testRemoveIsMultiplexed() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder prefixedBuilder = new SimBuilder();
@@ -275,7 +275,7 @@ public class CompositingFileStorageTest extends TestCase {
         standardBuilder.assertAllWereCalled();
     }
 
-    public void testIsStateFileCorrect() throws FileStorageException {
+    public void testIsStateFileCorrect() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder prefixedBuilder = new SimBuilder();
@@ -296,7 +296,7 @@ public class CompositingFileStorageTest extends TestCase {
         
     }
 
-    public void testIsStateFileCorrect2() throws FileStorageException {
+    public void testIsStateFileCorrect2() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder prefixedBuilder = new SimBuilder();
@@ -317,7 +317,7 @@ public class CompositingFileStorageTest extends TestCase {
         
     }
     
-    public void testRecreateStateFile() throws FileStorageException {
+    public void testRecreateStateFile() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder prefixedBuilder = new SimBuilder();
@@ -339,43 +339,43 @@ public class CompositingFileStorageTest extends TestCase {
         
         protected List<Object> remember = new ArrayList<Object>();
     
-        public boolean deleteFile(String identifier) throws FileStorageException {
+        public boolean deleteFile(String identifier) throws OXException {
             return false;
         }
 
-        public Set<String> deleteFiles(String[] identifiers) throws FileStorageException {
+        public Set<String> deleteFiles(String[] identifiers) throws OXException {
             return null;
         }
 
-        public InputStream getFile(String name) throws FileStorageException {
+        public InputStream getFile(String name) throws OXException {
             return null;
         }
 
-        public SortedSet<String> getFileList() throws FileStorageException {
+        public SortedSet<String> getFileList() throws OXException {
             return null;
         }
 
-        public long getFileSize(String name) throws FileStorageException {
+        public long getFileSize(String name) throws OXException {
             return 0;
         }
 
-        public String getMimeType(String name) throws FileStorageException {
+        public String getMimeType(String name) throws OXException {
             return null;
         }
 
-        public void recreateStateFile() throws FileStorageException {
+        public void recreateStateFile() throws OXException {
             
         }
 
-        public void remove() throws FileStorageException {
+        public void remove() throws OXException {
             
         }
 
-        public String saveNewFile(InputStream file) throws FileStorageException {
+        public String saveNewFile(InputStream file) throws OXException {
             return null;
         }
 
-        public boolean stateFileIsCorrect() throws FileStorageException {
+        public boolean stateFileIsCorrect() throws OXException {
             return false;
         }
         

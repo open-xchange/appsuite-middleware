@@ -59,7 +59,7 @@ import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.cifs.services.CIFSServiceRegistry;
 import com.openexchange.server.ServiceException;
@@ -76,9 +76,9 @@ public final class CIFSService implements FileStorageService {
      * Creates a new CIFS/SMB file storage service.
      * 
      * @return A new CIFS/SMB file storage service
-     * @throws FileStorageException If creation fails
+     * @throws OXException If creation fails
      */
-    public static CIFSService newInstance() throws FileStorageException {
+    public static CIFSService newInstance() throws OXException {
         final CIFSService newInst = new CIFSService();
         newInst.applyAccountManager();
         return newInst;
@@ -102,13 +102,13 @@ public final class CIFSService implements FileStorageService {
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CIFSConstants.CIFS_PASSWORD)));
     }
 
-    private void applyAccountManager() throws FileStorageException {
+    private void applyAccountManager() throws OXException {
         try {
             accountManager =
                 CIFSServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
                     this);
         } catch (final ServiceException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
     }
 
@@ -132,7 +132,7 @@ public final class CIFSService implements FileStorageService {
         return accountManager;
     }
 
-    public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws FileStorageException {
+    public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         return new CIFSAccountAccess(this, accountManager.getAccount(accountId, session), session);
     }
 

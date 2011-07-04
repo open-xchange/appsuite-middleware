@@ -67,7 +67,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -127,7 +127,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testExists() throws FileStorageException {
+    public void testExists() throws OXException {
         fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(true);
 
         assertTrue(exists(fileId.toUniqueID(), 12));
@@ -137,7 +137,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetDeltaWithoutSort() throws FileStorageException {
+    public void testGetDeltaWithoutSort() throws OXException {
 
         fileAccess.expectCall("getDelta", folderId.getFolderId(), 12l, Arrays.asList(
             File.Field.TITLE,
@@ -152,7 +152,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetDeltaWithSort() throws FileStorageException {
+    public void testGetDeltaWithSort() throws OXException {
 
         fileAccess.expectCall("getDelta", folderId.getFolderId(), 12l, Arrays.asList(
             File.Field.TITLE,
@@ -167,7 +167,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetDocument() throws FileStorageException {
+    public void testGetDocument() throws OXException {
         fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), 12);
 
         getDocument(fileId.toUniqueID(), 12);
@@ -177,7 +177,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetDocuments1() throws FileStorageException {
+    public void testGetDocuments1() throws OXException {
         fileAccess.expectCall("getDocuments", folderId.getFolderId());
 
         getDocuments(folderId.toUniqueID());
@@ -187,7 +187,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetDocuments2() throws FileStorageException {
+    public void testGetDocuments2() throws OXException {
         fileAccess.expectCall("getDocuments", folderId.getFolderId(), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -201,7 +201,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetDocuments3() throws FileStorageException {
+    public void testGetDocuments3() throws OXException {
         fileAccess.expectCall("getDocuments", folderId.getFolderId(), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -215,7 +215,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetDocuments4() throws FileStorageException {
+    public void testGetDocuments4() throws OXException {
         DefaultFile defaultFile = new DefaultFile();
         defaultFile.setLastModified(new Date());
         defaultFile.setId(fileId.getFileId());
@@ -239,7 +239,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetFileMetadata() throws FileStorageException {
+    public void testGetFileMetadata() throws OXException {
         DefaultFile file = new DefaultFile();
         file.setId(fileId.getFileId());
         file.setFolderId(fileId.getFolderId());
@@ -252,7 +252,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetVersions1() throws FileStorageException {
+    public void testGetVersions1() throws OXException {
         fileAccess.expectCall("getVersions", fileId.getFolderId(), fileId.getFileId());
 
         getVersions(fileId.toUniqueID());
@@ -261,7 +261,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetVersions2() throws FileStorageException {
+    public void testGetVersions2() throws OXException {
         fileAccess.expectCall("getVersions", fileId.getFolderId(), fileId.getFileId(), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -274,7 +274,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testGetVersions3() throws FileStorageException {
+    public void testGetVersions3() throws OXException {
         fileAccess.expectCall("getVersions", fileId.getFolderId(), fileId.getFileId(), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -287,7 +287,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testLock() throws FileStorageException {
+    public void testLock() throws OXException {
         fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337l);
 
         lock(fileId.toUniqueID(), 1337);
@@ -296,7 +296,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testUnlock() throws FileStorageException {
+    public void testUnlock() throws OXException {
         fileAccess.expectCall("unlock", fileId.getFolderId(), fileId.getFileId());
 
         unlock(fileId.toUniqueID());
@@ -305,7 +305,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testTouch() throws FileStorageException {
+    public void testTouch() throws OXException {
         fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337l);
 
         lock(fileId.toUniqueID(), 1337);
@@ -314,7 +314,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testRemoveDocument() throws FileStorageException {
+    public void testRemoveDocument() throws OXException {
         fileAccess.expectCall("removeDocument", folderId.getFolderId(), 12l);
 
         removeDocument(folderId.toUniqueID(), 12);
@@ -324,7 +324,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     // Somewhat brittle test
     @Test
-    public void testRemoveDocuments() throws FileStorageException {
+    public void testRemoveDocuments() throws OXException {
         FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
         fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(1); // Store it
@@ -354,7 +354,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testRemoveVersions() throws FileStorageException {
+    public void testRemoveVersions() throws OXException {
         int[] versions = new int[] { 1, 2, 3 };
 
         fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions);
@@ -366,7 +366,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testSearch() throws FileStorageException {
+    public void testSearch() throws OXException {
         fileAccess.expectCall("search", "query", Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -381,7 +381,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testSearchInAllFolders() throws FileStorageException {
+    public void testSearchInAllFolders() throws OXException {
         fileAccess.expectCall(
             "search",
             "query",
@@ -410,7 +410,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     // create file
     @Test
-    public void testCreateDocument1() throws FileStorageException {
+    public void testCreateDocument1() throws OXException {
         File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
@@ -426,7 +426,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testCreateDocument2() throws FileStorageException {
+    public void testCreateDocument2() throws OXException {
         File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
@@ -442,7 +442,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testCreateMetadata1() throws FileStorageException {
+    public void testCreateMetadata1() throws OXException {
         File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
@@ -458,7 +458,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testCreateMetadata2() throws FileStorageException {
+    public void testCreateMetadata2() throws OXException {
         File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
@@ -476,7 +476,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     // update file
     
     @Test
-    public void testUpdateDocument1() throws FileStorageException {
+    public void testUpdateDocument1() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
@@ -492,7 +492,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testUpdateDocument2() throws FileStorageException {
+    public void testUpdateDocument2() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
@@ -508,7 +508,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testUpdateMetadata1() throws FileStorageException {
+    public void testUpdateMetadata1() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
@@ -524,7 +524,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Test
-    public void testUpdateMetadata2() throws FileStorageException {
+    public void testUpdateMetadata2() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
@@ -542,7 +542,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     // Moving across filestores
     
     @Test
-    public void testMoveACompleteFileWithANewUpload() throws FileStorageException {
+    public void testMoveACompleteFileWithANewUpload() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
@@ -570,7 +570,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
     
     @Test
-    public void testPartialMetadataWithANewUpload() throws FileStorageException {
+    public void testPartialMetadataWithANewUpload() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
@@ -607,7 +607,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
     
     @Test
-    public void testMoveCompleteFileWithoutUpload() throws FileStorageException {
+    public void testMoveCompleteFileWithoutUpload() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
@@ -635,7 +635,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
     
     @Test
-    public void testMovePartialFileWithoutUpload() throws FileStorageException {
+    public void testMovePartialFileWithoutUpload() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
@@ -684,7 +684,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         assertEquals(fileId2.getService(), serviceId2);
     }
 
-    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws FileStorageException {
+    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
         if (this.accountId == null) {
             this.accountId = accountId;
         } else {
@@ -749,7 +749,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getFileAccess()
      */
-    public FileStorageFileAccess getFileAccess() throws FileStorageException {
+    public FileStorageFileAccess getFileAccess() throws OXException {
         if (files != null) {
             return files;
         }
@@ -760,7 +760,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getFolderAccess()
      */
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException {
+    public FileStorageFolderAccess getFolderAccess() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -769,7 +769,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getRootFolder()
      */
-    public FileStorageFolder getRootFolder() throws FileStorageException {
+    public FileStorageFolder getRootFolder() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -796,7 +796,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageResource#connect()
      */
-    public void connect() throws FileStorageException {
+    public void connect() throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -814,7 +814,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageResource#ping()
      */
-    public boolean ping() throws FileStorageException {
+    public boolean ping() throws OXException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -838,7 +838,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#addAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
-    public String addAccount(FileStorageAccount account, Session session) throws FileStorageException {
+    public String addAccount(FileStorageAccount account, Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -848,7 +848,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session,
      * java.lang.String)
      */
-    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws FileStorageException {
+    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws OXException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -858,7 +858,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#deleteAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
-    public void deleteAccount(FileStorageAccount account, Session session) throws FileStorageException {
+    public void deleteAccount(FileStorageAccount account, Session session) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -867,7 +867,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountManager#getAccount(java.lang.String, com.openexchange.session.Session)
      */
-    public FileStorageAccount getAccount(String id, Session session) throws FileStorageException {
+    public FileStorageAccount getAccount(String id, Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -876,7 +876,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountManager#getAccounts(com.openexchange.session.Session)
      */
-    public List<FileStorageAccount> getAccounts(Session session) throws FileStorageException {
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException {
         FileStorageAccount account = new FileStorageAccount() {
 
                     public Map<String, Object> getConfiguration() {
@@ -906,7 +906,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#migrateToNewSecret(java.lang.String, java.lang.String,
      * com.openexchange.session.Session)
      */
-    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws FileStorageException {
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -916,7 +916,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#updateAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
-    public void updateAccount(FileStorageAccount account, Session session) throws FileStorageException {
+    public void updateAccount(FileStorageAccount account, Session session) throws OXException {
         // TODO Auto-generated method stub
 
     }

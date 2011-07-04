@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.session.Session;
@@ -90,34 +90,34 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     };
     
     
-    public String addAccount(FileStorageAccount account, Session session) throws FileStorageException {
+    public String addAccount(FileStorageAccount account, Session session) throws OXException {
         return "";
     }
 
-    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws FileStorageException {
+    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws OXException {
         return true;
     }
 
-    public void deleteAccount(FileStorageAccount account, Session session) throws FileStorageException {
+    public void deleteAccount(FileStorageAccount account, Session session) throws OXException {
 
     }
 
-    public FileStorageAccount getAccount(String id, Session session) throws FileStorageException {
+    public FileStorageAccount getAccount(String id, Session session) throws OXException {
         if(id.equals(DEFAULT_ID)) {
             return DEFAULT_ACCOUNT;
         }
         throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, "com.openexchange.infostore");
     }
 
-    public List<FileStorageAccount> getAccounts(Session session) throws FileStorageException {
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException {
         return Arrays.asList(DEFAULT_ACCOUNT);
     }
 
-    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws FileStorageException {
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException {
 
     }
 
-    public void updateAccount(FileStorageAccount account, Session session) throws FileStorageException {
+    public void updateAccount(FileStorageAccount account, Session session) throws OXException {
 
     }
 

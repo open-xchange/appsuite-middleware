@@ -57,7 +57,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -133,7 +133,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         return session;
     }
 
-    public void connect() throws FileStorageException {
+    public void connect() throws OXException {
         if (connected.compareAndSet(false, true)) {
             final Map<String, Object> configuration = account.getConfiguration();
             String url = (String) configuration.get(CIFSConstants.CIFS_URL);
@@ -172,7 +172,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         }
     }
 
-    public boolean ping() throws FileStorageException {
+    public boolean ping() throws OXException {
         final Map<String, Object> configuration = account.getConfiguration();
         String url = (String) configuration.get(CIFSConstants.CIFS_URL);
         if (null == url) {
@@ -210,7 +210,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         return account.getId();
     }
 
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException {
+    public FileStorageFolderAccess getFolderAccess() throws OXException {
         if (!connected.get()) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
@@ -226,7 +226,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         return tmp;
     }
 
-    public FileStorageFileAccess getFileAccess() throws FileStorageException {
+    public FileStorageFileAccess getFileAccess() throws OXException {
         if (!connected.get()) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
@@ -242,7 +242,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         return tmp;
     }
 
-    public FileStorageFolder getRootFolder() throws FileStorageException {
+    public FileStorageFolder getRootFolder() throws OXException {
         connect();
         return getFolderAccess().getRootFolder();
     }

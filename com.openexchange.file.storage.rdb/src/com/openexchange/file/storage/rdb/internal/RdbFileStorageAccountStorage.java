@@ -68,7 +68,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
@@ -122,7 +122,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
     private static final String SQL_SELECT_CONFIDS_FOR_USER = "SELECT confId FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
-    public FileStorageAccount getAccount(final String serviceId, final int id, final Session session) throws FileStorageException {
+    public FileStorageAccount getAccount(final String serviceId, final int id, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -132,7 +132,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         try {
             rc = databaseService.getReadOnly(contextId);
         } catch (final DBPoolingException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -185,7 +185,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final GenericConfigStorageException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
@@ -194,7 +194,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
     private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
-    public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws FileStorageException {
+    public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -204,7 +204,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         try {
             rc = databaseService.getReadOnly(contextId);
         } catch (final DBPoolingException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
         List<FileStorageAccount> accounts;
         PreparedStatement stmt = null;
@@ -241,7 +241,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final GenericConfigStorageException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
@@ -254,9 +254,9 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
      * @param serviceId The service identifier
      * @param session The session
      * @return The identifiers of user-associated accounts of a certain service
-     * @throws FileStorageException If identifiers cannot be returned
+     * @throws OXException If identifiers cannot be returned
      */
-    public TIntArrayList getAccountIDs(final String serviceId, final Session session) throws FileStorageException {
+    public TIntArrayList getAccountIDs(final String serviceId, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -266,7 +266,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         try {
             rc = databaseService.getReadOnly(contextId);
         } catch (final DBPoolingException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
         TIntArrayList accounts;
         PreparedStatement stmt = null;
@@ -297,7 +297,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
     private static final String SQL_INSERT = "INSERT INTO filestorageAccount (cid, user, account, confId, serviceId, displayName) VALUES (?, ?, ?, ?, ?, ?)";
 
-    public int addAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+    public int addAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -308,7 +308,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
         } catch (final DBPoolingException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -351,12 +351,12 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             stmt.executeUpdate();
             wc.commit(); // COMMIT
             return genericConfId;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
         } catch (final GenericConfigStorageException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -370,13 +370,13 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         }
     }
 
-    private String encrypt(final String toCrypt, final Session session) throws FileStorageException, CryptoException {
+    private String encrypt(final String toCrypt, final Session session) throws OXException, CryptoException {
         final CryptoService cryptoService = getService(CryptoService.class);
         final SecretService secretService = getService(SecretService.class);
         return cryptoService.encrypt(toCrypt, secretService.getSecret(session));
     }
 
-    private String decrypt(final String toDecrypt, final Session session) throws FileStorageException, CryptoException {
+    private String decrypt(final String toDecrypt, final Session session) throws OXException, CryptoException {
         final CryptoService cryptoService = getService(CryptoService.class);
         final SecretService secretService = getService(SecretService.class);
         return cryptoService.decrypt(toDecrypt, secretService.getSecret(session));
@@ -384,7 +384,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
     private static final String SQL_DELETE = "DELETE FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
-    public void deleteAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void deleteAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -395,7 +395,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
         } catch (final DBPoolingException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -421,12 +421,12 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             stmt.setInt(pos, accountId);
             stmt.executeUpdate();
             wc.commit(); // COMMIT
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
         } catch (final GenericConfigStorageException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -442,7 +442,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
     private static final String SQL_UPDATE = "UPDATE filestorageAccount SET displayName = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
-    public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -453,7 +453,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
         } catch (final DBPoolingException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -501,12 +501,12 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                 stmt.executeUpdate();
             }
             wc.commit(); // COMMIT
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
         } catch (final GenericConfigStorageException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -520,26 +520,26 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         }
     }
 
-    private static <S> S getService(final Class<? extends S> clazz) throws FileStorageException {
+    private static <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
             return FileStorageRdbServiceRegistry.getServiceRegistry().getService(clazz, true);
         } catch (final ServiceException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
     }
 
-    private static Context getContext(final Session session) throws FileStorageException {
+    private static Context getContext(final Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getContext();
         }
         try {
             return getService(ContextService.class).getContext(session.getContextId());
         } catch (final ContextException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
     }
 
-    private static int getGenericConfId(final int contextId, final int userId, final String serviceId, final int accountId, final Connection con) throws FileStorageException, SQLException {
+    private static int getGenericConfId(final int contextId, final int userId, final String serviceId, final int accountId, final Connection con) throws OXException, SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -563,7 +563,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         }
     }
 
-    public boolean checkSecretCanDecryptStrings(final FileStorageService parentService, final Session session, final String secret) throws FileStorageException {
+    public boolean checkSecretCanDecryptStrings(final FileStorageService parentService, final Session session, final String secret) throws OXException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {
             return true;
@@ -588,14 +588,14 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                 }
             }
         } catch (final GenericConfigStorageException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } catch (final CryptoException e) {
             return false;
         }
         return true;
     }
 
-    private TIntArrayList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws FileStorageException {
+    private TIntArrayList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws OXException {
         final TIntArrayList confIds = new TIntArrayList(20);
         final DatabaseService databaseService = getService(CLAZZ_DB);
         PreparedStatement stmt = null;
@@ -619,7 +619,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (con != null) {
@@ -629,7 +629,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         return confIds;
     }
 
-    public void migrateToNewSecret(final FileStorageService parentService, final String oldSecret, final String newSecret, final Session session) throws FileStorageException {
+    public void migrateToNewSecret(final FileStorageService parentService, final String oldSecret, final String newSecret, final Session session) throws OXException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {
             return;
@@ -662,9 +662,9 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                 genericConfStorageService.update(ctx, confId, update);
             }
         } catch (final GenericConfigStorageException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         } catch (final CryptoException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
     }
 }

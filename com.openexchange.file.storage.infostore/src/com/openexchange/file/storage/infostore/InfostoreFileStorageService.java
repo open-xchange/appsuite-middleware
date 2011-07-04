@@ -54,7 +54,7 @@ import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -74,7 +74,7 @@ public class InfostoreFileStorageService implements FileStorageService {
 
     private InfostoreSearchEngine search;
 
-    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws FileStorageException {
+    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
         if (!accountId.equals(InfostoreDefaultAccountManager.DEFAULT_ID)) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId());
         }

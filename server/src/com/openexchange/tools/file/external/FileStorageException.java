@@ -57,14 +57,14 @@ import com.openexchange.groupware.EnumComponent;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class FileStorageException extends AbstractOXException {
+public class OXException extends AbstractOXException {
 
     /**
      * For serialization.
      */
     private static final long serialVersionUID = 7098813337802054897L;
 
-    public FileStorageException(final AbstractOXException x) {
+    public OXException(final AbstractOXException x) {
         super(x);
     }
 
@@ -74,7 +74,7 @@ public class FileStorageException extends AbstractOXException {
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public FileStorageException(final Code code, final Object... messageArgs) {
+    public OXException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
@@ -85,7 +85,7 @@ public class FileStorageException extends AbstractOXException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public FileStorageException(final Code code, final Throwable cause, final Object... messageArgs) {
+    public OXException(final Code code, final Throwable cause, final Object... messageArgs) {
         super(EnumComponent.FILESTORE, code.getCategory(), code.getDetailNumber(), null == code.getMessage() ? cause.getMessage() : code.getMessage(), cause);
         setMessageArgs(messageArgs);
     }
@@ -99,7 +99,7 @@ public class FileStorageException extends AbstractOXException {
      * @param message message of the exception.
      * @param cause the cause.
      */
-    protected FileStorageException(final EnumComponent component, final Category category, final int detailNumber, final String message, final Throwable cause) {
+    protected OXException(final EnumComponent component, final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(component, category, detailNumber, message, cause);
     }
 

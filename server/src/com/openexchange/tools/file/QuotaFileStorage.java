@@ -54,8 +54,8 @@ import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.external.FileStorageException.Code;
+import com.openexchange.tools.file.external.OXException;
+import com.openexchange.tools.file.external.OXException.Code;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 public final class QuotaFileStorage extends FileStorage {
@@ -64,14 +64,14 @@ public final class QuotaFileStorage extends FileStorage {
 
     private com.openexchange.tools.file.external.QuotaFileStorage qfs;
 
-    private QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageFactory qfss) throws FileStorageException {
+    private QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageFactory qfss) throws OXException {
         super();
         qfs = qfss.getQuotaFileStorage(ctx, uri);
     }
 
-    public static final QuotaFileStorage getInstance(final URI uri, final Context ctx) throws FileStorageException {
+    public static final QuotaFileStorage getInstance(final URI uri, final Context ctx) throws OXException {
         if (qfss == null) {
-            throw new FileStorageException(Code.INSTANTIATIONERROR, "No quota file storage starter registered.");
+            throw new OXException(Code.INSTANTIATIONERROR, "No quota file storage starter registered.");
         }
         return new com.openexchange.tools.file.QuotaFileStorage(uri, ctx, qfss);
     }
@@ -80,11 +80,11 @@ public final class QuotaFileStorage extends FileStorage {
         QuotaFileStorage.qfss = qfss;
     }
 
-    public long getUsage() throws FileStorageException {
+    public long getUsage() throws OXException {
         return qfs.getUsage();
     }
 
-    public void recalculateUsage() throws FileStorageException {
+    public void recalculateUsage() throws OXException {
         qfs.recalculateUsage();
     }
 
@@ -93,51 +93,51 @@ public final class QuotaFileStorage extends FileStorage {
     }
 
     @Override
-    public boolean deleteFile(final String identifier) throws FileStorageException {
+    public boolean deleteFile(final String identifier) throws OXException {
         return qfs.deleteFile(identifier);
     }
 
     @Override
-    public Set<String> deleteFiles(final String[] identifiers) throws FileStorageException {
+    public Set<String> deleteFiles(final String[] identifiers) throws OXException {
         return qfs.deleteFiles(identifiers);
     }
 
     @Override
-    public InputStream getFile(final String name) throws FileStorageException {
+    public InputStream getFile(final String name) throws OXException {
         return qfs.getFile(name);
     }
 
     @Override
-    public SortedSet<String> getFileList() throws FileStorageException {
+    public SortedSet<String> getFileList() throws OXException {
         return qfs.getFileList();
     }
 
     @Override
-    public long getFileSize(final String name) throws FileStorageException {
+    public long getFileSize(final String name) throws OXException {
         return qfs.getFileSize(name);
     }
 
     @Override
-    public String getMimeType(final String name) throws FileStorageException {
+    public String getMimeType(final String name) throws OXException {
         return qfs.getMimeType(name);
     }
 
     @Override
-    public void recreateStateFile() throws FileStorageException {
+    public void recreateStateFile() throws OXException {
         qfs.recreateStateFile();
     }
 
     @Override
-    public void remove() throws FileStorageException {
+    public void remove() throws OXException {
         qfs.remove();
     }
 
     @Override
-    public String saveNewFile(final InputStream file) throws FileStorageException {
+    public String saveNewFile(final InputStream file) throws OXException {
         return qfs.saveNewFile(file);
     }
 
-    public String saveNewFile(InputStream file, long sizeHint) throws FileStorageException {
+    public String saveNewFile(InputStream file, long sizeHint) throws OXException {
         // TODO use sizeHint to faster break on over quota
         return qfs.saveNewFile(file);
     }

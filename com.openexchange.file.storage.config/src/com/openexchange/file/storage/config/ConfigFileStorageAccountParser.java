@@ -60,7 +60,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 
 /**
@@ -146,7 +146,7 @@ public final class ConfigFileStorageAccountParser {
                     m.put(serviceId, map);
                 }
                 map.put(account.getId(), account);
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 final Log logger = LogFactory.getLog(ConfigFileStorageAccountParser.class);
                 logger.warn("Configuration for file storage account \"" + id + "\" is invalid: " + e.getMessage(), e);
             }
@@ -154,7 +154,7 @@ public final class ConfigFileStorageAccountParser {
         this.map = m;
     }
 
-    private static ConfigFileStorageAccount parseAccount(final String id, final Properties properties) throws FileStorageException {
+    private static ConfigFileStorageAccount parseAccount(final String id, final Properties properties) throws OXException {
         final StringBuilder sb = new StringBuilder(PREFIX).append(id).append('.');
         final int resetLen = sb.length();
         /*

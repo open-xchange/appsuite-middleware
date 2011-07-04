@@ -68,10 +68,10 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorageException;
-import com.openexchange.tools.file.external.QuotaFileStorageException.Code;
+import com.openexchange.tools.file.external.QuotaOXException;
+import com.openexchange.tools.file.external.QuotaOXException.Code;
 import com.openexchange.tools.sql.DBUtils;
 
 public class DBQuotaFileStorage implements QuotaFileStorage {
@@ -99,15 +99,15 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
      * @param context Context for the Quota.
      * @param fs The physical FileStorage.
      * @param db The DatabaseService.
-     * @throws QuotaFileStorageException
+     * @throws QuotaOXException
      */
-    public DBQuotaFileStorage(final Context context, final FileStorage fs, final DatabaseService db) throws QuotaFileStorageException {
+    public DBQuotaFileStorage(final Context context, final FileStorage fs, final DatabaseService db) throws QuotaOXException {
         super();
         this.context = context;
         fileStorage = fs;
         this.db = db;
         if (fileStorage == null) {
-            throw new QuotaFileStorageException(QuotaFileStorageException.Code.INSTANTIATIONERROR);
+            throw new QuotaOXException(QuotaOXException.Code.INSTANTIATIONERROR);
         }
     }
 
@@ -115,7 +115,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         return context.getFileStorageQuota();
     }
 
-    public boolean deleteFile(final String identifier) throws QuotaFileStorageException {
+    public boolean deleteFile(final String identifier) throws QuotaOXException {
         try {
             final long fileSize = fileStorage.getFileSize(identifier);
             final boolean deleted = fileStorage.deleteFile(identifier);
@@ -124,8 +124,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             }
             decUsage(fileSize);
             return true;
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 
@@ -134,14 +134,14 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
      * 
      * @param usage by that the QuotaUsage has to be increased
      * @return true if Quota is full
-     * @throws QuotaFileStorageException on Database errors
+     * @throws QuotaOXException on Database errors
      */
-    protected boolean incUsage(final long usage) throws QuotaFileStorageException {
+    protected boolean incUsage(final long usage) throws QuotaOXException {
         final Connection con;
         try {
             con = db.getWritable(context);
         } catch (final DBPoolingException e) {
-            throw new QuotaFileStorageException(e);
+            throw new QuotaOXException(e);
         }
 
         PreparedStatement sstmt = null;
@@ -156,7 +156,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             if (rs.next()) {
                 oldUsage = rs.getLong(1);
             } else {
-                throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
+                throw new QuotaOXException(Code.NO_USAGE, I(context.getContextId()));
             }
             long newUsage = oldUsage + usage;
             long quota = context.getFileStorageQuota();
@@ -168,12 +168,12 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             ustmt.setInt(2, context.getContextId());
             int rows = ustmt.executeUpdate();
             if (1 != rows) {
-                throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
+                throw new QuotaOXException(Code.UPDATE_FAILED, I(context.getContextId()));
             }
             con.commit();
         } catch (final SQLException s) {
             DBUtils.rollback(con);
-            throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, s);
+            throw new QuotaOXException(QuotaOXException.Code.SQLSTATEMENTERROR, s);
         } finally {
             DBUtils.autocommit(con);
             DBUtils.closeSQLStuff(rs);
@@ -188,14 +188,14 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
      * Decreases the QuotaUsage.
      * 
      * @param usage by that the Quota has to be decreased
-     * @throws QuotaFileStorageException
+     * @throws QuotaOXException
      */
-    protected void decUsage(final long usage) throws QuotaFileStorageException {
+    protected void decUsage(final long usage) throws QuotaOXException {
         final Connection con;
         try {
             con = db.getWritable(context);
         } catch (final DBPoolingException e) {
-            throw new QuotaFileStorageException(e);
+            throw new QuotaOXException(e);
         }
 
         PreparedStatement sstmt = null;
@@ -214,13 +214,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             if (rs.next()) {
                 oldUsage = rs.getLong("used");
             } else {
-                throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
+                throw new QuotaOXException(Code.NO_USAGE, I(context.getContextId()));
             }
             long newUsage = oldUsage - usage;
 
             if (newUsage < 0) {
                 newUsage = 0;
-                final QuotaFileStorageException e = new QuotaFileStorageException(QuotaFileStorageException.Code.QUOTA_UNDERRUN, I(context.getContextId()));
+                final QuotaOXException e = new QuotaOXException(QuotaOXException.Code.QUOTA_UNDERRUN, I(context.getContextId()));
                 LOG.fatal(e.getMessage(), e);
             }
 
@@ -229,13 +229,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             ustmt.setInt(2, context.getContextId());
             int rows = ustmt.executeUpdate();
             if (1 != rows) {
-                throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
+                throw new QuotaOXException(Code.UPDATE_FAILED, I(context.getContextId()));
             }
 
             con.commit();
         } catch (final SQLException s) {
             DBUtils.rollback(con);
-            throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, s);
+            throw new QuotaOXException(QuotaOXException.Code.SQLSTATEMENTERROR, s);
         } finally {
             DBUtils.autocommit(con);
             DBUtils.closeSQLStuff(rs);
@@ -245,7 +245,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
-    public Set<String> deleteFiles(final String[] identifiers) throws QuotaFileStorageException {
+    public Set<String> deleteFiles(final String[] identifiers) throws QuotaOXException {
         final HashMap<String, Long> fileSizes = new HashMap<String, Long>();
         final SortedSet<String> set = new TreeSet<String>();
         for (final String identifier : identifiers) {
@@ -257,8 +257,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
                 if (!deleted) {
                     set.add(identifier);
                 }
-            } catch (final FileStorageException e) {
-                throw new QuotaFileStorageException(e);
+            } catch (final OXException e) {
+                throw new QuotaOXException(e);
             }
 
         }
@@ -271,12 +271,12 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         return set;
     }
 
-    public long getUsage() throws QuotaFileStorageException {
+    public long getUsage() throws QuotaOXException {
         final Connection con;
         try {
             con = db.getReadOnly(context);
         } catch (final DBPoolingException p) {
-            throw new QuotaFileStorageException(p);
+            throw new QuotaOXException(p);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -288,10 +288,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             if (result.next()) {
                 usage = result.getLong(1);
             } else {
-                throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
+                throw new QuotaOXException(Code.NO_USAGE, I(context.getContextId()));
             }
         } catch (final SQLException e) {
-            throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, e);
+            throw new QuotaOXException(QuotaOXException.Code.SQLSTATEMENTERROR, e);
         } finally {
             DBUtils.closeSQLStuff(result);
             DBUtils.closeSQLStuff(stmt);
@@ -300,7 +300,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         return usage;
     }
 
-    public String saveNewFile(final InputStream is) throws QuotaFileStorageException {
+    public String saveNewFile(final InputStream is) throws QuotaOXException {
         String file = null;
         String retval = null;
         final boolean full;
@@ -316,18 +316,18 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
                 retval = null;
                 fileStorage.deleteFile(file);
             }
-        } catch (final QuotaFileStorageException q) {
+        } catch (final QuotaOXException q) {
             try {
                 fileStorage.deleteFile(file);
-            } catch (final FileStorageException f) {
-                throw new QuotaFileStorageException(f);
+            } catch (final OXException f) {
+                throw new QuotaOXException(f);
             }
-            throw new QuotaFileStorageException(q);
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+            throw new QuotaOXException(q);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
         if (full) {
-            throw new QuotaFileStorageException(QuotaFileStorageException.Code.STORE_FULL);
+            throw new QuotaOXException(QuotaOXException.Code.STORE_FULL);
         }
         return retval;
 
@@ -336,7 +336,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     /**
      * Recalculates the Usage if it's inconsistent based on all physically existing files and writes it into quota_usage.
      */
-    public void recalculateUsage() throws QuotaFileStorageException {
+    public void recalculateUsage() throws QuotaOXException {
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Recalculating usage for Context " + context.getContextId());
@@ -352,7 +352,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             try {
                 con = db.getWritable(context);
             } catch (final DBPoolingException e) {
-                throw new QuotaFileStorageException(e);
+                throw new QuotaOXException(e);
             }
 
             PreparedStatement stmt = null;
@@ -364,74 +364,74 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
                 stmt.setInt(2, context.getContextId());
                 int rows = stmt.executeUpdate();
                 if (1 != rows) {
-                    throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
+                    throw new QuotaOXException(Code.UPDATE_FAILED, I(context.getContextId()));
                 }
             } catch (final SQLException s) {
                 DBUtils.rollback(con);
-                throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, s);
+                throw new QuotaOXException(QuotaOXException.Code.SQLSTATEMENTERROR, s);
             } finally {
                 autocommit(con);
                 closeSQLStuff(result, stmt);
                 db.backWritable(context, con);
             }
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 
-    public SortedSet<String> getFileList() throws QuotaFileStorageException {
+    public SortedSet<String> getFileList() throws QuotaOXException {
         try {
             return fileStorage.getFileList();
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 
-    public InputStream getFile(final String file) throws QuotaFileStorageException {
+    public InputStream getFile(final String file) throws QuotaOXException {
         try {
             return fileStorage.getFile(file);
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 
-    public long getFileSize(final String name) throws QuotaFileStorageException {
+    public long getFileSize(final String name) throws QuotaOXException {
         try {
             return fileStorage.getFileSize(name);
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 
-    public String getMimeType(final String name) throws QuotaFileStorageException {
+    public String getMimeType(final String name) throws QuotaOXException {
         try {
             return fileStorage.getMimeType(name);
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 
-    public void remove() throws QuotaFileStorageException {
+    public void remove() throws QuotaOXException {
         try {
             fileStorage.remove();
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 
-    public void recreateStateFile() throws QuotaFileStorageException {
+    public void recreateStateFile() throws QuotaOXException {
         try {
             fileStorage.recreateStateFile();
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 
-    public boolean stateFileIsCorrect() throws FileStorageException {
+    public boolean stateFileIsCorrect() throws OXException {
         try {
             return fileStorage.stateFileIsCorrect();
-        } catch (final FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (final OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 }

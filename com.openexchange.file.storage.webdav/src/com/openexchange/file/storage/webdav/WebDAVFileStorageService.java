@@ -59,7 +59,7 @@ import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.services.WebDAVFileStorageServiceRegistry;
@@ -79,9 +79,9 @@ public final class WebDAVFileStorageService implements FileStorageService {
      * Creates a new WebDAV file storage service.
      * 
      * @return A new WebDAV file storage service
-     * @throws FileStorageException If creation fails
+     * @throws OXException If creation fails
      */
-    public static WebDAVFileStorageService newInstance() throws FileStorageException {
+    public static WebDAVFileStorageService newInstance() throws OXException {
         final WebDAVFileStorageService newInst = new WebDAVFileStorageService();
         newInst.applyAccountManager();
         return newInst;
@@ -105,13 +105,13 @@ public final class WebDAVFileStorageService implements FileStorageService {
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(WebDAVConstants.WEBDAV_PASSWORD)));
     }
 
-    private void applyAccountManager() throws FileStorageException {
+    private void applyAccountManager() throws OXException {
         try {
             accountManager =
                 WebDAVFileStorageServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
                     this);
-        } catch (final FileStorageException e) {
-            if (!FileStorageException.COMPONENT.equals(e.getComponent()) || MISSING_MANAGER_DETAIL_NUMBER != e.getDetailNumber()) {
+        } catch (final OXException e) {
+            if (!OXException.COMPONENT.equals(e.getComponent()) || MISSING_MANAGER_DETAIL_NUMBER != e.getDetailNumber()) {
                 throw e;
             }
             /*
@@ -119,7 +119,7 @@ public final class WebDAVFileStorageService implements FileStorageService {
              */
             throw e;
         } catch (final ServiceException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
     }
 
@@ -143,7 +143,7 @@ public final class WebDAVFileStorageService implements FileStorageService {
         return accountManager;
     }
 
-    public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws FileStorageException {
+    public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         return new WebDAVFileStorageAccountAccess(this, accountManager.getAccount(accountId, session), session);
     }
 

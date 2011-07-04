@@ -51,30 +51,30 @@ package com.openexchange.file.storage.webdav.exception;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.file.storage.webdav.WebDAVFileStorageException;
+import com.openexchange.file.storage.webdav.WebDAVOXException;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageExceptionCodes;
 
 /**
- * {@link WebDAVFileStorageExceptionFactory} - Factory for creating {@link WebDAVFileStorageException}.
+ * {@link WebDAVOXExceptionFactory} - Factory for creating {@link WebDAVOXException}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class WebDAVFileStorageExceptionFactory extends Exceptions<WebDAVFileStorageException> {
+public final class WebDAVOXExceptionFactory extends Exceptions<WebDAVOXException> {
 
-    private static final WebDAVFileStorageExceptionFactory SINGLETON = new WebDAVFileStorageExceptionFactory();
+    private static final WebDAVOXExceptionFactory SINGLETON = new WebDAVOXExceptionFactory();
 
     /**
      * Prevent instantiation.
      */
-    private WebDAVFileStorageExceptionFactory() {
+    private WebDAVOXExceptionFactory() {
         super();
     }
 
     /**
      * @return the singleton instance.
      */
-    public static WebDAVFileStorageExceptionFactory getInstance() {
+    public static WebDAVOXExceptionFactory getInstance() {
         return SINGLETON;
     }
 
@@ -82,8 +82,8 @@ public final class WebDAVFileStorageExceptionFactory extends Exceptions<WebDAVFi
      * {@inheritDoc}
      */
     @Override
-    protected WebDAVFileStorageException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
-        return new WebDAVFileStorageException(message, cause, args);
+    protected WebDAVOXException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        return new WebDAVOXException(message, cause, args);
     }
 
     /**

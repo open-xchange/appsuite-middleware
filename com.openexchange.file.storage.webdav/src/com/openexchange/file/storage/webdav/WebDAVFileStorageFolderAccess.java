@@ -71,7 +71,7 @@ import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -96,7 +96,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         rootUri = checkFolderId(((String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL)).trim());
     }
 
-    public boolean exists(final String folderId) throws FileStorageException {
+    public boolean exists(final String folderId) throws OXException {
         try {
             /*
              * Check
@@ -145,7 +145,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             } finally {
                 closeHttpMethod(propFindMethod);
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -158,7 +158,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         }
     }
 
-    public FileStorageFolder getFolder(final String folderId) throws FileStorageException {
+    public FileStorageFolder getFolder(final String folderId) throws OXException {
         try {
             /*
              * Check
@@ -248,7 +248,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
              * Return
              */
             return ret;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -261,7 +261,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         }
     }
 
-    public FileStorageFolder[] getSubfolders(final String parentId, final boolean all) throws FileStorageException {
+    public FileStorageFolder[] getSubfolders(final String parentId, final boolean all) throws OXException {
         try {
             /*
              * Check
@@ -338,7 +338,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
              * Return
              */
             return ret;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -351,11 +351,11 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         }
     }
 
-    public FileStorageFolder getRootFolder() throws FileStorageException {
+    public FileStorageFolder getRootFolder() throws OXException {
         return getFolder(rootUri);
     }
 
-    public String createFolder(final FileStorageFolder toCreate) throws FileStorageException {
+    public String createFolder(final FileStorageFolder toCreate) throws OXException {
         try {
             final URI uri = new URI(checkFolderId(toCreate.getParentId(), rootUri), true);
             final String prevPath = uri.getPath();
@@ -383,7 +383,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         }
     }
 
-    public String updateFolder(final String folderId, final FileStorageFolder toUpdate) throws FileStorageException {
+    public String updateFolder(final String folderId, final FileStorageFolder toUpdate) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
@@ -393,14 +393,14 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
              * WebDAV does neither support permissions nor subscriptions
              */
             return fid;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    public String moveFolder(final String folderId, final String newParentId) throws FileStorageException {
+    public String moveFolder(final String folderId, final String newParentId) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
@@ -438,7 +438,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             } finally {
                 closeHttpMethod(method);
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -451,7 +451,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         }
     }
 
-    public String renameFolder(final String folderId, final String newName) throws FileStorageException {
+    public String renameFolder(final String folderId, final String newName) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
@@ -482,7 +482,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             } finally {
                 closeHttpMethod(method);
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -495,11 +495,11 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         }
     }
 
-    public String deleteFolder(final String folderId) throws FileStorageException {
+    public String deleteFolder(final String folderId) throws OXException {
         return deleteFolder(folderId, true);
     }
 
-    public String deleteFolder(final String folderId, final boolean hardDelete) throws FileStorageException {
+    public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
@@ -516,7 +516,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             } finally {
                 closeHttpMethod(method);
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -529,15 +529,15 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         }
     }
 
-    public void clearFolder(final String folderId) throws FileStorageException {
+    public void clearFolder(final String folderId) throws OXException {
         clearFolder(folderId, true);
     }
 
-    public void clearFolder(final String folderId, final boolean hardDelete) throws FileStorageException {
+    public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         clearFolder0(folderId, false);
     }
 
-    private void clearFolder0(final String folderId, final boolean deleteRoot) throws FileStorageException {
+    private void clearFolder0(final String folderId, final boolean deleteRoot) throws OXException {
         try {
             /*
              * Check
@@ -651,7 +651,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                     throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -664,7 +664,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         }
     }
 
-    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws FileStorageException {
+    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
         final String fid = checkFolderId(folderId, rootUri);
         FileStorageFolder f = getFolder(fid);
@@ -676,15 +676,15 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         return list.toArray(new FileStorageFolder[list.size()]);
     }
 
-    public Quota getStorageQuota(final String folderId) throws FileStorageException {
+    public Quota getStorageQuota(final String folderId) throws OXException {
         return Quota.getUnlimitedQuota(Quota.Type.STORAGE);
     }
 
-    public Quota getFileQuota(final String folderId) throws FileStorageException {
+    public Quota getFileQuota(final String folderId) throws OXException {
         return Quota.getUnlimitedQuota(Quota.Type.FILE);
     }
 
-    public Quota[] getQuotas(final String folder, final Type[] types) throws FileStorageException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         final Quota[] ret = new Quota[types.length];
         for (int i = 0; i < ret.length; i++) {
             ret[i] = Quota.getUnlimitedQuota(types[i]);

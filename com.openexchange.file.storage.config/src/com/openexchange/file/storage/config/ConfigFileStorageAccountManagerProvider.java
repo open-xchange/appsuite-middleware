@@ -52,7 +52,7 @@ package com.openexchange.file.storage.config;
 import java.util.Map;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 
 /**
@@ -78,7 +78,7 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
         return (null != accounts && !accounts.isEmpty());
     }
 
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws FileStorageException {
+    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
         return new ConfigFileStorageAccountManager(service);
     }
 

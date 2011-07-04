@@ -132,7 +132,7 @@ import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileWithQuotaAction;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -250,7 +250,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             fs = getFileStorage(ctx);
         } catch (final FilestoreException e) {
             throw new InfostoreException(e);
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new InfostoreException(e);
         }
         try {
@@ -259,7 +259,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             } else {
                 return new ByteArrayInputStream(new byte[0]);
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new InfostoreException(e);
         }
     }
@@ -612,7 +612,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                         perform(createVersionAction, true);
 
-                    } catch (final FileStorageException e) {
+                    } catch (final OXException e) {
                         throw new InfostoreException(e);
                     } catch (final ContextException e) {
                         throw new InfostoreException(e);
@@ -754,7 +754,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return stringBuilder.toString();
     }
 
-    protected QuotaFileStorage getFileStorage(final Context ctx) throws FilestoreException, FileStorageException {
+    protected QuotaFileStorage getFileStorage(final Context ctx) throws FilestoreException, OXException {
         return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
@@ -891,7 +891,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                         perform(createVersionAction, true);
 
-                    } catch (final FileStorageException e) {
+                    } catch (final OXException e) {
                         throw new InfostoreException(e);
                     } catch (final ContextException e) {
                         throw new InfostoreException(e);
@@ -1084,7 +1084,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             try {
                 final QuotaFileStorage qfs = getFileStorage(context);
                 qfs.deleteFile(filestoreLocation);
-            } catch (final FileStorageException x) {
+            } catch (final OXException x) {
                 throw new InfostoreException(x);
             } catch (final FilestoreException e) {
                 throw new InfostoreException(e);
@@ -1651,13 +1651,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 for (final String id : fileIdRemoveList.get()) {
                     try {
                         qfs.deleteFile(id);
-                    } catch (final FileStorageException x) {
+                    } catch (final OXException x) {
                         throw new TransactionException(x);
                     }
                 }
             } catch (final FilestoreException e) {
                 throw new TransactionException(e);
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 rollback();
                 throw new TransactionException(e);
             }

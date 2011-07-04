@@ -67,8 +67,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.external.FileStorageException.Code;
+import com.openexchange.tools.file.external.OXException;
+import com.openexchange.tools.file.external.OXException.Code;
 
 /**
  * A {@link HashingFileStorage} generates UUIDs for every file that is stored in it. 
@@ -89,11 +89,11 @@ public class HashingFileStorage implements FileStorage {
         return new File(storage, identifier);
     }
 
-    public boolean deleteFile(String identifier) throws FileStorageException {
+    public boolean deleteFile(String identifier) throws OXException {
         return file(identifier).delete();
     }
 
-    public Set<String> deleteFiles(String[] identifiers) throws FileStorageException {
+    public Set<String> deleteFiles(String[] identifiers) throws OXException {
         Set<String> notDeleted = new HashSet<String>();
         for (String identifier : identifiers) {
             if (!deleteFile(identifier)) {
@@ -104,15 +104,15 @@ public class HashingFileStorage implements FileStorage {
         return notDeleted;
     }
 
-    public InputStream getFile(String name) throws FileStorageException {
+    public InputStream getFile(String name) throws OXException {
         try {
             return new BufferedInputStream(new FileInputStream(file(name)));
         } catch (FileNotFoundException e) {
-            throw new FileStorageException(Code.FILE_NOT_FOUND, name);
+            throw new OXException(Code.FILE_NOT_FOUND, name);
         }
     }
 
-    public SortedSet<String> getFileList() throws FileStorageException {
+    public SortedSet<String> getFileList() throws OXException {
         final SortedSet<String> files = new TreeSet<String>();
         final int beginIndex = storage.getAbsolutePath().length()+1;
         visit(new Visitor() {
@@ -127,20 +127,20 @@ public class HashingFileStorage implements FileStorage {
         return files;
     }
 
-    public long getFileSize(String name) throws FileStorageException {
+    public long getFileSize(String name) throws OXException {
         return file(name).length();
     }
 
-    public String getMimeType(String name) throws FileStorageException {
+    public String getMimeType(String name) throws OXException {
         final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
         return map.getContentType(file(name));
     }
 
-    public void recreateStateFile() throws FileStorageException {
+    public void recreateStateFile() throws OXException {
         // Nope, no state file used.
     }
 
-    public void remove() throws FileStorageException {
+    public void remove() throws OXException {
         visit(new Visitor() {
 
             public void visit(File f) {
@@ -150,11 +150,11 @@ public class HashingFileStorage implements FileStorage {
         });
     }
 
-    public String saveNewFile(InputStream file) throws FileStorageException {
+    public String saveNewFile(InputStream file) throws OXException {
         String[] filestorePath = generateName();
         File path = new File(storage, filestorePath[0]);
         if (!path.exists() && !path.mkdirs() && !path.exists()) {
-            throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, path.toString());
+            throw new OXException(OXException.Code.CREATE_DIR_FAILED, path.toString());
         }
 
         BufferedOutputStream bufOut = null;
@@ -169,9 +169,9 @@ public class HashingFileStorage implements FileStorage {
                 bufOut.write(i);
             }
         } catch (FileNotFoundException e) {
-            throw new FileStorageException(Code.FILE_NOT_FOUND, filePath.toString());
+            throw new OXException(Code.FILE_NOT_FOUND, filePath.toString());
         } catch (IOException e) {
-            throw new FileStorageException(Code.IOERROR, e.toString());
+            throw new OXException(Code.IOERROR, e.toString());
         } finally {
             if (bufIn != null) {
                 try {
@@ -218,7 +218,7 @@ public class HashingFileStorage implements FileStorage {
         return new String[] { b.toString(), uuid };
     }
 
-    public boolean stateFileIsCorrect() throws FileStorageException {
+    public boolean stateFileIsCorrect() throws OXException {
         return true; // We're not using a state file
     }
     

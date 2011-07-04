@@ -69,7 +69,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX.
@@ -99,7 +99,7 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected FileStorage getFileStorage(final Context ctx) throws FileStorageException, FilestoreException {
+    protected FileStorage getFileStorage(final Context ctx) throws OXException, FilestoreException {
         return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 

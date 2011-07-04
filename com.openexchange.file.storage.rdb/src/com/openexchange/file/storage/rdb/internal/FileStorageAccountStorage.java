@@ -51,7 +51,7 @@ package com.openexchange.file.storage.rdb.internal;
 
 import java.util.List;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -69,9 +69,9 @@ public interface FileStorageAccountStorage {
      * @param id The account ID
      * @param session The session
      * @return The account
-     * @throws FileStorageException If returning account fails
+     * @throws OXException If returning account fails
      */
-    public FileStorageAccount getAccount(String serviceId, int id, Session session) throws FileStorageException;
+    public FileStorageAccount getAccount(String serviceId, int id, Session session) throws OXException;
 
     /**
      * Gets all accounts associated with specified service and given user.
@@ -79,9 +79,9 @@ public interface FileStorageAccountStorage {
      * @param serviceId The service ID
      * @param session The session
      * @return All accounts associated with specified service and given user
-     * @throws FileStorageException If accounts cannot be returned
+     * @throws OXException If accounts cannot be returned
      */
-    public List<FileStorageAccount> getAccounts(String serviceId, Session session) throws FileStorageException;
+    public List<FileStorageAccount> getAccounts(String serviceId, Session session) throws OXException;
 
     /**
      * Adds given account.
@@ -90,9 +90,9 @@ public interface FileStorageAccountStorage {
      * @param account The account
      * @param session The session
      * @return The identifier of the newly created account
-     * @throws FileStorageException If insertion fails
+     * @throws OXException If insertion fails
      */
-    public int addAccount(String serviceId, FileStorageAccount account, Session session) throws FileStorageException;
+    public int addAccount(String serviceId, FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Deletes denoted account.
@@ -100,9 +100,9 @@ public interface FileStorageAccountStorage {
      * @param serviceId The service identifier
      * @param account The account
      * @param session The session
-     * @throws FileStorageException If deletion fails
+     * @throws OXException If deletion fails
      */
-    public void deleteAccount(String serviceId, FileStorageAccount account, Session session) throws FileStorageException;
+    public void deleteAccount(String serviceId, FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Updates given account.
@@ -110,8 +110,8 @@ public interface FileStorageAccountStorage {
      * @param serviceId The service identifier
      * @param account The account
      * @param session The session
-     * @throws FileStorageException If update fails
+     * @throws OXException If update fails
      */
-    public void updateAccount(String serviceId, FileStorageAccount account, Session session) throws FileStorageException;
+    public void updateAccount(String serviceId, FileStorageAccount account, Session session) throws OXException;
 
 }

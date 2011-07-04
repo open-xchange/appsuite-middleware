@@ -50,7 +50,7 @@
 package com.openexchange.file.storage.cifs;
 
 import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
@@ -60,7 +60,7 @@ import com.openexchange.groupware.Component;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class CIFSException extends FileStorageException {
+public class CIFSException extends OXException {
 
     private static final long serialVersionUID = 8319301827228045384L;
 

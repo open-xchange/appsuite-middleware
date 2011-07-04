@@ -58,7 +58,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import org.apache.commons.httpclient.URI;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -80,7 +80,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         super(rootUrl, auth, account, session);
     }
 
-    public boolean exists(final String folderId) throws FileStorageException {
+    public boolean exists(final String folderId) throws OXException {
         try {
             /*
              * Check
@@ -97,7 +97,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             return true;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
@@ -108,7 +108,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    public FileStorageFolder getFolder(final String folderId) throws FileStorageException {
+    public FileStorageFolder getFolder(final String folderId) throws OXException {
         try {
             /*
              * Check
@@ -146,7 +146,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * TODO: Set capabilities
              */
             return cifsFolder;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
@@ -157,7 +157,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    public FileStorageFolder[] getSubfolders(final String parentId, final boolean all) throws FileStorageException {
+    public FileStorageFolder[] getSubfolders(final String parentId, final boolean all) throws OXException {
         try {
             /*
              * Check
@@ -184,7 +184,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return
              */
             return list.toArray(new FileStorageFolder[list.size()]);
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
@@ -195,11 +195,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    public FileStorageFolder getRootFolder() throws FileStorageException {
+    public FileStorageFolder getRootFolder() throws OXException {
         return getFolder(rootUrl);
     }
 
-    public String createFolder(final FileStorageFolder toCreate) throws FileStorageException {
+    public String createFolder(final FileStorageFolder toCreate) throws OXException {
         try {
             final String parentId = toCreate.getParentId();
             final String pid = checkFolderId(parentId, rootUrl);
@@ -217,7 +217,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             final SmbFile newDir = new SmbFile(fid, auth);
             newDir.mkdir();
             return fid;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
@@ -228,7 +228,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    public String updateFolder(final String folderId, final FileStorageFolder toUpdate) throws FileStorageException {
+    public String updateFolder(final String folderId, final FileStorageFolder toUpdate) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
             if (rootUrl.equalsIgnoreCase(fid)) {
@@ -238,14 +238,14 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * CIFS/SMB does neither support permissions nor subscriptions
              */
             return fid;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    public String moveFolder(final String folderId, final String newParentId) throws FileStorageException {
+    public String moveFolder(final String folderId, final String newParentId) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
             if (rootUrl.equalsIgnoreCase(fid)) {
@@ -295,7 +295,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return URL
              */
             return newUri;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
@@ -306,7 +306,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    public String renameFolder(final String folderId, final String newName) throws FileStorageException {
+    public String renameFolder(final String folderId, final String newName) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
             if (rootUrl.equalsIgnoreCase(fid)) {
@@ -349,7 +349,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return URL
              */
             return newUri;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
@@ -360,11 +360,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    public String deleteFolder(final String folderId) throws FileStorageException {
+    public String deleteFolder(final String folderId) throws OXException {
         return deleteFolder(folderId, true);
     }
 
-    public String deleteFolder(final String folderId, final boolean hardDelete) throws FileStorageException {
+    public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
             if (rootUrl.equalsIgnoreCase(fid)) {
@@ -388,7 +388,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return
              */
             return fid;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
@@ -399,15 +399,15 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    public void clearFolder(final String folderId) throws FileStorageException {
+    public void clearFolder(final String folderId) throws OXException {
         clearFolder(folderId, true);
     }
 
-    public void clearFolder(final String folderId, final boolean hardDelete) throws FileStorageException {
+    public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         clearFolder0(folderId);
     }
 
-    private void clearFolder0(final String folderId) throws FileStorageException {
+    private void clearFolder0(final String folderId) throws OXException {
         try {
             /*
              * Check
@@ -430,7 +430,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             for (final SmbFile sub : listFiles) {
                 sub.delete();
             }
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
@@ -441,7 +441,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws FileStorageException {
+    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
         final String fid = checkFolderId(folderId, rootUrl);
         FileStorageFolder f = getFolder(fid);
@@ -453,15 +453,15 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         return list.toArray(new FileStorageFolder[list.size()]);
     }
 
-    public Quota getStorageQuota(final String folderId) throws FileStorageException {
+    public Quota getStorageQuota(final String folderId) throws OXException {
         return Quota.getUnlimitedQuota(Quota.Type.STORAGE);
     }
 
-    public Quota getFileQuota(final String folderId) throws FileStorageException {
+    public Quota getFileQuota(final String folderId) throws OXException {
         return Quota.getUnlimitedQuota(Quota.Type.FILE);
     }
 
-    public Quota[] getQuotas(final String folder, final Type[] types) throws FileStorageException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         final Quota[] ret = new Quota[types.length];
         for (int i = 0; i < ret.length; i++) {
             ret[i] = Quota.getUnlimitedQuota(types[i]);

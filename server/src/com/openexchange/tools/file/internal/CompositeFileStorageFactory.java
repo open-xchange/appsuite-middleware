@@ -3,7 +3,7 @@ package com.openexchange.tools.file.internal;
 import java.io.File;
 import java.net.URI;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.FileStorageFactory;
 
 /**
@@ -13,7 +13,7 @@ import com.openexchange.tools.file.external.FileStorageFactory;
  */
 public class CompositeFileStorageFactory implements FileStorageFactory {
 
-    public FileStorage getFileStorage(URI uri) throws FileStorageException {
+    public FileStorage getFileStorage(URI uri) throws OXException {
         LocalFileStorage standardFS = new LocalFileStorage(uri);
         HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
         CompositingFileStorage cStorage = new CompositingFileStorage();

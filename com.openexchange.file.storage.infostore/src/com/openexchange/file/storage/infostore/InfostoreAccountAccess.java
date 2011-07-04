@@ -50,7 +50,7 @@
 package com.openexchange.file.storage.infostore;
 
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -73,12 +73,12 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
     private InfostoreFolderAccess folders;
     private InfostoreAdapterFileAccess files;
 
-    public InfostoreAccountAccess(Session session, InfostoreFileStorageService service) throws FileStorageException {
+    public InfostoreAccountAccess(Session session, InfostoreFileStorageService service) throws OXException {
         try {
             this.session = new ServerSessionAdapter(session);
             this.service = service;
         } catch (ContextException e) {
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
     }
 
@@ -86,21 +86,21 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         return InfostoreDefaultAccountManager.DEFAULT_ID;
     }
 
-    public FileStorageFileAccess getFileAccess() throws FileStorageException {
+    public FileStorageFileAccess getFileAccess() throws OXException {
         if(files != null) {
             return files;
         }
         return files = new InfostoreAdapterFileAccess(session, service.getInfostore(), service.getSearch(), this);
     }
 
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException {
+    public FileStorageFolderAccess getFolderAccess() throws OXException {
         if(folders != null) {
             return folders;
         }
         return folders = new InfostoreFolderAccess(session);
     }
 
-    public FileStorageFolder getRootFolder() throws FileStorageException {
+    public FileStorageFolder getRootFolder() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -113,7 +113,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
 
     }
 
-    public void connect() throws FileStorageException {
+    public void connect() throws OXException {
 
     }
 
@@ -121,7 +121,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         return true;
     }
 
-    public boolean ping() throws FileStorageException {
+    public boolean ping() throws OXException {
         return true;
     }
 

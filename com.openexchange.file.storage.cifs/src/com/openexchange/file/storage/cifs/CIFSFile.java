@@ -56,7 +56,7 @@ import java.util.Set;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 
@@ -91,10 +91,10 @@ public final class CIFSFile extends DefaultFile {
      * Parses specified SMB file.
      * 
      * @param smbFile The SMB file
-     * @throws FileStorageException If parsing SMB file fails
+     * @throws OXException If parsing SMB file fails
      * @return This CIFS file
      */
-    public CIFSFile parseSmbFile(final SmbFile smbFile) throws FileStorageException {
+    public CIFSFile parseSmbFile(final SmbFile smbFile) throws OXException {
         return parseSmbFile(smbFile, null);
     }
 
@@ -103,10 +103,10 @@ public final class CIFSFile extends DefaultFile {
      * 
      * @param smbFile The SMB file
      * @param fields The fields to consider
-     * @throws FileStorageException If parsing SMB file fails
+     * @throws OXException If parsing SMB file fails
      * @return This CIFS file with property set applied
      */
-    public CIFSFile parseSmbFile(final SmbFile smbFile, final List<Field> fields) throws FileStorageException {
+    public CIFSFile parseSmbFile(final SmbFile smbFile, final List<Field> fields) throws OXException {
         if (null != smbFile) {
             try {
                 {

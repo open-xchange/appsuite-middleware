@@ -66,7 +66,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyIterator;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 
@@ -134,9 +134,9 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
      * Parses specified DAV property set of associated MultiStatus response.
      * 
      * @param propertySet The DAV property set of associated MultiStatus response
-     * @throws FileStorageException If parsing DAV property set fails
+     * @throws OXException If parsing DAV property set fails
      */
-    public void parseDavPropertySet(final DavPropertySet propertySet) throws FileStorageException {
+    public void parseDavPropertySet(final DavPropertySet propertySet) throws OXException {
         if (null != propertySet) {
             creationDate = parseDateProperty(DavConstants.PROPERTY_CREATIONDATE, propertySet);
             lastModifiedDate = parseDateProperty(DavConstants.PROPERTY_GETLASTMODIFIED, propertySet);

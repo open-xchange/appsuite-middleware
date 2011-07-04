@@ -53,7 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormContentParser;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -72,7 +72,7 @@ public class FileStorageAccountParser {
         registry = serviceRegistry;
     }
 
-    public FileStorageAccount parse(final JSONObject accountJSON) throws FileStorageException, JSONException {
+    public FileStorageAccount parse(final JSONObject accountJSON) throws OXException, JSONException {
         final DefaultFileStorageAccount account = new DefaultFileStorageAccount();
 
         account.setId(accountJSON.optString(FileStorageAccountConstants.ID));

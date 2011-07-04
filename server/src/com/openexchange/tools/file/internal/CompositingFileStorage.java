@@ -58,7 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 
 /**
  * {@link CompositingFileStorage}
@@ -73,12 +73,12 @@ public class CompositingFileStorage implements FileStorage {
 
     private String savePrefix;
 
-    public boolean deleteFile(String identifier) throws FileStorageException {
+    public boolean deleteFile(String identifier) throws OXException {
         PreparedName prepared = prepareName(identifier);
         return prepared.fs.deleteFile(prepared.name);
     }
 
-    public Set<String> deleteFiles(String[] identifiers) throws FileStorageException {
+    public Set<String> deleteFiles(String[] identifiers) throws OXException {
         Map<FileStorage, List<String>> partitions = new HashMap<FileStorage, List<String>>();
         Map<FileStorage, String> prefixes = new HashMap<FileStorage, String>();
         
@@ -115,12 +115,12 @@ public class CompositingFileStorage implements FileStorage {
         return notDeleted;
     }
 
-    public InputStream getFile(String name) throws FileStorageException {
+    public InputStream getFile(String name) throws OXException {
         PreparedName prepared = prepareName(name);
         return prepared.fs.getFile(prepared.name);
     }
 
-    public SortedSet<String> getFileList() throws FileStorageException {
+    public SortedSet<String> getFileList() throws OXException {
         SortedSet<String> fileList = standardFS.getFileList();
         for(Map.Entry<String, FileStorage> entry: prefixedStores.entrySet()) {
             String prefix = entry.getKey();
@@ -134,42 +134,42 @@ public class CompositingFileStorage implements FileStorage {
         return fileList;
     }
 
-    public long getFileSize(String name) throws FileStorageException {
+    public long getFileSize(String name) throws OXException {
         PreparedName preparedName = prepareName(name);
         return preparedName.fs.getFileSize(preparedName.name);
     }
 
-    public String getMimeType(String name) throws FileStorageException {
+    public String getMimeType(String name) throws OXException {
         return standardFS.getMimeType(name);
     }
 
-    public void recreateStateFile() throws FileStorageException {
+    public void recreateStateFile() throws OXException {
         standardFS.recreateStateFile();
         for(FileStorage fs: prefixedStores.values()) {
             fs.recreateStateFile();
         }
     }
 
-    public void remove() throws FileStorageException {
+    public void remove() throws OXException {
         standardFS.remove();
         for(FileStorage fs: prefixedStores.values()) {
             fs.remove();
         }
     }
 
-    public String saveNewFile(InputStream file) throws FileStorageException {
+    public String saveNewFile(InputStream file) throws OXException {
         if (savePrefix != null) {
             return saveNewFileInPrefixedSto(savePrefix, file);
         }
         return standardFS.saveNewFile(file);
     }
 
-    protected String saveNewFileInPrefixedSto(String prefix, InputStream file) throws FileStorageException {
+    protected String saveNewFileInPrefixedSto(String prefix, InputStream file) throws OXException {
         FileStorage fileStorage = prefixedStores.get(prefix);
         return prefix + "/" + fileStorage.saveNewFile(file);
     }
 
-    public boolean stateFileIsCorrect() throws FileStorageException {
+    public boolean stateFileIsCorrect() throws OXException {
         boolean stateFileIsCorrect = standardFS.stateFileIsCorrect();
         if(!stateFileIsCorrect) {
             return false;

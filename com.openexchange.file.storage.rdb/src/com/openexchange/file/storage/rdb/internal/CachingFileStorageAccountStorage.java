@@ -61,7 +61,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
 import com.openexchange.groupware.AbstractOXException;
@@ -136,28 +136,28 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         serviceRegistry = FileStorageRdbServiceRegistry.getServiceRegistry();
     }
 
-    private void invalidateFileStorageAccount(final String serviceId, final int id, final int user, final int cid) throws FileStorageException {
+    private void invalidateFileStorageAccount(final String serviceId, final int id, final int user, final int cid) throws OXException {
         final CacheService cacheService = serviceRegistry.getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
                 cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
             } catch (final CacheException e) {
-                throw new FileStorageException(e);
+                throw new OXException(e);
             }
         }
     }
 
-    public int addAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+    public int addAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
         return delegatee.addAccount(serviceId, account, session);
     }
 
-    public void deleteAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void deleteAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
         delegatee.deleteAccount(serviceId, account, session);
         invalidateFileStorageAccount(serviceId, Integer.parseInt(account.getId()), session.getUserId(), session.getContextId());
     }
 
-    public FileStorageAccount getAccount(final String serviceId, final int id, final Session session) throws FileStorageException {
+    public FileStorageAccount getAccount(final String serviceId, final int id, final Session session) throws OXException {
         final CacheService cacheService = serviceRegistry.getService(CacheService.class);
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session);
@@ -170,14 +170,14 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
                 session.getUserId(),
                 session.getContextId()), delegatee), REGION_NAME);
         } catch (final AbstractOXException e) {
-            if (e instanceof FileStorageException) {
-                throw (FileStorageException) e;
+            if (e instanceof OXException) {
+                throw (OXException) e;
             }
-            throw new FileStorageException(e);
+            throw new OXException(e);
         }
     }
 
-    public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws FileStorageException {
+    public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws OXException {
         final TIntArrayList ids = delegatee.getAccountIDs(serviceId, session);
         if (ids.isEmpty()) {
             return Collections.emptyList();
@@ -185,13 +185,13 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         final List<FileStorageAccount> accounts = new ArrayList<FileStorageAccount>(ids.size());
         class AdderProcedure implements TIntProcedure {
 
-            FileStorageException fsException;
+            OXException fsException;
 
             public boolean execute(final int id) {
                 try {
                     accounts.add(getAccount(serviceId, id, session));
                     return true;
-                } catch (final FileStorageException e) {
+                } catch (final OXException e) {
                     fsException = e;
                     return false;
                 }
@@ -205,16 +205,16 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         return accounts;
     }
 
-    public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
         delegatee.updateAccount(serviceId, account, session);
         invalidateFileStorageAccount(serviceId, Integer.parseInt(account.getId()), session.getUserId(), session.getContextId());
     }
 
-    public boolean checkSecretCanDecryptStrings(final FileStorageService parentService, final Session session, final String secret) throws FileStorageException {
+    public boolean checkSecretCanDecryptStrings(final FileStorageService parentService, final Session session, final String secret) throws OXException {
         return delegatee.checkSecretCanDecryptStrings(parentService, session, secret);
     }
 
-    public void migrateToNewSecret(final FileStorageService parentService, final String oldSecret, final String newSecret, final Session session) throws FileStorageException {
+    public void migrateToNewSecret(final FileStorageService parentService, final String oldSecret, final String newSecret, final Session session) throws OXException {
         delegatee.migrateToNewSecret(parentService, oldSecret, newSecret, session);
     }
 

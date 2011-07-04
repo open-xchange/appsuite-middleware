@@ -53,5 +53,5 @@ import java.net.URI;
 
 public interface FileStorageFactory {
 
-    public FileStorage getFileStorage(URI uri) throws FileStorageException;
+    public FileStorage getFileStorage(URI uri) throws OXException;
 }

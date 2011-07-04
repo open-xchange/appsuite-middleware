@@ -60,7 +60,7 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.AbstractOXException;
@@ -156,7 +156,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
                     try {
                         fileAccess.removeDocument(toRemove, now);
                         fileAccess.commit();
-                    } catch (final FileStorageException e) {
+                    } catch (final OXException e) {
                         fileAccess.rollback();
                         throw new LoginException(e);
                     } catch (final TransactionException e) {

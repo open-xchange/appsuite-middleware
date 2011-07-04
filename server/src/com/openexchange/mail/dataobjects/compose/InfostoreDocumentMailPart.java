@@ -58,7 +58,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -117,7 +117,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             final DocumentInputStreamProvider tmp = new DocumentInputStreamProvider(fileAccess, documentId);
             tmp.setName(getFileName());
             inputStreamProvider = tmp;
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         } catch (ServiceException e) {
             throw new MailException(e);
@@ -229,7 +229,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
         public InputStream getInputStream() throws IOException {
             try {
                 return fileAccess.getDocument(documentId, FileStorageFileAccess.CURRENT_VERSION);
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 final IOException io = new IOException("Input stream cannot be retrieved");
                 io.initCause(e);
                 throw io;

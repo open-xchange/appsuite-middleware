@@ -52,10 +52,10 @@ package com.openexchange.tools.file.internal;
 import java.net.URI;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorageException;
+import com.openexchange.tools.file.external.QuotaOXException;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
@@ -69,14 +69,14 @@ public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
         this.dbs = dbs;
     }
 
-    public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws QuotaFileStorageException {
+    public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws QuotaOXException {
         if (fss == null || dbs == null) {
-            throw new QuotaFileStorageException(QuotaFileStorageException.Code.INSTANTIATIONERROR);
+            throw new QuotaOXException(QuotaOXException.Code.INSTANTIATIONERROR);
         }
         try {
             return new DBQuotaFileStorage(ctx, fss.getFileStorage(uri), dbs);
-        } catch (FileStorageException e) {
-            throw new QuotaFileStorageException(e);
+        } catch (OXException e) {
+            throw new QuotaOXException(e);
         }
     }
 }

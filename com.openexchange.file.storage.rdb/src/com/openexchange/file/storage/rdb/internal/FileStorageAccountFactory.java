@@ -53,7 +53,7 @@ import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -92,7 +92,7 @@ public final class FileStorageAccountFactory implements FileStorageFactory<FileS
         return cacheKey;
     }
 
-    public FileStorageAccount load() throws FileStorageException {
+    public FileStorageAccount load() throws OXException {
         return accountStorage.getAccount(serviceId, accountId, session);
     }
 

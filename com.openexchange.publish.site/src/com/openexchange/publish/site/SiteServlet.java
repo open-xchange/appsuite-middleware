@@ -72,7 +72,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.AbstractOXException;
@@ -202,7 +202,7 @@ public class SiteServlet extends HttpServlet {
 
     // TODO: Whitelisting
 
-    private void updateFile(File file, HttpServletRequest req, IDBasedFileAccess fileAccess) throws IOException, FileStorageException {
+    private void updateFile(File file, HttpServletRequest req, IDBasedFileAccess fileAccess) throws IOException, OXException {
         BufferedReader r = null;
         File f = new DefaultFile();
         f.setId(file.getId());
@@ -231,7 +231,7 @@ public class SiteServlet extends HttpServlet {
         resp.getWriter().print(file.getDescription());
     }
 
-    private void sendFile(File file, HttpServletResponse resp, IDBasedFileAccess files) throws FileStorageException, IOException {
+    private void sendFile(File file, HttpServletResponse resp, IDBasedFileAccess files) throws OXException, IOException {
         resp.setContentType(file.getFileMIMEType());
         resp.setContentLength((int) file.getFileSize());
 

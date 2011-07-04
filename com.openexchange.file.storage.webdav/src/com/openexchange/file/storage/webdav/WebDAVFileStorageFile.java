@@ -59,7 +59,7 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 
@@ -97,10 +97,10 @@ public final class WebDAVFileStorageFile extends DefaultFile {
      * Parses specified DAV property set of associated MultiStatus response.
      * 
      * @param propertySet The DAV property set of associated MultiStatus response
-     * @throws FileStorageException If parsing DAV property set fails
+     * @throws OXException If parsing DAV property set fails
      * @return This WebDAV file with property set applied
      */
-    public WebDAVFileStorageFile parseDavPropertySet(final DavPropertySet propertySet) throws FileStorageException {
+    public WebDAVFileStorageFile parseDavPropertySet(final DavPropertySet propertySet) throws OXException {
         return parseDavPropertySet(propertySet, null);
     }
 
@@ -109,10 +109,10 @@ public final class WebDAVFileStorageFile extends DefaultFile {
      * 
      * @param propertySet The DAV property set of associated MultiStatus response
      * @param fields The fields to consider
-     * @throws FileStorageException If parsing DAV property set fails
+     * @throws OXException If parsing DAV property set fails
      * @return This WebDAV file with property set applied
      */
-    public WebDAVFileStorageFile parseDavPropertySet(final DavPropertySet propertySet, final List<Field> fields) throws FileStorageException {
+    public WebDAVFileStorageFile parseDavPropertySet(final DavPropertySet propertySet, final List<Field> fields) throws OXException {
         if (null != propertySet) {
             final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
             if (set.contains(Field.CREATED)) {

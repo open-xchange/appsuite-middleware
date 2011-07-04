@@ -51,7 +51,7 @@ package com.openexchange.file.storage.rdb.internal;
 
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.RdbFileStorageAccountManager;
 
@@ -75,7 +75,7 @@ public final class RdbFileStorageAccountManagerProvider implements FileStorageAc
         return true;
     }
 
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws FileStorageException {
+    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
         return new RdbFileStorageAccountManager(service);
     }
 

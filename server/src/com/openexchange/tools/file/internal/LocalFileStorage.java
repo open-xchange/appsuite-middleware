@@ -69,8 +69,8 @@ import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.external.FileStorageException.Code;
+import com.openexchange.tools.file.external.OXException;
+import com.openexchange.tools.file.external.OXException.Code;
 
 public class LocalFileStorage implements FileStorage {
 
@@ -148,9 +148,9 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param depth depth of sub directories for storing files.
      * @param entries number of entries per sub directory.
-     * @throws FileStorageException if a problem occurs while creating the file storage.
+     * @throws OXException if a problem occurs while creating the file storage.
      */
-    public LocalFileStorage(final URI uri) throws FileStorageException {
+    public LocalFileStorage(final URI uri) throws OXException {
         super();
         storage = new File(uri);
         
@@ -158,7 +158,7 @@ public class LocalFileStorage implements FileStorage {
             try {
                 LOCK.lock();
                 if (!storage.exists() && !mkdirs(storage)) {
-                    throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
+                    throw new OXException(OXException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
                 }
             } finally {
                 LOCK.unlock();
@@ -192,9 +192,9 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @author Steffen Templin
      * @return True if Statefile is correct
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public boolean stateFileIsCorrect() throws FileStorageException {
+    public boolean stateFileIsCorrect() throws OXException {
         lock(LOCK_TIMEOUT);
         try {
             final State state = loadState();
@@ -254,9 +254,9 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param identifier
      * @return String of the previous File
-     * @throws FileStorageException
+     * @throws OXException
      */
-    protected String getPreviousEntry(final String identifier) throws FileStorageException {
+    protected String getPreviousEntry(final String identifier) throws OXException {
         // Split Path String into Array and make ints from the hex-Strings
         final String[] tokens = identifier.split("/");
         final int[] parts = new int[tokens.length];
@@ -268,7 +268,7 @@ public class LocalFileStorage implements FileStorage {
                 parts[i] = val;
                 sum += val;
             } catch (final NumberFormatException n) {
-                throw new FileStorageException(FileStorageException.Code.NO_NUMBER, n);
+                throw new OXException(OXException.Code.NO_NUMBER, n);
             }
         }
 
@@ -312,7 +312,7 @@ public class LocalFileStorage implements FileStorage {
         return retval.substring(1);
     }
 
-    protected Set<String> getUnusedEntries() throws FileStorageException {
+    protected Set<String> getUnusedEntries() throws OXException {
         final State state = loadState();
         final SortedSet<String> unusedEntries = new TreeSet<String>();
 
@@ -328,9 +328,9 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param input the files data will be written from this input stream.
      * @return the identifier of the newly created file.
-     * @throws FileStorageException if an error occurs while storing the file.
+     * @throws OXException if an error occurs while storing the file.
      */
-    public String saveNewFile(final InputStream input) throws FileStorageException {
+    public String saveNewFile(final InputStream input) throws OXException {
         String nextentry = null;
         State state = null;
         lock(LOCK_TIMEOUT);
@@ -355,7 +355,7 @@ public class LocalFileStorage implements FileStorage {
                 if (nextentry == null) {
                     final Set<String> unused = scanForUnusedEntries();
                     if (unused.isEmpty()) {
-                        throw new FileStorageException(FileStorageException.Code.STORE_FULL);
+                        throw new OXException(OXException.Code.STORE_FULL);
                     }
                     final Iterator<String> iter = unused.iterator();
                     nextentry = iter.next();
@@ -377,7 +377,7 @@ public class LocalFileStorage implements FileStorage {
         }
         try {
             save(nextentry, input);
-        } catch (final FileStorageException ie) {
+        } catch (final OXException ie) {
             delete(new String[] { nextentry });
             lock(LOCK_TIMEOUT);
             try {
@@ -397,9 +397,9 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param identifier identifier of the file.
      * @return an inputstream from that the file can be read once.
-     * @throws FileStorageException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public InputStream getFile(final String identifier) throws FileStorageException {
+    public InputStream getFile(final String identifier) throws OXException {
         
         return load(identifier);
     }
@@ -434,10 +434,10 @@ public class LocalFileStorage implements FileStorage {
         }
     }
 
-    public long getFileSize(final String name) throws FileStorageException {
+    public long getFileSize(final String name) throws OXException {
         File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
-            throw new FileStorageException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
+            throw new OXException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
         }
         return dataFile.length();
     }
@@ -452,9 +452,9 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param identifier identifier of the file to delete.
      * @return true if the file has been deleted successfully.
-     * @throws FileStorageException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public boolean deleteFile(final String identifier) throws FileStorageException {
+    public boolean deleteFile(final String identifier) throws OXException {
         final boolean retval = delete(new String[] { identifier }).isEmpty();
         if (retval) {
             lock(LOCK_TIMEOUT);
@@ -474,9 +474,9 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param identifier identifier of the files to delete.
      * @return a set of identifiers that could not be deleted.
-     * @throws FileStorageException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public Set<String> deleteFiles(final String[] identifiers) throws FileStorageException {
+    public Set<String> deleteFiles(final String[] identifiers) throws OXException {
         final Set<String> notDeleted = delete(identifiers);
         if (notDeleted.size() < identifiers.length) {
             lock(LOCK_TIMEOUT);
@@ -498,9 +498,9 @@ public class LocalFileStorage implements FileStorage {
     /**
      * This method removes the complete FileStorage and its elements.
      * 
-     * @throws FileStorageException if removing fails.
+     * @throws OXException if removing fails.
      */
-    public void remove() throws FileStorageException {
+    public void remove() throws OXException {
         lock(LOCK_TIMEOUT);
         eliminate();
         // no unlock here because everything is removed.
@@ -509,9 +509,9 @@ public class LocalFileStorage implements FileStorage {
     /**
      * Recreates the state file of a storage no matter if it exists or not
      * 
-     * @throws FileStorageException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public void recreateStateFile() throws FileStorageException {
+    public void recreateStateFile() throws OXException {
         lock(LOCK_TIMEOUT);
         try {
             if (LOG.isInfoEnabled()) {
@@ -529,20 +529,20 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param identifier last used Entry in the Storage
      * @return Path of the next free Entry as String
-     * @throws FileStorageException if an error occurs while calculating the next free Entry
+     * @throws OXException if an error occurs while calculating the next free Entry
      */
-    protected String computeNextEntry(final String identifier) throws FileStorageException {
+    protected String computeNextEntry(final String identifier) throws OXException {
         final int[] entry = new int[depth];
         final StringTokenizer tokenizer = new StringTokenizer(identifier, File.separator);
         if (tokenizer.countTokens() != depth) {
-            throw new FileStorageException(FileStorageException.Code.DEPTH_MISMATCH);
+            throw new OXException(OXException.Code.DEPTH_MISMATCH);
         }
         int actualDepth = 0;
         while (tokenizer.hasMoreTokens()) {
             try {
                 entry[actualDepth++] = Integer.parseInt(tokenizer.nextToken(), 16);
             } catch (final NumberFormatException n) {
-                throw new FileStorageException(FileStorageException.Code.NO_NUMBER, n);
+                throw new OXException(OXException.Code.NO_NUMBER, n);
             }
         }
         boolean uebertrag = true;
@@ -570,9 +570,9 @@ public class LocalFileStorage implements FileStorage {
      * Scans the whole Storage and creates a list of unused Entries
      * 
      * @return Set of free Entries
-     * @throws FileStorageException if an error occurs while scanning
+     * @throws OXException if an error occurs while scanning
      */
-    protected Set<String> scanForUnusedEntries() throws FileStorageException {
+    protected Set<String> scanForUnusedEntries() throws OXException {
         final Set<String> unused = new HashSet<String>();
         String entry = computeFirstEntry();
         while (entry != null) {
@@ -604,7 +604,7 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param name Name of the file that has to be checked
      * @return true if File or Folder exists
-     * @throws FileStorageException
+     * @throws OXException
      */
     protected boolean exists(final String name) {
         return new File(storage, name).exists();
@@ -615,9 +615,9 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param name Name of the Inputfile
      * @param input The Inputfile
-     * @throws FileStorageException
+     * @throws OXException
      */
-    protected void save(final String name, final InputStream input) throws FileStorageException {
+    protected void save(final String name, final InputStream input) throws OXException {
         final File file = new File(storage, name);
         final File parentDir = file.getParentFile();
         
@@ -625,7 +625,7 @@ public class LocalFileStorage implements FileStorage {
             try {
                 LOCK.lock();
                 if (!parentDir.exists() && !mkdirs(parentDir)) {
-                    throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, parentDir.getAbsolutePath());
+                    throw new OXException(OXException.Code.CREATE_DIR_FAILED, parentDir.getAbsolutePath());
                 }
             } finally {
                 LOCK.unlock();
@@ -642,19 +642,19 @@ public class LocalFileStorage implements FileStorage {
                 len = input.read(buf);
             }
         } catch (final IOException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
+            throw new OXException(OXException.Code.IOERROR, e, e.getMessage());
         } finally {
             if (null != fos) {
                 try {
                     fos.close();
                 } catch (final IOException e) {
-                    throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
+                    throw new OXException(OXException.Code.IOERROR, e, e.getMessage());
                 }
             }
         }
     }
 
-    protected void lock(final long timeout) throws FileStorageException {
+    protected void lock(final long timeout) throws OXException {
         final File lock = new File(storage, LOCK_FILENAME);
         final long maxLifeTime = 100 * timeout;
         final long lastModified = lock.lastModified();
@@ -685,21 +685,21 @@ public class LocalFileStorage implements FileStorage {
             }
         } while (!created && System.currentTimeMillis() < failTime);
         if (!created) {
-            throw null == ioe ? new FileStorageException(Code.LOCK, lock.getAbsolutePath()) : new FileStorageException(Code.LOCK, ioe, lock.getAbsolutePath());
+            throw null == ioe ? new OXException(Code.LOCK, lock.getAbsolutePath()) : new OXException(Code.LOCK, ioe, lock.getAbsolutePath());
         }
     }
 
     /**
      * Deletes the lock
      * 
-     * @throws FileStorageException
+     * @throws OXException
      */
-    protected void unlock() throws FileStorageException {
+    protected void unlock() throws OXException {
         final File lock = new File(storage, LOCK_FILENAME);
         if (!lock.delete()) {
             if (lock.exists()) {
                 LOG.error("Couldn't delete lock file: " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
-                throw new FileStorageException(Code.UNLOCK);
+                throw new OXException(Code.UNLOCK);
             }
         }
     }
@@ -708,12 +708,12 @@ public class LocalFileStorage implements FileStorage {
      * Loads the state file.
      * 
      * @return a successfully loaded state file.
-     * @throws FileStorageException if the state file cannot be loaded.
+     * @throws OXException if the state file cannot be loaded.
      */
-    protected State loadState() throws FileStorageException {
+    protected State loadState() throws OXException {
         try {
             return new State(load(STATEFILENAME));
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             delete(new String[] { STATEFILENAME });
             throw e;
         }
@@ -723,12 +723,12 @@ public class LocalFileStorage implements FileStorage {
      * Saves the state file.
      * 
      * @param state state file to save.
-     * @throws FileStorageException if the saving fails.
+     * @throws OXException if the saving fails.
      */
-    protected void saveState(final State state) throws FileStorageException {
+    protected void saveState(final State state) throws OXException {
         try {
             save(STATEFILENAME, state.saveState());
-        } catch (final FileStorageException e) {
+        } catch (final OXException e) {
             delete(new String[] { STATEFILENAME });
             throw e;
         }
@@ -739,17 +739,17 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @param name Name of the File
      * @return File as FileInputStream
-     * @throws FileStorageException
+     * @throws OXException
      */
-    protected InputStream load(final String name) throws FileStorageException {
+    protected InputStream load(final String name) throws OXException {
         File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
-            throw new FileStorageException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
+            throw new OXException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
         }
         try {
             return new FileInputStream(new File(storage, name));
         } catch (final FileNotFoundException e) {
-            throw new FileStorageException(Code.IOERROR, e, e.getMessage());
+            throw new OXException(Code.IOERROR, e, e.getMessage());
         }
     }
 
@@ -779,11 +779,11 @@ public class LocalFileStorage implements FileStorage {
      * This method eliminates the complete storage of files including state files and parent directory. Before eliminating the storage, it
      * will be locked to exclude other instances throwing ugly errors.
      * 
-     * @throws FileStorageException if eliminating fails.
+     * @throws OXException if eliminating fails.
      */
-    protected void eliminate() throws FileStorageException {
+    protected void eliminate() throws OXException {
         if (storage.exists() && !delete(storage)) {
-            throw new FileStorageException(Code.NOT_ELIMINATED);
+            throw new OXException(Code.NOT_ELIMINATED);
         }
     }
 
@@ -821,9 +821,9 @@ public class LocalFileStorage implements FileStorage {
      * method doesn't care about empty (deleted) slots.
      * 
      * @return a fastly repaired state object.
-     * @throws FileStorageException if checking for existing files throws an IOException.
+     * @throws OXException if checking for existing files throws an IOException.
      */
-    protected State repairState() throws FileStorageException {
+    protected State repairState() throws OXException {
         String nextentry = computeFirstEntry();
         final State state = new State(depth, entries, nextentry);
         String previousentry = null;
