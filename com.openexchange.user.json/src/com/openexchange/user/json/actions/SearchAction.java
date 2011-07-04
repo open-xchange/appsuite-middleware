@@ -77,6 +77,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -236,7 +237,7 @@ public final class SearchAction extends AbstractUserAction {
         } catch (final OXException e) {
             throw new AjaxException(e);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 

@@ -71,6 +71,7 @@ import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -127,7 +128,7 @@ public final class NewAction extends AbstractMailAccountAction {
 
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 

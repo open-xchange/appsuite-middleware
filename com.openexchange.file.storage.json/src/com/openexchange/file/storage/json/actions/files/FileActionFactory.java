@@ -54,6 +54,7 @@ import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -91,7 +92,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(String action) throws AjaxException {
         AJAXActionService handler = ACTIONS.get(action);
         if(handler == null) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
         }
         return handler;
     }

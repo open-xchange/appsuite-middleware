@@ -68,6 +68,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -101,12 +102,12 @@ public final class UpdatesAction extends AbstractFolderAction {
         {
             final String timestampStr = request.getParameter("timestamp");
             if (null == timestampStr) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "timestamp");
+                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "timestamp");
             }
             try {
                 timestamp = new Date(Long.parseLong(timestampStr));
             } catch (final NumberFormatException e) {
-                throw new AjaxException(AjaxException.Code.InvalidParameterValue, "timestamp", timestampStr);
+                throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, "timestamp", timestampStr);
             }
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
@@ -166,7 +167,7 @@ public final class UpdatesAction extends AbstractFolderAction {
                 resultArray.put(jsonArray2.getJSONArray(i).get(0));
             }
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
         /*
          * Return appropriate result

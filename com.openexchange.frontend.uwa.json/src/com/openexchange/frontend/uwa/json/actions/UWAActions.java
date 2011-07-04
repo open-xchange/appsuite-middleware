@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link UWAActions}
@@ -76,7 +77,7 @@ public class UWAActions implements AJAXActionServiceFactory {
 
     public AJAXActionService createActionService(String action) throws AjaxException {
         if (!actions.containsKey(action)) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
         }
         return actions.get(action);
     }

@@ -60,6 +60,7 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,7 +92,7 @@ public final class CreateAction extends AbstractFolderAction {
         }
         final String parentId = request.getParameter("folder_id");
         if (null == parentId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "folder_id");
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "folder_id");
         }
         /*
          * Parse folder object

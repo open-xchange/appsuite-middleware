@@ -58,6 +58,7 @@ import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
 import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * 
@@ -122,35 +123,35 @@ public abstract class AbstractAction<T, U extends AbstractRequest> {
     protected abstract AbstractObject2JSON2Object<T> getConverter();
 
     protected JSONObject actionConfig(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxException.Code.UnknownAction, Action.CONFIG.getAjaxName());
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.CONFIG.getAjaxName());
     }
 
     protected int actionNew(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxException.Code.UnknownAction, Action.NEW.getAjaxName());
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.NEW.getAjaxName());
     }
 
     protected void actionReorder(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxException.Code.UnknownAction, Action.NEW.getAjaxName());
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.NEW.getAjaxName());
     }
 
     protected void actionUpdate(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxException.Code.UnknownAction, Action.UPDATE.getAjaxName());
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.UPDATE.getAjaxName());
     }
 
     protected void actionDelete(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxException.Code.UnknownAction, Action.DELETE.getAjaxName());
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.DELETE.getAjaxName());
     }
 
     protected JSONArray actionList(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxException.Code.UnknownAction, Action.LIST.getAjaxName());
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.LIST.getAjaxName());
     }
 
     protected void actionDeleteScript(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxException.Code.UnknownAction, Action.NEW.getAjaxName());
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.NEW.getAjaxName());
     }
 
     protected String actionGetScript(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxException.Code.UnknownAction, Action.NEW.getAjaxName());
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.NEW.getAjaxName());
     }
 
 

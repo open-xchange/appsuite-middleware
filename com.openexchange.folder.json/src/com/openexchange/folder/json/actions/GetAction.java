@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -94,7 +95,7 @@ public final class GetAction extends AbstractFolderAction {
         }
         final String folderId = request.getParameter("id");
         if (null == folderId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);

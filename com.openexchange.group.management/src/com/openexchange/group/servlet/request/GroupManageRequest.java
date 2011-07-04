@@ -73,6 +73,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.UserService;
 
 /**
@@ -123,7 +124,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
             } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
                 retval = actionUpdate(ctx, user, json);
             } else {
-                throw new AjaxException(AjaxException.Code.UnknownAction, action);
+                throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
             }
             return retval;
         } catch (final AbstractOXException e) {

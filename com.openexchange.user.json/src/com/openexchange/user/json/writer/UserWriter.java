@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.Utility;
 import com.openexchange.user.json.field.DistributionListField;
 import com.openexchange.user.json.field.UserField;
@@ -1219,7 +1220,7 @@ public final class UserWriter {
             }
             return jsonArray;
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 
@@ -1261,7 +1262,7 @@ public final class UserWriter {
             }
             return jsonArray;
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 
@@ -1298,7 +1299,7 @@ public final class UserWriter {
             }
             return jsonObject;
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 
@@ -1340,7 +1341,7 @@ public final class UserWriter {
             }
             return jsonArray;
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 

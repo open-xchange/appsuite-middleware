@@ -56,6 +56,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -78,7 +79,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
          */
         final String accountId = request.getParameter("id");
         if (null == accountId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
         }
         /*
          * Delete account

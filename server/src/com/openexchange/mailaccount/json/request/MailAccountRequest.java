@@ -94,6 +94,7 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -162,7 +163,7 @@ public final class MailAccountRequest {
         } else if ("get_tree".equalsIgnoreCase(action)) {
             return actionGetTree(jsonObject);
         } else {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
         }
     }
 
@@ -587,7 +588,7 @@ public final class MailAccountRequest {
 
             final int id = accountDescription.getId();
             if (-1 == id) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.ID);
+                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.ID);
             }
 
             final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
@@ -730,13 +731,13 @@ public final class MailAccountRequest {
     private static void checkNeededFields(final MailAccountDescription accountDescription) throws AjaxException {
         // Check needed fields
         if (null == accountDescription.getMailServer()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
         }
         if (null == accountDescription.getLogin()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.LOGIN);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.LOGIN);
         }
         if (null == accountDescription.getPassword()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.PASSWORD);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.PASSWORD);
         }
     }
 }

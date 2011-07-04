@@ -61,6 +61,7 @@ import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthmeta.MetaDataField;
 import com.openexchange.oauth.json.oauthmeta.MetaDataWriter;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,7 +85,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             final String serviceId = request.getParameter(MetaDataField.ID.getName());
             if (null == serviceId) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MetaDataField.ID.getName());
+                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MetaDataField.ID.getName());
             }
             /*
              * Request account
@@ -101,7 +102,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(jsonObject);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 

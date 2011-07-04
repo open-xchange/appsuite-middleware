@@ -59,6 +59,7 @@ import com.openexchange.config.objects.ConfigObjectRegistry;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -81,7 +82,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
     
     public AJAXActionService createActionService(String action) throws AjaxException {
         if(!GET.equals(action)) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
         }
         return new AJAXActionService() {
 
@@ -89,7 +90,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
                 
                 String path = request.getParameter(PATH);
                 if(path == null) {
-                    throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PATH);
+                    throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PATH);
                 }
                 
                 ConfigObjectRegistry view = registryFactory.getView(session.getUserId(), session.getContextId());
@@ -103,7 +104,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
                     Object json = JSONCoercion.coerceToJSON(object);
                     return new AJAXRequestResult(json);
                 } catch (JSONException e) {
-                    throw new AjaxException(AjaxException.Code.JSONError, e);
+                    throw new AjaxException(AjaxExceptionCodes.JSONError, e);
                 }
             }
             

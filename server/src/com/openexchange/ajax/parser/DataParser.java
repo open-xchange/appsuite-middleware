@@ -61,6 +61,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.groupware.AbstractOXException.Parsing;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.OXJSONException.Code;
 
@@ -248,10 +249,10 @@ public abstract class DataParser {
     public static String checkString(final JSONObject jsonObj, final String name) throws AjaxException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
         if (tmp.length() == 0) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
         return tmp;
     }
@@ -259,7 +260,7 @@ public abstract class DataParser {
     public static int checkInt(JSONObject json, String name) throws OXJSONException, AjaxException {
         final String tmp = checkString(json, name);
         if (tmp == null || tmp.length() == 0) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
         try {
             return Integer.parseInt(tmp);
@@ -271,7 +272,7 @@ public abstract class DataParser {
     public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, AjaxException {
         final String tmp = jsonObj.getString(name);
         if (tmp == null || tmp.length() == 0) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
         return Boolean.parseBoolean(tmp);
     }
@@ -279,7 +280,7 @@ public abstract class DataParser {
     public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
         final String tmp = jsonObj.getString(name);
         if (tmp == null || tmp.length() == 0) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
 
         try {
@@ -292,7 +293,7 @@ public abstract class DataParser {
     public static Date checkDate(final JSONObject jsonObj, final String name) throws OXJSONException, AjaxException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
 
         try {
@@ -305,7 +306,7 @@ public abstract class DataParser {
     public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws OXJSONException, AjaxException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
         try {
             final Date d = new Date(Long.parseLong(tmp));
@@ -320,7 +321,7 @@ public abstract class DataParser {
     public static UUID checkUUID(final JSONObject jsonObj, final String name) throws OXJSONException, AjaxException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
         try {
             return UUID.fromString(tmp);
@@ -332,7 +333,7 @@ public abstract class DataParser {
     public static JSONObject checkJSONObject(final JSONObject jsonObj, final String name) throws AjaxException {
         final JSONObject tmp = jsonObj.optJSONObject(name);
         if (tmp == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
         return tmp;
     }
@@ -340,7 +341,7 @@ public abstract class DataParser {
     public static JSONArray checkJSONArray(final JSONObject jsonObj, final String name) throws AjaxException {
         final JSONArray tmp = jsonObj.optJSONArray(name);
         if (tmp == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
         return tmp;
     }
@@ -428,7 +429,7 @@ public abstract class DataParser {
     public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
         final int[] i = parseJSONIntArray(jsonObj, name);
         if (i == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, name);
         }
 
         return i;

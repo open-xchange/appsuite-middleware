@@ -182,6 +182,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -1026,7 +1027,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (null == tmp2) {
                         tmp2 = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
                         if (null == tmp2) {
-                            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ID);
+                            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ID);
                         }
                         uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                     } else {
@@ -1173,7 +1174,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (null == tmp2) {
                         tmp2 = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
                         if (null == tmp2) {
-                            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ID);
+                            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ID);
                         }
                         uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                     } else {

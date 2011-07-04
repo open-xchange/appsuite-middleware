@@ -79,6 +79,7 @@ import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -126,14 +127,14 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         List<String> missingParameters = data.getMissingParameters(names);
         if (!missingParameters.isEmpty()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, missingParameters.toString());
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, missingParameters.toString());
         }
         return this;
     }
 
     public InfostoreRequest requireBody() throws AjaxException {
         if (data.getData() == null && !data.hasUploads() && data.getParameter("json") == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "data");
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "data");
         }
         return this;
     }
@@ -173,7 +174,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         if (!unknownColumns.isEmpty()) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, Param.COLUMNS.getName(), unknownColumns.toString());
+            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, Param.COLUMNS.getName(), unknownColumns.toString());
         }
 
         return columns = fields;
@@ -189,7 +190,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         Field field = sortingField = Field.get(sort);
         if (field == null) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, Param.SORT.getName(), sort);
+            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, Param.SORT.getName(), sort);
         }
         return field;
     }
@@ -197,7 +198,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public SortDirection getSortingOrder() throws AbstractOXException {
         SortDirection sortDirection = SortDirection.get(data.getParameter(Param.ORDER.getName()));
         if (sortDirection == null) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, Param.ORDER.getName(), sortDirection);
+            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, Param.ORDER.getName(), sortDirection);
         }
         return sortDirection;
     }
@@ -281,7 +282,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 folderMapping.put(id, tuple.optString(Param.FOLDER_ID.getName()));
             }
         } catch (JSONException x) {
-            throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, x.getMessage());
         }
 
     }
@@ -306,7 +307,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 versions[i] = body.getInt(i);
             }
         } catch (JSONException x) {
-            throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, x.getMessage());
         }
         return versions;
     }
@@ -356,7 +357,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         try {
             return queryObject.getString("pattern");
         } catch (JSONException x) {
-            throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, x.getMessage());
         }
     }
     
@@ -371,7 +372,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             try {
                 object = new JSONObject(data.getParameter(JSON));
             } catch (JSONException e) {
-                throw new AjaxException(AjaxException.Code.JSONError, e.getMessage());
+                throw new AjaxException(AjaxExceptionCodes.JSONError, e.getMessage());
             }
         }
 
@@ -432,7 +433,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 checkSize( uploadFile );
                 return new FileInputStream(uploadFile.getTmpFile());
             } catch (FileNotFoundException e) {
-                throw new AjaxException(AjaxException.Code.IOError,  e.getMessage());
+                throw new AjaxException(AjaxExceptionCodes.IOError,  e.getMessage());
             }
         }
         return null;

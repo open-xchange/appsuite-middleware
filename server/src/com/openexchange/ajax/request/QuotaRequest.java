@@ -63,6 +63,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -110,7 +111,7 @@ public class QuotaRequest {
         } else if ("mail".equals(action)) {
             return mail();
         }
-        throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
     }
 
     private JSONObject filestore() throws AbstractOXException, JSONException {

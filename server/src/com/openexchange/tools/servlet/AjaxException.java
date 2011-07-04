@@ -49,15 +49,14 @@
 
 package com.openexchange.tools.servlet;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 
 /**
  * Exception for problems in servlets.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AjaxException extends AbstractOXException {
+public class AjaxException extends OXException {
 
     /**
      * For serialization.
@@ -67,141 +66,8 @@ public class AjaxException extends AbstractOXException {
     /**
      * Initializes a new {@link AjaxException}
      * 
-     * @param cause The init cause
      */
-    public AjaxException(final AbstractOXException cause) {
-        super(cause);
-    }
-
-    /**
-     * Initializes a new exception using the information provided by the code.
-     * 
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public AjaxException(final Code code, final Object... messageArgs) {
-        this(code, null, messageArgs);
-    }
-
-    /**
-     * Initializes a new exception using the information provided by the code.
-     * 
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public AjaxException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.SERVLET, code.category, code.number, null == code.message ? cause.getMessage() : code.message, cause);
-        setMessageArgs(messageArgs);
-    }
-
-    /**
-     * Error codes for servlet exceptions.
-     * 
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-     */
-    public static enum Code {
-        /**
-         * Unknown AJAX action: %s.
-         */
-        UnknownAction("Unknown AJAX action: %s.", Category.CODE_ERROR, 1),
-        /**
-         * Missing the following request parameter: %s
-         */
-        MISSING_PARAMETER("Missing the following request parameter: %s", Category.CODE_ERROR, 2),
-        /**
-         * Missing upload image.
-         */
-        NoUploadImage("Missing upload image.", Category.CODE_ERROR, 3),
-        /**
-         * Invalid parameter: %s
-         */
-        InvalidParameter("Invalid parameter: %s", Category.CODE_ERROR, 4),
-        /**
-         * I/O error while writing to Writer object: %s
-         */
-        IOError("I/O error while writing to Writer object: %s", Category.INTERNAL_ERROR, 5),
-        /**
-         * Missing AJAX request handler for module %s
-         */
-        MISSING_REQUEST_HANDLER("Missing AJAX request handler for module %s", Category.CODE_ERROR, 6),
-        /**
-         * Unknown module: %s.
-         */
-        UNKNOWN_MODULE("Unknown module: %s.", Category.CODE_ERROR, 7),
-        /**
-         * A harmful attachment was detected.
-         */
-        HARMFUL_ATTACHMENT("A harmful attachment was detected.", Category.CODE_ERROR, 8),
-        /**
-         * JSON error: %s
-         */
-        JSONError("JSON error: %s", Category.CODE_ERROR, 9),
-        /**
-         * Invalid parameter "%1$s": %2$s
-         */
-        InvalidParameterValue("Invalid parameter \"%1$s\": %2$s", Category.CODE_ERROR, 10),
-        /**
-         * Unexpected error: %1$s
-         */
-        UnexpectedError("Unexpected error: %1$s", Category.CODE_ERROR, 11),
-        /**
-         * A parameter conflict occurred.
-         */
-        ParameterConflict("A parameter conflict occurred.", Category.CODE_ERROR, 12),
-        /**
-         * Parameter "%1$s" conflicts with parameter "%2$s".
-         */
-        EitherParameterConflict("Parameter \"%1$s\" conflicts with parameter \"%2$s\".", Category.CODE_ERROR, 13),
-        /**
-         * Action "%1$s" on request path "%2$s" is not permitted via a non-secure connection.
-         */
-        NonSecureDenied("Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure connection.", Category.CODE_ERROR, 14),
-        /**
-         * The action "%1$s" is disabled due to server configuration
-         */
-        DisabledAction("The action \"%1$s\" is disabled due to server configuration", Category.PERMISSION, 15),
-        ;
-        
-        /**
-         * Message of the exception.
-         */
-        private final String message;
-
-        /**
-         * Category of the exception.
-         */
-        private final Category category;
-
-        /**
-         * Detail number of the exception.
-         */
-        private final int number;
-
-        /**
-         * Default constructor.
-         * 
-         * @param message message.
-         * @param category category.
-         * @param detailNumber detail number.
-         */
-        private Code(final String message, final Category category, final int detailNumber) {
-            this.message = message;
-            this.category = category;
-            number = detailNumber;
-        }
-
-        public Category getCategory() {
-            return category;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public int getNumber() {
-            return number;
-        }
+    private AjaxException() {
+        super();
     }
 }

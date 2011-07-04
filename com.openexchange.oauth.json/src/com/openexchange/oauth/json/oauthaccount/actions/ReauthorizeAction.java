@@ -63,6 +63,7 @@ import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -78,14 +79,14 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
          */
         final String accountId = request.getParameter("id");
         if (null == accountId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
         }
         final int id = Tools.getUnsignedInteger(accountId);
 
         
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
         }
         final OAuthService oAuthService = getOAuthService();
         

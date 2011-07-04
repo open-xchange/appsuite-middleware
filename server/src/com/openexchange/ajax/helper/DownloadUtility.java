@@ -61,6 +61,7 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DownloadUtility} - Utility class for download.
@@ -126,7 +127,7 @@ public final class DownloadUtility {
                 try {
                     nRead = in.read(sequence, 0, sequence.length);
                 } catch (final IOException e) {
-                    throw new AjaxException(AjaxException.Code.IOError, e, e.getMessage());
+                    throw new AjaxException(AjaxExceptionCodes.IOError, e, e.getMessage());
                 }
                 if (nRead < sequence.length) {
                     final byte[] tmp = sequence;

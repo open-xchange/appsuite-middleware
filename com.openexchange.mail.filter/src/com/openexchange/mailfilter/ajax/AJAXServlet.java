@@ -74,6 +74,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -140,7 +141,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 public String getParameter(final Parameter param) throws AjaxException {
                     final String value = req.getParameter(param.getName());
                     if (param.isRequired() && null == value) {
-                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, param.getName());
+                        throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, param.getName());
                     }
                     return value;
                 }
@@ -197,7 +198,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 public String getParameter(final Parameter param) throws AjaxException {
                     final String value = req.getParameter(param.getName());
                     if (null == value) {
-                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, param.getName());
+                        throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, param.getName());
                     }
                     return value;
                 }

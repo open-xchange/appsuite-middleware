@@ -67,6 +67,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -161,7 +162,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
                 array.put(object);
             }
         } catch (JSONException x) {
-            throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, x.getMessage());
         }
 
         return new AJAXRequestResult(array);
@@ -194,7 +195,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
         } catch (Throwable t) {
             failure(req,t);
             LOG.error(t.getMessage(), t);
-            throw new AjaxException(AjaxException.Code.UnexpectedError, t.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.UnexpectedError, t.getMessage());
         } finally {
             after(req);
             

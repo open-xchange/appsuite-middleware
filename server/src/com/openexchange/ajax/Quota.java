@@ -59,6 +59,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -76,7 +77,7 @@ public class Quota extends SessionServlet {
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             if (null == action) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
+                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ACTION);
             }
             final ServerSession session = getSessionObject(req);
 

@@ -71,6 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
@@ -125,7 +126,7 @@ public class LinkRequest {
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
 			actionDelete(jsonObject);
 		} else {
-			throw new AjaxException(AjaxException.Code.UnknownAction, action);
+			throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
 		}
 	}
 	

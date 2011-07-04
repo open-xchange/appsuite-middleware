@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.field.DistributionListField;
 import com.openexchange.user.json.field.UserField;
 
@@ -101,7 +102,7 @@ public final class UserParser {
             user.setId(userId);
             return user;
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 
@@ -174,7 +175,7 @@ public final class UserParser {
 
             return contact;
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         } catch (final ContactException e) {
             throw new AjaxException(e);
         }

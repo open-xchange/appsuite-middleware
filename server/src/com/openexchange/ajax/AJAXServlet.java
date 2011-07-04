@@ -96,6 +96,7 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
 
 /**
@@ -533,7 +534,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected static String getAction(final HttpServletRequest req) throws OXConflictException {
         final String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
-            throw new OXConflictException(new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION));
+            throw new OXConflictException(new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ACTION));
         }
         return action;
     }

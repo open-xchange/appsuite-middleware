@@ -68,6 +68,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -113,7 +114,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final MultipleHandler handler = createMultipleHandler();
 
             if (action == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
+                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ACTION);
             }
             final Object response = handler.performRequest(action, request, getSessionObject(req), Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();

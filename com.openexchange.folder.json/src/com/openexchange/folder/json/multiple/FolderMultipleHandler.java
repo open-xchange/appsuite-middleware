@@ -62,6 +62,7 @@ import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,7 +85,7 @@ public final class FolderMultipleHandler implements MultipleHandler {
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         final AJAXActionService actionService = FolderActionFactory.getInstance().createActionService(action);
         if (null == actionService) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
         }
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);

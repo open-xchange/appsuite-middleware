@@ -79,6 +79,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
@@ -180,7 +181,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
             }
             return new AJAXRequestResult(addResponse.getID().get(0));
         } catch (JSONException e) {
-        	throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+        	throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 

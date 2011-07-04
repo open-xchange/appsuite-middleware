@@ -68,6 +68,7 @@ import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.Paths;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -90,7 +91,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
     public AJAXActionService createActionService(final String action) throws AjaxException {
         if (!action.equals(REGISTER)) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
         }
         return REGISTER_ACTION;
     }
@@ -149,7 +150,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
                 json.put("url", uri);
                 return json;
             } catch (JSONException e) {
-                throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+                throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
             }
         }
 

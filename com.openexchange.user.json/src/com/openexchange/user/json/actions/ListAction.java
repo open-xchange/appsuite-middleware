@@ -67,6 +67,7 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
@@ -108,7 +109,7 @@ public final class ListAction extends AbstractUserAction {
             {
                 final JSONArray jsonArray = (JSONArray) request.getData();
                 if (null == jsonArray) {
-                    throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "data");
+                    throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "data");
                 }
                 final int len = jsonArray.length();
                 userIdArray = new int[len];
@@ -160,7 +161,7 @@ public final class ListAction extends AbstractUserAction {
              */
             return new AJAXRequestResult(jsonArray, lastModified);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
 

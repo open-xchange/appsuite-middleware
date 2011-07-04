@@ -58,6 +58,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -86,7 +87,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         }
         final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
         if (uuid == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, OAuthConstants.SESSION_PARAM_UUID);
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, OAuthConstants.SESSION_PARAM_UUID);
         }
         /*
          * Get request token secret from session parameters

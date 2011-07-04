@@ -70,6 +70,7 @@ import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -100,7 +101,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
              */
             return reauthorizeCallbackAction(accountId, request, session);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
         }
     }
     
@@ -113,7 +114,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
+            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
         }
         /*
          * Generate UUID
