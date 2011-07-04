@@ -54,7 +54,6 @@ import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.sso.SSOConstants;
