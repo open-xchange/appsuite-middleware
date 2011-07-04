@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**

@@ -50,7 +50,7 @@
 package com.openexchange.tools.file;
 
 import java.io.InputStream;
-import com.openexchange.tools.file.external.OXException;
+import com.openexchange.exception.OXException;
 
 public class SaveFileWithQuotaAction extends SaveFileAction {
 

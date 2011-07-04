@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport.exceptions;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 

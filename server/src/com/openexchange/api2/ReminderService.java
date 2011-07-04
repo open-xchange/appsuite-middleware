@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderException;

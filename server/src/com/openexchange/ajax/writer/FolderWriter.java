@@ -65,6 +65,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;

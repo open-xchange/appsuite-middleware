@@ -56,6 +56,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
+import com.openexchange.exception.OXException;
 
 public class Exception2Message {
 	

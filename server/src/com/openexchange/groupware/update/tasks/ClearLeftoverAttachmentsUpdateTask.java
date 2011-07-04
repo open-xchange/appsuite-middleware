@@ -64,13 +64,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.external.OXException;
 
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 

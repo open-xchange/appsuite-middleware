@@ -59,6 +59,7 @@ import java.util.Set;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;

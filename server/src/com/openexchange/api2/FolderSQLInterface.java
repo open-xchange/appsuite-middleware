@@ -51,6 +51,7 @@ package com.openexchange.api2;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.iterator.SearchIterator;
 

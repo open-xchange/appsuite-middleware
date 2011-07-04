@@ -62,6 +62,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;

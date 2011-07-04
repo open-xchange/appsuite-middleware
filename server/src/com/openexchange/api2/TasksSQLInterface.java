@@ -50,6 +50,7 @@
 package com.openexchange.api2;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;

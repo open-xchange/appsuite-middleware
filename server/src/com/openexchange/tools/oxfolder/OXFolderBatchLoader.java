@@ -65,6 +65,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;

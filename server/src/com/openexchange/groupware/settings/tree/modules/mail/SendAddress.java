@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;

@@ -50,6 +50,7 @@
 package com.openexchange.tools.file.external;
 
 import java.net.URI;
+import com.openexchange.exception.OXException;
 
 public interface FileStorageFactory {
 

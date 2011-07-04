@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;

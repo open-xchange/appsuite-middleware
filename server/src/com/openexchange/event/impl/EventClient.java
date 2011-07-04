@@ -65,6 +65,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;

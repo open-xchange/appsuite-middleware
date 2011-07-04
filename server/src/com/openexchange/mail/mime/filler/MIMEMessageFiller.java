@@ -84,6 +84,7 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataProperties;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;

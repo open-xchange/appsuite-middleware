@@ -64,6 +64,7 @@ import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;

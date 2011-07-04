@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentException;

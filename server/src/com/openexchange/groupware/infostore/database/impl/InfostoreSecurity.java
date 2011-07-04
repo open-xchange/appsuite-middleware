@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;

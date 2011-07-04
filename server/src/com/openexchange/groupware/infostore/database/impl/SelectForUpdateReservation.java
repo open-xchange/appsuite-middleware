@@ -58,6 +58,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;

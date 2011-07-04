@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.paths.impl;
 
 import com.openexchange.database.tx.DBService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.PathResolver;

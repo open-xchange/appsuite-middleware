@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**

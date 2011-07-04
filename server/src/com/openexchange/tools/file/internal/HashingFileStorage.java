@@ -65,10 +65,9 @@ import java.util.UUID;
 import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.OXException;
-import com.openexchange.tools.file.external.OXException.Code;
 
 /**
  * A {@link HashingFileStorage} generates UUIDs for every file that is stored in it. 
@@ -108,7 +107,7 @@ public class HashingFileStorage implements FileStorage {
         try {
             return new BufferedInputStream(new FileInputStream(file(name)));
         } catch (FileNotFoundException e) {
-            throw new OXException(Code.FILE_NOT_FOUND, name);
+            throw FileExceptionCode.FILE_NOT_FOUND.create(name);
         }
     }
 
@@ -154,7 +153,7 @@ public class HashingFileStorage implements FileStorage {
         String[] filestorePath = generateName();
         File path = new File(storage, filestorePath[0]);
         if (!path.exists() && !path.mkdirs() && !path.exists()) {
-            throw new OXException(OXException.Code.CREATE_DIR_FAILED, path.toString());
+            throw FileExceptionCode.CREATE_DIR_FAILED.create(path.toString());
         }
 
         BufferedOutputStream bufOut = null;
@@ -169,9 +168,9 @@ public class HashingFileStorage implements FileStorage {
                 bufOut.write(i);
             }
         } catch (FileNotFoundException e) {
-            throw new OXException(Code.FILE_NOT_FOUND, filePath.toString());
+            throw FileExceptionCode.FILE_NOT_FOUND.create(filePath.toString());
         } catch (IOException e) {
-            throw new OXException(Code.IOERROR, e.toString());
+            throw FileExceptionCode.IOERROR.create(e.toString());
         } finally {
             if (bufIn != null) {
                 try {

@@ -68,9 +68,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.OXException;
-import com.openexchange.tools.file.external.OXException.Code;
+import com.openexchange.tools.file.external.FileStorageCodes;
 
 public class LocalFileStorage implements FileStorage {
 
@@ -158,7 +158,7 @@ public class LocalFileStorage implements FileStorage {
             try {
                 LOCK.lock();
                 if (!storage.exists() && !mkdirs(storage)) {
-                    throw new OXException(OXException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
+                    throw FileExceptionCode.CREATE_DIR_FAILED.create(storage.getAbsolutePath());
                 }
             } finally {
                 LOCK.unlock();
@@ -268,7 +268,7 @@ public class LocalFileStorage implements FileStorage {
                 parts[i] = val;
                 sum += val;
             } catch (final NumberFormatException n) {
-                throw new OXException(OXException.Code.NO_NUMBER, n);
+                throw FileExceptionCode.NO_NUMBER.create(n);
             }
         }
 
@@ -355,7 +355,7 @@ public class LocalFileStorage implements FileStorage {
                 if (nextentry == null) {
                     final Set<String> unused = scanForUnusedEntries();
                     if (unused.isEmpty()) {
-                        throw new OXException(OXException.Code.STORE_FULL);
+                        throw FileExceptionCode.STORE_FULL.create();
                     }
                     final Iterator<String> iter = unused.iterator();
                     nextentry = iter.next();
@@ -437,7 +437,7 @@ public class LocalFileStorage implements FileStorage {
     public long getFileSize(final String name) throws OXException {
         File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
-            throw new OXException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
+            throw FileExceptionCode.FILE_NOT_FOUND.create(dataFile.getAbsoluteFile().getAbsolutePath());
         }
         return dataFile.length();
     }
@@ -535,14 +535,14 @@ public class LocalFileStorage implements FileStorage {
         final int[] entry = new int[depth];
         final StringTokenizer tokenizer = new StringTokenizer(identifier, File.separator);
         if (tokenizer.countTokens() != depth) {
-            throw new OXException(OXException.Code.DEPTH_MISMATCH);
+            throw FileExceptionCode.DEPTH_MISMATCH.create();
         }
         int actualDepth = 0;
         while (tokenizer.hasMoreTokens()) {
             try {
                 entry[actualDepth++] = Integer.parseInt(tokenizer.nextToken(), 16);
             } catch (final NumberFormatException n) {
-                throw new OXException(OXException.Code.NO_NUMBER, n);
+                throw FileExceptionCode.NO_NUMBER.create(n);
             }
         }
         boolean uebertrag = true;
@@ -625,7 +625,7 @@ public class LocalFileStorage implements FileStorage {
             try {
                 LOCK.lock();
                 if (!parentDir.exists() && !mkdirs(parentDir)) {
-                    throw new OXException(OXException.Code.CREATE_DIR_FAILED, parentDir.getAbsolutePath());
+                    throw FileExceptionCode.CREATE_DIR_FAILED.create(parentDir.getAbsolutePath());
                 }
             } finally {
                 LOCK.unlock();
@@ -642,13 +642,13 @@ public class LocalFileStorage implements FileStorage {
                 len = input.read(buf);
             }
         } catch (final IOException e) {
-            throw new OXException(OXException.Code.IOERROR, e, e.getMessage());
+            throw FileExceptionCode.IOERROR.create(e, e.getMessage());
         } finally {
             if (null != fos) {
                 try {
                     fos.close();
                 } catch (final IOException e) {
-                    throw new OXException(OXException.Code.IOERROR, e, e.getMessage());
+                    throw FileExceptionCode.IOERROR.create(e, e.getMessage());
                 }
             }
         }
@@ -685,7 +685,7 @@ public class LocalFileStorage implements FileStorage {
             }
         } while (!created && System.currentTimeMillis() < failTime);
         if (!created) {
-            throw null == ioe ? new OXException(Code.LOCK, lock.getAbsolutePath()) : new OXException(Code.LOCK, ioe, lock.getAbsolutePath());
+            throw null == ioe ? FileExceptionCode.LOCK.create(lock.getAbsolutePath()) : new OXException(FileStorageCodes.LOCK, ioe, lock.getAbsolutePath());
         }
     }
 
@@ -699,7 +699,7 @@ public class LocalFileStorage implements FileStorage {
         if (!lock.delete()) {
             if (lock.exists()) {
                 LOG.error("Couldn't delete lock file: " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
-                throw new OXException(Code.UNLOCK);
+                throw FileExceptionCode.UNLOCK.create();
             }
         }
     }
@@ -744,12 +744,12 @@ public class LocalFileStorage implements FileStorage {
     protected InputStream load(final String name) throws OXException {
         File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
-            throw new OXException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
+            throw FileExceptionCode.FILE_NOT_FOUND.create(dataFile.getAbsoluteFile().getAbsolutePath());
         }
         try {
             return new FileInputStream(new File(storage, name));
         } catch (final FileNotFoundException e) {
-            throw new OXException(Code.IOERROR, e, e.getMessage());
+            throw FileExceptionCode.IOERROR.create(e, e.getMessage());
         }
     }
 
@@ -783,7 +783,7 @@ public class LocalFileStorage implements FileStorage {
      */
     protected void eliminate() throws OXException {
         if (storage.exists() && !delete(storage)) {
-            throw new OXException(Code.NOT_ELIMINATED);
+            throw FileExceptionCode.NOT_ELIMINATED.create();
         }
     }
 

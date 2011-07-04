@@ -50,6 +50,7 @@
 package com.openexchange.api2.sync;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
 /**

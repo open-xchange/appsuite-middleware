@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
 import com.openexchange.database.provider.SimpleDBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;

@@ -70,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -77,7 +78,6 @@ import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.OXException;
 
 /**
  * This class contains some tools to ease update of database.

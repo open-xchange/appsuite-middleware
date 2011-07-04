@@ -80,6 +80,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;

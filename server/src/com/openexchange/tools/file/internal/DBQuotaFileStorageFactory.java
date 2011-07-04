@@ -51,9 +51,9 @@ package com.openexchange.tools.file.internal;
 
 import java.net.URI;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.file.external.QuotaOXException;

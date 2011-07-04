@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.folder;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;

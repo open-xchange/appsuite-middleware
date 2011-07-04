@@ -52,6 +52,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLockManager;

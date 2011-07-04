@@ -73,6 +73,7 @@ import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.management.ManagementException;

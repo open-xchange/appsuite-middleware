@@ -52,6 +52,7 @@ package com.openexchange.tools.oxfolder;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import com.openexchange.exception.OXException;
 
 
 /**

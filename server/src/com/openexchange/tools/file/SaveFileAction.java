@@ -50,7 +50,7 @@
 package com.openexchange.tools.file;
 
 import java.io.InputStream;
-import com.openexchange.tools.file.external.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
 

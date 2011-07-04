@@ -84,6 +84,7 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.database.PrivateFlag;
 import com.openexchange.groupware.container.Contact;

@@ -67,6 +67,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.Contacts;

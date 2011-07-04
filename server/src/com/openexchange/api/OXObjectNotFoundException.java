@@ -50,6 +50,7 @@
 package com.openexchange.api;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 

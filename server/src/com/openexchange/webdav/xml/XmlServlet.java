@@ -67,6 +67,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;

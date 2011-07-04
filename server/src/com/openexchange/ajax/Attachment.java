@@ -77,6 +77,7 @@ import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentConfig;

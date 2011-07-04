@@ -64,6 +64,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;

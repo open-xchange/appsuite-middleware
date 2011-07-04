@@ -52,6 +52,7 @@ package com.openexchange.tools.file.external;
 import java.io.InputStream;
 import java.util.Set;
 import java.util.SortedSet;
+import com.openexchange.exception.OXException;
 
 public interface FileStorage {
 

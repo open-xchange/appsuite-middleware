@@ -49,6 +49,7 @@
 
 package com.openexchange.api2;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.session.Session;
 

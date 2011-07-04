@@ -53,9 +53,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.external.OXException;
-import com.openexchange.tools.file.external.OXException.Code;
 
 public class FileStorage {
 
@@ -74,7 +73,7 @@ public class FileStorage {
 
     public static final FileStorage getInstance(final URI uri) throws OXException {
         if (fss == null) {
-            throw new OXException(Code.INSTANTIATIONERROR, "No file storage starter registered.");
+            throw FileExceptionCode.INSTANTIATIONERROR.create("No file storage starter registered.");
         }
         return new FileStorage(fss.getFileStorage(uri));
     }

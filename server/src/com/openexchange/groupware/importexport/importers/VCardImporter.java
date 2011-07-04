@@ -64,6 +64,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;

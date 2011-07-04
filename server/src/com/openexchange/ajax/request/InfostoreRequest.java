@@ -75,6 +75,7 @@ import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;

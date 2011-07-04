@@ -52,6 +52,7 @@ package com.openexchange.groupware.infostore.webdav;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;

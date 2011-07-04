@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**

@@ -51,6 +51,7 @@ package com.openexchange.groupware.impl;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.ldap.User;

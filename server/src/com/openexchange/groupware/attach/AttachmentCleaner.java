@@ -54,6 +54,7 @@ import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;

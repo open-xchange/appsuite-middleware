@@ -74,6 +74,7 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFolder;

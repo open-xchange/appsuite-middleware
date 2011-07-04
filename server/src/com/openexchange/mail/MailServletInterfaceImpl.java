@@ -84,6 +84,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.dataretention.DataRetentionException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;

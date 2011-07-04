@@ -63,6 +63,7 @@ import java.util.Set;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.InfostoreException;

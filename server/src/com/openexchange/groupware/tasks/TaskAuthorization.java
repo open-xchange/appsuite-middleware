@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;

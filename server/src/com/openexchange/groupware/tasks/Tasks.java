@@ -51,6 +51,7 @@ package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;

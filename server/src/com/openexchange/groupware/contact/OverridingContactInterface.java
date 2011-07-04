@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
 

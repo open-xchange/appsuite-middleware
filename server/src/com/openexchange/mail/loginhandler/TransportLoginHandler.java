@@ -57,6 +57,7 @@ import java.util.List;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;

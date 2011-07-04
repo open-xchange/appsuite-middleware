@@ -84,6 +84,7 @@ import com.openexchange.data.conversion.ical.ITipMethod;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.impl.AppointmentEventInterface2;
 import com.openexchange.event.impl.TaskEventInterface2;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;

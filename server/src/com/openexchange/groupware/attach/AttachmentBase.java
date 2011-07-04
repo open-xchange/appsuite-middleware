@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 import java.util.SortedSet;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;

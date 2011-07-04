@@ -67,6 +67,7 @@ import com.openexchange.ajax.request.FolderRequest;
 import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.json.OXJSONWriter;

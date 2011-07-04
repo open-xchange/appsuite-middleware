@@ -1,0 +1,124 @@
+package com.openexchange.tools.file.external;
+
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
+
+/**
+ * Error codes for the file storage exception.
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public enum FileStorageCodes implements OXExceptionCode {
+    /** An IO error occurred: %s */
+    IOERROR("An IO error occurred: %s", Category.CATEGORY_SERVICE_DOWN, 3),
+    /** May be used to turn the IOException of getInstance into a proper AbstractOXException */
+    INSTANTIATIONERROR("Couldn't reach the filestore: %s", Category.CATEGORY_SERVICE_DOWN, 4),
+    /** Cannot create directory \"%1$s\" for FileStorage. */
+    CREATE_DIR_FAILED("Cannot create directory \"%1$s\" for FileStorage.", Category.CATEGORY_CONFIGURATION, 6),
+    /** Unsupported encoding. */
+    ENCODING("Unsupported encoding.", Category.CATEGORY_ERROR, 9),
+    /** Number parsing problem. */
+    NO_NUMBER("Number parsing problem.", Category.CATEGORY_ERROR, 10),
+    /** File storage is full. */
+    STORE_FULL("File storage is full.", Category.CATEGORY_CAPACITY, 11),
+    /** Depth mismatch while computing next entry. */
+    DEPTH_MISMATCH("'Depth' mismatch while computing next entry.", Category.CATEGORY_ERROR, 12),
+    /** Cannot remove lock file. */
+    UNLOCK("Cannot remove lock file.", Category.CATEGORY_SERVICE_DOWN, 13),
+    /** Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore. */
+    LOCK("Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore.", Category.CATEGORY_SERVICE_DOWN, 14),
+    /** Eliminating the FileStorage failed. */
+    NOT_ELIMINATED("Eliminating the FileStorage failed.", Category.CATEGORY_SERVICE_DOWN, 16),
+    /** File does not exist in filestore \"%1$s\". Consider running consistency tool. */
+    FILE_NOT_FOUND("File does not exist in filestore \"%1$s\". Consider running consistency tool.", Category.CATEGORY_SERVICE_DOWN, 17);
+
+    /**
+     * Message of the exception.
+     */
+    private final String message;
+
+    /**
+     * Category of the exception.
+     */
+    private final Category category;
+
+    /**
+     * Detail number of the exception.
+     */
+    private final int number;
+    
+    private final boolean display;
+
+    /**
+     * Default constructor.
+     * 
+     * @param message message.
+     * @param category category.
+     * @param detailNumber detail number.
+     */
+    private FileStorageCodes(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        this.category = category;
+        this.number = detailNumber;
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
+    }
+
+    public String getPrefix() {
+        return "FLS";
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+    
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public com.openexchange.exception.OXException create() {
+        return create(new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public com.openexchange.exception.OXException create(final Object... args) {
+        return create((Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public com.openexchange.exception.OXException create(final Throwable cause, final Object... args) {
+        final com.openexchange.exception.OXException ret;
+        if (display) {
+            ret = new com.openexchange.exception.OXException(number, message, cause, args);
+        } else {
+            ret =
+                new com.openexchange.exception.OXException(
+                    number,
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
+        }
+        return ret.addCategory(category).setPrefix(getPrefix());
+    }
+}

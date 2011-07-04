@@ -51,6 +51,7 @@ package com.openexchange.groupware.attach;
 
 import java.io.InputStream;
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;

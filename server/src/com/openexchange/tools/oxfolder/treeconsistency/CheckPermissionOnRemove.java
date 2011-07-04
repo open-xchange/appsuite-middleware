@@ -59,6 +59,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCache;

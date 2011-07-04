@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;

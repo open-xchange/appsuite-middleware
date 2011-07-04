@@ -50,6 +50,7 @@
 package com.openexchange.groupware.attach.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;

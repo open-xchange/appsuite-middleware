@@ -67,6 +67,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;

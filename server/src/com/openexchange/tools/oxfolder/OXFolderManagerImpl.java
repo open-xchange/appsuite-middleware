@@ -73,6 +73,7 @@ import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderException;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;

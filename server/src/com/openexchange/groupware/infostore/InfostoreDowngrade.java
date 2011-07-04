@@ -50,6 +50,7 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;

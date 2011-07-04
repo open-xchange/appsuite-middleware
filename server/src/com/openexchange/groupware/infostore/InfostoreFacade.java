@@ -51,6 +51,7 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;

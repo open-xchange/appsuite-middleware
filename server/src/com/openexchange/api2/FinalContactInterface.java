@@ -51,6 +51,7 @@ package com.openexchange.api2;
 
 import java.util.List;
 import java.util.UUID;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;

@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;

@@ -61,6 +61,7 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;

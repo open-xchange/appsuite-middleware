@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import com.openexchange.exception.OXException;
+
 
 
 /**

@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * This class contains basic helper methods needed by all importers.

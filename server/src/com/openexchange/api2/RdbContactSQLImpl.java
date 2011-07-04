@@ -82,6 +82,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentException;

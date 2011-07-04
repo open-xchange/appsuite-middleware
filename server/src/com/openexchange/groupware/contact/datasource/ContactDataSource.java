@@ -65,6 +65,7 @@ import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;

@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;

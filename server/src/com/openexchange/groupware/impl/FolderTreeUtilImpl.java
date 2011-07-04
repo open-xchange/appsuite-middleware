@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;

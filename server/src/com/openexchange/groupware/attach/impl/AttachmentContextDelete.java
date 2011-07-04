@@ -51,6 +51,7 @@ package com.openexchange.groupware.attach.impl;
 
 import java.sql.Connection;
 import com.openexchange.database.provider.SimpleDBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;

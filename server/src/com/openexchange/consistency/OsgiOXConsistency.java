@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
@@ -69,7 +70,6 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.OXException;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX.

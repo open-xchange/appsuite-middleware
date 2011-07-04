@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tx.TransactionAware;
 

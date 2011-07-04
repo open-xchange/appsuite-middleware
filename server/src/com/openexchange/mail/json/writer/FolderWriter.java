@@ -61,6 +61,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;

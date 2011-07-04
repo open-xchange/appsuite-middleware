@@ -68,6 +68,7 @@ import java.util.Queue;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;

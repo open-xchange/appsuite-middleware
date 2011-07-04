@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;

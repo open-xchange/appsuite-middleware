@@ -57,6 +57,7 @@ import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.internet.MimeUtility;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;

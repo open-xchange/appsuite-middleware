@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Queue;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;

@@ -109,6 +109,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;

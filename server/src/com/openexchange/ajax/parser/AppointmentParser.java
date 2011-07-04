@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.servlet.OXJSONException;
 

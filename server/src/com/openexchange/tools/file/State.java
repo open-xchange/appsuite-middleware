@@ -63,7 +63,7 @@ import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.tools.file.external.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -140,11 +140,11 @@ class State {
                 line = reader.readLine();
             }
         } catch (final UnsupportedEncodingException e) {
-            throw new OXException(OXException.Code.ENCODING, e);
+            throw FileExceptionCode.ENCODING.create(e);
         } catch (final NumberFormatException e) {
-            throw new OXException(OXException.Code.NO_NUMBER, e);
+            throw FileExceptionCode.NO_NUMBER.create(e);
         } catch (final IOException e) {
-            throw new OXException(OXException.Code.IOERROR, e, e.getMessage());
+            throw FileExceptionCode.IOERROR.create(e, e.getMessage());
         } finally {
             if (null != reader) {
                 try {
@@ -189,9 +189,9 @@ class State {
             osw.close();
             return new ByteArrayInputStream(baos.toByteArray());
         } catch (final UnsupportedEncodingException e) {
-            throw new OXException(OXException.Code.ENCODING, e);
+            throw FileExceptionCode.ENCODING.create(e);
         } catch (final IOException e) {
-            throw new OXException(OXException.Code.IOERROR, e, e.getMessage());
+            throw FileExceptionCode.IOERROR.create(e, e.getMessage());
         }
     }
 
