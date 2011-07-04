@@ -53,11 +53,11 @@ import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * {@link HeaderCacheExceptionCodes} - Enumeration about all {@link HeaderCacheException}s.
+ * {@link HeaderCacheExceptionCode} - Enumeration about all {@link HeaderCacheException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum HeaderCacheExceptionCodes implements OXErrorMessage {
+public enum HeaderCacheExceptionCode implements OXErrorMessage {
 
     /**
      * An error occurred: %1$s
@@ -70,7 +70,7 @@ public enum HeaderCacheExceptionCodes implements OXErrorMessage {
 
     private final String message;
 
-    private HeaderCacheExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private HeaderCacheExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;

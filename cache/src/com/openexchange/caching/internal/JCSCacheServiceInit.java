@@ -63,7 +63,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.engine.control.CompositeCacheConfigurator;
 import org.apache.jcs.engine.control.CompositeCacheManager;
-import com.openexchange.caching.CacheExceptionCodes;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -163,7 +163,7 @@ public final class JCSCacheServiceInit {
         try {
             return loadProperties(new FileInputStream(cacheConfigFile));
         } catch (final FileNotFoundException e) {
-            throw CacheExceptionCodes.MISSING_CACHE_CONFIG_FILE.create(e, cacheConfigFile);
+            throw CacheExceptionCode.MISSING_CACHE_CONFIG_FILE.create(e, cacheConfigFile);
         }
     }
 
@@ -172,7 +172,7 @@ public final class JCSCacheServiceInit {
         try {
             props.load(in);
         } catch (final IOException e) {
-            throw CacheExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             try {
                 in.close();
@@ -334,7 +334,7 @@ public final class JCSCacheServiceInit {
          */
         final String cacheConfigFile = configurationService.getProperty(PROP_CACHE_CONF_FILE);
         if (cacheConfigFile == null) {
-            final OXException ce = CacheExceptionCodes.MISSING_CONFIGURATION_PROPERTY.create(PROP_CACHE_CONF_FILE);
+            final OXException ce = CacheExceptionCode.MISSING_CONFIGURATION_PROPERTY.create(PROP_CACHE_CONF_FILE);
             if (errorIfNull) {
                 throw ce;
             }
@@ -359,7 +359,7 @@ public final class JCSCacheServiceInit {
          */
         final String value = props.getProperty(DEFAULT_REGION);
         if (null == value || 0 == value.length()) {
-            throw CacheExceptionCodes.MISSING_DEFAULT_AUX.create();
+            throw CacheExceptionCode.MISSING_DEFAULT_AUX.create();
         }
     }
 
