@@ -67,7 +67,7 @@ public final class RFC2616Regex {
         super();
     }
 
-    private static final String tokenRegex = "[\\p{ASCII}&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
+    private static final String tokenCharRegex = "[\\p{ASCII}&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]";
 
     /**
      * Regular expression that satisfies a <i>token</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
@@ -80,7 +80,7 @@ public final class RFC2616Regex {
      * 	              | &quot;{&quot; | &quot;}&quot; | SP | HT
      * </pre>
      */
-    public static final Pattern TOKEN = Pattern.compile(tokenRegex);
+    public static final Pattern TOKEN = Pattern.compile(tokenCharRegex + "+"); // At least one token character fits a token
 
     private static final String qdtextRegex = "[\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}\"]]*";
 
@@ -117,7 +117,7 @@ public final class RFC2616Regex {
      */
     public static final Pattern QUOTED_STRING = Pattern.compile(quotedStringRegex);
 
-    private static final String valueRegex = RegexUtility.OR(RegexUtility.group(tokenRegex, false), RegexUtility.group(
+    private static final String valueRegex = RegexUtility.OR(RegexUtility.group(RegexUtility.zeroOrMoreTimes(tokenCharRegex), false), RegexUtility.group(
         quotedStringRegex,
         false));
 
@@ -141,7 +141,7 @@ public final class RFC2616Regex {
 
     private static final String portRegex = RegexUtility.concat(";\\p{Blank}*\\$Port(=\"", RegexUtility.group(valueRegex, false), "\")?");
 
-    private static final String cookieValueRegex = RegexUtility.concat(RegexUtility.group(tokenRegex, true), "=", RegexUtility.group(
+    private static final String cookieValueRegex = RegexUtility.concat(RegexUtility.group(RegexUtility.oneOrMoreTimes(tokenCharRegex), true), "=", RegexUtility.group(
         valueRegex,
         true), RegexUtility.optional(pathRegex, RegexUtility.GroupType.NON_CAPTURING), RegexUtility.optional(
         domainRegex,

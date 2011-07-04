@@ -1,3 +1,7 @@
+* 2011-07-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #19585: Allowing empty cookie values; e.g. ``mycookie=лл
+
 * 2011-07-02 - thorben.betten@open-xchange.com
 
  - Bugfix #19561: Proper re-initialization of LIST/LSUB cache
