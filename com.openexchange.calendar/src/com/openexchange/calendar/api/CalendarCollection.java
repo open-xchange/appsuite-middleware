@@ -101,7 +101,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.MBoolean;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -249,9 +248,9 @@ public final class CalendarCollection implements CalendarCollectionService {
      * recurrence.
      * 
      * @param cdao The recurring appointment
-     * @throws OXCalendarException If recurring appointment's pattern is invalid
+     * @throws OXException If recurring appointment's pattern is invalid
      */
-    private void convertDSString(final CalendarDataObject cdao) throws OXCalendarException {
+    private void convertDSString(final CalendarDataObject cdao) throws OXException {
         char name;
         String value;
         final String ds = cdao.getRecurrence();
@@ -277,8 +276,8 @@ public final class CalendarCollection implements CalendarCollectionService {
     
     private void checkAndCorrectErrors(final CalendarDataObject cdao) {
         if (cdao.getInterval() > MAX_OCCURRENCESE) {
-            final OXCalendarException exc = new OXCalendarException(
-                    OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getInterval()), Integer
+            final OXException exc = 
+                    OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getInterval()), Integer
                             .valueOf(MAX_OCCURRENCESE));
             if (LOG.isWarnEnabled()) {
                 LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
@@ -286,8 +285,8 @@ public final class CalendarCollection implements CalendarCollectionService {
             cdao.setInterval(MAX_OCCURRENCESE);
         }
         if (cdao.getOccurrence() > MAX_OCCURRENCESE) {
-            final OXCalendarException exc = new OXCalendarException(
-                    OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getOccurrence()), Integer
+            final OXException exc = 
+                    OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getOccurrence()), Integer
                             .valueOf(MAX_OCCURRENCESE));
             if (LOG.isWarnEnabled()) {
                 LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
@@ -356,11 +355,11 @@ public final class CalendarCollection implements CalendarCollectionService {
      *            The value
      * @param cdao
      *            The calendar object
-     * @throws OXCalendarException
+     * @throws OXException
      *             If an unknown name-value-pair occurs
      */
     private void encodeNameValuePair(final char name, final String value, final CalendarDataObject cdao)
-            throws OXCalendarException {
+            throws OXException {
         if (name == 't') {
             int t = Integer.parseInt(value);
             if (t == 5) {
