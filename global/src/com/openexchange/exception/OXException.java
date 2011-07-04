@@ -61,6 +61,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
+import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.internal.I18n;
 import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.session.Session;
@@ -115,7 +116,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private final int code;
 
-    private final String displayMessage;
+    private String displayMessage;
 
     private String logMessage;
 
@@ -389,6 +390,9 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException addCategory(final Category category) {
         if (null != category) {
+            if (EnumType.TRY_AGAIN.equals(category.getType()) && OXExceptionStrings.MESSAGE.equals(displayMessage)) {
+                displayMessage = OXExceptionStrings.MESSAGE_RETRY;
+            }
             categories.add(category);
         }
         return this;
