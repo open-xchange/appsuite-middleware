@@ -302,7 +302,7 @@ public interface Category extends Comparable<Category> {
     public static interface Type {
 
         /**
-         * Gets the name for this category.
+         * Gets the name for parental category.
          * 
          * @return The name
          */
