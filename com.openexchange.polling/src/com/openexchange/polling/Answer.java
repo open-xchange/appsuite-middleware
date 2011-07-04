@@ -64,8 +64,8 @@ public class Answer {
         return answers;
     }
 
-    public void setAnswers(List<Integer> answers) {
-        this.answers = answers;
+    public void setAnswers(final List<Integer> answers) {
+        this.answers = new ArrayList<Integer>(answers);
     }
     
     public void newMethod() {
