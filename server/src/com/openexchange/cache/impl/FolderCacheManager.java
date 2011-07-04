@@ -149,7 +149,7 @@ public final class FolderCacheManager {
      */
     public static FolderCacheManager getInstance() throws FolderCacheNotEnabledException, OXException {
         if (!OXFolderProperties.isEnableFolderCache()) {
-            throw new FolderCacheNotEnabledException();
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
         }
         if (instance == null) {
             synchronized (FolderCacheManager.class) {
@@ -251,7 +251,7 @@ public final class FolderCacheManager {
      */
     public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readCon) throws OXException {
         if (null == folderCache) {
-            throw new FolderCacheNotEnabledException();
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
         }
         try {
             if (fromCache) {
@@ -369,7 +369,7 @@ public final class FolderCacheManager {
      */
     public FolderObject putIfAbsent(final FolderObject folderObj, final Context ctx, final ElementAttributes elemAttribs) throws OXException {
         if (null == folderCache) {
-            throw new FolderCacheNotEnabledException();
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
         }
         if (!folderObj.containsObjectID()) {
             throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.ID, I(-1), I(ctx.getContextId()));
