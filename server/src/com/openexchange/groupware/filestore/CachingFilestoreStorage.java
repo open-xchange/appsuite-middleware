@@ -60,6 +60,7 @@ import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -111,7 +112,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
             return id;
         }
 
-        public Filestore load() throws FilestoreException {
+        public Filestore load() throws FilestoreException, OXException {
             return delegate.getFilestore(id.intValue());
         }
 

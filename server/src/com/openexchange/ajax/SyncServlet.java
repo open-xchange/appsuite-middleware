@@ -304,7 +304,7 @@ public class SyncServlet extends PermissionServlet {
 			throws OXException {
 		final String paramVal = req.getParameter(paramName);
 		if (paramVal == null) {
-			throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, paramName);
+			throw OXFolderExceptionCode.MISSING_PARAMETER.create(paramName);
 		}
 		return paramVal;
 	}

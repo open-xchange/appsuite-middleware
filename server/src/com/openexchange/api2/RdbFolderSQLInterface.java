@@ -241,9 +241,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             }
             return fo;
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -385,9 +385,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             }
             return folderobject;
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -478,9 +478,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             OXFolderManager.getInstance(session, oxfolderAccess).deleteFolder(folderobject, false, lastModified);
             return folderId;
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -688,9 +688,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         } catch (final SearchIteratorException e) {
             throw new OXException(e);
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -829,7 +829,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                         getUserName(session, user),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(OXFolderExceptionCode.NOT_VISIBLE, Category.USER_CONFIGURATION, Integer.valueOf(objectID), getUserName(
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(Category.USER_CONFIGURATION, Integer.valueOf(objectID), getUserName(
                     session,
                     user), Integer.valueOf(ctx.getContextId()));
             }
@@ -837,9 +837,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
             return objectID;
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 

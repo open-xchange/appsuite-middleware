@@ -150,7 +150,7 @@ public final class OXFolderUtility {
             final Integer key = Integer.valueOf(permission.getEntity());
             if (set.contains(key)) {
                 if (permission.isGroupPermission()) {
-                    throw new OXFolderException(OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION, getGroupName(
+                    throw OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION.create(getGroupName(
                         permission.getEntity(),
                         ctx));
                 }
@@ -209,7 +209,7 @@ public final class OXFolderUtility {
             }
         }
         if (!affectedUsers.isEmpty()) {
-            throw new OXFolderException(OXFolderExceptionCode.SIMILAR_NAMED_SHARED_FOLDER, folderName);
+            throw OXFolderExceptionCode.SIMILAR_NAMED_SHARED_FOLDER.create(folderName);
         }
     }
 
@@ -222,7 +222,7 @@ public final class OXFolderUtility {
     public static void checkFolderStringData(final FolderObject checkMe) throws OXFolderException {
         final String result;
         if (checkMe.containsFolderName() && (result = Check.containsInvalidChars(checkMe.getFolderName())) != null) {
-            throw new OXFolderException(OXFolderExceptionCode.INVALID_DATA, result);
+            throw OXFolderExceptionCode.INVALID_DATA.create(result);
         }
     }
 
@@ -265,7 +265,7 @@ public final class OXFolderUtility {
         if (adminPermissionCount == 0) {
             throw new OXFolderLogicException(OXFolderExceptionCode.NO_FOLDER_ADMIN);
         } else if (isDefaultFolder && !creatorIsAdmin) {
-            throw new OXFolderException(OXFolderExceptionCode.CREATOR_IS_NOT_ADMIN, getUserName(creator, ctx), getFolderName(
+            throw OXFolderExceptionCode.CREATOR_IS_NOT_ADMIN.create(getUserName(creator, ctx), getFolderName(
                 folderObj.getObjectID(),
                 ctx));
         }
@@ -336,7 +336,7 @@ public final class OXFolderUtility {
                 final OCLPermission newPerm = newPerms[i];
                 if (newPerm.isGroupPermission()) {
                     final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                    throw new OXFolderException(OXFolderExceptionCode.NO_GROUP_PERMISSION, null == i18nName ? getFolderName(
+                    throw OXFolderExceptionCode.NO_GROUP_PERMISSION.create(null == i18nName ? getFolderName(
                         folderId,
                         ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
                 }
@@ -350,7 +350,7 @@ public final class OXFolderUtility {
                 final OCLPermission newPerm = newPerms[i];
                 if (!newPerm.isGroupPermission() && newPerm.getEntity() != admin) {
                     final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                    throw new OXFolderException(OXFolderExceptionCode.NO_INDIVIDUAL_PERMISSION, null == i18nName ? getFolderName(
+                    throw OXFolderExceptionCode.NO_INDIVIDUAL_PERMISSION.create(null == i18nName ? getFolderName(
                         folderId,
                         ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
                 }
@@ -370,7 +370,7 @@ public final class OXFolderUtility {
             toCheck,
             allowedObjectPermissions) || toCheck.getFolderPermission() > maxAllowedFolderPermission) {
             final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-            throw new OXFolderException(OXFolderExceptionCode.FOLDER_VISIBILITY_PERMISSION_ONLY, null == i18nName ? getFolderName(
+            throw OXFolderExceptionCode.FOLDER_VISIBILITY_PERMISSION_ONLY.create(null == i18nName ? getFolderName(
                 folderId,
                 ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
         }
@@ -587,7 +587,7 @@ public final class OXFolderUtility {
         } else if (parentModule == FolderObject.INFOSTORE) {
             return (newFolderModule == FolderObject.INFOSTORE);
         } else {
-            throw new OXFolderException(OXFolderExceptionCode.UNKNOWN_MODULE, Integer.valueOf(parentModule), Integer.valueOf(cid));
+            throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(parentModule), Integer.valueOf(cid));
         }
         return true;
     }

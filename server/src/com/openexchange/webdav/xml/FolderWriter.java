@@ -339,7 +339,7 @@ public class FolderWriter extends FolderChildWriter {
                     deletedQueue.add(fo);
                 }
             } catch (final SQLException e) {
-                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -367,7 +367,7 @@ public class FolderWriter extends FolderChildWriter {
                     deletedQueue.add(fo);
                 }
             } catch (final SQLException e) {
-                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -386,7 +386,7 @@ public class FolderWriter extends FolderChildWriter {
                     updatedQueue.add(fo);
                 }
             } catch (final SQLException e) {
-                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -408,7 +408,7 @@ public class FolderWriter extends FolderChildWriter {
                     updatedQueue.add(fo);
                 }
             } catch (final SQLException e) {
-                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
 

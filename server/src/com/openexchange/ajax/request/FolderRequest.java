@@ -97,7 +97,7 @@ public class FolderRequest {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CLEAR)) {
             FOLDER_SERVLET.actionPutClearFolder(session, pw, jsonObject);
         } else {
-            throw new OXFolderException(OXFolderExceptionCode.UNKNOWN_ACTION, action);
+            throw OXFolderExceptionCode.UNKNOWN_ACTION.create(action);
         }
     }
 

@@ -145,7 +145,7 @@ public final class OXFolderSQL {
             }
             return set.toArray();
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -1482,7 +1482,7 @@ public final class OXFolderSQL {
                     callWriteCon.rollback(); // ROLLBACK
                     callWriteCon.setAutoCommit(true);
                 }
-                throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
             }
         } finally {
             NEXTSERIAL_LOCK.unlock();

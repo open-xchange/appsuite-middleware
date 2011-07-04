@@ -249,7 +249,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             removeFromFolderCache(fuids, event.getContext());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
          * Strip all user permission from other (public) infostore folders
@@ -320,7 +320,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 ids.add(Integer.valueOf(fuid));
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
          * Update cache
@@ -375,7 +375,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 cSql.deleteAppointmentsInFolder(folderID, event.getWriteCon());
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -413,7 +413,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 }
             }
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(event.getContext().getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(event.getContext().getContextId()));
         }
     }
 
@@ -467,7 +467,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 event.getWriteCon());
             set.addAll(tmp);
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
          * Update cache

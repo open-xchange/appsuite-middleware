@@ -138,7 +138,7 @@ abstract class CheckPermission {
         } catch (final OXFolderNotFoundException e) {
             throw e;
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 

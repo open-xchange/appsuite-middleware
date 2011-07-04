@@ -169,9 +169,9 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                 }
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 

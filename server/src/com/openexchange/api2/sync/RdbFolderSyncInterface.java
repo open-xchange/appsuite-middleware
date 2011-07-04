@@ -157,9 +157,9 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folder, false, lastModified);
             return folder.getObjectID();
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 

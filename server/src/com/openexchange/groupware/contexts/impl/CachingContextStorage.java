@@ -59,6 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateStatus;
@@ -124,7 +125,7 @@ public class CachingContextStorage extends ContextStorage {
             public Serializable getKey() {
                 return I(contextId);
             }
-            public ContextExtended load() throws AbstractOXException {
+            public ContextExtended load() throws OXException {
                 final ContextExtended retval = getPersistantImpl().loadContext(contextId);
                 // TODO We should introduce a logic layer above this context storage layer. That layer should then trigger the update tasks.
                 // Nearly all accesses to the ContextStorage need then to be replaced with an access to the ContextService.

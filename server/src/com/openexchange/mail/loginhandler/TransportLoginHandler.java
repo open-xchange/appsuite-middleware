@@ -123,7 +123,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
             } catch (final DBPoolingException e) {
                 throw new LoginException(e);
             } catch (final SQLException e) {
-                throw new LoginException(new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage()));
+                throw new LoginException(OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage()));
             } catch (final OXFolderException e) {
                 throw new LoginException(e);
             } catch (final OXException e) {

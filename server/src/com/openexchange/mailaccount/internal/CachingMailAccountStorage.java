@@ -64,6 +64,7 @@ import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mailaccount.Attribute;
@@ -147,7 +148,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return newCacheKey(cacheService, MailAccount.DEFAULT_ID, user, cid);
             }
 
-            public MailAccount load() throws MailAccountException {
+            public MailAccount load() throws MailAccountException, OXException {
                 return d.getDefaultMailAccount(user, cid);
             }
 
@@ -178,7 +179,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return newCacheKey(cacheService, id, user, cid);
             }
 
-            public MailAccount load() throws MailAccountException {
+            public MailAccount load() throws MailAccountException, OXException {
                 return d.getMailAccount(id, user, cid);
             }
 
@@ -244,7 +245,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                     return key;
                 }
     
-                public MailAccount load() throws MailAccountException {
+                public MailAccount load() throws MailAccountException, OXException {
                     return d.getMailAccount(id, user, cid);
                 }
     

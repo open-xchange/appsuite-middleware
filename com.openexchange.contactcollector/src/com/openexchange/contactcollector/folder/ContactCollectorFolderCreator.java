@@ -107,7 +107,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         } catch (final SettingException e) {
             throw new LoginException(e);
         } catch (final SQLException e) {
-            throw new LoginException(new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage()));
+            throw new LoginException(OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage()));
         } catch (final AbstractOXException e) {
             throw new LoginException(e);
         } finally {

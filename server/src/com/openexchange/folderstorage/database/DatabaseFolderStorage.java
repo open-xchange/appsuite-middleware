@@ -409,7 +409,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             folderManager.createFolder(createMe, true, millis);
             final int fuid = createMe.getObjectID();
             if (fuid <= 0) {
-                throw new OXFolderException(OXFolderExceptionCode.CREATE_FAILED, new Object[0]);
+                throw OXFolderExceptionCode.CREATE_FAILED.create(new Object[0]);
             }
             folder.setID(String.valueOf(fuid));
         } catch (final OXException e) {
@@ -958,7 +958,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 } catch (final DBPoolingException e) {
                     throw new FolderException(e);
                 } catch (final SQLException e) {
-                    throw new FolderException(new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage()));
+                    throw new FolderException(OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage()));
                 }
             }
             /*
@@ -1326,7 +1326,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(id)) {
                 final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
-                throw new FolderException(new OXFolderException(OXFolderExceptionCode.NO_ADMIN_ACCESS, OXFolderUtility.getUserName(
+                throw new FolderException(OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(
                     session.getUserId(),
                     context), UserStorage.getStorageUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId())));
             }
@@ -1682,7 +1682,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     private static <T> T getParameter(final Class<T> clazz, final String name, final StorageParameters parameters) throws FolderException {
         final T parameter = optParameter(clazz, name, parameters);
         if (null == parameter) {
-            throw new FolderException(new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, name));
+            throw new FolderException(OXFolderExceptionCode.MISSING_PARAMETER.create(name));
         }
         return parameter;
     }
@@ -1695,7 +1695,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             return clazz.cast(obj);
         } catch (final ClassCastException e) {
-            throw new FolderException(new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, e, name));
+            throw new FolderException(OXFolderExceptionCode.MISSING_PARAMETER.create(e, name));
         }
     }
 

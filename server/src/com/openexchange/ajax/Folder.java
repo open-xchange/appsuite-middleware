@@ -2371,7 +2371,7 @@ public class Folder extends SessionServlet {
     private static final String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {
         final String paramVal = req.getParameter(paramName);
         if (paramVal == null) {
-            throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, paramName);
+            throw OXFolderExceptionCode.MISSING_PARAMETER.create(paramName);
         }
         return paramVal;
     }
@@ -2381,7 +2381,7 @@ public class Folder extends SessionServlet {
     private static final int[] checkIntArrayParam(final HttpServletRequest req, final String paramName) throws OXException {
         String tmp = req.getParameter(paramName);
         if (tmp == null) {
-            throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, paramName);
+            throw OXFolderExceptionCode.MISSING_PARAMETER.create(paramName);
         }
         final String[] sa = PATERN_SPLIT.split(tmp, 0);
         tmp = null;
@@ -2390,7 +2390,7 @@ public class Folder extends SessionServlet {
             try {
                 intArray[a] = Integer.parseInt(sa[a]);
             } catch (final NumberFormatException e) {
-                throw new OXFolderException(OXFolderExceptionCode.BAD_PARAM_VALUE, e, sa[a], paramName);
+                throw OXFolderExceptionCode.BAD_PARAM_VALUE.create(e, sa[a], paramName);
             }
         }
         return intArray;

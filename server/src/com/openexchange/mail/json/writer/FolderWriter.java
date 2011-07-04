@@ -653,7 +653,7 @@ public final class FolderWriter {
                     try {
                         retval += mapping[permission[i]] << shiftVal;
                     } catch (final Exception e) {
-                        throw new OXFolderException(OXFolderExceptionCode.MAP_PERMISSION_FAILED, e, Integer.valueOf(permission[i]));
+                        throw OXFolderExceptionCode.MAP_PERMISSION_FAILED.create(e, Integer.valueOf(permission[i]));
                     }
                 }
             }

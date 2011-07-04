@@ -121,7 +121,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    if (mailadmin == -1) {
 		        mailadmin = OXFolderSQL.getContextMailAdmin(readCon, ctx);
 		        if (mailadmin == -1) {
-		            throw new OXFolderException(OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx.getContextId()));
+		            throw OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT.create(Integer.valueOf(ctx.getContextId()));
 		        }
 		    }
 		    /*
@@ -199,7 +199,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    if (mailadmin == -1) {
 		        mailadmin = OXFolderSQL.getContextMailAdmin(readCon, ctx);
 		        if (mailadmin == -1) {
-		            throw new OXFolderException(OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx.getContextId()));
+		            throw OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT.create(Integer.valueOf(ctx.getContextId()));
 		        }
 		    }
 		    /*

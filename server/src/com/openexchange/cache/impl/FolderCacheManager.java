@@ -66,12 +66,12 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -174,7 +174,7 @@ public final class FolderCacheManager {
                     if (null != cacheService) {
                         try {
                             cacheService.freeCache(FOLDER_CACHE_REGION_NAME);
-                        } catch (final CacheException e) {
+                        } catch (final OXException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -186,33 +186,25 @@ public final class FolderCacheManager {
     /**
      * Initializes cache reference.
      * 
-     * @throws OXFolderException If initializing the cache reference fails
+     * @throws OXException If initializing the cache reference fails
      */
-    public void initCache() throws OXFolderException {
+    public void initCache() throws OXException {
         if (folderCache != null) {
             return;
         }
-        try {
-            folderCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(FOLDER_CACHE_REGION_NAME);
-        } catch (final CacheException e) {
-            throw new OXFolderException(OXFolderExceptionCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e.getMessage());
-        }
+        folderCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(FOLDER_CACHE_REGION_NAME);
     }
 
     /**
      * Releases cache reference.
      * 
-     * @throws OXFolderException If clearing cache fails
+     * @throws OXException If clearing cache fails
      */
-    public void releaseCache() throws OXFolderException {
+    public void releaseCache() throws OXException {
         if (folderCache == null) {
             return;
         }
-        try {
-            folderCache.clear();
-        } catch (final CacheException e) {
-            throw new OXFolderException(OXFolderExceptionCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e.getMessage());
-        }
+        folderCache.clear();
         folderCache = null;
     }
 
@@ -244,7 +236,7 @@ public final class FolderCacheManager {
             return getCacheKey(ctx.getContextId(), folderId);
         }
 
-        public FolderObject load() throws AbstractOXException {
+        public FolderObject load() throws OXException {
             return loadFolderObjectInternal(folderId, ctx, null);
         }
     }
@@ -392,7 +384,7 @@ public final class FolderCacheManager {
             throw new FolderCacheNotEnabledException();
         }
         if (!folderObj.containsObjectID()) {
-            throw new OXFolderException(OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
+            throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.ID, I(-1), I(ctx.getContextId()));
         }
         return putIfAbsentInternal(new InstanceFolderProvider(folderObj.clone()), ctx, elemAttribs);
     }
@@ -480,7 +472,7 @@ public final class FolderCacheManager {
             return;
         }
         if (!folderObj.containsObjectID()) {
-            throw new OXFolderException(OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
+            throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.ID, I(-1), I(ctx.getContextId()));
         }
         if (null != elemAttribs) {
             /*

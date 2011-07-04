@@ -400,9 +400,9 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.endObject();
             }
         } catch (final JSONException e) {
-            throw new OXFolderException(OXFolderExceptionCode.JSON_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final AbstractOXException e) {
             throw new OXFolderException(e);
         }
@@ -443,9 +443,9 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.endArray();
             }
         } catch (final JSONException e) {
-            throw new OXFolderException(OXFolderExceptionCode.JSON_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final AbstractOXException e) {
             throw new OXFolderException(e);
         }
@@ -622,9 +622,9 @@ public final class FolderWriter extends DataWriter {
                                         FolderCacheManager.getInstance().putFolderObject(fo, ctx);
                                     }
                                 } catch (final SQLException e) {
-                                    throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, e, FolderFields.PERMISSIONS);
+                                    throw OXFolderExceptionCode.MISSING_PARAMETER.create(e, FolderFields.PERMISSIONS);
                                 } catch (final DBPoolingException e) {
-                                    throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, e, FolderFields.PERMISSIONS);
+                                    throw OXFolderExceptionCode.MISSING_PARAMETER.create(e, FolderFields.PERMISSIONS);
                                 }
                             }
                             /*
@@ -659,7 +659,7 @@ public final class FolderWriter extends DataWriter {
                                 } catch (final DBPoolingException e) {
                                     throw new OXException(e);
                                 } catch (final SQLException e) {
-                                    throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
+                                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                                 }
                             }
                             /*
@@ -734,7 +734,7 @@ public final class FolderWriter extends DataWriter {
                     try {
                         retval += mapping[permission[i]] << shiftVal;
                     } catch (final Exception e) {
-                        throw new OXFolderException(OXFolderExceptionCode.MAP_PERMISSION_FAILED, e, Integer.valueOf(permission[i]));
+                        throw OXFolderExceptionCode.MAP_PERMISSION_FAILED.create(e, Integer.valueOf(permission[i]));
                     }
                 }
             }

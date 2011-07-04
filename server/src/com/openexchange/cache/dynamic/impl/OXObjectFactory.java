@@ -51,11 +51,11 @@ package com.openexchange.cache.dynamic.impl;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
- * This interface must be implemented to reload objects that have been removed
- * from the cache cause of object life timeout.
+ * This interface must be implemented to reload objects that have been removed from the cache cause of object life timeout.
+ * 
  * @param <T> Type that is loaded by this object factory.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -68,11 +68,10 @@ public interface OXObjectFactory<T> {
     Serializable getKey();
 
     /**
-     * @return the object loaded from the database that will be put into cache
-     * if the object life timeout removed it.
-     * @throws AbstractOXException if loading the object fails.
+     * @return the object loaded from the database that will be put into cache if the object life timeout removed it.
+     * @throws OXException If loading the object fails
      */
-    T load() throws AbstractOXException;
+    T load() throws OXException;
 
     /**
      * @return the single lock for the single cache object.

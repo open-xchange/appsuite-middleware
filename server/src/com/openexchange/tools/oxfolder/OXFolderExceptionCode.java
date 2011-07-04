@@ -476,6 +476,16 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
     ;
 
     /**
+     * Checks specified exception for a folder-not-found error.
+     * 
+     * @param e The exception to check
+     * @return <code>true</code> if a folder-not-found error; otherwise <code>false</code>
+     */
+    public static boolean isNotFound(final OXException e) {
+        return (OXFolderExceptionCode.NOT_EXISTS.getPrefix().equals(e.getPrefix()) && OXFolderExceptionCode.NOT_EXISTS.getNumber() == e.getCode());
+    }
+
+    /**
      * Message of the exception.
      */
     private final String message;
