@@ -49,8 +49,8 @@
 
 package com.openexchange.file.storage.infostore;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -73,11 +73,11 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
     private InfostoreFolderAccess folders;
     private InfostoreAdapterFileAccess files;
 
-    public InfostoreAccountAccess(Session session, InfostoreFileStorageService service) throws OXException {
+    public InfostoreAccountAccess(final Session session, final InfostoreFileStorageService service) throws OXException {
         try {
             this.session = new ServerSessionAdapter(session);
             this.service = service;
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new OXException(e);
         }
     }

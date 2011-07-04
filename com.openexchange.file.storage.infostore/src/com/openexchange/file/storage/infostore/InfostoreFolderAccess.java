@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.infostore;
 
-import com.openexchange.file.storage.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
@@ -68,58 +68,58 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
      * Initializes a new {@link InfostoreFolderAccess}.
      * @param session
      */
-    public InfostoreFolderAccess(ServerSession session) {
+    public InfostoreFolderAccess(final ServerSession session) {
         super();
         // TODO Auto-generated constructor stub
         
     }
 
-    public void clearFolder(String folderId) throws OXException {
+    public void clearFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    public void clearFolder(String folderId, boolean hardDelete) throws OXException {
+    public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    public String createFolder(FileStorageFolder toCreate) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public String deleteFolder(String folderId) throws OXException {
+    public String createFolder(final FileStorageFolder toCreate) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
+    public String deleteFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public boolean exists(String folderId) throws OXException {
+    public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean exists(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return false;
     }
 
-    public Quota getFileQuota(String folderId) throws OXException {
+    public Quota getFileQuota(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public FileStorageFolder getFolder(String folderId) throws OXException {
+    public FileStorageFolder getFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
+    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public Quota[] getQuotas(String folder, Type[] types) throws OXException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -129,27 +129,27 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         return null;
     }
 
-    public Quota getStorageQuota(String folderId) throws OXException {
+    public Quota getStorageQuota(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
+    public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public String moveFolder(String folderId, String newParentId) throws OXException {
+    public String moveFolder(final String folderId, final String newParentId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public String renameFolder(String folderId, String newName) throws OXException {
+    public String renameFolder(final String folderId, final String newName) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
+    public String updateFolder(final String identifier, final FileStorageFolder toUpdate) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
