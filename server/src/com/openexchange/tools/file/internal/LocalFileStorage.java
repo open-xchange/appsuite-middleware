@@ -130,7 +130,7 @@ public class LocalFileStorage implements FileStorage {
     protected static final Set<String> SPECIAL_FILENAMES;
 
     static {
-        Set<String> tmp = new HashSet<String>();
+        final Set<String> tmp = new HashSet<String>();
         tmp.add(LOCK_FILENAME);
         tmp.add(STATEFILENAME);
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
@@ -158,7 +158,7 @@ public class LocalFileStorage implements FileStorage {
             try {
                 LOCK.lock();
                 if (!storage.exists() && !mkdirs(storage)) {
-                    throw FileExceptionCode.CREATE_DIR_FAILED.create(storage.getAbsolutePath());
+                    throw FileStorageCodes.CREATE_DIR_FAILED.create(storage.getAbsolutePath());
                 }
             } finally {
                 LOCK.unlock();
@@ -268,7 +268,7 @@ public class LocalFileStorage implements FileStorage {
                 parts[i] = val;
                 sum += val;
             } catch (final NumberFormatException n) {
-                throw FileExceptionCode.NO_NUMBER.create(n);
+                throw FileStorageCodes.NO_NUMBER.create(n);
             }
         }
 
@@ -304,7 +304,7 @@ public class LocalFileStorage implements FileStorage {
         }
 
         // Forms the Output String
-        StringBuilder retval = new StringBuilder();
+        final StringBuilder retval = new StringBuilder();
         for (int j = 0; j < vals.length; j++) {
             retval.append("/");
             retval.append(vals[j]);
@@ -355,7 +355,7 @@ public class LocalFileStorage implements FileStorage {
                 if (nextentry == null) {
                     final Set<String> unused = scanForUnusedEntries();
                     if (unused.isEmpty()) {
-                        throw FileExceptionCode.STORE_FULL.create();
+                        throw FileStorageCodes.STORE_FULL.create();
                     }
                     final Iterator<String> iter = unused.iterator();
                     nextentry = iter.next();
@@ -435,9 +435,9 @@ public class LocalFileStorage implements FileStorage {
     }
 
     public long getFileSize(final String name) throws OXException {
-        File dataFile = new File(storage, name);
+        final File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
-            throw FileExceptionCode.FILE_NOT_FOUND.create(dataFile.getAbsoluteFile().getAbsolutePath());
+            throw FileStorageCodes.FILE_NOT_FOUND.create(dataFile.getAbsoluteFile().getAbsolutePath());
         }
         return dataFile.length();
     }
@@ -535,14 +535,14 @@ public class LocalFileStorage implements FileStorage {
         final int[] entry = new int[depth];
         final StringTokenizer tokenizer = new StringTokenizer(identifier, File.separator);
         if (tokenizer.countTokens() != depth) {
-            throw FileExceptionCode.DEPTH_MISMATCH.create();
+            throw FileStorageCodes.DEPTH_MISMATCH.create();
         }
         int actualDepth = 0;
         while (tokenizer.hasMoreTokens()) {
             try {
                 entry[actualDepth++] = Integer.parseInt(tokenizer.nextToken(), 16);
             } catch (final NumberFormatException n) {
-                throw FileExceptionCode.NO_NUMBER.create(n);
+                throw FileStorageCodes.NO_NUMBER.create(n);
             }
         }
         boolean uebertrag = true;
@@ -625,7 +625,7 @@ public class LocalFileStorage implements FileStorage {
             try {
                 LOCK.lock();
                 if (!parentDir.exists() && !mkdirs(parentDir)) {
-                    throw FileExceptionCode.CREATE_DIR_FAILED.create(parentDir.getAbsolutePath());
+                    throw FileStorageCodes.CREATE_DIR_FAILED.create(parentDir.getAbsolutePath());
                 }
             } finally {
                 LOCK.unlock();
@@ -642,13 +642,13 @@ public class LocalFileStorage implements FileStorage {
                 len = input.read(buf);
             }
         } catch (final IOException e) {
-            throw FileExceptionCode.IOERROR.create(e, e.getMessage());
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             if (null != fos) {
                 try {
                     fos.close();
                 } catch (final IOException e) {
-                    throw FileExceptionCode.IOERROR.create(e, e.getMessage());
+                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
                 }
             }
         }
@@ -685,7 +685,7 @@ public class LocalFileStorage implements FileStorage {
             }
         } while (!created && System.currentTimeMillis() < failTime);
         if (!created) {
-            throw null == ioe ? FileExceptionCode.LOCK.create(lock.getAbsolutePath()) : new OXException(FileStorageCodes.LOCK, ioe, lock.getAbsolutePath());
+            throw null == ioe ? FileStorageCodes.LOCK.create(lock.getAbsolutePath()) : FileStorageCodes.LOCK.create(ioe, lock.getAbsolutePath());
         }
     }
 
@@ -699,7 +699,7 @@ public class LocalFileStorage implements FileStorage {
         if (!lock.delete()) {
             if (lock.exists()) {
                 LOG.error("Couldn't delete lock file: " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
-                throw FileExceptionCode.UNLOCK.create();
+                throw FileStorageCodes.UNLOCK.create();
             }
         }
     }
@@ -742,14 +742,14 @@ public class LocalFileStorage implements FileStorage {
      * @throws OXException
      */
     protected InputStream load(final String name) throws OXException {
-        File dataFile = new File(storage, name);
+        final File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
-            throw FileExceptionCode.FILE_NOT_FOUND.create(dataFile.getAbsoluteFile().getAbsolutePath());
+            throw FileStorageCodes.FILE_NOT_FOUND.create(dataFile.getAbsoluteFile().getAbsolutePath());
         }
         try {
             return new FileInputStream(new File(storage, name));
         } catch (final FileNotFoundException e) {
-            throw FileExceptionCode.IOERROR.create(e, e.getMessage());
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }
 
@@ -783,7 +783,7 @@ public class LocalFileStorage implements FileStorage {
      */
     protected void eliminate() throws OXException {
         if (storage.exists() && !delete(storage)) {
-            throw FileExceptionCode.NOT_ELIMINATED.create();
+            throw FileStorageCodes.NOT_ELIMINATED.create();
         }
     }
 
@@ -839,11 +839,11 @@ public class LocalFileStorage implements FileStorage {
         return state;
     }
 
-    private boolean mkdirs(File directory) {
+    private boolean mkdirs(final File directory) {
         if (directory.exists()) {
             return true;
         }
-        File parent = directory.getParentFile();
+        final File parent = directory.getParentFile();
         if (!mkdirs(parent)) {
             return false;
         }

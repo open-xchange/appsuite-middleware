@@ -68,6 +68,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
  * A {@link HashingFileStorage} generates UUIDs for every file that is stored in it. 
@@ -78,23 +79,23 @@ public class HashingFileStorage implements FileStorage {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(HashingFileStorage.class));
 
-    private File storage;
+    private final File storage;
 
-    public HashingFileStorage(File storage) {
+    public HashingFileStorage(final File storage) {
         this.storage = storage;
     }
     
-    protected File file(String identifier) {
+    protected File file(final String identifier) {
         return new File(storage, identifier);
     }
 
-    public boolean deleteFile(String identifier) throws OXException {
+    public boolean deleteFile(final String identifier) throws OXException {
         return file(identifier).delete();
     }
 
-    public Set<String> deleteFiles(String[] identifiers) throws OXException {
-        Set<String> notDeleted = new HashSet<String>();
-        for (String identifier : identifiers) {
+    public Set<String> deleteFiles(final String[] identifiers) throws OXException {
+        final Set<String> notDeleted = new HashSet<String>();
+        for (final String identifier : identifiers) {
             if (!deleteFile(identifier)) {
                 notDeleted.add(identifier);
             }
@@ -103,11 +104,11 @@ public class HashingFileStorage implements FileStorage {
         return notDeleted;
     }
 
-    public InputStream getFile(String name) throws OXException {
+    public InputStream getFile(final String name) throws OXException {
         try {
             return new BufferedInputStream(new FileInputStream(file(name)));
-        } catch (FileNotFoundException e) {
-            throw FileExceptionCode.FILE_NOT_FOUND.create(name);
+        } catch (final FileNotFoundException e) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
     }
 
@@ -116,7 +117,7 @@ public class HashingFileStorage implements FileStorage {
         final int beginIndex = storage.getAbsolutePath().length()+1;
         visit(new Visitor() {
 
-            public void visit(File f) {
+            public void visit(final File f) {
                 if(f.isFile()) {
                     files.add(f.getAbsolutePath().substring(beginIndex));
                 }
@@ -126,11 +127,11 @@ public class HashingFileStorage implements FileStorage {
         return files;
     }
 
-    public long getFileSize(String name) throws OXException {
+    public long getFileSize(final String name) throws OXException {
         return file(name).length();
     }
 
-    public String getMimeType(String name) throws OXException {
+    public String getMimeType(final String name) throws OXException {
         final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
         return map.getContentType(file(name));
     }
@@ -142,23 +143,23 @@ public class HashingFileStorage implements FileStorage {
     public void remove() throws OXException {
         visit(new Visitor() {
 
-            public void visit(File f) {
+            public void visit(final File f) {
                 f.delete();
             }
             
         });
     }
 
-    public String saveNewFile(InputStream file) throws OXException {
-        String[] filestorePath = generateName();
-        File path = new File(storage, filestorePath[0]);
+    public String saveNewFile(final InputStream file) throws OXException {
+        final String[] filestorePath = generateName();
+        final File path = new File(storage, filestorePath[0]);
         if (!path.exists() && !path.mkdirs() && !path.exists()) {
-            throw FileExceptionCode.CREATE_DIR_FAILED.create(path.toString());
+            throw FileStorageCodes.CREATE_DIR_FAILED.create(path.toString());
         }
 
         BufferedOutputStream bufOut = null;
         BufferedInputStream bufIn = null;
-        File filePath = new File(path, filestorePath[1]);
+        final File filePath = new File(path, filestorePath[1]);
         try {
             bufIn = new BufferedInputStream(file);
             bufOut = new BufferedOutputStream(new FileOutputStream(filePath));
@@ -167,22 +168,22 @@ public class HashingFileStorage implements FileStorage {
             while((i = bufIn.read()) != -1) {
                 bufOut.write(i);
             }
-        } catch (FileNotFoundException e) {
-            throw FileExceptionCode.FILE_NOT_FOUND.create(filePath.toString());
-        } catch (IOException e) {
-            throw FileExceptionCode.IOERROR.create(e.toString());
+        } catch (final FileNotFoundException e) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create(filePath.toString());
+        } catch (final IOException e) {
+            throw FileStorageCodes.IOERROR.create(e.toString());
         } finally {
             if (bufIn != null) {
                 try {
                     bufIn.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
             if (bufOut != null) {
                 try {
                     bufOut.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -192,11 +193,11 @@ public class HashingFileStorage implements FileStorage {
     }
 
     public String[] generateName() {
-        String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+        final String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
 
-        String prefix = Integer.toHexString(uuid.hashCode());
+        final String prefix = Integer.toHexString(uuid.hashCode());
 
-        StringBuilder b = new StringBuilder();
+        final StringBuilder b = new StringBuilder();
 
         int i = 0;
         for (; i < prefix.length() && i < 6; i++) {
@@ -222,20 +223,20 @@ public class HashingFileStorage implements FileStorage {
     }
     
     // Visits all nodes - depth first
-    protected void visit(Visitor visitor) {
+    protected void visit(final Visitor visitor) {
         recurse(storage, visitor);
     }
     
-    protected void recurse(File f, Visitor visitor) {
+    protected void recurse(final File f, final Visitor visitor) {
         if(f.isFile()) {
             visitor.visit(f);
             return;
         }
-        File[] files = f.listFiles();
+        final File[] files = f.listFiles();
         if(files == null) {
             return;
         }
-        for (File file : files) {
+        for (final File file : files) {
             recurse(file, visitor);
         }
         visitor.visit(f);

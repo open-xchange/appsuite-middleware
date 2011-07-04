@@ -55,9 +55,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
-import com.openexchange.tools.file.external.QuotaOXException;
 import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
+import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
 
@@ -70,14 +69,10 @@ public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
         this.dbs = dbs;
     }
 
-    public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws QuotaOXException {
+    public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws OXException {
         if (fss == null || dbs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
-        try {
-            return new DBQuotaFileStorage(ctx, fss.getFileStorage(uri), dbs);
-        } catch (OXException e) {
-            throw new QuotaOXException(e);
-        }
+        return new DBQuotaFileStorage(ctx, fss.getFileStorage(uri), dbs);
     }
 }
