@@ -704,7 +704,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     }
                 } else {
                     if (monthday > 5) {
-                        throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_.create(2, Integer.valueOf(monthday));
+                        throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(2, Integer.valueOf(monthday));
                     }
                     dsf(recStrBuilder, 5);
                     dsf(recStrBuilder, 'i', interval);
@@ -1017,11 +1017,11 @@ public final class CalendarCollection implements CalendarCollectionService {
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL_2) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL_.create(2, re, Integer.valueOf(re.getValue()));
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL_2.create(2, re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY_2) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_.create(2, re, Integer.valueOf(re.getValue()));
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(2, re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_INTERVAL) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_DAY) {
@@ -1276,7 +1276,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL.create(Integer.valueOf(cdao.getInterval()));
                 }
                 if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5) {
-                    throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_.create(2, Integer.valueOf(cdao.getDayInMonth()));
+                    throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(2, Integer.valueOf(cdao.getDayInMonth()));
                 }
             } else {
                 if (cdao.getInterval() < 1) {
