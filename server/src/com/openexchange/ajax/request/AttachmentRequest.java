@@ -89,7 +89,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -161,7 +161,7 @@ public class AttachmentRequest extends CommonRequest {
                 
                 if (conversionService == null) {
                     throw new ServiceException(
-                        ServiceErrorCode.SERVICE_UNAVAILABLE,
+                        ServiceExceptionCode.SERVICE_UNAVAILABLE,
                         ConversionService.class.getName());
                 }
                 

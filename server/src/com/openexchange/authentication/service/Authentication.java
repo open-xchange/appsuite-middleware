@@ -56,7 +56,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -107,7 +107,7 @@ public final class Authentication {
         throws LoginException, ServiceException {
         final AuthenticationService auth = SERVICE_REF.get();
         if (null == auth) {
-            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, AuthenticationService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());
         }
         return auth.handleLoginInfo(new LoginInfo() {
             public String getPassword() {

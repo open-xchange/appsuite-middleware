@@ -77,7 +77,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -140,7 +140,7 @@ public final class LoginPerformer {
             final AuthorizationService authService = Authorization.getService();
             if (null == authService) {
                 // FIXME: what todo??
-                final ServiceException e = new ServiceException(ServiceErrorCode.SERVICE_INITIALIZATION_FAILED);
+                final ServiceException e = new ServiceException(ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED);
                 LOG.error("unable to find AuthorizationService", e);
                 throw e;
             }

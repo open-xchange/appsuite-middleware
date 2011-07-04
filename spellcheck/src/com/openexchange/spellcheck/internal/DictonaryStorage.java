@@ -74,7 +74,7 @@ import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.spellcheck.SpellCheckException;
 import com.openexchange.spellcheck.SpellCheckService;
@@ -263,7 +263,7 @@ public final class DictonaryStorage {
 				}
 				spellCheckDir = new File(dirPath);
 			} else {
-				throw new SpellCheckException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE,
+				throw new SpellCheckException(new ServiceException(ServiceExceptionCode.SERVICE_UNAVAILABLE,
 						SpellCheckService.class.getName()));
 			}
 		}

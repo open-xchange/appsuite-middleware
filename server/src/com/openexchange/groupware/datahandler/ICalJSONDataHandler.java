@@ -92,7 +92,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -146,7 +146,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         }
         final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
         if (iCalParser == null) {
-            throw new DataException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, ICalParser.class.getName()));
+            throw new DataException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ICalParser.class.getName()));
         }
         final List<CalendarDataObject> appointments;
         final List<Task> tasks;

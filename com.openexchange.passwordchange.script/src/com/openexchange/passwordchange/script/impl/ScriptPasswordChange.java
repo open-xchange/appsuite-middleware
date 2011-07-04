@@ -65,7 +65,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.services.SPWServiceRegistry;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.user.UserService;
 
@@ -108,7 +108,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		{
 			final UserService userService = getServiceRegistry().getService(UserService.class);
 			if (userService == null) {
-				throw new UserException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE,UserService.class.getName()));
+				throw new UserException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName()));
 			}
 			user = userService.getUser(event.getSession().getUserId(), event.getContext());
 
@@ -162,15 +162,15 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		        case 5:
 		            throw new UserException(new PasswordException(PasswordException.Code.LDAP_ERROR));
 		        default:
-		            throw new UserException(new ServiceException(ServiceErrorCode.IO_ERROR));
+		            throw new UserException(new ServiceException(ServiceExceptionCode.IO_ERROR));
 		        }
 		    }
 		} catch (IOException e) {
 			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
-			throw new UserException(new ServiceException(ServiceErrorCode.IO_ERROR, e));			
+			throw new UserException(ServiceExceptionCode.IO_ERROR.create( e));			
 		} catch (InterruptedException e) {
 			LOG.fatal("Error while changing password for user "+usern+" in context "+cid+"\n",e);
-			throw new UserException(new ServiceException(ServiceErrorCode.IO_ERROR, e));			
+			throw new UserException(ServiceExceptionCode.IO_ERROR.create( e));			
 		}
 		
 	}

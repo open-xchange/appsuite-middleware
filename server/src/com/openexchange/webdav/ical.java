@@ -100,7 +100,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -202,7 +202,7 @@ public final class ical extends PermissionServlet {
 
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             if (null == emitter) {
-                throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, ICalEmitter.class.getName());
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ICalEmitter.class.getName());
             }
             final ICalSession iSession = emitter.createSession();
             final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();

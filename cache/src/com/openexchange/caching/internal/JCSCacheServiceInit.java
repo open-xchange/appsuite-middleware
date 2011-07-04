@@ -66,7 +66,7 @@ import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.caching.CacheExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link JCSCacheServiceInit} - Initialization for {@link JCSCache}.
@@ -292,7 +292,7 @@ public final class JCSCacheServiceInit {
      */
     public void loadDefaultConfiguration() throws OXException {
         if (configurationService == null) {
-            throw ServiceErrorCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
         }
         configureByPropertyFile(true, true);
         LOG.info("JCS caching system successfully re-configured.");
